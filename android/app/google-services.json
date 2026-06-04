@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1011139931151",
+    "project_id": "cardence-3cec8",
+    "storage_bucket": "cardence-3cec8.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1011139931151:android:67d4dbf1c5f6cbe5b4077a",
+        "android_client_info": {
+          "package_name": "com.furkanages.cardence"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDrfd0jHzPjqwVNkLUNQNUblK9R9WLpt0E"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,0 +1,443 @@
+import 'package:flutter/material.dart';
+
+import '../../../../core/theme/app_colors.dart';
+import '../../../../core/widgets/atoms/cardence_app_bar.dart';
+import '../../../../core/widgets/organisms/cardence_scaffold.dart';
+import '../../../../core/widgets/organisms/flippable_person_card.dart';
+import '../../../saved_cards/domain/entities/saved_card.dart';
+import '../../../saved_cards/domain/usecases/get_saved_cards.dart';
+import '../../../saved_cards/domain/usecases/save_saved_card.dart';
+import '../../../saved_cards/presentation/pages/saved_card_detail_page.dart';
+import '../../../saved_cards/presentation/saved_cards_catalog.dart';
+import '../../domain/entities/event_group.dart';
+import '../../domain/usecases/get_event_groups.dart';
+import '../../domain/usecases/save_event_groups.dart';
+import '../widgets/pick_saved_cards_for_group_sheet.dart';
+
+/// Bir etkinlik grubunun detayı: bu gruba bağlı kayıtlı kartlar listelenir.
+class EventGroupDetailPage extends StatefulWidget {
+  const EventGroupDetailPage({
+    super.key,
+    required this.group,
+    required this.getEventGroups,
+    required this.saveEventGroups,
+    required this.getSavedCards,
+    required this.saveSavedCard,
+  });
+
+  final EventGroup group;
+  final GetEventGroups getEventGroups;
+  final SaveEventGroups saveEventGroups;
+  final GetSavedCards getSavedCards;
+  final SaveSavedCard saveSavedCard;
+
+  @override
+  State<EventGroupDetailPage> createState() => _EventGroupDetailPageState();
+}
+
+class _EventGroupDetailPageState extends State<EventGroupDetailPage> {
+  List<SavedCard> _linkedCards = [];
+  List<SavedCard> _availableToAdd = [];
+  bool _loading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  Future<void> _load() async {
+    setState(() => _loading = true);
+    final cards = await widget.getSavedCards();
+    if (!mounted) return;
+    final allCards = SavedCardsCatalog.displayCards(cards);
+    setState(() {
+      _linkedCards = allCards
+          .where((c) => c.linkedEventGroupIds.contains(widget.group.id))
+          .toList();
+      _availableToAdd = allCards
+          .where((c) => !c.linkedEventGroupIds.contains(widget.group.id))
+          .toList();
+      _loading = false;
+    });
+  }
+
+  Future<void> _persistCardUpdate(SavedCard updated) async {
+    await widget.saveSavedCard(updated);
+    await _load();
+  }
+
+  Future<void> _openCardDetail(SavedCard card) async {
+    await Navigator.of(context).push<void>(
+      MaterialPageRoute<void>(
+        builder: (context) => SavedCardDetailPage(
+          card: card,
+          getEventGroups: widget.getEventGroups,
+          getSavedCards: widget.getSavedCards,
+          saveEventGroups: widget.saveEventGroups,
+          saveSavedCard: widget.saveSavedCard,
+          onSave: _persistCardUpdate,
+        ),
+      ),
+    );
+    await _load();
+  }
+
+  Future<void> _openAddCardsPicker() async {
+    if (_availableToAdd.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Gruba eklenecek kayıtlı kart kalmadı'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+
+    final selectedIds = await PickSavedCardsForGroupSheet.show(
+      context,
+      cards: _availableToAdd,
+      eventGroupId: widget.group.id,
+      eventGroupName: widget.group.name,
+      addOnly: true,
+    );
+    if (!mounted || selectedIds == null || selectedIds.isEmpty) return;
+
+    var addedCount = 0;
+    for (final card in _availableToAdd) {
+      if (!selectedIds.contains(card.cardId)) continue;
+      final ids = List<String>.from(card.linkedEventGroupIds)
+        ..add(widget.group.id);
+      await widget.saveSavedCard(card.copyWith(linkedEventGroupIds: ids));
+      addedCount++;
+    }
+
+    if (!mounted) return;
+    await _load();
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('$addedCount kart gruba eklendi'),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
+
+  Future<void> _confirmDeleteGroup() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Grubu sil'),
+        content: Text(
+          '"${widget.group.name}" etkinlik grubunu silmek istediğinize emin misiniz? '
+          'Gruptaki kart bağlantıları kaldırılır.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('İptal'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            style: FilledButton.styleFrom(
+              backgroundColor: AppColors.error,
+              foregroundColor: AppColors.textOnPrimary,
+            ),
+            child: const Text('Sil'),
+          ),
+        ],
+      ),
+    );
+    if (!mounted || confirmed != true) return;
+    await _deleteGroup();
+  }
+
+  Future<void> _deleteGroup() async {
+    final persisted = await widget.getSavedCards();
+    final allCards = SavedCardsCatalog.displayCards(persisted);
+    for (final card in allCards) {
+      if (!card.linkedEventGroupIds.contains(widget.group.id)) continue;
+      final ids = List<String>.from(card.linkedEventGroupIds)
+        ..remove(widget.group.id);
+      await widget.saveSavedCard(card.copyWith(linkedEventGroupIds: ids));
+    }
+
+    final groups = await widget.getEventGroups();
+    final updatedGroups = groups.where((g) => g.id != widget.group.id).toList();
+    await widget.saveEventGroups(updatedGroups);
+
+    if (!mounted) return;
+    Navigator.of(context).pop();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('"${widget.group.name}" silindi'),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
+
+  Future<void> _openAddNoteModal(SavedCard card) async {
+    var draftNote = card.about ?? '';
+    final note = await showModalBottomSheet<String>(
+      context: context,
+      isScrollControlled: true,
+      showDragHandle: true,
+      builder: (context) {
+        return SafeArea(
+          child: SingleChildScrollView(
+            padding: EdgeInsets.fromLTRB(
+              16,
+              8,
+              16,
+              MediaQuery.of(context).viewInsets.bottom + 16,
+            ),
+            child: StatefulBuilder(
+              builder: (context, setModalState) {
+                return Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Text(
+                      'Kişi notu',
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                    const SizedBox(height: 10),
+                    TextFormField(
+                      initialValue: draftNote,
+                      minLines: 3,
+                      maxLines: 6,
+                      maxLength: 240,
+                      onChanged: (value) =>
+                          setModalState(() => draftNote = value),
+                      decoration: const InputDecoration(
+                        hintText: 'Bu kişi hakkında not yazın',
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    FilledButton(
+                      onPressed: () =>
+                          Navigator.of(context).pop(draftNote.trim()),
+                      child: const Text('Kaydet'),
+                    ),
+                  ],
+                );
+              },
+            ),
+          ),
+        );
+      },
+    );
+
+    if (!mounted || note == null) return;
+    await _persistCardUpdate(
+      card.copyWith(
+        about: note.isEmpty ? null : note,
+        clearAbout: note.isEmpty,
+      ),
+    );
+  }
+
+  static const double _deleteBarContentHeight = 48;
+  static const double _deleteBarVerticalPadding = 16;
+
+  double _deleteBarInset(BuildContext context) {
+    return MediaQuery.paddingOf(context).bottom +
+        _deleteBarVerticalPadding +
+        _deleteBarContentHeight +
+        _deleteBarVerticalPadding;
+  }
+
+  Widget _buildStickyDeleteBar(BuildContext context) {
+    return SafeArea(
+      top: false,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(
+          20,
+          0,
+          20,
+          _deleteBarVerticalPadding,
+        ),
+        child: Material(
+          color: Colors.transparent,
+          child: FilledButton.icon(
+            onPressed: _confirmDeleteGroup,
+            icon: const Icon(Icons.delete_outline_rounded),
+            label: const Text('Bu grubu sil'),
+            style: FilledButton.styleFrom(
+              backgroundColor: AppColors.error,
+              foregroundColor: AppColors.textOnPrimary,
+              minimumSize: const Size.fromHeight(_deleteBarContentHeight),
+              elevation: 8,
+              shadowColor: AppColors.error.withValues(alpha: 0.45),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildBodyContent(
+    BuildContext context,
+    ColorScheme colorScheme,
+    TextTheme textTheme,
+  ) {
+    final bottomInset = _deleteBarInset(context);
+
+    if (_linkedCards.isEmpty) {
+      return SingleChildScrollView(
+        padding: EdgeInsets.fromLTRB(24, 24, 24, bottomInset),
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            minHeight: MediaQuery.sizeOf(context).height -
+                (MediaQuery.paddingOf(context).top + kToolbarHeight) -
+                bottomInset -
+                48,
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.credit_card_off_rounded,
+                size: 64,
+                color: colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Bu grupta kart yok',
+                style: textTheme.titleMedium?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Kaydedilen kartlarınızdan seçerek bu gruba kart ekleyebilirsiniz.',
+                style: textTheme.bodySmall?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 24),
+              FilledButton.icon(
+                onPressed: _availableToAdd.isEmpty ? null : _openAddCardsPicker,
+                icon: const Icon(Icons.add_rounded, size: 20),
+                label: const Text('Kart ekle'),
+                style: FilledButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: AppColors.textOnPrimary,
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return ListView.builder(
+      padding: EdgeInsets.fromLTRB(20, 16, 20, bottomInset),
+      itemCount: _linkedCards.length,
+      itemBuilder: (context, index) {
+        final card = _linkedCards[index];
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 20),
+          child: _SavedCardPreviewTile(
+            card: card,
+            onTap: () => _openCardDetail(card),
+            onAddNote: () => _openAddNoteModal(card),
+          ),
+        );
+      },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final textTheme = theme.textTheme;
+    final colorScheme = theme.colorScheme;
+
+    return CardenceScaffold(
+      appBar: CardenceAppBar(
+        title: widget.group.name,
+        actions: [
+          if (!_loading && _availableToAdd.isNotEmpty)
+            CardenceAppBar.iconAction(
+              icon: Icons.person_add_alt_1_rounded,
+              tooltip: 'Kart ekle',
+              onPressed: _openAddCardsPicker,
+            ),
+        ],
+      ),
+      body: _loading
+          ? const Center(child: CircularProgressIndicator())
+          : Stack(
+              fit: StackFit.expand,
+              children: [
+                _buildBodyContent(context, colorScheme, textTheme),
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  child: _buildStickyDeleteBar(context),
+                ),
+              ],
+            ),
+    );
+  }
+}
+
+class _SavedCardPreviewTile extends StatelessWidget {
+  const _SavedCardPreviewTile({
+    required this.card,
+    required this.onTap,
+    this.onAddNote,
+  });
+
+  final SavedCard card;
+  final VoidCallback onTap;
+  final VoidCallback? onAddNote;
+
+  @override
+  Widget build(BuildContext context) {
+    final hasNote = card.about != null && card.about!.trim().isNotEmpty;
+    final displayName = card.displayName?.trim().isEmpty ?? true
+        ? 'Kart ${card.cardId.substring(0, 8)}...'
+        : card.displayName!;
+    final companyName = card.company?.trim();
+
+    final frontEntries = <({String label, String value})>[
+      if (card.title != null && card.title!.trim().isNotEmpty)
+        (label: 'Ünvan', value: card.title!.trim()),
+      if (card.email != null && card.email!.trim().isNotEmpty)
+        (label: 'E-posta', value: card.email!.trim()),
+      if (card.phone != null && card.phone!.trim().isNotEmpty)
+        (label: 'Telefon', value: card.phone!.trim()),
+    ];
+
+    final backEntries = <({String label, String value})>[
+      if (card.about != null && card.about!.trim().isNotEmpty)
+        (label: 'Notlar', value: card.about!.trim()),
+    ];
+
+    return GestureDetector(
+      onTap: onTap,
+      child: FlippablePersonCard(
+        title: displayName,
+        titleSecondary: companyName,
+        frontEntries: frontEntries,
+        backEntries: backEntries,
+        emptyMessage: 'Kart bilgisi yok',
+        backEmptyMessage: 'Bu kişi için not bulunmuyor.',
+        backEmptyActionLabel: 'Not ekle',
+        onBackEmptyActionTap: hasNote ? null : onAddNote,
+        onBackEditTap: hasNote ? onAddNote : null,
+        onTap: onTap,
+      ),
+    );
+  }
+}

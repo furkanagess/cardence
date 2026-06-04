@@ -1,0 +1,91 @@
+import 'package:flutter/material.dart';
+
+import '../../../../core/theme/app_colors.dart';
+
+/// Görünüm modu ve hızlı filtre erişimi.
+class SavedCardsScreenToolbar extends StatelessWidget {
+  const SavedCardsScreenToolbar({
+    super.key,
+    required this.showFlippableView,
+    required this.hasActiveFilters,
+    required this.activeFilterCount,
+    required this.onViewModeChanged,
+    required this.onOpenFilters,
+    required this.onClearFilters,
+  });
+
+  final bool showFlippableView;
+  final bool hasActiveFilters;
+  final int activeFilterCount;
+  final ValueChanged<bool> onViewModeChanged;
+  final VoidCallback onOpenFilters;
+  final VoidCallback onClearFilters;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
+      child: Row(
+        children: [
+          Expanded(
+            child: SegmentedButton<bool>(
+              segments: const [
+                ButtonSegment(
+                  value: true,
+                  label: Text('Kart'),
+                  icon: Icon(Icons.style_rounded, size: 18),
+                ),
+                ButtonSegment(
+                  value: false,
+                  label: Text('Liste'),
+                  icon: Icon(Icons.view_list_rounded, size: 18),
+                ),
+              ],
+              selected: {showFlippableView},
+              onSelectionChanged: (set) => onViewModeChanged(set.first),
+              style: ButtonStyle(
+                visualDensity: VisualDensity.compact,
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              ),
+            ),
+          ),
+          const SizedBox(width: 10),
+          FilterChip(
+            label: Text(
+              hasActiveFilters ? 'Filtre ($activeFilterCount)' : 'Filtrele',
+            ),
+            avatar: Icon(
+              Icons.tune_rounded,
+              size: 18,
+              color: hasActiveFilters
+                  ? colorScheme.onPrimaryContainer
+                  : colorScheme.onSurfaceVariant,
+            ),
+            selected: hasActiveFilters,
+            showCheckmark: false,
+            onSelected: (_) => onOpenFilters(),
+            selectedColor: AppColors.primary.withValues(alpha: 0.14),
+            side: BorderSide(
+              color: hasActiveFilters
+                  ? AppColors.primary.withValues(alpha: 0.45)
+                  : colorScheme.outlineVariant,
+            ),
+          ),
+          if (hasActiveFilters) ...[
+            const SizedBox(width: 4),
+            IconButton(
+              tooltip: 'Filtreleri temizle',
+              onPressed: onClearFilters,
+              icon: const Icon(Icons.close_rounded, size: 20),
+              style: IconButton.styleFrom(
+                visualDensity: VisualDensity.compact,
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}

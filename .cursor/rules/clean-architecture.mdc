@@ -1,0 +1,73 @@
+---
+description: Cardence – Clean Architecture, BLoC state management ve Atomic Design kuralları
+globs: lib/**/*.dart
+alwaysApply: true
+---
+
+# Cardence – Mimari ve Tasarım Kuralları
+
+Bu projede **Clean Architecture**, **BLoC state management** ve **Atomic Design** standartlarına uyulur. Tüm geliştirmeler aşağıdaki kurallara göre yapılır.
+
+---
+
+## 1. Clean Architecture
+
+### Zorunlu kurallar
+
+1. **Katmanlar:** Her feature `domain/`, `data/`, `presentation/` altında yapılandırılır. Domain en içte; Flutter/Firebase import edilmez.
+
+2. **Bağımlılık yönü:** Domain hiçbir dış pakete bağımlı değildir. Data yalnızca Domain’e bağımlıdır. Presentation, Domain’i (ve gerekirse Data’daki abstract interface’leri) kullanır; concrete implementation’lar sadece DI ile verilir.
+
+3. **Domain:** Sadece entities, repository **interface**’leri ve use case’ler. `import 'package:flutter/...'` veya `import 'package:firebase_...'` **yasak**.
+
+4. **Data:** Models (Entity ↔ JSON/Map dönüşümü), DataSource abstract + impl, Repository impl. Repository, Domain’deki interface’i implement eder.
+
+5. **Presentation:** BLoC/Cubit, pages, widgets. Use case veya repository (interface) kullanır; doğrudan Firebase/Flutter servis import’u yapılmaz (DI ile enjekte edilir).
+
+### Feature klasör yapısı
+
+```
+lib/features/<feature>/
+  domain/entities/
+  domain/repositories/   # abstract
+  domain/usecases/
+  data/models/
+  data/datasources/      # abstract + impl
+  data/repositories/     # impl
+  presentation/bloc/ veya cubit/
+  presentation/pages/
+  presentation/widgets/
+```
+
+Yeni dosya eklerken katmanı doğru yere koy; domain’e framework veya veri kaynağı kodu taşıma.
+
+---
+
+## 2. BLoC State Management
+
+- **State management:** Sadece **BLoC** veya **Cubit** (flutter_bloc) kullanılır. Provider/ChangeNotifier/Riverpod kullanılmaz.
+- **BLoC/Cubit yeri:** Her feature için `presentation/bloc/` veya `presentation/cubit/`. Dosya adları: `*_bloc.dart`, `*_event.dart`, `*_state.dart` veya `*_cubit.dart`.
+- **İş akışı:** UI sadece event emit eder veya cubit metodunu çağırır; **iş mantığı BLoC/Cubit veya use case’te** olur. Sayfa/widget içinde repository veya use case çağrılmaz.
+- **State tüketimi:** `BlocProvider`, `BlocBuilder`, `BlocListener`, `BlocConsumer` kullan. Gerekmedikçe `context.read<>()` ile bloc al; state’i `BlocBuilder` ile dinle.
+- **Event/State:** Event’ler immutable; state’ler Equatable ile karşılaştırılabilir olmalı. Her BLoC tek sorumluluk: tek bir feature/ekran akışı.
+- **Cubit ne zaman:** Basit, event’e gerek olmayan tek yönlü akışlarda Cubit kullanılabilir (ör. filtre, QR). Karmaşık çok adımlı akışlarda BLoC tercih edilir.
+
+---
+
+## 3. Atomic Design System
+
+- **Hiyerarşi:** Atoms → Molecules → Organisms. Sayfalar (pages) organism ve molekül birleşimi; feature’a özel widget’lar `features/<feature>/presentation/widgets/` altında.
+- **lib/core/widgets/atoms/:** En küçük, tekrar kullanılabilir bileşenler (CustomText, CustomButton, CustomTextField, CustomIcon). Tek başına anlamlı; tema ile uyumlu.
+- **lib/core/widgets/molecules/:** Atom’ların anlamlı grupları (CardFieldItem, SearchBar, FilterChip, PrioritySelector). Tek bir işlev/veri parçası.
+- **lib/core/widgets/organisms/:** Molekül ve atom’lardan oluşan büyük bloklar (BusinessCardPreview, BusinessCardDetail, QrCodeDisplay). Ekran bölümü veya tam kart/dialog.
+- **Kullanım:** Yeni UI bileşeni eklerken önce atom mu molecule mu organism olduğuna karar ver; core’da paylaşılan mı yoksa feature’a özel mi olduğuna göre `core/widgets/` veya `features/<feature>/presentation/widgets/` kullan.
+- **Tema:** Atom ve molecule’lar `Theme.of(context)` veya proje tema sabitleri (core/theme) kullanır; hard-coded renk/font mümkün olduğunca kullanılmaz.
+
+---
+
+## 4. Renkler: Sadece AppColors
+
+- **Tüm renkler** uygulama genelinde **`AppColors`** (lib/core/theme/app_colors.dart) üzerinden kullanılır.
+- **Yasak:** `Colors.blue`, `Colors.white`, `Color(0xFF...)`, `Colors.grey` gibi doğrudan Flutter `Colors` veya ham `Color()` değerleri. Bunlar yerine `AppColors.primary`, `AppColors.surfaceLight`, `AppColors.textPrimary` vb. kullan.
+- **İstisna:** Sadece şeffaflık gerektiğinde `Colors.transparent` kullanılabilir (örn. `surfaceTintColor: Colors.transparent`). Yeni renk ihtiyacı varsa önce `AppColors`’a eklenir, sonra kullanılır.
+- **Tema ile uyum:** Widget’lar `Theme.of(context).colorScheme` veya `Theme.of(context).textTheme` kullanıyorsa bu değerler zaten tema üzerinden gelir; ekstra renk verirken yine `AppColors` veya `colorScheme.primary` gibi tema alanları kullanılır, ham renk yazılmaz.
