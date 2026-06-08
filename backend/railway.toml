@@ -1,0 +1,16 @@
+# Cardence API — Railway deploy (monorepo: repo root = Flutter, bu klasör = .NET API)
+#
+# Railway Dashboard → Service Settings:
+#   Root Directory: backend
+#   Config file path: /backend/railway.toml
+
+[build]
+builder = "DOCKERFILE"
+dockerfilePath = "Dockerfile"
+watchPatterns = ["**/*.cs", "**/*.csproj", "Dockerfile"]
+
+[deploy]
+healthcheckPath = "/health/ready"
+healthcheckTimeout = 300
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 10

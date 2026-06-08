@@ -31,9 +31,16 @@ cd backend/deploy
 
 ### Seçenek A — Railway (önerilen, hızlı)
 
+> **Monorepo uyarısı:** Repo kökünde Flutter var. Railway varsayılan olarak **Railpack** ile
+> Flutter kökünü build etmeye çalışır ve `railpack process exited with an error` verir.
+> Mutlaka **Root Directory = `backend`** ve **Dockerfile builder** kullanın.
+
 1. [railway.app](https://railway.app) → New Project → Deploy from GitHub
-2. Repo: `cardence`, root directory: `backend`
-3. Railway otomatik `Dockerfile` algılar
+2. Repo: `cardence`
+3. API servisi → **Settings**:
+   - **Root Directory:** `backend`
+   - **Config file path:** `/backend/railway.toml`
+   - **Builder:** Dockerfile (Railpack değil)
 4. **Variables** ekle:
 
 | Variable                     | Değer                        |
@@ -139,7 +146,25 @@ flutter run --dart-define=API_BASE_URL=https://cardenceapi.app
 
 | Sorun                | Çözüm                                                               |
 | -------------------- | ------------------------------------------------------------------- |
+| `railpack process exited with an error` | Root Directory = `backend`; Config = `/backend/railway.toml`; Builder = Dockerfile |
+| `Railpack could not determine how to build` | Aynı — Flutter kökü build edilmeye çalışılıyor |
+| `scheduling build on Metal builder` sonra fail | Settings → Build → Metal build environment kapat; veya config path doğrula |
 | `NXDOMAIN`           | Domain henüz satın alınmamış veya DNS yayılmamış (24–48 saat bekle) |
 | SSL hatası           | Cloudflare SSL Full; platform sertifikası aktif mi kontrol et       |
 | 502 Bad Gateway      | Container çalışıyor mu; `ConnectionStrings` doğru mu                |
 | Flutter bağlanamıyor | Release build mi; `ApiConfig.productionBaseUrl` kontrol et          |
+
+### Railway deploy log'unda ne görmelisiniz?
+
+Başarılı build:
+```
+Using Detected Dockerfile
+# veya
+builder = DOCKERFILE
+```
+
+Yanlış build (düzeltilmeli):
+```
+Railpack 0.x.x
+No start command was found
+```
