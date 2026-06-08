@@ -14,10 +14,24 @@ using Serilog;
 
 // Railway injects PORT at runtime. ASPNETCORE_URLS overrides UseUrls(), so map PORT
 // before the host is built. Local Docker Compose sets ASPNETCORE_URLS explicitly.
+const string railwayHealthcheckHost = "healthcheck.railway.app";
 var railwayPort = Environment.GetEnvironmentVariable("PORT");
 if (!string.IsNullOrWhiteSpace(railwayPort))
 {
     Environment.SetEnvironmentVariable("ASPNETCORE_URLS", $"http://+:{railwayPort}");
+
+    var allowedHosts = Environment.GetEnvironmentVariable("AllowedHosts");
+    if (string.IsNullOrWhiteSpace(allowedHosts))
+    {
+        allowedHosts = "cardenceapi.app;www.cardenceapi.app";
+    }
+
+    if (!allowedHosts.Contains(railwayHealthcheckHost, StringComparison.OrdinalIgnoreCase))
+    {
+        Environment.SetEnvironmentVariable(
+            "AllowedHosts",
+            $"{allowedHosts};{railwayHealthcheckHost}");
+    }
 }
 
 var builder = WebApplication.CreateBuilder(args);

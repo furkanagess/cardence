@@ -57,7 +57,7 @@ Railway Dashboard → API servisi → **Settings**:
 | `ConnectionStrings__Default` | `${{Postgres.DATABASE_PRIVATE_URL}}` (bkz. PostgreSQL bölümü) |
 | `Jwt__SigningKey`            | Güçlü rastgele 32+ karakter  |
 | `Api__PublicBaseUrl`         | `https://cardenceapi.app`    |
-| `AllowedHosts`               | `cardenceapi.app;www.cardenceapi.app` |
+| `AllowedHosts`               | `cardenceapi.app;www.cardenceapi.app;healthcheck.railway.app` |
 | `Database__UseInMemory`      | `false`                      |
 
 6. **Settings → Networking → Custom Domain** → `cardenceapi.app` ekle
@@ -198,7 +198,7 @@ flutter run --dart-define=API_BASE_URL=https://cardenceapi.app
 - [ ] `appsettings.Production.json` git'e **girmez**
 - [ ] PostgreSQL SSL (`SSL Mode=Require`)
 - [ ] Swagger production'da kapalı (mevcut)
-- [ ] `AllowedHosts` = `cardenceapi.app`
+- [ ] `AllowedHosts` = `cardenceapi.app;www.cardenceapi.app;healthcheck.railway.app`
 
 ---
 
@@ -214,7 +214,7 @@ flutter run --dart-define=API_BASE_URL=https://cardenceapi.app
 | 502 Bad Gateway      | Container çalışıyor mu; `ConnectionStrings` doğru mu                |
 | Startup crash / `localhost:5432` | PostgreSQL servisi ekle; `ConnectionStrings__Default=${{Postgres.DATABASE_PRIVATE_URL}}` |
 | `Database startup failed` log | Postgres servisi ayakta mı; variable referansı doğru servis adına mı bağlı |
-| Healthcheck 14x "service unavailable" | Dockerfile'da `ASPNETCORE_URLS=8080` olmamalı; Railway `PORT` kullanır |
+| Healthcheck 14x "service unavailable" | `AllowedHosts` içinde `healthcheck.railway.app` olmalı; PORT/ASPNETCORE_URLS uyumu |
 | Flutter bağlanamıyor | Release build mi; `ApiConfig.productionBaseUrl` kontrol et          |
 
 ### Railway deploy log'unda ne görmelisiniz?
