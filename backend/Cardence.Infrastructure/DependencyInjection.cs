@@ -20,7 +20,7 @@ public static class DependencyInjection
         services.AddDbContext<CardenceDbContext>(options =>
         {
             var useInMemory = configuration.GetValue<bool>("Database:UseInMemory");
-            var connectionString = configuration.GetConnectionString("Default");
+            var connectionString = DatabaseConnectionStringResolver.Resolve(configuration);
 
             if (useInMemory || string.IsNullOrWhiteSpace(connectionString))
             {

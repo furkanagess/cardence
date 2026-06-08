@@ -49,6 +49,10 @@ Domain bağlantısı: [deploy/README.md](deploy/README.md)
 
 Deploy rehberi: [docs/deployment-cardenceapi.app.md](docs/deployment-cardenceapi.app.md)
 
+### Railway (monorepo)
+
+Repo kökü Flutter; API `backend/` altında. Railway'de **Root Directory = `backend`** olmadan deploy Railpack hatası verir. Detay: [deployment rehberi](docs/deployment-cardenceapi.app.md#seçenek-a--railway-önerilen-hızlı).
+
 Endpoint'ler PascalCase düz path kullanır (`/BusinessCards`, `/Authentication`). Swagger'da domain grupları altında listelenir.
 
 ## Proje yapısı

@@ -12,13 +12,15 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Serilog;
 
-var builder = WebApplication.CreateBuilder(args);
-
-var port = Environment.GetEnvironmentVariable("PORT");
-if (!string.IsNullOrWhiteSpace(port))
+// Railway injects PORT at runtime. ASPNETCORE_URLS overrides UseUrls(), so map PORT
+// before the host is built. Local Docker Compose sets ASPNETCORE_URLS explicitly.
+var railwayPort = Environment.GetEnvironmentVariable("PORT");
+if (!string.IsNullOrWhiteSpace(railwayPort))
 {
-    builder.WebHost.UseUrls($"http://+:{port}");
+    Environment.SetEnvironmentVariable("ASPNETCORE_URLS", $"http://+:{railwayPort}");
 }
+
+var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.Configure<ApiOptions>(builder.Configuration.GetSection(ApiOptions.SectionName));
 
@@ -157,13 +159,47 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<CardenceDbContext>();
-    if (dbContext.Database.IsRelational())
+    var logger = scope.ServiceProvider.GetRequiredService<ILoggerFactory>()
+        .CreateLogger("Cardence.Api.Database");
+
+    try
     {
-        await dbContext.Database.MigrateAsync();
+        if (dbContext.Database.IsRelational())
+        {
+            await dbContext.Database.MigrateAsync();
+            logger.LogInformation("Database migrations applied.");
+        }
+        else
+        {
+            await dbContext.Database.EnsureCreatedAsync();
+            logger.LogWarning("Using in-memory database.");
+        }
     }
-    else
+    catch (Exception ex)
     {
-        await dbContext.Database.EnsureCreatedAsync();
+        var connectionString = app.Configuration.GetConnectionString("Default");
+        var looksLocal = DatabaseConnectionStringResolver.LooksLikeLocalDefault(connectionString);
+
+        logger.LogError(
+            ex,
+            "Database startup failed. ConnectionStrings__Default={ConnectionConfigured}, " +
+            "DATABASE_URL set={DatabaseUrlSet}, PGHOST set={PgHostSet}. " +
+            "On Railway: add a PostgreSQL service and set ConnectionStrings__Default " +
+            "or reference DATABASE_PRIVATE_URL from the Postgres service.",
+            !string.IsNullOrWhiteSpace(connectionString),
+            !string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("DATABASE_URL")),
+            !string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("PGHOST")));
+
+        if (app.Environment.IsProduction() && looksLocal)
+        {
+            throw new InvalidOperationException(
+                "Production startup requires a PostgreSQL connection string. " +
+                "Set ConnectionStrings__Default on Railway to the Postgres service URL, " +
+                "or add a PostgreSQL database to the Railway project.",
+                ex);
+        }
+
+        throw;
     }
 }
 

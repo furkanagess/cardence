@@ -1,8 +1,21 @@
-# Cardence API — Railway deploy (monorepo: repo root = Flutter, bu klasör = .NET API)
+# Cardence API — Railway deploy
 #
-# Railway Dashboard → Service Settings:
-#   Root Directory: backend
-#   Config file path: /backend/railway.toml
+# MONOREPO: Repo root = Flutter. .NET API = this directory (backend/).
+#
+# Set Root Directory to "backend" in Railway service settings.
+# Without it, Railway builds from the Flutter root, ignores backend/railway.toml,
+# and Railpack fails (Flutter/Dart is not a supported deploy language).
+#
+# Required Railway Dashboard settings:
+#   Root Directory:    backend
+#   Config file path:  /backend/railway.toml
+#   Builder:           Dockerfile
+#
+# PostgreSQL (separate Railway service — required):
+#   1. + New → Database → PostgreSQL
+#   2. On cardence API service → Variables:
+#      ConnectionStrings__Default = ${{Postgres.DATABASE_PRIVATE_URL}}
+#   See railway.env.example and docs/deployment-cardenceapi.app.md
 
 [build]
 builder = "DOCKERFILE"

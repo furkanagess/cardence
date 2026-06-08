@@ -31,29 +31,89 @@ cd backend/deploy
 
 ### Seçenek A — Railway (önerilen, hızlı)
 
-> **Monorepo uyarısı:** Repo kökünde Flutter var. Railway varsayılan olarak **Railpack** ile
-> Flutter kökünü build etmeye çalışır ve `railpack process exited with an error` verir.
-> Mutlaka **Root Directory = `backend`** ve **Dockerfile builder** kullanın.
+#### Monorepo — zorunlu Railway ayarı
+
+Set the **Root Directory** to `backend` in the Railway service settings.
+
+This is a monorepo where the repo root is a **Flutter** project, but the **.NET API** lives in the `backend` subdirectory. Without this setting, Railway builds from the Flutter root, ignores the config files in `backend/`, and **Railpack** fails because Flutter/Dart is not a supported deploy language.
+
+Railway Dashboard → API servisi → **Settings**:
+
+| Ayar | Değer | Neden |
+|------|-------|-------|
+| **Root Directory** | `backend` | Build `backend/Dockerfile` üzerinden yapılır |
+| **Config file path** | `/backend/railway.toml` | Config dosyası root directory'yi takip etmez |
+| **Builder** | **Dockerfile** | Railpack Flutter kökünü build etmeye çalışır |
 
 1. [railway.app](https://railway.app) → New Project → Deploy from GitHub
 2. Repo: `cardence`
-3. API servisi → **Settings**:
-   - **Root Directory:** `backend`
-   - **Config file path:** `/backend/railway.toml`
-   - **Builder:** Dockerfile (Railpack değil)
-4. **Variables** ekle:
+3. Yukarıdaki **Settings** tablosunu uygula
+4. **PostgreSQL ekle** (aşağıdaki bölüm — API bu olmadan crash eder)
+5. **Variables** ekle:
 
 | Variable                     | Değer                        |
 | ---------------------------- | ---------------------------- |
 | `ASPNETCORE_ENVIRONMENT`     | `Production`                 |
-| `ConnectionStrings__Default` | PostgreSQL connection string |
+| `ConnectionStrings__Default` | `${{Postgres.DATABASE_PRIVATE_URL}}` (bkz. PostgreSQL bölümü) |
 | `Jwt__SigningKey`            | Güçlü rastgele 32+ karakter  |
 | `Api__PublicBaseUrl`         | `https://cardenceapi.app`    |
-| `AllowedHosts`               | `cardenceapi.app`            |
+| `AllowedHosts`               | `cardenceapi.app;www.cardenceapi.app` |
+| `Database__UseInMemory`      | `false`                      |
 
-5. PostgreSQL ekle: Railway → Add PostgreSQL → connection string'i kopyala
 6. **Settings → Networking → Custom Domain** → `cardenceapi.app` ekle
 7. Railway'in verdiği CNAME hedefini domain DNS'ine yaz
+
+#### PostgreSQL (Railway) — zorunlu
+
+API başlangıçta EF Core migration çalıştırır (`Program.cs`). `appsettings.json` içindeki
+varsayılan `localhost:5432` Railway container'ında yoktur; PostgreSQL servisi olmadan uygulama
+**startup'ta crash** eder.
+
+**1. PostgreSQL servisi ekle**
+
+Railway proje canvas → **+ New** → **Database** → **PostgreSQL**
+
+Servis adı genelde `Postgres` olur (farklıysa aşağıdaki referansta adı değiştirin).
+
+**2. cardence API servisine connection string bağla**
+
+cardence API servisi → **Variables** → **New Variable**:
+
+| Name | Value |
+|------|-------|
+| `ConnectionStrings__Default` | `${{Postgres.DATABASE_PRIVATE_URL}}` |
+
+Railway UI'da **Add Reference** → PostgreSQL servisi → `DATABASE_PRIVATE_URL` seçmek de aynı işi yapar.
+
+> `DATABASE_PRIVATE_URL` internal network üzerinden bağlanır (önerilen).  
+> Alternatif: `DATABASE_PUBLIC_URL` (dış erişim; genelde gerekmez).
+
+**3. Npgsql format (manuel kopyalarsanız)**
+
+PostgreSQL servisi → **Connect** → **Public Network** veya **Private Network** URL:
+
+```
+Host=containers-us-west-xxx.railway.app;Port=5432;Database=railway;Username=postgres;Password=SECRET;SSL Mode=Require;Trust Server Certificate=true
+```
+
+**4. Redeploy**
+
+Variables kaydedildikten sonra API servisini **Redeploy** edin. Log'da şunu görmelisiniz:
+
+```
+Database migrations applied.
+```
+
+**5. Otomatik fallback (kod)**
+
+API ayrıca şu ortam değişkenlerini de okur (ConnectionStrings set edilmemişse):
+
+- `DATABASE_URL` / `DATABASE_PRIVATE_URL`
+- `PGHOST`, `PGPORT`, `PGUSER`, `PGPASSWORD`, `PGDATABASE`
+
+Yine de Railway'de `ConnectionStrings__Default` referansını açıkça set etmek en güvenilir yoldur.
+
+Örnek env listesi: [`railway.env.example`](../railway.env.example)
 
 ### Seçenek B — Docker (VPS / Fly.io)
 
@@ -152,6 +212,9 @@ flutter run --dart-define=API_BASE_URL=https://cardenceapi.app
 | `NXDOMAIN`           | Domain henüz satın alınmamış veya DNS yayılmamış (24–48 saat bekle) |
 | SSL hatası           | Cloudflare SSL Full; platform sertifikası aktif mi kontrol et       |
 | 502 Bad Gateway      | Container çalışıyor mu; `ConnectionStrings` doğru mu                |
+| Startup crash / `localhost:5432` | PostgreSQL servisi ekle; `ConnectionStrings__Default=${{Postgres.DATABASE_PRIVATE_URL}}` |
+| `Database startup failed` log | Postgres servisi ayakta mı; variable referansı doğru servis adına mı bağlı |
+| Healthcheck 14x "service unavailable" | Dockerfile'da `ASPNETCORE_URLS=8080` olmamalı; Railway `PORT` kullanır |
 | Flutter bağlanamıyor | Release build mi; `ApiConfig.productionBaseUrl` kontrol et          |
 
 ### Railway deploy log'unda ne görmelisiniz?

@@ -23,7 +23,6 @@ RUN dotnet publish Cardence.Api/Cardence.Api.csproj \
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS final
 WORKDIR /app
 
-ENV ASPNETCORE_URLS=http://+:8080
 ENV ASPNETCORE_ENVIRONMENT=Production
 
 EXPOSE 8080
