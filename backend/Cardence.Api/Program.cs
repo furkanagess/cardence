@@ -14,7 +14,26 @@ using Serilog;
 
 // Railway injects PORT at runtime. ASPNETCORE_URLS overrides UseUrls(), so map PORT
 // before the host is built. Local Docker Compose sets ASPNETCORE_URLS explicitly.
+static void AppendAllowedHost(ref string allowedHosts, string host)
+{
+    if (string.IsNullOrWhiteSpace(host))
+    {
+        return;
+    }
+
+    foreach (var entry in allowedHosts.Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+    {
+        if (string.Equals(entry, host, StringComparison.OrdinalIgnoreCase))
+        {
+            return;
+        }
+    }
+
+    allowedHosts = string.IsNullOrWhiteSpace(allowedHosts) ? host : $"{allowedHosts};{host}";
+}
+
 const string railwayHealthcheckHost = "healthcheck.railway.app";
+const string railwayAppWildcard = "*.up.railway.app";
 var railwayPort = Environment.GetEnvironmentVariable("PORT");
 if (!string.IsNullOrWhiteSpace(railwayPort))
 {
@@ -26,12 +45,13 @@ if (!string.IsNullOrWhiteSpace(railwayPort))
         allowedHosts = "cardenceapi.app;www.cardenceapi.app";
     }
 
-    if (!allowedHosts.Contains(railwayHealthcheckHost, StringComparison.OrdinalIgnoreCase))
-    {
-        Environment.SetEnvironmentVariable(
-            "AllowedHosts",
-            $"{allowedHosts};{railwayHealthcheckHost}");
-    }
+    AppendAllowedHost(ref allowedHosts, railwayHealthcheckHost);
+    AppendAllowedHost(ref allowedHosts, railwayAppWildcard);
+
+    var railwayPublicDomain = Environment.GetEnvironmentVariable("RAILWAY_PUBLIC_DOMAIN");
+    AppendAllowedHost(ref allowedHosts, railwayPublicDomain);
+
+    Environment.SetEnvironmentVariable("AllowedHosts", allowedHosts);
 }
 
 var builder = WebApplication.CreateBuilder(args);

@@ -20,5 +20,5 @@
       "Default": "Information"
     }
   },
-  "AllowedHosts": "cardenceapi.app;www.cardenceapi.app;healthcheck.railway.app"
+  "AllowedHosts": "cardenceapi.app;www.cardenceapi.app;healthcheck.railway.app;*.up.railway.app"
 }
