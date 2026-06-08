@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/atoms/cardence_app_bar.dart';
+import '../../../../core/widgets/atoms/custom_button.dart';
 import '../../../../core/widgets/organisms/cardence_scaffold.dart';
 import '../../../../core/widgets/organisms/flippable_person_card.dart';
 import '../../../saved_cards/domain/entities/saved_card.dart';
+import '../../../saved_cards/domain/usecases/delete_saved_card.dart';
 import '../../../saved_cards/domain/usecases/get_saved_cards.dart';
 import '../../../saved_cards/domain/usecases/save_saved_card.dart';
 import '../../../saved_cards/presentation/pages/saved_card_detail_page.dart';
@@ -23,6 +25,7 @@ class EventGroupDetailPage extends StatefulWidget {
     required this.saveEventGroups,
     required this.getSavedCards,
     required this.saveSavedCard,
+    required this.deleteSavedCard,
   });
 
   final EventGroup group;
@@ -30,6 +33,7 @@ class EventGroupDetailPage extends StatefulWidget {
   final SaveEventGroups saveEventGroups;
   final GetSavedCards getSavedCards;
   final SaveSavedCard saveSavedCard;
+  final DeleteSavedCard deleteSavedCard;
 
   @override
   State<EventGroupDetailPage> createState() => _EventGroupDetailPageState();
@@ -76,6 +80,7 @@ class _EventGroupDetailPageState extends State<EventGroupDetailPage> {
           getSavedCards: widget.getSavedCards,
           saveEventGroups: widget.saveEventGroups,
           saveSavedCard: widget.saveSavedCard,
+          deleteSavedCard: widget.deleteSavedCard,
           onSave: _persistCardUpdate,
         ),
       ),
@@ -137,13 +142,14 @@ class _EventGroupDetailPageState extends State<EventGroupDetailPage> {
             onPressed: () => Navigator.of(context).pop(false),
             child: const Text('İptal'),
           ),
-          FilledButton(
+          CustomButton(
+            label: 'Sil',
             onPressed: () => Navigator.of(context).pop(true),
+            fullWidth: false,
             style: FilledButton.styleFrom(
               backgroundColor: AppColors.error,
               foregroundColor: AppColors.textOnPrimary,
             ),
-            child: const Text('Sil'),
           ),
         ],
       ),
@@ -214,10 +220,11 @@ class _EventGroupDetailPageState extends State<EventGroupDetailPage> {
                       ),
                     ),
                     const SizedBox(height: 8),
-                    FilledButton(
+                    CustomButton(
+                      label: 'Kaydet',
                       onPressed: () =>
                           Navigator.of(context).pop(draftNote.trim()),
-                      child: const Text('Kaydet'),
+                      fullWidth: false,
                     ),
                   ],
                 );
@@ -259,14 +266,13 @@ class _EventGroupDetailPageState extends State<EventGroupDetailPage> {
         ),
         child: Material(
           color: Colors.transparent,
-          child: FilledButton.icon(
+          child: CustomButton(
+            label: 'Bu grubu sil',
+            icon: Icons.delete_outline_rounded,
             onPressed: _confirmDeleteGroup,
-            icon: const Icon(Icons.delete_outline_rounded),
-            label: const Text('Bu grubu sil'),
             style: FilledButton.styleFrom(
               backgroundColor: AppColors.error,
               foregroundColor: AppColors.textOnPrimary,
-              minimumSize: const Size.fromHeight(_deleteBarContentHeight),
               elevation: 8,
               shadowColor: AppColors.error.withValues(alpha: 0.45),
               shape: RoundedRectangleBorder(
@@ -321,10 +327,11 @@ class _EventGroupDetailPageState extends State<EventGroupDetailPage> {
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 24),
-              FilledButton.icon(
+              CustomButton(
+                label: 'Kart ekle',
+                icon: Icons.add_rounded,
                 onPressed: _availableToAdd.isEmpty ? null : _openAddCardsPicker,
-                icon: const Icon(Icons.add_rounded, size: 20),
-                label: const Text('Kart ekle'),
+                fullWidth: false,
                 style: FilledButton.styleFrom(
                   backgroundColor: AppColors.primary,
                   foregroundColor: AppColors.textOnPrimary,

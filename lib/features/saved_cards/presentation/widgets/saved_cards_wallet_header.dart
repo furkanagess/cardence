@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/widgets/atoms/custom_button.dart';
 import '../../domain/entities/saved_cards_wallet_quota.dart';
 import '../../domain/saved_cards_wallet_limits.dart';
 
@@ -136,12 +137,11 @@ class SavedCardsWalletHeader extends StatelessWidget {
                 const SizedBox(height: 12),
                 Align(
                   alignment: Alignment.centerLeft,
-                  child: FilledButton.tonalIcon(
+                  child: CustomButton.tonal(
+                    label: atLimit ? 'Paket al, sınırı artır' : 'Premium pakete geç',
+                    icon: Icons.workspace_premium_outlined,
                     onPressed: onUpgradeTap,
-                    icon: const Icon(Icons.workspace_premium_outlined, size: 18),
-                    label: Text(
-                      atLimit ? 'Paket al, sınırı artır' : 'Premium pakete geç',
-                    ),
+                    fullWidth: false,
                     style: FilledButton.styleFrom(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 14,

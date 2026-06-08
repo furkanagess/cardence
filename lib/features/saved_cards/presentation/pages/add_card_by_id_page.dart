@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 
 import '../../../../core/widgets/atoms/cardence_app_bar.dart';
+import '../../../../core/widgets/atoms/custom_button.dart';
 import '../../../../core/widgets/organisms/cardence_scaffold.dart';
 import '../../domain/entities/add_saved_card_result.dart';
 import '../../domain/entities/card_share_payload.dart';
@@ -187,21 +188,15 @@ class _AddCardByIdPageState extends State<AddCardByIdPage> {
               ),
             ],
             const SizedBox(height: 24),
-            FilledButton(
-              onPressed: _submitting ? null : _submit,
+            CustomButton(
+              label: 'Cüzdana ekle',
+              onPressed: _submit,
+              isLoading: _submitting,
               style: FilledButton.styleFrom(
-                minimumSize: const Size.fromHeight(48),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
               ),
-              child: _submitting
-                  ? const SizedBox(
-                      width: 22,
-                      height: 22,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : const Text('Cüzdana ekle'),
             ),
           ],
         ),

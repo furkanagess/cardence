@@ -1,0 +1,26 @@
+# cardenceapi.app → Cardence API (local Docker)
+# PostgreSQL: mevcut cardence-postgres container veya host 5432
+
+services:
+  api:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    container_name: cardence-api
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_URLS: http://+:8080
+      Api__PublicBaseUrl: https://cardenceapi.app
+      AllowedHosts: cardenceapi.app;www.cardenceapi.app;localhost;127.0.0.1
+      Database__UseInMemory: "false"
+      ConnectionStrings__Default: Host=host.docker.internal;Port=5432;Database=cardence;Username=postgres;Password=dev
+      Jwt__Issuer: Cardence
+      Jwt__Audience: Cardence.App
+      Jwt__SigningKey: ${JWT_SIGNING_KEY:-PRODUCTION-CHANGE-ME-MIN-32-CHARS-LONG!!}
+      Jwt__AccessTokenMinutes: "60"
+      Jwt__RefreshTokenDays: "30"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../atoms/custom_button.dart';
+
 /// Kişi / iletişim kartı: tema ile uyumlu, profesyonel ve üç boyutlu görünüm.
 /// [compact] true olduğunda kartvizit oranında sıkı yerleşim kullanılır.
 class PersonInfoCard extends StatelessWidget {
@@ -180,17 +182,18 @@ class PersonInfoCard extends StatelessWidget {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            FilledButton.tonalIcon(
+                            CustomButton.tonal(
+                              label: emptyActionLabel!,
+                              icon: Icons.add_rounded,
                               onPressed: onEmptyActionTap,
+                              fullWidth: false,
+                              visualDensity: VisualDensity.compact,
                               style: FilledButton.styleFrom(
                                 padding: EdgeInsets.symmetric(
                                   horizontal: compact ? 12 : 16,
                                   vertical: compact ? 8 : 10,
                                 ),
-                                visualDensity: VisualDensity.compact,
                               ),
-                              icon: const Icon(Icons.add_rounded, size: 18),
-                              label: Text(emptyActionLabel!),
                             ),
                           ],
                         ),

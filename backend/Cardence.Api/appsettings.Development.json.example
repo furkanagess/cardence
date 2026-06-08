@@ -1,0 +1,16 @@
+{
+  "Database": {
+    "UseInMemory": false
+  },
+  "ConnectionStrings": {
+    "Default": "Host=localhost;Port=5432;Database=cardence;Username=postgres;Password=dev"
+  },
+  "Jwt": {
+    "SigningKey": "CHANGE-ME-MIN-32-CHARS-LONG-DEVELOPMENT-KEY"
+  },
+  "Serilog": {
+    "MinimumLevel": {
+      "Default": "Debug"
+    }
+  }
+}

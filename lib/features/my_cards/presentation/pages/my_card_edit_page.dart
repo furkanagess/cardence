@@ -4,6 +4,7 @@ import 'package:uuid/uuid.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/atoms/cardence_app_bar.dart';
+import '../../../../core/widgets/atoms/custom_button.dart';
 import '../../../../core/widgets/organisms/cardence_scaffold.dart';
 import '../../../../core/widgets/molecules/skills_chip_input.dart';
 import '../widgets/collapsible_card_preview_panel.dart';
@@ -342,14 +343,14 @@ class _MyCardEditPageState extends State<MyCardEditPage> {
                     colorScheme: colorScheme,
                     textTheme: textTheme,
                     children: [
-                      FilledButton.icon(
+                      CustomButton(
+                        label: 'Tasarım ve paylaşım',
+                        icon: Icons.palette_outlined,
                         onPressed: () async {
                           await _save(popAfter: false);
                           if (!mounted) return;
                           _openDesignAndShare(_buildDraft());
                         },
-                        icon: const Icon(Icons.palette_outlined, size: 20),
-                        label: const Text('Tasarım ve paylaşım'),
                         style: FilledButton.styleFrom(
                           backgroundColor: AppColors.primary,
                           foregroundColor: AppColors.textOnPrimary,
@@ -358,21 +359,10 @@ class _MyCardEditPageState extends State<MyCardEditPage> {
                       ),
                     ],
                   ),
-                  FilledButton(
-                    onPressed: _saving ? null : _save,
-                    style: FilledButton.styleFrom(
-                      minimumSize: const Size.fromHeight(48),
-                    ),
-                    child: _saving
-                        ? const SizedBox(
-                            height: 22,
-                            width: 22,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: AppColors.textOnPrimary,
-                            ),
-                          )
-                        : const Text('Kaydet'),
+                  CustomButton(
+                    label: 'Kaydet',
+                    onPressed: _save,
+                    isLoading: _saving,
                   ),
                 ],
               ),

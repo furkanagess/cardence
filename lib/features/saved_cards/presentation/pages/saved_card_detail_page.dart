@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../../core/constants/app_constants.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/widgets/atoms/custom_button.dart';
 import '../../../../core/widgets/atoms/cardence_app_bar.dart';
 import '../../../../core/widgets/organisms/cardence_scaffold.dart';
 import '../../../../core/widgets/organisms/flippable_person_card.dart';
@@ -11,7 +13,9 @@ import '../../../event_groups/domain/usecases/get_event_groups.dart';
 import '../../../event_groups/domain/usecases/save_event_groups.dart';
 import '../../../event_groups/presentation/pages/event_group_detail_page.dart';
 import '../../../event_groups/presentation/widgets/pick_event_groups_for_card_sheet.dart';
+import '../../../auth/data/datasources/auth_remote_datasource.dart';
 import '../../domain/entities/saved_card.dart';
+import '../../domain/usecases/delete_saved_card.dart';
 import '../../domain/usecases/get_saved_cards.dart';
 import '../../domain/usecases/save_saved_card.dart';
 
@@ -25,6 +29,7 @@ class SavedCardDetailPage extends StatefulWidget {
     this.getSavedCards,
     this.saveEventGroups,
     this.saveSavedCard,
+    this.deleteSavedCard,
     this.heroTag,
   });
 
@@ -34,6 +39,7 @@ class SavedCardDetailPage extends StatefulWidget {
   final GetSavedCards? getSavedCards;
   final SaveEventGroups? saveEventGroups;
   final SaveSavedCard? saveSavedCard;
+  final DeleteSavedCard? deleteSavedCard;
   final String? heroTag;
 
   @override
@@ -41,9 +47,13 @@ class SavedCardDetailPage extends StatefulWidget {
 }
 
 class _SavedCardDetailPageState extends State<SavedCardDetailPage> {
+  static const double _deleteBarContentHeight = 48;
+  static const double _deleteBarVerticalPadding = 16;
+
   late SavedCard _card;
   List<EventGroup> _eventGroups = [];
   bool _loadingGroups = true;
+  bool _deleting = false;
 
   @override
   void initState() {
@@ -70,10 +80,24 @@ class _SavedCardDetailPageState extends State<SavedCardDetailPage> {
   bool get _canOpenGroupDetail =>
       widget.getSavedCards != null &&
       widget.saveEventGroups != null &&
-      widget.saveSavedCard != null;
+      widget.saveSavedCard != null &&
+      widget.deleteSavedCard != null;
 
   bool get _canAddToMoreGroups =>
       !_loadingGroups && _availableGroupsForCard.isNotEmpty;
+
+  bool get _isDemoCard => _card.cardId.startsWith('dummy-');
+
+  bool get _canDeleteCard =>
+      widget.deleteSavedCard != null && !_isDemoCard;
+
+  double _deleteBarInset(BuildContext context) {
+    if (!_canDeleteCard) return 0;
+    return MediaQuery.paddingOf(context).bottom +
+        _deleteBarVerticalPadding +
+        _deleteBarContentHeight +
+        _deleteBarVerticalPadding;
+  }
 
   List<EventGroup> get _availableGroupsForCard => _eventGroups
       .where((g) => !_card.linkedEventGroupIds.contains(g.id))
@@ -127,11 +151,109 @@ class _SavedCardDetailPageState extends State<SavedCardDetailPage> {
           saveEventGroups: widget.saveEventGroups!,
           getSavedCards: widget.getSavedCards!,
           saveSavedCard: widget.saveSavedCard!,
+          deleteSavedCard: widget.deleteSavedCard!,
         ),
       ),
     );
     if (!mounted) return;
     await Future.wait([_loadEventGroups(), _refreshCardFromStorage()]);
+  }
+
+  Future<void> _confirmDeleteCard() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Kartı sil'),
+        content: Text(
+          '"$_displayName" kartını cüzdanınızdan silmek istediğinize emin misiniz?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('İptal'),
+          ),
+          CustomButton(
+            label: 'Sil',
+            onPressed: () => Navigator.of(context).pop(true),
+            fullWidth: false,
+            style: FilledButton.styleFrom(
+              backgroundColor: AppColors.error,
+              foregroundColor: AppColors.textOnPrimary,
+            ),
+          ),
+        ],
+      ),
+    );
+    if (!mounted || confirmed != true) return;
+    await _deleteCard();
+  }
+
+  Future<void> _deleteCard() async {
+    final deleteSavedCard = widget.deleteSavedCard;
+    if (deleteSavedCard == null) return;
+
+    setState(() => _deleting = true);
+    try {
+      await deleteSavedCard(_card.cardId);
+      if (!mounted) return;
+      Navigator.of(context).pop();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('$_displayName cüzdandan silindi'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    } on AuthApiException catch (e) {
+      if (!mounted) return;
+      setState(() => _deleting = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(e.message),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _deleting = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Kart silinemedi. Lütfen tekrar deneyin.'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
+  }
+
+  Widget _buildStickyDeleteBar(BuildContext context) {
+    return SafeArea(
+      top: false,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(
+          20,
+          0,
+          20,
+          _deleteBarVerticalPadding,
+        ),
+        child: Material(
+          color: Colors.transparent,
+          child: CustomButton(
+            label: 'Kartı cüzdandan sil',
+            icon: Icons.delete_outline_rounded,
+            onPressed: _deleting ? null : _confirmDeleteCard,
+            isLoading: _deleting,
+            style: FilledButton.styleFrom(
+              backgroundColor: AppColors.error,
+              foregroundColor: AppColors.textOnPrimary,
+              elevation: 8,
+              shadowColor: AppColors.error.withValues(alpha: 0.45),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   Future<void> _refreshCardFromStorage() async {
@@ -160,9 +282,10 @@ class _SavedCardDetailPageState extends State<SavedCardDetailPage> {
             onPressed: () => Navigator.of(context).pop(false),
             child: const Text('İptal'),
           ),
-          FilledButton(
+          CustomButton(
+            label: 'Çıkar',
             onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Çıkar'),
+            fullWidth: false,
           ),
         ],
       ),
@@ -282,6 +405,13 @@ class _SavedCardDetailPageState extends State<SavedCardDetailPage> {
       'Aralık',
     ];
     return '${dt.day} ${months[dt.month - 1]} ${dt.year}';
+  }
+
+  String _savedAtDescription(int? ms) {
+    if (ms == null) {
+      return '${AppConstants.appName} ile kaydedildi · tarih bilinmiyor';
+    }
+    return '${_formatSavedAt(ms)} tarihinde ${AppConstants.appName} ile kaydedildi';
   }
 
   Future<void> _copyToClipboard(String label, String value) async {
@@ -413,16 +543,15 @@ class _SavedCardDetailPageState extends State<SavedCardDetailPage> {
                       ),
                     ),
                     const SizedBox(height: 12),
-                    FilledButton(
+                    CustomButton(
+                      label: 'Kaydet',
                       onPressed: () =>
                           Navigator.of(context).pop(draftNote.trim()),
                       style: FilledButton.styleFrom(
-                        minimumSize: const Size.fromHeight(48),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                      child: const Text('Kaydet'),
                     ),
                   ],
                 );
@@ -473,15 +602,17 @@ class _SavedCardDetailPageState extends State<SavedCardDetailPage> {
       onBackEditTap: hasNote ? _openNoteEditor : null,
     );
 
+    final bottomInset = _deleteBarInset(context);
+
     return CardenceScaffold(
-      backgroundColor: colorScheme.surfaceContainerLowest,
       appBar: CardenceAppBar(
         title: _displayName,
-        backgroundColor: colorScheme.surfaceContainerLowest,
-        scrolledUnderElevation: 0.5,
       ),
-      body: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 4, 16, 32),
+      body: Stack(
+        fit: StackFit.expand,
+        children: [
+          ListView(
+        padding: EdgeInsets.fromLTRB(16, 12, 16, 32 + bottomInset),
         children: [
           if (widget.heroTag != null)
             Hero(
@@ -535,9 +666,11 @@ class _SavedCardDetailPageState extends State<SavedCardDetailPage> {
           const SizedBox(height: 20),
           _DetailSection(
             title: 'Etkinlik grupları',
-            actionLabel: _canAddToMoreGroups ? 'Ekle' : null,
-            onAction:
-                _canAddToMoreGroups ? _openAddToEventGroupsSheet : null,
+            actionLabel:
+                _hasLinkedGroups && _canAddToMoreGroups ? 'Ekle' : null,
+            onAction: _hasLinkedGroups && _canAddToMoreGroups
+                ? _openAddToEventGroupsSheet
+                : null,
             child: AnimatedSwitcher(
               duration: const Duration(milliseconds: 220),
               switchInCurve: Curves.easeOut,
@@ -547,9 +680,12 @@ class _SavedCardDetailPageState extends State<SavedCardDetailPage> {
                       key: ValueKey('event_groups_loading'),
                     )
                   : !_hasLinkedGroups
-                      ? _EventGroupsEmptyCard(
+                      ? _DetailEmptyActionCard(
                           key: const ValueKey('event_groups_empty'),
-                          onAdd: _openAddToEventGroupsSheet,
+                          icon: Icons.event_note_outlined,
+                          message: 'Henüz gruba eklenmedi',
+                          buttonLabel: 'Gruba ekle',
+                          onPressed: _openAddToEventGroupsSheet,
                         )
                       : _LinkedEventGroupsCard(
                           key: ValueKey(
@@ -574,32 +710,32 @@ class _SavedCardDetailPageState extends State<SavedCardDetailPage> {
                     note: _card.about!.trim(),
                     onTap: _openNoteEditor,
                   )
-                : _NoteEmptyCard(onAdd: _openNoteEditor),
+                : _DetailEmptyActionCard(
+                    icon: Icons.note_add_outlined,
+                    message: 'Henüz not eklenmedi',
+                    buttonLabel: 'Not ekle',
+                    onPressed: _openNoteEditor,
+                  ),
           ),
-          const SizedBox(height: 20),
-          _DetailSection(
-            title: 'Kayıt bilgisi',
-            child: _GroupedInfoCard(
-              children: [
-                _MetaInfoRow(
-                  icon: Icons.calendar_today_rounded,
-                  label: 'Kaydedilme',
-                  value: _formatSavedAt(_card.savedAt),
-                ),
-              ],
-            ),
-          ),
-          if (companyName != null && companyName.isNotEmpty) ...[
-            const SizedBox(height: 12),
-            Center(
-              child: Text(
-                'Cardence ile kaydedildi',
-                style: textTheme.labelSmall?.copyWith(
-                  color: colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
-                ),
+          const SizedBox(height: 12),
+          Center(
+            child: Text(
+              _savedAtDescription(_card.savedAt),
+              textAlign: TextAlign.center,
+              style: textTheme.labelSmall?.copyWith(
+                color: colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
               ),
             ),
-          ],
+          ),
+        ],
+      ),
+          if (_canDeleteCard)
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: 0,
+              child: _buildStickyDeleteBar(context),
+            ),
         ],
       ),
     );
@@ -990,10 +1126,20 @@ class _NoteFilledCard extends StatelessWidget {
   }
 }
 
-class _NoteEmptyCard extends StatelessWidget {
-  const _NoteEmptyCard({required this.onAdd});
+/// Boş not / etkinlik grubu gibi bölümlerde ortak kesik çizgili kart + tam genişlik CTA.
+class _DetailEmptyActionCard extends StatelessWidget {
+  const _DetailEmptyActionCard({
+    super.key,
+    required this.icon,
+    required this.message,
+    required this.buttonLabel,
+    required this.onPressed,
+  });
 
-  final VoidCallback onAdd;
+  final IconData icon;
+  final String message;
+  final String buttonLabel;
+  final VoidCallback onPressed;
 
   @override
   Widget build(BuildContext context) {
@@ -1003,7 +1149,7 @@ class _NoteEmptyCard extends StatelessWidget {
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        onTap: onAdd,
+        onTap: onPressed,
         borderRadius: BorderRadius.circular(16),
         child: CustomPaint(
           painter: _DashedBorderPainter(
@@ -1013,24 +1159,28 @@ class _NoteEmptyCard extends StatelessWidget {
           child: Padding(
             padding: const EdgeInsets.all(20),
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Icon(
-                  Icons.note_add_outlined,
-                  size: 36,
-                  color: colorScheme.primary.withValues(alpha: 0.8),
+                Center(
+                  child: Icon(
+                    icon,
+                    size: 36,
+                    color: colorScheme.primary.withValues(alpha: 0.8),
+                  ),
                 ),
                 const SizedBox(height: 12),
                 Text(
-                  'Henüz not eklenmedi',
+                  message,
+                  textAlign: TextAlign.center,
                   style: textTheme.titleSmall?.copyWith(
                     fontWeight: FontWeight.w600,
                   ),
                 ),
                 const SizedBox(height: 16),
-                FilledButton.tonalIcon(
-                  onPressed: onAdd,
-                  icon: const Icon(Icons.add_rounded, size: 20),
-                  label: const Text('Not ekle'),
+                CustomButton.tonal(
+                  label: buttonLabel,
+                  icon: Icons.add_rounded,
+                  onPressed: onPressed,
                   style: FilledButton.styleFrom(
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -1299,118 +1449,6 @@ class _LinkedEventGroupTile extends StatelessWidget {
             ],
           ),
         ),
-      ),
-    );
-  }
-}
-
-class _EventGroupsEmptyCard extends StatelessWidget {
-  const _EventGroupsEmptyCard({super.key, required this.onAdd});
-
-  final VoidCallback onAdd;
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
-
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onAdd,
-        borderRadius: BorderRadius.circular(16),
-        child: CustomPaint(
-          painter: _DashedBorderPainter(
-            color: colorScheme.outlineVariant,
-            radius: 16,
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              children: [
-                Icon(
-                  Icons.event_note_outlined,
-                  size: 36,
-                  color: colorScheme.primary.withValues(alpha: 0.8),
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  'Henüz gruba eklenmedi',
-                  style: textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                FilledButton.tonalIcon(
-                  onPressed: onAdd,
-                  icon: const Icon(Icons.add_rounded, size: 20),
-                  label: const Text('Gruba ekle'),
-                  style: FilledButton.styleFrom(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _MetaInfoRow extends StatelessWidget {
-  const _MetaInfoRow({
-    required this.icon,
-    required this.label,
-    required this.value,
-  });
-
-  final IconData icon;
-  final String label;
-  final String value;
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
-
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
-      child: Row(
-        children: [
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: colorScheme.surfaceContainerHighest,
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Icon(icon, size: 20, color: colorScheme.onSurfaceVariant),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  label,
-                  style: textTheme.labelMedium?.copyWith(
-                    color: colorScheme.onSurfaceVariant,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  value,
-                  style: textTheme.bodyLarge?.copyWith(
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
       ),
     );
   }

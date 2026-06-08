@@ -1,0 +1,21 @@
+# Backend — kök .gitignore ile aynı kurallar geçerli.
+# Bu dosya backend/ altında çalışırken ek hatırlatma sağlar.
+
+bin/
+obj/
+.vs/
+.idea/
+*.user
+*.suo
+
+.env
+.env.*
+!.env.example
+
+appsettings.Production.json
+appsettings.*.local.json
+appsettings.Development.json
+
+**/Migrations/*.Designer.cs.bak
+TestResults/
+*.trx

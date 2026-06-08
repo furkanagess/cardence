@@ -1,0 +1,72 @@
+using Cardence.Application.DTOs.Cards;
+using Cardence.Domain.Entities;
+
+namespace Cardence.Application.Mapping;
+
+public static class BusinessCardMapper
+{
+    public static BusinessCardDto ToDto(BusinessCard entity) => new()
+    {
+        CardName = entity.CardName,
+        DisplayName = entity.DisplayName,
+        Email = entity.Email,
+        Phone = entity.Phone,
+        Company = entity.Company,
+        Title = entity.Title,
+        Website = entity.Website,
+        Linkedin = entity.Linkedin,
+        Skills = entity.Skills,
+        School = entity.School,
+        About = entity.About,
+        AccentColor = entity.AccentColor,
+        BackgroundColor = entity.BackgroundColor,
+        LastUsedPaletteBackgroundColor = entity.LastUsedPaletteBackgroundColor,
+        LinkedEventGroupIds = [],
+        CardId = entity.CardId,
+    };
+
+    public static void ApplyDto(BusinessCard entity, BusinessCardDto dto)
+    {
+        entity.CardName = dto.CardName;
+        entity.DisplayName = dto.DisplayName;
+        entity.Email = dto.Email;
+        entity.Phone = dto.Phone;
+        entity.Company = dto.Company;
+        entity.Title = dto.Title;
+        entity.Website = dto.Website;
+        entity.Linkedin = dto.Linkedin;
+        entity.Skills = dto.Skills;
+        entity.School = dto.School;
+        entity.About = dto.About;
+        entity.AccentColor = dto.AccentColor;
+        entity.BackgroundColor = dto.BackgroundColor;
+        entity.LastUsedPaletteBackgroundColor = dto.LastUsedPaletteBackgroundColor;
+        entity.UpdatedAt = DateTime.UtcNow;
+    }
+
+    public static Dictionary<string, object?> ToSharePayload(BusinessCard entity)
+    {
+        var payload = new Dictionary<string, object?> { ["id"] = entity.CardId };
+
+        AddIfNotEmpty(payload, "n", entity.DisplayName);
+        AddIfNotEmpty(payload, "e", entity.Email);
+        AddIfNotEmpty(payload, "p", entity.Phone);
+        AddIfNotEmpty(payload, "c", entity.Company);
+        AddIfNotEmpty(payload, "t", entity.Title);
+        AddIfNotEmpty(payload, "w", entity.Website);
+        AddIfNotEmpty(payload, "l", entity.Linkedin);
+        AddIfNotEmpty(payload, "s", entity.Skills);
+        AddIfNotEmpty(payload, "o", entity.School);
+        AddIfNotEmpty(payload, "h", entity.About);
+
+        return payload;
+    }
+
+    private static void AddIfNotEmpty(Dictionary<string, object?> payload, string key, string? value)
+    {
+        if (!string.IsNullOrWhiteSpace(value))
+        {
+            payload[key] = value;
+        }
+    }
+}

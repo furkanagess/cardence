@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/widgets/atoms/custom_button.dart';
 import '../../domain/entities/saved_cards_wallet_quota.dart';
 import '../../domain/saved_cards_wallet_limits.dart';
 
@@ -107,15 +108,14 @@ class WalletQuotaDetailSheet extends StatelessWidget {
             ],
             if (!quota.isPremium && onUpgradeTap != null) ...[
               const SizedBox(height: 20),
-              FilledButton.icon(
+              CustomButton(
+                label: atLimit ? 'Paket al, sınırı artır' : 'Premium pakete geç',
+                icon: Icons.workspace_premium_outlined,
                 onPressed: () {
                   Navigator.of(context).pop();
                   onUpgradeTap!();
                 },
-                icon: const Icon(Icons.workspace_premium_outlined, size: 20),
-                label: Text(atLimit ? 'Paket al, sınırı artır' : 'Premium pakete geç'),
                 style: FilledButton.styleFrom(
-                  minimumSize: const Size.fromHeight(48),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),

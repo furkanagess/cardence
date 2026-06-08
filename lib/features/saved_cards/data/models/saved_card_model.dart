@@ -86,7 +86,7 @@ class SavedCardModel {
 
   factory SavedCardModel.fromJson(Map<String, dynamic> json) {
     return SavedCardModel(
-      cardId: json['cardId'] as String,
+      cardId: (json['cardId'] ?? json['CardId']).toString(),
       displayName: json['displayName'] as String?,
       email: json['email'] as String?,
       phone: json['phone'] as String?,

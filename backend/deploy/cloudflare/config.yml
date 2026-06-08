@@ -1,0 +1,14 @@
+# Cloudflare Tunnel — cardenceapi.app → local API (port 8080)
+#
+# Kurulum sonrası credentials dosya yolu ve tunnel ID bu dosyada güncellenir.
+# connect-domain.sh scripti bunu otomatik yapar.
+
+tunnel: cardence-api
+credentials-file: CREDENTIALS_PATH_PLACEHOLDER
+
+ingress:
+  - hostname: cardenceapi.app
+    service: http://localhost:8080
+  - hostname: www.cardenceapi.app
+    service: http://localhost:8080
+  - service: http_status:404

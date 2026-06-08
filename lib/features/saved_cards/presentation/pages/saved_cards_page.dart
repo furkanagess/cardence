@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import '../../../../core/theme/app_colors.dart';
+import '../../../../core/widgets/atoms/custom_button.dart';
 import '../../../../core/widgets/organisms/cardence_scaffold.dart';
 import '../../../../core/widgets/organisms/flippable_person_card.dart';
 import '../../../event_groups/domain/entities/event_group.dart';
@@ -11,6 +11,7 @@ import '../../domain/entities/add_saved_card_result.dart';
 import '../../domain/entities/saved_card.dart';
 import '../../domain/entities/saved_cards_wallet_quota.dart';
 import '../../domain/usecases/add_saved_card.dart';
+import '../../domain/usecases/delete_saved_card.dart';
 import '../../domain/usecases/get_saved_cards.dart';
 import '../../domain/usecases/get_saved_cards_wallet_quota.dart';
 import '../../domain/usecases/save_saved_card.dart';
@@ -18,6 +19,7 @@ import '../../domain/usecases/upgrade_wallet_plan.dart';
 import '../saved_cards_catalog.dart';
 import '../widgets/add_saved_card_sheet.dart';
 import '../widgets/saved_card_list_tile.dart';
+import '../widgets/saved_cards_add_card_fab.dart';
 import '../widgets/saved_cards_screen_toolbar.dart';
 import '../widgets/saved_cards_wallet_strip.dart';
 import '../widgets/wallet_upgrade_sheet.dart';
@@ -39,6 +41,7 @@ class SavedCardsPage extends StatefulWidget {
     required this.onViewModeChanged,
     required this.getSavedCardsWalletQuota,
     required this.addSavedCard,
+    required this.deleteSavedCard,
     required this.upgradeWalletPlan,
   });
 
@@ -52,6 +55,7 @@ class SavedCardsPage extends StatefulWidget {
   final ValueChanged<bool> onViewModeChanged;
   final GetSavedCardsWalletQuota getSavedCardsWalletQuota;
   final AddSavedCard addSavedCard;
+  final DeleteSavedCard deleteSavedCard;
   final UpgradeWalletPlan upgradeWalletPlan;
 
   @override
@@ -106,6 +110,9 @@ class _SavedCardsPageState extends State<SavedCardsPage> {
     if (!mounted) return;
     setState(() {
       _cards = list;
+      if (SavedCardsCatalog.isUsingDemoCards(list)) {
+        _dummyCardsOrder = SavedCardsCatalog.demoDisplayList(list);
+      }
     });
   }
 
@@ -234,7 +241,8 @@ class _SavedCardsPageState extends State<SavedCardsPage> {
     const horizontalPadding = 20.0;
     const topPadding = 4.0;
     const cardVerticalStep = 64.0;
-    const extraBottomPadding = 28.0;
+    const contentBottomInset = 128.0;
+    const extraBottomPadding = 32.0;
     final quota = _quota;
 
     final cardsHeight = displayCards.isEmpty
@@ -306,7 +314,7 @@ class _SavedCardsPageState extends State<SavedCardsPage> {
                       horizontalPadding,
                       topPadding,
                       horizontalPadding,
-                      88,
+                      contentBottomInset,
                     ),
                     child: SizedBox(
                       height: cardsHeight,
@@ -416,7 +424,7 @@ class _SavedCardsPageState extends State<SavedCardsPage> {
                     ),
                   )
                 : ListView.builder(
-                    padding: const EdgeInsets.fromLTRB(20, 4, 20, 88),
+                    padding: const EdgeInsets.fromLTRB(20, 4, 20, contentBottomInset),
                     itemCount: displayCards.length,
                     itemBuilder: (context, index) {
                       final card = displayCards[index];
@@ -430,25 +438,13 @@ class _SavedCardsPageState extends State<SavedCardsPage> {
             ],
           ),
           Positioned(
-            right: 20,
-            bottom: 16,
-            child: SafeArea(
-              top: false,
-              child: FloatingActionButton.extended(
-                onPressed: _onAddCardTap,
-                icon: Icon(
-                  canAddMore
-                      ? Icons.add_rounded
-                      : Icons.workspace_premium_outlined,
-                ),
-                label: Text(canAddMore ? 'Ekle' : 'Paket'),
-                backgroundColor: canAddMore
-                    ? AppColors.primary
-                    : colorScheme.secondaryContainer,
-                foregroundColor: canAddMore
-                    ? AppColors.textOnPrimary
-                    : colorScheme.onSecondaryContainer,
-              ),
+            left: 0,
+            right: 0,
+            top: 0,
+            bottom: 0,
+            child: SavedCardsDraggableFab(
+              canAddMore: canAddMore,
+              onPressed: _onAddCardTap,
             ),
           ),
         ],
@@ -724,7 +720,8 @@ class _SavedCardsPageState extends State<SavedCardsPage> {
                       const SizedBox(width: 12),
                       Expanded(
                         flex: 2,
-                        child: FilledButton(
+                        child: CustomButton(
+                          label: 'Uygula',
                           onPressed: () {
                             setState(() {
                               _selectedEventFilter = tempEvent;
@@ -737,12 +734,10 @@ class _SavedCardsPageState extends State<SavedCardsPage> {
                             Navigator.of(context).pop();
                           },
                           style: FilledButton.styleFrom(
-                            minimumSize: const Size.fromHeight(48),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
                             ),
                           ),
-                          child: const Text('Uygula'),
                         ),
                       ),
                     ],
@@ -955,6 +950,7 @@ class _SavedCardsPageState extends State<SavedCardsPage> {
           getSavedCards: widget.getSavedCards,
           saveEventGroups: widget.saveEventGroups,
           saveSavedCard: widget.saveSavedCard,
+          deleteSavedCard: widget.deleteSavedCard,
           onSave: _persistCardUpdate,
         ),
       ),
@@ -964,13 +960,13 @@ class _SavedCardsPageState extends State<SavedCardsPage> {
   }
 
   Future<void> _persistCardUpdate(SavedCard updated) async {
-    if (_cards.isEmpty) {
+    if (SavedCardsCatalog.isUsingDemoCards(_cards)) {
       setState(() {
         _dummyCardsOrder = _dummyCardsOrder
             .map((c) => c.cardId == updated.cardId ? updated : c)
             .toList();
       });
-      return;
+      if (_cards.isEmpty) return;
     }
 
     await widget.saveSavedCard(updated);
@@ -1070,10 +1066,11 @@ class _SavedCardsPageState extends State<SavedCardsPage> {
                       ),
                     ),
                     const SizedBox(height: 8),
-                    FilledButton(
+                    CustomButton(
+                      label: 'Kaydet',
                       onPressed: () =>
                           Navigator.of(context).pop(draftNote.trim()),
-                      child: const Text('Kaydet'),
+                      fullWidth: false,
                     ),
                   ],
                 );

@@ -8,6 +8,7 @@ import '../widgets/create_event_group_sheet.dart';
 import '../../domain/usecases/get_event_groups.dart';
 import '../../domain/usecases/save_event_groups.dart';
 import '../../../saved_cards/domain/entities/saved_card.dart';
+import '../../../saved_cards/domain/usecases/delete_saved_card.dart';
 import '../../../saved_cards/domain/usecases/get_saved_cards.dart';
 import '../../../saved_cards/domain/usecases/save_saved_card.dart';
 import 'event_group_detail_page.dart';
@@ -20,6 +21,7 @@ class EventGroupsPage extends StatefulWidget {
     required this.saveEventGroups,
     required this.getSavedCards,
     required this.saveSavedCard,
+    required this.deleteSavedCard,
     this.createGroupTrigger = 0,
   });
 
@@ -27,6 +29,7 @@ class EventGroupsPage extends StatefulWidget {
   final SaveEventGroups saveEventGroups;
   final GetSavedCards getSavedCards;
   final SaveSavedCard saveSavedCard;
+  final DeleteSavedCard deleteSavedCard;
   final int createGroupTrigger;
 
   @override
@@ -240,6 +243,7 @@ class _EventGroupsPageState extends State<EventGroupsPage> {
               saveEventGroups: widget.saveEventGroups,
               getSavedCards: widget.getSavedCards,
               saveSavedCard: widget.saveSavedCard,
+              deleteSavedCard: widget.deleteSavedCard,
             ),
           ),
         )

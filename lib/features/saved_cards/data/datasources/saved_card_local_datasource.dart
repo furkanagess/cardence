@@ -7,6 +7,8 @@ const String _keySavedCards = 'saved_cards';
 abstract class SavedCardLocalDataSource {
   Future<List<SavedCardModel>> getSavedCards();
   Future<void> saveCard(SavedCardModel card);
+  Future<void> deleteCard(String cardId);
+  Future<void> replaceAll(List<SavedCardModel> cards);
 }
 
 class SavedCardLocalDataSourceImpl implements SavedCardLocalDataSource {
@@ -30,5 +32,21 @@ class SavedCardLocalDataSourceImpl implements SavedCardLocalDataSource {
       updated.add(card);
     }
     await _prefs.setString(_keySavedCards, SavedCardModel.listToJsonString(updated));
+  }
+
+  @override
+  Future<void> deleteCard(String cardId) async {
+    final list = await getSavedCards();
+    final updated =
+        list.where((card) => card.cardId != cardId).toList(growable: false);
+    await replaceAll(updated);
+  }
+
+  @override
+  Future<void> replaceAll(List<SavedCardModel> cards) async {
+    await _prefs.setString(
+      _keySavedCards,
+      SavedCardModel.listToJsonString(cards),
+    );
   }
 }

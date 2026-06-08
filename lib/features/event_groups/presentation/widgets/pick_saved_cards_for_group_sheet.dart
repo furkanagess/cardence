@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/widgets/atoms/custom_button.dart';
 import '../../../saved_cards/domain/entities/saved_card.dart';
 import '../../../saved_cards/presentation/widgets/saved_card_selectable_list.dart';
 
@@ -114,18 +115,13 @@ class _PickSavedCardsForGroupSheetState
             ),
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
-              child: FilledButton(
+              child: CustomButton(
+                label: _selectedIds.isEmpty
+                    ? 'Kartları gruba ekle'
+                    : '${_selectedIds.length} kartı gruba ekle',
                 onPressed: widget.cards.isEmpty || _selectedIds.isEmpty
                     ? null
                     : () => Navigator.of(context).pop(_selectedIds),
-                style: FilledButton.styleFrom(
-                  minimumSize: const Size.fromHeight(48),
-                ),
-                child: Text(
-                  _selectedIds.isEmpty
-                      ? 'Kartları gruba ekle'
-                      : '${_selectedIds.length} kartı gruba ekle',
-                ),
               ),
             ),
           ],

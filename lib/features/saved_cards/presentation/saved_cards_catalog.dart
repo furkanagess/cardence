@@ -103,13 +103,153 @@ class SavedCardsCatalog {
       about: 'Veri modelleme tarafinda guvenilir, teknik raporlamasi kuvvetli.',
       savedAt: 1739923200000,
     ),
+    SavedCard(
+      cardId: 'dummy-11',
+      displayName: 'Aylin Koc',
+      email: 'aylin.koc@skybridge.co',
+      phone: '+90 532 908 17 44',
+      company: 'SkyBridge',
+      title: 'UX Researcher',
+      website: 'https://aylinkoc.design',
+      school: 'ODTU',
+      about: 'Kullanici testlerini duzenli yurutuyor, bulgulari net aktariyor.',
+      savedAt: 1740528000000,
+    ),
+    SavedCard(
+      cardId: 'dummy-12',
+      displayName: 'Emre Tas',
+      email: 'emre.tas@finexa.com',
+      phone: '+90 533 210 88 31',
+      company: 'Finexa',
+      title: 'Finans Analisti',
+      linkedin: 'https://linkedin.com/in/emretas',
+      savedAt: 1741132800000,
+    ),
+    SavedCard(
+      cardId: 'dummy-13',
+      displayName: 'Gizem Polat',
+      email: 'gizem.polat@healtech.io',
+      phone: '+90 534 667 29 05',
+      company: 'HealTech',
+      title: 'Product Manager',
+      skills: 'Agile, Roadmap, Stakeholder',
+      about: 'Sprint planlamasi guclu, ekipler arasi koordinasyonu iyi yonetiyor.',
+      savedAt: 1741737600000,
+    ),
+    SavedCard(
+      cardId: 'dummy-14',
+      displayName: 'Baris Guney',
+      email: 'baris.guney@logistream.net',
+      phone: '+90 535 441 70 18',
+      company: 'LogiStream',
+      title: 'Operations Manager',
+      website: 'https://logistream.net',
+      savedAt: 1742342400000,
+    ),
+    SavedCard(
+      cardId: 'dummy-15',
+      displayName: 'Ceren Aydin',
+      email: 'ceren.aydin@pixelwave.studio',
+      phone: '+90 536 552 93 27',
+      company: 'PixelWave Studio',
+      title: 'Motion Designer',
+      linkedin: 'https://linkedin.com/in/cerenaydin',
+      school: 'Mimar Sinan GSU',
+      about: 'Animasyon teslimleri zamaninda, marka diline uyumlu calisiyor.',
+      savedAt: 1742947200000,
+    ),
+    SavedCard(
+      cardId: 'dummy-16',
+      displayName: 'Kaan Yildiz',
+      email: 'kaan.yildiz@cloudnest.dev',
+      phone: '+90 537 118 64 90',
+      company: 'CloudNest',
+      title: 'DevOps Engineer',
+      skills: 'Kubernetes, CI/CD, Terraform',
+      savedAt: 1743552000000,
+    ),
+    SavedCard(
+      cardId: 'dummy-17',
+      displayName: 'Melis Ucar',
+      email: 'melis.ucar@brandloom.agency',
+      phone: '+90 538 309 55 72',
+      company: 'Brandloom',
+      title: 'Brand Strategist',
+      website: 'https://brandloom.agency',
+      about: 'Marka konumlandirmada net oneriler sunuyor, sunumlari ikna edici.',
+      savedAt: 1744156800000,
+    ),
+    SavedCard(
+      cardId: 'dummy-18',
+      displayName: 'Tolga Seker',
+      email: 'tolga.seker@autoparts.tr',
+      phone: '+90 539 874 20 66',
+      company: 'AutoParts TR',
+      title: 'Supply Chain Lead',
+      savedAt: 1744761600000,
+    ),
+    SavedCard(
+      cardId: 'dummy-19',
+      displayName: 'Irem Balci',
+      email: 'irem.balci@edunova.org',
+      phone: '+90 530 246 81 39',
+      company: 'EduNova',
+      title: 'Learning Designer',
+      linkedin: 'https://linkedin.com/in/irembalci',
+      school: 'Bogazici Universitesi',
+      skills: 'E-ogrenme, Storyboard, LMS',
+      about: 'Egitim iceriklerini ogrenci odakli kurguluyor, geri bildirime acik.',
+      savedAt: 1745366400000,
+    ),
+    SavedCard(
+      cardId: 'dummy-20',
+      displayName: 'Serkan Mutlu',
+      email: 'serkan.mutlu@cybershield.io',
+      phone: '+90 531 703 12 58',
+      company: 'CyberShield',
+      title: 'Security Architect',
+      website: 'https://cybershield.io',
+      linkedin: 'https://linkedin.com/in/serkanmutlu',
+      about: 'Guvenlik denetimlerinde detayci, risk raporlarini anlasilir yaziyor.',
+      savedAt: 1745971200000,
+    ),
   ];
 
-  /// Kalıcı kayıtlar varsa onları, yoksa demo kartları döndürür.
-  static List<SavedCard> displayCards(List<SavedCard> persisted) {
-    if (persisted.isNotEmpty) return persisted;
-    return List<SavedCard>.from(demoCards);
+  static bool _isDummyCardId(String cardId) => cardId.startsWith('dummy-');
+
+  /// Yalnızca yerel demo kartları gösterilirken true (boş cüzdan demo değildir).
+  static bool isUsingDemoCards(List<SavedCard> persisted) {
+    if (persisted.isEmpty) return false;
+    return persisted.every((c) => _isDummyCardId(c.cardId));
   }
 
-  static bool isUsingDemoCards(List<SavedCard> persisted) => persisted.isEmpty;
+  /// Katalogdaki tüm demo kartlar; kalıcı sıra korunur, yeni dummy'ler eklenir.
+  static List<SavedCard> demoDisplayList(List<SavedCard> persisted) {
+    final catalogById = {for (final c in demoCards) c.cardId: c};
+    if (persisted.isEmpty) {
+      return List<SavedCard>.from(demoCards);
+    }
+
+    final ordered = <SavedCard>[];
+    final seen = <String>{};
+    for (final card in persisted) {
+      if (!_isDummyCardId(card.cardId)) continue;
+      final fromCatalog = catalogById[card.cardId];
+      if (fromCatalog == null) continue;
+      ordered.add(fromCatalog);
+      seen.add(card.cardId);
+    }
+    for (final card in demoCards) {
+      if (!seen.contains(card.cardId)) ordered.add(card);
+    }
+    return ordered;
+  }
+
+  /// Kalıcı kayıtlar varsa onları, demo modunda güncel katalog listesini döndürür.
+  static List<SavedCard> displayCards(List<SavedCard> persisted) {
+    if (isUsingDemoCards(persisted)) {
+      return demoDisplayList(persisted);
+    }
+    return persisted;
+  }
 }

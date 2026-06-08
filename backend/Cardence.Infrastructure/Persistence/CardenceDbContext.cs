@@ -1,0 +1,24 @@
+using Cardence.Domain.Entities;
+using Microsoft.EntityFrameworkCore;
+
+namespace Cardence.Infrastructure.Persistence;
+
+public sealed class CardenceDbContext : DbContext
+{
+    public CardenceDbContext(DbContextOptions<CardenceDbContext> options)
+        : base(options)
+    {
+    }
+
+    public DbSet<User> Users => Set<User>();
+    public DbSet<BusinessCard> BusinessCards => Set<BusinessCard>();
+    public DbSet<SavedCard> SavedCards => Set<SavedCard>();
+    public DbSet<WalletEntitlement> WalletEntitlements => Set<WalletEntitlement>();
+    public DbSet<AuthRefreshToken> AuthRefreshTokens => Set<AuthRefreshToken>();
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.ApplyConfigurationsFromAssembly(typeof(CardenceDbContext).Assembly);
+        base.OnModelCreating(modelBuilder);
+    }
+}

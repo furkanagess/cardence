@@ -108,14 +108,16 @@ class SavedCardsWalletStrip extends StatelessWidget {
                       color: colorScheme.onSurfaceVariant,
                     ),
                   ),
-                  const Spacer(),
-                  Text(
-                    '${quota.remaining} boş',
-                    style: textTheme.labelMedium?.copyWith(
-                      color: colorScheme.onSurfaceVariant,
-                      fontWeight: FontWeight.w500,
+                  if (!isDemoMode) ...[
+                    const Spacer(),
+                    Text(
+                      '${quota.remaining} boş',
+                      style: textTheme.labelMedium?.copyWith(
+                        color: colorScheme.onSurfaceVariant,
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
-                  ),
+                  ],
                   if (inAppBar) ...[
                     const SizedBox(width: 2),
                     Icon(
@@ -126,16 +128,6 @@ class SavedCardsWalletStrip extends StatelessWidget {
                   ],
                 ],
               ),
-              if (isDemoMode) ...[
-                const SizedBox(height: 6),
-                Text(
-                  'Örnek kartlar · ${quota.remaining} slot kullanılabilir',
-                  style: textTheme.bodySmall?.copyWith(
-                    color: colorScheme.onSurfaceVariant,
-                    height: 1.3,
-                  ),
-                ),
-              ],
               const SizedBox(height: 8),
               ClipRRect(
                 borderRadius: BorderRadius.circular(3),

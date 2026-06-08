@@ -79,24 +79,45 @@ class CardenceAppBar extends StatelessWidget implements PreferredSizeWidget {
     );
   }
 
+  static ButtonStyle _flowButtonStyle(BuildContext context) {
+    final background = Theme.of(context).scaffoldBackgroundColor;
+    final onSurface = Theme.of(context).colorScheme.onSurface;
+    return ButtonStyle(
+      backgroundColor: WidgetStatePropertyAll(background),
+      overlayColor: const WidgetStatePropertyAll(Colors.transparent),
+      shadowColor: const WidgetStatePropertyAll(Colors.transparent),
+      surfaceTintColor: const WidgetStatePropertyAll(Colors.transparent),
+      foregroundColor: WidgetStateProperty.resolveWith((states) {
+        if (states.contains(WidgetState.disabled)) {
+          return onSurface.withValues(alpha: 0.38);
+        }
+        return onSurface;
+      }),
+    );
+  }
+
   /// Akış ekranları için geri butonu (onboarding vb.).
   static Widget flowBackButton({
+    required BuildContext context,
     required VoidCallback? onPressed,
   }) {
     return IconButton(
       tooltip: 'Geri',
       onPressed: onPressed,
+      style: _flowButtonStyle(context),
       icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
     );
   }
 
   /// Akış ekranları için metin aksiyonu (ör. Atla).
   static Widget flowTextAction({
+    required BuildContext context,
     required String label,
     required VoidCallback onPressed,
   }) {
     return TextButton(
       onPressed: onPressed,
+      style: _flowButtonStyle(context),
       child: Text(label),
     );
   }
@@ -146,11 +167,14 @@ class CardenceAppBar extends StatelessWidget implements PreferredSizeWidget {
           _isRoot || _isFlow ? false : automaticallyImplyLeading,
       leading: leading,
       actions: actions,
-      backgroundColor: backgroundColor ?? appBarTheme.backgroundColor ?? colorScheme.surface,
+      backgroundColor: backgroundColor ??
+          (_isFlow
+              ? theme.scaffoldBackgroundColor
+              : appBarTheme.backgroundColor ?? colorScheme.surface),
       foregroundColor: foregroundColor ?? appBarTheme.foregroundColor,
       elevation: elevation ?? appBarTheme.elevation ?? 0,
-      scrolledUnderElevation:
-          scrolledUnderElevation ?? appBarTheme.scrolledUnderElevation ?? 1,
+      scrolledUnderElevation: scrolledUnderElevation ??
+          (_isFlow ? 0 : appBarTheme.scrolledUnderElevation ?? 1),
       surfaceTintColor: Colors.transparent,
       iconTheme: IconThemeData(
         color: foregroundColor ?? colorScheme.onSurface,

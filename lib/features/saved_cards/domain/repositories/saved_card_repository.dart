@@ -1,6 +1,10 @@
 import '../entities/saved_card.dart';
+import '../entities/saved_cards_wallet_quota.dart';
 
 abstract class SavedCardRepository {
   Future<List<SavedCard>> getSavedCards();
+  Future<SavedCard> addCard(SavedCard card);
   Future<void> saveCard(SavedCard card);
+  Future<void> deleteCard(String cardId);
+  Future<SavedCardsWalletQuota> getWalletQuota();
 }

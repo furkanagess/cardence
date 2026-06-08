@@ -1,33 +1,56 @@
 import 'package:flutter/material.dart';
 
 import 'core/constants/app_constants.dart';
+import 'core/network/interceptors/chuck_interceptor_service.dart';
 import 'core/theme/app_theme.dart';
+import 'core/widgets/molecules/chuck_fab_overlay.dart';
 import 'core/widgets/organisms/cardence_scaffold.dart';
-import 'features/onboarding/domain/usecases/complete_onboarding.dart';
+import 'features/auth/domain/usecases/forgot_password.dart';
+import 'features/auth/domain/usecases/login_with_email.dart';
+import 'features/auth/domain/usecases/login_with_phone.dart';
+import 'features/auth/domain/usecases/logout.dart';
+import 'features/auth/domain/usecases/register_user.dart';
+import 'features/auth/domain/usecases/reset_password.dart';
+import 'features/auth/domain/usecases/restore_auth_session.dart';
+import 'features/auth/presentation/pages/login_page.dart';
+import 'features/event_groups/domain/usecases/get_event_groups.dart';
+import 'features/event_groups/domain/usecases/save_event_groups.dart';
 import 'features/onboarding/domain/usecases/get_onboarding_completed.dart';
 import 'features/onboarding/domain/usecases/get_onboarding_draft_card.dart';
 import 'features/onboarding/domain/usecases/get_onboarding_draft_cards.dart';
-import 'features/event_groups/domain/usecases/get_event_groups.dart';
-import 'features/event_groups/domain/usecases/save_event_groups.dart';
+import 'features/business_cards/domain/usecases/save_business_card.dart';
+import 'features/onboarding/domain/usecases/save_onboarding_draft_card.dart';
+import 'features/onboarding/domain/usecases/sync_onboarding_from_server.dart';
+import 'features/onboarding/presentation/pages/onboarding_page.dart';
 import 'features/saved_cards/domain/usecases/add_saved_card.dart';
+import 'features/saved_cards/domain/usecases/delete_saved_card.dart';
 import 'features/saved_cards/domain/usecases/get_saved_cards.dart';
 import 'features/saved_cards/domain/usecases/get_saved_cards_wallet_quota.dart';
 import 'features/saved_cards/domain/usecases/save_saved_card.dart';
 import 'features/saved_cards/domain/usecases/upgrade_wallet_plan.dart';
-import 'features/onboarding/domain/usecases/save_onboarding_draft_card.dart';
-import 'features/onboarding/presentation/pages/onboarding_page.dart';
 import 'features/settings/domain/entities/theme_preference.dart';
 import 'features/settings/domain/usecases/get_theme_preference.dart';
 import 'features/settings/domain/usecases/set_theme_preference.dart';
 import 'features/shell/presentation/pages/main_shell_page.dart';
 
-/// Uygulama kökü: onboarding, tema, bottom nav ile ana kabuk.
+enum _AppDestination { loading, login, onboarding, main }
+
+/// Uygulama kökü: login → onboarding → ana kabuk.
 class App extends StatefulWidget {
   const App({
     super.key,
+    required this.restoreAuthSession,
+    required this.loginWithEmail,
+    required this.loginWithPhone,
+    required this.registerUser,
+    required this.forgotPassword,
+    required this.resetPassword,
+    required this.logout,
     required this.getOnboardingCompleted,
     required this.completeOnboarding,
+    required this.syncOnboardingFromServer,
     required this.saveOnboardingDraftCard,
+    required this.saveBusinessCard,
     required this.getOnboardingDraftCard,
     required this.getOnboardingDraftCards,
     required this.getThemePreference,
@@ -38,12 +61,22 @@ class App extends StatefulWidget {
     required this.saveSavedCard,
     required this.getSavedCardsWalletQuota,
     required this.addSavedCard,
+    required this.deleteSavedCard,
     required this.upgradeWalletPlan,
   });
 
+  final RestoreAuthSession restoreAuthSession;
+  final LoginWithEmail loginWithEmail;
+  final LoginWithPhone loginWithPhone;
+  final RegisterUser registerUser;
+  final ForgotPassword forgotPassword;
+  final ResetPassword resetPassword;
+  final Logout logout;
   final GetOnboardingCompleted getOnboardingCompleted;
-  final CompleteOnboarding completeOnboarding;
+  final Future<void> Function() completeOnboarding;
+  final SyncOnboardingFromServer syncOnboardingFromServer;
   final SaveOnboardingDraftCard saveOnboardingDraftCard;
+  final SaveBusinessCard saveBusinessCard;
   final GetOnboardingDraftCard getOnboardingDraftCard;
   final GetOnboardingDraftCards getOnboardingDraftCards;
   final GetThemePreference getThemePreference;
@@ -54,6 +87,7 @@ class App extends StatefulWidget {
   final SaveSavedCard saveSavedCard;
   final GetSavedCardsWalletQuota getSavedCardsWalletQuota;
   final AddSavedCard addSavedCard;
+  final DeleteSavedCard deleteSavedCard;
   final UpgradeWalletPlan upgradeWalletPlan;
 
   @override
@@ -61,23 +95,38 @@ class App extends StatefulWidget {
 }
 
 class _AppState extends State<App> {
-  bool _isLoading = true;
-  bool _showOnboarding = true;
+  _AppDestination _destination = _AppDestination.loading;
   ThemePreference _themePreference = ThemePreference.system;
 
   @override
   void initState() {
     super.initState();
-    _checkOnboarding();
+    _bootstrap();
     _loadTheme();
   }
 
-  Future<void> _checkOnboarding() async {
+  Future<void> _bootstrap() async {
+    final restored = await widget.restoreAuthSession();
+    if (!mounted) return;
+
+    if (!restored.isAuthenticated) {
+      setState(() => _destination = _AppDestination.login);
+      return;
+    }
+
+    if (restored.onboardingCompleted == true) {
+      await widget.syncOnboardingFromServer(completed: true);
+    }
+
+    await _resolvePostLoginDestination();
+  }
+
+  Future<void> _resolvePostLoginDestination() async {
     final completed = await widget.getOnboardingCompleted();
     if (!mounted) return;
     setState(() {
-      _isLoading = false;
-      _showOnboarding = !completed;
+      _destination =
+          completed ? _AppDestination.main : _AppDestination.onboarding;
     });
   }
 
@@ -87,8 +136,18 @@ class _AppState extends State<App> {
     setState(() => _themePreference = pref);
   }
 
+  void _onLoginSuccess() {
+    _resolvePostLoginDestination();
+  }
+
   void _onOnboardingFinish() {
-    setState(() => _showOnboarding = false);
+    setState(() => _destination = _AppDestination.main);
+  }
+
+  Future<void> _onLogout() async {
+    await widget.logout();
+    if (!mounted) return;
+    setState(() => _destination = _AppDestination.login);
   }
 
   void _onThemeChanged(ThemePreference preference) async {
@@ -108,36 +167,61 @@ class _AppState extends State<App> {
     }
   }
 
+  Widget _buildHome() {
+    switch (_destination) {
+      case _AppDestination.loading:
+        return const _SplashContent();
+      case _AppDestination.login:
+        return LoginPage(
+          loginWithEmail: widget.loginWithEmail,
+          loginWithPhone: widget.loginWithPhone,
+          registerUser: widget.registerUser,
+          forgotPassword: widget.forgotPassword,
+          resetPassword: widget.resetPassword,
+          onLoginSuccess: _onLoginSuccess,
+        );
+      case _AppDestination.onboarding:
+        return OnboardingPageView(
+          completeOnboarding: widget.completeOnboarding,
+          saveOnboardingDraftCard: widget.saveOnboardingDraftCard,
+          saveBusinessCard: widget.saveBusinessCard,
+          onFinish: _onOnboardingFinish,
+        );
+      case _AppDestination.main:
+        return MainShellPage(
+          getOnboardingDraftCard: widget.getOnboardingDraftCard,
+          getOnboardingDraftCards: widget.getOnboardingDraftCards,
+          saveOnboardingDraftCard: widget.saveOnboardingDraftCard,
+          getEventGroups: widget.getEventGroups,
+          saveEventGroups: widget.saveEventGroups,
+          getSavedCards: widget.getSavedCards,
+          saveSavedCard: widget.saveSavedCard,
+          getSavedCardsWalletQuota: widget.getSavedCardsWalletQuota,
+          addSavedCard: widget.addSavedCard,
+          deleteSavedCard: widget.deleteSavedCard,
+          upgradeWalletPlan: widget.upgradeWalletPlan,
+          themePreference: _themePreference,
+          onThemeChanged: _onThemeChanged,
+          onLogout: _onLogout,
+        );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      navigatorKey: ChuckInterceptorService.instance.navigatorKey,
       title: 'Cardence',
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
       themeMode: _themeMode,
       debugShowCheckedModeBanner: false,
-      home: _isLoading
-          ? const _SplashContent()
-          : _showOnboarding
-              ? OnboardingPageView(
-                  completeOnboarding: widget.completeOnboarding,
-                  saveOnboardingDraftCard: widget.saveOnboardingDraftCard,
-                  onFinish: _onOnboardingFinish,
-                )
-              : MainShellPage(
-                  getOnboardingDraftCard: widget.getOnboardingDraftCard,
-                  getOnboardingDraftCards: widget.getOnboardingDraftCards,
-                  saveOnboardingDraftCard: widget.saveOnboardingDraftCard,
-                  getEventGroups: widget.getEventGroups,
-                  saveEventGroups: widget.saveEventGroups,
-                  getSavedCards: widget.getSavedCards,
-                  saveSavedCard: widget.saveSavedCard,
-                  getSavedCardsWalletQuota: widget.getSavedCardsWalletQuota,
-                  addSavedCard: widget.addSavedCard,
-                  upgradeWalletPlan: widget.upgradeWalletPlan,
-                  themePreference: _themePreference,
-                  onThemeChanged: _onThemeChanged,
-                ),
+      builder: (context, child) {
+        return ChuckFabOverlay(
+          child: child ?? const SizedBox.shrink(),
+        );
+      },
+      home: _buildHome(),
     );
   }
 }

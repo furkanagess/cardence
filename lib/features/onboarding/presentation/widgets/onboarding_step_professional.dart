@@ -1,17 +1,22 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/widgets/molecules/skills_chip_input.dart';
+import '../../../../core/widgets/atoms/custom_text_field.dart';
 import '../../domain/entities/onboarding_card_draft.dart';
+import 'onboarding_step_shell.dart';
 
 class OnboardingStepProfessional extends StatefulWidget {
   const OnboardingStepProfessional({
     super.key,
     required this.draft,
     required this.onChanged,
+    required this.stepIndex,
+    required this.stepCount,
   });
 
   final OnboardingCardDraft draft;
   final ValueChanged<OnboardingCardDraft> onChanged;
+  final int stepIndex;
+  final int stepCount;
 
   @override
   State<OnboardingStepProfessional> createState() =>
@@ -21,8 +26,6 @@ class OnboardingStepProfessional extends StatefulWidget {
 class _OnboardingStepProfessionalState extends State<OnboardingStepProfessional> {
   late final TextEditingController _companyController;
   late final TextEditingController _titleController;
-  late final TextEditingController _schoolController;
-  late final TextEditingController _aboutController;
 
   @override
   void initState() {
@@ -31,10 +34,6 @@ class _OnboardingStepProfessionalState extends State<OnboardingStepProfessional>
         TextEditingController(text: widget.draft.company ?? '');
     _titleController =
         TextEditingController(text: widget.draft.title ?? '');
-    _schoolController =
-        TextEditingController(text: widget.draft.school ?? '');
-    _aboutController =
-        TextEditingController(text: widget.draft.about ?? '');
   }
 
   @override
@@ -48,105 +47,44 @@ class _OnboardingStepProfessionalState extends State<OnboardingStepProfessional>
         _titleController.text != (widget.draft.title ?? '')) {
       _titleController.text = widget.draft.title ?? '';
     }
-    if (oldWidget.draft.school != widget.draft.school &&
-        _schoolController.text != (widget.draft.school ?? '')) {
-      _schoolController.text = widget.draft.school ?? '';
-    }
-    if (oldWidget.draft.about != widget.draft.about &&
-        _aboutController.text != (widget.draft.about ?? '')) {
-      _aboutController.text = widget.draft.about ?? '';
-    }
   }
 
   @override
   void dispose() {
     _companyController.dispose();
     _titleController.dispose();
-    _schoolController.dispose();
-    _aboutController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(horizontal: 24),
+    return OnboardingStepShell(
+      title: 'İş bilgileri',
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(
-            'Profesyonel Bilgiler',
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: Theme.of(context).colorScheme.onSurface,
-                ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Şirket, ünvan, okul ve hakkımda bilgilerin kartında görünsün.',
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
-          ),
-          const SizedBox(height: 24),
-          TextField(
-            textCapitalization: TextCapitalization.words,
-            decoration: const InputDecoration(
-              hintText: 'Şirket adı',
-              prefixIcon: Icon(Icons.business_outlined),
-            ),
+          const OnboardingFieldLabel(label: 'Şirket', required: true),
+          CustomTextField(
             controller: _companyController,
+            autofocus: true,
+            textCapitalization: TextCapitalization.words,
+            textInputAction: TextInputAction.next,
+            hintText: 'Örn. Cardence A.Ş.',
+            prefixIcon: const Icon(Icons.business_outlined),
             onChanged: (value) => widget.onChanged(
-              widget.draft.copyWith(company: value.isEmpty ? null : value),
+              widget.draft.copyWith(company: value.isEmpty ? null : value.trim()),
             ),
           ),
           const SizedBox(height: 16),
-          TextField(
-            textCapitalization: TextCapitalization.words,
-            decoration: const InputDecoration(
-              hintText: 'Ünvan (örn. Yazılım Geliştirici)',
-              prefixIcon: Icon(Icons.badge_outlined),
-            ),
+          const OnboardingFieldLabel(label: 'Pozisyon', required: true),
+          CustomTextField(
             controller: _titleController,
-            onChanged: (value) => widget.onChanged(
-              widget.draft.copyWith(title: value.isEmpty ? null : value),
-            ),
-          ),
-          const SizedBox(height: 16),
-          SkillsChipInput(
-            label: 'Yetenekler',
-            hintText: 'Yetenek ekle (örn. Flutter)',
-            value: widget.draft.skills,
-            onChanged: (s) => widget.onChanged(
-              widget.draft.copyWith(skills: (s ?? '').trim().isEmpty ? null : s),
-            ),
-          ),
-          const SizedBox(height: 16),
-          TextField(
             textCapitalization: TextCapitalization.words,
-            decoration: const InputDecoration(
-              hintText: 'Okul (örn. İstanbul Üniversitesi)',
-              prefixIcon: Icon(Icons.school_outlined),
-            ),
-            controller: _schoolController,
+            textInputAction: TextInputAction.done,
+            hintText: 'Örn. Ürün Müdürü',
+            prefixIcon: const Icon(Icons.work_outline_rounded),
             onChanged: (value) => widget.onChanged(
-              widget.draft.copyWith(school: value.isEmpty ? null : value),
-            ),
-          ),
-          const SizedBox(height: 16),
-          TextField(
-            minLines: 4,
-            maxLines: 8,
-            maxLength: 200,
-            textCapitalization: TextCapitalization.sentences,
-            decoration: const InputDecoration(
-              hintText: 'Kısaca kendinizi tanıtın (hakkımda)',
-              prefixIcon: Icon(Icons.person_outline_rounded),
-              alignLabelWithHint: true,
-            ),
-            controller: _aboutController,
-            onChanged: (value) => widget.onChanged(
-              widget.draft.copyWith(about: value.isEmpty ? null : value),
+              widget.draft.copyWith(title: value.isEmpty ? null : value.trim()),
             ),
           ),
         ],

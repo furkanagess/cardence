@@ -7,6 +7,7 @@ import 'package:uuid/uuid.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/atoms/cardence_app_bar.dart';
+import '../../../../core/widgets/atoms/custom_button.dart';
 import '../../../../core/widgets/organisms/cardence_scaffold.dart';
 import '../card_customize_colors.dart';
 import '../widgets/collapsible_card_preview_panel.dart';
@@ -136,12 +137,13 @@ class _CardDetailPageState extends State<CardDetailPage> {
             onPressed: () => Navigator.of(context).pop(),
             child: const Text('İptal'),
           ),
-          FilledButton(
+          CustomButton(
+            label: 'Uygula',
             onPressed: () {
               Navigator.of(context).pop();
               _setTextColor(_colorToHex(pickerColor));
             },
-            child: const Text('Uygula'),
+            fullWidth: false,
           ),
         ],
       ),
@@ -207,12 +209,13 @@ class _CardDetailPageState extends State<CardDetailPage> {
             onPressed: () => Navigator.of(context).pop(),
             child: const Text('İptal'),
           ),
-          FilledButton(
+          CustomButton(
+            label: 'Uygula',
             onPressed: () {
               Navigator.of(context).pop();
               _setBackgroundColorFromPalette(_colorToHex(pickerColor));
             },
-            child: const Text('Uygula'),
+            fullWidth: false,
           ),
         ],
       ),
@@ -343,10 +346,10 @@ class _CardDetailPageState extends State<CardDetailPage> {
                         subtitle: 'Arka plan, metin rengi ve kart stili.',
                       ),
                       const SizedBox(height: 12),
-                      FilledButton.icon(
+                      CustomButton(
+                        label: 'Kartı özelleştir',
+                        icon: Icons.palette_outlined,
                         onPressed: _showCustomizeBottomSheet,
-                        icon: const Icon(Icons.palette_outlined, size: 20),
-                        label: const Text('Kartı özelleştir'),
                         style: FilledButton.styleFrom(
                           backgroundColor: AppColors.primary,
                           foregroundColor: AppColors.textOnPrimary,
@@ -369,10 +372,10 @@ class _CardDetailPageState extends State<CardDetailPage> {
                             'Başka biri Cardence ile QR\'ı okutarak kartınızı kaydedebilir.',
                       ),
                       const SizedBox(height: 12),
-                      FilledButton.icon(
+                      CustomButton(
+                        label: 'QR ile paylaş',
+                        icon: Icons.qr_code_2_rounded,
                         onPressed: _showShareQrDialog,
-                        icon: const Icon(Icons.qr_code_2_rounded, size: 22),
-                        label: const Text('QR ile paylaş'),
                         style: FilledButton.styleFrom(
                           backgroundColor: AppColors.primary,
                           foregroundColor: AppColors.textOnPrimary,
@@ -675,7 +678,8 @@ class _CustomizeCardSheetContentState extends State<_CustomizeCardSheetContent> 
               ],
             ),
             const SizedBox(height: 24),
-            FilledButton(
+            CustomButton(
+              label: 'Tamam',
               onPressed: () => Navigator.of(context).pop(),
               style: FilledButton.styleFrom(
                 backgroundColor: AppColors.primary,
@@ -685,7 +689,6 @@ class _CustomizeCardSheetContentState extends State<_CustomizeCardSheetContent> 
                   borderRadius: BorderRadius.circular(12),
                 ),
               ),
-              child: const Text('Tamam'),
             ),
           ],
         ),

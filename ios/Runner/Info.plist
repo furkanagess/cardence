@@ -49,5 +49,10 @@
 		<string>Kart QR kodunu okutmak için kamera kullanılır.</string>
 		<key>UIStatusBarHidden</key>
 		<false/>
+		<key>NSAppTransportSecurity</key>
+		<dict>
+			<key>NSAllowsLocalNetworking</key>
+			<true/>
+		</dict>
 	</dict>
 </plist>

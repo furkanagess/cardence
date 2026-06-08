@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/widgets/atoms/custom_button.dart';
+import '../../../../core/widgets/atoms/custom_text_field.dart';
 import '../../../../core/widgets/molecules/new_event_group_name_dialog.dart';
 import '../../../saved_cards/domain/entities/saved_card.dart';
 import '../../../saved_cards/domain/usecases/get_saved_cards.dart';
@@ -170,13 +172,11 @@ class _CreateEventGroupSheetState extends State<CreateEventGroupSheet> {
             if (_step == _stepName) ...[
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: TextField(
+                child: CustomTextField(
                   controller: _nameController,
-                  decoration: InputDecoration(
-                    labelText: 'Etkinlik adı',
-                    hintText: 'Örn. Web Summit 2026',
-                    errorText: _nameErrorText,
-                  ),
+                  labelText: 'Etkinlik adı',
+                  hintText: 'Örn. Web Summit 2026',
+                  errorText: _nameErrorText,
                   autofocus: true,
                   textInputAction: TextInputAction.next,
                   onSubmitted: (_) => _goToPickCards(),
@@ -215,23 +215,15 @@ class _CreateEventGroupSheetState extends State<CreateEventGroupSheet> {
                   if (_step == _stepPickCards) const SizedBox(width: 8),
                   Expanded(
                     child: _step == _stepName
-                        ? FilledButton(
+                        ? CustomButton(
+                            label: 'İleri',
                             onPressed: _goToPickCards,
-                            style: FilledButton.styleFrom(
-                              minimumSize: const Size.fromHeight(48),
-                            ),
-                            child: const Text('İleri'),
                           )
-                        : FilledButton(
+                        : CustomButton(
+                            label: _selectedCardIds.isEmpty
+                                ? 'Grubu oluştur'
+                                : '${_selectedCardIds.length} kartla oluştur',
                             onPressed: _loadingCards ? null : _submit,
-                            style: FilledButton.styleFrom(
-                              minimumSize: const Size.fromHeight(48),
-                            ),
-                            child: Text(
-                              _selectedCardIds.isEmpty
-                                  ? 'Grubu oluştur'
-                                  : '${_selectedCardIds.length} kartla oluştur',
-                            ),
                           ),
                   ),
                 ],

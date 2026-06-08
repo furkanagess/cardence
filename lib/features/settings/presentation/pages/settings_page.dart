@@ -11,10 +11,12 @@ class SettingsPage extends StatelessWidget {
     super.key,
     required this.currentTheme,
     required this.onThemeChanged,
+    this.onLogout,
   });
 
   final ThemePreference currentTheme;
   final ValueChanged<ThemePreference> onThemeChanged;
+  final VoidCallback? onLogout;
 
   @override
   Widget build(BuildContext context) {
@@ -53,6 +55,34 @@ class SettingsPage extends StatelessWidget {
             value: currentTheme == ThemePreference.system,
             onTap: () => onThemeChanged(ThemePreference.system),
           ),
+          if (onLogout != null) ...[
+            const SizedBox(height: 16),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: Text(
+                'Hesap',
+                style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                      color: AppColors.textSecondary,
+                      fontWeight: FontWeight.w600,
+                    ),
+              ),
+            ),
+            ListTile(
+              leading: Icon(
+                Icons.logout_rounded,
+                color: Theme.of(context).colorScheme.error,
+              ),
+              title: Text(
+                'Çıkış yap',
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.error,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              subtitle: const Text('Oturumu kapat ve giriş ekranına dön'),
+              onTap: onLogout,
+            ),
+          ],
         ],
       ),
     );

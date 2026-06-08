@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flip_card/flip_card.dart';
 
+import '../atoms/custom_button.dart';
 import 'person_info_card.dart';
 
 /// Dikdörtgen (kartvizit oranında), çevrilebilir kişi kartı.
@@ -208,10 +209,11 @@ class _FlippablePersonCardState extends State<FlippablePersonCard>
         borderRadius: BorderRadius.circular(_cardRadius),
         child: showCenteredAddNote
             ? Center(
-                child: FilledButton.tonalIcon(
+                child: CustomButton.tonal(
+                  label: widget.backEmptyActionLabel ?? 'Not ekle',
+                  icon: Icons.add_rounded,
                   onPressed: widget.onBackEmptyActionTap,
-                  icon: const Icon(Icons.add_rounded, size: 20),
-                  label: Text(widget.backEmptyActionLabel ?? 'Not ekle'),
+                  fullWidth: false,
                   style: FilledButton.styleFrom(
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),

@@ -12,9 +12,18 @@ void main() async {
   FlutterNativeSplash.remove();
 
   runApp(App(
+    restoreAuthSession: result.restoreAuthSession,
+    loginWithEmail: result.loginWithEmail,
+    loginWithPhone: result.loginWithPhone,
+    registerUser: result.registerUser,
+    forgotPassword: result.forgotPassword,
+    resetPassword: result.resetPassword,
+    logout: result.logout,
     getOnboardingCompleted: result.getOnboardingCompleted,
     completeOnboarding: result.completeOnboarding,
+    syncOnboardingFromServer: result.syncOnboardingFromServer,
     saveOnboardingDraftCard: result.saveOnboardingDraftCard,
+    saveBusinessCard: result.saveBusinessCard,
     getOnboardingDraftCard: result.getOnboardingDraftCard,
     getOnboardingDraftCards: result.getOnboardingDraftCards,
     getThemePreference: result.getThemePreference,
@@ -25,6 +34,7 @@ void main() async {
     saveSavedCard: result.saveSavedCard,
     getSavedCardsWalletQuota: result.getSavedCardsWalletQuota,
     addSavedCard: result.addSavedCard,
+    deleteSavedCard: result.deleteSavedCard,
     upgradeWalletPlan: result.upgradeWalletPlan,
   ));
 }

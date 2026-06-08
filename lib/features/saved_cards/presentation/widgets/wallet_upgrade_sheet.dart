@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/widgets/atoms/custom_button.dart';
 import '../../domain/saved_cards_wallet_limits.dart';
 import '../../domain/usecases/upgrade_wallet_plan.dart';
 
@@ -64,19 +65,18 @@ class WalletUpgradeSheet extends StatelessWidget {
               text: 'QR ve kart ID ile hızlı ekleme',
             ),
             const SizedBox(height: 24),
-            FilledButton(
+            CustomButton(
+              label: 'Premium\'u etkinleştir (demo)',
               onPressed: () async {
                 await upgradeWalletPlan();
                 if (!context.mounted) return;
                 Navigator.of(context).pop(true);
               },
               style: FilledButton.styleFrom(
-                minimumSize: const Size.fromHeight(48),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
               ),
-              child: const Text('Premium\'u etkinleştir (demo)'),
             ),
             const SizedBox(height: 8),
             Text(

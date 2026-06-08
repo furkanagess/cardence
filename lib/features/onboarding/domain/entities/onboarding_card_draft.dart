@@ -84,11 +84,11 @@ class OnboardingCardDraft {
     'about',
   ];
 
-  /// Ön yüzde varsayılan gösterilecek alanlar (ünvan, e-posta, telefon).
+  /// Ön yüzde varsayılan gösterilecek alanlar (şirket, pozisyon, e-posta).
   static const List<String> defaultFrontVisibleFields = [
+    'company',
     'title',
     'email',
-    'phone',
   ];
 
   /// Eski varsayılan ön yüz (geçiş için).

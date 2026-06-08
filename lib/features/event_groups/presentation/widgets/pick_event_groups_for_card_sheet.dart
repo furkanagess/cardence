@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/widgets/atoms/custom_button.dart';
 import '../../domain/entities/event_group.dart';
 
 /// Bir kayıtlı kartın eklenebileceği etkinlik gruplarını seçtirir.
@@ -130,18 +131,13 @@ class _PickEventGroupsForCardSheetState extends State<PickEventGroupsForCardShee
             ),
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
-              child: FilledButton(
+              child: CustomButton(
+                label: _selectedIds.isEmpty
+                    ? 'Gruplara ekle'
+                    : '${_selectedIds.length} gruba ekle',
                 onPressed: widget.groups.isEmpty || _selectedIds.isEmpty
                     ? null
                     : () => Navigator.of(context).pop(_selectedIds),
-                style: FilledButton.styleFrom(
-                  minimumSize: const Size.fromHeight(48),
-                ),
-                child: Text(
-                  _selectedIds.isEmpty
-                      ? 'Gruplara ekle'
-                      : '${_selectedIds.length} gruba ekle',
-                ),
               ),
             ),
           ],

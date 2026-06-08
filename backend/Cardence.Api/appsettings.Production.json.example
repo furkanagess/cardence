@@ -1,0 +1,24 @@
+{
+  "Api": {
+    "PublicBaseUrl": "https://cardenceapi.app"
+  },
+  "Database": {
+    "UseInMemory": false
+  },
+  "ConnectionStrings": {
+    "Default": "Host=YOUR_DB_HOST;Port=5432;Database=cardence;Username=postgres;Password=CHANGE_ME;SSL Mode=Require"
+  },
+  "Jwt": {
+    "Issuer": "Cardence",
+    "Audience": "Cardence.App",
+    "SigningKey": "GENERATE-A-STRONG-RANDOM-KEY-MIN-32-CHARS",
+    "AccessTokenMinutes": 60,
+    "RefreshTokenDays": 30
+  },
+  "Serilog": {
+    "MinimumLevel": {
+      "Default": "Information"
+    }
+  },
+  "AllowedHosts": "cardenceapi.app;www.cardenceapi.app"
+}

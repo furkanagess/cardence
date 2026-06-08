@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../../theme/app_colors.dart';
+import '../../validation/app_validators.dart';
+import '../atoms/custom_text_field.dart';
 
 /// Yetenek alanı: metin kutusu + "+" ile yetenek ekleme, chip'lerde "-" ile silme.
 /// [value] virgülle ayrılmış yetenekler; [onChanged] güncel string ile çağrılır.
@@ -43,6 +45,15 @@ class _SkillsChipInputState extends State<SkillsChipInput> {
     super.initState();
     _items = SkillsChipInput._parse(widget.value);
     _controller = TextEditingController();
+    _controller.addListener(_onDraftChanged);
+  }
+
+  void _onDraftChanged() => setState(() {});
+
+  bool get _canAdd {
+    final text = _controller.text.trim();
+    if (!AppValidators.isValidSkillDraft(text)) return false;
+    return !_items.contains(text);
   }
 
   @override
@@ -55,13 +66,14 @@ class _SkillsChipInputState extends State<SkillsChipInput> {
 
   @override
   void dispose() {
+    _controller.removeListener(_onDraftChanged);
     _controller.dispose();
     super.dispose();
   }
 
   void _add() {
+    if (!_canAdd) return;
     final text = _controller.text.trim();
-    if (text.isEmpty) return;
     if (_items.contains(text)) {
       _controller.clear();
       setState(() {});
@@ -107,37 +119,31 @@ class _SkillsChipInputState extends State<SkillsChipInput> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Expanded(
-                child: TextField(
+                child: CustomTextField(
                   controller: _controller,
                   textCapitalization: TextCapitalization.words,
-                  decoration: InputDecoration(
-                    hintText: widget.hintText,
-                    prefixIcon: const Icon(Icons.workspace_premium_outlined),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    filled: true,
-                    fillColor: colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 14,
-                      vertical: 12,
-                    ),
-                  ),
-                  onSubmitted: (_) => _add(),
+                  hintText: widget.hintText,
+                  prefixIcon: const Icon(Icons.workspace_premium_outlined),
+                  textInputAction: TextInputAction.done,
+                  onSubmitted: _canAdd ? (_) => _add() : null,
                 ),
               ),
               const SizedBox(width: 8),
               Material(
-                color: AppColors.primary,
+                color: _canAdd
+                    ? AppColors.primary
+                    : colorScheme.surfaceContainerHighest,
                 borderRadius: BorderRadius.circular(12),
                 child: InkWell(
                   borderRadius: BorderRadius.circular(12),
-                  onTap: _add,
-                  child: const Padding(
-                    padding: EdgeInsets.all(12),
+                  onTap: _canAdd ? _add : null,
+                  child: Padding(
+                    padding: const EdgeInsets.all(12),
                     child: Icon(
                       Icons.add,
-                      color: AppColors.textOnPrimary,
+                      color: _canAdd
+                          ? AppColors.textOnPrimary
+                          : colorScheme.onSurface.withValues(alpha: 0.38),
                       size: 24,
                     ),
                   ),

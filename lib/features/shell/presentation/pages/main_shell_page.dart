@@ -6,6 +6,7 @@ import '../../../../core/widgets/organisms/cardence_scaffold.dart';
 import '../../../event_groups/domain/usecases/get_event_groups.dart';
 import '../../../event_groups/domain/usecases/save_event_groups.dart';
 import '../../../saved_cards/domain/usecases/add_saved_card.dart';
+import '../../../saved_cards/domain/usecases/delete_saved_card.dart';
 import '../../../saved_cards/domain/usecases/get_saved_cards.dart';
 import '../../../saved_cards/domain/usecases/get_saved_cards_wallet_quota.dart';
 import '../../../saved_cards/domain/usecases/save_saved_card.dart';
@@ -33,9 +34,11 @@ class MainShellPage extends StatefulWidget {
     required this.saveSavedCard,
     required this.getSavedCardsWalletQuota,
     required this.addSavedCard,
+    required this.deleteSavedCard,
     required this.upgradeWalletPlan,
     required this.themePreference,
     required this.onThemeChanged,
+    required this.onLogout,
   });
 
   final GetOnboardingDraftCard getOnboardingDraftCard;
@@ -47,9 +50,11 @@ class MainShellPage extends StatefulWidget {
   final SaveSavedCard saveSavedCard;
   final GetSavedCardsWalletQuota getSavedCardsWalletQuota;
   final AddSavedCard addSavedCard;
+  final DeleteSavedCard deleteSavedCard;
   final UpgradeWalletPlan upgradeWalletPlan;
   final ThemePreference themePreference;
   final ValueChanged<ThemePreference> onThemeChanged;
+  final VoidCallback onLogout;
 
   @override
   State<MainShellPage> createState() => _MainShellPageState();
@@ -127,6 +132,7 @@ class _MainShellPageState extends State<MainShellPage> {
             saveEventGroups: widget.saveEventGroups,
             getSavedCardsWalletQuota: widget.getSavedCardsWalletQuota,
             addSavedCard: widget.addSavedCard,
+            deleteSavedCard: widget.deleteSavedCard,
             upgradeWalletPlan: widget.upgradeWalletPlan,
             showFlippableView: _showSavedCardsFlippableView,
             onViewModeChanged: (flippable) =>
@@ -139,6 +145,7 @@ class _MainShellPageState extends State<MainShellPage> {
             saveEventGroups: widget.saveEventGroups,
             getSavedCards: widget.getSavedCards,
             saveSavedCard: widget.saveSavedCard,
+            deleteSavedCard: widget.deleteSavedCard,
             createGroupTrigger: _eventGroupsCreateTrigger,
           ),
           ProfilePage(
@@ -150,12 +157,15 @@ class _MainShellPageState extends State<MainShellPage> {
         ],
       ),
       extendBody: true,
-      bottomNavigationBar: Padding(
-        padding: const EdgeInsets.fromLTRB(24, 0, 24, 16),
-        child: _LiquidGlassBottomNavBar(
-          currentIndex: _currentIndex,
-          itemCount: 3,
-          onTap: (index) => setState(() => _currentIndex = index),
+      bottomNavigationBar: SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(24, 0, 24, 16),
+          child: _LiquidGlassBottomNavBar(
+            currentIndex: _currentIndex,
+            itemCount: 3,
+            onTap: (index) => setState(() => _currentIndex = index),
+          ),
         ),
       ),
     );
@@ -167,13 +177,14 @@ class _MainShellPageState extends State<MainShellPage> {
         builder: (context) => SettingsPage(
           currentTheme: widget.themePreference,
           onThemeChanged: widget.onThemeChanged,
+          onLogout: widget.onLogout,
         ),
       ),
     );
   }
 }
 
-/// Liquid glass tarzı bottom nav: gradient arka plan, sliding pill indicator.
+/// Bottom nav: opak yüzey, sliding pill indicator.
 class _LiquidGlassBottomNavBar extends StatefulWidget {
   const _LiquidGlassBottomNavBar({
     required this.currentIndex,
@@ -212,11 +223,11 @@ class _LiquidGlassBottomNavBarState extends State<_LiquidGlassBottomNavBar> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final navBg1 = theme.colorScheme.primary.withValues(alpha: 0.15);
-    final navBg2 = theme.colorScheme.primary.withValues(alpha: 0.08);
-    final borderColor = theme.colorScheme.primary.withValues(alpha: 0.3);
-    final pillColor = theme.colorScheme.inverseSurface;
-    final selectedIconColor = theme.colorScheme.onInverseSurface;
+    final colorScheme = theme.colorScheme;
+    final navSurface = colorScheme.surface;
+    final borderColor = colorScheme.outline;
+    final pillColor = colorScheme.inverseSurface;
+    final selectedIconColor = colorScheme.onInverseSurface;
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -236,21 +247,16 @@ class _LiquidGlassBottomNavBarState extends State<_LiquidGlassBottomNavBar> {
                   child: Container(
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(28),
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [navBg1, navBg2],
-                      ),
+                      color: navSurface,
                       border: Border.all(
                         color: borderColor,
-                        width: 1.2,
+                        width: 1,
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: theme.colorScheme.primary
-                              .withValues(alpha: 0.2),
+                          color: colorScheme.shadow.withValues(alpha: 0.12),
                           blurRadius: 12,
-                          offset: const Offset(0, 6),
+                          offset: const Offset(0, 4),
                           spreadRadius: -2,
                         ),
                       ],

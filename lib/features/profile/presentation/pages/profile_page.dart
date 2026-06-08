@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/widgets/atoms/custom_button.dart';
 import '../../../../core/widgets/organisms/flippable_person_card.dart';
 import '../../../my_cards/presentation/pages/card_view_page.dart';
 import '../../../my_cards/presentation/pages/my_card_edit_page.dart';
@@ -197,20 +198,19 @@ class _ProfilePageState extends State<ProfilePage> {
           ],
           Padding(
             padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
-            child: FilledButton.icon(
+            child: CustomButton(
+              label: 'Yeni kart',
+              icon: Icons.add_rounded,
               onPressed: _createNewCard,
-              icon: const Icon(Icons.add_rounded, size: 22),
-              label: const Text('Yeni kart'),
-              style: FilledButton.styleFrom(
-                minimumSize: const Size.fromHeight(48),
-              ),
             ),
           ),
           if (_cards.isNotEmpty) ...[
             const SizedBox(height: 16),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: FilledButton.icon(
+              child: CustomButton(
+                label: 'Kart yüzü ve alan düzeni',
+                icon: Icons.view_carousel_outlined,
                 onPressed: () {
                   Navigator.of(context)
                       .push(
@@ -226,8 +226,6 @@ class _ProfilePageState extends State<ProfilePage> {
                       )
                       .then((_) => _loadCards());
                 },
-                icon: const Icon(Icons.view_carousel_outlined, size: 20),
-                label: const Text('Kart yüzü ve alan düzeni'),
                 style: FilledButton.styleFrom(
                   backgroundColor: AppColors.primary,
                   foregroundColor: AppColors.textOnPrimary,

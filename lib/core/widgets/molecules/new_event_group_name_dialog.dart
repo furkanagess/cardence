@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../atoms/custom_button.dart';
+import '../atoms/custom_text_field.dart';
+
 /// Yeni etkinlik grubu adı girişi; girilen metni döndürür veya iptal edilirse null.
 class NewEventGroupNameDialog extends StatefulWidget {
   const NewEventGroupNameDialog({
@@ -71,13 +74,11 @@ class _NewEventGroupNameDialogState extends State<NewEventGroupNameDialog> {
   Widget build(BuildContext context) {
     return AlertDialog(
       title: const Text('Yeni etkinlik grubu'),
-      content: TextField(
+      content: CustomTextField(
         controller: _controller,
-        decoration: InputDecoration(
-          labelText: 'Etkinlik adı',
-          hintText: 'Örn. Web Summit 2026',
-          errorText: _errorText,
-        ),
+        labelText: 'Etkinlik adı',
+        hintText: 'Örn. Web Summit 2026',
+        errorText: _errorText,
         autofocus: true,
         textInputAction: TextInputAction.done,
         onSubmitted: (_) => _submit(),
@@ -87,9 +88,10 @@ class _NewEventGroupNameDialogState extends State<NewEventGroupNameDialog> {
           onPressed: () => Navigator.of(context).pop(),
           child: const Text('İptal'),
         ),
-        FilledButton(
+        CustomButton(
+          label: 'Ekle',
           onPressed: _submit,
-          child: const Text('Ekle'),
+          fullWidth: false,
         ),
       ],
     );

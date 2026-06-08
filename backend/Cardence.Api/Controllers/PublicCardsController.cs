@@ -1,0 +1,40 @@
+using Cardence.Application.Common;
+using Cardence.Application.Interfaces;
+using Microsoft.AspNetCore.Mvc;
+
+namespace Cardence.Api.Controllers;
+
+[ApiController]
+[Route("")]
+[Tags("PublicCards")]
+public sealed class PublicCardsController : ControllerBase
+{
+    private readonly IBusinessCardService _businessCardService;
+
+    public PublicCardsController(IBusinessCardService businessCardService)
+    {
+        _businessCardService = businessCardService;
+    }
+
+    [HttpGet("PublicBusinessCardShare")]
+    [ProducesResponseType(typeof(ApiResponse<IReadOnlyDictionary<string, object?>>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse<object?>), StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<ApiResponse<IReadOnlyDictionary<string, object?>>>> GetPublicBusinessCardShare(
+        [FromQuery] string cardId,
+        CancellationToken cancellationToken)
+    {
+        var payload = await _businessCardService.GetPublicSharePayloadAsync(cardId, cancellationToken);
+        return Ok(ApiResponse<IReadOnlyDictionary<string, object?>>.Ok(payload, HttpContext.TraceIdentifier));
+    }
+
+    [HttpHead("PublicBusinessCard")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> PublicBusinessCardExists(
+        [FromQuery] string cardId,
+        CancellationToken cancellationToken)
+    {
+        var exists = await _businessCardService.PublicCardExistsAsync(cardId, cancellationToken);
+        return exists ? NoContent() : NotFound();
+    }
+}

@@ -7,6 +7,7 @@ import 'package:uuid/uuid.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/atoms/cardence_app_bar.dart';
+import '../../../../core/widgets/atoms/custom_button.dart';
 import '../../../../core/widgets/organisms/cardence_scaffold.dart';
 import '../../../../core/widgets/organisms/flippable_person_card.dart';
 import '../widgets/my_card_preview_helpers.dart';
@@ -537,7 +538,8 @@ class _CardViewPageState extends State<CardViewPage> {
             onPressed: () => Navigator.of(context).pop(),
             child: const Text('İptal'),
           ),
-          FilledButton(
+          CustomButton(
+            label: 'Uygula',
             onPressed: () {
               Navigator.of(context).pop();
               final r = (pickerColor.r * 255).round().clamp(0, 255);
@@ -547,7 +549,7 @@ class _CardViewPageState extends State<CardViewPage> {
                   '#${r.toRadixString(16).padLeft(2, '0')}${g.toRadixString(16).padLeft(2, '0')}${b.toRadixString(16).padLeft(2, '0')}';
               _setTextColor(d, hex);
             },
-            child: const Text('Uygula'),
+            fullWidth: false,
           ),
         ],
       ),
@@ -666,12 +668,13 @@ class _CardViewPageState extends State<CardViewPage> {
         ),
         actions: [
           TextButton(onPressed: () => Navigator.of(ctx).pop(), child: const Text('İptal')),
-          FilledButton(
+          CustomButton(
+            label: 'Uygula',
             onPressed: () {
               Navigator.of(ctx).pop();
               _setBackgroundColorFromPalette(d, _colorToHex(pickerColor));
             },
-            child: const Text('Uygula'),
+            fullWidth: false,
           ),
         ],
       ),
@@ -714,10 +717,10 @@ class _CardViewPageState extends State<CardViewPage> {
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 24),
-                FilledButton.icon(
+                CustomButton(
+                  label: 'Yeni kart oluştur',
+                  icon: Icons.add_rounded,
                   onPressed: _createNewCard,
-                  icon: const Icon(Icons.add_rounded, size: 20),
-                  label: const Text('Yeni kart oluştur'),
                   style: FilledButton.styleFrom(
                     backgroundColor: AppColors.primary,
                     foregroundColor: AppColors.textOnPrimary,
@@ -919,10 +922,10 @@ class _CardViewPageState extends State<CardViewPage> {
               ),
             ),
             const SizedBox(height: 16),
-            FilledButton.icon(
+            CustomButton(
+              label: 'Yeni kart oluştur',
+              icon: Icons.add_rounded,
               onPressed: _createNewCard,
-              icon: const Icon(Icons.add_rounded, size: 20),
-              label: const Text('Yeni kart oluştur'),
               style: FilledButton.styleFrom(
                 backgroundColor: AppColors.primary,
                 foregroundColor: AppColors.textOnPrimary,

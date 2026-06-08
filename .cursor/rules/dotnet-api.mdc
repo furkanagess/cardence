@@ -1,0 +1,130 @@
+---
+description: Cardence .NET Backend API — Clean Architecture ve API sözleşmesi kuralları
+globs: backend/**/*
+alwaysApply: false
+---
+
+# Cardence .NET Backend Kuralları
+
+Bu kurallar `backend/` klasöründeki tüm .NET geliştirmeler için geçerlidir.
+
+---
+
+## 1. Tek kaynak dokümanlar
+
+- API sözleşmesi: `backend/docs/dotnet-backend-api.md`
+- Veritabanı tasarımı: `backend/docs/database-design.md`
+- Geliştirme akışı: `backend/docs/backend-development.md`
+- Flutter DTO uyumu: `lib/features/**/data/models/`
+
+Endpoint, DTO alan adı veya iş kuralı belirsizse önce bu dosyalara bak; tahmin etme.
+
+---
+
+## 2. Clean Architecture
+
+### Katmanlar
+
+```
+Cardence.Domain        → Entity, enum, domain exception (framework yok)
+Cardence.Application   → DTO, validator, use case, repository interface
+Cardence.Infrastructure → EF Core, repository impl, JWT, external servisler
+Cardence.Api           → Controller, middleware, Program.cs
+```
+
+### Bağımlılık yönü
+
+- Domain → hiçbir projeye bağımlı değil
+- Application → yalnızca Domain
+- Infrastructure → Application + Domain
+- Api → Application + Infrastructure
+
+**Yasak:** Domain/Application katmanında `Microsoft.AspNetCore.*`, `Microsoft.EntityFrameworkCore.*` import.
+
+---
+
+## 3. API konvansiyonları
+
+| Kural | Değer |
+|-------|-------|
+| Path isimlendirme | PascalCase, düz path: `/SaveBusinessCard`, `/LoginWithGoogle` |
+| Prefix | Yok (`/api/v1` kullanılmaz) |
+| Swagger tag | Domain grubu: `Authentication`, `BusinessCards`, `Wallet` |
+| Auth | `Authorization: Bearer {jwt}` |
+| Response zarfı | `{ success, data, error, traceId }` |
+| `savedAt` | Unix epoch **milliseconds** |
+| Renkler | Hex `#RRGGBB` |
+| Public QR | `CardSharePayload` kısa anahtarlar: `id`, `n`, `e`, `p`, `c`, `t`, `w`, `l`, `s`, `o`, `h` |
+
+---
+
+## 4. Flutter uyumu (zorunlu)
+
+| Backend DTO | Flutter model |
+|-------------|---------------|
+| `BusinessCardDto` | `OnboardingCardDraftModel.toJson()` |
+| `SavedCardDto` | `SavedCardModel.toJson()` |
+| `EventGroupDto` | `EventGroupModel.toJson()` |
+| `CardSharePayload` | `CardSharePayload.toJson()` |
+
+JSON property adları **birebir aynı** olmalı (camelCase).
+
+---
+
+## 5. İş kuralları (kısa)
+
+1. `BusinessCard.linkedEventGroupIds` → her zaman boş / ignore
+2. `SavedCard` → kullanıcı başına `cardId` unique (duplicate → 409)
+3. Wallet limit: Free 15, Premium 200
+4. `frontVisibleFields` / `backVisibleFields` → max 3'er
+5. EventGroup silinince saved card'lardan unlink
+6. `dummy-*` card ID'leri persist edilmez
+
+---
+
+## 6. Doğrulama
+
+FluentValidation kullan. Kurallar `backend/docs/dotnet-backend-api.md` Bölüm 9 ile uyumlu:
+
+- `personName`, `organizationText`, `email`, `skillToken` regex'leri
+- Onboarding zorunlu: displayName, company, title, email
+- `cardId` manuel giriş: `^[a-zA-Z0-9\-_]{8,}$`
+
+---
+
+## 7. Hata kodları
+
+HTTP status + `error.code` standardı:
+
+| Kod | HTTP |
+|-----|------|
+| `WALLET_DUPLICATE_CARD` | 409 |
+| `WALLET_LIMIT_REACHED` | 403 |
+| `INVALID_CARD_PAYLOAD` | 400 |
+| `CARD_NOT_FOUND` | 404 |
+| `DUPLICATE_EVENT_GROUP_NAME` | 409 |
+
+---
+
+## 8. Güvenlik
+
+- Secret'lar (`SigningKey`, connection string) **commit edilmez**
+- `appsettings.Production.json` ve `.env` → `.gitignore`
+- Production'da JWT key → environment variable veya Key Vault
+
+---
+
+## 9. Geliştirme alışkanlıkları
+
+- Her özellik sonrası: `dotnet build backend/`
+- Kritik iş kuralları için unit test yaz
+- Controller ince tut; mantık Application service'te
+- Yeni endpoint → Swagger + `dotnet-backend-api.md` güncelle
+
+---
+
+## 10. Kapsam
+
+- Yalnızca `backend/` altında değişiklik yap
+- Flutter dosyalarını (`lib/`) backend fazı dışında değiştirme
+- Flutter entegrasyonu açıkça istenmedikçe `lib/core/network/` dışına dokunma
