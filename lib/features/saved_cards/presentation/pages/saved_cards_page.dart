@@ -984,7 +984,7 @@ class _SavedCardsPageState extends State<SavedCardsPage> {
     bool wrapHero = false,
   }) {
     final displayName = card.displayName?.trim().isEmpty ?? true
-        ? 'Kart ${card.cardId.substring(0, 8)}...'
+        ? 'Kart ${card.cardId}'
         : card.displayName!;
     final companyName = card.company?.trim();
 

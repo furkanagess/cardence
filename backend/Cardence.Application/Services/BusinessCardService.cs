@@ -47,7 +47,9 @@ public sealed class BusinessCardService : IBusinessCardService
 
         var userId = _currentUser.GetRequiredUserId();
         var cardId = string.IsNullOrWhiteSpace(request.CardId)
-            ? Guid.NewGuid().ToString()
+            ? await CardIdGenerator.GenerateUniqueAsync(
+                (id, ct) => _repository.CardIdExistsAsync(id, cancellationToken: ct),
+                cancellationToken)
             : request.CardId.Trim();
 
         if (await _repository.CardIdExistsAsync(cardId, cancellationToken: cancellationToken))

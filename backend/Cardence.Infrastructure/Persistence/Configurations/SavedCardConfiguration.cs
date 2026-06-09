@@ -1,4 +1,5 @@
 using System.Text.Json;
+using Cardence.Domain.Constants;
 using Cardence.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
@@ -17,7 +18,7 @@ public sealed class SavedCardConfiguration : IEntityTypeConfiguration<SavedCard>
         builder.HasKey(x => x.Id);
 
         builder.Property(x => x.UserId).HasColumnName("user_id");
-        builder.Property(x => x.CardId).HasMaxLength(36).HasColumnName("card_id");
+        builder.Property(x => x.CardId).HasMaxLength(BusinessCardConstants.CardIdLength).HasColumnName("card_id");
         builder.Property(x => x.DisplayName).HasMaxLength(200).HasColumnName("display_name");
         builder.Property(x => x.Email).HasMaxLength(320).HasColumnName("email");
         builder.Property(x => x.Phone).HasMaxLength(20).HasColumnName("phone");

@@ -2,9 +2,9 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
-import 'package:uuid/uuid.dart';
 
 import '../../../../core/constants/app_constants.dart';
+import '../../../../core/utils/card_id_generator.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/atoms/cardence_app_bar.dart';
 import '../../../../core/widgets/atoms/custom_button.dart';
@@ -628,7 +628,7 @@ class _CardViewPageState extends State<CardViewPage> {
 
   Future<void> _createNewCard() async {
     final current = _draft ?? const OnboardingCardDraft();
-    final newId = const Uuid().v4();
+    final newId = CardIdGenerator.generate();
     final copy = current.copyWith(
       cardId: newId,
       cardName: 'Yeni kart',

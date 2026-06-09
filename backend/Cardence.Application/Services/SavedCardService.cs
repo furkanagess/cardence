@@ -1,5 +1,4 @@
 using System.Text.Json;
-using System.Text.RegularExpressions;
 using Cardence.Application.Common;
 using Cardence.Application.DTOs.Wallet;
 using Cardence.Application.Interfaces;
@@ -14,10 +13,6 @@ namespace Cardence.Application.Services;
 
 public sealed class SavedCardService : ISavedCardService
 {
-    private static readonly Regex CardIdPattern = new(
-        @"^[a-zA-Z0-9\-_]+$",
-        RegexOptions.Compiled);
-
     private readonly ISavedCardRepository _savedCardRepository;
     private readonly IBusinessCardRepository _businessCardRepository;
     private readonly IWalletEntitlementRepository _walletRepository;
@@ -261,13 +256,12 @@ public sealed class SavedCardService : ISavedCardService
 
     private static void ValidateCardId(string? cardId)
     {
-        var id = cardId?.Trim() ?? string.Empty;
-        if (id.Length < 8 || !CardIdPattern.IsMatch(id))
+        if (!CardIdGenerator.IsValid(cardId))
         {
             throw new ValidationException([
                 new ValidationFailure(
                     "cardId",
-                    "Card id must be at least 8 characters and contain only letters, numbers, hyphens, or underscores."),
+                    "Card id must be exactly 6 digits."),
             ]);
         }
     }

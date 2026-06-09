@@ -1,5 +1,4 @@
-import 'package:uuid/uuid.dart';
-
+import '../../../../core/utils/card_id_generator.dart';
 import '../entities/onboarding_card_draft.dart';
 
 /// Onboarding taslağını kayıt ve önizleme için normalize eder.
@@ -48,9 +47,10 @@ class OnboardingDraftHelper {
   }
 
   static OnboardingCardDraft prepareForSave(OnboardingCardDraft draft) {
-    final cardId = (draft.cardId?.trim().isNotEmpty ?? false)
-        ? draft.cardId!
-        : const Uuid().v4();
+    final cardId = (draft.cardId?.trim().isNotEmpty ?? false) &&
+            CardIdGenerator.isValid(draft.cardId)
+        ? draft.cardId!.trim()
+        : CardIdGenerator.generate();
 
     return draft.copyWith(
       cardId: cardId,

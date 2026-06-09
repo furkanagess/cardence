@@ -36,7 +36,7 @@ public sealed class BusinessCardServiceTests
 
         var result = await _service.CreateAsync(request);
 
-        result.CardId.Should().NotBeNullOrWhiteSpace();
+        result.CardId.Should().MatchRegex(@"^\d{6}$");
         await _repository.Received(1).AddAsync(
             Arg.Is<BusinessCard>(card => card.UserId == _userId),
             Arg.Any<CancellationToken>());
@@ -45,9 +45,9 @@ public sealed class BusinessCardServiceTests
     [Fact]
     public async Task CreateAsync_ThrowsConflict_WhenCardIdExists()
     {
-        var request = ValidCardRequest(cardId: "existing-card-id-123");
+        var request = ValidCardRequest(cardId: "123456");
 
-        _repository.CardIdExistsAsync("existing-card-id-123", null, Arg.Any<CancellationToken>())
+        _repository.CardIdExistsAsync("123456", null, Arg.Any<CancellationToken>())
             .Returns(true);
 
         var act = () => _service.CreateAsync(request);
@@ -58,7 +58,7 @@ public sealed class BusinessCardServiceTests
     [Fact]
     public async Task UpsertAsync_UpdatesExistingCard()
     {
-        var cardId = "my-card-id-12345";
+        var cardId = "482917";
         var existing = new BusinessCard
         {
             Id = Guid.NewGuid(),

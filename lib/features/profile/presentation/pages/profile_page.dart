@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:uuid/uuid.dart';
 
+import '../../../../core/utils/card_id_generator.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/atoms/custom_button.dart';
 import '../../../../core/widgets/organisms/flippable_person_card.dart';
@@ -120,7 +120,7 @@ class _ProfilePageState extends State<ProfilePage> {
     final template = _cards.isNotEmpty ? _cards.first : widget.draft;
     final base = template ?? const OnboardingCardDraft();
     final newCard = base.copyWith(
-      cardId: const Uuid().v4(),
+      cardId: CardIdGenerator.generate(),
       cardName: 'Yeni kart',
       frontVisibleFields: base.shouldMigrateFrontFields
           ? List<String>.from(OnboardingCardDraft.defaultFrontVisibleFields)

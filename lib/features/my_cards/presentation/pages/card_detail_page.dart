@@ -1,11 +1,10 @@
 import 'dart:convert';
 
+import 'package:cardence/core/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:qr_flutter/qr_flutter.dart';
-import 'package:uuid/uuid.dart';
-
-import '../../../../core/theme/app_colors.dart';
+import '../../../../core/utils/card_id_generator.dart';
 import '../../../../core/widgets/atoms/cardence_app_bar.dart';
 import '../../../../core/widgets/atoms/custom_button.dart';
 import '../../../../core/widgets/organisms/cardence_scaffold.dart';
@@ -65,7 +64,8 @@ class _CardDetailPageState extends State<CardDetailPage> {
       _draft.lastUsedPaletteBackgroundColor != null &&
       _draft.lastUsedPaletteBackgroundColor!.length == 7 &&
       _draft.lastUsedPaletteBackgroundColor!.startsWith('#') &&
-      !cardBackgroundColorOptions.contains(_draft.lastUsedPaletteBackgroundColor);
+      !cardBackgroundColorOptions
+          .contains(_draft.lastUsedPaletteBackgroundColor);
 
   Future<void> _persistDraft(OnboardingCardDraft updated) async {
     final synced = await widget.persistOnboardingCard(updated);
@@ -101,9 +101,8 @@ class _CardDetailPageState extends State<CardDetailPage> {
   }
 
   Future<void> _openCustomTextColorPicker() async {
-    final current = _selectedTextColor != null
-        ? _parseColor(_selectedTextColor!)
-        : null;
+    final current =
+        _selectedTextColor != null ? _parseColor(_selectedTextColor!) : null;
     final bg = _backgroundColor();
     Color pickerColor = current ??
         (bg != null
@@ -181,8 +180,7 @@ class _CardDetailPageState extends State<CardDetailPage> {
     final lastUsed = _draft.lastUsedPaletteBackgroundColor != null
         ? _parseColor(_draft.lastUsedPaletteBackgroundColor!)
         : null;
-    Color pickerColor =
-        currentBg ?? lastUsed ?? const Color(0xFFF5F5F5);
+    Color pickerColor = currentBg ?? lastUsed ?? const Color(0xFFF5F5F5);
     await showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
@@ -216,10 +214,8 @@ class _CardDetailPageState extends State<CardDetailPage> {
 
   Future<void> _showShareQrDialog() async {
     String cardId = _draft.cardId ?? '';
-    if (cardId.isEmpty) {
-      const uuid = Uuid();
-      cardId = uuid.v4();
-      await _persistDraft(_draft.copyWith(cardId: cardId));
+    if (!CardIdGenerator.isValid(cardId)) {
+      await _persistDraft(_draft.copyWith(cardId: CardIdGenerator.generate()));
       cardId = _draft.cardId ?? cardId;
     }
     final payload = CardSharePayload(
@@ -250,8 +246,8 @@ class _CardDetailPageState extends State<CardDetailPage> {
                 Text(
                   'Diğer kişi bu QR\'ı Cardence ile okutarak kartınızı kaydedebilir.',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
                 ),
                 const SizedBox(height: 20),
                 Container(
@@ -271,8 +267,8 @@ class _CardDetailPageState extends State<CardDetailPage> {
                 SelectableText(
                   'Kart ID: $cardId',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
                 ),
               ],
             ),
@@ -301,7 +297,8 @@ class _CardDetailPageState extends State<CardDetailPage> {
             icon: Icons.edit_outlined,
             tooltip: 'Bilgileri düzenle',
             onPressed: () async {
-              final updated = await Navigator.of(context).push<OnboardingCardDraft>(
+              final updated =
+                  await Navigator.of(context).push<OnboardingCardDraft>(
                 MaterialPageRoute(
                   builder: (context) => MyCardEditPage(
                     initialDraft: _draft,
@@ -424,7 +421,8 @@ class _CustomizeCardSheetContent extends StatefulWidget {
       _CustomizeCardSheetContentState();
 }
 
-class _CustomizeCardSheetContentState extends State<_CustomizeCardSheetContent> {
+class _CustomizeCardSheetContentState
+    extends State<_CustomizeCardSheetContent> {
   late String? _pendingBackground;
   late String? _pendingText;
 
@@ -478,7 +476,8 @@ class _CustomizeCardSheetContentState extends State<_CustomizeCardSheetContent> 
           ),
           child: Icon(
             isSelected ? Icons.check_rounded : Icons.palette_outlined,
-            color: isSelected ? AppColors.primary : colorScheme.onSurfaceVariant,
+            color:
+                isSelected ? AppColors.primary : colorScheme.onSurfaceVariant,
             size: 22,
           ),
         ),
@@ -530,7 +529,8 @@ class _CustomizeCardSheetContentState extends State<_CustomizeCardSheetContent> 
           ),
           child: Icon(
             isSelected ? Icons.check_rounded : Icons.title_outlined,
-            color: isSelected ? AppColors.primary : colorScheme.onSurfaceVariant,
+            color:
+                isSelected ? AppColors.primary : colorScheme.onSurfaceVariant,
             size: 22,
           ),
         ),
@@ -579,7 +579,8 @@ class _CustomizeCardSheetContentState extends State<_CustomizeCardSheetContent> 
         child: SizedBox(
           width: 48,
           height: 48,
-          child: Icon(Icons.palette_outlined, color: AppColors.primary, size: 22),
+          child:
+              Icon(Icons.palette_outlined, color: AppColors.primary, size: 22),
         ),
       ),
     );
@@ -634,8 +635,7 @@ class _CustomizeCardSheetContentState extends State<_CustomizeCardSheetContent> 
               runSpacing: 12,
               children: [
                 _buildDefaultBackgroundChip(),
-                ...widget.backgroundColorOptions
-                    .map(_buildBackgroundColorChip),
+                ...widget.backgroundColorOptions.map(_buildBackgroundColorChip),
                 if (widget.hasLastUsedBackground &&
                     widget.lastUsedBackgroundHex != null)
                   _buildBackgroundColorChip(widget.lastUsedBackgroundHex!),

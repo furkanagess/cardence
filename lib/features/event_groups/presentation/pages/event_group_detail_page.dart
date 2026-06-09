@@ -413,7 +413,7 @@ class _SavedCardPreviewTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final hasNote = card.about != null && card.about!.trim().isNotEmpty;
     final displayName = card.displayName?.trim().isEmpty ?? true
-        ? 'Kart ${card.cardId.substring(0, 8)}...'
+        ? 'Kart ${card.cardId}'
         : card.displayName!;
     final companyName = card.company?.trim();
 

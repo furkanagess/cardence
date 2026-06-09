@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
-import 'package:uuid/uuid.dart';
-
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/utils/card_id_generator.dart';
 import '../../../../core/widgets/atoms/cardence_app_bar.dart';
 import '../../../../core/widgets/atoms/custom_button.dart';
 import '../../../../core/widgets/organisms/cardence_scaffold.dart';
@@ -55,7 +54,7 @@ class _MyCardEditPageState extends State<MyCardEditPage> {
   void initState() {
     super.initState();
     final d = widget.initialDraft;
-    _cardId = d.cardId ?? const Uuid().v4();
+    _cardId = CardIdGenerator.isValid(d.cardId) ? d.cardId!.trim() : CardIdGenerator.generate();
     _cardNameController =
         TextEditingController(text: d.cardName ?? d.listTitle);
     _nameController = TextEditingController(text: d.displayName ?? '');

@@ -12,7 +12,7 @@ public sealed class BusinessCardDtoValidator : AbstractValidator<BusinessCardDto
         RuleFor(x => x.CardId)
             .Matches(ValidationPatterns.CardId)
             .When(x => !string.IsNullOrWhiteSpace(x.CardId))
-            .WithMessage("cardId must be at least 8 alphanumeric characters.");
+            .WithMessage("cardId must be exactly 6 digits.");
 
         RuleFor(x => x.DisplayName)
             .Must(HasValidFullName)

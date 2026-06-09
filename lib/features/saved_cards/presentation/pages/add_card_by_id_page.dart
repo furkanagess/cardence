@@ -6,6 +6,7 @@ import '../../../../core/widgets/atoms/cardence_app_bar.dart';
 import '../../../../core/widgets/atoms/custom_button.dart';
 import '../../../../core/widgets/organisms/cardence_scaffold.dart';
 import '../../domain/entities/add_saved_card_result.dart';
+import '../../../../core/utils/card_id_generator.dart';
 import '../../domain/entities/card_share_payload.dart';
 import '../../domain/entities/saved_card.dart';
 import '../../domain/extensions/card_share_payload_to_saved_card.dart';
@@ -94,9 +95,8 @@ class _AddCardByIdPageState extends State<AddCardByIdPage> {
     if (_useJson) return null;
     final id = value?.trim() ?? '';
     if (id.isEmpty) return 'Kart ID girin';
-    if (id.length < 8) return 'En az 8 karakter olmalı';
-    if (!RegExp(r'^[a-zA-Z0-9\-_]+$').hasMatch(id)) {
-      return 'Yalnızca harf, rakam, tire ve alt çizgi kullanın';
+    if (!CardIdGenerator.isValid(id)) {
+      return 'Kart ID tam 6 haneli sayı olmalıdır';
     }
     return null;
   }
@@ -146,7 +146,7 @@ class _AddCardByIdPageState extends State<AddCardByIdPage> {
                 validator: _validateCardId,
                 decoration: const InputDecoration(
                   labelText: 'Kart ID',
-                  hintText: 'ör. 8f3c2a1b-4d5e-6f7a-8b9c-0d1e2f3a4b5c',
+                  hintText: 'ör. 482917',
                   prefixIcon: Icon(Icons.badge_outlined),
                 ),
                 textInputAction: TextInputAction.done,

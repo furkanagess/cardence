@@ -20,7 +20,7 @@ class SavedCardListTile extends StatelessWidget {
   static String titleFor(SavedCard card) {
     final name = card.displayName?.trim();
     if (name != null && name.isNotEmpty) return name;
-    return 'Kart ${card.cardId.substring(0, 8)}...';
+    return 'Kart ${card.cardId}';
   }
 
   static String? subtitleFor(SavedCard card) {

@@ -312,7 +312,7 @@ class _SavedCardDetailPageState extends State<SavedCardDetailPage> {
   String get _displayName {
     final name = _card.displayName?.trim();
     if (name == null || name.isEmpty) {
-      return 'Kart ${_card.cardId.substring(0, 8)}...';
+      return 'Kart ${_card.cardId}';
     }
     return name;
   }
