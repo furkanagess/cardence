@@ -1,3 +1,6 @@
+using Cardence.Application.DTOs.Cards;
+using Cardence.Application.DTOs.Wallet;
+
 namespace Cardence.Application.DTOs.Auth;
 
 public sealed class UserProfileEntity
@@ -8,4 +11,6 @@ public sealed class UserProfileEntity
     public string? Phone { get; init; }
     public bool OnboardingCompleted { get; init; }
     public DateTime CreatedAt { get; init; }
+    public IReadOnlyList<SavedCardDto> SavedCards { get; init; } = [];
+    public IReadOnlyList<BusinessCardDto> BusinessCards { get; init; } = [];
 }

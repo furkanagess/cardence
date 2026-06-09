@@ -10,11 +10,17 @@ class AuthRepositoryImpl implements AuthRepository {
   AuthRepositoryImpl({
     required AuthRemoteDataSource remote,
     required AuthLocalDataSource local,
+    Future<void> Function(UserProfile profile)? onProfileSynced,
+    Future<void> Function()? onLogout,
   })  : _remote = remote,
-        _local = local;
+        _local = local,
+        _onProfileSynced = onProfileSynced,
+        _onLogout = onLogout;
 
   final AuthRemoteDataSource _remote;
   final AuthLocalDataSource _local;
+  final Future<void> Function(UserProfile profile)? _onProfileSynced;
+  final Future<void> Function()? _onLogout;
 
   Future<AuthSession> _persist(AuthSessionModel model) async {
     await _local.saveSession(model);
@@ -35,9 +41,11 @@ class AuthRepositoryImpl implements AuthRepository {
 
   Future<UserProfile> _fetchAndPersistProfile(AuthSessionModel session) async {
     final profile = await _remote.getMe(session.accessToken);
-    final enriched = _mergeProfile(session, profile.toEntity());
+    final entity = profile.toEntity();
+    final enriched = _mergeProfile(session, entity);
     await _local.saveSession(enriched);
-    return profile.toEntity();
+    await _onProfileSynced?.call(entity);
+    return entity;
   }
 
   Future<AuthSession?> _tryRefresh(AuthSession session) async {
@@ -196,16 +204,21 @@ class AuthRepositoryImpl implements AuthRepository {
       throw AuthApiException('Oturum bulunamadı.');
     }
     final profile = await _remote.completeOnboarding(session.accessToken);
+    final entity = profile.toEntity();
     final enriched = _mergeProfile(
       AuthSessionModel.fromEntity(session),
-      profile.toEntity(),
+      entity,
     );
     await _local.saveSession(enriched);
+    await _onProfileSynced?.call(entity);
   }
 
   @override
-  Future<void> logout() => _local.clearSession();
+  Future<void> logout() => clearSession();
 
   @override
-  Future<void> clearSession() => _local.clearSession();
+  Future<void> clearSession() async {
+    await _onLogout?.call();
+    await _local.clearSession();
+  }
 }

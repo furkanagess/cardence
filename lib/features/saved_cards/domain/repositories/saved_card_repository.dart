@@ -9,4 +9,5 @@ abstract class SavedCardRepository {
   Future<void> saveCard(SavedCard card);
   Future<void> deleteCard(String cardId);
   Future<SavedCardsWalletQuota> getWalletQuota();
+  Future<void> cacheFromProfile(List<SavedCard> cards);
 }

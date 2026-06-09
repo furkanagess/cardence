@@ -7,6 +7,7 @@ import '../../firebase_options.dart';
 import '../../features/auth/data/datasources/auth_local_datasource.dart';
 import '../../features/auth/data/datasources/auth_remote_datasource.dart';
 import '../../features/auth/data/repositories/auth_repository_impl.dart';
+import '../../features/auth/domain/entities/user_profile.dart';
 import '../../features/auth/domain/usecases/complete_onboarding_remote.dart';
 import '../../features/auth/domain/usecases/forgot_password.dart';
 import '../../features/auth/domain/usecases/get_auth_session.dart';
@@ -52,6 +53,8 @@ import '../../features/settings/data/datasources/theme_local_datasource.dart';
 import '../../features/settings/data/repositories/theme_repository_impl.dart';
 import '../../features/settings/domain/usecases/get_theme_preference.dart';
 import '../../features/settings/domain/usecases/set_theme_preference.dart';
+import '../user_data/clear_user_scoped_local_data.dart';
+import '../user_data/sync_user_profile_cards.dart';
 
 /// Uygulama açılışında çalıştırılacak tüm init işlemleri ve sonuçları.
 /// main() içinde [AppInit.init] çağrılır; dönen [AppInitResult] ile [App] başlatılır.
@@ -64,12 +67,43 @@ class AppInit {
     ChuckInterceptorService.instance.ensureInitialized();
     await _initFirebase();
     final prefs = await _initSharedPreferences();
-    final auth = _initAuth(prefs);
-    final businessCards = _initBusinessCards(prefs);
+    final authLocal = AuthLocalDataSourceImpl(prefs);
+
+    final onboardingLocal = OnboardingLocalDataSourceImpl(prefs, authLocal);
+    final onboardingRepo = OnboardingRepositoryImpl(onboardingLocal);
+    final syncOnboardingFromServer = SyncOnboardingFromServer(onboardingRepo);
+
+    final savedCardLocal = SavedCardLocalDataSourceImpl(prefs, authLocal);
+    final savedCardRepo = SavedCardRepositoryImpl(
+      local: savedCardLocal,
+      remote: SavedCardRemoteDataSourceImpl(),
+      authLocal: authLocal,
+    );
+    final walletLocal = WalletEntitlementLocalDataSourceImpl(prefs);
+    final walletRepo = WalletEntitlementRepositoryImpl(walletLocal);
+
+    final syncUserProfileCards = SyncUserProfileCards(
+      savedCardRepo,
+      onboardingRepo,
+      syncOnboardingFromServer,
+    );
+    final clearUserScopedLocalData = ClearUserScopedLocalData(
+      authLocal,
+      savedCardLocal,
+      onboardingLocal,
+    );
+
+    final auth = _initAuth(
+      authLocal: authLocal,
+      onProfileSynced: syncUserProfileCards.call,
+      onLogout: clearUserScopedLocalData.call,
+    );
+    final businessCards = _initBusinessCards(prefs, authLocal);
     final onboarding = _initOnboarding(
-      prefs,
-      auth.completeOnboardingRemote,
-      auth.getCurrentUser,
+      onboardingRepo: onboardingRepo,
+      syncOnboardingFromServer: syncOnboardingFromServer,
+      completeOnboardingRemote: auth.completeOnboardingRemote,
+      getCurrentUser: auth.getCurrentUser,
     );
     final persistOnboardingCard = PersistOnboardingCard(
       onboarding.saveOnboardingDraftCard,
@@ -78,7 +112,10 @@ class AppInit {
     final theme = _initTheme(prefs);
 
     final eventGroups = _initEventGroups(prefs);
-    final savedCards = _initSavedCards(prefs);
+    final savedCards = _initSavedCards(
+      savedCardRepo: savedCardRepo,
+      walletRepo: walletRepo,
+    );
     return AppInitResult(
       restoreAuthSession: auth.restoreAuthSession,
       getAuthSession: auth.getAuthSession,
@@ -118,24 +155,17 @@ class AppInit {
     AddSavedCard addSavedCard,
     DeleteSavedCard deleteSavedCard,
     UpgradeWalletPlan upgradeWalletPlan,
-  }) _initSavedCards(SharedPreferences prefs) {
-    final local = SavedCardLocalDataSourceImpl(prefs);
-    final remote = SavedCardRemoteDataSourceImpl();
-    final authLocal = AuthLocalDataSourceImpl(prefs);
-    final repo = SavedCardRepositoryImpl(
-      local: local,
-      remote: remote,
-      authLocal: authLocal,
-    );
-    final walletLocal = WalletEntitlementLocalDataSourceImpl(prefs);
-    final walletRepo = WalletEntitlementRepositoryImpl(walletLocal);
-    final getQuota = GetSavedCardsWalletQuota(repo);
+  }) _initSavedCards({
+    required SavedCardRepositoryImpl savedCardRepo,
+    required WalletEntitlementRepositoryImpl walletRepo,
+  }) {
+    final getQuota = GetSavedCardsWalletQuota(savedCardRepo);
     return (
-      getSavedCards: GetSavedCards(repo),
-      saveSavedCard: SaveSavedCard(repo),
+      getSavedCards: GetSavedCards(savedCardRepo),
+      saveSavedCard: SaveSavedCard(savedCardRepo),
       getSavedCardsWalletQuota: getQuota,
-      addSavedCard: AddSavedCard(repo),
-      deleteSavedCard: DeleteSavedCard(repo),
+      addSavedCard: AddSavedCard(savedCardRepo),
+      deleteSavedCard: DeleteSavedCard(savedCardRepo),
       upgradeWalletPlan: UpgradeWalletPlan(walletRepo),
     );
   }
@@ -173,10 +203,18 @@ class AppInit {
     GetCurrentUser getCurrentUser,
     Logout logout,
     CompleteOnboardingRemote completeOnboardingRemote,
-  }) _initAuth(SharedPreferences prefs) {
+  }) _initAuth({
+    required AuthLocalDataSource authLocal,
+    required Future<void> Function(UserProfile profile) onProfileSynced,
+    required Future<void> Function() onLogout,
+  }) {
     final remote = AuthRemoteDataSourceImpl();
-    final local = AuthLocalDataSourceImpl(prefs);
-    final repo = AuthRepositoryImpl(remote: remote, local: local);
+    final repo = AuthRepositoryImpl(
+      remote: remote,
+      local: authLocal,
+      onProfileSynced: onProfileSynced,
+      onLogout: onLogout,
+    );
     return (
       restoreAuthSession: RestoreAuthSession(repo),
       getAuthSession: GetAuthSession(repo),
@@ -197,8 +235,8 @@ class AppInit {
     UpsertBusinessCard upsertBusinessCard,
   }) _initBusinessCards(
     SharedPreferences prefs,
+    AuthLocalDataSource authLocal,
   ) {
-    final authLocal = AuthLocalDataSourceImpl(prefs);
     final remote = BusinessCardRemoteDataSourceImpl();
     final repo = BusinessCardRepositoryImpl(
       remote: remote,
@@ -219,13 +257,13 @@ class AppInit {
     GetOnboardingDraftCard getOnboardingDraftCard,
     GetOnboardingDraftCards getOnboardingDraftCards,
     ResolveOnboardingInitialDraft resolveOnboardingInitialDraft,
-  }) _initOnboarding(
-    SharedPreferences prefs,
-    CompleteOnboardingRemote completeOnboardingRemote,
-    GetCurrentUser getCurrentUser,
-  ) {
-    final local = OnboardingLocalDataSourceImpl(prefs);
-    final repo = OnboardingRepositoryImpl(local);
+  }) _initOnboarding({
+    required OnboardingRepositoryImpl onboardingRepo,
+    required SyncOnboardingFromServer syncOnboardingFromServer,
+    required CompleteOnboardingRemote completeOnboardingRemote,
+    required GetCurrentUser getCurrentUser,
+  }) {
+    final repo = onboardingRepo;
     final flow = CompleteOnboardingFlow(
       local: CompleteOnboarding(repo),
       remote: completeOnboardingRemote,

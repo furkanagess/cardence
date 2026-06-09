@@ -1,5 +1,8 @@
 import 'package:equatable/equatable.dart';
 
+import '../../../business_cards/domain/entities/business_card.dart';
+import '../../../saved_cards/domain/entities/saved_card.dart';
+
 class UserProfile extends Equatable {
   const UserProfile({
     required this.userId,
@@ -8,6 +11,8 @@ class UserProfile extends Equatable {
     this.phone,
     this.onboardingCompleted = false,
     this.createdAt,
+    this.savedCards = const [],
+    this.businessCards = const [],
   });
 
   final String userId;
@@ -16,6 +21,8 @@ class UserProfile extends Equatable {
   final String? phone;
   final bool onboardingCompleted;
   final DateTime? createdAt;
+  final List<SavedCard> savedCards;
+  final List<BusinessCard> businessCards;
 
   @override
   List<Object?> get props => [
@@ -25,5 +32,7 @@ class UserProfile extends Equatable {
         phone,
         onboardingCompleted,
         createdAt,
+        savedCards,
+        businessCards,
       ];
 }

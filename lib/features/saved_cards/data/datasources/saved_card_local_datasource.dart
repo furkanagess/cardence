@@ -1,23 +1,48 @@
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../auth/data/datasources/auth_local_datasource.dart';
 import '../models/saved_card_model.dart';
 
-const String _keySavedCards = 'saved_cards';
+const String _legacyKeySavedCards = 'saved_cards';
+
+String savedCardsStorageKey(String userId) => 'saved_cards_$userId';
 
 abstract class SavedCardLocalDataSource {
   Future<List<SavedCardModel>> getSavedCards();
   Future<void> saveCard(SavedCardModel card);
   Future<void> deleteCard(String cardId);
   Future<void> replaceAll(List<SavedCardModel> cards);
+  Future<void> clearForUser(String userId);
 }
 
 class SavedCardLocalDataSourceImpl implements SavedCardLocalDataSource {
-  SavedCardLocalDataSourceImpl(this._prefs);
+  SavedCardLocalDataSourceImpl(this._prefs, this._authLocal);
+
   final SharedPreferences _prefs;
+  final AuthLocalDataSource _authLocal;
+
+  Future<String> _storageKey() async {
+    final session = await _authLocal.getSession();
+    final userId = session?.userId;
+    if (userId == null || userId.isEmpty) return '${_legacyKeySavedCards}_guest';
+    return savedCardsStorageKey(userId);
+  }
+
+  Future<void> _migrateLegacyIfNeeded(String key) async {
+    if (key.endsWith('_guest')) return;
+    final existing = _prefs.getString(key);
+    if (existing != null && existing.isNotEmpty) return;
+    final legacy = _prefs.getString(_legacyKeySavedCards);
+    if (legacy == null || legacy.isEmpty) return;
+    await _prefs.setString(key, legacy);
+    await _prefs.remove(_legacyKeySavedCards);
+  }
 
   @override
   Future<List<SavedCardModel>> getSavedCards() async {
-    final jsonStr = _prefs.getString(_keySavedCards);
+    final key = await _storageKey();
+    await _migrateLegacyIfNeeded(key);
+    final jsonStr = _prefs.getString(key);
     return SavedCardModel.listFromJsonString(jsonStr);
   }
 
@@ -31,7 +56,7 @@ class SavedCardLocalDataSourceImpl implements SavedCardLocalDataSource {
     } else {
       updated.add(card);
     }
-    await _prefs.setString(_keySavedCards, SavedCardModel.listToJsonString(updated));
+    await replaceAll(updated);
   }
 
   @override
@@ -44,9 +69,15 @@ class SavedCardLocalDataSourceImpl implements SavedCardLocalDataSource {
 
   @override
   Future<void> replaceAll(List<SavedCardModel> cards) async {
+    final key = await _storageKey();
     await _prefs.setString(
-      _keySavedCards,
+      key,
       SavedCardModel.listToJsonString(cards),
     );
+  }
+
+  @override
+  Future<void> clearForUser(String userId) async {
+    await _prefs.remove(savedCardsStorageKey(userId));
   }
 }

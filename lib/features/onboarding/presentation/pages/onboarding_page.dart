@@ -14,8 +14,6 @@ import '../widgets/onboarding_step_name.dart';
 import '../widgets/onboarding_step_optional.dart';
 import '../widgets/onboarding_step_preview.dart';
 import '../widgets/onboarding_step_professional.dart';
-import '../widgets/onboarding_step_welcome.dart';
-
 /// İlk açılışta adım adım kart oluşturma ile gösterilen onboarding ekranı.
 class OnboardingPageView extends StatefulWidget {
   const OnboardingPageView({
@@ -136,12 +134,10 @@ class _OnboardingContentState extends State<_OnboardingContent> {
                             context.read<OnboardingCubit>().setPage(i),
                         itemCount: OnboardingState.stepCount,
                         itemBuilder: (context, index) {
-                          final isWelcome = index == 0;
                           return Padding(
                             padding: EdgeInsets.only(
                               bottom: OnboardingBottomBar.contentBottomInset(
                                 context,
-                                showStepIndicator: !isWelcome,
                               ),
                             ),
                             child: _buildStep(context, state, index),
@@ -179,36 +175,34 @@ class _OnboardingContentState extends State<_OnboardingContent> {
 
     switch (index) {
       case 0:
-        return const OnboardingStepWelcome();
-      case 1:
         return OnboardingStepName(
           draft: state.draft,
           stepIndex: stepIndex,
           stepCount: stepCount,
           onChanged: (d) => context.read<OnboardingCubit>().updateDraft(d),
         );
-      case 2:
+      case 1:
         return OnboardingStepProfessional(
           draft: state.draft,
           stepIndex: stepIndex,
           stepCount: stepCount,
           onChanged: (d) => context.read<OnboardingCubit>().updateDraft(d),
         );
-      case 3:
+      case 2:
         return OnboardingStepContact(
           draft: state.draft,
           stepIndex: stepIndex,
           stepCount: stepCount,
           onChanged: (d) => context.read<OnboardingCubit>().updateDraft(d),
         );
-      case 4:
+      case 3:
         return OnboardingStepOptional(
           draft: state.draft,
           stepIndex: stepIndex,
           stepCount: stepCount,
           onChanged: (d) => context.read<OnboardingCubit>().updateDraft(d),
         );
-      case 5:
+      case 4:
         return OnboardingStepPreview(
           draft: OnboardingDraftHelper.forPreview(state.draft),
           stepIndex: stepIndex,
@@ -271,14 +265,8 @@ class _OnboardingBottomActions extends StatelessWidget {
       builder: (context, state) {
         final isLastPage = state.isLastPage;
         final isSaving = state.isSaving;
-        final isWelcome = state.isFirstPage;
-        final isFormStep = !isWelcome;
 
-        final primaryLabel = isLastPage
-            ? 'Kartımı oluştur'
-            : isWelcome
-                ? 'Başla'
-                : 'Devam';
+        final primaryLabel = isLastPage ? 'Kartımı oluştur' : 'Devam';
 
         return OnboardingBottomBar(
           stepCount: OnboardingState.stepCount,
@@ -286,7 +274,6 @@ class _OnboardingBottomActions extends StatelessWidget {
           primaryLabel: primaryLabel,
           isLoading: isSaving,
           enabled: state.canProceedCurrentStep,
-          showStepIndicator: isFormStep,
           onPrimaryPressed: () async {
             if (isLastPage) {
               if (!state.canFinish) {
@@ -302,12 +289,10 @@ class _OnboardingBottomActions extends StatelessWidget {
               return;
             }
 
-            if (!isWelcome) {
-              final error = state.validationErrorForCurrentStep;
-              if (error != null) {
-                _showValidationSnackBar(context, error);
-                return;
-              }
+            final error = state.validationErrorForCurrentStep;
+            if (error != null) {
+              _showValidationSnackBar(context, error);
+              return;
             }
 
             context.read<OnboardingCubit>().nextPage();

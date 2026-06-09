@@ -103,4 +103,11 @@ class SavedCardRepositoryImpl implements SavedCardRepository {
     final quota = await _remote.getWalletQuota(accessToken: token);
     return quota.toEntity();
   }
+
+  @override
+  Future<void> cacheFromProfile(List<SavedCard> cards) async {
+    await _local.replaceAll(
+      cards.map(SavedCardModel.fromEntity).toList(growable: false),
+    );
+  }
 }

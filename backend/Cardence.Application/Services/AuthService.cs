@@ -1,6 +1,7 @@
 using Cardence.Application.Common;
 using Cardence.Application.DTOs.Auth;
 using Cardence.Application.Interfaces;
+using Cardence.Application.Mapping;
 using Cardence.Application.Options;
 using Cardence.Domain.Entities;
 using Microsoft.Extensions.Logging;
@@ -14,6 +15,8 @@ public sealed class AuthService : IAuthService
     private static readonly TimeSpan OtpLifetime = TimeSpan.FromMinutes(5);
 
     private readonly IUserRepository _userRepository;
+    private readonly IBusinessCardRepository _businessCardRepository;
+    private readonly ISavedCardRepository _savedCardRepository;
     private readonly IJwtTokenService _jwtTokenService;
     private readonly IAuthTokenStore _authTokenStore;
     private readonly IPasswordHasher _passwordHasher;
@@ -22,6 +25,8 @@ public sealed class AuthService : IAuthService
 
     public AuthService(
         IUserRepository userRepository,
+        IBusinessCardRepository businessCardRepository,
+        ISavedCardRepository savedCardRepository,
         IJwtTokenService jwtTokenService,
         IAuthTokenStore authTokenStore,
         IPasswordHasher passwordHasher,
@@ -29,6 +34,8 @@ public sealed class AuthService : IAuthService
         ILogger<AuthService> logger)
     {
         _userRepository = userRepository;
+        _businessCardRepository = businessCardRepository;
+        _savedCardRepository = savedCardRepository;
         _jwtTokenService = jwtTokenService;
         _authTokenStore = authTokenStore;
         _passwordHasher = passwordHasher;
@@ -383,16 +390,7 @@ public sealed class AuthService : IAuthService
                 "Kullanıcı bulunamadı.");
         }
 
-        var profile = new UserProfileEntity
-        {
-            UserId = user.Id.ToString(),
-            DisplayName = user.DisplayName,
-            Email = user.Email,
-            Phone = user.Phone,
-            OnboardingCompleted = user.OnboardingCompleted,
-            CreatedAt = user.CreatedAt,
-        };
-
+        var profile = await BuildUserProfileAsync(user, cancellationToken);
         return AuthServiceResponse<UserProfileEntity>.Ok(profile, "Profil bilgisi alındı.");
     }
 
@@ -528,7 +526,22 @@ public sealed class AuthService : IAuthService
         user.UpdatedAt = DateTime.UtcNow;
         await _userRepository.UpdateAsync(user, cancellationToken);
 
-        var profile = new UserProfileEntity
+        var profile = await BuildUserProfileAsync(user, cancellationToken);
+        return AuthServiceResponse<UserProfileEntity>.Ok(profile, "Onboarding tamamlandı.");
+    }
+
+    private async Task<UserProfileEntity> BuildUserProfileAsync(
+        User user,
+        CancellationToken cancellationToken)
+    {
+        var businessCards = await _businessCardRepository.GetByUserIdAsync(
+            user.Id,
+            cancellationToken);
+        var savedCards = await _savedCardRepository.GetByUserIdAsync(
+            user.Id,
+            cancellationToken);
+
+        return new UserProfileEntity
         {
             UserId = user.Id.ToString(),
             DisplayName = user.DisplayName,
@@ -536,9 +549,9 @@ public sealed class AuthService : IAuthService
             Phone = user.Phone,
             OnboardingCompleted = user.OnboardingCompleted,
             CreatedAt = user.CreatedAt,
+            BusinessCards = businessCards.Select(BusinessCardMapper.ToDto).ToList(),
+            SavedCards = savedCards.Select(SavedCardMapper.ToDto).ToList(),
         };
-
-        return AuthServiceResponse<UserProfileEntity>.Ok(profile, "Onboarding tamamlandı.");
     }
 
     private async Task<AuthServiceResponse<object?>> SendResetOtpInternalAsync(

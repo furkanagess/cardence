@@ -1,3 +1,5 @@
+import '../../../business_cards/data/models/business_card_model.dart';
+import '../../../saved_cards/data/models/saved_card_model.dart';
 import '../../domain/entities/user_profile.dart';
 
 class UserProfileModel {
@@ -8,6 +10,8 @@ class UserProfileModel {
     this.phone,
     this.onboardingCompleted = false,
     this.createdAt,
+    this.savedCards = const [],
+    this.businessCards = const [],
   });
 
   final String userId;
@@ -16,6 +20,8 @@ class UserProfileModel {
   final String? phone;
   final bool onboardingCompleted;
   final DateTime? createdAt;
+  final List<SavedCardModel> savedCards;
+  final List<BusinessCardModel> businessCards;
 
   static bool _readBool(dynamic value) {
     if (value is bool) return value;
@@ -26,6 +32,22 @@ class UserProfileModel {
       if (normalized == 'false') return false;
     }
     return false;
+  }
+
+  static List<SavedCardModel> _parseSavedCards(dynamic value) {
+    if (value is! List) return const [];
+    return value
+        .whereType<Map<String, dynamic>>()
+        .map(SavedCardModel.fromJson)
+        .toList();
+  }
+
+  static List<BusinessCardModel> _parseBusinessCards(dynamic value) {
+    if (value is! List) return const [];
+    return value
+        .whereType<Map<String, dynamic>>()
+        .map(BusinessCardModel.fromJson)
+        .toList();
   }
 
   factory UserProfileModel.fromJson(Map<String, dynamic> json) {
@@ -41,6 +63,9 @@ class UserProfileModel {
         json['onboardingCompleted'] ?? json['OnboardingCompleted'],
       ),
       createdAt: createdAtRaw != null ? DateTime.tryParse(createdAtRaw) : null,
+      savedCards: _parseSavedCards(json['savedCards'] ?? json['SavedCards']),
+      businessCards:
+          _parseBusinessCards(json['businessCards'] ?? json['BusinessCards']),
     );
   }
 
@@ -51,5 +76,7 @@ class UserProfileModel {
         phone: phone,
         onboardingCompleted: onboardingCompleted,
         createdAt: createdAt,
+        savedCards: savedCards.map((card) => card.toEntity()).toList(),
+        businessCards: businessCards.map((card) => card.toEntity()).toList(),
       );
 }

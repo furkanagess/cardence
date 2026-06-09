@@ -21,8 +21,8 @@ class OnboardingState extends Equatable {
   final bool isSaving;
   final String? errorMessage;
 
-  /// welcome, name, professional, contact, optional, preview
-  static const int stepCount = 6;
+  /// name, professional, contact, optional, preview
+  static const int stepCount = 5;
 
   bool get isLastPage => currentPageIndex >= stepCount - 1;
   bool get isFirstPage => currentPageIndex <= 0;
@@ -31,16 +31,14 @@ class OnboardingState extends Equatable {
   String? validationErrorForStep(int stepIndex) {
     switch (stepIndex) {
       case 0:
-        return null;
-      case 1:
         return OnboardingValidation.validateDisplayName(draft.displayName);
-      case 2:
+      case 1:
         return OnboardingValidation.validateCompany(draft.company) ??
             OnboardingValidation.validateTitle(draft.title);
-      case 3:
+      case 2:
         return OnboardingValidation.validateEmail(draft.email);
+      case 3:
       case 4:
-      case 5:
         return null;
       default:
         return null;
@@ -52,7 +50,6 @@ class OnboardingState extends Equatable {
 
   /// Mevcut adımda Devam / Tamamla aktif mi.
   bool get canProceedCurrentStep {
-    if (isFirstPage) return true;
     if (isLastPage) return canFinish;
     return validationErrorForCurrentStep == null;
   }
