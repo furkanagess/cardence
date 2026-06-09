@@ -1,10 +1,13 @@
 using System.Text;
+using Cardence.Api.Health;
 using Cardence.Api.Middleware;
 using Cardence.Application;
 using Cardence.Application.Options;
 using Cardence.Infrastructure;
 using Cardence.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -186,7 +189,11 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
-builder.Services.AddHealthChecks();
+builder.Services.AddHealthChecks()
+    .AddDbContextCheck<CardenceDbContext>(
+        name: "postgresql",
+        failureStatus: HealthStatus.Unhealthy,
+        tags: ["ready", "db"]);
 
 var app = builder.Build();
 
@@ -274,7 +281,11 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
-app.MapHealthChecks("/health/ready");
+app.MapHealthChecks("/health/ready", new HealthCheckOptions
+{
+    Predicate = check => check.Tags.Contains("ready"),
+    ResponseWriter = HealthCheckResponseWriter.WriteReadyResponse,
+});
 
 app.Run();
 

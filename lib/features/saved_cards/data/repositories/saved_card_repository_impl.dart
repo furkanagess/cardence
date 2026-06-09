@@ -3,6 +3,8 @@ import '../../../auth/data/datasources/auth_remote_datasource.dart';
 import '../../domain/entities/saved_card.dart';
 import '../../domain/entities/saved_cards_wallet_quota.dart';
 import '../../domain/repositories/saved_card_repository.dart';
+import '../../domain/extensions/card_share_payload_to_saved_card.dart';
+import '../datasources/public_business_card_remote_datasource.dart';
 import '../datasources/saved_card_local_datasource.dart';
 import '../datasources/saved_card_remote_datasource.dart';
 import '../models/saved_card_model.dart';
@@ -12,13 +14,17 @@ class SavedCardRepositoryImpl implements SavedCardRepository {
     required SavedCardLocalDataSource local,
     required SavedCardRemoteDataSource remote,
     required AuthLocalDataSource authLocal,
+    PublicBusinessCardRemoteDataSource? publicCardRemote,
   })  : _local = local,
         _remote = remote,
-        _authLocal = authLocal;
+        _authLocal = authLocal,
+        _publicCardRemote =
+            publicCardRemote ?? PublicBusinessCardRemoteDataSourceImpl();
 
   final SavedCardLocalDataSource _local;
   final SavedCardRemoteDataSource _remote;
   final AuthLocalDataSource _authLocal;
+  final PublicBusinessCardRemoteDataSource _publicCardRemote;
 
   Future<String?> _tryAccessToken() async {
     final session = await _authLocal.getSession();
@@ -55,6 +61,12 @@ class SavedCardRepositoryImpl implements SavedCardRepository {
 
     final localCards = await _local.getSavedCards();
     return localCards.map((model) => model.toEntity()).toList();
+  }
+
+  @override
+  Future<SavedCard?> fetchPublicCardByCardId(String cardId) async {
+    final payload = await _publicCardRemote.fetchSharePayload(cardId);
+    return payload?.toSavedCard();
   }
 
   @override

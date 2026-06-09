@@ -157,6 +157,21 @@ Cloudflare'de **SSL/TLS → Full** seç; proxy (turuncu bulut) açık olsun.
 
 ```bash
 curl https://cardenceapi.app/health/ready
+# PostgreSQL dahil JSON yanıt:
+curl -s https://cardenceapi.app/health/ready | python3 -m json.tool
+```
+
+**Railway izleme (API + DB + tablo sayıları):** [`railway-monitoring.md`](railway-monitoring.md)
+
+Railway API servisine isteğe bağlı ekleyin:
+
+| Variable | Açıklama |
+|----------|----------|
+| `Monitoring__ApiKey` | `GET /health/status` tablo sayıları; header `X-Monitoring-Key` |
+
+```bash
+cd backend/deploy/scripts && ./railway-monitor.sh
+MONITORING_KEY="your-key" ./railway-monitor.sh
 ```
 
 Swagger (yalnızca Development ortamında açık):

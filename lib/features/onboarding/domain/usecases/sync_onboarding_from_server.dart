@@ -9,6 +9,8 @@ class SyncOnboardingFromServer {
   Future<void> call({required bool completed}) async {
     if (completed) {
       await _repository.setOnboardingCompleted();
+    } else {
+      await _repository.clearOnboardingCompleted();
     }
   }
 }

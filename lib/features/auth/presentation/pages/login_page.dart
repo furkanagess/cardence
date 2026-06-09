@@ -6,6 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/network/api_config.dart';
+import '../../../../core/widgets/atoms/cardence_app_bar.dart';
 import '../../../../core/widgets/atoms/custom_button.dart';
 import '../../../../core/widgets/organisms/cardence_connect_animation.dart';
 import '../../../../core/widgets/organisms/cardence_scaffold.dart';
@@ -138,191 +139,233 @@ class _AuthViewState extends State<_AuthView>
             );
         }
       },
-      child: CardenceScaffold(
-        resizeToAvoidBottomInset: true,
-        body: SafeArea(
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              final keyboardVisible =
-                  MediaQuery.viewInsetsOf(context).bottom > 0;
-              final logoSize = keyboardVisible
-                  ? 72.0
-                  : math
-                      .min(
-                        constraints.maxWidth * 0.58,
-                        constraints.maxHeight * 0.26,
-                      )
-                      .clamp(140.0, 200.0);
+      child: BlocBuilder<LoginBloc, LoginState>(
+        builder: (context, state) {
+          return CardenceScaffold(
+            resizeToAvoidBottomInset: false,
+            appBar: state.isRegisterMode
+                ? CardenceAppBar(
+                    title: 'Kayıt ol',
+                    leading: CardenceAppBar.backButton(
+                      context: context,
+                      onPressed: () =>
+                          _switchMode(context, AuthScreenMode.login),
+                    ),
+                  )
+                : null,
+            body: SafeArea(
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final bottomInset =
+                      MediaQuery.viewInsetsOf(context).bottom;
+                  final keyboardVisible = bottomInset > 0;
+                  final logoSize = keyboardVisible
+                      ? 72.0
+                      : math
+                          .min(
+                            constraints.maxWidth * 0.58,
+                            constraints.maxHeight * 0.26,
+                          )
+                          .clamp(140.0, 200.0);
 
-              return Padding(
-                padding: const EdgeInsets.fromLTRB(24, 4, 24, 0),
-                child: BlocBuilder<LoginBloc, LoginState>(
-                  builder: (context, state) {
-                    final isRegister = state.isRegisterMode;
-
-                    if (isRegister) {
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          Padding(
-                            padding: EdgeInsets.fromLTRB(
-                              0,
-                              keyboardVisible ? 4 : 12,
-                              0,
-                              keyboardVisible ? 8 : 16,
-                            ),
-                            child: Text(
-                              'Hesap oluşturun',
-                              textAlign: TextAlign.center,
-                              style: (keyboardVisible
-                                      ? textTheme.titleSmall
-                                      : textTheme.titleMedium)
-                                  ?.copyWith(
-                                color: colorScheme.primary,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ),
-                          Expanded(
-                            child: keyboardVisible
-                                ? SingleChildScrollView(
-                                    keyboardDismissBehavior:
-                                        ScrollViewKeyboardDismissBehavior
-                                            .onDrag,
-                                    padding: const EdgeInsets.only(bottom: 8),
-                                    child: RegisterForm(
-                                      isLoading: state.isLoading,
-                                      onSubmit: ({
-                                        required displayName,
-                                        required email,
-                                        required password,
-                                        phone,
-                                      }) =>
-                                          context.read<LoginBloc>().add(
-                                                RegisterSubmitted(
-                                                  displayName: displayName,
-                                                  email: email,
-                                                  password: password,
-                                                  phone: phone,
-                                                ),
-                                              ),
-                                    ),
-                                  )
-                                : RegisterForm(
-                                    isLoading: state.isLoading,
-                                    onSubmit: ({
-                                      required displayName,
-                                      required email,
-                                      required password,
-                                      phone,
-                                    }) =>
-                                        context.read<LoginBloc>().add(
-                                              RegisterSubmitted(
-                                                displayName: displayName,
-                                                email: email,
-                                                password: password,
-                                                phone: phone,
-                                              ),
-                                            ),
-                                  ),
-                          ),
-                          _AuthModeLink(
-                            isRegister: true,
-                            onTap: () =>
-                                _switchMode(context, AuthScreenMode.login),
-                          ),
-                          if (kDebugMode)
-                            Padding(
-                              padding: const EdgeInsets.only(top: 4),
-                              child: Text(
-                                'API: ${ApiConfig.baseUrl}',
-                                textAlign: TextAlign.center,
-                                style: textTheme.labelSmall?.copyWith(
-                                  color: colorScheme.onSurfaceVariant,
-                                ),
-                              ),
-                            ),
-                        ],
-                      );
-                    }
-
-                    return Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        FadeTransition(
-                          opacity: _introFade,
-                          child: Column(
-                            children: [
-                              AnimatedContainer(
-                                duration: const Duration(milliseconds: 200),
-                                curve: Curves.easeOutCubic,
-                                height: logoSize + (keyboardVisible ? 0 : 8),
-                                child: Center(
-                                  child: CardenceConnectAnimation(
-                                    size: logoSize,
-                                  ),
-                                ),
-                              ),
-                              if (!keyboardVisible) ...[
-                                const SizedBox(height: 8),
-                                Text(
-                                  AppConstants.appName,
-                                  textAlign: TextAlign.center,
-                                  style: textTheme.headlineSmall?.copyWith(
-                                    fontWeight: FontWeight.w800,
-                                    letterSpacing: -0.4,
-                                  ),
-                                ),
-                              ],
-                              SizedBox(height: keyboardVisible ? 8 : 4),
-                              Text(
-                                'Hesabınıza giriş yapın',
-                                textAlign: TextAlign.center,
-                                style: (keyboardVisible
-                                        ? textTheme.titleSmall
-                                        : textTheme.titleMedium)
-                                    ?.copyWith(
-                                  color: colorScheme.primary,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        SizedBox(height: keyboardVisible ? 12 : 16),
-                        Expanded(
-                          child: _LoginFormContent(
+                  return Padding(
+                    padding: const EdgeInsets.fromLTRB(24, 4, 24, 0),
+                    child: state.isRegisterMode
+                        ? _RegisterScreenContent(
                             state: state,
-                            expandToFill: !keyboardVisible,
+                            keyboardVisible: keyboardVisible,
+                            bottomInset: bottomInset,
+                          )
+                        : _LoginScreenContent(
+                            state: state,
+                            keyboardVisible: keyboardVisible,
+                            bottomInset: bottomInset,
+                            logoSize: logoSize,
+                            introFade: _introFade,
+                            colorScheme: colorScheme,
+                            textTheme: textTheme,
                             onForgotPassword: () =>
                                 _openForgotPassword(context),
+                            onRegisterTap: () =>
+                                _switchMode(context, AuthScreenMode.register),
                           ),
-                        ),
-                        _AuthModeLink(
-                          isRegister: false,
-                          onTap: () =>
-                              _switchMode(context, AuthScreenMode.register),
-                        ),
-                        if (kDebugMode)
-                          Padding(
-                            padding: const EdgeInsets.only(top: 4),
-                            child: Text(
-                              'API: ${ApiConfig.baseUrl}',
-                              textAlign: TextAlign.center,
-                              style: textTheme.labelSmall?.copyWith(
-                                color: colorScheme.onSurfaceVariant,
-                              ),
-                            ),
-                          ),
-                      ],
-                    );
-                  },
+                  );
+                },
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _RegisterScreenContent extends StatelessWidget {
+  const _RegisterScreenContent({
+    required this.state,
+    required this.keyboardVisible,
+    required this.bottomInset,
+  });
+
+  final LoginState state;
+  final bool keyboardVisible;
+  final double bottomInset;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
+    final registerForm = RegisterForm(
+      isLoading: state.isLoading,
+      onSubmit: ({
+        required displayName,
+        required email,
+        required password,
+        phone,
+      }) =>
+          context.read<LoginBloc>().add(
+                RegisterSubmitted(
+                  displayName: displayName,
+                  email: email,
+                  password: password,
+                  phone: phone,
                 ),
-              );
-            },
+              ),
+    );
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Expanded(
+          child: SingleChildScrollView(
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+            padding: EdgeInsets.only(
+              top: 8,
+              bottom: keyboardVisible ? bottomInset + 16 : 8,
+            ),
+            child: registerForm,
           ),
         ),
-      ),
+        if (!keyboardVisible) ...[
+          _AuthModeLink(
+            isRegister: true,
+            onTap: () => context
+                .read<LoginBloc>()
+                .add(const AuthScreenModeChanged(AuthScreenMode.login)),
+          ),
+          if (kDebugMode)
+            Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: Text(
+                'API: ${ApiConfig.baseUrl}',
+                textAlign: TextAlign.center,
+                style: textTheme.labelSmall?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ),
+        ],
+      ],
+    );
+  }
+}
+
+class _LoginScreenContent extends StatelessWidget {
+  const _LoginScreenContent({
+    required this.state,
+    required this.keyboardVisible,
+    required this.bottomInset,
+    required this.logoSize,
+    required this.introFade,
+    required this.colorScheme,
+    required this.textTheme,
+    required this.onForgotPassword,
+    required this.onRegisterTap,
+  });
+
+  final LoginState state;
+  final bool keyboardVisible;
+  final double bottomInset;
+  final double logoSize;
+  final Animation<double> introFade;
+  final ColorScheme colorScheme;
+  final TextTheme textTheme;
+  final VoidCallback onForgotPassword;
+  final VoidCallback onRegisterTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        FadeTransition(
+          opacity: introFade,
+          child: Column(
+            children: [
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                curve: Curves.easeOutCubic,
+                height: logoSize + (keyboardVisible ? 0 : 8),
+                child: Center(
+                  child: CardenceConnectAnimation(
+                    size: logoSize,
+                  ),
+                ),
+              ),
+              if (!keyboardVisible) ...[
+                const SizedBox(height: 8),
+                Text(
+                  AppConstants.appName,
+                  textAlign: TextAlign.center,
+                  style: textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -0.4,
+                  ),
+                ),
+              ],
+              SizedBox(height: keyboardVisible ? 8 : 4),
+              Text(
+                'Hesabınıza giriş yapın',
+                textAlign: TextAlign.center,
+                style: (keyboardVisible
+                        ? textTheme.titleSmall
+                        : textTheme.titleMedium)
+                    ?.copyWith(
+                  color: colorScheme.primary,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+        ),
+        SizedBox(height: keyboardVisible ? 12 : 16),
+        Expanded(
+          child: _LoginFormContent(
+            state: state,
+            expandToFill: !keyboardVisible,
+            bottomInset: bottomInset,
+            onForgotPassword: onForgotPassword,
+          ),
+        ),
+        if (!keyboardVisible) ...[
+          _AuthModeLink(
+            isRegister: false,
+            onTap: onRegisterTap,
+          ),
+          if (kDebugMode)
+            Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: Text(
+                'API: ${ApiConfig.baseUrl}',
+                textAlign: TextAlign.center,
+                style: textTheme.labelSmall?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ),
+        ],
+      ],
     );
   }
 }
@@ -378,11 +421,13 @@ class _LoginFormContent extends StatefulWidget {
     required this.state,
     required this.onForgotPassword,
     this.expandToFill = false,
+    this.bottomInset = 0,
   });
 
   final LoginState state;
   final VoidCallback onForgotPassword;
   final bool expandToFill;
+  final double bottomInset;
 
   @override
   State<_LoginFormContent> createState() => _LoginFormContentState();
@@ -464,7 +509,7 @@ class _LoginFormContentState extends State<_LoginFormContent> {
 
     return SingleChildScrollView(
       keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-      padding: const EdgeInsets.only(bottom: 8),
+      padding: EdgeInsets.only(bottom: widget.bottomInset + 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [

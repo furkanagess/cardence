@@ -4,6 +4,8 @@ import 'package:intl_phone_field/intl_phone_field.dart';
 import '../../../../core/validation/app_validators.dart';
 import '../../../../core/widgets/atoms/custom_button.dart';
 import '../../../../core/widgets/atoms/custom_text_field.dart';
+import '../../../onboarding/presentation/onboarding_name_helper.dart';
+import '../../../onboarding/presentation/onboarding_validation.dart';
 import '../../../onboarding/presentation/widgets/onboarding_step_shell.dart';
 import 'auth_password_field.dart';
 
@@ -27,12 +29,14 @@ class RegisterForm extends StatefulWidget {
 }
 
 class _RegisterFormState extends State<RegisterForm> {
-  final _nameController = TextEditingController();
+  final _firstNameController = TextEditingController();
+  final _lastNameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
   String _phoneNumber = '';
-  String? _nameError;
+  String? _firstNameError;
+  String? _lastNameError;
   String? _emailError;
   String? _phoneError;
   String? _passwordError;
@@ -40,7 +44,8 @@ class _RegisterFormState extends State<RegisterForm> {
 
   @override
   void dispose() {
-    _nameController.dispose();
+    _firstNameController.dispose();
+    _lastNameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
@@ -48,21 +53,20 @@ class _RegisterFormState extends State<RegisterForm> {
   }
 
   void _submit() {
-    final displayName = _nameController.text.trim();
+    final firstName = _firstNameController.text;
+    final lastName = _lastNameController.text;
+    final displayName = OnboardingNameHelper.combine(firstName, lastName);
     final email = _emailController.text.trim().toLowerCase();
     final password = _passwordController.text;
     final confirmPassword = _confirmPasswordController.text;
     final phone = _phoneNumber.trim();
 
-    String? nameError;
+    final firstNameError = OnboardingValidation.validateFirstName(firstName);
+    final lastNameError = OnboardingValidation.validateLastName(lastName);
     String? emailError;
     String? phoneError;
     String? passwordError;
     String? confirmPasswordError;
-
-    if (!AppValidators.matches(AppValidators.personName, displayName)) {
-      nameError = 'Geçerli bir ad soyad girin.';
-    }
     if (!AppValidators.matches(AppValidators.email, email)) {
       emailError = 'Geçerli bir e-posta girin.';
     }
@@ -78,14 +82,16 @@ class _RegisterFormState extends State<RegisterForm> {
     }
 
     setState(() {
-      _nameError = nameError;
+      _firstNameError = firstNameError;
+      _lastNameError = lastNameError;
       _emailError = emailError;
       _phoneError = phoneError;
       _passwordError = passwordError;
       _confirmPasswordError = confirmPasswordError;
     });
 
-    if (nameError != null ||
+    if (firstNameError != null ||
+        lastNameError != null ||
         emailError != null ||
         phoneError != null ||
         passwordError != null ||
@@ -110,19 +116,35 @@ class _RegisterFormState extends State<RegisterForm> {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const OnboardingFieldLabel(label: 'Ad Soyad', required: true),
+        const OnboardingFieldLabel(label: 'Ad', required: true),
         CustomTextField(
-          controller: _nameController,
-          hintText: 'Adınız Soyadınız',
+          controller: _firstNameController,
+          hintText: 'Örn. Ayşe',
           textInputAction: TextInputAction.next,
           textCapitalization: TextCapitalization.words,
           prefixIcon: Icon(
             Icons.person_outline_rounded,
             color: colorScheme.onSurfaceVariant,
           ),
-          errorText: _nameError,
+          errorText: _firstNameError,
           onChanged: (_) {
-            if (_nameError != null) setState(() => _nameError = null);
+            if (_firstNameError != null) setState(() => _firstNameError = null);
+          },
+        ),
+        const SizedBox(height: 8),
+        const OnboardingFieldLabel(label: 'Soyad', required: true),
+        CustomTextField(
+          controller: _lastNameController,
+          hintText: 'Örn. Yılmaz',
+          textInputAction: TextInputAction.next,
+          textCapitalization: TextCapitalization.words,
+          prefixIcon: Icon(
+            Icons.person_outline_rounded,
+            color: colorScheme.onSurfaceVariant,
+          ),
+          errorText: _lastNameError,
+          onChanged: (_) {
+            if (_lastNameError != null) setState(() => _lastNameError = null);
           },
         ),
         const SizedBox(height: 8),
@@ -151,7 +173,7 @@ class _RegisterFormState extends State<RegisterForm> {
             errorText: _phoneError,
           ),
           initialCountryCode: 'TR',
-          disableLengthCheck: false,
+          disableLengthCheck: true,
           onChanged: (phone) {
             _phoneNumber = phone.completeNumber;
             if (_phoneError != null) setState(() => _phoneError = null);

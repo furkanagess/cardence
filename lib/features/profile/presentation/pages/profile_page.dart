@@ -9,7 +9,7 @@ import '../../../my_cards/presentation/pages/my_card_edit_page.dart';
 import '../../../my_cards/presentation/widgets/my_card_preview_helpers.dart';
 import '../../../onboarding/domain/entities/onboarding_card_draft.dart';
 import '../../../onboarding/domain/usecases/get_onboarding_draft_cards.dart';
-import '../../../onboarding/domain/usecases/save_onboarding_draft_card.dart';
+import '../../../business_cards/domain/usecases/persist_onboarding_card.dart';
 
 const double _profileCarouselViewportFraction = 0.88;
 const double _profileCarouselHorizontalPadding = 12;
@@ -21,13 +21,13 @@ class ProfilePage extends StatefulWidget {
     super.key,
     this.draft,
     required this.getOnboardingDraftCards,
-    required this.saveOnboardingDraftCard,
+    required this.persistOnboardingCard,
     this.onDraftUpdated,
   });
 
   final OnboardingCardDraft? draft;
   final GetOnboardingDraftCards getOnboardingDraftCards;
-  final SaveOnboardingDraftCard saveOnboardingDraftCard;
+  final PersistOnboardingCard persistOnboardingCard;
   final ValueChanged<OnboardingCardDraft>? onDraftUpdated;
 
   @override
@@ -93,7 +93,7 @@ class _ProfilePageState extends State<ProfilePage> {
         builder: (context) => MyCardEditPage(
           initialDraft: card,
           isNewCard: isNew,
-          saveOnboardingDraftCard: widget.saveOnboardingDraftCard,
+          persistOnboardingCard: widget.persistOnboardingCard,
           onDraftUpdated: widget.onDraftUpdated,
         ),
       ),
@@ -218,8 +218,8 @@ class _ProfilePageState extends State<ProfilePage> {
                           builder: (context) => CardViewPage(
                             getOnboardingDraftCards:
                                 widget.getOnboardingDraftCards,
-                            saveOnboardingDraftCard:
-                                widget.saveOnboardingDraftCard,
+                            persistOnboardingCard:
+                                widget.persistOnboardingCard,
                             onDraftUpdated: widget.onDraftUpdated,
                           ),
                         ),

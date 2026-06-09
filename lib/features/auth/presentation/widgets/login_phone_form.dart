@@ -80,7 +80,7 @@ class LoginPhoneFormState extends State<LoginPhoneForm> {
             errorText: _phoneError,
           ),
           initialCountryCode: 'TR',
-          disableLengthCheck: false,
+          disableLengthCheck: true,
           onChanged: (phone) {
             _phoneNumber = phone.completeNumber;
             if (_phoneError != null) setState(() => _phoneError = null);

@@ -89,7 +89,7 @@ public sealed class AuthService : IAuthService
                 "Telefon gereklidir.");
         }
 
-        var phone = NormalizePhone(request.Phone);
+        var phone = PhoneNormalizer.Normalize(request.Phone);
 
         if (!string.IsNullOrWhiteSpace(request.Password))
         {
@@ -326,7 +326,7 @@ public sealed class AuthService : IAuthService
         string? phone = null;
         if (!string.IsNullOrWhiteSpace(request.Phone))
         {
-            phone = NormalizePhone(request.Phone);
+            phone = PhoneNormalizer.Normalize(request.Phone);
             if (phone.Length < 8)
             {
                 return FailSession(
@@ -341,16 +341,16 @@ public sealed class AuthService : IAuthService
             return FailSession(
                 AuthErrorCodes.UserAlreadyExists,
                 "UserAlreadyExists",
-                "Bu e-posta adresi zaten kayıtlı.");
+                "Bu e-posta adresi başka bir hesapta kayıtlı.");
         }
 
-        if (phone is not null
+        if (!string.IsNullOrEmpty(phone)
             && await _userRepository.GetByPhoneAsync(phone, cancellationToken) is not null)
         {
             return FailSession(
                 AuthErrorCodes.UserAlreadyExists,
                 "UserAlreadyExists",
-                "Bu telefon numarası zaten kayıtlı.");
+                "Bu telefon numarası başka bir hesapta kayıtlı.");
         }
 
         var now = DateTime.UtcNow;
@@ -417,7 +417,7 @@ public sealed class AuthService : IAuthService
 
         if (!string.IsNullOrWhiteSpace(request.Phone))
         {
-            var phone = NormalizePhone(request.Phone);
+            var phone = PhoneNormalizer.Normalize(request.Phone);
             var user = await _userRepository.GetByPhoneAsync(phone, cancellationToken);
             if (user is null)
             {
@@ -476,7 +476,7 @@ public sealed class AuthService : IAuthService
         }
         else if (!string.IsNullOrWhiteSpace(request.Phone))
         {
-            var phone = NormalizePhone(request.Phone);
+            var phone = PhoneNormalizer.Normalize(request.Phone);
             otpKey = BuildResetPhoneOtpKey(phone);
             user = await _userRepository.GetByPhoneAsync(phone, cancellationToken);
         }
@@ -595,7 +595,7 @@ public sealed class AuthService : IAuthService
                 "Phone is required.");
         }
 
-        var normalized = NormalizePhone(phone);
+        var normalized = PhoneNormalizer.Normalize(phone);
         var code = GenerateOtpCode();
         await _authTokenStore.SaveOtpAsync(
             BuildPhoneOtpKey(normalized),
@@ -674,9 +674,6 @@ public sealed class AuthService : IAuthService
 
     private static string GenerateOtpCode() =>
         Random.Shared.Next(100000, 999999).ToString();
-
-    private static string NormalizePhone(string phone) =>
-        phone.Trim().Replace(" ", string.Empty);
 
     private static string BuildPhoneOtpKey(string phone) => $"phone:{phone}";
 

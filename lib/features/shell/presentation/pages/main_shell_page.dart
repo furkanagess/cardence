@@ -16,7 +16,7 @@ import '../../../onboarding/domain/entities/onboarding_card_draft.dart';
 import '../../../profile/presentation/pages/profile_page.dart';
 import '../../../onboarding/domain/usecases/get_onboarding_draft_card.dart';
 import '../../../onboarding/domain/usecases/get_onboarding_draft_cards.dart';
-import '../../../onboarding/domain/usecases/save_onboarding_draft_card.dart';
+import '../../../business_cards/domain/usecases/persist_onboarding_card.dart';
 import '../../../saved_cards/presentation/pages/saved_cards_page.dart';
 import '../../../settings/domain/entities/theme_preference.dart';
 import '../../../settings/presentation/pages/settings_page.dart';
@@ -27,7 +27,7 @@ class MainShellPage extends StatefulWidget {
     super.key,
     required this.getOnboardingDraftCard,
     required this.getOnboardingDraftCards,
-    required this.saveOnboardingDraftCard,
+    required this.persistOnboardingCard,
     required this.getEventGroups,
     required this.saveEventGroups,
     required this.getSavedCards,
@@ -43,7 +43,7 @@ class MainShellPage extends StatefulWidget {
 
   final GetOnboardingDraftCard getOnboardingDraftCard;
   final GetOnboardingDraftCards getOnboardingDraftCards;
-  final SaveOnboardingDraftCard saveOnboardingDraftCard;
+  final PersistOnboardingCard persistOnboardingCard;
   final GetEventGroups getEventGroups;
   final SaveEventGroups saveEventGroups;
   final GetSavedCards getSavedCards;
@@ -151,7 +151,7 @@ class _MainShellPageState extends State<MainShellPage> {
           ProfilePage(
             draft: _myCardDraft,
             getOnboardingDraftCards: widget.getOnboardingDraftCards,
-            saveOnboardingDraftCard: widget.saveOnboardingDraftCard,
+            persistOnboardingCard: widget.persistOnboardingCard,
             onDraftUpdated: (updated) => setState(() => _myCardDraft = updated),
           ),
         ],

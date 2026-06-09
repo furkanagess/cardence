@@ -11,20 +11,21 @@ import '../widgets/collapsible_card_preview_panel.dart';
 import '../widgets/my_card_preview_helpers.dart';
 import 'card_detail_page.dart';
 import '../../../onboarding/domain/entities/onboarding_card_draft.dart';
-import '../../../onboarding/domain/usecases/save_onboarding_draft_card.dart';
+import '../../../../core/network/auth_api_exception.dart';
+import '../../../business_cards/domain/usecases/persist_onboarding_card.dart';
 
 /// Tek bir kartin adini ve bilgilerini duzenleme ekrani.
 class MyCardEditPage extends StatefulWidget {
   const MyCardEditPage({
     super.key,
     required this.initialDraft,
-    required this.saveOnboardingDraftCard,
+    required this.persistOnboardingCard,
     this.isNewCard = false,
     this.onDraftUpdated,
   });
 
   final OnboardingCardDraft initialDraft;
-  final SaveOnboardingDraftCard saveOnboardingDraftCard;
+  final PersistOnboardingCard persistOnboardingCard;
   final bool isNewCard;
   final ValueChanged<OnboardingCardDraft>? onDraftUpdated;
 
@@ -133,13 +134,33 @@ class _MyCardEditPageState extends State<MyCardEditPage> {
       return;
     }
     setState(() => _saving = true);
-    final updated = _buildDraft();
-    await widget.saveOnboardingDraftCard(updated);
-    if (!mounted) return;
-    setState(() => _saving = false);
-    widget.onDraftUpdated?.call(updated);
-    if (popAfter) {
-      Navigator.of(context).pop(updated);
+    final draft = _buildDraft();
+    try {
+      final updated = await widget.persistOnboardingCard(draft);
+      if (!mounted) return;
+      setState(() => _saving = false);
+      widget.onDraftUpdated?.call(updated);
+      if (popAfter) {
+        Navigator.of(context).pop(updated);
+      }
+    } on AuthApiException catch (e) {
+      if (!mounted) return;
+      setState(() => _saving = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(e.message),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _saving = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Kart kaydedilemedi. Lütfen tekrar deneyin.'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
     }
   }
 
@@ -148,7 +169,7 @@ class _MyCardEditPageState extends State<MyCardEditPage> {
       MaterialPageRoute<void>(
         builder: (context) => CardDetailPage(
           draft: draft,
-          saveOnboardingDraftCard: widget.saveOnboardingDraftCard,
+          persistOnboardingCard: widget.persistOnboardingCard,
           onDraftUpdated: widget.onDraftUpdated,
         ),
       ),

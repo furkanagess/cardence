@@ -1,6 +1,7 @@
 using Cardence.Application.Interfaces;
 using Cardence.Application.Options;
 using Cardence.Infrastructure.Auth;
+using Cardence.Infrastructure.Health;
 using Cardence.Infrastructure.Persistence;
 using Cardence.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -16,6 +17,8 @@ public static class DependencyInjection
         IConfiguration configuration)
     {
         services.Configure<JwtOptions>(configuration.GetSection(JwtOptions.SectionName));
+        services.Configure<ApiOptions>(configuration.GetSection(ApiOptions.SectionName));
+        services.Configure<MonitoringOptions>(configuration.GetSection(MonitoringOptions.SectionName));
 
         services.AddDbContext<CardenceDbContext>(options =>
         {
@@ -41,6 +44,7 @@ public static class DependencyInjection
         services.AddScoped<ISavedCardRepository, SavedCardRepository>();
         services.AddScoped<IWalletEntitlementRepository, WalletEntitlementRepository>();
         services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<IHealthStatusReader, HealthStatusReader>();
 
         return services;
     }

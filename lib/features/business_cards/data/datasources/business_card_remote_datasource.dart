@@ -12,6 +12,11 @@ abstract class BusinessCardRemoteDataSource {
     Map<String, dynamic> body, {
     required String accessToken,
   });
+
+  Future<BusinessCardModel> updateBusinessCard(
+    Map<String, dynamic> body, {
+    required String accessToken,
+  });
 }
 
 class BusinessCardRemoteDataSourceImpl implements BusinessCardRemoteDataSource {
@@ -67,6 +72,20 @@ class BusinessCardRemoteDataSourceImpl implements BusinessCardRemoteDataSource {
       body: body,
       accessToken: accessToken,
       fallbackError: 'Kart kaydedilemedi.',
+    );
+    return _parseCard(json);
+  }
+
+  @override
+  Future<BusinessCardModel> updateBusinessCard(
+    Map<String, dynamic> body, {
+    required String accessToken,
+  }) async {
+    final json = await _client.put(
+      '/UpdateBusinessCard',
+      body: body,
+      accessToken: accessToken,
+      fallbackError: 'Kart güncellenemedi.',
     );
     return _parseCard(json);
   }

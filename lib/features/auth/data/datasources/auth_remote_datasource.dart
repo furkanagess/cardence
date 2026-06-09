@@ -114,7 +114,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   }) async {
     final body = <String, dynamic>{
       'displayName': displayName,
-      'email': email,
+      'email': email.trim().toLowerCase(),
       'password': password,
     };
     if (phone != null && phone.trim().isNotEmpty) {

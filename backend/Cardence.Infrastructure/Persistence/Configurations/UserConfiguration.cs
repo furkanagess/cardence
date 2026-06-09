@@ -20,6 +20,13 @@ public sealed class UserConfiguration : IEntityTypeConfiguration<User>
         builder.Property(x => x.CreatedAt).HasColumnName("created_at");
         builder.Property(x => x.UpdatedAt).HasColumnName("updated_at");
 
-        builder.HasIndex(x => x.Email).IsUnique();
+        builder.HasIndex(x => x.Email)
+            .IsUnique()
+            .HasDatabaseName("ix_users_email");
+
+        builder.HasIndex(x => x.Phone)
+            .IsUnique()
+            .HasDatabaseName("ix_users_phone")
+            .HasFilter("phone IS NOT NULL AND phone <> ''");
     }
 }

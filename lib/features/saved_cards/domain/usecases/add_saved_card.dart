@@ -15,12 +15,18 @@ class AddSavedCard {
     }
 
     try {
-      await _cardRepository.addCard(
-        card.copyWith(
-          cardId: id,
-          savedAt: card.savedAt ?? DateTime.now().millisecondsSinceEpoch,
-        ),
-      );
+      final savedAt = card.savedAt ?? DateTime.now().millisecondsSinceEpoch;
+      var toSave = card.copyWith(cardId: id, savedAt: savedAt);
+
+      final fromDb = await _cardRepository.fetchPublicCardByCardId(id);
+      if (fromDb != null) {
+        toSave = fromDb.copyWith(
+          savedAt: savedAt,
+          linkedEventGroupIds: card.linkedEventGroupIds,
+        );
+      }
+
+      await _cardRepository.addCard(toSave);
       return const AddSavedCardSuccess();
     } on AuthApiException catch (e) {
       if (e.statusCode == 409 || e.errorCode == 'WALLET_DUPLICATE_CARD') {

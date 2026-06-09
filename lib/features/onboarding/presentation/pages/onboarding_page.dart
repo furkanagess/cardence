@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/widgets/organisms/cardence_scaffold.dart';
-import '../../../business_cards/domain/usecases/save_business_card.dart';
-import '../../domain/usecases/save_onboarding_draft_card.dart';
+import '../../../business_cards/domain/usecases/persist_onboarding_card.dart';
+import '../../domain/entities/onboarding_card_draft.dart';
+import '../../domain/usecases/resolve_onboarding_initial_draft.dart';
 import '../cubit/onboarding_cubit.dart';
 import '../cubit/onboarding_state.dart';
 import '../onboarding_draft_helper.dart';
@@ -16,29 +17,53 @@ import '../widgets/onboarding_step_professional.dart';
 import '../widgets/onboarding_step_welcome.dart';
 
 /// İlk açılışta adım adım kart oluşturma ile gösterilen onboarding ekranı.
-class OnboardingPageView extends StatelessWidget {
+class OnboardingPageView extends StatefulWidget {
   const OnboardingPageView({
     super.key,
     required this.completeOnboarding,
-    required this.saveOnboardingDraftCard,
-    required this.saveBusinessCard,
+    required this.resolveInitialDraft,
+    required this.persistOnboardingCard,
     required this.onFinish,
   });
 
   final Future<void> Function() completeOnboarding;
-  final SaveOnboardingDraftCard saveOnboardingDraftCard;
-  final SaveBusinessCard saveBusinessCard;
+  final ResolveOnboardingInitialDraft resolveInitialDraft;
+  final PersistOnboardingCard persistOnboardingCard;
   final VoidCallback onFinish;
 
   @override
+  State<OnboardingPageView> createState() => _OnboardingPageViewState();
+}
+
+class _OnboardingPageViewState extends State<OnboardingPageView> {
+  late final Future<OnboardingCardDraft> _initialDraftFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _initialDraftFuture = widget.resolveInitialDraft();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => OnboardingCubit(
-        completeOnboarding: completeOnboarding,
-        saveOnboardingDraftCard: saveOnboardingDraftCard,
-        saveBusinessCard: saveBusinessCard,
-      ),
-      child: _OnboardingContent(onFinish: onFinish),
+    return FutureBuilder<OnboardingCardDraft>(
+      future: _initialDraftFuture,
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return const CardenceScaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
+        }
+
+        return BlocProvider(
+          create: (_) => OnboardingCubit(
+            completeOnboarding: widget.completeOnboarding,
+            persistOnboardingCard: widget.persistOnboardingCard,
+            initialDraft: snapshot.data,
+          ),
+          child: _OnboardingContent(onFinish: widget.onFinish),
+        );
+      },
     );
   }
 }

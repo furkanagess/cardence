@@ -13,6 +13,7 @@ const String _keyDraftCards = 'onboarding_draft_cards';
 abstract class OnboardingLocalDataSource {
   Future<bool> isOnboardingCompleted();
   Future<void> setOnboardingCompleted();
+  Future<void> clearOnboardingCompleted();
   Future<void> saveDraftCard(OnboardingCardDraftModel draft);
   Future<OnboardingCardDraftModel?> getDraftCard();
   Future<List<OnboardingCardDraftModel>> getDraftCards();
@@ -52,6 +53,11 @@ class OnboardingLocalDataSourceImpl implements OnboardingLocalDataSource {
   @override
   Future<void> setOnboardingCompleted() async {
     await _prefs.setBool(_keyOnboardingCompleted, true);
+  }
+
+  @override
+  Future<void> clearOnboardingCompleted() async {
+    await _prefs.remove(_keyOnboardingCompleted);
   }
 
   @override

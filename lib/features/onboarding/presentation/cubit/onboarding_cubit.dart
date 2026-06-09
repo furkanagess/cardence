@@ -1,24 +1,20 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../auth/data/datasources/auth_remote_datasource.dart';
-import '../../../business_cards/data/mappers/onboarding_draft_mapper.dart';
-import '../../../business_cards/domain/usecases/save_business_card.dart';
+import '../../../../core/network/auth_api_exception.dart';
+import '../../../business_cards/domain/usecases/persist_onboarding_card.dart';
 import '../../domain/entities/onboarding_card_draft.dart';
-import '../../domain/usecases/save_onboarding_draft_card.dart';
-import '../onboarding_draft_helper.dart';
 import 'onboarding_state.dart';
 
 class OnboardingCubit extends Cubit<OnboardingState> {
   OnboardingCubit({
     required Future<void> Function() completeOnboarding,
-    required this.saveOnboardingDraftCard,
-    required this.saveBusinessCard,
+    required this.persistOnboardingCard,
+    OnboardingCardDraft? initialDraft,
   })  : _completeOnboarding = completeOnboarding,
-        super(OnboardingState());
+        super(OnboardingState(draft: initialDraft));
 
   final Future<void> Function() _completeOnboarding;
-  final SaveOnboardingDraftCard saveOnboardingDraftCard;
-  final SaveBusinessCard saveBusinessCard;
+  final PersistOnboardingCard persistOnboardingCard;
 
   void setPage(int index) {
     if (index < 0 || index >= OnboardingState.stepCount) return;
@@ -46,19 +42,8 @@ class OnboardingCubit extends Cubit<OnboardingState> {
     if (!state.canFinish) return false;
     emit(state.copyWith(isSaving: true, clearError: true));
     try {
-      final prepared = OnboardingDraftHelper.prepareForSave(state.draft);
-      await saveOnboardingDraftCard(prepared);
-
-      final saved = await saveBusinessCard(
-        OnboardingDraftMapper.toBusinessCard(prepared),
-      );
-
-      final syncedDraft = prepared.copyWith(
-        cardId: saved.cardId ?? prepared.cardId,
-      );
-      await saveOnboardingDraftCard(syncedDraft);
+      final syncedDraft = await persistOnboardingCard(state.draft);
       emit(state.copyWith(draft: syncedDraft));
-
       await _completeOnboarding();
       return true;
     } on AuthApiException catch (e) {

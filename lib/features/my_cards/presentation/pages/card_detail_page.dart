@@ -12,7 +12,7 @@ import '../../../../core/widgets/organisms/cardence_scaffold.dart';
 import '../card_customize_colors.dart';
 import '../widgets/collapsible_card_preview_panel.dart';
 import '../../../onboarding/domain/entities/onboarding_card_draft.dart';
-import '../../../onboarding/domain/usecases/save_onboarding_draft_card.dart';
+import '../../../business_cards/domain/usecases/persist_onboarding_card.dart';
 import 'my_card_edit_page.dart';
 import '../../../saved_cards/domain/entities/card_share_payload.dart';
 
@@ -21,12 +21,12 @@ class CardDetailPage extends StatefulWidget {
   const CardDetailPage({
     super.key,
     required this.draft,
-    required this.saveOnboardingDraftCard,
+    required this.persistOnboardingCard,
     this.onDraftUpdated,
   });
 
   final OnboardingCardDraft draft;
-  final SaveOnboardingDraftCard saveOnboardingDraftCard;
+  final PersistOnboardingCard persistOnboardingCard;
   final ValueChanged<OnboardingCardDraft>? onDraftUpdated;
 
   @override
@@ -67,45 +67,37 @@ class _CardDetailPageState extends State<CardDetailPage> {
       _draft.lastUsedPaletteBackgroundColor!.startsWith('#') &&
       !cardBackgroundColorOptions.contains(_draft.lastUsedPaletteBackgroundColor);
 
+  Future<void> _persistDraft(OnboardingCardDraft updated) async {
+    final synced = await widget.persistOnboardingCard(updated);
+    if (!mounted) return;
+    setState(() => _draft = synced);
+    widget.onDraftUpdated?.call(synced);
+  }
+
   Future<void> _setDefaultBackground() async {
     final updated = _draft.copyWith(clearBackgroundColor: true);
-    await widget.saveOnboardingDraftCard(updated);
-    if (!mounted) return;
-    setState(() => _draft = updated);
-    widget.onDraftUpdated?.call(updated);
+    await _persistDraft(updated);
   }
 
   Future<void> _setBackgroundColor(String hex) async {
-    final updated = _draft.copyWith(backgroundColor: hex);
-    await widget.saveOnboardingDraftCard(updated);
-    if (!mounted) return;
-    setState(() => _draft = updated);
-    widget.onDraftUpdated?.call(updated);
+    await _persistDraft(_draft.copyWith(backgroundColor: hex));
   }
 
   Future<void> _setBackgroundColorFromPalette(String hex) async {
-    final updated = _draft.copyWith(
-        backgroundColor: hex, lastUsedPaletteBackgroundColor: hex);
-    await widget.saveOnboardingDraftCard(updated);
-    if (!mounted) return;
-    setState(() => _draft = updated);
-    widget.onDraftUpdated?.call(updated);
+    await _persistDraft(
+      _draft.copyWith(
+        backgroundColor: hex,
+        lastUsedPaletteBackgroundColor: hex,
+      ),
+    );
   }
 
   Future<void> _setDefaultTextColor() async {
-    final updated = _draft.copyWith(clearAccentColor: true);
-    await widget.saveOnboardingDraftCard(updated);
-    if (!mounted) return;
-    setState(() => _draft = updated);
-    widget.onDraftUpdated?.call(updated);
+    await _persistDraft(_draft.copyWith(clearAccentColor: true));
   }
 
   Future<void> _setTextColor(String hex) async {
-    final updated = _draft.copyWith(accentColor: hex);
-    await widget.saveOnboardingDraftCard(updated);
-    if (!mounted) return;
-    setState(() => _draft = updated);
-    widget.onDraftUpdated?.call(updated);
+    await _persistDraft(_draft.copyWith(accentColor: hex));
   }
 
   Future<void> _openCustomTextColorPicker() async {
@@ -227,10 +219,8 @@ class _CardDetailPageState extends State<CardDetailPage> {
     if (cardId.isEmpty) {
       const uuid = Uuid();
       cardId = uuid.v4();
-      final updated = _draft.copyWith(cardId: cardId);
-      await widget.saveOnboardingDraftCard(updated);
-      if (!mounted) return;
-      setState(() => _draft = updated);
+      await _persistDraft(_draft.copyWith(cardId: cardId));
+      cardId = _draft.cardId ?? cardId;
     }
     final payload = CardSharePayload(
       id: cardId,
@@ -315,7 +305,7 @@ class _CardDetailPageState extends State<CardDetailPage> {
                 MaterialPageRoute(
                   builder: (context) => MyCardEditPage(
                     initialDraft: _draft,
-                    saveOnboardingDraftCard: widget.saveOnboardingDraftCard,
+                    persistOnboardingCard: widget.persistOnboardingCard,
                     onDraftUpdated: widget.onDraftUpdated,
                   ),
                 ),

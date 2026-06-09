@@ -134,7 +134,7 @@ class _AddCardByIdPageState extends State<AddCardByIdPage> {
             const SizedBox(height: 20),
             if (!_useJson) ...[
               Text(
-                'Paylaşılan kart kimliğini girin. Tam bilgiler için QR okutmanız önerilir.',
+                'Paylaşılan kart kimliğini girin. Bilgiler sunucudaki güncel kartvizitten alınır.',
                 style: textTheme.bodyMedium?.copyWith(
                   color: colorScheme.onSurfaceVariant,
                   height: 1.4,

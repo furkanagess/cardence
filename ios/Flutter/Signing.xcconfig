@@ -1,0 +1,3 @@
+// Tüm iOS hedefleri için ortak imza ayarları (App Store archive dahil).
+DEVELOPMENT_TEAM = 4NZ23FB632
+CODE_SIGN_STYLE = Automatic

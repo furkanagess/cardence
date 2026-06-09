@@ -1,3 +1,4 @@
+using Cardence.Application.Common;
 using Cardence.Application.Interfaces;
 using Cardence.Domain.Entities;
 using Cardence.Infrastructure.Persistence;
@@ -21,16 +22,26 @@ public sealed class UserRepository : IUserRepository
 
     public async Task<User?> GetByEmailAsync(string email, CancellationToken cancellationToken = default)
     {
+        var normalizedEmail = email.Trim().ToLowerInvariant();
         return await _dbContext.Users.FirstOrDefaultAsync(
-            user => user.Email == email,
+            user => user.Email != null && user.Email.ToLower() == normalizedEmail,
             cancellationToken);
     }
 
     public async Task<User?> GetByPhoneAsync(string phone, CancellationToken cancellationToken = default)
     {
-        return await _dbContext.Users.FirstOrDefaultAsync(
-            user => user.Phone == phone,
-            cancellationToken);
+        var normalizedPhone = PhoneNormalizer.Normalize(phone);
+        if (string.IsNullOrEmpty(normalizedPhone))
+        {
+            return null;
+        }
+
+        var candidates = await _dbContext.Users
+            .Where(user => user.Phone != null && user.Phone != string.Empty)
+            .ToListAsync(cancellationToken);
+
+        return candidates.FirstOrDefault(
+            user => PhoneNormalizer.AreEquivalent(user.Phone, normalizedPhone));
     }
 
     public async Task AddAsync(User user, CancellationToken cancellationToken = default)

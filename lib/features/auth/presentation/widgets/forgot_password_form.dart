@@ -172,14 +172,6 @@ class _ForgotPasswordFormState extends State<ForgotPasswordForm> {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text(
-          'Kayıtlı e-posta adresinize sıfırlama kodu gönderilir.',
-          style: textTheme.bodySmall?.copyWith(
-            color: colorScheme.onSurfaceVariant,
-            height: 1.4,
-          ),
-        ),
-        const SizedBox(height: 12),
         const OnboardingFieldLabel(label: 'E-posta', required: true),
         CustomTextField(
           controller: _emailController,
@@ -195,6 +187,14 @@ class _ForgotPasswordFormState extends State<ForgotPasswordForm> {
           onChanged: (_) {
             if (_emailError != null) setState(() => _emailError = null);
           },
+        ),
+        const SizedBox(height: 12),
+        Text(
+          'Kayıtlı e-posta adresinize sıfırlama kodu gönderilir.',
+          style: textTheme.bodySmall?.copyWith(
+            color: colorScheme.onSurfaceVariant,
+            height: 1.4,
+          ),
         ),
         const SizedBox(height: 14),
         CustomButton(

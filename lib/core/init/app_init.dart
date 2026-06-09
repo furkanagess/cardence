@@ -20,7 +20,9 @@ import '../../features/auth/domain/usecases/restore_auth_session.dart';
 import '../../features/business_cards/data/datasources/business_card_remote_datasource.dart';
 import '../../features/business_cards/data/repositories/business_card_repository_impl.dart';
 import '../../features/business_cards/domain/usecases/get_business_cards.dart';
+import '../../features/business_cards/domain/usecases/persist_onboarding_card.dart';
 import '../../features/business_cards/domain/usecases/save_business_card.dart';
+import '../../features/business_cards/domain/usecases/upsert_business_card.dart';
 import 'complete_onboarding_flow.dart';
 import '../../features/event_groups/data/datasources/event_group_local_datasource.dart';
 import '../../features/event_groups/data/repositories/event_group_repository_impl.dart';
@@ -33,6 +35,7 @@ import '../../features/onboarding/domain/usecases/get_onboarding_completed.dart'
 import '../../features/onboarding/domain/usecases/sync_onboarding_from_server.dart';
 import '../../features/onboarding/domain/usecases/get_onboarding_draft_card.dart';
 import '../../features/onboarding/domain/usecases/get_onboarding_draft_cards.dart';
+import '../../features/onboarding/domain/usecases/resolve_onboarding_initial_draft.dart';
 import '../../features/onboarding/domain/usecases/save_onboarding_draft_card.dart';
 import '../../features/saved_cards/data/datasources/saved_card_local_datasource.dart';
 import '../../features/saved_cards/data/datasources/saved_card_remote_datasource.dart';
@@ -63,7 +66,15 @@ class AppInit {
     final prefs = await _initSharedPreferences();
     final auth = _initAuth(prefs);
     final businessCards = _initBusinessCards(prefs);
-    final onboarding = _initOnboarding(prefs, auth.completeOnboardingRemote);
+    final onboarding = _initOnboarding(
+      prefs,
+      auth.completeOnboardingRemote,
+      auth.getCurrentUser,
+    );
+    final persistOnboardingCard = PersistOnboardingCard(
+      onboarding.saveOnboardingDraftCard,
+      businessCards.upsertBusinessCard,
+    );
     final theme = _initTheme(prefs);
 
     final eventGroups = _initEventGroups(prefs);
@@ -82,9 +93,11 @@ class AppInit {
       completeOnboarding: onboarding.completeOnboarding,
       syncOnboardingFromServer: onboarding.syncOnboardingFromServer,
       saveOnboardingDraftCard: onboarding.saveOnboardingDraftCard,
+      persistOnboardingCard: persistOnboardingCard,
       saveBusinessCard: businessCards.saveBusinessCard,
       getOnboardingDraftCard: onboarding.getOnboardingDraftCard,
       getOnboardingDraftCards: onboarding.getOnboardingDraftCards,
+      resolveOnboardingInitialDraft: onboarding.resolveOnboardingInitialDraft,
       getThemePreference: theme.getThemePreference,
       setThemePreference: theme.setThemePreference,
       getEventGroups: eventGroups.getEventGroups,
@@ -181,6 +194,7 @@ class AppInit {
   static ({
     SaveBusinessCard saveBusinessCard,
     GetBusinessCards getBusinessCards,
+    UpsertBusinessCard upsertBusinessCard,
   }) _initBusinessCards(
     SharedPreferences prefs,
   ) {
@@ -193,6 +207,7 @@ class AppInit {
     return (
       saveBusinessCard: SaveBusinessCard(repo),
       getBusinessCards: GetBusinessCards(repo),
+      upsertBusinessCard: UpsertBusinessCard(repo),
     );
   }
 
@@ -203,9 +218,11 @@ class AppInit {
     SaveOnboardingDraftCard saveOnboardingDraftCard,
     GetOnboardingDraftCard getOnboardingDraftCard,
     GetOnboardingDraftCards getOnboardingDraftCards,
+    ResolveOnboardingInitialDraft resolveOnboardingInitialDraft,
   }) _initOnboarding(
     SharedPreferences prefs,
     CompleteOnboardingRemote completeOnboardingRemote,
+    GetCurrentUser getCurrentUser,
   ) {
     final local = OnboardingLocalDataSourceImpl(prefs);
     final repo = OnboardingRepositoryImpl(local);
@@ -213,13 +230,18 @@ class AppInit {
       local: CompleteOnboarding(repo),
       remote: completeOnboardingRemote,
     );
+    final getDraftCard = GetOnboardingDraftCard(repo);
     return (
       getOnboardingCompleted: GetOnboardingCompleted(repo),
       completeOnboarding: flow.call,
       syncOnboardingFromServer: SyncOnboardingFromServer(repo),
       saveOnboardingDraftCard: SaveOnboardingDraftCard(repo),
-      getOnboardingDraftCard: GetOnboardingDraftCard(repo),
+      getOnboardingDraftCard: getDraftCard,
       getOnboardingDraftCards: GetOnboardingDraftCards(repo),
+      resolveOnboardingInitialDraft: ResolveOnboardingInitialDraft(
+        getDraftCard,
+        getCurrentUser,
+      ),
     );
   }
 
@@ -252,9 +274,11 @@ class AppInitResult {
     required this.completeOnboarding,
     required this.syncOnboardingFromServer,
     required this.saveOnboardingDraftCard,
+    required this.persistOnboardingCard,
     required this.saveBusinessCard,
     required this.getOnboardingDraftCard,
     required this.getOnboardingDraftCards,
+    required this.resolveOnboardingInitialDraft,
     required this.getThemePreference,
     required this.setThemePreference,
     required this.getEventGroups,
@@ -280,9 +304,11 @@ class AppInitResult {
   final Future<void> Function() completeOnboarding;
   final SyncOnboardingFromServer syncOnboardingFromServer;
   final SaveOnboardingDraftCard saveOnboardingDraftCard;
+  final PersistOnboardingCard persistOnboardingCard;
   final SaveBusinessCard saveBusinessCard;
   final GetOnboardingDraftCard getOnboardingDraftCard;
   final GetOnboardingDraftCards getOnboardingDraftCards;
+  final ResolveOnboardingInitialDraft resolveOnboardingInitialDraft;
   final GetThemePreference getThemePreference;
   final SetThemePreference setThemePreference;
   final GetEventGroups getEventGroups;

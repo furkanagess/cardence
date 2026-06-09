@@ -39,4 +39,22 @@ class BusinessCardRepositoryImpl implements BusinessCardRepository {
     );
     return model.toEntity();
   }
+
+  @override
+  Future<BusinessCard> upsertCard(BusinessCard card) async {
+    final cardId = card.cardId?.trim();
+    if (cardId == null || cardId.isEmpty) {
+      throw AuthApiException('Kart kimliği eksik.');
+    }
+
+    final token = await _requireAccessToken();
+    final body = BusinessCardModel.fromEntity(card).toApiJson();
+    body['cardId'] = cardId;
+
+    final model = await _remote.updateBusinessCard(
+      body,
+      accessToken: token,
+    );
+    return model.toEntity();
+  }
 }

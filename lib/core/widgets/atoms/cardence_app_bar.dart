@@ -47,6 +47,21 @@ class CardenceAppBar extends StatelessWidget implements PreferredSizeWidget {
   final double? scrolledUnderElevation;
 
   static const double _actionIconSize = 24;
+  static const IconData _backIcon = Icons.arrow_back_rounded;
+
+  /// Tüm AppBar geri butonlarında kullanılan standart ikon.
+  static Widget backButton({
+    required BuildContext context,
+    VoidCallback? onPressed,
+    ButtonStyle? style,
+  }) {
+    return IconButton(
+      tooltip: MaterialLocalizations.of(context).backButtonTooltip,
+      onPressed: onPressed ?? () => Navigator.of(context).maybePop(),
+      style: style,
+      icon: const Icon(_backIcon, size: _actionIconSize),
+    );
+  }
 
   /// Standart sağ üst ikon aksiyonu (24px, tooltip).
   static Widget iconAction({
@@ -101,11 +116,10 @@ class CardenceAppBar extends StatelessWidget implements PreferredSizeWidget {
     required BuildContext context,
     required VoidCallback? onPressed,
   }) {
-    return IconButton(
-      tooltip: 'Geri',
+    return backButton(
+      context: context,
       onPressed: onPressed,
       style: _flowButtonStyle(context),
-      icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
     );
   }
 
@@ -154,27 +168,33 @@ class CardenceAppBar extends StatelessWidget implements PreferredSizeWidget {
     );
   }
 
+  Widget? _resolveLeading(BuildContext context) {
+    if (leading != null) return leading;
+    if (_isRoot || _isFlow || !automaticallyImplyLeading) return null;
+    final canPop = ModalRoute.of(context)?.canPop ?? false;
+    if (!canPop) return null;
+    return backButton(context: context);
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final appBarTheme = theme.appBarTheme;
 
+    final pageBackground = theme.scaffoldBackgroundColor;
+
     return AppBar(
       title: _buildTitle(context),
       centerTitle: _centerTitle,
-      automaticallyImplyLeading:
-          _isRoot || _isFlow ? false : automaticallyImplyLeading,
-      leading: leading,
+      automaticallyImplyLeading: false,
+      leading: _resolveLeading(context),
       actions: actions,
-      backgroundColor: backgroundColor ??
-          (_isFlow
-              ? theme.scaffoldBackgroundColor
-              : appBarTheme.backgroundColor ?? colorScheme.surface),
+      backgroundColor: backgroundColor ?? pageBackground,
       foregroundColor: foregroundColor ?? appBarTheme.foregroundColor,
       elevation: elevation ?? appBarTheme.elevation ?? 0,
-      scrolledUnderElevation: scrolledUnderElevation ??
-          (_isFlow ? 0 : appBarTheme.scrolledUnderElevation ?? 1),
+      scrolledUnderElevation:
+          scrolledUnderElevation ?? appBarTheme.scrolledUnderElevation ?? 0,
       surfaceTintColor: Colors.transparent,
       iconTheme: IconThemeData(
         color: foregroundColor ?? colorScheme.onSurface,

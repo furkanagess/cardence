@@ -113,7 +113,11 @@ class AuthRepositoryImpl implements AuthRepository {
       email: email,
       password: password,
     );
-    return _persist(model);
+    final session = await _persist(model);
+    try {
+      await _fetchAndPersistProfile(model);
+    } catch (_) {}
+    return session;
   }
 
   @override
@@ -125,7 +129,11 @@ class AuthRepositoryImpl implements AuthRepository {
       phone: phone,
       password: password,
     );
-    return _persist(model);
+    final session = await _persist(model);
+    try {
+      await _fetchAndPersistProfile(model);
+    } catch (_) {}
+    return session;
   }
 
   @override

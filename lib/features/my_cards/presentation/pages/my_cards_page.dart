@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../widgets/my_card_preview_helpers.dart';
 import '../../../onboarding/domain/entities/onboarding_card_draft.dart';
-import '../../../onboarding/domain/usecases/save_onboarding_draft_card.dart';
+import '../../../business_cards/domain/usecases/persist_onboarding_card.dart';
 import 'card_detail_page.dart';
 
 /// Kendi kartlarım: kartlar ListView ile listelenir.
@@ -10,12 +10,12 @@ class MyCardsPage extends StatelessWidget {
   const MyCardsPage({
     super.key,
     this.draft,
-    required this.saveOnboardingDraftCard,
+    required this.persistOnboardingCard,
     this.onDraftUpdated,
   });
 
   final OnboardingCardDraft? draft;
-  final SaveOnboardingDraftCard saveOnboardingDraftCard;
+  final PersistOnboardingCard persistOnboardingCard;
   final ValueChanged<OnboardingCardDraft>? onDraftUpdated;
 
   @override
@@ -33,7 +33,7 @@ class MyCardsPage extends StatelessWidget {
           padding: const EdgeInsets.only(bottom: 20),
           child: _MyCardItem(
             draft: draft!,
-            saveOnboardingDraftCard: saveOnboardingDraftCard,
+            persistOnboardingCard: persistOnboardingCard,
             onDraftUpdated: onDraftUpdated,
           ),
         );
@@ -94,12 +94,12 @@ class MyCardsPage extends StatelessWidget {
 class _MyCardItem extends StatelessWidget {
   const _MyCardItem({
     required this.draft,
-    required this.saveOnboardingDraftCard,
+    required this.persistOnboardingCard,
     this.onDraftUpdated,
   });
 
   final OnboardingCardDraft draft;
-  final SaveOnboardingDraftCard saveOnboardingDraftCard;
+  final PersistOnboardingCard persistOnboardingCard;
   final ValueChanged<OnboardingCardDraft>? onDraftUpdated;
 
   @override
@@ -112,7 +112,7 @@ class _MyCardItem extends StatelessWidget {
           MaterialPageRoute<void>(
             builder: (context) => CardDetailPage(
               draft: draft,
-              saveOnboardingDraftCard: saveOnboardingDraftCard,
+              persistOnboardingCard: persistOnboardingCard,
               onDraftUpdated: onDraftUpdated,
             ),
           ),

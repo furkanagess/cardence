@@ -41,9 +41,6 @@ class _ForgotPasswordView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
-
     return BlocListener<ForgotPasswordBloc, ForgotPasswordState>(
       listenWhen: (prev, curr) => prev.status != curr.status,
       listener: (context, state) {
@@ -75,67 +72,44 @@ class _ForgotPasswordView extends StatelessWidget {
       },
       child: CardenceScaffold(
         resizeToAvoidBottomInset: true,
-        appBar: CardenceAppBar(
-          title: 'Şifremi unuttum',
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back_rounded),
-            onPressed: () => Navigator.of(context).pop(),
-          ),
-        ),
+        appBar: const CardenceAppBar(title: 'Şifremi unuttum'),
         body: SafeArea(
           child: Padding(
             padding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
             child: BlocBuilder<ForgotPasswordBloc, ForgotPasswordState>(
               builder: (context, state) {
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Text(
-                      state.isOtpStep
-                          ? 'Yeni şifrenizi belirleyin'
-                          : 'Şifrenizi sıfırlayın',
-                      style: textTheme.titleMedium?.copyWith(
-                        color: colorScheme.primary,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    Expanded(
-                      child: SingleChildScrollView(
-                        keyboardDismissBehavior:
-                            ScrollViewKeyboardDismissBehavior.onDrag,
-                        child: ForgotPasswordForm(
-                          isLoading: state.isLoading,
-                          isOtpStep: state.isOtpStep,
-                          pendingEmail: state.pendingEmail,
-                          onRequestOtp: (email) => context
-                              .read<ForgotPasswordBloc>()
-                              .add(ForgotPasswordOtpRequested(email: email)),
-                          onResetPassword: ({
-                            required email,
-                            required otpCode,
-                            required newPassword,
-                          }) =>
-                              context.read<ForgotPasswordBloc>().add(
-                                    ForgotPasswordResetSubmitted(
-                                      email: email,
-                                      otpCode: otpCode,
-                                      newPassword: newPassword,
-                                    ),
-                                  ),
-                          onBack: () {
-                            if (state.isOtpStep) {
-                              context.read<ForgotPasswordBloc>().add(
-                                    const ForgotPasswordBackToEmail(),
-                                  );
-                              return;
-                            }
-                            Navigator.of(context).pop();
-                          },
-                        ),
-                      ),
-                    ),
-                  ],
+                return SingleChildScrollView(
+                  keyboardDismissBehavior:
+                      ScrollViewKeyboardDismissBehavior.onDrag,
+                  child: ForgotPasswordForm(
+                    isLoading: state.isLoading,
+                    isOtpStep: state.isOtpStep,
+                    pendingEmail: state.pendingEmail,
+                    onRequestOtp: (email) => context
+                        .read<ForgotPasswordBloc>()
+                        .add(ForgotPasswordOtpRequested(email: email)),
+                    onResetPassword: ({
+                      required email,
+                      required otpCode,
+                      required newPassword,
+                    }) =>
+                        context.read<ForgotPasswordBloc>().add(
+                              ForgotPasswordResetSubmitted(
+                                email: email,
+                                otpCode: otpCode,
+                                newPassword: newPassword,
+                              ),
+                            ),
+                    onBack: () {
+                      if (state.isOtpStep) {
+                        context.read<ForgotPasswordBloc>().add(
+                              const ForgotPasswordBackToEmail(),
+                            );
+                        return;
+                      }
+                      Navigator.of(context).pop();
+                    },
+                  ),
                 );
               },
             ),

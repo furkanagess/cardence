@@ -286,7 +286,13 @@ namespace Cardence.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("Email")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasDatabaseName("ix_users_email");
+
+                    b.HasIndex("Phone")
+                        .IsUnique()
+                        .HasDatabaseName("ix_users_phone")
+                        .HasFilter("phone IS NOT NULL AND phone <> ''");
 
                     b.ToTable("users", (string)null);
                 });

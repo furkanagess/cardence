@@ -37,16 +37,20 @@ public static class SavedCardMapper
         entity.LinkedEventGroupIds = dto.LinkedEventGroupIds.ToList();
     }
 
+    /// <summary>
+    /// Kaynak kart business_cards tablosundaysa profil alanlarını DB'den uygular.
+    /// </summary>
     public static void HydrateFromBusinessCard(SavedCard entity, BusinessCard source)
     {
-        entity.DisplayName ??= source.DisplayName;
-        entity.Email ??= source.Email;
-        entity.Phone ??= source.Phone;
-        entity.Company ??= source.Company;
-        entity.Title ??= source.Title;
-        entity.Website ??= source.Website;
-        entity.Linkedin ??= source.Linkedin;
-        entity.Skills ??= source.Skills;
-        entity.School ??= source.School;
+        entity.DisplayName = source.DisplayName;
+        entity.Email = source.Email;
+        entity.Phone = source.Phone;
+        entity.Company = source.Company;
+        entity.Title = source.Title;
+        entity.Website = source.Website;
+        entity.Linkedin = source.Linkedin;
+        entity.Skills = source.Skills;
+        entity.School = source.School;
+        entity.About = source.About;
     }
 }

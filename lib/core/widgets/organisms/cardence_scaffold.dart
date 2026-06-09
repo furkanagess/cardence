@@ -27,8 +27,8 @@ class CardenceScaffold extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final surfaceColor =
-        backgroundColor ?? Theme.of(context).scaffoldBackgroundColor;
+    final theme = Theme.of(context);
+    final pageColor = backgroundColor ?? theme.scaffoldBackgroundColor;
 
     Widget? wrappedBody = body;
     if (wrappedBody != null && showWatermark) {
@@ -36,7 +36,7 @@ class CardenceScaffold extends StatelessWidget {
         fit: StackFit.expand,
         children: [
           CardWatermark(
-            surfaceColor: surfaceColor,
+            surfaceColor: pageColor,
             variant: CardWatermarkVariant.screen,
           ),
           wrappedBody,
@@ -44,14 +44,24 @@ class CardenceScaffold extends StatelessWidget {
       );
     }
 
-    return Scaffold(
+    final scaffold = Scaffold(
       appBar: appBar,
-      backgroundColor: backgroundColor,
+      backgroundColor: pageColor,
       body: wrappedBody,
       bottomNavigationBar: bottomNavigationBar,
       extendBody: extendBody,
       resizeToAvoidBottomInset: resizeToAvoidBottomInset,
       floatingActionButton: floatingActionButton,
+    );
+
+    return Theme(
+      data: theme.copyWith(
+        scaffoldBackgroundColor: pageColor,
+        appBarTheme: theme.appBarTheme.copyWith(
+          backgroundColor: pageColor,
+        ),
+      ),
+      child: scaffold,
     );
   }
 }

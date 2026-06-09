@@ -36,8 +36,9 @@ class AppTheme {
       appBarTheme: AppBarTheme(
         centerTitle: true,
         elevation: 0,
-        scrolledUnderElevation: 1,
-        backgroundColor: isLight ? AppColors.surfaceLight : AppColors.surfaceDark,
+        scrolledUnderElevation: 0,
+        backgroundColor:
+            isLight ? AppColors.backgroundLight : AppColors.backgroundDark,
         foregroundColor:
             isLight ? AppColors.textPrimary : AppColors.textPrimaryDark,
         surfaceTintColor: Colors.transparent,

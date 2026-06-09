@@ -6,6 +6,7 @@ import 'core/theme/app_theme.dart';
 import 'core/widgets/molecules/chuck_fab_overlay.dart';
 import 'core/widgets/organisms/cardence_scaffold.dart';
 import 'features/auth/domain/usecases/forgot_password.dart';
+import 'features/auth/domain/usecases/get_current_user.dart';
 import 'features/auth/domain/usecases/login_with_email.dart';
 import 'features/auth/domain/usecases/login_with_phone.dart';
 import 'features/auth/domain/usecases/logout.dart';
@@ -18,8 +19,9 @@ import 'features/event_groups/domain/usecases/save_event_groups.dart';
 import 'features/onboarding/domain/usecases/get_onboarding_completed.dart';
 import 'features/onboarding/domain/usecases/get_onboarding_draft_card.dart';
 import 'features/onboarding/domain/usecases/get_onboarding_draft_cards.dart';
+import 'features/onboarding/domain/usecases/resolve_onboarding_initial_draft.dart';
+import 'features/business_cards/domain/usecases/persist_onboarding_card.dart';
 import 'features/business_cards/domain/usecases/save_business_card.dart';
-import 'features/onboarding/domain/usecases/save_onboarding_draft_card.dart';
 import 'features/onboarding/domain/usecases/sync_onboarding_from_server.dart';
 import 'features/onboarding/presentation/pages/onboarding_page.dart';
 import 'features/saved_cards/domain/usecases/add_saved_card.dart';
@@ -45,14 +47,16 @@ class App extends StatefulWidget {
     required this.registerUser,
     required this.forgotPassword,
     required this.resetPassword,
+    required this.getCurrentUser,
     required this.logout,
     required this.getOnboardingCompleted,
     required this.completeOnboarding,
     required this.syncOnboardingFromServer,
-    required this.saveOnboardingDraftCard,
+    required this.persistOnboardingCard,
     required this.saveBusinessCard,
     required this.getOnboardingDraftCard,
     required this.getOnboardingDraftCards,
+    required this.resolveOnboardingInitialDraft,
     required this.getThemePreference,
     required this.setThemePreference,
     required this.getEventGroups,
@@ -71,14 +75,16 @@ class App extends StatefulWidget {
   final RegisterUser registerUser;
   final ForgotPassword forgotPassword;
   final ResetPassword resetPassword;
+  final GetCurrentUser getCurrentUser;
   final Logout logout;
   final GetOnboardingCompleted getOnboardingCompleted;
   final Future<void> Function() completeOnboarding;
   final SyncOnboardingFromServer syncOnboardingFromServer;
-  final SaveOnboardingDraftCard saveOnboardingDraftCard;
+  final PersistOnboardingCard persistOnboardingCard;
   final SaveBusinessCard saveBusinessCard;
   final GetOnboardingDraftCard getOnboardingDraftCard;
   final GetOnboardingDraftCards getOnboardingDraftCards;
+  final ResolveOnboardingInitialDraft resolveOnboardingInitialDraft;
   final GetThemePreference getThemePreference;
   final SetThemePreference setThemePreference;
   final GetEventGroups getEventGroups;
@@ -114,14 +120,27 @@ class _AppState extends State<App> {
       return;
     }
 
-    if (restored.onboardingCompleted == true) {
-      await widget.syncOnboardingFromServer(completed: true);
-    }
+    final onboardingDone = restored.onboardingCompleted == true;
+    await widget.syncOnboardingFromServer(completed: onboardingDone);
 
-    await _resolvePostLoginDestination();
+    setState(() {
+      _destination =
+          onboardingDone ? _AppDestination.main : _AppDestination.login;
+    });
+  }
+
+  Future<void> _syncOnboardingFromProfile() async {
+    try {
+      final profile = await widget.getCurrentUser();
+      await widget.syncOnboardingFromServer(
+        completed: profile.onboardingCompleted,
+      );
+    } catch (_) {}
   }
 
   Future<void> _resolvePostLoginDestination() async {
+    await _syncOnboardingFromProfile();
+
     final completed = await widget.getOnboardingCompleted();
     if (!mounted) return;
     setState(() {
@@ -146,6 +165,7 @@ class _AppState extends State<App> {
 
   Future<void> _onLogout() async {
     await widget.logout();
+    await widget.syncOnboardingFromServer(completed: false);
     if (!mounted) return;
     setState(() => _destination = _AppDestination.login);
   }
@@ -183,15 +203,15 @@ class _AppState extends State<App> {
       case _AppDestination.onboarding:
         return OnboardingPageView(
           completeOnboarding: widget.completeOnboarding,
-          saveOnboardingDraftCard: widget.saveOnboardingDraftCard,
-          saveBusinessCard: widget.saveBusinessCard,
+          resolveInitialDraft: widget.resolveOnboardingInitialDraft,
+          persistOnboardingCard: widget.persistOnboardingCard,
           onFinish: _onOnboardingFinish,
         );
       case _AppDestination.main:
         return MainShellPage(
           getOnboardingDraftCard: widget.getOnboardingDraftCard,
           getOnboardingDraftCards: widget.getOnboardingDraftCards,
-          saveOnboardingDraftCard: widget.saveOnboardingDraftCard,
+          persistOnboardingCard: widget.persistOnboardingCard,
           getEventGroups: widget.getEventGroups,
           saveEventGroups: widget.saveEventGroups,
           getSavedCards: widget.getSavedCards,

@@ -101,8 +101,10 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
         clearError: true,
       ));
     } on AuthApiException catch (e) {
-      emit(
-          state.copyWith(status: LoginStatus.failure, errorMessage: e.message));
+      emit(state.copyWith(
+        status: LoginStatus.failure,
+        errorMessage: e.message,
+      ));
     } catch (_) {
       emit(state.copyWith(
         status: LoginStatus.failure,

@@ -13,7 +13,7 @@ import '../../../../core/widgets/organisms/flippable_person_card.dart';
 import '../widgets/my_card_preview_helpers.dart';
 import '../../../onboarding/domain/entities/onboarding_card_draft.dart';
 import '../../../onboarding/domain/usecases/get_onboarding_draft_cards.dart';
-import '../../../onboarding/domain/usecases/save_onboarding_draft_card.dart';
+import '../../../business_cards/domain/usecases/persist_onboarding_card.dart';
 import '../card_customize_colors.dart';
 import 'card_detail_page.dart';
 
@@ -42,12 +42,12 @@ class CardViewPage extends StatefulWidget {
   const CardViewPage({
     super.key,
     required this.getOnboardingDraftCards,
-    required this.saveOnboardingDraftCard,
+    required this.persistOnboardingCard,
     this.onDraftUpdated,
   });
 
   final GetOnboardingDraftCards getOnboardingDraftCards;
-  final SaveOnboardingDraftCard saveOnboardingDraftCard;
+  final PersistOnboardingCard persistOnboardingCard;
   final ValueChanged<OnboardingCardDraft>? onDraftUpdated;
 
   @override
@@ -98,16 +98,16 @@ class _CardViewPageState extends State<CardViewPage> {
   }
 
   Future<void> _saveDraft(OnboardingCardDraft updated) async {
-    await widget.saveOnboardingDraftCard(updated);
+    final synced = await widget.persistOnboardingCard(updated);
     if (!mounted) return;
-    final idx = _cards.indexWhere((c) => c.cardId == updated.cardId);
+    final idx = _cards.indexWhere((c) => c.cardId == synced.cardId);
     if (idx >= 0) {
-      _cards = List.from(_cards)..[idx] = updated;
+      _cards = List.from(_cards)..[idx] = synced;
     } else {
-      _cards = List.from(_cards)..add(updated);
+      _cards = List.from(_cards)..add(synced);
     }
     setState(() {});
-    widget.onDraftUpdated?.call(updated);
+    widget.onDraftUpdated?.call(synced);
   }
 
   static String? _value(OnboardingCardDraft d, String key) {
@@ -639,12 +639,12 @@ class _CardViewPageState extends State<CardViewPage> {
           ? List<String>.from(OnboardingCardDraft.backFieldKeys.take(3))
           : List.from(current.backVisibleFields),
     );
-    await widget.saveOnboardingDraftCard(copy);
+    final synced = await widget.persistOnboardingCard(copy);
     if (!mounted) return;
     await _loadCards();
-    final idx = _cards.indexWhere((c) => c.cardId == newId);
+    final idx = _cards.indexWhere((c) => c.cardId == synced.cardId);
     if (idx >= 0) setState(() => _selectedIndex = idx);
-    widget.onDraftUpdated?.call(copy);
+    widget.onDraftUpdated?.call(synced);
   }
 
   Future<void> _openColorPalette() async {
@@ -904,7 +904,7 @@ class _CardViewPageState extends State<CardViewPage> {
                   MaterialPageRoute<void>(
                     builder: (context) => CardDetailPage(
                       draft: d,
-                      saveOnboardingDraftCard: widget.saveOnboardingDraftCard,
+                      persistOnboardingCard: widget.persistOnboardingCard,
                       onDraftUpdated: (updated) {
                         widget.onDraftUpdated?.call(updated);
                         _loadCards();

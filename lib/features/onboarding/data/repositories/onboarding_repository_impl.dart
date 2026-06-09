@@ -17,6 +17,10 @@ class OnboardingRepositoryImpl implements OnboardingRepository {
       _localDataSource.setOnboardingCompleted();
 
   @override
+  Future<void> clearOnboardingCompleted() =>
+      _localDataSource.clearOnboardingCompleted();
+
+  @override
   Future<void> saveDraftCard(OnboardingCardDraft draft) async {
     await _localDataSource.saveDraftCard(
       OnboardingCardDraftModel.fromEntity(draft),
