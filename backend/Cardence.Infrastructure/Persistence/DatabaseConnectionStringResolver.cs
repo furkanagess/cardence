@@ -9,7 +9,7 @@ public static class DatabaseConnectionStringResolver
 {
     public static string? Resolve(IConfiguration configuration)
     {
-        var fromConfig = configuration.GetConnectionString("Default");
+        var fromConfig = NullIfWhiteSpace(configuration.GetConnectionString("Default"));
 
         var databaseUrl = FirstNonEmpty(
             Environment.GetEnvironmentVariable("DATABASE_URL"),
@@ -19,7 +19,7 @@ public static class DatabaseConnectionStringResolver
 
         if (!string.IsNullOrWhiteSpace(databaseUrl))
         {
-            return NormalizeDatabaseUrl(databaseUrl);
+            return ToNpgsqlConnectionString(databaseUrl);
         }
 
         var pgHost = Environment.GetEnvironmentVariable("PGHOST");
@@ -28,7 +28,7 @@ public static class DatabaseConnectionStringResolver
             return BuildFromPostgresEnv();
         }
 
-        return fromConfig;
+        return ToNpgsqlConnectionString(fromConfig);
     }
 
     public static bool LooksLikeLocalDefault(string? connectionString)
@@ -52,18 +52,61 @@ public static class DatabaseConnectionStringResolver
         var password = Environment.GetEnvironmentVariable("PGPASSWORD") ?? string.Empty;
         var database = Environment.GetEnvironmentVariable("PGDATABASE") ?? "railway";
 
-        return $"Host={host};Port={port};Database={database};Username={user};Password={password};SSL Mode=Require;Trust Server Certificate=true";
+        return BuildNpgsql(host, port, database, user, password);
     }
 
-    private static string NormalizeDatabaseUrl(string databaseUrl)
+    private static string? ToNpgsqlConnectionString(string? connectionString)
     {
-        if (databaseUrl.StartsWith("postgres://", StringComparison.OrdinalIgnoreCase))
+        if (string.IsNullOrWhiteSpace(connectionString))
         {
-            return "postgresql://" + databaseUrl["postgres://".Length..];
+            return null;
         }
 
-        return databaseUrl;
+        var trimmed = connectionString.Trim();
+        if (IsPostgresUri(trimmed))
+        {
+            return ConvertPostgresUriToNpgsql(trimmed);
+        }
+
+        return trimmed;
     }
+
+    private static bool IsPostgresUri(string value) =>
+        value.StartsWith("postgres://", StringComparison.OrdinalIgnoreCase)
+        || value.StartsWith("postgresql://", StringComparison.OrdinalIgnoreCase);
+
+    private static string ConvertPostgresUriToNpgsql(string databaseUrl)
+    {
+        var normalized = databaseUrl.StartsWith("postgres://", StringComparison.OrdinalIgnoreCase)
+            ? "postgresql://" + databaseUrl["postgres://".Length..]
+            : databaseUrl;
+
+        var uri = new Uri(normalized);
+        var userInfo = uri.UserInfo.Split(':', 2);
+        var username = Uri.UnescapeDataString(userInfo[0]);
+        var password = userInfo.Length > 1 ? Uri.UnescapeDataString(userInfo[1]) : string.Empty;
+        var database = uri.AbsolutePath.TrimStart('/');
+        if (string.IsNullOrWhiteSpace(database))
+        {
+            database = "railway";
+        }
+
+        var port = uri.Port > 0 ? uri.Port.ToString() : "5432";
+        return BuildNpgsql(uri.Host, port, database, username, password);
+    }
+
+    private static string BuildNpgsql(
+        string host,
+        string port,
+        string database,
+        string username,
+        string password)
+    {
+        return $"Host={host};Port={port};Database={database};Username={username};Password={password};SSL Mode=Require;Trust Server Certificate=true";
+    }
+
+    private static string? NullIfWhiteSpace(string? value) =>
+        string.IsNullOrWhiteSpace(value) ? null : value.Trim();
 
     private static string? FirstNonEmpty(params string?[] values)
     {

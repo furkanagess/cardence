@@ -7,6 +7,7 @@ using Cardence.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 
 namespace Cardence.Infrastructure;
 
@@ -14,7 +15,8 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddInfrastructure(
         this IServiceCollection services,
-        IConfiguration configuration)
+        IConfiguration configuration,
+        IHostEnvironment? environment = null)
     {
         services.Configure<JwtOptions>(configuration.GetSection(JwtOptions.SectionName));
         services.Configure<ApiOptions>(configuration.GetSection(ApiOptions.SectionName));
@@ -24,6 +26,15 @@ public static class DependencyInjection
         {
             var useInMemory = configuration.GetValue<bool>("Database:UseInMemory");
             var connectionString = DatabaseConnectionStringResolver.Resolve(configuration);
+            var isProduction = environment?.IsProduction() == true;
+
+            if (isProduction && (useInMemory || string.IsNullOrWhiteSpace(connectionString)))
+            {
+                throw new InvalidOperationException(
+                    "Production requires a PostgreSQL connection string. " +
+                    "Set ConnectionStrings__Default=${{Postgres.DATABASE_URL}} on Railway " +
+                    "and Database__UseInMemory=false.");
+            }
 
             if (useInMemory || string.IsNullOrWhiteSpace(connectionString))
             {

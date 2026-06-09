@@ -92,7 +92,7 @@ builder.Host.UseSerilog((context, services, configuration) =>
         .WriteTo.Console());
 
 builder.Services.AddApplication();
-builder.Services.AddInfrastructure(builder.Configuration);
+builder.Services.AddInfrastructure(builder.Configuration, builder.Environment);
 
 var apiOptions = builder.Configuration.GetSection(ApiOptions.SectionName).Get<ApiOptions>()
     ?? new ApiOptions();
