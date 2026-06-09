@@ -52,44 +52,6 @@ class SavedCardsWalletStrip extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              if (!inAppBar) ...[
-                Row(
-                  children: [
-                    Icon(
-                      Icons.account_balance_wallet_outlined,
-                      size: 18,
-                      color: colorScheme.primary,
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        'Cüzdan kapasitesi',
-                        style: textTheme.labelLarge?.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                    if (quota.isPremium)
-                      _MiniBadge(
-                        label: 'Premium',
-                        color: colorScheme.primaryContainer,
-                        onColor: colorScheme.onPrimaryContainer,
-                      )
-                    else
-                      _MiniBadge(
-                        label: 'Ücretsiz',
-                        color: colorScheme.surfaceContainerHighest,
-                        onColor: colorScheme.onSurfaceVariant,
-                      ),
-                    Icon(
-                      Icons.chevron_right_rounded,
-                      size: 20,
-                      color: colorScheme.onSurfaceVariant,
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-              ],
               Row(
                 crossAxisAlignment: CrossAxisAlignment.baseline,
                 textBaseline: TextBaseline.alphabetic,
@@ -108,16 +70,6 @@ class SavedCardsWalletStrip extends StatelessWidget {
                       color: colorScheme.onSurfaceVariant,
                     ),
                   ),
-                  if (!isDemoMode) ...[
-                    const Spacer(),
-                    Text(
-                      '${quota.remaining} boş',
-                      style: textTheme.labelMedium?.copyWith(
-                        color: colorScheme.onSurfaceVariant,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
                   if (inAppBar) ...[
                     const SizedBox(width: 2),
                     Icon(
@@ -161,37 +113,6 @@ class SavedCardsWalletStrip extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 6, 20, 4),
       child: content,
-    );
-  }
-}
-
-class _MiniBadge extends StatelessWidget {
-  const _MiniBadge({
-    required this.label,
-    required this.color,
-    required this.onColor,
-  });
-
-  final String label;
-  final Color color;
-  final Color onColor;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-      decoration: BoxDecoration(
-        color: color,
-        borderRadius: BorderRadius.circular(6),
-      ),
-      child: Text(
-        label,
-        style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              color: onColor,
-              fontWeight: FontWeight.w600,
-              fontSize: 10,
-            ),
-      ),
     );
   }
 }

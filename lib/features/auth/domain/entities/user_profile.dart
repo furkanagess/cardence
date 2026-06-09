@@ -9,6 +9,7 @@ class UserProfile extends Equatable {
     this.displayName,
     this.email,
     this.phone,
+    this.photoUrl,
     this.onboardingCompleted = false,
     this.createdAt,
     this.savedCards = const [],
@@ -19,6 +20,7 @@ class UserProfile extends Equatable {
   final String? displayName;
   final String? email;
   final String? phone;
+  final String? photoUrl;
   final bool onboardingCompleted;
   final DateTime? createdAt;
   final List<SavedCard> savedCards;
@@ -30,6 +32,7 @@ class UserProfile extends Equatable {
         displayName,
         email,
         phone,
+        photoUrl,
         onboardingCompleted,
         createdAt,
         savedCards,

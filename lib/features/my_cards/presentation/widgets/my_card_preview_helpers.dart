@@ -100,6 +100,7 @@ class MyCardPreviewHelpers {
       compact: true,
       accentColor: parseHexColor(draft.accentColor),
       backgroundColor: parseHexColor(draft.backgroundColor),
+      photoUrl: draft.photoUrl,
     );
 
     return SizedBox(

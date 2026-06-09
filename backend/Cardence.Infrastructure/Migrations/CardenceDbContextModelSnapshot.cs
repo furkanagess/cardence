@@ -121,6 +121,11 @@ namespace Cardence.Infrastructure.Migrations
                         .HasColumnType("character varying(20)")
                         .HasColumnName("phone");
 
+                    b.Property<string>("PhotoUrl")
+                        .HasMaxLength(2048)
+                        .HasColumnType("character varying(2048)")
+                        .HasColumnName("photo_url");
+
                     b.Property<string>("School")
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)")
@@ -245,6 +250,47 @@ namespace Cardence.Infrastructure.Migrations
                     b.ToTable("saved_cards", (string)null);
                 });
 
+            modelBuilder.Entity("Cardence.Domain.Entities.SupportRequest", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasMaxLength(320)
+                        .HasColumnType("character varying(320)")
+                        .HasColumnName("email");
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)")
+                        .HasColumnName("message");
+
+                    b.Property<string>("Topic")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("topic");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedAt");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("support_requests", (string)null);
+                });
+
             modelBuilder.Entity("Cardence.Domain.Entities.User", b =>
                 {
                     b.Property<Guid>("Id")
@@ -278,6 +324,11 @@ namespace Cardence.Infrastructure.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("character varying(20)")
                         .HasColumnName("phone");
+
+                    b.Property<string>("PhotoUrl")
+                        .HasMaxLength(2048)
+                        .HasColumnType("character varying(2048)")
+                        .HasColumnName("photo_url");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")
@@ -344,6 +395,17 @@ namespace Cardence.Infrastructure.Migrations
                 });
 
             modelBuilder.Entity("Cardence.Domain.Entities.SavedCard", b =>
+                {
+                    b.HasOne("Cardence.Domain.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Cardence.Domain.Entities.SupportRequest", b =>
                 {
                     b.HasOne("Cardence.Domain.Entities.User", "User")
                         .WithMany()

@@ -13,6 +13,7 @@ import 'features/auth/domain/usecases/logout.dart';
 import 'features/auth/domain/usecases/register_user.dart';
 import 'features/auth/domain/usecases/reset_password.dart';
 import 'features/auth/domain/usecases/restore_auth_session.dart';
+import 'features/auth/domain/usecases/upload_profile_photo.dart';
 import 'features/auth/presentation/pages/login_page.dart';
 import 'features/event_groups/domain/usecases/get_event_groups.dart';
 import 'features/event_groups/domain/usecases/save_event_groups.dart';
@@ -33,6 +34,7 @@ import 'features/saved_cards/domain/usecases/upgrade_wallet_plan.dart';
 import 'features/settings/domain/entities/theme_preference.dart';
 import 'features/settings/domain/usecases/get_theme_preference.dart';
 import 'features/settings/domain/usecases/set_theme_preference.dart';
+import 'features/support/domain/usecases/submit_support_request.dart';
 import 'features/shell/presentation/pages/main_shell_page.dart';
 
 enum _AppDestination { loading, login, onboarding, main }
@@ -50,6 +52,7 @@ class App extends StatefulWidget {
     required this.resetPassword,
     required this.getCurrentUser,
     required this.logout,
+    required this.uploadProfilePhoto,
     required this.getOnboardingCompleted,
     required this.completeOnboarding,
     required this.syncOnboardingFromServer,
@@ -60,6 +63,7 @@ class App extends StatefulWidget {
     required this.resolveOnboardingInitialDraft,
     required this.getThemePreference,
     required this.setThemePreference,
+    required this.submitSupportRequest,
     required this.getEventGroups,
     required this.saveEventGroups,
     required this.getSavedCards,
@@ -79,6 +83,7 @@ class App extends StatefulWidget {
   final ResetPassword resetPassword;
   final GetCurrentUser getCurrentUser;
   final Logout logout;
+  final UploadProfilePhoto uploadProfilePhoto;
   final GetOnboardingCompleted getOnboardingCompleted;
   final Future<void> Function() completeOnboarding;
   final SyncOnboardingFromServer syncOnboardingFromServer;
@@ -89,6 +94,7 @@ class App extends StatefulWidget {
   final ResolveOnboardingInitialDraft resolveOnboardingInitialDraft;
   final GetThemePreference getThemePreference;
   final SetThemePreference setThemePreference;
+  final SubmitSupportRequest submitSupportRequest;
   final GetEventGroups getEventGroups;
   final SaveEventGroups saveEventGroups;
   final GetSavedCards getSavedCards;
@@ -222,9 +228,12 @@ class _AppState extends State<App> {
           addSavedCard: widget.addSavedCard,
           deleteSavedCard: widget.deleteSavedCard,
           upgradeWalletPlan: widget.upgradeWalletPlan,
+          getCurrentUser: widget.getCurrentUser,
           themePreference: _themePreference,
           onThemeChanged: _onThemeChanged,
           onLogout: _onLogout,
+          uploadProfilePhoto: widget.uploadProfilePhoto,
+          submitSupportRequest: widget.submitSupportRequest,
         );
     }
   }

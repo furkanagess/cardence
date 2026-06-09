@@ -9,6 +9,7 @@ public sealed class UserProfileEntity
     public string? DisplayName { get; init; }
     public string? Email { get; init; }
     public string? Phone { get; init; }
+    public string? PhotoUrl { get; init; }
     public bool OnboardingCompleted { get; init; }
     public DateTime CreatedAt { get; init; }
     public IReadOnlyList<SavedCardDto> SavedCards { get; init; } = [];

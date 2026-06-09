@@ -23,6 +23,7 @@ class AddSavedCard {
         toSave = fromDb.copyWith(
           savedAt: savedAt,
           linkedEventGroupIds: card.linkedEventGroupIds,
+          origin: card.origin,
         );
       }
 
@@ -43,7 +44,7 @@ class AddSavedCard {
       }
       if (e.statusCode == 404 || e.errorCode == 'CARD_NOT_FOUND') {
         return AddSavedCardInvalidPayload(
-          'Kart bulunamadı. ID\'yi kontrol edin veya QR kodu okutun.',
+          'Kart bulunamadı. ID\'yi kontrol edin.',
         );
       }
       return AddSavedCardInvalidPayload(e.message);

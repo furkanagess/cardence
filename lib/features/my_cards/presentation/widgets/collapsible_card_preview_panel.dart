@@ -8,16 +8,12 @@ class CollapsibleCardPreviewPanel extends StatefulWidget {
   const CollapsibleCardPreviewPanel({
     super.key,
     required this.draft,
-    this.initiallyExpanded = true,
-    this.isLivePreview = false,
+    this.initiallyExpanded = false,
     this.emptyMessage = 'Bilgi girildikçe kartta görünür',
   });
 
   final OnboardingCardDraft draft;
   final bool initiallyExpanded;
-
-  /// Düzenleme ekranında canlı güncelleme rozeti ve kısa açıklama.
-  final bool isLivePreview;
   final String emptyMessage;
 
   @override
@@ -36,24 +32,15 @@ class _CollapsibleCardPreviewPanelState extends State<CollapsibleCardPreviewPane
 
   void _toggle() => setState(() => _expanded = !_expanded);
 
-  String? get _collapsedSubtitle {
-    final name = widget.draft.displayName?.trim();
-    final company = widget.draft.company?.trim();
-    if (name != null && name.isNotEmpty && company != null && company.isNotEmpty) {
-      return '$name · $company';
-    }
-    if (name != null && name.isNotEmpty) return name;
-    if (company != null && company.isNotEmpty) return company;
-    return widget.draft.cardName?.trim();
-  }
-
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final textTheme = theme.textTheme;
+    final pageColor = theme.scaffoldBackgroundColor;
 
     return Material(
-      color: colorScheme.surfaceContainerLowest,
+      color: pageColor,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -73,58 +60,13 @@ class _CollapsibleCardPreviewPanelState extends State<CollapsibleCardPreviewPane
                     ),
                     const SizedBox(width: 12),
                     Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Kart önizleme',
-                            style: textTheme.titleSmall?.copyWith(
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          if (!_expanded) ...[
-                            const SizedBox(height: 2),
-                            Text(
-                              _collapsedSubtitle?.isNotEmpty == true
-                                  ? _collapsedSubtitle!
-                                  : 'Önizlemeyi görmek için dokunun',
-                              style: textTheme.bodySmall?.copyWith(
-                                color: colorScheme.onSurfaceVariant,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ] else if (widget.isLivePreview) ...[
-                            const SizedBox(height: 2),
-                            Text(
-                              'Değişiklikler anında yansır',
-                              style: textTheme.bodySmall?.copyWith(
-                                color: colorScheme.onSurfaceVariant,
-                              ),
-                            ),
-                          ],
-                        ],
+                      child: Text(
+                        'Kart önizleme',
+                        style: textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ),
-                    if (widget.isLivePreview && _expanded)
-                      Container(
-                        margin: const EdgeInsets.only(right: 4),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          color: colorScheme.primaryContainer,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Text(
-                          'Canlı',
-                          style: textTheme.labelSmall?.copyWith(
-                            color: colorScheme.onPrimaryContainer,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
                     Icon(
                       _expanded
                           ? Icons.keyboard_arrow_up_rounded

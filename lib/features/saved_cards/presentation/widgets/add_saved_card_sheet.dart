@@ -4,11 +4,12 @@ import '../../domain/entities/saved_cards_wallet_quota.dart';
 
 /// Kart ekleme yöntemi seçimi.
 enum AddSavedCardMethod {
-  qrScan,
+  manualEntry,
+  physicalScan,
   cardId,
 }
 
-/// QR veya kart ID ile ekleme alt sayfası.
+/// Manuel giriş, fotoğraf veya kart ID ile ekleme alt sayfası.
 class AddSavedCardSheet extends StatelessWidget {
   const AddSavedCardSheet({
     super.key,
@@ -58,19 +59,31 @@ class AddSavedCardSheet extends StatelessWidget {
             ),
             const SizedBox(height: 20),
             _MethodTile(
-              icon: Icons.qr_code_scanner_rounded,
-              title: 'QR kod okut',
-              subtitle: 'Karşı tarafın paylaştığı Cardence QR\'ını tarayın',
+              icon: Icons.edit_note_outlined,
+              title: 'Bilgileri elle gir',
+              subtitle: 'Kartvizitteki ad, e-posta ve diğer bilgileri yazın',
               enabled: canAdd,
               onTap: canAdd
-                  ? () => Navigator.of(context).pop(AddSavedCardMethod.qrScan)
+                  ? () =>
+                      Navigator.of(context).pop(AddSavedCardMethod.manualEntry)
+                  : null,
+            ),
+            const SizedBox(height: 10),
+            _MethodTile(
+              icon: Icons.photo_camera_outlined,
+              title: 'Kartvizit fotoğrafla',
+              subtitle: 'Ön yüz zorunlu; arka yüz opsiyonel. Bilgiler otomatik okunur',
+              enabled: canAdd,
+              onTap: canAdd
+                  ? () =>
+                      Navigator.of(context).pop(AddSavedCardMethod.physicalScan)
                   : null,
             ),
             const SizedBox(height: 10),
             _MethodTile(
               icon: Icons.badge_outlined,
-              title: 'Kart ID veya kod yapıştır',
-              subtitle: 'Kart kimliği girin veya QR içeriğini yapıştırın',
+              title: 'Kart ID ile ekle',
+              subtitle: '6 haneli Cardence kart kimliğini girin',
               enabled: canAdd,
               onTap: canAdd
                   ? () => Navigator.of(context).pop(AddSavedCardMethod.cardId)

@@ -1,10 +1,12 @@
 import '../entities/card_share_payload.dart';
 import '../entities/saved_card.dart';
+import '../entities/saved_card_origin.dart';
 
 extension CardSharePayloadToSavedCard on CardSharePayload {
   SavedCard toSavedCard() {
     return SavedCard(
       cardId: id,
+      origin: SavedCardOrigin.cardence,
       displayName: n,
       email: e,
       phone: p,
@@ -15,6 +17,7 @@ extension CardSharePayloadToSavedCard on CardSharePayload {
       skills: s,
       school: o,
       about: h,
+      photoUrl: ph,
       savedAt: DateTime.now().millisecondsSinceEpoch,
     );
   }

@@ -1,0 +1,214 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
+import '../../../../core/theme/app_colors.dart';
+import '../../../../core/widgets/atoms/cardence_app_bar.dart';
+import '../../../../core/widgets/atoms/custom_button.dart';
+import '../../../../core/widgets/atoms/custom_text_field.dart';
+import '../../../../core/widgets/organisms/cardence_scaffold.dart';
+import '../../domain/usecases/submit_support_request.dart';
+import '../cubit/support_cubit.dart';
+import '../cubit/support_state.dart';
+import '../widgets/support_topic_selector.dart';
+
+class SupportPage extends StatelessWidget {
+  const SupportPage({
+    super.key,
+    required this.submitSupportRequest,
+    this.initialEmail,
+  });
+
+  final SubmitSupportRequest submitSupportRequest;
+  final String? initialEmail;
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (_) => SupportCubit(
+        submitSupportRequest: submitSupportRequest,
+        initialEmail: initialEmail,
+      ),
+      child: const _SupportView(),
+    );
+  }
+}
+
+class _SupportView extends StatefulWidget {
+  const _SupportView();
+
+  @override
+  State<_SupportView> createState() => _SupportViewState();
+}
+
+class _SupportViewState extends State<_SupportView> {
+  late final TextEditingController _emailController;
+  late final TextEditingController _messageController;
+
+  @override
+  void initState() {
+    super.initState();
+    final initialEmail = context.read<SupportCubit>().state.email;
+    _emailController = TextEditingController(text: initialEmail);
+    _messageController = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _messageController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocListener<SupportCubit, SupportState>(
+      listenWhen: (prev, curr) => prev.status != curr.status,
+      listener: (context, state) {
+        if (state.status == SupportStatus.success) {
+          ScaffoldMessenger.of(context)
+            ..hideCurrentSnackBar()
+            ..showSnackBar(
+              const SnackBar(
+                content: Text('Destek talebiniz alındı. En kısa sürede dönüş yapacağız.'),
+                behavior: SnackBarBehavior.floating,
+              ),
+            );
+          Navigator.of(context).pop();
+        }
+        if (state.status == SupportStatus.failure && state.errorMessage != null) {
+          ScaffoldMessenger.of(context)
+            ..hideCurrentSnackBar()
+            ..showSnackBar(
+              SnackBar(
+                content: Text(state.errorMessage!),
+                behavior: SnackBarBehavior.floating,
+              ),
+            );
+        }
+      },
+      child: CardenceScaffold(
+        resizeToAvoidBottomInset: true,
+        appBar: const CardenceAppBar(title: 'Destek'),
+        body: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
+            child: BlocBuilder<SupportCubit, SupportState>(
+              builder: (context, state) {
+                final cubit = context.read<SupportCubit>();
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    _SupportIntroCard(),
+                    const SizedBox(height: 20),
+                    Expanded(
+                      child: SingleChildScrollView(
+                        keyboardDismissBehavior:
+                            ScrollViewKeyboardDismissBehavior.onDrag,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            CustomTextField(
+                              controller: _emailController,
+                              labelText: 'E-posta',
+                              hintText: 'ornek@mail.com',
+                              keyboardType: TextInputType.emailAddress,
+                              textInputAction: TextInputAction.next,
+                              onChanged: cubit.setEmail,
+                            ),
+                            const SizedBox(height: 16),
+                            SupportTopicSelector(
+                              selected: state.topic,
+                              onChanged: cubit.setTopic,
+                            ),
+                            const SizedBox(height: 16),
+                            CustomTextField(
+                              controller: _messageController,
+                              labelText: 'Mesajınız',
+                              hintText: 'Sorununuzu veya talebinizi kısaca açıklayın…',
+                              minLines: 5,
+                              maxLines: 8,
+                              maxLength: 2000,
+                              textInputAction: TextInputAction.newline,
+                              onChanged: cubit.setMessage,
+                              helperText: 'En az 10 karakter',
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    CustomButton(
+                      label: 'Talebi gönder',
+                      icon: Icons.send_rounded,
+                      isLoading: state.isSubmitting,
+                      enabled: state.canSubmit,
+                      onPressed: () => cubit.submit(),
+                    ),
+                  ],
+                );
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _SupportIntroCard extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: colorScheme.primaryContainer.withValues(alpha: 0.55),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: colorScheme.outline.withValues(alpha: 0.25),
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              color: colorScheme.primary.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: const Icon(
+              Icons.support_agent_rounded,
+              color: AppColors.primary,
+            ),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Size yardımcı olalım',
+                  style: textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w700,
+                    color: colorScheme.onSurface,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'E-postanızı, konuyu ve kısa bir not bırakın; ekibimiz talebinizi inceleyecek.',
+                  style: textTheme.bodySmall?.copyWith(
+                    color: colorScheme.onSurfaceVariant,
+                    height: 1.35,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}

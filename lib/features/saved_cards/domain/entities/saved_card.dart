@@ -1,7 +1,10 @@
-/// Başka kullanıcıdan QR/ID ile alınıp kaydedilen kart (framework yok).
+import 'saved_card_origin.dart';
+
+/// Başka kullanıcıdan ID ile veya manuel olarak kaydedilen kart (framework yok).
 class SavedCard {
   const SavedCard({
     required this.cardId,
+    this.origin = SavedCardOrigin.cardence,
     this.displayName,
     this.email,
     this.phone,
@@ -12,11 +15,15 @@ class SavedCard {
     this.skills,
     this.school,
     this.about,
+    this.photoUrl,
     this.savedAt,
+    this.frontImagePath,
+    this.backImagePath,
     List<String>? linkedEventGroupIds,
   }) : linkedEventGroupIds = linkedEventGroupIds ?? const [];
 
   final String cardId;
+  final SavedCardOrigin origin;
   final String? displayName;
   final String? email;
   final String? phone;
@@ -27,13 +34,23 @@ class SavedCard {
   final String? skills;
   final String? school;
   final String? about;
+  final String? photoUrl;
   /// Kaydedilme zamanı (ms since epoch).
   final int? savedAt;
+  /// Yerel fiziksel kartvizit ön yüz fotoğrafı (yalnızca cihazda).
+  final String? frontImagePath;
+  /// Yerel fiziksel kartvizit arka yüz fotoğrafı (yalnızca cihazda).
+  final String? backImagePath;
   /// Bağlı etkinlik grubu id'leri.
   final List<String> linkedEventGroupIds;
 
+  bool get isManualEntry => origin == SavedCardOrigin.manual;
+
+  bool get isCardenceLinked => origin == SavedCardOrigin.cardence;
+
   SavedCard copyWith({
     String? cardId,
+    SavedCardOrigin? origin,
     String? displayName,
     String? email,
     String? phone,
@@ -45,11 +62,15 @@ class SavedCard {
     String? school,
     String? about,
     bool clearAbout = false,
+    String? photoUrl,
     int? savedAt,
+    String? frontImagePath,
+    String? backImagePath,
     List<String>? linkedEventGroupIds,
   }) {
     return SavedCard(
       cardId: cardId ?? this.cardId,
+      origin: origin ?? this.origin,
       displayName: displayName ?? this.displayName,
       email: email ?? this.email,
       phone: phone ?? this.phone,
@@ -60,7 +81,10 @@ class SavedCard {
       skills: skills ?? this.skills,
       school: school ?? this.school,
       about: clearAbout ? null : (about ?? this.about),
+      photoUrl: photoUrl ?? this.photoUrl,
       savedAt: savedAt ?? this.savedAt,
+      frontImagePath: frontImagePath ?? this.frontImagePath,
+      backImagePath: backImagePath ?? this.backImagePath,
       linkedEventGroupIds: linkedEventGroupIds ?? this.linkedEventGroupIds,
     );
   }

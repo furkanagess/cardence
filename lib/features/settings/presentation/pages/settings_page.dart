@@ -5,20 +5,36 @@ import '../../../../core/widgets/atoms/cardence_app_bar.dart';
 import '../../../../core/widgets/atoms/custom_button.dart';
 import '../../../../core/widgets/molecules/cardence_confirm_dialog.dart';
 import '../../../../core/widgets/organisms/cardence_scaffold.dart';
+import '../../../auth/domain/usecases/upload_profile_photo.dart';
 import '../../domain/entities/theme_preference.dart';
+import '../widgets/settings_menu_tile.dart';
+import '../widgets/settings_profile_header.dart';
+import '../widgets/settings_theme_selector.dart';
 
-/// Ayarlar sayfası – tema değişimi ve çıkış.
+/// Ayarlar sayfası – tema, destek ve çıkış.
 class SettingsPage extends StatefulWidget {
   const SettingsPage({
     super.key,
     required this.currentTheme,
     required this.onThemeChanged,
     required this.onLogout,
+    required this.onOpenSupport,
+    required this.uploadProfilePhoto,
+    this.userDisplayName,
+    this.userEmail,
+    this.userPhotoUrl,
+    this.onPhotoUpdated,
   });
 
   final ThemePreference currentTheme;
   final ValueChanged<ThemePreference> onThemeChanged;
   final Future<void> Function() onLogout;
+  final VoidCallback onOpenSupport;
+  final UploadProfilePhoto uploadProfilePhoto;
+  final String? userDisplayName;
+  final String? userEmail;
+  final String? userPhotoUrl;
+  final ValueChanged<String?>? onPhotoUpdated;
 
   @override
   State<SettingsPage> createState() => _SettingsPageState();
@@ -51,52 +67,60 @@ class _SettingsPageState extends State<SettingsPage> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    final displayName = widget.userDisplayName?.trim();
+    final email = widget.userEmail?.trim();
+
     return CardenceScaffold(
       appBar: const CardenceAppBar(
         title: 'Ayarlar',
       ),
-      body: Column(
-        children: [
-          Expanded(
-            child: ListView(
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              children: [
-                Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  child: Text(
-                    'Görünüm',
-                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                          color: AppColors.textSecondary,
-                          fontWeight: FontWeight.w600,
-                        ),
-                  ),
-                ),
-                _ThemeTile(
-                  title: 'Açık tema',
-                  subtitle: 'Her zaman açık renk teması',
-                  value: widget.currentTheme == ThemePreference.light,
-                  onTap: () => widget.onThemeChanged(ThemePreference.light),
-                ),
-                _ThemeTile(
-                  title: 'Koyu tema',
-                  subtitle: 'Her zaman koyu renk teması',
-                  value: widget.currentTheme == ThemePreference.dark,
-                  onTap: () => widget.onThemeChanged(ThemePreference.dark),
-                ),
-                _ThemeTile(
-                  title: 'Sistem',
-                  subtitle: 'Cihaz ayarına göre (açık/koyu)',
-                  value: widget.currentTheme == ThemePreference.system,
-                  onTap: () => widget.onThemeChanged(ThemePreference.system),
-                ),
-              ],
+      body: Padding(
+        padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            SettingsProfileHeader(
+              displayName: (displayName == null || displayName.isEmpty)
+                  ? 'Cardence kullanıcısı'
+                  : displayName,
+              email: email,
+              photoUrl: widget.userPhotoUrl,
+              uploadProfilePhoto: widget.uploadProfilePhoto,
+              onPhotoUpdated: widget.onPhotoUpdated,
             ),
-          ),
-          SafeArea(
-            top: false,
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+            const SizedBox(height: 24),
+            Text(
+              'Görünüm',
+              style: textTheme.titleSmall?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 12),
+            SettingsThemeSelector(
+              current: widget.currentTheme,
+              onChanged: widget.onThemeChanged,
+            ),
+            const SizedBox(height: 24),
+            Text(
+              'Yardım',
+              style: textTheme.titleSmall?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 12),
+            SettingsMenuTile(
+              icon: Icons.support_agent_rounded,
+              title: 'Destek',
+              subtitle: 'Sorun bildir veya öneri gönder',
+              onTap: widget.onOpenSupport,
+            ),
+            const Spacer(),
+            SafeArea(
+              top: false,
               child: CustomButton(
                 label: 'Çıkış yap',
                 icon: Icons.logout_rounded,
@@ -109,36 +133,9 @@ class _SettingsPageState extends State<SettingsPage> {
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
-    );
-  }
-}
-
-class _ThemeTile extends StatelessWidget {
-  const _ThemeTile({
-    required this.title,
-    required this.subtitle,
-    required this.value,
-    required this.onTap,
-  });
-
-  final String title;
-  final String subtitle;
-  final bool value;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return ListTile(
-      title: Text(title),
-      subtitle: Text(subtitle),
-      trailing: value
-          ? Icon(Icons.check_circle,
-              color: Theme.of(context).colorScheme.primary)
-          : null,
-      onTap: onTap,
     );
   }
 }

@@ -17,6 +17,7 @@ class BusinessCardToDraftMapper {
       skills: card.skills,
       school: card.school,
       about: card.about,
+      photoUrl: card.photoUrl,
       accentColor: card.accentColor,
       backgroundColor: card.backgroundColor,
       lastUsedPaletteBackgroundColor: card.lastUsedPaletteBackgroundColor,

@@ -122,4 +122,37 @@ public sealed class AuthenticationController : ControllerBase
         var response = await _authService.CompleteOnboardingAsync(userId, cancellationToken);
         return Ok(response);
     }
+
+    [Authorize]
+    [HttpPost("UploadProfilePhoto")]
+    [RequestSizeLimit(5 * 1024 * 1024)]
+    [ProducesResponseType(typeof(AuthServiceResponse<UserProfileEntity>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<AuthServiceResponse<UserProfileEntity>>> UploadProfilePhoto(
+        IFormFile photo,
+        CancellationToken cancellationToken)
+    {
+        if (photo is null || photo.Length == 0)
+        {
+            return BadRequest(AuthServiceResponse<UserProfileEntity>.Fail(
+                400,
+                "InvalidPhoto",
+                "Profil fotoğrafı seçilmedi."));
+        }
+
+        var userId = _currentUserService.GetRequiredUserId();
+        await using var stream = photo.OpenReadStream();
+        var response = await _authService.UploadProfilePhotoAsync(
+            userId,
+            stream,
+            photo.ContentType,
+            photo.Length,
+            cancellationToken);
+
+        if (!response.Success)
+        {
+            return BadRequest(response);
+        }
+
+        return Ok(response);
+    }
 }

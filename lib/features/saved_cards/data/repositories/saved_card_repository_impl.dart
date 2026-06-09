@@ -76,8 +76,13 @@ class SavedCardRepositoryImpl implements SavedCardRepository {
       SavedCardModel.fromEntity(card).toJson(),
       accessToken: token,
     );
-    await _local.saveCard(saved);
-    return saved.toEntity();
+    final merged = saved.toEntity().copyWith(
+      origin: card.origin,
+      frontImagePath: card.frontImagePath,
+      backImagePath: card.backImagePath,
+    );
+    await _local.saveCard(SavedCardModel.fromEntity(merged));
+    return merged;
   }
 
   @override
@@ -87,7 +92,12 @@ class SavedCardRepositoryImpl implements SavedCardRepository {
       SavedCardModel.fromEntity(card).toJson(),
       accessToken: token,
     );
-    await _local.saveCard(updated);
+    final merged = updated.toEntity().copyWith(
+      origin: card.origin,
+      frontImagePath: card.frontImagePath,
+      backImagePath: card.backImagePath,
+    );
+    await _local.saveCard(SavedCardModel.fromEntity(merged));
   }
 
   @override

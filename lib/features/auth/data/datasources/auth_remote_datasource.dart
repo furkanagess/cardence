@@ -1,3 +1,5 @@
+import 'package:dio/dio.dart';
+
 import '../../../../core/network/api_response_parser.dart';
 import '../../../../core/network/auth_api_exception.dart';
 import '../../../../core/network/dio_api_client.dart';
@@ -38,6 +40,11 @@ abstract class AuthRemoteDataSource {
   Future<UserProfileModel> getMe(String accessToken);
 
   Future<UserProfileModel> completeOnboarding(String accessToken);
+
+  Future<UserProfileModel> uploadProfilePhoto({
+    required String filePath,
+    required String accessToken,
+  });
 }
 
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
@@ -187,6 +194,23 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       '/CompleteOnboarding',
       accessToken: accessToken,
       fallbackError: 'Profil bilgisi alınamadı.',
+    );
+    return _parseProfile(json);
+  }
+
+  @override
+  Future<UserProfileModel> uploadProfilePhoto({
+    required String filePath,
+    required String accessToken,
+  }) async {
+    final formData = FormData.fromMap({
+      'photo': await MultipartFile.fromFile(filePath),
+    });
+    final json = await _client.postMultipart(
+      '/UploadProfilePhoto',
+      formData: formData,
+      accessToken: accessToken,
+      fallbackError: 'Profil fotoğrafı yüklenemedi.',
     );
     return _parseProfile(json);
   }

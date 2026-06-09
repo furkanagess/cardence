@@ -18,6 +18,8 @@ import '../../domain/entities/saved_card.dart';
 import '../../domain/usecases/delete_saved_card.dart';
 import '../../domain/usecases/get_saved_cards.dart';
 import '../../domain/usecases/save_saved_card.dart';
+import '../widgets/saved_card_origin_badge.dart';
+import '../widgets/saved_cards_physical_photo_preview.dart';
 
 /// Kaydedilen bir kisinin tam detay ekrani: onizleme, hizli aksiyonlar, tum alanlar.
 class SavedCardDetailPage extends StatefulWidget {
@@ -590,17 +592,26 @@ class _SavedCardDetailPageState extends State<SavedCardDetailPage> {
     final companyName = _card.company?.trim();
     final hasNote = _has(_card.about);
 
-    final preview = FlippablePersonCard(
-      title: _displayName,
-      titleSecondary: companyName,
-      frontEntries: _previewFrontEntries,
-      backEntries: _previewBackEntries,
-      emptyMessage: 'Kart bilgisi yok',
-      backEmptyMessage: 'Bu kişi için not bulunmuyor.',
-      backEmptyActionLabel: 'Not ekle',
-      onBackEmptyActionTap: _openNoteEditor,
-      onBackEditTap: hasNote ? _openNoteEditor : null,
-    );
+    final frontPhoto = _card.frontImagePath?.trim();
+    final hasPhysicalPhoto = frontPhoto != null && frontPhoto.isNotEmpty;
+
+    final preview = hasPhysicalPhoto
+        ? SavedCardsPhysicalPhotoPreview(
+            frontImagePath: frontPhoto,
+            backImagePath: _card.backImagePath,
+          )
+        : FlippablePersonCard(
+            title: _displayName,
+            titleSecondary: companyName,
+            photoUrl: _card.photoUrl,
+            frontEntries: _previewFrontEntries,
+            backEntries: _previewBackEntries,
+            emptyMessage: 'Kart bilgisi yok',
+            backEmptyMessage: 'Bu kişi için not bulunmuyor.',
+            backEmptyActionLabel: 'Not ekle',
+            onBackEmptyActionTap: _openNoteEditor,
+            onBackEditTap: hasNote ? _openNoteEditor : null,
+          );
 
     final bottomInset = _deleteBarInset(context);
 
@@ -624,6 +635,11 @@ class _SavedCardDetailPageState extends State<SavedCardDetailPage> {
             )
           else
             preview,
+          const SizedBox(height: 12),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: SavedCardOriginBadge(origin: _card.origin),
+          ),
           const SizedBox(height: 20),
           if (showQuickActions)
             _QuickActionsRow(

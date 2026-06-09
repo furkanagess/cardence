@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/widgets/atoms/cardence_app_bar.dart';
@@ -17,9 +18,14 @@ import '../../../profile/presentation/pages/profile_page.dart';
 import '../../../onboarding/domain/usecases/get_onboarding_draft_card.dart';
 import '../../../onboarding/domain/usecases/get_onboarding_draft_cards.dart';
 import '../../../business_cards/domain/usecases/persist_onboarding_card.dart';
+import '../../../saved_cards/presentation/cubit/saved_cards_cubit.dart';
 import '../../../saved_cards/presentation/pages/saved_cards_page.dart';
+import '../../../auth/domain/usecases/get_current_user.dart';
+import '../../../auth/domain/usecases/upload_profile_photo.dart';
 import '../../../settings/domain/entities/theme_preference.dart';
 import '../../../settings/presentation/pages/settings_page.dart';
+import '../../../support/domain/usecases/submit_support_request.dart';
+import '../../../support/presentation/pages/support_page.dart';
 
 /// Ana kabuk: 2 ekran bottom nav ile (ikon only); Ayarlar AppBar'dan.
 class MainShellPage extends StatefulWidget {
@@ -36,9 +42,12 @@ class MainShellPage extends StatefulWidget {
     required this.addSavedCard,
     required this.deleteSavedCard,
     required this.upgradeWalletPlan,
+    required this.getCurrentUser,
     required this.themePreference,
     required this.onThemeChanged,
     required this.onLogout,
+    required this.uploadProfilePhoto,
+    required this.submitSupportRequest,
   });
 
   final GetOnboardingDraftCard getOnboardingDraftCard;
@@ -52,9 +61,12 @@ class MainShellPage extends StatefulWidget {
   final AddSavedCard addSavedCard;
   final DeleteSavedCard deleteSavedCard;
   final UpgradeWalletPlan upgradeWalletPlan;
+  final GetCurrentUser getCurrentUser;
   final ThemePreference themePreference;
   final ValueChanged<ThemePreference> onThemeChanged;
   final Future<void> Function() onLogout;
+  final UploadProfilePhoto uploadProfilePhoto;
+  final SubmitSupportRequest submitSupportRequest;
 
   @override
   State<MainShellPage> createState() => _MainShellPageState();
@@ -125,20 +137,28 @@ class _MainShellPageState extends State<MainShellPage> {
       body: IndexedStack(
         index: _currentIndex,
         children: [
-          SavedCardsPage(
-            getSavedCards: widget.getSavedCards,
-            saveSavedCard: widget.saveSavedCard,
-            getEventGroups: widget.getEventGroups,
-            saveEventGroups: widget.saveEventGroups,
-            getSavedCardsWalletQuota: widget.getSavedCardsWalletQuota,
-            addSavedCard: widget.addSavedCard,
-            deleteSavedCard: widget.deleteSavedCard,
-            upgradeWalletPlan: widget.upgradeWalletPlan,
-            showFlippableView: _showSavedCardsFlippableView,
-            onViewModeChanged: (flippable) =>
-                setState(() => _showSavedCardsFlippableView = flippable),
-            filterTrigger: _savedCardsFilterTrigger,
-            addCardTrigger: _savedCardsAddCardTrigger,
+          BlocProvider(
+            create: (_) => SavedCardsCubit(
+              getSavedCards: widget.getSavedCards,
+              saveSavedCard: widget.saveSavedCard,
+              getEventGroups: widget.getEventGroups,
+              getSavedCardsWalletQuota: widget.getSavedCardsWalletQuota,
+              upgradeWalletPlan: widget.upgradeWalletPlan,
+            )..load(),
+            child: SavedCardsPage(
+              getEventGroups: widget.getEventGroups,
+              getSavedCards: widget.getSavedCards,
+              saveEventGroups: widget.saveEventGroups,
+              saveSavedCard: widget.saveSavedCard,
+              deleteSavedCard: widget.deleteSavedCard,
+              addSavedCard: widget.addSavedCard,
+              upgradeWalletPlan: widget.upgradeWalletPlan,
+              showFlippableView: _showSavedCardsFlippableView,
+              onViewModeChanged: (flippable) =>
+                  setState(() => _showSavedCardsFlippableView = flippable),
+              filterTrigger: _savedCardsFilterTrigger,
+              addCardTrigger: _savedCardsAddCardTrigger,
+            ),
           ),
           EventGroupsPage(
             getEventGroups: widget.getEventGroups,
@@ -171,13 +191,33 @@ class _MainShellPageState extends State<MainShellPage> {
     );
   }
 
-  void _openSettings(BuildContext context) {
+  Future<void> _openSettings(BuildContext context) async {
+    final user = await widget.getCurrentUser();
+    if (!context.mounted) return;
+
     Navigator.of(context).push(
       MaterialPageRoute<void>(
         builder: (context) => SettingsPage(
           currentTheme: widget.themePreference,
           onThemeChanged: widget.onThemeChanged,
           onLogout: widget.onLogout,
+          userDisplayName: user.displayName,
+          userEmail: user.email,
+          userPhotoUrl: user.photoUrl,
+          uploadProfilePhoto: widget.uploadProfilePhoto,
+          onPhotoUpdated: (_) => _loadMyCardDraft(),
+          onOpenSupport: () => _openSupport(context, user.email),
+        ),
+      ),
+    );
+  }
+
+  void _openSupport(BuildContext context, String? initialEmail) {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (context) => SupportPage(
+          submitSupportRequest: widget.submitSupportRequest,
+          initialEmail: initialEmail,
         ),
       ),
     );

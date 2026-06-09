@@ -16,6 +16,7 @@ class OnboardingCardDraftModel {
     this.skills,
     this.school,
     this.about,
+    this.photoUrl,
     List<String>? visibleFields,
     List<String>? frontVisibleFields,
     List<String>? backVisibleFields,
@@ -40,6 +41,7 @@ class OnboardingCardDraftModel {
   final String? skills;
   final String? school;
   final String? about;
+  final String? photoUrl;
   final List<String> visibleFields;
   final List<String> frontVisibleFields;
   final List<String> backVisibleFields;
@@ -65,6 +67,7 @@ class OnboardingCardDraftModel {
       skills: entity.skills,
       school: entity.school,
       about: entity.about,
+      photoUrl: entity.photoUrl,
       visibleFields: union,
       frontVisibleFields: front,
       backVisibleFields: back,
@@ -89,6 +92,7 @@ class OnboardingCardDraftModel {
       skills: skills,
       school: school,
       about: about,
+      photoUrl: photoUrl,
       visibleFields: List.from(visibleFields),
       frontVisibleFields: List.from(frontVisibleFields),
       backVisibleFields: List.from(backVisibleFields),
@@ -113,6 +117,7 @@ class OnboardingCardDraftModel {
       'skills': skills,
       'school': school,
       'about': about,
+      'photoUrl': photoUrl,
       'visibleFields': visibleFields,
       'frontVisibleFields': frontVisibleFields,
       'backVisibleFields': backVisibleFields,
@@ -162,6 +167,7 @@ class OnboardingCardDraftModel {
       skills: json['skills'] as String?,
       school: json['school'] as String?,
       about: json['about'] as String?,
+      photoUrl: json['photoUrl'] as String?,
       visibleFields: visibleFields,
       frontVisibleFields: front,
       backVisibleFields: back,

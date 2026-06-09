@@ -46,7 +46,9 @@
 		<key>UIApplicationSupportsIndirectInputEvents</key>
 		<true/>
 		<key>NSCameraUsageDescription</key>
-		<string>Kart QR kodunu okutmak için kamera kullanılır.</string>
+		<string>Fiziksel kartvizit fotoğrafı çekmek için kamera kullanılır.</string>
+		<key>NSPhotoLibraryUsageDescription</key>
+		<string>Kartvizit fotoğrafı seçmek için galeri erişimi gerekir.</string>
 		<key>UIStatusBarHidden</key>
 		<false/>
 		<key>NSAppTransportSecurity</key>

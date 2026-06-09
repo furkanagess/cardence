@@ -198,6 +198,27 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
+  Future<UserProfile> uploadProfilePhoto(String filePath) async {
+    final session = await getStoredSession();
+    if (session == null || !session.isValid) {
+      throw AuthApiException('Oturum bulunamadı. Lütfen tekrar giriş yapın.');
+    }
+
+    final profile = await _remote.uploadProfilePhoto(
+      filePath: filePath,
+      accessToken: session.accessToken,
+    );
+    final entity = profile.toEntity();
+    final enriched = _mergeProfile(
+      AuthSessionModel.fromEntity(session),
+      entity,
+    );
+    await _local.saveSession(enriched);
+    await _onProfileSynced?.call(entity);
+    return entity;
+  }
+
+  @override
   Future<void> completeOnboardingOnServer() async {
     final session = await getStoredSession();
     if (session == null || !session.isValid) {

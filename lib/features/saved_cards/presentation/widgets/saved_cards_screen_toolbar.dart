@@ -11,7 +11,6 @@ class SavedCardsScreenToolbar extends StatelessWidget {
     required this.activeFilterCount,
     required this.onViewModeChanged,
     required this.onOpenFilters,
-    required this.onClearFilters,
   });
 
   final bool showFlippableView;
@@ -19,7 +18,6 @@ class SavedCardsScreenToolbar extends StatelessWidget {
   final int activeFilterCount;
   final ValueChanged<bool> onViewModeChanged;
   final VoidCallback onOpenFilters;
-  final VoidCallback onClearFilters;
 
   @override
   Widget build(BuildContext context) {
@@ -51,39 +49,27 @@ class SavedCardsScreenToolbar extends StatelessWidget {
               ),
             ),
           ),
-          const SizedBox(width: 10),
-          FilterChip(
-            label: Text(
-              hasActiveFilters ? 'Filtre ($activeFilterCount)' : 'Filtrele',
-            ),
-            avatar: Icon(
-              Icons.tune_rounded,
-              size: 18,
-              color: hasActiveFilters
-                  ? colorScheme.onPrimaryContainer
-                  : colorScheme.onSurfaceVariant,
-            ),
-            selected: hasActiveFilters,
-            showCheckmark: false,
-            onSelected: (_) => onOpenFilters(),
-            selectedColor: AppColors.primary.withValues(alpha: 0.14),
-            side: BorderSide(
-              color: hasActiveFilters
-                  ? AppColors.primary.withValues(alpha: 0.45)
-                  : colorScheme.outlineVariant,
-            ),
-          ),
-          if (hasActiveFilters) ...[
-            const SizedBox(width: 4),
-            IconButton(
-              tooltip: 'Filtreleri temizle',
-              onPressed: onClearFilters,
-              icon: const Icon(Icons.close_rounded, size: 20),
-              style: IconButton.styleFrom(
-                visualDensity: VisualDensity.compact,
+          IconButton(
+            tooltip: hasActiveFilters
+                ? 'Filtre ($activeFilterCount)'
+                : 'Filtrele',
+            onPressed: onOpenFilters,
+            icon: Badge(
+              isLabelVisible: hasActiveFilters,
+              label: Text('$activeFilterCount'),
+              backgroundColor: AppColors.primary,
+              textColor: AppColors.textOnPrimary,
+              child: Icon(
+                Icons.tune_rounded,
+                color: hasActiveFilters
+                    ? AppColors.primary
+                    : colorScheme.onSurfaceVariant,
               ),
             ),
-          ],
+            style: IconButton.styleFrom(
+              visualDensity: VisualDensity.compact,
+            ),
+          ),
         ],
       ),
     );

@@ -27,6 +27,9 @@ class OnboardingDraftMapper {
           ? draft.school!.trim()
           : null,
       about: draft.about?.trim().isNotEmpty == true ? draft.about!.trim() : null,
+      photoUrl: draft.photoUrl?.trim().isNotEmpty == true
+          ? draft.photoUrl!.trim()
+          : null,
       accentColor: draft.accentColor,
       backgroundColor: draft.backgroundColor,
       lastUsedPaletteBackgroundColor: draft.lastUsedPaletteBackgroundColor,

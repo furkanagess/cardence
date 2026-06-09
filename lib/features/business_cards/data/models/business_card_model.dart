@@ -13,6 +13,7 @@ class BusinessCardModel {
     this.skills,
     this.school,
     this.about,
+    this.photoUrl,
     this.accentColor,
     this.backgroundColor,
     this.lastUsedPaletteBackgroundColor,
@@ -30,6 +31,7 @@ class BusinessCardModel {
   final String? skills;
   final String? school;
   final String? about;
+  final String? photoUrl;
   final String? accentColor;
   final String? backgroundColor;
   final String? lastUsedPaletteBackgroundColor;
@@ -48,6 +50,7 @@ class BusinessCardModel {
       skills: entity.skills,
       school: entity.school,
       about: entity.about,
+      photoUrl: entity.photoUrl,
       accentColor: entity.accentColor,
       backgroundColor: entity.backgroundColor,
       lastUsedPaletteBackgroundColor: entity.lastUsedPaletteBackgroundColor,
@@ -67,6 +70,7 @@ class BusinessCardModel {
         skills: skills,
         school: school,
         about: about,
+        photoUrl: photoUrl,
         accentColor: accentColor,
         backgroundColor: backgroundColor,
         lastUsedPaletteBackgroundColor: lastUsedPaletteBackgroundColor,
@@ -86,6 +90,7 @@ class BusinessCardModel {
       'skills': skills,
       'school': school,
       'about': about,
+      'photoUrl': photoUrl,
       'accentColor': accentColor,
       'backgroundColor': backgroundColor,
       'lastUsedPaletteBackgroundColor': lastUsedPaletteBackgroundColor,
@@ -108,6 +113,7 @@ class BusinessCardModel {
       skills: json['skills']?.toString(),
       school: json['school']?.toString(),
       about: json['about']?.toString(),
+      photoUrl: json['photoUrl']?.toString(),
       accentColor: json['accentColor']?.toString(),
       backgroundColor: json['backgroundColor']?.toString(),
       lastUsedPaletteBackgroundColor:

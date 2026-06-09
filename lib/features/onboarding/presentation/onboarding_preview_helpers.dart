@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/widgets/organisms/flippable_person_card.dart';
 import '../../../../core/widgets/organisms/person_info_card.dart';
+import '../../my_cards/presentation/widgets/my_card_preview_helpers.dart';
 import '../domain/entities/onboarding_card_draft.dart';
 
 /// Onboarding önizlemesi için kart girişleri.
@@ -68,6 +69,9 @@ class OnboardingPreviewHelpers {
         entries: frontEntries(draft),
         emptyMessage: 'Alanlar doldukça görünür',
         compact: true,
+        accentColor: MyCardPreviewHelpers.parseHexColor(draft.accentColor),
+        backgroundColor: MyCardPreviewHelpers.parseHexColor(draft.backgroundColor),
+        photoUrl: draft.photoUrl,
       ),
     );
   }

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../atoms/card_watermark.dart';
 import '../atoms/custom_button.dart';
+import '../atoms/profile_avatar.dart';
 
 /// Kişi / iletişim kartı: tema ile uyumlu, profesyonel ve üç boyutlu görünüm.
 /// [compact] true olduğunda kartvizit oranında sıkı yerleşim kullanılır.
@@ -18,6 +20,9 @@ class PersonInfoCard extends StatelessWidget {
     this.fillHeight = false,
     this.accentColor,
     this.backgroundColor,
+    this.photoUrl,
+    this.showAppLogo = true,
+    this.titleRightInset = 0,
   });
 
   /// Kartın üstünde vurgulanan isim / başlık.
@@ -44,6 +49,15 @@ class PersonInfoCard extends StatelessWidget {
 
   /// Kart arka plan rengi. null ise tema surface kullanılır; verilirse metin kontrastı otomatik ayarlanır.
   final Color? backgroundColor;
+
+  /// Kişi profil fotoğrafı URL'si.
+  final String? photoUrl;
+
+  /// Başlık satırının sağında Cardence logosu gösterilir.
+  final bool showAppLogo;
+
+  /// Flip butonu gibi üst sağ öğeler için ek sağ boşluk.
+  final double titleRightInset;
 
   /// Arka plan rengine göre okunabilir metin rengi (koyu arka plan → açık metin).
   static Color _onSurfaceForBackground(Color bg) {
@@ -125,44 +139,76 @@ class PersonInfoCard extends StatelessWidget {
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(radius - 2),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          mainAxisSize: MainAxisSize.max,
+        child: Stack(
+          clipBehavior: Clip.hardEdge,
           children: [
-            if (hasTitle) ...[
-              Container(
-                width: double.infinity,
-                padding: EdgeInsets.fromLTRB(
-                  paddingH,
-                  paddingTitleTop,
-                  paddingH,
-                  hasEntries ? titleBottomGap : (compact ? 6 : 10),
-                ),
-                child: RichText(
-                  maxLines: compact ? 1 : 2,
-                  overflow: TextOverflow.ellipsis,
-                  text: TextSpan(
-                    text: title!,
-                    style: (compact ? textTheme.titleMedium : textTheme.headlineSmall)?.copyWith(
-                      fontWeight: FontWeight.w700,
-                      color: onSurface,
-                      letterSpacing: compact ? 0 : -0.25,
-                    ),
-                    children: hasSecondaryTitle
-                        ? [
-                            TextSpan(
-                              text: ' • ${titleSecondary!.trim()}',
-                              style: (compact ? textTheme.bodySmall : textTheme.bodyMedium)
-                                  ?.copyWith(
-                                color: onSurfaceVariant,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ]
-                        : const [],
-                  ),
+            if (showAppLogo)
+              Positioned(
+                top: compact ? -18 : -12,
+                right: (compact ? 2 : 8) + titleRightInset,
+                child: CardenceCardCornerWatermark(
+                  surfaceColor: surfaceColor,
+                  compact: compact,
                 ),
               ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              mainAxisSize: MainAxisSize.max,
+              children: [
+                if (hasTitle) ...[
+                  Container(
+                    width: double.infinity,
+                    padding: EdgeInsets.fromLTRB(
+                      paddingH,
+                      paddingTitleTop,
+                      paddingH + titleRightInset,
+                      hasEntries ? titleBottomGap : (compact ? 6 : 10),
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        if (photoUrl != null && photoUrl!.trim().isNotEmpty) ...[
+                          ProfileAvatar(
+                            photoUrl: photoUrl,
+                            displayName: title,
+                            size: compact ? 44 : 56,
+                          ),
+                          SizedBox(width: compact ? 10 : 14),
+                        ],
+                        Expanded(
+                          child: RichText(
+                            maxLines: compact ? 1 : 2,
+                            overflow: TextOverflow.ellipsis,
+                            text: TextSpan(
+                              text: title!,
+                              style: (compact
+                                      ? textTheme.titleMedium
+                                      : textTheme.headlineSmall)
+                                  ?.copyWith(
+                                fontWeight: FontWeight.w700,
+                                color: onSurface,
+                                letterSpacing: compact ? 0 : -0.25,
+                              ),
+                              children: hasSecondaryTitle
+                                  ? [
+                                      TextSpan(
+                                        text: ' • ${titleSecondary!.trim()}',
+                                        style: (compact
+                                                ? textTheme.bodySmall
+                                                : textTheme.bodyMedium)
+                                            ?.copyWith(
+                                          color: onSurfaceVariant,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ]
+                                  : const [],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
               if (hasEntries)
                 Padding(
                   padding: EdgeInsets.symmetric(horizontal: paddingH),
@@ -277,6 +323,8 @@ class PersonInfoCard extends StatelessWidget {
                         .toList(),
                   ),
                 ),
+              ],
+            ),
           ],
         ),
       ),

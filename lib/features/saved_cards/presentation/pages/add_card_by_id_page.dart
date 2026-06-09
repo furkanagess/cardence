@@ -1,20 +1,17 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../../../core/utils/card_id_generator.dart';
 import '../../../../core/widgets/atoms/cardence_app_bar.dart';
 import '../../../../core/widgets/atoms/custom_button.dart';
 import '../../../../core/widgets/atoms/custom_text_field.dart';
 import '../../../../core/widgets/organisms/cardence_scaffold.dart';
 import '../../domain/entities/add_saved_card_result.dart';
-import '../../../../core/utils/card_id_generator.dart';
-import '../../domain/entities/card_share_payload.dart';
 import '../../domain/entities/saved_card.dart';
-import '../../domain/extensions/card_share_payload_to_saved_card.dart';
+import '../../domain/entities/saved_card_origin.dart';
 import '../../domain/usecases/add_saved_card.dart';
 
-/// Kart ID veya QR JSON içeriği ile cüzdana kart ekleme.
+/// Kart ID ile cüzdana kart ekleme.
 class AddCardByIdPage extends StatefulWidget {
   const AddCardByIdPage({
     super.key,
@@ -30,14 +27,11 @@ class AddCardByIdPage extends StatefulWidget {
 class _AddCardByIdPageState extends State<AddCardByIdPage> {
   final _formKey = GlobalKey<FormState>();
   final _cardIdController = TextEditingController();
-  final _jsonController = TextEditingController();
-  bool _useJson = false;
   bool _submitting = false;
 
   @override
   void dispose() {
     _cardIdController.dispose();
-    _jsonController.dispose();
     super.dispose();
   }
 
@@ -45,28 +39,11 @@ class _AddCardByIdPageState extends State<AddCardByIdPage> {
     if (!_formKey.currentState!.validate()) return;
     setState(() => _submitting = true);
 
-    SavedCard? card;
-    if (_useJson) {
-      try {
-        final map = jsonDecode(_jsonController.text.trim()) as Map<String, dynamic>;
-        final payload = CardSharePayload.fromJson(map);
-        if (payload == null) {
-          _showError('Geçersiz kart kodu. "id" alanı zorunludur.');
-          setState(() => _submitting = false);
-          return;
-        }
-        card = payload.toSavedCard();
-      } catch (_) {
-        _showError('JSON okunamadı. QR içeriğini olduğu gibi yapıştırın.');
-        setState(() => _submitting = false);
-        return;
-      }
-    } else {
-      card = SavedCard(
-        cardId: _cardIdController.text.trim(),
-        savedAt: DateTime.now().millisecondsSinceEpoch,
-      );
-    }
+    final card = SavedCard(
+      cardId: _cardIdController.text.trim(),
+      origin: SavedCardOrigin.cardence,
+      savedAt: DateTime.now().millisecondsSinceEpoch,
+    );
 
     final result = await widget.addSavedCard(card);
     if (!mounted) return;
@@ -94,7 +71,6 @@ class _AddCardByIdPageState extends State<AddCardByIdPage> {
   }
 
   String? _validateCardId(String? value) {
-    if (_useJson) return null;
     final id = value?.trim() ?? '';
     if (id.isEmpty) return 'Kart ID girin';
     if (!CardIdGenerator.isValid(id)) {
@@ -115,88 +91,33 @@ class _AddCardByIdPageState extends State<AddCardByIdPage> {
         child: ListView(
           padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
           children: [
-            SegmentedButton<bool>(
-              segments: const [
-                ButtonSegment(
-                  value: false,
-                  label: Text('Kart ID'),
-                  icon: Icon(Icons.tag_rounded, size: 18),
-                ),
-                ButtonSegment(
-                  value: true,
-                  label: Text('QR kodu'),
-                  icon: Icon(Icons.code_rounded, size: 18),
-                ),
-              ],
-              selected: {_useJson},
-              onSelectionChanged: (set) {
-                setState(() => _useJson = set.first);
-              },
+            Text(
+              'Paylaşılan kart kimliğini girin. Bilgiler sunucudaki güncel kartvizitten alınır.',
+              style: textTheme.bodyMedium?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+                height: 1.4,
+              ),
             ),
-            const SizedBox(height: 20),
-            if (!_useJson) ...[
-              Text(
-                'Paylaşılan kart kimliğini girin. Bilgiler sunucudaki güncel kartvizitten alınır.',
-                style: textTheme.bodyMedium?.copyWith(
-                  color: colorScheme.onSurfaceVariant,
-                  height: 1.4,
-                ),
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _cardIdController,
-                validator: _validateCardId,
-                keyboardType: TextInputType.number,
+            const SizedBox(height: 16),
+            TextFormField(
+              controller: _cardIdController,
+              validator: _validateCardId,
+              keyboardType: TextInputType.number,
+              maxLength: CardIdGenerator.length,
+              inputFormatters: [
+                FilteringTextInputFormatter.digitsOnly,
+                LengthLimitingTextInputFormatter(CardIdGenerator.length),
+              ],
+              decoration: CustomTextField.themedDecoration(
+                context,
+                labelText: 'Kart ID',
+                hintText: '482917',
+                prefixIcon: const Icon(Icons.badge_outlined),
                 maxLength: CardIdGenerator.length,
-                inputFormatters: [
-                  FilteringTextInputFormatter.digitsOnly,
-                  LengthLimitingTextInputFormatter(CardIdGenerator.length),
-                ],
-                decoration: CustomTextField.themedDecoration(
-                  context,
-                  labelText: 'Kart ID',
-                  hintText: '482917',
-                  prefixIcon: const Icon(Icons.badge_outlined),
-                  maxLength: CardIdGenerator.length,
-                ),
-                textInputAction: TextInputAction.done,
-                autocorrect: false,
               ),
-            ] else ...[
-              Text(
-                'QR kodun içindeki JSON metnini yapıştırın (Cardence paylaşım formatı).',
-                style: textTheme.bodyMedium?.copyWith(
-                  color: colorScheme.onSurfaceVariant,
-                  height: 1.4,
-                ),
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _jsonController,
-                minLines: 5,
-                maxLines: 10,
-                validator: (v) {
-                  if (!_useJson) return null;
-                  if (v == null || v.trim().isEmpty) {
-                    return 'QR içeriğini yapıştırın';
-                  }
-                  return null;
-                },
-                decoration: InputDecoration(
-                  labelText: 'QR içeriği (JSON)',
-                  hintText: '{"id":"...","n":"Ad Soyad",...}',
-                  alignLabelWithHint: true,
-                  filled: true,
-                  fillColor: colorScheme.surfaceContainerHighest
-                      .withValues(alpha: 0.45),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(14),
-                    borderSide: BorderSide.none,
-                  ),
-                ),
-                autocorrect: false,
-              ),
-            ],
+              textInputAction: TextInputAction.done,
+              autocorrect: false,
+            ),
             const SizedBox(height: 24),
             CustomButton(
               label: 'Cüzdana ekle',

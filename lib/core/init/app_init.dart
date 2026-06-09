@@ -17,6 +17,7 @@ import '../../features/auth/domain/usecases/logout.dart';
 import '../../features/auth/domain/usecases/register_user.dart';
 import '../../features/auth/domain/usecases/reset_password.dart';
 import '../../features/auth/domain/usecases/restore_auth_session.dart';
+import '../../features/auth/domain/usecases/upload_profile_photo.dart';
 import '../../features/business_cards/data/datasources/business_card_remote_datasource.dart';
 import '../../features/business_cards/data/repositories/business_card_repository_impl.dart';
 import '../../features/business_cards/domain/usecases/get_business_cards.dart';
@@ -52,6 +53,9 @@ import '../../features/settings/data/datasources/theme_local_datasource.dart';
 import '../../features/settings/data/repositories/theme_repository_impl.dart';
 import '../../features/settings/domain/usecases/get_theme_preference.dart';
 import '../../features/settings/domain/usecases/set_theme_preference.dart';
+import '../../features/support/data/datasources/support_remote_datasource.dart';
+import '../../features/support/data/repositories/support_repository_impl.dart';
+import '../../features/support/domain/usecases/submit_support_request.dart';
 import '../user_data/clear_user_scoped_local_data.dart';
 import '../user_data/sync_user_profile_cards.dart';
 
@@ -110,6 +114,7 @@ class AppInit {
       businessCards.upsertBusinessCard,
     );
     final theme = _initTheme(prefs);
+    final support = _initSupport(authLocal);
 
     final eventGroups = _initEventGroups(eventGroupLocal);
     final savedCards = _initSavedCards(
@@ -126,6 +131,7 @@ class AppInit {
       resetPassword: auth.resetPassword,
       getCurrentUser: auth.getCurrentUser,
       logout: auth.logout,
+      uploadProfilePhoto: auth.uploadProfilePhoto,
       getOnboardingCompleted: onboarding.getOnboardingCompleted,
       completeOnboarding: onboarding.completeOnboarding,
       syncOnboardingFromServer: onboarding.syncOnboardingFromServer,
@@ -137,6 +143,7 @@ class AppInit {
       resolveOnboardingInitialDraft: onboarding.resolveOnboardingInitialDraft,
       getThemePreference: theme.getThemePreference,
       setThemePreference: theme.setThemePreference,
+      submitSupportRequest: support.submitSupportRequest,
       getEventGroups: eventGroups.getEventGroups,
       saveEventGroups: eventGroups.saveEventGroups,
       getSavedCards: savedCards.getSavedCards,
@@ -201,6 +208,7 @@ class AppInit {
     ResetPassword resetPassword,
     GetCurrentUser getCurrentUser,
     Logout logout,
+    UploadProfilePhoto uploadProfilePhoto,
     CompleteOnboardingRemote completeOnboardingRemote,
   }) _initAuth({
     required AuthLocalDataSource authLocal,
@@ -224,6 +232,7 @@ class AppInit {
       resetPassword: ResetPassword(repo),
       getCurrentUser: GetCurrentUser(repo),
       logout: Logout(repo),
+      uploadProfilePhoto: UploadProfilePhoto(repo),
       completeOnboardingRemote: CompleteOnboardingRemote(repo),
     );
   }
@@ -293,6 +302,18 @@ class AppInit {
       setThemePreference: SetThemePreference(repo),
     );
   }
+
+  static ({SubmitSupportRequest submitSupportRequest}) _initSupport(
+    AuthLocalDataSource authLocal,
+  ) {
+    final repo = SupportRepositoryImpl(
+      remote: SupportRemoteDataSourceImpl(),
+      authLocal: authLocal,
+    );
+    return (
+      submitSupportRequest: SubmitSupportRequest(repo),
+    );
+  }
 }
 
 /// [AppInit.init] sonucu; [App] ve gerekirse diğer yerler tarafından kullanılır.
@@ -307,6 +328,7 @@ class AppInitResult {
     required this.resetPassword,
     required this.getCurrentUser,
     required this.logout,
+    required this.uploadProfilePhoto,
     required this.getOnboardingCompleted,
     required this.completeOnboarding,
     required this.syncOnboardingFromServer,
@@ -318,6 +340,7 @@ class AppInitResult {
     required this.resolveOnboardingInitialDraft,
     required this.getThemePreference,
     required this.setThemePreference,
+    required this.submitSupportRequest,
     required this.getEventGroups,
     required this.saveEventGroups,
     required this.getSavedCards,
@@ -337,6 +360,7 @@ class AppInitResult {
   final ResetPassword resetPassword;
   final GetCurrentUser getCurrentUser;
   final Logout logout;
+  final UploadProfilePhoto uploadProfilePhoto;
   final GetOnboardingCompleted getOnboardingCompleted;
   final Future<void> Function() completeOnboarding;
   final SyncOnboardingFromServer syncOnboardingFromServer;
@@ -348,6 +372,7 @@ class AppInitResult {
   final ResolveOnboardingInitialDraft resolveOnboardingInitialDraft;
   final GetThemePreference getThemePreference;
   final SetThemePreference setThemePreference;
+  final SubmitSupportRequest submitSupportRequest;
   final GetEventGroups getEventGroups;
   final SaveEventGroups saveEventGroups;
   final GetSavedCards getSavedCards;

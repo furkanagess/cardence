@@ -1,13 +1,11 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 
-import '../../../../core/constants/app_constants.dart';
 import '../../../../core/utils/card_id_generator.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/atoms/cardence_app_bar.dart';
 import '../../../../core/widgets/atoms/custom_button.dart';
+import '../../../../core/widgets/molecules/cardence_confirm_dialog.dart';
 import '../../../../core/widgets/organisms/cardence_scaffold.dart';
 import '../../../../core/widgets/organisms/flippable_person_card.dart';
 import '../widgets/my_card_preview_helpers.dart';
@@ -15,29 +13,8 @@ import '../../../onboarding/domain/entities/onboarding_card_draft.dart';
 import '../../../onboarding/domain/usecases/get_onboarding_draft_cards.dart';
 import '../../../business_cards/domain/usecases/persist_onboarding_card.dart';
 import '../card_customize_colors.dart';
-import 'card_detail_page.dart';
 
-const Map<String, String> _fieldLabels = {
-  'displayName': 'Ad',
-  'email': 'E-posta',
-  'phone': 'Telefon',
-  'company': 'Şirket',
-  'title': 'Ünvan',
-  'website': 'Web sitesi',
-  'linkedin': 'LinkedIn',
-  'skills': 'Yetenekler',
-  'school': 'Okul',
-  'about': 'Hakkımda',
-};
-
-class _FieldDragData {
-  const _FieldDragData({required this.fieldKey, required this.fromFront});
-
-  final String fieldKey;
-  final bool fromFront;
-}
-
-/// Kart görünümü: önizleme, renk düzenlemesi, gösterilecek alanlar, yeni kart oluşturma.
+/// Kart görünümü: önizleme, renk düzenlemesi ve yeni kart oluşturma.
 class CardViewPage extends StatefulWidget {
   const CardViewPage({
     super.key,
@@ -56,13 +33,41 @@ class CardViewPage extends StatefulWidget {
 
 class _CardViewPageState extends State<CardViewPage> {
   List<OnboardingCardDraft> _cards = [];
+  List<OnboardingCardDraft> _savedBaseline = [];
   int _selectedIndex = 0;
   bool _loading = true;
+  bool _saving = false;
   static const double _carouselViewportFraction = 0.88;
   late final PageController _pageController = PageController(viewportFraction: _carouselViewportFraction);
 
   OnboardingCardDraft? get _draft =>
       _cards.isEmpty ? null : _cards[_selectedIndex.clamp(0, _cards.length - 1)];
+
+  bool get _hasUnsavedChanges {
+    for (final card in _cards) {
+      final cardId = card.cardId;
+      if (cardId == null) return true;
+      final baseline = _baselineFor(cardId);
+      if (baseline == null || !card.contentEquals(baseline)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  OnboardingCardDraft? _baselineFor(String cardId) {
+    for (final card in _savedBaseline) {
+      if (card.cardId == cardId) return card;
+    }
+    return null;
+  }
+
+  void _updateSelectedCard(OnboardingCardDraft updated) {
+    final idx = _selectedIndex.clamp(0, _cards.length - 1);
+    setState(() {
+      _cards = List<OnboardingCardDraft>.from(_cards)..[idx] = updated;
+    });
+  }
 
   @override
   void initState() {
@@ -81,7 +86,10 @@ class _CardViewPageState extends State<CardViewPage> {
     if (!mounted) return;
     setState(() {
       _cards = list;
-      if (_selectedIndex >= _cards.length) _selectedIndex = _cards.isEmpty ? 0 : _cards.length - 1;
+      _savedBaseline = List<OnboardingCardDraft>.from(list);
+      if (_selectedIndex >= _cards.length) {
+        _selectedIndex = _cards.isEmpty ? 0 : _cards.length - 1;
+      }
       _loading = false;
     });
     if (_cards.length > 1 && _selectedIndex > 0) {
@@ -97,35 +105,6 @@ class _CardViewPageState extends State<CardViewPage> {
     }
   }
 
-  Future<void> _saveDraft(OnboardingCardDraft updated) async {
-    final synced = await widget.persistOnboardingCard(updated);
-    if (!mounted) return;
-    final idx = _cards.indexWhere((c) => c.cardId == synced.cardId);
-    if (idx >= 0) {
-      _cards = List.from(_cards)..[idx] = synced;
-    } else {
-      _cards = List.from(_cards)..add(synced);
-    }
-    setState(() {});
-    widget.onDraftUpdated?.call(synced);
-  }
-
-  static String? _value(OnboardingCardDraft d, String key) {
-    switch (key) {
-      case 'displayName': return d.displayName;
-      case 'email': return d.email;
-      case 'phone': return d.phone;
-      case 'company': return d.company;
-      case 'title': return d.title;
-      case 'website': return d.website;
-      case 'linkedin': return d.linkedin;
-      case 'skills': return d.skills;
-      case 'school': return d.school;
-      case 'about': return d.about;
-      default: return null;
-    }
-  }
-
   static Color? _parseHex(String? hex) {
     if (hex == null || hex.length != 7 || !hex.startsWith('#')) return null;
     return Color(int.parse(hex.substring(1), radix: 16) + 0xFF000000);
@@ -138,377 +117,87 @@ class _CardViewPageState extends State<CardViewPage> {
     return '#${r.toRadixString(16).padLeft(2, '0')}${g.toRadixString(16).padLeft(2, '0')}${b.toRadixString(16).padLeft(2, '0')}';
   }
 
-  bool _hasFieldValue(OnboardingCardDraft d, String key) {
-    final value = _value(d, key);
-    return value != null && value.trim().isNotEmpty;
+  void _setBackgroundColor(OnboardingCardDraft d, String? hex) {
+    final updated =
+        hex == null ? d.copyWith(clearBackgroundColor: true) : d.copyWith(backgroundColor: hex);
+    _updateSelectedCard(updated);
   }
 
-  bool _canAcceptDrop(OnboardingCardDraft d, String key, {required bool toFront}) {
-    if (!_hasFieldValue(d, key)) return false;
-    final list = toFront ? d.frontVisibleFields : d.backVisibleFields;
-    final max = toFront ? AppConstants.maxFrontCardFields : AppConstants.maxBackCardFields;
-    if (list.contains(key)) return true;
-    return list.length < max;
+  void _setBackgroundColorFromPalette(OnboardingCardDraft d, String hex) {
+    _updateSelectedCard(
+      d.copyWith(backgroundColor: hex, lastUsedPaletteBackgroundColor: hex),
+    );
   }
 
-  List<String> _displayFieldKeys(OnboardingCardDraft draft, bool isFront) {
-    final baseKeys = isFront ? OnboardingCardDraft.frontFieldKeys : OnboardingCardDraft.backFieldKeys;
-    final keysWithValue = baseKeys.where((key) => _hasFieldValue(draft, key)).toList();
-    if (keysWithValue.isEmpty) return const [];
-    final selected = (isFront ? draft.frontVisibleFields : draft.backVisibleFields)
-        .where(keysWithValue.contains)
-        .toList();
-    final remaining = keysWithValue.where((key) => !selected.contains(key)).toList();
-    return [...selected, ...remaining];
+  void _setTextColor(OnboardingCardDraft d, String? hex) {
+    final updated =
+        hex == null ? d.copyWith(clearAccentColor: true) : d.copyWith(accentColor: hex);
+    _updateSelectedCard(updated);
   }
 
-  Widget _buildFieldList({
-    required bool isFront,
-    required bool enableReorder,
-    required OnboardingCardDraft draft,
-    required ColorScheme colorScheme,
-  }) {
-    final orderedKeys = _displayFieldKeys(draft, isFront);
+  Future<bool> _confirmDiscardChanges() {
+    return CardenceConfirmDialog.show(
+      context,
+      title: 'Kaydedilmemiş değişiklikler',
+      message:
+          'Yaptığınız değişiklikler kaydedilmedi. Çıkmak istediğinize emin misiniz?',
+      confirmLabel: 'Çık',
+      cancelLabel: 'İptal',
+      icon: Icons.warning_amber_rounded,
+      confirmIsDestructive: true,
+    ).then((value) => value == true);
+  }
 
-    if (orderedKeys.isEmpty) {
-      return Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8),
-        child: Text(
-          'Bu yüzde gösterilecek alan yok.',
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant),
-        ),
-      );
+  Future<void> _save() async {
+    if (_saving) return;
+
+    final dirtyCards = _cards.where((card) {
+      final cardId = card.cardId;
+      if (cardId == null) return true;
+      final baseline = _baselineFor(cardId);
+      return baseline == null || !card.contentEquals(baseline);
+    }).toList();
+
+    if (dirtyCards.isEmpty) {
+      if (mounted) Navigator.of(context).pop();
+      return;
     }
 
-    return Column(
-      children: [
-        ...orderedKeys.map(
-          (key) => Padding(
-            padding: const EdgeInsets.only(bottom: 8),
-            child: _buildFieldTile(
-              draft: draft,
-              fieldKey: key,
-              isFront: isFront,
-              colorScheme: colorScheme,
-              enableReorder: enableReorder,
-            ),
-          ),
-        ),
-        if (enableReorder) _buildListEndDropZone(draft: draft, isFront: isFront),
-      ],
-    );
-  }
+    setState(() => _saving = true);
+    try {
+      var nextCards = List<OnboardingCardDraft>.from(_cards);
+      var nextBaseline = List<OnboardingCardDraft>.from(_savedBaseline);
 
-  Widget _buildFieldTile({
-    required OnboardingCardDraft draft,
-    required String fieldKey,
-    required bool isFront,
-    required ColorScheme colorScheme,
-    required bool enableReorder,
-  }) {
-    final child = _buildFieldTileContent(
-      draft: draft,
-      fieldKey: fieldKey,
-      isFront: isFront,
-      colorScheme: colorScheme,
-    );
+      for (final card in dirtyCards) {
+        final synced = await widget.persistOnboardingCard(card);
+        if (!mounted) return;
 
-    return DragTarget<_FieldDragData>(
-      onWillAccept: (data) => _canAcceptDropOnTile(
-        data: data,
-        draft: draft,
-        fieldKey: fieldKey,
-        isFront: isFront,
-        enableReorder: enableReorder,
-      ),
-      onAccept: (data) => _handleTileDrop(
-        data: data,
-        draft: draft,
-        targetKey: fieldKey,
-        isFront: isFront,
-        enableReorder: enableReorder,
-      ),
-      builder: (context, candidateData, rejected) {
-        final highlight = candidateData.isNotEmpty;
-        return AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(
-              color: highlight ? AppColors.primary : Colors.transparent,
-              width: highlight ? 1.5 : 0.0,
-            ),
-            color: highlight ? AppColors.primary.withValues(alpha: 0.05) : Colors.transparent,
-          ),
-          padding: const EdgeInsets.all(1),
-          child: LongPressDraggable<_FieldDragData>(
-            data: _FieldDragData(fieldKey: fieldKey, fromFront: isFront),
-            dragAnchorStrategy: pointerDragAnchorStrategy,
-            feedback: Material(
-              elevation: 6,
-              borderRadius: BorderRadius.circular(12),
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 360),
-                child: _buildFieldTileContent(
-                  draft: draft,
-                  fieldKey: fieldKey,
-                  isFront: isFront,
-                  colorScheme: colorScheme,
-                  ignorePointer: true,
-                ),
-              ),
-            ),
-            childWhenDragging: _buildFieldTileContent(
-              draft: draft,
-              fieldKey: fieldKey,
-              isFront: isFront,
-              colorScheme: colorScheme,
-              ignorePointer: true,
-              opacity: 0.4,
-            ),
-            child: child,
-          ),
-        );
-      },
-    );
-  }
+        final syncedId = synced.cardId;
+        if (syncedId == null) continue;
+        final cardIndex = nextCards.indexWhere((c) => c.cardId == syncedId);
+        if (cardIndex >= 0) {
+          nextCards[cardIndex] = synced;
+        }
+        final baselineIndex =
+            nextBaseline.indexWhere((c) => c.cardId == syncedId);
+        if (baselineIndex >= 0) {
+          nextBaseline[baselineIndex] = synced;
+        } else {
+          nextBaseline = [...nextBaseline, synced];
+        }
+        widget.onDraftUpdated?.call(synced);
+      }
 
-  bool _canAcceptDropOnTile({
-    required _FieldDragData? data,
-    required OnboardingCardDraft draft,
-    required String fieldKey,
-    required bool isFront,
-    required bool enableReorder,
-  }) {
-    if (data == null) return false;
-    if (data.fromFront == isFront) {
-      if (!enableReorder) return false;
-      if (data.fieldKey == fieldKey) return false;
-      return _isReorderableKey(draft, data.fieldKey, isFront);
+      if (!mounted) return;
+      setState(() {
+        _cards = nextCards;
+        _savedBaseline = nextBaseline;
+        _saving = false;
+      });
+      Navigator.of(context).pop();
+    } catch (_) {
+      if (mounted) setState(() => _saving = false);
     }
-    return _canAcceptDrop(draft, data.fieldKey, toFront: isFront);
-  }
-
-  void _handleTileDrop({
-    required _FieldDragData data,
-    required OnboardingCardDraft draft,
-    required String targetKey,
-    required bool isFront,
-    required bool enableReorder,
-  }) {
-    if (data.fromFront == isFront) {
-      if (!enableReorder) return;
-      _handleSameSideDrop(
-        draft: draft,
-        isFront: isFront,
-        draggedKey: data.fieldKey,
-        beforeKey: targetKey,
-      );
-    } else {
-      if (!_canAcceptDrop(draft, data.fieldKey, toFront: isFront)) return;
-      unawaited(_moveFieldBetweenSides(draft, data.fieldKey, toFront: isFront));
-    }
-  }
-
-  bool _isReorderableKey(OnboardingCardDraft draft, String key, bool isFront) {
-    final selected = isFront ? draft.frontVisibleFields : draft.backVisibleFields;
-    return selected.contains(key);
-  }
-
-  void _handleSameSideDrop({
-    required OnboardingCardDraft draft,
-    required bool isFront,
-    required String draggedKey,
-    required String? beforeKey,
-  }) {
-    final selected = isFront ? draft.frontVisibleFields : draft.backVisibleFields;
-    if (!selected.contains(draggedKey)) return;
-    final orderedKeys = _displayFieldKeys(draft, isFront);
-    final targetIndex = beforeKey == null ? orderedKeys.length : orderedKeys.indexOf(beforeKey);
-    final insertIndex = beforeKey == null
-        ? selected.length
-        : selected.contains(beforeKey)
-            ? selected.indexOf(beforeKey)
-            : (targetIndex < 0 ? selected.length : _countSelectedBeforeIndex(selected, orderedKeys, targetIndex));
-    unawaited(_reorderSelectedField(
-      draft: draft,
-      isFront: isFront,
-      fieldKey: draggedKey,
-      insertIndex: insertIndex,
-    ));
-  }
-
-  int _countSelectedBeforeIndex(List<String> selected, List<String> orderedKeys, int targetIndex) {
-    if (targetIndex <= 0) return 0;
-    var count = 0;
-    for (var i = 0; i < targetIndex && i < orderedKeys.length; i++) {
-      if (selected.contains(orderedKeys[i])) count++;
-    }
-    return count;
-  }
-
-  Future<void> _reorderSelectedField({
-    required OnboardingCardDraft draft,
-    required bool isFront,
-    required String fieldKey,
-    required int insertIndex,
-  }) async {
-    final list = List<String>.from(isFront ? draft.frontVisibleFields : draft.backVisibleFields);
-    final currentIndex = list.indexOf(fieldKey);
-    if (currentIndex == -1) return;
-    var targetIndex = insertIndex.clamp(0, list.length);
-    if (currentIndex < targetIndex) targetIndex -= 1;
-    list.removeAt(currentIndex);
-    list.insert(targetIndex, fieldKey);
-    final updated = isFront ? draft.copyWith(frontVisibleFields: list) : draft.copyWith(backVisibleFields: list);
-    await _saveDraft(updated);
-  }
-
-  Widget _buildListEndDropZone({
-    required OnboardingCardDraft draft,
-    required bool isFront,
-  }) {
-    return DragTarget<_FieldDragData>(
-      onWillAccept: (data) =>
-          data != null && data.fromFront == isFront && _isReorderableKey(draft, data.fieldKey, isFront),
-      onAccept: (data) => _handleSameSideDrop(
-        draft: draft,
-        isFront: isFront,
-        draggedKey: data.fieldKey,
-        beforeKey: null,
-      ),
-      builder: (context, candidate, rejected) {
-        final highlight = candidate.isNotEmpty;
-        return AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          height: 32,
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(10),
-            border: Border.all(
-              color: highlight ? AppColors.primary : Colors.transparent,
-              width: highlight ? 1.5 : 0,
-            ),
-          ),
-          child: Text(
-            'Listenin sonuna bırak',
-            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: highlight ? AppColors.primary : Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildFieldTileContent({
-    required OnboardingCardDraft draft,
-    required String fieldKey,
-    required bool isFront,
-    required ColorScheme colorScheme,
-    bool ignorePointer = false,
-    double opacity = 1,
-  }) {
-    final label = _fieldLabels[fieldKey] ?? fieldKey;
-    final selectedList = isFront ? draft.frontVisibleFields : draft.backVisibleFields;
-    final isSelected = selectedList.contains(fieldKey);
-    final max = isFront ? AppConstants.maxFrontCardFields : AppConstants.maxBackCardFields;
-    final canAdd = selectedList.length < max;
-    final selectedIndex = selectedList.indexOf(fieldKey);
-    final canMoveUp = selectedIndex > 0;
-    final canMoveDown = selectedIndex != -1 && selectedIndex < selectedList.length - 1;
-    final canSendOpposite = isSelected || _canAcceptDrop(draft, fieldKey, toFront: !isFront);
-
-    Widget buildIconButton({
-      required IconData icon,
-      required VoidCallback? onPressed,
-      String? tooltip,
-    }) {
-      return IconButton(
-        icon: Icon(icon, size: 20),
-        color: colorScheme.onSurfaceVariant,
-        splashRadius: 18,
-        tooltip: tooltip,
-        onPressed: ignorePointer ? null : onPressed,
-      );
-    }
-
-    final tile = Container(
-      decoration: BoxDecoration(
-        color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: colorScheme.outline.withValues(alpha: 0.2)),
-      ),
-      child: CheckboxListTile(
-        value: isSelected,
-        onChanged: ignorePointer
-            ? null
-            : (v) {
-                if (v == true && !canAdd) return;
-                if (isFront) {
-                  _toggleFrontField(draft, fieldKey);
-                } else {
-                  _toggleBackField(draft, fieldKey);
-                }
-              },
-        title: Text(label),
-        controlAffinity: ListTileControlAffinity.leading,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
-        dense: true,
-        secondary: SizedBox(
-          width: 132,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              buildIconButton(
-                icon: Icons.align_vertical_top,
-                tooltip: 'Yukarı hizala',
-                onPressed: canMoveUp
-                    ? () => isFront ? _moveFrontField(draft, fieldKey, -1) : _moveBackField(draft, fieldKey, -1)
-                    : null,
-              ),
-              buildIconButton(
-                icon: Icons.align_vertical_bottom,
-                tooltip: 'Aşağı hizala',
-                onPressed: canMoveDown
-                    ? () => isFront ? _moveFrontField(draft, fieldKey, 1) : _moveBackField(draft, fieldKey, 1)
-                    : null,
-              ),
-              buildIconButton(
-                icon: isFront ? Icons.flip_to_back : Icons.flip_to_front,
-                tooltip: isFront ? 'Arka yüze taşı' : 'Ön yüze taşı',
-                onPressed: canSendOpposite ? () => _moveFieldBetweenSides(draft, fieldKey, toFront: !isFront) : null,
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-
-    return Opacity(
-      opacity: opacity,
-      child: IgnorePointer(
-        ignoring: ignorePointer,
-        child: tile,
-      ),
-    );
-  }
-
-  Future<void> _setBackgroundColor(OnboardingCardDraft d, String? hex) async {
-    final updated = hex == null ? d.copyWith(clearBackgroundColor: true) : d.copyWith(backgroundColor: hex);
-    await _saveDraft(updated);
-  }
-
-  Future<void> _setBackgroundColorFromPalette(OnboardingCardDraft d, String hex) async {
-    final updated = d.copyWith(backgroundColor: hex, lastUsedPaletteBackgroundColor: hex);
-    await _saveDraft(updated);
-  }
-
-  Future<void> _setTextColor(OnboardingCardDraft d, String? hex) async {
-    final updated = hex == null
-        ? d.copyWith(clearAccentColor: true)
-        : d.copyWith(accentColor: hex);
-    await _saveDraft(updated);
   }
 
   Future<void> _openCustomTextColorPicker(OnboardingCardDraft d) async {
@@ -554,76 +243,6 @@ class _CardViewPageState extends State<CardViewPage> {
         ],
       ),
     );
-  }
-
-  Future<void> _toggleFrontField(OnboardingCardDraft d, String fieldKey) async {
-    final list = List<String>.from(d.frontVisibleFields);
-    if (list.contains(fieldKey)) {
-      list.remove(fieldKey);
-    } else if (list.length < AppConstants.maxFrontCardFields) {
-      list.add(fieldKey);
-    } else {
-      return;
-    }
-    final updated = d.copyWith(frontVisibleFields: list);
-    await _saveDraft(updated);
-  }
-
-  Future<void> _toggleBackField(OnboardingCardDraft d, String fieldKey) async {
-    final list = List<String>.from(d.backVisibleFields);
-    if (list.contains(fieldKey)) {
-      list.remove(fieldKey);
-    } else if (list.length < AppConstants.maxBackCardFields) {
-      list.add(fieldKey);
-    } else {
-      return;
-    }
-    final updated = d.copyWith(backVisibleFields: list);
-    await _saveDraft(updated);
-  }
-
-  Future<void> _moveFrontField(OnboardingCardDraft d, String fieldKey, int direction) async {
-    final list = List<String>.from(d.frontVisibleFields);
-    final index = list.indexOf(fieldKey);
-    if (index == -1) return;
-    final newIndex = index + direction;
-    if (newIndex < 0 || newIndex >= list.length) return;
-    list.removeAt(index);
-    list.insert(newIndex, fieldKey);
-    final updated = d.copyWith(frontVisibleFields: list);
-    await _saveDraft(updated);
-  }
-
-  Future<void> _moveBackField(OnboardingCardDraft d, String fieldKey, int direction) async {
-    final list = List<String>.from(d.backVisibleFields);
-    final index = list.indexOf(fieldKey);
-    if (index == -1) return;
-    final newIndex = index + direction;
-    if (newIndex < 0 || newIndex >= list.length) return;
-    list.removeAt(index);
-    list.insert(newIndex, fieldKey);
-    final updated = d.copyWith(backVisibleFields: list);
-    await _saveDraft(updated);
-  }
-
-  Future<void> _moveFieldBetweenSides(OnboardingCardDraft d, String fieldKey, {required bool toFront}) async {
-    final front = List<String>.from(d.frontVisibleFields);
-    final back = List<String>.from(d.backVisibleFields);
-    if (toFront) {
-      if (front.length >= AppConstants.maxFrontCardFields) return;
-      back.remove(fieldKey);
-      if (!front.contains(fieldKey)) {
-        front.add(fieldKey);
-      }
-    } else {
-      if (back.length >= AppConstants.maxBackCardFields) return;
-      front.remove(fieldKey);
-      if (!back.contains(fieldKey)) {
-        back.add(fieldKey);
-      }
-    }
-    final updated = d.copyWith(frontVisibleFields: front, backVisibleFields: back);
-    await _saveDraft(updated);
   }
 
   Future<void> _createNewCard() async {
@@ -743,196 +362,153 @@ class _CardViewPageState extends State<CardViewPage> {
     final isCarousel = _cards.length > 1;
     const dotRowHeight = 24.0;
 
-    return CardenceScaffold(
-      backgroundColor: colorScheme.surface,
-      appBar: const CardenceAppBar(title: 'Kart Görünümü'),
-      body: SingleChildScrollView(
-        child: Column(
+    return PopScope(
+      canPop: !_hasUnsavedChanges,
+      onPopInvokedWithResult: (didPop, result) async {
+        if (didPop || !_hasUnsavedChanges) return;
+        final shouldLeave = await _confirmDiscardChanges();
+        if (!mounted || !shouldLeave) return;
+        Navigator.of(context).pop();
+      },
+      child: CardenceScaffold(
+        appBar: const CardenceAppBar(title: 'Kart Görünümü'),
+        body: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            AspectRatio(
-              aspectRatio: FlippablePersonCard.cardAspectRatio,
-              child: isCarousel
-                  ? PageView.builder(
-                      controller: _pageController,
-                      itemCount: _cards.length,
-                      onPageChanged: (index) => setState(() => _selectedIndex = index),
-                      padEnds: false,
-                      itemBuilder: (context, index) {
-                        final draft = _cards[index];
-
-                        return AnimatedBuilder(
-                          animation: _pageController,
-                          builder: (context, child) {
-                            double t = 0;
-                            if (_pageController.position.haveDimensions) {
-                              final page = _pageController.page ?? _pageController.initialPage.toDouble();
-                              t = (page - index).abs().clamp(0.0, 1.0);
-                            }
-                            const maxScaleDelta = 0.06;
-                            const maxFadeDelta = 0.2;
-                            final scale = 1.0 - (t * maxScaleDelta);
-                            final opacity = 1.0 - (t * maxFadeDelta);
-
-                            return Opacity(
-                              opacity: opacity,
-                              child: Transform.scale(
-                                scale: scale,
-                                child: child,
-                              ),
-                            );
-                          },
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: cardHorizontalPadding),
-                            child: MyCardPreviewHelpers.flippableCard(
-                              draft: draft,
-                              emptyMessage: 'Kart bilgisi yok',
-                            ),
-                          ),
-                        );
-                      },
-                    )
-                  : Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: cardHorizontalPadding),
-                      child: MyCardPreviewHelpers.flippableCard(
-                        draft: d,
-                        emptyMessage: 'Kart bilgisi yok',
-                      ),
-                    ),
-            ),
-            if (isCarousel)
-              SizedBox(
-                height: dotRowHeight,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: List.generate(_cards.length, (i) {
-                    final isActive = i == _selectedIndex;
-                    return Container(
-                      margin: const EdgeInsets.symmetric(horizontal: 3),
-                      width: isActive ? 20 : 8,
-                      height: 8,
-                      decoration: BoxDecoration(
-                        color: isActive ? AppColors.primary : colorScheme.outline.withValues(alpha: 0.4),
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                    );
-                  }),
-                ),
-              ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
+            Expanded(
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-            const SizedBox(height: 24),
-            Text(
-              isCarousel ? 'Seçili kart bilgileri' : 'Kart bilgileri',
-              style: textTheme.titleSmall?.copyWith(color: colorScheme.onSurface, fontWeight: FontWeight.w600),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              isCarousel
-                  ? 'Aşağıdaki ayarlar şu an seçili karta aittir.'
-                  : 'Renk ve gösterilecek alanları düzenleyebilirsiniz.',
-              style: textTheme.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'Kart rengi',
-              style: textTheme.titleSmall?.copyWith(color: colorScheme.onSurfaceVariant, fontWeight: FontWeight.w600),
-            ),
-            const SizedBox(height: 12),
-            Wrap(
-              spacing: 12,
-              runSpacing: 12,
-              children: [
-                _buildColorChip(d, null),
-                ...cardBackgroundColorOptions.map((hex) => _buildColorChip(d, hex)),
-                if (hasLastUsed && d.lastUsedPaletteBackgroundColor != null)
-                  _buildColorChip(d, d.lastUsedPaletteBackgroundColor!),
-                _buildPaletteButton(),
-              ],
-            ),
-            const SizedBox(height: 20),
-            Text(
-              'Metin rengi',
-              style: textTheme.titleSmall?.copyWith(color: colorScheme.onSurfaceVariant, fontWeight: FontWeight.w600),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              'Otomatik: arka plana göre okunabilir renk.',
-              style: textTheme.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant),
-            ),
-            const SizedBox(height: 12),
-            Wrap(
-              spacing: 12,
-              runSpacing: 12,
-              children: [
-                _buildTextColorChip(d, null),
-                ...cardTextColorOptions.map((hex) => _buildTextColorChip(d, hex)),
-                _buildTextPaletteButton(d),
-              ],
-            ),
-            const SizedBox(height: 24),
-            Text(
-              'Kartta gösterilecek bilgiler',
-              style: textTheme.titleSmall?.copyWith(color: colorScheme.onSurfaceVariant, fontWeight: FontWeight.w600),
-            ),
-            const SizedBox(height: 6),
-            Text(
-              'Ön ve arka yüzde en fazla ${AppConstants.maxFrontCardFields} alan seçin.',
-              style: textTheme.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'Ön yüz',
-              style: textTheme.labelLarge?.copyWith(color: colorScheme.onSurface, fontWeight: FontWeight.w600),
-            ),
-            const SizedBox(height: 8),
-            _buildFieldList(isFront: true, enableReorder: true, draft: d, colorScheme: colorScheme),
-            const SizedBox(height: 16),
-            Text(
-              'Arka yüz',
-              style: textTheme.labelLarge?.copyWith(color: colorScheme.onSurface, fontWeight: FontWeight.w600),
-            ),
-            const SizedBox(height: 8),
-            _buildFieldList(isFront: false, enableReorder: false, draft: d, colorScheme: colorScheme),
-            const SizedBox(height: 24),
-            OutlinedButton.icon(
-              onPressed: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute<void>(
-                    builder: (context) => CardDetailPage(
-                      draft: d,
-                      persistOnboardingCard: widget.persistOnboardingCard,
-                      onDraftUpdated: (updated) {
-                        widget.onDraftUpdated?.call(updated);
-                        _loadCards();
-                      },
+                  Expanded(
+                    child: Center(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: cardHorizontalPadding),
+                        child: AspectRatio(
+                          aspectRatio: FlippablePersonCard.cardAspectRatio,
+                          child: isCarousel
+                              ? PageView.builder(
+                                  controller: _pageController,
+                                  itemCount: _cards.length,
+                                  onPageChanged: (index) =>
+                                      setState(() => _selectedIndex = index),
+                                  padEnds: false,
+                                  itemBuilder: (context, index) {
+                                    final draft = _cards[index];
+
+                                    return AnimatedBuilder(
+                                      animation: _pageController,
+                                      builder: (context, child) {
+                                        double t = 0;
+                                        if (_pageController.position.haveDimensions) {
+                                          final page = _pageController.page ??
+                                              _pageController.initialPage.toDouble();
+                                          t = (page - index).abs().clamp(0.0, 1.0);
+                                        }
+                                        const maxScaleDelta = 0.06;
+                                        const maxFadeDelta = 0.2;
+                                        final scale = 1.0 - (t * maxScaleDelta);
+                                        final opacity = 1.0 - (t * maxFadeDelta);
+
+                                        return Opacity(
+                                          opacity: opacity,
+                                          child: Transform.scale(
+                                            scale: scale,
+                                            child: child,
+                                          ),
+                                        );
+                                      },
+                                      child: MyCardPreviewHelpers.flippableCard(
+                                        draft: draft,
+                                        emptyMessage: 'Kart bilgisi yok',
+                                      ),
+                                    );
+                                  },
+                                )
+                              : MyCardPreviewHelpers.flippableCard(
+                                  draft: d,
+                                  emptyMessage: 'Kart bilgisi yok',
+                                ),
+                        ),
+                      ),
                     ),
                   ),
-                );
-              },
-              icon: const Icon(Icons.tune_rounded, size: 20),
-              label: const Text('Tasarım ve QR paylaşımı'),
-              style: OutlinedButton.styleFrom(
-                foregroundColor: AppColors.primary,
-                side: BorderSide(color: AppColors.primary.withValues(alpha: 0.6)),
-                padding: const EdgeInsets.symmetric(vertical: 14),
+                  if (isCarousel)
+                    SizedBox(
+                      height: dotRowHeight,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: List.generate(_cards.length, (i) {
+                          final isActive = i == _selectedIndex;
+                          return Container(
+                            margin: const EdgeInsets.symmetric(horizontal: 3),
+                            width: isActive ? 20 : 8,
+                            height: 8,
+                            decoration: BoxDecoration(
+                              color: isActive
+                                  ? AppColors.primary
+                                  : colorScheme.outline.withValues(alpha: 0.4),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                          );
+                        }),
+                      ),
+                    ),
+                ],
               ),
             ),
-            const SizedBox(height: 16),
-            CustomButton(
-              label: 'Yeni kart oluştur',
-              icon: Icons.add_rounded,
-              onPressed: _createNewCard,
-              style: FilledButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: AppColors.textOnPrimary,
-                padding: const EdgeInsets.symmetric(vertical: 14),
-              ),
-            ),
-            const SizedBox(height: 32),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'Kart rengi',
+                    style: textTheme.titleSmall?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Wrap(
+                    spacing: 12,
+                    runSpacing: 12,
+                    children: [
+                      _buildColorChip(d, null),
+                      ...cardBackgroundColorOptions.map((hex) => _buildColorChip(d, hex)),
+                      if (hasLastUsed && d.lastUsedPaletteBackgroundColor != null)
+                        _buildColorChip(d, d.lastUsedPaletteBackgroundColor!),
+                      _buildPaletteButton(),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                  Text(
+                    'Metin rengi',
+                    style: textTheme.titleSmall?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Wrap(
+                    spacing: 12,
+                    runSpacing: 12,
+                    children: [
+                      _buildTextColorChip(d, null),
+                      ...cardTextColorOptions.map((hex) => _buildTextColorChip(d, hex)),
+                      _buildTextPaletteButton(d),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                  CustomButton(
+                    label: 'Kaydet',
+                    onPressed: _hasUnsavedChanges && !_saving ? _save : null,
+                    isLoading: _saving,
+                    style: FilledButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      foregroundColor: AppColors.textOnPrimary,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                    ),
+                  ),
                 ],
               ),
             ),

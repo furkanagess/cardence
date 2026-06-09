@@ -46,37 +46,6 @@ class SavedCardsWalletHeader extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Row(
-                children: [
-                  Icon(
-                    Icons.account_balance_wallet_outlined,
-                    size: 20,
-                    color: colorScheme.primary,
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      'Cüzdan kapasitesi',
-                      style: textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                  if (quota.isPremium)
-                    _PlanBadge(
-                      label: 'Premium',
-                      background: colorScheme.primaryContainer,
-                      foreground: colorScheme.onPrimaryContainer,
-                    )
-                  else
-                    _PlanBadge(
-                      label: 'Ücretsiz',
-                      background: colorScheme.surfaceContainerHighest,
-                      foreground: colorScheme.onSurfaceVariant,
-                    ),
-                ],
-              ),
-              const SizedBox(height: 10),
-              Row(
                 crossAxisAlignment: CrossAxisAlignment.baseline,
                 textBaseline: TextBaseline.alphabetic,
                 children: [
@@ -91,14 +60,6 @@ class SavedCardsWalletHeader extends StatelessWidget {
                     ' / ${quota.maxCards} kart',
                     style: textTheme.bodyMedium?.copyWith(
                       color: colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                  const Spacer(),
-                  Text(
-                    '${quota.remaining} boş',
-                    style: textTheme.labelMedium?.copyWith(
-                      color: colorScheme.onSurfaceVariant,
-                      fontWeight: FontWeight.w500,
                     ),
                   ),
                 ],
@@ -157,36 +118,6 @@ class SavedCardsWalletHeader extends StatelessWidget {
             ],
           ),
         ),
-      ),
-    );
-  }
-}
-
-class _PlanBadge extends StatelessWidget {
-  const _PlanBadge({
-    required this.label,
-    required this.background,
-    required this.foreground,
-  });
-
-  final String label;
-  final Color background;
-  final Color foreground;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(
-        color: background,
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Text(
-        label,
-        style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              color: foreground,
-              fontWeight: FontWeight.w600,
-            ),
       ),
     );
   }

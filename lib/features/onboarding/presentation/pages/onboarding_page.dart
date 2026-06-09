@@ -207,6 +207,7 @@ class _OnboardingContentState extends State<_OnboardingContent> {
           draft: OnboardingDraftHelper.forPreview(state.draft),
           stepIndex: stepIndex,
           stepCount: stepCount,
+          onChanged: (d) => context.read<OnboardingCubit>().updateDraft(d),
         );
       default:
         return const SizedBox.shrink();

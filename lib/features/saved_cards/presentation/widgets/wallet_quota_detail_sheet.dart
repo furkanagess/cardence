@@ -46,11 +46,6 @@ class WalletQuotaDetailSheet extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text(
-              'Cüzdan kapasitesi',
-              style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600),
-            ),
-            const SizedBox(height: 16),
             Row(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
@@ -68,13 +63,6 @@ class WalletQuotaDetailSheet extends StatelessWidget {
                     style: textTheme.titleMedium?.copyWith(
                       color: colorScheme.onSurfaceVariant,
                     ),
-                  ),
-                ),
-                const Spacer(),
-                Text(
-                  '${quota.remaining} boş',
-                  style: textTheme.labelLarge?.copyWith(
-                    color: colorScheme.onSurfaceVariant,
                   ),
                 ),
               ],

@@ -8,6 +8,7 @@ class UserProfileModel {
     this.displayName,
     this.email,
     this.phone,
+    this.photoUrl,
     this.onboardingCompleted = false,
     this.createdAt,
     this.savedCards = const [],
@@ -18,6 +19,7 @@ class UserProfileModel {
   final String? displayName;
   final String? email;
   final String? phone;
+  final String? photoUrl;
   final bool onboardingCompleted;
   final DateTime? createdAt;
   final List<SavedCardModel> savedCards;
@@ -59,6 +61,7 @@ class UserProfileModel {
           (json['displayName'] ?? json['DisplayName'])?.toString(),
       email: (json['email'] ?? json['Email'])?.toString(),
       phone: (json['phone'] ?? json['Phone'])?.toString(),
+      photoUrl: (json['photoUrl'] ?? json['PhotoUrl'])?.toString(),
       onboardingCompleted: _readBool(
         json['onboardingCompleted'] ?? json['OnboardingCompleted'],
       ),
@@ -74,6 +77,7 @@ class UserProfileModel {
         displayName: displayName,
         email: email,
         phone: phone,
+        photoUrl: photoUrl,
         onboardingCompleted: onboardingCompleted,
         createdAt: createdAt,
         savedCards: savedCards.map((card) => card.toEntity()).toList(),

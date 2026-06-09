@@ -20,6 +20,7 @@ class FlippablePersonCard extends StatefulWidget {
     this.onBackEditTap,
     this.accentColor,
     this.backgroundColor,
+    this.photoUrl,
     this.onTap,
   });
 
@@ -42,6 +43,7 @@ class FlippablePersonCard extends StatefulWidget {
 
   /// Kart arka plan rengi. null ise tema surface.
   final Color? backgroundColor;
+  final String? photoUrl;
   final VoidCallback? onTap;
 
   /// Kartvizit oranı: genişlik / yükseklik (ISO 7810 ID-1 ~ 85.6×53.98 mm).
@@ -130,6 +132,8 @@ class _FlippablePersonCardState extends State<FlippablePersonCard>
   static const double _flipButtonRight = 8;
   static const double _flipIconSize = 28;
   static const double _flipIconPadding = 8;
+  static const double _titleRightInsetForFlip =
+      _flipIconPadding * 2 + _flipIconSize + _flipButtonRight;
 
   Widget _buildFront(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
@@ -153,6 +157,8 @@ class _FlippablePersonCardState extends State<FlippablePersonCard>
           compact: true,
           accentColor: widget.accentColor,
           backgroundColor: widget.backgroundColor,
+          photoUrl: widget.photoUrl,
+          titleRightInset: _titleRightInsetForFlip,
         ),
       ),
     );
@@ -235,6 +241,7 @@ class _FlippablePersonCardState extends State<FlippablePersonCard>
                 fillHeight: true,
                 accentColor: widget.accentColor,
                 backgroundColor: widget.backgroundColor,
+                titleRightInset: _titleRightInsetForFlip,
               ),
       ),
     );

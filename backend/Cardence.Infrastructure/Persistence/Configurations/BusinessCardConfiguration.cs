@@ -26,6 +26,7 @@ public sealed class BusinessCardConfiguration : IEntityTypeConfiguration<Busines
         builder.Property(x => x.Skills).HasColumnName("skills");
         builder.Property(x => x.School).HasMaxLength(200).HasColumnName("school");
         builder.Property(x => x.About).HasColumnName("about");
+        builder.Property(x => x.PhotoUrl).HasMaxLength(2048).HasColumnName("photo_url");
         builder.Property(x => x.AccentColor).HasMaxLength(7).HasColumnName("accent_color");
         builder.Property(x => x.BackgroundColor).HasMaxLength(7).HasColumnName("background_color");
         builder.Property(x => x.LastUsedPaletteBackgroundColor)

@@ -37,6 +37,8 @@ abstract class AuthRepository {
 
   Future<UserProfile> getCurrentUser();
 
+  Future<UserProfile> uploadProfilePhoto(String filePath);
+
   Future<void> completeOnboardingOnServer();
 
   Future<void> logout();

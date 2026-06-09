@@ -70,3 +70,46 @@ class CardWatermark extends StatelessWidget {
     );
   }
 }
+
+/// Kart sağ üst köşesinde filigran tarzı Cardence logosu.
+class CardenceCardCornerWatermark extends StatelessWidget {
+  const CardenceCardCornerWatermark({
+    super.key,
+    required this.surfaceColor,
+    this.compact = false,
+  });
+
+  final Color surfaceColor;
+  final bool compact;
+
+  double get _size => compact ? 88 : 112;
+
+  double get _opacity {
+    final isDark = surfaceColor.computeLuminance() < 0.35;
+    return isDark ? 0.14 : 0.1;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = surfaceColor.computeLuminance() < 0.35;
+
+    return IgnorePointer(
+      child: Opacity(
+        opacity: _opacity,
+        child: Image.asset(
+          CardWatermark.assetPath,
+          width: _size,
+          height: _size,
+          fit: BoxFit.contain,
+          color: isDark ? AppColors.surfaceLight : AppColors.primary,
+          colorBlendMode: BlendMode.srcIn,
+          errorBuilder: (_, __, ___) => Icon(
+            Icons.credit_card_rounded,
+            size: _size * 0.55,
+            color: isDark ? AppColors.surfaceLight : AppColors.primary,
+          ),
+        ),
+      ),
+    );
+  }
+}

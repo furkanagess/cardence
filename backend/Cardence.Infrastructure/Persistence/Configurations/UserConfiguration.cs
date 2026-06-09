@@ -15,6 +15,7 @@ public sealed class UserConfiguration : IEntityTypeConfiguration<User>
         builder.Property(x => x.DisplayName).HasMaxLength(200).HasColumnName("display_name");
         builder.Property(x => x.Email).HasMaxLength(320).HasColumnName("email");
         builder.Property(x => x.Phone).HasMaxLength(20).HasColumnName("phone");
+        builder.Property(x => x.PhotoUrl).HasMaxLength(2048).HasColumnName("photo_url");
         builder.Property(x => x.PasswordHash).HasMaxLength(512).HasColumnName("password_hash");
         builder.Property(x => x.OnboardingCompleted).HasColumnName("onboarding_completed");
         builder.Property(x => x.CreatedAt).HasColumnName("created_at");

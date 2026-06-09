@@ -19,6 +19,7 @@ class OnboardingDraftSeeder {
       displayName: _fill(base.displayName, profile.displayName),
       email: _fill(base.email, profile.email),
       phone: _fill(base.phone, profile.phone),
+      photoUrl: _fill(base.photoUrl, profile.photoUrl),
     );
   }
 

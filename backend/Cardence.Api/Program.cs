@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.OpenApi.Models;
 using Serilog;
 
@@ -278,6 +279,15 @@ app.Lifetime.ApplicationStarted.Register(() =>
 });
 
 app.UseHttpsRedirection();
+
+var uploadsPath = Path.Combine(app.Environment.ContentRootPath, "uploads");
+Directory.CreateDirectory(uploadsPath);
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(uploadsPath),
+    RequestPath = "/uploads",
+});
+
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();

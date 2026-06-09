@@ -93,6 +93,35 @@ class DioApiClient {
     }
   }
 
+  Future<Map<String, dynamic>> postMultipart(
+    String path, {
+    required FormData formData,
+    String? accessToken,
+    required String fallbackError,
+  }) async {
+    try {
+      final response = await _dio.post<dynamic>(
+        _url(path),
+        data: formData,
+        options: Options(
+          headers: {
+            if (accessToken != null && accessToken.isNotEmpty)
+              'Authorization': 'Bearer $accessToken',
+          },
+          contentType: 'multipart/form-data',
+        ),
+      );
+      final data = response.data;
+      if (data is Map<String, dynamic>) return data;
+      if (data is Map) return Map<String, dynamic>.from(data);
+      throw AuthApiException(fallbackError);
+    } on AuthApiException {
+      rethrow;
+    } on DioException catch (e) {
+      throw ApiResponseParser.fromDioException(e, fallbackError);
+    }
+  }
+
   Future<void> delete(
     String path, {
     required String accessToken,

@@ -14,6 +14,7 @@ public static class DependencyInjection
         services.AddScoped<IBusinessCardService, BusinessCardService>();
         services.AddScoped<ISavedCardService, SavedCardService>();
         services.AddScoped<IAuthService, AuthService>();
+        services.AddScoped<ISupportService, SupportService>();
         return services;
     }
 }

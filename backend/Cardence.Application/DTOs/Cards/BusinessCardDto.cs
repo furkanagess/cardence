@@ -13,6 +13,7 @@ public sealed class BusinessCardDto
     public string? Skills { get; init; }
     public string? School { get; init; }
     public string? About { get; init; }
+    public string? PhotoUrl { get; init; }
     public string? AccentColor { get; init; }
     public string? BackgroundColor { get; init; }
     public string? LastUsedPaletteBackgroundColor { get; init; }

@@ -22,7 +22,7 @@ Bu projede **Clean Architecture**, **BLoC state management** ve **Atomic Design*
 
 4. **Data:** Models (Entity ↔ JSON/Map dönüşümü), DataSource abstract + impl, Repository impl. Repository, Domain’deki interface’i implement eder.
 
-5. **Presentation:** BLoC/Cubit, pages, widgets. Use case veya repository (interface) kullanır; doğrudan Firebase/Flutter servis import’u yapılmaz (DI ile enjekte edilir).
+5. **Presentation:** BLoC/Cubit, mixins, pages, widgets. Use case veya repository (interface) kullanır; doğrudan Firebase/Flutter servis import’u yapılmaz (DI ile enjekte edilir).
 
 ### Feature klasör yapısı
 
@@ -35,6 +35,7 @@ lib/features/<feature>/
   data/datasources/      # abstract + impl
   data/repositories/     # impl
   presentation/bloc/ veya cubit/
+  presentation/mixins/
   presentation/pages/
   presentation/widgets/
 ```
@@ -51,6 +52,14 @@ Yeni dosya eklerken katmanı doğru yere koy; domain’e framework veya veri kay
 - **State tüketimi:** `BlocProvider`, `BlocBuilder`, `BlocListener`, `BlocConsumer` kullan. Gerekmedikçe `context.read<>()` ile bloc al; state’i `BlocBuilder` ile dinle.
 - **Event/State:** Event’ler immutable; state’ler Equatable ile karşılaştırılabilir olmalı. Her BLoC tek sorumluluk: tek bir feature/ekran akışı.
 - **Cubit ne zaman:** Basit, event’e gerek olmayan tek yönlü akışlarda Cubit kullanılabilir (ör. filtre, QR). Karmaşık çok adımlı akışlarda BLoC tercih edilir.
+
+### View dosyaları (pages / widgets)
+
+- **`presentation/pages/` ve `presentation/widgets/`** yalnızca UI içerir: layout, tema, `BlocBuilder` / `BlocListener`, callback bağlama.
+- **Yasak (page/widget içinde):** use case çağrısı, `setState` ile iş state’i, filtre/sıralama/kaydetme mantığı, private widget sınıfları, enum/yardımcı fonksiyonlar, data katmanı import’u.
+- **İş mantığı:** ilgili feature `Cubit` / `BLoC` içinde; saf yardımcılar `presentation/cubit/` veya `domain/` altında.
+- **Yan etkiler (snackbar, navigasyon, sheet):** `presentation/mixins/` altında mixin; page `State` yalnızca mixin’i uygular.
+- **Alt bileşenler:** aynı feature `presentation/widgets/` altında ayrı dosya; page dosyasında nested class tanımlanmaz.
 
 ---
 

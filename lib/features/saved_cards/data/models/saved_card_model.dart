@@ -1,10 +1,12 @@
 import 'dart:convert';
 
 import '../../domain/entities/saved_card.dart';
+import '../../domain/entities/saved_card_origin.dart';
 
 class SavedCardModel {
   SavedCardModel({
     required this.cardId,
+    this.origin = SavedCardOrigin.cardence,
     this.displayName,
     this.email,
     this.phone,
@@ -15,11 +17,15 @@ class SavedCardModel {
     this.skills,
     this.school,
     this.about,
+    this.photoUrl,
     this.savedAt,
+    this.frontImagePath,
+    this.backImagePath,
     List<String>? linkedEventGroupIds,
   }) : linkedEventGroupIds = linkedEventGroupIds ?? const [];
 
   final String cardId;
+  final SavedCardOrigin origin;
   final String? displayName;
   final String? email;
   final String? phone;
@@ -30,12 +36,16 @@ class SavedCardModel {
   final String? skills;
   final String? school;
   final String? about;
+  final String? photoUrl;
   final int? savedAt;
+  final String? frontImagePath;
+  final String? backImagePath;
   final List<String> linkedEventGroupIds;
 
   factory SavedCardModel.fromEntity(SavedCard entity) {
     return SavedCardModel(
       cardId: entity.cardId,
+      origin: entity.origin,
       displayName: entity.displayName,
       email: entity.email,
       phone: entity.phone,
@@ -46,13 +56,17 @@ class SavedCardModel {
       skills: entity.skills,
       school: entity.school,
       about: entity.about,
+      photoUrl: entity.photoUrl,
       savedAt: entity.savedAt,
+      frontImagePath: entity.frontImagePath,
+      backImagePath: entity.backImagePath,
       linkedEventGroupIds: List.from(entity.linkedEventGroupIds),
     );
   }
 
   SavedCard toEntity() => SavedCard(
         cardId: cardId,
+        origin: origin,
         displayName: displayName,
         email: email,
         phone: phone,
@@ -63,12 +77,16 @@ class SavedCardModel {
         skills: skills,
         school: school,
         about: about,
+        photoUrl: photoUrl,
         savedAt: savedAt,
+        frontImagePath: frontImagePath,
+        backImagePath: backImagePath,
         linkedEventGroupIds: List.from(linkedEventGroupIds),
       );
 
   Map<String, dynamic> toJson() => {
         'cardId': cardId,
+        'origin': origin.name,
         if (displayName != null) 'displayName': displayName,
         if (email != null) 'email': email,
         if (phone != null) 'phone': phone,
@@ -79,7 +97,10 @@ class SavedCardModel {
         if (skills != null) 'skills': skills,
         if (school != null) 'school': school,
         if (about != null) 'about': about,
+        if (photoUrl != null) 'photoUrl': photoUrl,
         if (savedAt != null) 'savedAt': savedAt,
+        if (frontImagePath != null) 'frontImagePath': frontImagePath,
+        if (backImagePath != null) 'backImagePath': backImagePath,
         if (linkedEventGroupIds.isNotEmpty)
           'linkedEventGroupIds': linkedEventGroupIds,
       };
@@ -87,6 +108,7 @@ class SavedCardModel {
   factory SavedCardModel.fromJson(Map<String, dynamic> json) {
     return SavedCardModel(
       cardId: (json['cardId'] ?? json['CardId']).toString(),
+      origin: _parseOrigin(json),
       displayName: json['displayName'] as String?,
       email: json['email'] as String?,
       phone: json['phone'] as String?,
@@ -97,9 +119,26 @@ class SavedCardModel {
       skills: json['skills'] as String?,
       school: json['school'] as String?,
       about: json['about'] as String?,
+      photoUrl: json['photoUrl'] as String?,
       savedAt: json['savedAt'] as int?,
+      frontImagePath: json['frontImagePath'] as String?,
+      backImagePath: json['backImagePath'] as String?,
       linkedEventGroupIds: _parseStringList(json['linkedEventGroupIds']),
     );
+  }
+
+  static SavedCardOrigin _parseOrigin(Map<String, dynamic> json) {
+    final raw = json['origin'] as String?;
+    if (raw == SavedCardOrigin.manual.name) {
+      return SavedCardOrigin.manual;
+    }
+    if (raw == SavedCardOrigin.cardence.name) {
+      return SavedCardOrigin.cardence;
+    }
+    if (json['frontImagePath'] != null || json['backImagePath'] != null) {
+      return SavedCardOrigin.manual;
+    }
+    return SavedCardOrigin.cardence;
   }
 
   static List<String> _parseStringList(dynamic value) {

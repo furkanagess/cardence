@@ -16,6 +16,7 @@ class OnboardingCardDraft {
     this.skills,
     this.school,
     this.about,
+    this.photoUrl,
     List<String>? visibleFields,
     List<String>? frontVisibleFields,
     List<String>? backVisibleFields,
@@ -41,6 +42,7 @@ class OnboardingCardDraft {
   final String? skills;
   final String? school;
   final String? about;
+  final String? photoUrl;
   final List<String> visibleFields;
   /// Ön yüzde gösterilecek alanlar (en fazla 3).
   final List<String> frontVisibleFields;
@@ -146,6 +148,30 @@ class OnboardingCardDraft {
     return true;
   }
 
+  /// Form ve tasarım alanlarının tamamını karşılaştırır (kaydedilmemiş değişiklik tespiti).
+  bool contentEquals(OnboardingCardDraft other) {
+    return cardName == other.cardName &&
+        displayName == other.displayName &&
+        email == other.email &&
+        phone == other.phone &&
+        company == other.company &&
+        title == other.title &&
+        website == other.website &&
+        linkedin == other.linkedin &&
+        skills == other.skills &&
+        school == other.school &&
+        about == other.about &&
+        photoUrl == other.photoUrl &&
+        accentColor == other.accentColor &&
+        backgroundColor == other.backgroundColor &&
+        lastUsedPaletteBackgroundColor == other.lastUsedPaletteBackgroundColor &&
+        cardId == other.cardId &&
+        _listEquals(visibleFields, other.visibleFields) &&
+        _listEquals(frontVisibleFields, other.frontVisibleFields) &&
+        _listEquals(backVisibleFields, other.backVisibleFields) &&
+        _listEquals(linkedEventGroupIds, other.linkedEventGroupIds);
+  }
+
   OnboardingCardDraft copyWith({
     String? cardName,
     String? displayName,
@@ -158,6 +184,8 @@ class OnboardingCardDraft {
     String? skills,
     String? school,
     String? about,
+    String? photoUrl,
+    bool clearPhotoUrl = false,
     List<String>? visibleFields,
     List<String>? frontVisibleFields,
     List<String>? backVisibleFields,
@@ -181,6 +209,7 @@ class OnboardingCardDraft {
       skills: skills ?? this.skills,
       school: school ?? this.school,
       about: about ?? this.about,
+      photoUrl: clearPhotoUrl ? null : (photoUrl ?? this.photoUrl),
       visibleFields: visibleFields ?? this.visibleFields,
       frontVisibleFields: frontVisibleFields ?? this.frontVisibleFields,
       backVisibleFields: backVisibleFields ?? this.backVisibleFields,

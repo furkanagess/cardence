@@ -436,6 +436,7 @@ class _SavedCardPreviewTile extends StatelessWidget {
       child: FlippablePersonCard(
         title: displayName,
         titleSecondary: companyName,
+        photoUrl: card.photoUrl,
         frontEntries: frontEntries,
         backEntries: backEntries,
         emptyMessage: 'Kart bilgisi yok',

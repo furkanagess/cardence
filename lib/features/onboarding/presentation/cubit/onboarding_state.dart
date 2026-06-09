@@ -21,7 +21,7 @@ class OnboardingState extends Equatable {
   final bool isSaving;
   final String? errorMessage;
 
-  /// name, professional, contact, optional, preview
+  /// name, professional, contact, optional, preview + renk
   static const int stepCount = 5;
 
   bool get isLastPage => currentPageIndex >= stepCount - 1;

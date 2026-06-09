@@ -13,6 +13,7 @@ class CardSharePayload {
     this.s,
     this.o,
     this.h,
+    this.ph,
   });
 
   /// Kart benzersiz id (cardId).
@@ -37,6 +38,8 @@ class CardSharePayload {
   final String? o;
   /// about (hakkımda)
   final String? h;
+  /// photoUrl
+  final String? ph;
 
   Map<String, dynamic> toJson() => {
         'id': id,
@@ -50,6 +53,7 @@ class CardSharePayload {
         if (s != null && s!.isNotEmpty) 's': s,
         if (o != null && o!.isNotEmpty) 'o': o,
         if (h != null && h!.isNotEmpty) 'h': h,
+        if (ph != null && ph!.isNotEmpty) 'ph': ph,
       };
 
   static CardSharePayload? fromJson(Map<String, dynamic>? json) {
@@ -66,6 +70,7 @@ class CardSharePayload {
       s: json['s'] as String?,
       o: json['o'] as String?,
       h: json['h'] as String?,
+      ph: json['ph'] as String?,
     );
   }
 }

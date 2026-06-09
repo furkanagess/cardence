@@ -18,6 +18,7 @@ public static class BusinessCardMapper
         Skills = entity.Skills,
         School = entity.School,
         About = entity.About,
+        PhotoUrl = entity.PhotoUrl,
         AccentColor = entity.AccentColor,
         BackgroundColor = entity.BackgroundColor,
         LastUsedPaletteBackgroundColor = entity.LastUsedPaletteBackgroundColor,
@@ -38,6 +39,7 @@ public static class BusinessCardMapper
         entity.Skills = dto.Skills;
         entity.School = dto.School;
         entity.About = dto.About;
+        entity.PhotoUrl = dto.PhotoUrl;
         entity.AccentColor = dto.AccentColor;
         entity.BackgroundColor = dto.BackgroundColor;
         entity.LastUsedPaletteBackgroundColor = dto.LastUsedPaletteBackgroundColor;
@@ -58,6 +60,7 @@ public static class BusinessCardMapper
         AddIfNotEmpty(payload, "s", entity.Skills);
         AddIfNotEmpty(payload, "o", entity.School);
         AddIfNotEmpty(payload, "h", entity.About);
+        AddIfNotEmpty(payload, "ph", entity.PhotoUrl);
 
         return payload;
     }

@@ -4,9 +4,11 @@ import 'package:cardence/core/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:qr_flutter/qr_flutter.dart';
+import '../../../../core/network/auth_api_exception.dart';
 import '../../../../core/utils/card_id_generator.dart';
 import '../../../../core/widgets/atoms/cardence_app_bar.dart';
 import '../../../../core/widgets/atoms/custom_button.dart';
+import '../../../../core/widgets/molecules/cardence_confirm_dialog.dart';
 import '../../../../core/widgets/organisms/cardence_scaffold.dart';
 import '../card_customize_colors.dart';
 import '../widgets/collapsible_card_preview_panel.dart';
@@ -34,13 +36,18 @@ class CardDetailPage extends StatefulWidget {
 
 class _CardDetailPageState extends State<CardDetailPage> {
   late OnboardingCardDraft _draft;
+  late OnboardingCardDraft _savedDraft;
+  bool _saving = false;
   String? get _selectedBackground => _draft.backgroundColor;
   String? get _selectedTextColor => _draft.accentColor;
+
+  bool get _hasUnsavedChanges => !_draft.contentEquals(_savedDraft);
 
   @override
   void initState() {
     super.initState();
     _draft = widget.draft;
+    _savedDraft = widget.draft;
   }
 
   static Color? _parseColor(String hex) {
@@ -67,24 +74,76 @@ class _CardDetailPageState extends State<CardDetailPage> {
       !cardBackgroundColorOptions
           .contains(_draft.lastUsedPaletteBackgroundColor);
 
-  Future<void> _persistDraft(OnboardingCardDraft updated) async {
-    final synced = await widget.persistOnboardingCard(updated);
-    if (!mounted) return;
-    setState(() => _draft = synced);
-    widget.onDraftUpdated?.call(synced);
+  void _applyDraft(OnboardingCardDraft updated) {
+    setState(() => _draft = updated);
   }
 
-  Future<void> _setDefaultBackground() async {
-    final updated = _draft.copyWith(clearBackgroundColor: true);
-    await _persistDraft(updated);
+  Future<void> _save() async {
+    if (_saving || !_hasUnsavedChanges) return;
+    setState(() => _saving = true);
+    var draftToSave = _draft;
+    if (!CardIdGenerator.isValid(draftToSave.cardId)) {
+      draftToSave = draftToSave.copyWith(cardId: CardIdGenerator.generate());
+    }
+    try {
+      final synced = await widget.persistOnboardingCard(draftToSave);
+      if (!mounted) return;
+      setState(() {
+        _saving = false;
+        _draft = synced;
+        _savedDraft = synced;
+      });
+      widget.onDraftUpdated?.call(synced);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Kart kaydedildi'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    } on AuthApiException catch (e) {
+      if (!mounted) return;
+      setState(() => _saving = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(e.message),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _saving = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Kart kaydedilemedi. Lütfen tekrar deneyin.'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
   }
 
-  Future<void> _setBackgroundColor(String hex) async {
-    await _persistDraft(_draft.copyWith(backgroundColor: hex));
+  Future<bool> _confirmDiscardChanges() {
+    return CardenceConfirmDialog.show(
+      context,
+      title: 'Kaydedilmemiş değişiklikler',
+      message:
+          'Yaptığınız değişiklikler kaydedilmedi. Çıkmak istediğinize emin misiniz?',
+      confirmLabel: 'Çık',
+      cancelLabel: 'İptal',
+      icon: Icons.warning_amber_rounded,
+      confirmIsDestructive: true,
+    ).then((value) => value == true);
   }
 
-  Future<void> _setBackgroundColorFromPalette(String hex) async {
-    await _persistDraft(
+  void _setDefaultBackground() {
+    _applyDraft(_draft.copyWith(clearBackgroundColor: true));
+  }
+
+  void _setBackgroundColor(String hex) {
+    _applyDraft(_draft.copyWith(backgroundColor: hex));
+  }
+
+  void _setBackgroundColorFromPalette(String hex) {
+    _applyDraft(
       _draft.copyWith(
         backgroundColor: hex,
         lastUsedPaletteBackgroundColor: hex,
@@ -92,12 +151,12 @@ class _CardDetailPageState extends State<CardDetailPage> {
     );
   }
 
-  Future<void> _setDefaultTextColor() async {
-    await _persistDraft(_draft.copyWith(clearAccentColor: true));
+  void _setDefaultTextColor() {
+    _applyDraft(_draft.copyWith(clearAccentColor: true));
   }
 
-  Future<void> _setTextColor(String hex) async {
-    await _persistDraft(_draft.copyWith(accentColor: hex));
+  void _setTextColor(String hex) {
+    _applyDraft(_draft.copyWith(accentColor: hex));
   }
 
   Future<void> _openCustomTextColorPicker() async {
@@ -212,11 +271,11 @@ class _CardDetailPageState extends State<CardDetailPage> {
     );
   }
 
-  Future<void> _showShareQrDialog() async {
+  void _showShareQrDialog() {
     String cardId = _draft.cardId ?? '';
     if (!CardIdGenerator.isValid(cardId)) {
-      await _persistDraft(_draft.copyWith(cardId: CardIdGenerator.generate()));
-      cardId = _draft.cardId ?? cardId;
+      cardId = CardIdGenerator.generate();
+      _applyDraft(_draft.copyWith(cardId: cardId));
     }
     final payload = CardSharePayload(
       id: cardId,
@@ -230,6 +289,7 @@ class _CardDetailPageState extends State<CardDetailPage> {
       s: _draft.skills?.trim().isEmpty ?? true ? null : _draft.skills,
       o: _draft.school?.trim().isEmpty ?? true ? null : _draft.school,
       h: _draft.about?.trim().isEmpty ?? true ? null : _draft.about,
+      ph: _draft.photoUrl?.trim().isEmpty ?? true ? null : _draft.photoUrl,
     );
     final jsonStr = jsonEncode(payload.toJson());
     if (!mounted) return;
@@ -286,13 +346,24 @@ class _CardDetailPageState extends State<CardDetailPage> {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-
-    return CardenceScaffold(
-      backgroundColor: colorScheme.surface,
+    return PopScope(
+      canPop: !_hasUnsavedChanges,
+      onPopInvokedWithResult: (didPop, result) async {
+        if (didPop || !_hasUnsavedChanges) return;
+        final shouldLeave = await _confirmDiscardChanges();
+        if (!mounted || !shouldLeave) return;
+        Navigator.of(context).pop();
+      },
+      child: CardenceScaffold(
       appBar: CardenceAppBar(
+        variant: CardenceAppBarVariant.editor,
         title: _draft.listTitle,
         actions: [
+          CardenceAppBar.textAction(
+            label: 'Kaydet',
+            onPressed: _hasUnsavedChanges ? _save : null,
+            loading: _saving,
+          ),
           CardenceAppBar.iconAction(
             icon: Icons.edit_outlined,
             tooltip: 'Bilgileri düzenle',
@@ -303,12 +374,22 @@ class _CardDetailPageState extends State<CardDetailPage> {
                   builder: (context) => MyCardEditPage(
                     initialDraft: _draft,
                     persistOnboardingCard: widget.persistOnboardingCard,
-                    onDraftUpdated: widget.onDraftUpdated,
+                    onDraftUpdated: (synced) {
+                      widget.onDraftUpdated?.call(synced);
+                      if (!mounted) return;
+                      setState(() {
+                        _draft = synced;
+                        _savedDraft = synced;
+                      });
+                    },
                   ),
                 ),
               );
               if (!mounted || updated == null) return;
-              setState(() => _draft = updated);
+              setState(() {
+                _draft = updated;
+                _savedDraft = updated;
+              });
             },
           ),
         ],
@@ -380,11 +461,12 @@ class _CardDetailPageState extends State<CardDetailPage> {
           ),
         ],
       ),
+      ),
     );
   }
 }
 
-/// Kartı özelleştir bottom sheet: renge tıklanınca hemen uygulanır ve kaydedilir.
+/// Kartı özelleştir bottom sheet: renge tıklanınca önizlemeye yansır; kayıt Kaydet ile yapılır.
 class _CustomizeCardSheetContent extends StatefulWidget {
   const _CustomizeCardSheetContent({
     required this.initialBackgroundSelection,
@@ -409,11 +491,11 @@ class _CustomizeCardSheetContent extends StatefulWidget {
   final String? initialTextSelection;
   final List<String> textColorOptions;
   final Color? Function(String) parseColor;
-  final Future<void> Function() onSelectDefaultBackground;
-  final Future<void> Function(String hex) onSelectBackgroundColor;
+  final VoidCallback onSelectDefaultBackground;
+  final void Function(String hex) onSelectBackgroundColor;
   final VoidCallback onOpenBackgroundPalette;
-  final Future<void> Function() onSelectDefaultTextColor;
-  final Future<void> Function(String hex) onSelectTextColor;
+  final VoidCallback onSelectDefaultTextColor;
+  final void Function(String hex) onSelectTextColor;
   final VoidCallback onOpenTextPalette;
 
   @override
@@ -463,9 +545,9 @@ class _CustomizeCardSheetContentState
     final colorScheme = Theme.of(context).colorScheme;
     final isSelected = _pendingBackground == null;
     return GestureDetector(
-      onTap: () async {
+      onTap: () {
         setState(() => _pendingBackground = null);
-        await widget.onSelectDefaultBackground();
+        widget.onSelectDefaultBackground();
       },
       child: _chipBorder(
         isSelected: isSelected,
@@ -490,9 +572,9 @@ class _CustomizeCardSheetContentState
     if (color == null) return const SizedBox.shrink();
     final isSelected = _pendingBackground == hex;
     return GestureDetector(
-      onTap: () async {
+      onTap: () {
         setState(() => _pendingBackground = hex);
-        await widget.onSelectBackgroundColor(hex);
+        widget.onSelectBackgroundColor(hex);
       },
       child: _chipBorder(
         isSelected: isSelected,
@@ -518,7 +600,7 @@ class _CustomizeCardSheetContentState
     return GestureDetector(
       onTap: () async {
         setState(() => _pendingText = null);
-        await widget.onSelectDefaultTextColor();
+        widget.onSelectDefaultTextColor();
       },
       child: _chipBorder(
         isSelected: isSelected,
@@ -545,7 +627,7 @@ class _CustomizeCardSheetContentState
     return GestureDetector(
       onTap: () async {
         setState(() => _pendingText = hex);
-        await widget.onSelectTextColor(hex);
+        widget.onSelectTextColor(hex);
       },
       child: _chipBorder(
         isSelected: isSelected,

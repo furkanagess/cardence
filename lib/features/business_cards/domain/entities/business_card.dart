@@ -12,6 +12,7 @@ class BusinessCard {
     this.skills,
     this.school,
     this.about,
+    this.photoUrl,
     this.accentColor,
     this.backgroundColor,
     this.lastUsedPaletteBackgroundColor,
@@ -29,6 +30,7 @@ class BusinessCard {
   final String? skills;
   final String? school;
   final String? about;
+  final String? photoUrl;
   final String? accentColor;
   final String? backgroundColor;
   final String? lastUsedPaletteBackgroundColor;

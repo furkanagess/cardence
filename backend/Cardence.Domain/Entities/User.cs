@@ -6,6 +6,7 @@ public sealed class User
     public string? DisplayName { get; set; }
     public string? Email { get; set; }
     public string? Phone { get; set; }
+    public string? PhotoUrl { get; set; }
     public string? PasswordHash { get; set; }
     public bool OnboardingCompleted { get; set; }
     public DateTime CreatedAt { get; set; }

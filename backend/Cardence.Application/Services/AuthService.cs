@@ -20,8 +20,17 @@ public sealed class AuthService : IAuthService
     private readonly IJwtTokenService _jwtTokenService;
     private readonly IAuthTokenStore _authTokenStore;
     private readonly IPasswordHasher _passwordHasher;
+    private readonly IProfilePhotoStorage _profilePhotoStorage;
     private readonly JwtOptions _jwtOptions;
     private readonly ILogger<AuthService> _logger;
+
+    private static readonly HashSet<string> AllowedPhotoContentTypes = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "image/jpeg",
+        "image/jpg",
+        "image/png",
+        "image/webp",
+    };
 
     public AuthService(
         IUserRepository userRepository,
@@ -30,6 +39,7 @@ public sealed class AuthService : IAuthService
         IJwtTokenService jwtTokenService,
         IAuthTokenStore authTokenStore,
         IPasswordHasher passwordHasher,
+        IProfilePhotoStorage profilePhotoStorage,
         IOptions<JwtOptions> jwtOptions,
         ILogger<AuthService> logger)
     {
@@ -39,6 +49,7 @@ public sealed class AuthService : IAuthService
         _jwtTokenService = jwtTokenService;
         _authTokenStore = authTokenStore;
         _passwordHasher = passwordHasher;
+        _profilePhotoStorage = profilePhotoStorage;
         _jwtOptions = jwtOptions.Value;
         _logger = logger;
     }
@@ -547,11 +558,70 @@ public sealed class AuthService : IAuthService
             DisplayName = user.DisplayName,
             Email = user.Email,
             Phone = user.Phone,
+            PhotoUrl = user.PhotoUrl,
             OnboardingCompleted = user.OnboardingCompleted,
             CreatedAt = user.CreatedAt,
             BusinessCards = businessCards.Select(BusinessCardMapper.ToDto).ToList(),
             SavedCards = savedCards.Select(SavedCardMapper.ToDto).ToList(),
         };
+    }
+
+    public async Task<AuthServiceResponse<UserProfileEntity>> UploadProfilePhotoAsync(
+        Guid userId,
+        Stream photoStream,
+        string contentType,
+        long contentLength,
+        CancellationToken cancellationToken = default)
+    {
+        if (contentLength <= 0 || contentLength > 5 * 1024 * 1024)
+        {
+            return AuthServiceResponse<UserProfileEntity>.Fail(
+                400,
+                "InvalidPhoto",
+                "Profil fotoğrafı en fazla 5 MB olabilir.");
+        }
+
+        if (!AllowedPhotoContentTypes.Contains(contentType))
+        {
+            return AuthServiceResponse<UserProfileEntity>.Fail(
+                400,
+                "InvalidPhoto",
+                "Yalnızca JPEG, PNG veya WebP formatları desteklenir.");
+        }
+
+        var user = await _userRepository.GetByIdAsync(userId, cancellationToken);
+        if (user is null)
+        {
+            return AuthServiceResponse<UserProfileEntity>.Fail(
+                AuthErrorCodes.UserNotFound,
+                "UserNotFound",
+                "Kullanıcı bulunamadı.");
+        }
+
+        var photoUrl = await _profilePhotoStorage.SaveProfilePhotoAsync(
+            userId,
+            photoStream,
+            contentType,
+            cancellationToken);
+
+        user.PhotoUrl = photoUrl;
+        user.UpdatedAt = DateTime.UtcNow;
+        await _userRepository.UpdateAsync(user, cancellationToken);
+
+        var businessCards = await _businessCardRepository.GetByUserIdAsync(
+            userId,
+            cancellationToken);
+        foreach (var card in businessCards)
+        {
+            card.PhotoUrl = photoUrl;
+            card.UpdatedAt = DateTime.UtcNow;
+            await _businessCardRepository.UpdateAsync(card, cancellationToken);
+        }
+
+        var profile = await BuildUserProfileAsync(user, cancellationToken);
+        return AuthServiceResponse<UserProfileEntity>.Ok(
+            profile,
+            "Profil fotoğrafı güncellendi.");
     }
 
     private async Task<AuthServiceResponse<object?>> SendResetOtpInternalAsync(

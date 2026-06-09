@@ -43,4 +43,11 @@ public interface IAuthService
     Task<AuthServiceResponse<UserProfileEntity>> CompleteOnboardingAsync(
         Guid userId,
         CancellationToken cancellationToken = default);
+
+    Task<AuthServiceResponse<UserProfileEntity>> UploadProfilePhotoAsync(
+        Guid userId,
+        Stream photoStream,
+        string contentType,
+        long contentLength,
+        CancellationToken cancellationToken = default);
 }

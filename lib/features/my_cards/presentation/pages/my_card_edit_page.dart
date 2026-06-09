@@ -5,6 +5,7 @@ import '../../../../core/utils/card_id_generator.dart';
 import '../../../../core/widgets/atoms/cardence_app_bar.dart';
 import '../../../../core/widgets/atoms/custom_button.dart';
 import '../../../../core/widgets/organisms/cardence_scaffold.dart';
+import '../../../../core/widgets/molecules/cardence_confirm_dialog.dart';
 import '../../../../core/widgets/molecules/skills_chip_input.dart';
 import '../widgets/collapsible_card_preview_panel.dart';
 import '../widgets/my_card_preview_helpers.dart';
@@ -34,6 +35,7 @@ class MyCardEditPage extends StatefulWidget {
 
 class _MyCardEditPageState extends State<MyCardEditPage> {
   final _formKey = GlobalKey<FormState>();
+  late OnboardingCardDraft _baselineDraft;
   late String _cardId;
   late TextEditingController _cardNameController;
   late TextEditingController _nameController;
@@ -50,10 +52,13 @@ class _MyCardEditPageState extends State<MyCardEditPage> {
 
   static Map<String, String> get _labels => MyCardPreviewHelpers.fieldLabels;
 
+  bool get _hasUnsavedChanges => !_buildDraft().contentEquals(_baselineDraft);
+
   @override
   void initState() {
     super.initState();
     final d = widget.initialDraft;
+    _baselineDraft = d;
     _cardId = CardIdGenerator.isValid(d.cardId) ? d.cardId!.trim() : CardIdGenerator.generate();
     _cardNameController =
         TextEditingController(text: d.cardName ?? d.listTitle);
@@ -84,7 +89,7 @@ class _MyCardEditPageState extends State<MyCardEditPage> {
   }
 
   OnboardingCardDraft _buildDraft() {
-    final base = widget.initialDraft;
+    final base = _baselineDraft;
     return base.copyWith(
       cardId: _cardId,
       cardName: _cardNameController.text.trim().isEmpty
@@ -137,7 +142,10 @@ class _MyCardEditPageState extends State<MyCardEditPage> {
     try {
       final updated = await widget.persistOnboardingCard(draft);
       if (!mounted) return;
-      setState(() => _saving = false);
+      setState(() {
+        _saving = false;
+        _baselineDraft = updated;
+      });
       widget.onDraftUpdated?.call(updated);
       if (popAfter) {
         Navigator.of(context).pop(updated);
@@ -163,13 +171,50 @@ class _MyCardEditPageState extends State<MyCardEditPage> {
     }
   }
 
+  void _applyDraftFromSaved(OnboardingCardDraft draft) {
+    setState(() {
+      _baselineDraft = draft;
+      _cardId = CardIdGenerator.isValid(draft.cardId)
+          ? draft.cardId!.trim()
+          : _cardId;
+      _cardNameController.text = draft.cardName ?? draft.listTitle;
+      _nameController.text = draft.displayName ?? '';
+      _emailController.text = draft.email ?? '';
+      _companyController.text = draft.company ?? '';
+      _titleController.text = draft.title ?? '';
+      _websiteController.text = draft.website ?? '';
+      _linkedInController.text = draft.linkedin ?? '';
+      _schoolController.text = draft.school ?? '';
+      _aboutController.text = draft.about ?? '';
+      _skillsValue = draft.skills;
+      _phoneFullNumber = draft.phone;
+    });
+  }
+
+  Future<bool> _confirmDiscardChanges() {
+    return CardenceConfirmDialog.show(
+      context,
+      title: 'Kaydedilmemiş değişiklikler',
+      message:
+          'Yaptığınız değişiklikler kaydedilmedi. Çıkmak istediğinize emin misiniz?',
+      confirmLabel: 'Çık',
+      cancelLabel: 'İptal',
+      icon: Icons.warning_amber_rounded,
+      confirmIsDestructive: true,
+    ).then((value) => value == true);
+  }
+
   void _openDesignAndShare(OnboardingCardDraft draft) {
     Navigator.of(context).push(
       MaterialPageRoute<void>(
         builder: (context) => CardDetailPage(
           draft: draft,
           persistOnboardingCard: widget.persistOnboardingCard,
-          onDraftUpdated: widget.onDraftUpdated,
+          onDraftUpdated: (updated) {
+            widget.onDraftUpdated?.call(updated);
+            if (!mounted) return;
+            _applyDraftFromSaved(updated);
+          },
         ),
       ),
     );
@@ -244,8 +289,15 @@ class _MyCardEditPageState extends State<MyCardEditPage> {
     final colorScheme = theme.colorScheme;
     final previewDraft = _buildDraft();
 
-    return CardenceScaffold(
-      backgroundColor: colorScheme.surface,
+    return PopScope(
+      canPop: !_hasUnsavedChanges,
+      onPopInvokedWithResult: (didPop, result) async {
+        if (didPop || !_hasUnsavedChanges) return;
+        final shouldLeave = await _confirmDiscardChanges();
+        if (!mounted || !shouldLeave) return;
+        Navigator.of(context).pop();
+      },
+      child: CardenceScaffold(
       appBar: CardenceAppBar(
         variant: CardenceAppBarVariant.editor,
         title: widget.isNewCard ? 'Yeni kart' : 'Kartı düzenle',
@@ -264,8 +316,6 @@ class _MyCardEditPageState extends State<MyCardEditPage> {
           children: [
             CollapsibleCardPreviewPanel(
               draft: previewDraft,
-              initiallyExpanded: !widget.isNewCard,
-              isLivePreview: true,
               emptyMessage: 'Bilgi girildikçe kartta görünür',
             ),
             Expanded(
@@ -366,11 +416,7 @@ class _MyCardEditPageState extends State<MyCardEditPage> {
                       CustomButton(
                         label: 'Tasarım ve paylaşım',
                         icon: Icons.palette_outlined,
-                        onPressed: () async {
-                          await _save(popAfter: false);
-                          if (!mounted) return;
-                          _openDesignAndShare(_buildDraft());
-                        },
+                        onPressed: () => _openDesignAndShare(_buildDraft()),
                         style: FilledButton.styleFrom(
                           backgroundColor: AppColors.primary,
                           foregroundColor: AppColors.textOnPrimary,
@@ -389,6 +435,7 @@ class _MyCardEditPageState extends State<MyCardEditPage> {
             ),
           ],
         ),
+      ),
       ),
     );
   }

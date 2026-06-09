@@ -4,6 +4,7 @@ using Cardence.Infrastructure.Auth;
 using Cardence.Infrastructure.Health;
 using Cardence.Infrastructure.Persistence;
 using Cardence.Infrastructure.Repositories;
+using Cardence.Infrastructure.Storage;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -55,7 +56,9 @@ public static class DependencyInjection
         services.AddScoped<ISavedCardRepository, SavedCardRepository>();
         services.AddScoped<IWalletEntitlementRepository, WalletEntitlementRepository>();
         services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<ISupportRequestRepository, SupportRequestRepository>();
         services.AddScoped<IHealthStatusReader, HealthStatusReader>();
+        services.AddScoped<IProfilePhotoStorage, LocalProfilePhotoStorage>();
 
         return services;
     }

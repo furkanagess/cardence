@@ -16,6 +16,7 @@ public sealed class BusinessCard
     public string? Skills { get; set; }
     public string? School { get; set; }
     public string? About { get; set; }
+    public string? PhotoUrl { get; set; }
     public string? AccentColor { get; set; }
     public string? BackgroundColor { get; set; }
     public string? LastUsedPaletteBackgroundColor { get; set; }
