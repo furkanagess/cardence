@@ -12,26 +12,33 @@ class ChuckInterceptorService {
   static final ChuckInterceptorService instance = ChuckInterceptorService._();
 
   Chuck? _chuck;
+  GlobalKey<NavigatorState>? _boundNavigatorKey;
 
   bool get isActive => _chuck != null && AppEnv.isChuckEnabled;
 
-  GlobalKey<NavigatorState>? get navigatorKey => _chuck?.getNavigatorKey();
+  GlobalKey<NavigatorState>? get navigatorKey =>
+      _boundNavigatorKey ?? _chuck?.getNavigatorKey();
 
   Interceptor? get dioInterceptor => _chuck?.getDioInterceptor();
 
   /// Chuck instance hazırlar. [DioClient] oluşturulmadan önce çağrılmalı.
   void initialize({GlobalKey<NavigatorState>? navigatorKey}) {
     if (!AppEnv.isChuckEnabled) return;
+
+    if (navigatorKey != null) {
+      _boundNavigatorKey = navigatorKey;
+    }
+
     if (_chuck != null) return;
 
     _chuck = Chuck(
-      navigatorKey: navigatorKey,
+      navigatorKey: _boundNavigatorKey,
       showNotification: false,
       showInspectorOnShake: true,
     );
   }
 
-  /// Idempotent başlatma.
+  /// Idempotent başlatma; [navigatorKey] bir kez bağlandıktan sonra saklanır.
   void ensureInitialized({GlobalKey<NavigatorState>? navigatorKey}) {
     if (!AppEnv.isChuckEnabled) return;
     initialize(navigatorKey: navigatorKey);
@@ -46,7 +53,7 @@ class ChuckInterceptorService {
   /// Inspector ekranını açar.
   void showInspector() {
     if (!AppEnv.isChuckEnabled) return;
-    ensureInitialized();
+    ensureInitialized(navigatorKey: _boundNavigatorKey);
     _chuck?.showInspector();
   }
 }

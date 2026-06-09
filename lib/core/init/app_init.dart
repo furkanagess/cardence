@@ -2,7 +2,6 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/widgets.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../network/interceptors/chuck_interceptor_service.dart';
 import '../../firebase_options.dart';
 import '../../features/auth/data/datasources/auth_local_datasource.dart';
 import '../../features/auth/data/datasources/auth_remote_datasource.dart';
@@ -64,7 +63,6 @@ class AppInit {
   /// Tüm bağımlılıkları ve servisleri başlatır. Uygulama açılmadan önce tek sefer çağrılmalı.
   static Future<AppInitResult> init() async {
     WidgetsFlutterBinding.ensureInitialized();
-    ChuckInterceptorService.instance.ensureInitialized();
     await _initFirebase();
     final prefs = await _initSharedPreferences();
     final authLocal = AuthLocalDataSourceImpl(prefs);
@@ -81,6 +79,7 @@ class AppInit {
     );
     final walletLocal = WalletEntitlementLocalDataSourceImpl(prefs);
     final walletRepo = WalletEntitlementRepositoryImpl(walletLocal);
+    final eventGroupLocal = EventGroupLocalDataSourceImpl(prefs);
 
     final syncUserProfileCards = SyncUserProfileCards(
       savedCardRepo,
@@ -88,15 +87,16 @@ class AppInit {
       syncOnboardingFromServer,
     );
     final clearUserScopedLocalData = ClearUserScopedLocalData(
-      authLocal,
-      savedCardLocal,
-      onboardingLocal,
+      authLocal: authLocal,
+      savedCardLocal: savedCardLocal,
+      onboardingLocal: onboardingLocal,
+      prefs: prefs,
     );
 
     final auth = _initAuth(
       authLocal: authLocal,
       onProfileSynced: syncUserProfileCards.call,
-      onLogout: clearUserScopedLocalData.call,
+      onLogout: () => clearUserScopedLocalData(),
     );
     final businessCards = _initBusinessCards(prefs, authLocal);
     final onboarding = _initOnboarding(
@@ -111,7 +111,7 @@ class AppInit {
     );
     final theme = _initTheme(prefs);
 
-    final eventGroups = _initEventGroups(prefs);
+    final eventGroups = _initEventGroups(eventGroupLocal);
     final savedCards = _initSavedCards(
       savedCardRepo: savedCardRepo,
       walletRepo: walletRepo,
@@ -173,8 +173,7 @@ class AppInit {
   static ({
     GetEventGroups getEventGroups,
     SaveEventGroups saveEventGroups,
-  }) _initEventGroups(SharedPreferences prefs) {
-    final local = EventGroupLocalDataSourceImpl(prefs);
+  }) _initEventGroups(EventGroupLocalDataSource local) {
     final repo = EventGroupRepositoryImpl(local);
     return (
       getEventGroups: GetEventGroups(repo),

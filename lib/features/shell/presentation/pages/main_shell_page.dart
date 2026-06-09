@@ -54,7 +54,7 @@ class MainShellPage extends StatefulWidget {
   final UpgradeWalletPlan upgradeWalletPlan;
   final ThemePreference themePreference;
   final ValueChanged<ThemePreference> onThemeChanged;
-  final VoidCallback onLogout;
+  final Future<void> Function() onLogout;
 
   @override
   State<MainShellPage> createState() => _MainShellPageState();

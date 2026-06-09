@@ -13,6 +13,7 @@ abstract class SavedCardLocalDataSource {
   Future<void> deleteCard(String cardId);
   Future<void> replaceAll(List<SavedCardModel> cards);
   Future<void> clearForUser(String userId);
+  Future<void> clearLegacyKeys();
 }
 
 class SavedCardLocalDataSourceImpl implements SavedCardLocalDataSource {
@@ -79,5 +80,11 @@ class SavedCardLocalDataSourceImpl implements SavedCardLocalDataSource {
   @override
   Future<void> clearForUser(String userId) async {
     await _prefs.remove(savedCardsStorageKey(userId));
+  }
+
+  @override
+  Future<void> clearLegacyKeys() async {
+    await _prefs.remove(_legacyKeySavedCards);
+    await _prefs.remove('${_legacyKeySavedCards}_guest');
   }
 }

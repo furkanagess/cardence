@@ -2,21 +2,52 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/atoms/cardence_app_bar.dart';
+import '../../../../core/widgets/atoms/custom_button.dart';
+import '../../../../core/widgets/molecules/cardence_confirm_dialog.dart';
 import '../../../../core/widgets/organisms/cardence_scaffold.dart';
 import '../../domain/entities/theme_preference.dart';
 
-/// Ayarlar sayfası – tema değişimi ve diğer ayarlar.
-class SettingsPage extends StatelessWidget {
+/// Ayarlar sayfası – tema değişimi ve çıkış.
+class SettingsPage extends StatefulWidget {
   const SettingsPage({
     super.key,
     required this.currentTheme,
     required this.onThemeChanged,
-    this.onLogout,
+    required this.onLogout,
   });
 
   final ThemePreference currentTheme;
   final ValueChanged<ThemePreference> onThemeChanged;
-  final VoidCallback? onLogout;
+  final Future<void> Function() onLogout;
+
+  @override
+  State<SettingsPage> createState() => _SettingsPageState();
+}
+
+class _SettingsPageState extends State<SettingsPage> {
+  bool _loggingOut = false;
+
+  Future<void> _confirmAndLogout() async {
+    if (_loggingOut) return;
+
+    final confirmed = await CardenceConfirmDialog.show(
+      context,
+      title: 'Çıkış yap',
+      message:
+          'Oturumunuz kapatılacak ve giriş ekranına yönlendirileceksiniz. Kayıtlı kartlarınız bir sonraki girişinizde yeniden yüklenecektir.',
+      confirmLabel: 'Çıkış yap',
+      icon: Icons.logout_rounded,
+      confirmIsDestructive: true,
+    );
+    if (!mounted || confirmed != true) return;
+
+    setState(() => _loggingOut = true);
+    try {
+      await widget.onLogout();
+    } finally {
+      if (mounted) setState(() => _loggingOut = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -24,65 +55,61 @@ class SettingsPage extends StatelessWidget {
       appBar: const CardenceAppBar(
         title: 'Ayarlar',
       ),
-      body: ListView(
-        padding: const EdgeInsets.symmetric(vertical: 16),
+      body: Column(
         children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: Text(
-              'Görünüm',
-              style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                    color: AppColors.textSecondary,
-                    fontWeight: FontWeight.w600,
+          Expanded(
+            child: ListView(
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              children: [
+                Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  child: Text(
+                    'Görünüm',
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                          color: AppColors.textSecondary,
+                          fontWeight: FontWeight.w600,
+                        ),
                   ),
+                ),
+                _ThemeTile(
+                  title: 'Açık tema',
+                  subtitle: 'Her zaman açık renk teması',
+                  value: widget.currentTheme == ThemePreference.light,
+                  onTap: () => widget.onThemeChanged(ThemePreference.light),
+                ),
+                _ThemeTile(
+                  title: 'Koyu tema',
+                  subtitle: 'Her zaman koyu renk teması',
+                  value: widget.currentTheme == ThemePreference.dark,
+                  onTap: () => widget.onThemeChanged(ThemePreference.dark),
+                ),
+                _ThemeTile(
+                  title: 'Sistem',
+                  subtitle: 'Cihaz ayarına göre (açık/koyu)',
+                  value: widget.currentTheme == ThemePreference.system,
+                  onTap: () => widget.onThemeChanged(ThemePreference.system),
+                ),
+              ],
             ),
           ),
-          _ThemeTile(
-            title: 'Açık tema',
-            subtitle: 'Her zaman açık renk teması',
-            value: currentTheme == ThemePreference.light,
-            onTap: () => onThemeChanged(ThemePreference.light),
-          ),
-          _ThemeTile(
-            title: 'Koyu tema',
-            subtitle: 'Her zaman koyu renk teması',
-            value: currentTheme == ThemePreference.dark,
-            onTap: () => onThemeChanged(ThemePreference.dark),
-          ),
-          _ThemeTile(
-            title: 'Sistem',
-            subtitle: 'Cihaz ayarına göre (açık/koyu)',
-            value: currentTheme == ThemePreference.system,
-            onTap: () => onThemeChanged(ThemePreference.system),
-          ),
-          if (onLogout != null) ...[
-            const SizedBox(height: 16),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              child: Text(
-                'Hesap',
-                style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                      color: AppColors.textSecondary,
-                      fontWeight: FontWeight.w600,
-                    ),
-              ),
-            ),
-            ListTile(
-              leading: Icon(
-                Icons.logout_rounded,
-                color: Theme.of(context).colorScheme.error,
-              ),
-              title: Text(
-                'Çıkış yap',
-                style: TextStyle(
-                  color: Theme.of(context).colorScheme.error,
-                  fontWeight: FontWeight.w600,
+          SafeArea(
+            top: false,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+              child: CustomButton(
+                label: 'Çıkış yap',
+                icon: Icons.logout_rounded,
+                isLoading: _loggingOut,
+                enabled: !_loggingOut,
+                onPressed: _confirmAndLogout,
+                style: FilledButton.styleFrom(
+                  backgroundColor: AppColors.error,
+                  foregroundColor: AppColors.textOnPrimary,
                 ),
               ),
-              subtitle: const Text('Oturumu kapat ve giriş ekranına dön'),
-              onTap: onLogout,
             ),
-          ],
+          ),
         ],
       ),
     );
@@ -108,7 +135,8 @@ class _ThemeTile extends StatelessWidget {
       title: Text(title),
       subtitle: Text(subtitle),
       trailing: value
-          ? Icon(Icons.check_circle, color: Theme.of(context).colorScheme.primary)
+          ? Icon(Icons.check_circle,
+              color: Theme.of(context).colorScheme.primary)
           : null,
       onTap: onTap,
     );

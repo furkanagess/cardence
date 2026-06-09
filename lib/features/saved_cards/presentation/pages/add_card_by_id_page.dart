@@ -1,9 +1,11 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../../../../core/widgets/atoms/cardence_app_bar.dart';
 import '../../../../core/widgets/atoms/custom_button.dart';
+import '../../../../core/widgets/atoms/custom_text_field.dart';
 import '../../../../core/widgets/organisms/cardence_scaffold.dart';
 import '../../domain/entities/add_saved_card_result.dart';
 import '../../../../core/utils/card_id_generator.dart';
@@ -144,10 +146,18 @@ class _AddCardByIdPageState extends State<AddCardByIdPage> {
               TextFormField(
                 controller: _cardIdController,
                 validator: _validateCardId,
-                decoration: const InputDecoration(
+                keyboardType: TextInputType.number,
+                maxLength: CardIdGenerator.length,
+                inputFormatters: [
+                  FilteringTextInputFormatter.digitsOnly,
+                  LengthLimitingTextInputFormatter(CardIdGenerator.length),
+                ],
+                decoration: CustomTextField.themedDecoration(
+                  context,
                   labelText: 'Kart ID',
-                  hintText: 'ör. 482917',
-                  prefixIcon: Icon(Icons.badge_outlined),
+                  hintText: '482917',
+                  prefixIcon: const Icon(Icons.badge_outlined),
+                  maxLength: CardIdGenerator.length,
                 ),
                 textInputAction: TextInputAction.done,
                 autocorrect: false,

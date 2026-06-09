@@ -3,15 +3,23 @@ import 'package:flutter_native_splash/flutter_native_splash.dart';
 
 import 'app.dart';
 import 'core/init/app_init.dart';
+import 'core/network/interceptors/chuck_interceptor_service.dart';
+
+final GlobalKey<NavigatorState> rootNavigatorKey = GlobalKey<NavigatorState>();
 
 void main() async {
   final widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
 
+  ChuckInterceptorService.instance.ensureInitialized(
+    navigatorKey: rootNavigatorKey,
+  );
+
   final result = await AppInit.init();
   FlutterNativeSplash.remove();
 
   runApp(App(
+    rootNavigatorKey: rootNavigatorKey,
     restoreAuthSession: result.restoreAuthSession,
     loginWithEmail: result.loginWithEmail,
     loginWithPhone: result.loginWithPhone,

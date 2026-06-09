@@ -21,6 +21,7 @@ import '../widgets/add_saved_card_sheet.dart';
 import '../widgets/saved_card_list_tile.dart';
 import '../widgets/saved_cards_add_card_fab.dart';
 import '../widgets/saved_cards_screen_toolbar.dart';
+import '../widgets/saved_cards_loading_shimmer.dart';
 import '../widgets/saved_cards_wallet_strip.dart';
 import '../widgets/wallet_upgrade_sheet.dart';
 import 'add_card_by_id_page.dart';
@@ -71,6 +72,7 @@ class _SavedCardsPageState extends State<SavedCardsPage> {
   List<SavedCard> _cards = [];
   List<EventGroup> _eventGroups = [];
   SavedCardsWalletQuota? _quota;
+  bool _isLoadingCards = true;
   late List<SavedCard> _dummyCardsOrder;
   int? _draggingCardIndex;
   int? _hoverTargetIndex;
@@ -110,6 +112,7 @@ class _SavedCardsPageState extends State<SavedCardsPage> {
     if (!mounted) return;
     setState(() {
       _cards = list;
+      _isLoadingCards = false;
       if (SavedCardsCatalog.isUsingDemoCards(list)) {
         _dummyCardsOrder = SavedCardsCatalog.demoDisplayList(list);
       }
@@ -296,7 +299,9 @@ class _SavedCardsPageState extends State<SavedCardsPage> {
                 },
               ),
               Expanded(
-                child: displayCards.isEmpty
+                child: _isLoadingCards
+                    ? const SavedCardsLoadingShimmer()
+                    : displayCards.isEmpty
                     ? _EmptyResultsView(
                         hasFilters: _hasActiveFilters,
                         onClearFilters: () {

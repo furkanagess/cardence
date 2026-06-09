@@ -6,19 +6,21 @@ abstract class WalletEntitlementLocalDataSource {
   Future<WalletPlanTier> getPlanTier();
 
   Future<void> setPlanTier(WalletPlanTier tier);
+
+  Future<void> clear();
 }
 
 class WalletEntitlementLocalDataSourceImpl
     implements WalletEntitlementLocalDataSource {
   WalletEntitlementLocalDataSourceImpl(this._prefs);
 
-  static const _keyPlanTier = 'wallet_plan_tier';
+  static const walletPlanTierStorageKey = 'wallet_plan_tier';
 
   final SharedPreferences _prefs;
 
   @override
   Future<WalletPlanTier> getPlanTier() async {
-    final raw = _prefs.getString(_keyPlanTier);
+    final raw = _prefs.getString(walletPlanTierStorageKey);
     if (raw == WalletPlanTier.premium.name) {
       return WalletPlanTier.premium;
     }
@@ -27,6 +29,11 @@ class WalletEntitlementLocalDataSourceImpl
 
   @override
   Future<void> setPlanTier(WalletPlanTier tier) async {
-    await _prefs.setString(_keyPlanTier, tier.name);
+    await _prefs.setString(walletPlanTierStorageKey, tier.name);
+  }
+
+  @override
+  Future<void> clear() async {
+    await _prefs.remove(walletPlanTierStorageKey);
   }
 }

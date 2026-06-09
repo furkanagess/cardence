@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
 import 'core/constants/app_constants.dart';
-import 'core/network/interceptors/chuck_interceptor_service.dart';
 import 'core/theme/app_theme.dart';
 import 'core/widgets/molecules/chuck_fab_overlay.dart';
+import 'core/widgets/organisms/cardence_connect_animation.dart';
 import 'core/widgets/organisms/cardence_scaffold.dart';
 import 'features/auth/domain/usecases/forgot_password.dart';
 import 'features/auth/domain/usecases/get_current_user.dart';
@@ -41,6 +41,7 @@ enum _AppDestination { loading, login, onboarding, main }
 class App extends StatefulWidget {
   const App({
     super.key,
+    required this.rootNavigatorKey,
     required this.restoreAuthSession,
     required this.loginWithEmail,
     required this.loginWithPhone,
@@ -69,6 +70,7 @@ class App extends StatefulWidget {
     required this.upgradeWalletPlan,
   });
 
+  final GlobalKey<NavigatorState> rootNavigatorKey;
   final RestoreAuthSession restoreAuthSession;
   final LoginWithEmail loginWithEmail;
   final LoginWithPhone loginWithPhone;
@@ -165,8 +167,8 @@ class _AppState extends State<App> {
 
   Future<void> _onLogout() async {
     await widget.logout();
-    await widget.syncOnboardingFromServer(completed: false);
     if (!mounted) return;
+    widget.rootNavigatorKey.currentState?.popUntil((route) => route.isFirst);
     setState(() => _destination = _AppDestination.login);
   }
 
@@ -230,7 +232,7 @@ class _AppState extends State<App> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      navigatorKey: ChuckInterceptorService.instance.navigatorKey,
+      navigatorKey: widget.rootNavigatorKey,
       title: 'Cardence',
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
@@ -252,7 +254,6 @@ class _SplashContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
 
     return CardenceScaffold(
       showWatermark: false,
@@ -261,29 +262,17 @@ class _SplashContent extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Image.asset(
-              isDark
-                  ? 'assets/icons/cardence_logo_splash_white.png'
-                  : 'assets/icons/cardence_logo-removebg.png',
-              width: 120,
-              height: 120,
-              fit: BoxFit.contain,
-            ),
-            const SizedBox(height: 32),
-            SizedBox(
-              width: 28,
-              height: 28,
-              child: CircularProgressIndicator(
-                strokeWidth: 2.5,
-                color: theme.colorScheme.primary,
-              ),
+            const CardenceConnectAnimation(
+              size: 220,
+              repeat: true,
             ),
             const SizedBox(height: 24),
             Text(
               AppConstants.appName,
               style: theme.textTheme.headlineSmall?.copyWith(
                 color: theme.colorScheme.onSurface,
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.w800,
+                letterSpacing: -0.4,
               ),
             ),
             const SizedBox(height: 4),

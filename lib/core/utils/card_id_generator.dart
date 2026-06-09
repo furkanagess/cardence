@@ -4,6 +4,8 @@ import 'dart:math';
 class CardIdGenerator {
   CardIdGenerator._();
 
+  static const int length = 6;
+
   static final Random _random = Random();
 
   static final RegExp cardIdPattern = RegExp(r'^\d{6}$');

@@ -26,6 +26,7 @@ abstract class OnboardingLocalDataSource {
   Future<List<OnboardingCardDraftModel>> getDraftCards();
   Future<void> replaceAllDraftCards(List<OnboardingCardDraftModel> drafts);
   Future<void> clearForUser(String userId);
+  Future<void> clearLegacyKeys();
 }
 
 class OnboardingLocalDataSourceImpl implements OnboardingLocalDataSource {
@@ -184,5 +185,15 @@ class OnboardingLocalDataSourceImpl implements OnboardingLocalDataSource {
     await _prefs.remove(onboardingCompletedStorageKey(userId));
     await _prefs.remove(onboardingDraftCardsStorageKey(userId));
     await _prefs.remove(onboardingDraftCardStorageKey(userId));
+  }
+
+  @override
+  Future<void> clearLegacyKeys() async {
+    await _prefs.remove(_legacyKeyOnboardingCompleted);
+    await _prefs.remove(_legacyKeyDraftCard);
+    await _prefs.remove(_legacyKeyDraftCards);
+    await _prefs.remove('${_legacyKeyOnboardingCompleted}_guest');
+    await _prefs.remove('${_legacyKeyDraftCard}_guest');
+    await _prefs.remove('${_legacyKeyDraftCards}_guest');
   }
 }
