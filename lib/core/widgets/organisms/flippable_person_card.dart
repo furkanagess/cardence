@@ -22,6 +22,7 @@ class FlippablePersonCard extends StatefulWidget {
     this.backgroundColor,
     this.photoUrl,
     this.onTap,
+    this.showAppLogo = true,
   });
 
   final String? title;
@@ -45,6 +46,9 @@ class FlippablePersonCard extends StatefulWidget {
   final Color? backgroundColor;
   final String? photoUrl;
   final VoidCallback? onTap;
+
+  /// false: Cardence köşe logosu gizlenir (elle girilen kartlar).
+  final bool showAppLogo;
 
   /// Kartvizit oranı: genişlik / yükseklik (ISO 7810 ID-1 ~ 85.6×53.98 mm).
   static const double cardAspectRatio = 1.586;
@@ -159,6 +163,7 @@ class _FlippablePersonCardState extends State<FlippablePersonCard>
           backgroundColor: widget.backgroundColor,
           photoUrl: widget.photoUrl,
           titleRightInset: _titleRightInsetForFlip,
+          showAppLogo: widget.showAppLogo,
         ),
       ),
     );
@@ -242,6 +247,7 @@ class _FlippablePersonCardState extends State<FlippablePersonCard>
                 accentColor: widget.accentColor,
                 backgroundColor: widget.backgroundColor,
                 titleRightInset: _titleRightInsetForFlip,
+                showAppLogo: widget.showAppLogo,
               ),
       ),
     );

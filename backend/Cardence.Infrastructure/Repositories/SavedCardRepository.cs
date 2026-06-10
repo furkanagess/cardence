@@ -8,22 +8,29 @@ namespace Cardence.Infrastructure.Repositories;
 public sealed class SavedCardRepository : ISavedCardRepository
 {
     private readonly CardenceDbContext _dbContext;
+    private readonly IEventGroupRepository _eventGroupRepository;
 
-    public SavedCardRepository(CardenceDbContext dbContext)
+    public SavedCardRepository(
+        CardenceDbContext dbContext,
+        IEventGroupRepository eventGroupRepository)
     {
         _dbContext = dbContext;
+        _eventGroupRepository = eventGroupRepository;
     }
 
     public async Task<IReadOnlyList<SavedCard>> GetByUserIdAsync(
         Guid userId,
         CancellationToken cancellationToken = default)
     {
-        return await _dbContext.SavedCards
+        var cards = await _dbContext.SavedCards
             .AsNoTracking()
             .Where(card => card.UserId == userId)
             .OrderBy(card => card.SortOrder)
             .ThenByDescending(card => card.SavedAt)
             .ToListAsync(cancellationToken);
+
+        await _eventGroupRepository.PopulateLinkedGroupIdsAsync(cards, cancellationToken);
+        return cards;
     }
 
     public async Task<SavedCard?> GetByUserAndCardIdAsync(

@@ -5,7 +5,9 @@ import '../../../../core/constants/app_constants.dart';
 import '../../../../core/widgets/atoms/cardence_app_bar.dart';
 import '../../../../core/widgets/organisms/cardence_scaffold.dart';
 import '../../../event_groups/domain/usecases/get_event_groups.dart';
-import '../../../event_groups/domain/usecases/save_event_groups.dart';
+import '../../../event_groups/domain/usecases/create_event_group.dart';
+import '../../../event_groups/domain/usecases/delete_event_group.dart';
+import '../../../event_groups/domain/usecases/link_event_group_cards.dart';
 import '../../../saved_cards/domain/usecases/add_saved_card.dart';
 import '../../../saved_cards/domain/usecases/delete_saved_card.dart';
 import '../../../saved_cards/domain/usecases/get_saved_cards.dart';
@@ -35,7 +37,9 @@ class MainShellPage extends StatefulWidget {
     required this.getOnboardingDraftCards,
     required this.persistOnboardingCard,
     required this.getEventGroups,
-    required this.saveEventGroups,
+    required this.createEventGroup,
+    required this.deleteEventGroup,
+    required this.linkEventGroupCards,
     required this.getSavedCards,
     required this.saveSavedCard,
     required this.getSavedCardsWalletQuota,
@@ -54,7 +58,9 @@ class MainShellPage extends StatefulWidget {
   final GetOnboardingDraftCards getOnboardingDraftCards;
   final PersistOnboardingCard persistOnboardingCard;
   final GetEventGroups getEventGroups;
-  final SaveEventGroups saveEventGroups;
+  final CreateEventGroup createEventGroup;
+  final DeleteEventGroup deleteEventGroup;
+  final LinkEventGroupCards linkEventGroupCards;
   final GetSavedCards getSavedCards;
   final SaveSavedCard saveSavedCard;
   final GetSavedCardsWalletQuota getSavedCardsWalletQuota;
@@ -132,23 +138,24 @@ class _MainShellPageState extends State<MainShellPage> {
 
   @override
   Widget build(BuildContext context) {
-    return CardenceScaffold(
-      appBar: _buildAppBar(context),
-      body: IndexedStack(
-        index: _currentIndex,
-        children: [
-          BlocProvider(
-            create: (_) => SavedCardsCubit(
-              getSavedCards: widget.getSavedCards,
-              saveSavedCard: widget.saveSavedCard,
+    return BlocProvider(
+      create: (_) => SavedCardsCubit(
+        getSavedCards: widget.getSavedCards,
+        saveSavedCard: widget.saveSavedCard,
+        getEventGroups: widget.getEventGroups,
+        getSavedCardsWalletQuota: widget.getSavedCardsWalletQuota,
+        upgradeWalletPlan: widget.upgradeWalletPlan,
+      )..load(),
+      child: CardenceScaffold(
+        appBar: _buildAppBar(context),
+        body: IndexedStack(
+          index: _currentIndex,
+          children: [
+            SavedCardsPage(
               getEventGroups: widget.getEventGroups,
-              getSavedCardsWalletQuota: widget.getSavedCardsWalletQuota,
-              upgradeWalletPlan: widget.upgradeWalletPlan,
-            )..load(),
-            child: SavedCardsPage(
-              getEventGroups: widget.getEventGroups,
               getSavedCards: widget.getSavedCards,
-              saveEventGroups: widget.saveEventGroups,
+              deleteEventGroup: widget.deleteEventGroup,
+              linkEventGroupCards: widget.linkEventGroupCards,
               saveSavedCard: widget.saveSavedCard,
               deleteSavedCard: widget.deleteSavedCard,
               addSavedCard: widget.addSavedCard,
@@ -159,32 +166,34 @@ class _MainShellPageState extends State<MainShellPage> {
               filterTrigger: _savedCardsFilterTrigger,
               addCardTrigger: _savedCardsAddCardTrigger,
             ),
-          ),
-          EventGroupsPage(
-            getEventGroups: widget.getEventGroups,
-            saveEventGroups: widget.saveEventGroups,
-            getSavedCards: widget.getSavedCards,
-            saveSavedCard: widget.saveSavedCard,
-            deleteSavedCard: widget.deleteSavedCard,
-            createGroupTrigger: _eventGroupsCreateTrigger,
-          ),
-          ProfilePage(
-            draft: _myCardDraft,
-            getOnboardingDraftCards: widget.getOnboardingDraftCards,
-            persistOnboardingCard: widget.persistOnboardingCard,
-            onDraftUpdated: (updated) => setState(() => _myCardDraft = updated),
-          ),
-        ],
-      ),
-      extendBody: true,
-      bottomNavigationBar: SafeArea(
-        top: false,
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(24, 0, 24, 16),
-          child: _LiquidGlassBottomNavBar(
-            currentIndex: _currentIndex,
-            itemCount: 3,
-            onTap: (index) => setState(() => _currentIndex = index),
+            EventGroupsPage(
+              getEventGroups: widget.getEventGroups,
+              createEventGroup: widget.createEventGroup,
+              deleteEventGroup: widget.deleteEventGroup,
+              linkEventGroupCards: widget.linkEventGroupCards,
+              getSavedCards: widget.getSavedCards,
+              saveSavedCard: widget.saveSavedCard,
+              deleteSavedCard: widget.deleteSavedCard,
+              createGroupTrigger: _eventGroupsCreateTrigger,
+            ),
+            ProfilePage(
+              draft: _myCardDraft,
+              getOnboardingDraftCards: widget.getOnboardingDraftCards,
+              persistOnboardingCard: widget.persistOnboardingCard,
+              onDraftUpdated: (updated) => setState(() => _myCardDraft = updated),
+            ),
+          ],
+        ),
+        extendBody: true,
+        bottomNavigationBar: SafeArea(
+          top: false,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(24, 0, 24, 16),
+            child: _LiquidGlassBottomNavBar(
+              currentIndex: _currentIndex,
+              itemCount: 3,
+              onTap: (index) => setState(() => _currentIndex = index),
+            ),
           ),
         ),
       ),

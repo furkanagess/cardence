@@ -17,9 +17,11 @@ class EventGroupModel {
   Map<String, dynamic> toJson() => {'id': id, 'name': name};
 
   factory EventGroupModel.fromJson(Map<String, dynamic> json) {
+    final id = json['id'] ?? json['Id'];
+    final name = json['name'] ?? json['Name'];
     return EventGroupModel(
-      id: json['id'] as String,
-      name: json['name'] as String,
+      id: id?.toString() ?? '',
+      name: name?.toString() ?? '',
     );
   }
 

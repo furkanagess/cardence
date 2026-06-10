@@ -16,7 +16,9 @@ import 'features/auth/domain/usecases/restore_auth_session.dart';
 import 'features/auth/domain/usecases/upload_profile_photo.dart';
 import 'features/auth/presentation/pages/login_page.dart';
 import 'features/event_groups/domain/usecases/get_event_groups.dart';
-import 'features/event_groups/domain/usecases/save_event_groups.dart';
+import 'features/event_groups/domain/usecases/create_event_group.dart';
+import 'features/event_groups/domain/usecases/delete_event_group.dart';
+import 'features/event_groups/domain/usecases/link_event_group_cards.dart';
 import 'features/onboarding/domain/usecases/get_onboarding_completed.dart';
 import 'features/onboarding/domain/usecases/get_onboarding_draft_card.dart';
 import 'features/onboarding/domain/usecases/get_onboarding_draft_cards.dart';
@@ -65,7 +67,9 @@ class App extends StatefulWidget {
     required this.setThemePreference,
     required this.submitSupportRequest,
     required this.getEventGroups,
-    required this.saveEventGroups,
+    required this.createEventGroup,
+    required this.deleteEventGroup,
+    required this.linkEventGroupCards,
     required this.getSavedCards,
     required this.saveSavedCard,
     required this.getSavedCardsWalletQuota,
@@ -96,7 +100,9 @@ class App extends StatefulWidget {
   final SetThemePreference setThemePreference;
   final SubmitSupportRequest submitSupportRequest;
   final GetEventGroups getEventGroups;
-  final SaveEventGroups saveEventGroups;
+  final CreateEventGroup createEventGroup;
+  final DeleteEventGroup deleteEventGroup;
+  final LinkEventGroupCards linkEventGroupCards;
   final GetSavedCards getSavedCards;
   final SaveSavedCard saveSavedCard;
   final GetSavedCardsWalletQuota getSavedCardsWalletQuota;
@@ -221,7 +227,9 @@ class _AppState extends State<App> {
           getOnboardingDraftCards: widget.getOnboardingDraftCards,
           persistOnboardingCard: widget.persistOnboardingCard,
           getEventGroups: widget.getEventGroups,
-          saveEventGroups: widget.saveEventGroups,
+          createEventGroup: widget.createEventGroup,
+          deleteEventGroup: widget.deleteEventGroup,
+          linkEventGroupCards: widget.linkEventGroupCards,
           getSavedCards: widget.getSavedCards,
           saveSavedCard: widget.saveSavedCard,
           getSavedCardsWalletQuota: widget.getSavedCardsWalletQuota,

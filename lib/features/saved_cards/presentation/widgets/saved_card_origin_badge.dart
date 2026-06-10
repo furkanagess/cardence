@@ -1,63 +1,74 @@
 import 'package:flutter/material.dart';
 
-import '../../domain/entities/saved_card_origin.dart';
+/// Elle girilen kartlar için rozet yerine alt bilgi satırı.
+class ManualEntryCaption extends StatelessWidget {
+  const ManualEntryCaption({super.key, this.compact = false});
 
-/// Manuel ve Cardence kartlarını ayırt eden küçük rozet.
-class SavedCardOriginBadge extends StatelessWidget {
-  const SavedCardOriginBadge({
-    super.key,
-    required this.origin,
-    this.compact = false,
-  });
-
-  final SavedCardOrigin origin;
   final bool compact;
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
-    final isManual = origin == SavedCardOrigin.manual;
+    final foreground = colorScheme.onSurfaceVariant;
 
-    final background = isManual
-        ? colorScheme.secondaryContainer
-        : colorScheme.primaryContainer;
-    final foreground = isManual
-        ? colorScheme.onSecondaryContainer
-        : colorScheme.onPrimaryContainer;
-    final icon = isManual ? Icons.edit_note_rounded : Icons.badge_rounded;
-    final label = isManual ? 'Manuel' : 'Cardence';
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(
+          Icons.draw_outlined,
+          size: compact ? 14 : 16,
+          color: foreground,
+        ),
+        const SizedBox(width: 6),
+        Text(
+          'Elle girildi',
+          style: (compact ? textTheme.labelSmall : textTheme.labelMedium)
+              ?.copyWith(
+            color: foreground,
+            fontWeight: FontWeight.w500,
+            letterSpacing: 0.1,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// Detay ekranında elle girilen kartlar için açıklayıcı şerit.
+class ManualEntryDetailBanner extends StatelessWidget {
+  const ManualEntryDetailBanner({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
 
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: background,
-        borderRadius: BorderRadius.circular(compact ? 8 : 10),
-        boxShadow: [
-          BoxShadow(
-            color: colorScheme.shadow.withValues(alpha: 0.12),
-            blurRadius: 6,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.45),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: colorScheme.outlineVariant.withValues(alpha: 0.55),
+        ),
       ),
       child: Padding(
-        padding: EdgeInsets.symmetric(
-          horizontal: compact ? 8 : 10,
-          vertical: compact ? 4 : 6,
-        ),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
         child: Row(
-          mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: compact ? 14 : 16, color: foreground),
-            const SizedBox(width: 4),
-            Text(
-              label,
-              style: (compact
-                      ? textTheme.labelSmall
-                      : textTheme.labelMedium)
-                  ?.copyWith(
-                color: foreground,
-                fontWeight: FontWeight.w600,
+            Icon(
+              Icons.draw_outlined,
+              size: 18,
+              color: colorScheme.onSurfaceVariant,
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                'Bu kart elle girildi; Cardence hesabına bağlı değil.',
+                style: textTheme.bodySmall?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
+                  height: 1.35,
+                ),
               ),
             ),
           ],

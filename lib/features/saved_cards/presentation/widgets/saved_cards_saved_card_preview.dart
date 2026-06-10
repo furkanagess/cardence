@@ -65,27 +65,28 @@ class SavedCardsSavedCardPreview extends StatelessWidget {
             onBackEmptyActionTap: onEditNote,
             onBackEditTap: hasNote ? onEditNote : null,
             onTap: onTap,
+            showAppLogo: card.isCardenceLinked,
           );
 
-    final previewWithBadge = _SavedCardPreviewWithBadge(
+    final previewWithOrigin = _SavedCardPreviewWithOrigin(
       cardWidget: cardWidget,
       origin: card.origin,
     );
 
-    if (!wrapHero || heroTag == null) return previewWithBadge;
+    if (!wrapHero || heroTag == null) return previewWithOrigin;
 
     return Hero(
       tag: heroTag!,
       child: Material(
         color: Colors.transparent,
-        child: previewWithBadge,
+        child: previewWithOrigin,
       ),
     );
   }
 }
 
-class _SavedCardPreviewWithBadge extends StatelessWidget {
-  const _SavedCardPreviewWithBadge({
+class _SavedCardPreviewWithOrigin extends StatelessWidget {
+  const _SavedCardPreviewWithOrigin({
     required this.cardWidget,
     required this.origin,
   });
@@ -95,16 +96,30 @@ class _SavedCardPreviewWithBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      clipBehavior: Clip.none,
-      children: [
-        cardWidget,
-        Positioned(
-          top: 10,
-          left: 10,
-          child: SavedCardOriginBadge(origin: origin, compact: true),
-        ),
-      ],
-    );
+    final colorScheme = Theme.of(context).colorScheme;
+    final isManual = origin == SavedCardOrigin.manual;
+
+    if (isManual) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          DecoratedBox(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(
+                color: colorScheme.outlineVariant.withValues(alpha: 0.65),
+                width: 1.25,
+              ),
+            ),
+            child: cardWidget,
+          ),
+          const SizedBox(height: 8),
+          const ManualEntryCaption(compact: true),
+        ],
+      );
+    }
+
+    return cardWidget;
   }
 }

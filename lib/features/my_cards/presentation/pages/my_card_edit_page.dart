@@ -6,10 +6,10 @@ import '../../../../core/widgets/atoms/cardence_app_bar.dart';
 import '../../../../core/widgets/atoms/custom_button.dart';
 import '../../../../core/widgets/organisms/cardence_scaffold.dart';
 import '../../../../core/widgets/molecules/cardence_confirm_dialog.dart';
+import '../../../../core/widgets/molecules/card_color_customize_section.dart';
 import '../../../../core/widgets/molecules/skills_chip_input.dart';
 import '../widgets/collapsible_card_preview_panel.dart';
 import '../widgets/my_card_preview_helpers.dart';
-import 'card_detail_page.dart';
 import '../../../onboarding/domain/entities/onboarding_card_draft.dart';
 import '../../../../core/network/auth_api_exception.dart';
 import '../../../business_cards/domain/usecases/persist_onboarding_card.dart';
@@ -171,26 +171,6 @@ class _MyCardEditPageState extends State<MyCardEditPage> {
     }
   }
 
-  void _applyDraftFromSaved(OnboardingCardDraft draft) {
-    setState(() {
-      _baselineDraft = draft;
-      _cardId = CardIdGenerator.isValid(draft.cardId)
-          ? draft.cardId!.trim()
-          : _cardId;
-      _cardNameController.text = draft.cardName ?? draft.listTitle;
-      _nameController.text = draft.displayName ?? '';
-      _emailController.text = draft.email ?? '';
-      _companyController.text = draft.company ?? '';
-      _titleController.text = draft.title ?? '';
-      _websiteController.text = draft.website ?? '';
-      _linkedInController.text = draft.linkedin ?? '';
-      _schoolController.text = draft.school ?? '';
-      _aboutController.text = draft.about ?? '';
-      _skillsValue = draft.skills;
-      _phoneFullNumber = draft.phone;
-    });
-  }
-
   Future<bool> _confirmDiscardChanges() {
     return CardenceConfirmDialog.show(
       context,
@@ -204,19 +184,94 @@ class _MyCardEditPageState extends State<MyCardEditPage> {
     ).then((value) => value == true);
   }
 
-  void _openDesignAndShare(OnboardingCardDraft draft) {
-    Navigator.of(context).push(
-      MaterialPageRoute<void>(
-        builder: (context) => CardDetailPage(
-          draft: draft,
-          persistOnboardingCard: widget.persistOnboardingCard,
-          onDraftUpdated: (updated) {
-            widget.onDraftUpdated?.call(updated);
-            if (!mounted) return;
-            _applyDraftFromSaved(updated);
-          },
-        ),
+  void _showColorCustomizeBottomSheet() {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: colorScheme.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
+      builder: (sheetContext) {
+        return StatefulBuilder(
+          builder: (context, sheetSetState) {
+            final draft = _buildDraft();
+            return Padding(
+              padding: EdgeInsets.fromLTRB(
+                20,
+                12,
+                20,
+                20 + MediaQuery.paddingOf(sheetContext).bottom,
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Center(
+                    child: Container(
+                      width: 40,
+                      height: 4,
+                      margin: const EdgeInsets.only(bottom: 16),
+                      decoration: BoxDecoration(
+                        color: colorScheme.outline.withValues(alpha: 0.4),
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                  ),
+                  Text(
+                    'Kart renkleri',
+                    style: Theme.of(sheetContext).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w700,
+                        ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Değişiklikler önizlemeye anında yansır; kaydetmek için Kaydet\'e basın.',
+                    style: Theme.of(sheetContext).textTheme.bodySmall?.copyWith(
+                          color: colorScheme.onSurfaceVariant,
+                          height: 1.35,
+                        ),
+                  ),
+                  const SizedBox(height: 20),
+                  CardColorCustomizeSection(
+                    backgroundColor: draft.backgroundColor,
+                    accentColor: draft.accentColor,
+                    lastUsedPaletteBackgroundColor:
+                        draft.lastUsedPaletteBackgroundColor,
+                    onBackgroundColorChanged: (hex) {
+                      setState(() {
+                        _baselineDraft = hex == null
+                            ? _baselineDraft.copyWith(clearBackgroundColor: true)
+                            : _baselineDraft.copyWith(backgroundColor: hex);
+                      });
+                      sheetSetState(() {});
+                    },
+                    onAccentColorChanged: (hex) {
+                      setState(() {
+                        _baselineDraft = hex == null
+                            ? _baselineDraft.copyWith(clearAccentColor: true)
+                            : _baselineDraft.copyWith(accentColor: hex);
+                      });
+                      sheetSetState(() {});
+                    },
+                    onLastUsedPaletteBackgroundChanged: (hex) {
+                      setState(() {
+                        _baselineDraft = _baselineDraft.copyWith(
+                          lastUsedPaletteBackgroundColor: hex,
+                        );
+                      });
+                      sheetSetState(() {});
+                    },
+                  ),
+                  const SizedBox(height: 8),
+                ],
+              ),
+            );
+          },
+        );
+      },
     );
   }
 
@@ -301,13 +356,6 @@ class _MyCardEditPageState extends State<MyCardEditPage> {
       appBar: CardenceAppBar(
         variant: CardenceAppBarVariant.editor,
         title: widget.isNewCard ? 'Yeni kart' : 'Kartı düzenle',
-        actions: [
-          CardenceAppBar.textAction(
-            label: 'Kaydet',
-            onPressed: _save,
-            loading: _saving,
-          ),
-        ],
       ),
       body: Form(
         key: _formKey,
@@ -408,15 +456,15 @@ class _MyCardEditPageState extends State<MyCardEditPage> {
                     ],
                   ),
                   _buildFormSection(
-                    title: 'Tasarım ve paylaşım',
-                    subtitle: 'Renk, görünür alanlar ve QR paylaşımı.',
+                    title: 'Tasarım',
+                    subtitle: 'Kart ve metin rengini düzenleyin.',
                     colorScheme: colorScheme,
                     textTheme: textTheme,
                     children: [
                       CustomButton(
-                        label: 'Tasarım ve paylaşım',
+                        label: 'Renkleri düzenle',
                         icon: Icons.palette_outlined,
-                        onPressed: () => _openDesignAndShare(_buildDraft()),
+                        onPressed: _showColorCustomizeBottomSheet,
                         style: FilledButton.styleFrom(
                           backgroundColor: AppColors.primary,
                           foregroundColor: AppColors.textOnPrimary,

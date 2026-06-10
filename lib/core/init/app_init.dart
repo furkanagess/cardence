@@ -28,7 +28,10 @@ import 'complete_onboarding_flow.dart';
 import '../../features/event_groups/data/datasources/event_group_local_datasource.dart';
 import '../../features/event_groups/data/repositories/event_group_repository_impl.dart';
 import '../../features/event_groups/domain/usecases/get_event_groups.dart';
-import '../../features/event_groups/domain/usecases/save_event_groups.dart';
+import '../../features/event_groups/data/datasources/event_group_remote_datasource.dart';
+import '../../features/event_groups/domain/usecases/create_event_group.dart';
+import '../../features/event_groups/domain/usecases/delete_event_group.dart';
+import '../../features/event_groups/domain/usecases/link_event_group_cards.dart';
 import '../../features/onboarding/data/datasources/onboarding_local_datasource.dart';
 import '../../features/onboarding/data/repositories/onboarding_repository_impl.dart';
 import '../../features/onboarding/domain/usecases/complete_onboarding.dart';
@@ -83,7 +86,7 @@ class AppInit {
     );
     final walletLocal = WalletEntitlementLocalDataSourceImpl(prefs);
     final walletRepo = WalletEntitlementRepositoryImpl(walletLocal);
-    final eventGroupLocal = EventGroupLocalDataSourceImpl(prefs);
+    final eventGroupLocal = EventGroupLocalDataSourceImpl(prefs, authLocal);
 
     final syncUserProfileCards = SyncUserProfileCards(
       savedCardRepo,
@@ -94,6 +97,7 @@ class AppInit {
       authLocal: authLocal,
       savedCardLocal: savedCardLocal,
       onboardingLocal: onboardingLocal,
+      eventGroupLocal: eventGroupLocal,
       prefs: prefs,
     );
 
@@ -116,7 +120,10 @@ class AppInit {
     final theme = _initTheme(prefs);
     final support = _initSupport(authLocal);
 
-    final eventGroups = _initEventGroups(eventGroupLocal);
+    final eventGroups = _initEventGroups(
+      local: eventGroupLocal,
+      authLocal: authLocal,
+    );
     final savedCards = _initSavedCards(
       savedCardRepo: savedCardRepo,
       walletRepo: walletRepo,
@@ -145,7 +152,9 @@ class AppInit {
       setThemePreference: theme.setThemePreference,
       submitSupportRequest: support.submitSupportRequest,
       getEventGroups: eventGroups.getEventGroups,
-      saveEventGroups: eventGroups.saveEventGroups,
+      createEventGroup: eventGroups.createEventGroup,
+      deleteEventGroup: eventGroups.deleteEventGroup,
+      linkEventGroupCards: eventGroups.linkEventGroupCards,
       getSavedCards: savedCards.getSavedCards,
       saveSavedCard: savedCards.saveSavedCard,
       getSavedCardsWalletQuota: savedCards.getSavedCardsWalletQuota,
@@ -179,12 +188,23 @@ class AppInit {
 
   static ({
     GetEventGroups getEventGroups,
-    SaveEventGroups saveEventGroups,
-  }) _initEventGroups(EventGroupLocalDataSource local) {
-    final repo = EventGroupRepositoryImpl(local);
+    CreateEventGroup createEventGroup,
+    DeleteEventGroup deleteEventGroup,
+    LinkEventGroupCards linkEventGroupCards,
+  }) _initEventGroups({
+    required EventGroupLocalDataSource local,
+    required AuthLocalDataSource authLocal,
+  }) {
+    final repo = EventGroupRepositoryImpl(
+      local: local,
+      remote: EventGroupRemoteDataSourceImpl(),
+      authLocal: authLocal,
+    );
     return (
       getEventGroups: GetEventGroups(repo),
-      saveEventGroups: SaveEventGroups(repo),
+      createEventGroup: CreateEventGroup(repo),
+      deleteEventGroup: DeleteEventGroup(repo),
+      linkEventGroupCards: LinkEventGroupCards(repo),
     );
   }
 
@@ -342,7 +362,9 @@ class AppInitResult {
     required this.setThemePreference,
     required this.submitSupportRequest,
     required this.getEventGroups,
-    required this.saveEventGroups,
+    required this.createEventGroup,
+    required this.deleteEventGroup,
+    required this.linkEventGroupCards,
     required this.getSavedCards,
     required this.saveSavedCard,
     required this.getSavedCardsWalletQuota,
@@ -374,7 +396,9 @@ class AppInitResult {
   final SetThemePreference setThemePreference;
   final SubmitSupportRequest submitSupportRequest;
   final GetEventGroups getEventGroups;
-  final SaveEventGroups saveEventGroups;
+  final CreateEventGroup createEventGroup;
+  final DeleteEventGroup deleteEventGroup;
+  final LinkEventGroupCards linkEventGroupCards;
   final GetSavedCards getSavedCards;
   final SaveSavedCard saveSavedCard;
   final GetSavedCardsWalletQuota getSavedCardsWalletQuota;

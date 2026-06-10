@@ -49,11 +49,13 @@ class DioApiClient {
     String? accessToken,
     required String fallbackError,
     bool requireData = true,
+    Map<String, dynamic>? queryParameters,
   }) async {
     try {
       final response = await _dio.post<dynamic>(
         _url(path),
         data: body ?? <String, dynamic>{},
+        queryParameters: queryParameters,
         options: _options(accessToken: accessToken),
       );
       return ApiResponseParser.parseEnvelope(
@@ -126,10 +128,12 @@ class DioApiClient {
     String path, {
     required String accessToken,
     required String fallbackError,
+    Map<String, dynamic>? queryParameters,
   }) async {
     try {
       final response = await _dio.delete<dynamic>(
         _url(path),
+        queryParameters: queryParameters,
         options: _options(accessToken: accessToken),
       );
       ApiResponseParser.parseEnvelope(

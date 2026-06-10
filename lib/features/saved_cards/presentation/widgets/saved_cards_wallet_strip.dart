@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/widgets/atoms/shimmer.dart';
 import '../../domain/entities/saved_cards_wallet_quota.dart';
 import '../../domain/saved_cards_wallet_limits.dart';
 import 'wallet_quota_detail_sheet.dart';
@@ -111,8 +112,51 @@ class SavedCardsWalletStrip extends StatelessWidget {
     }
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 6, 20, 4),
+      padding: const EdgeInsets.fromLTRB(20, 6, 20, 16),
       child: content,
+    );
+  }
+}
+
+/// Cüzdan kotası yüklenirken strip ile aynı boyutta iskelet.
+class SavedCardsWalletStripShimmer extends StatelessWidget {
+  const SavedCardsWalletStripShimmer({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 6, 20, 16),
+      child: Shimmer(
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: colorScheme.surfaceContainerLowest,
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(
+              color: colorScheme.outlineVariant.withValues(alpha: 0.2),
+            ),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const ShimmerPlaceholder(
+                  width: 120,
+                  height: 22,
+                  borderRadius: 8,
+                ),
+                const SizedBox(height: 8),
+                const ShimmerPlaceholder(
+                  height: 5,
+                  borderRadius: 3,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

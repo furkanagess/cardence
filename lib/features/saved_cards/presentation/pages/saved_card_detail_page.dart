@@ -10,7 +10,8 @@ import '../../../../core/widgets/organisms/cardence_scaffold.dart';
 import '../../../../core/widgets/organisms/flippable_person_card.dart';
 import '../../../event_groups/domain/entities/event_group.dart';
 import '../../../event_groups/domain/usecases/get_event_groups.dart';
-import '../../../event_groups/domain/usecases/save_event_groups.dart';
+import '../../../event_groups/domain/usecases/delete_event_group.dart';
+import '../../../event_groups/domain/usecases/link_event_group_cards.dart';
 import '../../../event_groups/presentation/pages/event_group_detail_page.dart';
 import '../../../event_groups/presentation/widgets/pick_event_groups_for_card_sheet.dart';
 import '../../../auth/data/datasources/auth_remote_datasource.dart';
@@ -29,7 +30,8 @@ class SavedCardDetailPage extends StatefulWidget {
     required this.onSave,
     required this.getEventGroups,
     this.getSavedCards,
-    this.saveEventGroups,
+    this.deleteEventGroup,
+    this.linkEventGroupCards,
     this.saveSavedCard,
     this.deleteSavedCard,
     this.heroTag,
@@ -39,7 +41,8 @@ class SavedCardDetailPage extends StatefulWidget {
   final Future<void> Function(SavedCard updated) onSave;
   final GetEventGroups getEventGroups;
   final GetSavedCards? getSavedCards;
-  final SaveEventGroups? saveEventGroups;
+  final DeleteEventGroup? deleteEventGroup;
+  final LinkEventGroupCards? linkEventGroupCards;
   final SaveSavedCard? saveSavedCard;
   final DeleteSavedCard? deleteSavedCard;
   final String? heroTag;
@@ -81,7 +84,8 @@ class _SavedCardDetailPageState extends State<SavedCardDetailPage> {
 
   bool get _canOpenGroupDetail =>
       widget.getSavedCards != null &&
-      widget.saveEventGroups != null &&
+      widget.deleteEventGroup != null &&
+      widget.linkEventGroupCards != null &&
       widget.saveSavedCard != null &&
       widget.deleteSavedCard != null;
 
@@ -150,7 +154,8 @@ class _SavedCardDetailPageState extends State<SavedCardDetailPage> {
         builder: (context) => EventGroupDetailPage(
           group: group,
           getEventGroups: widget.getEventGroups,
-          saveEventGroups: widget.saveEventGroups!,
+          deleteEventGroup: widget.deleteEventGroup!,
+          linkEventGroupCards: widget.linkEventGroupCards!,
           getSavedCards: widget.getSavedCards!,
           saveSavedCard: widget.saveSavedCard!,
           deleteSavedCard: widget.deleteSavedCard!,
@@ -611,6 +616,7 @@ class _SavedCardDetailPageState extends State<SavedCardDetailPage> {
             backEmptyActionLabel: 'Not ekle',
             onBackEmptyActionTap: _openNoteEditor,
             onBackEditTap: hasNote ? _openNoteEditor : null,
+            showAppLogo: _card.isCardenceLinked,
           );
 
     final bottomInset = _deleteBarInset(context);
@@ -635,11 +641,10 @@ class _SavedCardDetailPageState extends State<SavedCardDetailPage> {
             )
           else
             preview,
-          const SizedBox(height: 12),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: SavedCardOriginBadge(origin: _card.origin),
-          ),
+          if (_card.isManualEntry) ...[
+            const SizedBox(height: 12),
+            const ManualEntryDetailBanner(),
+          ],
           const SizedBox(height: 20),
           if (showQuickActions)
             _QuickActionsRow(

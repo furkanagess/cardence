@@ -16,6 +16,8 @@ public sealed class CardenceDbContext : DbContext
     public DbSet<WalletEntitlement> WalletEntitlements => Set<WalletEntitlement>();
     public DbSet<AuthRefreshToken> AuthRefreshTokens => Set<AuthRefreshToken>();
     public DbSet<SupportRequest> SupportRequests => Set<SupportRequest>();
+    public DbSet<EventGroup> EventGroups => Set<EventGroup>();
+    public DbSet<SavedCardEventGroup> SavedCardEventGroups => Set<SavedCardEventGroup>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

@@ -13,7 +13,8 @@ import '../../../saved_cards/presentation/pages/saved_card_detail_page.dart';
 import '../../../saved_cards/presentation/saved_cards_catalog.dart';
 import '../../domain/entities/event_group.dart';
 import '../../domain/usecases/get_event_groups.dart';
-import '../../domain/usecases/save_event_groups.dart';
+import '../../domain/usecases/delete_event_group.dart';
+import '../../domain/usecases/link_event_group_cards.dart';
 import '../widgets/pick_saved_cards_for_group_sheet.dart';
 
 /// Bir etkinlik grubunun detayı: bu gruba bağlı kayıtlı kartlar listelenir.
@@ -22,7 +23,8 @@ class EventGroupDetailPage extends StatefulWidget {
     super.key,
     required this.group,
     required this.getEventGroups,
-    required this.saveEventGroups,
+    required this.deleteEventGroup,
+    required this.linkEventGroupCards,
     required this.getSavedCards,
     required this.saveSavedCard,
     required this.deleteSavedCard,
@@ -30,7 +32,8 @@ class EventGroupDetailPage extends StatefulWidget {
 
   final EventGroup group;
   final GetEventGroups getEventGroups;
-  final SaveEventGroups saveEventGroups;
+  final DeleteEventGroup deleteEventGroup;
+  final LinkEventGroupCards linkEventGroupCards;
   final GetSavedCards getSavedCards;
   final SaveSavedCard saveSavedCard;
   final DeleteSavedCard deleteSavedCard;
@@ -78,7 +81,8 @@ class _EventGroupDetailPageState extends State<EventGroupDetailPage> {
           card: card,
           getEventGroups: widget.getEventGroups,
           getSavedCards: widget.getSavedCards,
-          saveEventGroups: widget.saveEventGroups,
+          deleteEventGroup: widget.deleteEventGroup,
+          linkEventGroupCards: widget.linkEventGroupCards,
           saveSavedCard: widget.saveSavedCard,
           deleteSavedCard: widget.deleteSavedCard,
           onSave: _persistCardUpdate,
@@ -108,14 +112,12 @@ class _EventGroupDetailPageState extends State<EventGroupDetailPage> {
     );
     if (!mounted || selectedIds == null || selectedIds.isEmpty) return;
 
-    var addedCount = 0;
-    for (final card in _availableToAdd) {
-      if (!selectedIds.contains(card.cardId)) continue;
-      final ids = List<String>.from(card.linkedEventGroupIds)
-        ..add(widget.group.id);
-      await widget.saveSavedCard(card.copyWith(linkedEventGroupIds: ids));
-      addedCount++;
-    }
+    await widget.linkEventGroupCards(
+      groupId: widget.group.id,
+      cardIds: selectedIds.toList(),
+    );
+    final addedCount = selectedIds.length;
+    await widget.getSavedCards();
 
     if (!mounted) return;
     await _load();
@@ -159,18 +161,8 @@ class _EventGroupDetailPageState extends State<EventGroupDetailPage> {
   }
 
   Future<void> _deleteGroup() async {
-    final persisted = await widget.getSavedCards();
-    final allCards = SavedCardsCatalog.displayCards(persisted);
-    for (final card in allCards) {
-      if (!card.linkedEventGroupIds.contains(widget.group.id)) continue;
-      final ids = List<String>.from(card.linkedEventGroupIds)
-        ..remove(widget.group.id);
-      await widget.saveSavedCard(card.copyWith(linkedEventGroupIds: ids));
-    }
-
-    final groups = await widget.getEventGroups();
-    final updatedGroups = groups.where((g) => g.id != widget.group.id).toList();
-    await widget.saveEventGroups(updatedGroups);
+    await widget.deleteEventGroup(widget.group.id);
+    await widget.getSavedCards();
 
     if (!mounted) return;
     Navigator.of(context).pop();

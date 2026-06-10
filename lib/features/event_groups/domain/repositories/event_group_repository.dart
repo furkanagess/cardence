@@ -1,7 +1,20 @@
 import '../entities/event_group.dart';
 
-/// Etkinlik gruplarının yerel saklanması – Domain interface.
+/// Etkinlik grupları – sunucu birincil, yerel önbellek yedek.
 abstract class EventGroupRepository {
   Future<List<EventGroup>> getEventGroups();
-  Future<void> saveEventGroups(List<EventGroup> groups);
+
+  Future<EventGroup> createEventGroup(String name);
+
+  Future<void> deleteEventGroup(String groupId);
+
+  Future<void> linkCards({
+    required String groupId,
+    required List<String> cardIds,
+  });
+
+  Future<void> unlinkCard({
+    required String groupId,
+    required String cardId,
+  });
 }

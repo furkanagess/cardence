@@ -57,6 +57,7 @@ public static class DependencyInjection
         services.AddScoped<IWalletEntitlementRepository, WalletEntitlementRepository>();
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<ISupportRequestRepository, SupportRequestRepository>();
+        services.AddScoped<IEventGroupRepository, EventGroupRepository>();
         services.AddScoped<IHealthStatusReader, HealthStatusReader>();
         services.AddScoped<IProfilePhotoStorage, LocalProfilePhotoStorage>();
 

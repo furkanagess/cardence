@@ -3,7 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/widgets/organisms/cardence_scaffold.dart';
 import '../../../event_groups/domain/usecases/get_event_groups.dart';
-import '../../../event_groups/domain/usecases/save_event_groups.dart';
+import '../../../event_groups/domain/usecases/delete_event_group.dart';
+import '../../../event_groups/domain/usecases/link_event_group_cards.dart';
 import '../../domain/usecases/add_saved_card.dart';
 import '../../domain/usecases/delete_saved_card.dart';
 import '../../domain/usecases/get_saved_cards.dart';
@@ -33,7 +34,8 @@ class SavedCardsPage extends StatefulWidget {
     required this.upgradeWalletPlan,
     required this.getEventGroups,
     required this.getSavedCards,
-    required this.saveEventGroups,
+    required this.deleteEventGroup,
+    required this.linkEventGroupCards,
     required this.saveSavedCard,
     required this.deleteSavedCard,
   });
@@ -46,7 +48,8 @@ class SavedCardsPage extends StatefulWidget {
   final UpgradeWalletPlan upgradeWalletPlan;
   final GetEventGroups getEventGroups;
   final GetSavedCards getSavedCards;
-  final SaveEventGroups saveEventGroups;
+  final DeleteEventGroup deleteEventGroup;
+  final LinkEventGroupCards linkEventGroupCards;
   final SaveSavedCard saveSavedCard;
   final DeleteSavedCard deleteSavedCard;
 
@@ -112,19 +115,7 @@ class _SavedCardsPageState extends State<SavedCardsPage>
                             isDemoMode: isDemoMode,
                             onUpgradeTap: cubit.requestUpgradeSheet,
                           )
-                        : const Padding(
-                            padding: EdgeInsets.fromLTRB(20, 12, 20, 4),
-                            child: SizedBox(
-                              height: 72,
-                              child: Center(
-                                child: SizedBox(
-                                  width: 22,
-                                  height: 22,
-                                  child: CircularProgressIndicator(strokeWidth: 2),
-                                ),
-                              ),
-                            ),
-                          ),
+                        : const SavedCardsWalletStripShimmer(),
                   ),
                   SavedCardsScreenToolbar(
                     showFlippableView: widget.showFlippableView,
@@ -161,7 +152,9 @@ class _SavedCardsPageState extends State<SavedCardsPage>
                                         heroTag: heroTag,
                                         getEventGroups: widget.getEventGroups,
                                         getSavedCards: widget.getSavedCards,
-                                        saveEventGroups: widget.saveEventGroups,
+                                        deleteEventGroup: widget.deleteEventGroup,
+                                        linkEventGroupCards:
+                                            widget.linkEventGroupCards,
                                         saveSavedCard: widget.saveSavedCard,
                                         deleteSavedCard: widget.deleteSavedCard,
                                       ),
@@ -189,7 +182,9 @@ class _SavedCardsPageState extends State<SavedCardsPage>
                                           card: card,
                                           getEventGroups: widget.getEventGroups,
                                           getSavedCards: widget.getSavedCards,
-                                          saveEventGroups: widget.saveEventGroups,
+                                          deleteEventGroup: widget.deleteEventGroup,
+                                        linkEventGroupCards:
+                                            widget.linkEventGroupCards,
                                           saveSavedCard: widget.saveSavedCard,
                                           deleteSavedCard: widget.deleteSavedCard,
                                         ),

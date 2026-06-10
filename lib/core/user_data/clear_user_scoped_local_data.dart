@@ -12,15 +12,18 @@ class ClearUserScopedLocalData {
     required AuthLocalDataSource authLocal,
     required SavedCardLocalDataSource savedCardLocal,
     required OnboardingLocalDataSource onboardingLocal,
+    required EventGroupLocalDataSource eventGroupLocal,
     required SharedPreferences prefs,
   })  : _authLocal = authLocal,
         _savedCardLocal = savedCardLocal,
         _onboardingLocal = onboardingLocal,
+        _eventGroupLocal = eventGroupLocal,
         _prefs = prefs;
 
   final AuthLocalDataSource _authLocal;
   final SavedCardLocalDataSource _savedCardLocal;
   final OnboardingLocalDataSource _onboardingLocal;
+  final EventGroupLocalDataSource _eventGroupLocal;
   final SharedPreferences _prefs;
 
   Future<void> call() async {
@@ -29,10 +32,11 @@ class ClearUserScopedLocalData {
     if (userId != null && userId.isNotEmpty) {
       await _savedCardLocal.clearForUser(userId);
       await _onboardingLocal.clearForUser(userId);
+      await _eventGroupLocal.clearForUser(userId);
     }
     await _savedCardLocal.clearLegacyKeys();
     await _onboardingLocal.clearLegacyKeys();
-    await _prefs.remove(eventGroupsStorageKey);
+    await _eventGroupLocal.clearLegacyKeys();
     await _prefs.remove(WalletEntitlementLocalDataSourceImpl.walletPlanTierStorageKey);
   }
 }

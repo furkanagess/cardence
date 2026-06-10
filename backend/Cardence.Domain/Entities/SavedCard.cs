@@ -17,7 +17,11 @@ public sealed class SavedCard
     public string? About { get; set; }
     public long SavedAt { get; set; }
     public int SortOrder { get; set; }
+    /// <summary>
+    /// API yanıtı için join tablosundan doldurulur; jsonb kolonuna yazılmaz.
+    /// </summary>
     public List<string> LinkedEventGroupIds { get; set; } = [];
 
     public User User { get; set; } = null!;
+    public ICollection<SavedCardEventGroup> EventGroupLinks { get; set; } = [];
 }

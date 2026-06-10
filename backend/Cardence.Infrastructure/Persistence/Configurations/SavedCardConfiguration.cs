@@ -1,16 +1,12 @@
-using System.Text.Json;
 using Cardence.Domain.Constants;
 using Cardence.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Cardence.Infrastructure.Persistence.Configurations;
 
 public sealed class SavedCardConfiguration : IEntityTypeConfiguration<SavedCard>
 {
-    private static readonly JsonSerializerOptions JsonOptions = new();
-
     public void Configure(EntityTypeBuilder<SavedCard> builder)
     {
         builder.ToTable("saved_cards");
@@ -31,19 +27,7 @@ public sealed class SavedCardConfiguration : IEntityTypeConfiguration<SavedCard>
         builder.Property(x => x.About).HasColumnName("about");
         builder.Property(x => x.SavedAt).HasColumnName("saved_at");
         builder.Property(x => x.SortOrder).HasColumnName("sort_order");
-        builder.Property(x => x.LinkedEventGroupIds)
-            .HasColumnName("linked_event_group_ids")
-            .HasColumnType("jsonb")
-            .HasConversion(
-                value => JsonSerializer.Serialize(value, JsonOptions),
-                value => JsonSerializer.Deserialize<List<string>>(value, JsonOptions)
-                    ?? new List<string>())
-            .Metadata.SetValueComparer(new ValueComparer<List<string>>(
-                (left, right) =>
-                    (left ?? new List<string>()).SequenceEqual(right ?? new List<string>()),
-                value => (value ?? new List<string>())
-                    .Aggregate(0, (hash, item) => HashCode.Combine(hash, item.GetHashCode())),
-                value => (value ?? new List<string>()).ToList()));
+        builder.Ignore(x => x.LinkedEventGroupIds);
 
         builder.HasIndex(x => new { x.UserId, x.CardId }).IsUnique();
         builder.HasIndex(x => new { x.UserId, x.SortOrder });

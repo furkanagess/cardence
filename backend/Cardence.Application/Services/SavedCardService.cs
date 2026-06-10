@@ -16,17 +16,20 @@ public sealed class SavedCardService : ISavedCardService
     private readonly ISavedCardRepository _savedCardRepository;
     private readonly IBusinessCardRepository _businessCardRepository;
     private readonly IWalletEntitlementRepository _walletRepository;
+    private readonly IEventGroupRepository _eventGroupRepository;
     private readonly ICurrentUserService _currentUser;
 
     public SavedCardService(
         ISavedCardRepository savedCardRepository,
         IBusinessCardRepository businessCardRepository,
         IWalletEntitlementRepository walletRepository,
+        IEventGroupRepository eventGroupRepository,
         ICurrentUserService currentUser)
     {
         _savedCardRepository = savedCardRepository;
         _businessCardRepository = businessCardRepository;
         _walletRepository = walletRepository;
+        _eventGroupRepository = eventGroupRepository;
         _currentUser = currentUser;
     }
 
@@ -60,6 +63,12 @@ public sealed class SavedCardService : ISavedCardService
 
         SavedCardMapper.ApplyDto(existing, request);
         await _savedCardRepository.UpdateAsync(existing, cancellationToken);
+        await _eventGroupRepository.SyncSavedCardLinksAsync(
+            userId,
+            existing.Id,
+            request.LinkedEventGroupIds,
+            cancellationToken);
+        existing.LinkedEventGroupIds = request.LinkedEventGroupIds.ToList();
 
         return SavedCardMapper.ToDto(existing);
     }
@@ -167,6 +176,13 @@ public sealed class SavedCardService : ISavedCardService
         }
 
         await _savedCardRepository.AddAsync(entity, cancellationToken);
+        await _eventGroupRepository.SyncSavedCardLinksAsync(
+            userId,
+            entity.Id,
+            request.LinkedEventGroupIds,
+            cancellationToken);
+        entity.LinkedEventGroupIds = request.LinkedEventGroupIds.ToList();
+
         return SavedCardMapper.ToDto(entity);
     }
 

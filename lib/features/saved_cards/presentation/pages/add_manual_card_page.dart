@@ -39,6 +39,8 @@ class _AddManualCardPageState extends State<AddManualCardPage> {
   late final TextEditingController _linkedInController;
   late final TextEditingController _aboutController;
   String? _phoneFullNumber;
+  late final String _initialCountryCode;
+  late final String _initialPhoneNational;
 
   @override
   void initState() {
@@ -52,6 +54,40 @@ class _AddManualCardPageState extends State<AddManualCardPage> {
     _linkedInController = TextEditingController(text: d?.linkedin ?? '');
     _aboutController = TextEditingController(text: d?.about ?? '');
     _phoneFullNumber = d?.phone;
+    _initialCountryCode = _countryCodeFromPhone(d?.phone);
+    _initialPhoneNational = _nationalFromPhone(d?.phone);
+  }
+
+  static String _countryCodeFromPhone(String? full) {
+    if (full == null || full.isEmpty) return 'TR';
+    final digits = full.replaceAll(RegExp(r'\D'), '');
+    if (digits.startsWith('90')) return 'TR';
+    if (digits.startsWith('1')) return 'US';
+    if (digits.startsWith('44')) return 'GB';
+    if (digits.startsWith('49')) return 'DE';
+    if (digits.startsWith('33')) return 'FR';
+    return 'TR';
+  }
+
+  static String _nationalFromPhone(String? full) {
+    if (full == null || full.isEmpty) return '';
+    final digits = full.replaceAll(RegExp(r'\D'), '');
+    if (digits.startsWith('90') && digits.length > 2) {
+      return digits.substring(2);
+    }
+    if (digits.startsWith('1') && digits.length > 1) {
+      return digits.substring(1);
+    }
+    if (digits.startsWith('44') && digits.length > 2) {
+      return digits.substring(2);
+    }
+    if (digits.startsWith('49') && digits.length > 2) {
+      return digits.substring(2);
+    }
+    if (digits.startsWith('33') && digits.length > 2) {
+      return digits.substring(2);
+    }
+    return digits;
   }
 
   @override
@@ -126,7 +162,8 @@ class _AddManualCardPageState extends State<AddManualCardPage> {
           final message = state.errorMessage;
           if (message == null) return;
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(message), behavior: SnackBarBehavior.floating),
+            SnackBar(
+                content: Text(message), behavior: SnackBarBehavior.floating),
           );
         },
         child: CardenceScaffold(
@@ -162,8 +199,10 @@ class _AddManualCardPageState extends State<AddManualCardPage> {
                 Padding(
                   padding: const EdgeInsets.only(bottom: 14),
                   child: IntlPhoneField(
-                    key: ValueKey<String?>(_phoneFullNumber),
-                    initialCountryCode: 'TR',
+                    initialCountryCode: _initialCountryCode,
+                    initialValue: _initialPhoneNational,
+                    keyboardType: TextInputType.phone,
+                    disableLengthCheck: true,
                     decoration: InputDecoration(
                       labelText: 'Telefon',
                       counterText: '',
@@ -175,8 +214,10 @@ class _AddManualCardPageState extends State<AddManualCardPage> {
                         borderSide: BorderSide.none,
                       ),
                     ),
-                    onChanged: (phone) =>
-                        setState(() => _phoneFullNumber = phone.completeNumber),
+                    onChanged: (phone) {
+                      _phoneFullNumber =
+                          phone.number.isEmpty ? null : phone.completeNumber;
+                    },
                   ),
                 ),
                 _buildField('Şirket', _companyController),
@@ -247,8 +288,7 @@ class _AddManualCardPageState extends State<AddManualCardPage> {
         decoration: InputDecoration(
           labelText: label,
           filled: true,
-          fillColor:
-              colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
+          fillColor: colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(10),
             borderSide: BorderSide.none,

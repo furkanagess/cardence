@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:uuid/uuid.dart';
-
+import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../saved_cards/presentation/cubit/saved_cards_cubit.dart';
+import '../../../saved_cards/presentation/cubit/saved_cards_state.dart';
 import '../../../saved_cards/presentation/saved_cards_catalog.dart';
 import '../../domain/entities/event_group.dart';
 import '../widgets/create_event_group_sheet.dart';
 import '../../domain/usecases/get_event_groups.dart';
-import '../../domain/usecases/save_event_groups.dart';
+import '../../domain/usecases/create_event_group.dart';
+import '../../domain/usecases/delete_event_group.dart';
+import '../../domain/usecases/link_event_group_cards.dart';
 import '../../../saved_cards/domain/entities/saved_card.dart';
 import '../../../saved_cards/domain/usecases/delete_saved_card.dart';
 import '../../../saved_cards/domain/usecases/get_saved_cards.dart';
@@ -18,7 +21,9 @@ class EventGroupsPage extends StatefulWidget {
   const EventGroupsPage({
     super.key,
     required this.getEventGroups,
-    required this.saveEventGroups,
+    required this.createEventGroup,
+    required this.deleteEventGroup,
+    required this.linkEventGroupCards,
     required this.getSavedCards,
     required this.saveSavedCard,
     required this.deleteSavedCard,
@@ -26,7 +31,9 @@ class EventGroupsPage extends StatefulWidget {
   });
 
   final GetEventGroups getEventGroups;
-  final SaveEventGroups saveEventGroups;
+  final CreateEventGroup createEventGroup;
+  final DeleteEventGroup deleteEventGroup;
+  final LinkEventGroupCards linkEventGroupCards;
   final GetSavedCards getSavedCards;
   final SaveSavedCard saveSavedCard;
   final DeleteSavedCard deleteSavedCard;
@@ -38,31 +45,26 @@ class EventGroupsPage extends StatefulWidget {
 
 class _EventGroupsPageState extends State<EventGroupsPage> {
   List<EventGroup> _groups = [];
-  List<SavedCard> _savedCards = [];
   bool _loading = true;
 
   @override
   void initState() {
     super.initState();
-    _load();
+    _loadGroups();
   }
 
-  Future<void> _load() async {
+  Future<void> _loadGroups() async {
     setState(() => _loading = true);
-    final results = await Future.wait([
-      widget.getEventGroups(),
-      widget.getSavedCards(),
-    ]);
+    final groups = await widget.getEventGroups();
     if (!mounted) return;
     setState(() {
-      _groups = results[0] as List<EventGroup>;
-      _savedCards = results[1] as List<SavedCard>;
+      _groups = groups;
       _loading = false;
     });
   }
 
-  int _savedCardCountForGroup(String groupId) {
-    return _savedCards
+  int _savedCardCountForGroup(String groupId, List<SavedCard> savedCards) {
+    return savedCards
         .where((c) => c.linkedEventGroupIds.contains(groupId))
         .length;
   }
@@ -75,24 +77,21 @@ class _EventGroupsPageState extends State<EventGroupsPage> {
     );
     if (!mounted || result == null) return;
 
-    final newGroup = EventGroup(id: const Uuid().v4(), name: result.name);
-    final updatedList = List<EventGroup>.from(_groups)..add(newGroup);
-    await widget.saveEventGroups(updatedList);
+    final savedCardsCubit = context.read<SavedCardsCubit>();
+    final newGroup = await widget.createEventGroup(result.name);
 
     if (result.selectedCardIds.isNotEmpty) {
-      final persisted = await widget.getSavedCards();
-      final pickable = SavedCardsCatalog.displayCards(persisted);
-      for (final card in pickable) {
-        if (!result.selectedCardIds.contains(card.cardId)) continue;
-        if (card.linkedEventGroupIds.contains(newGroup.id)) continue;
-        final ids = List<String>.from(card.linkedEventGroupIds)
-          ..add(newGroup.id);
-        await widget.saveSavedCard(card.copyWith(linkedEventGroupIds: ids));
+      await widget.linkEventGroupCards(
+        groupId: newGroup.id,
+        cardIds: result.selectedCardIds.toList(),
+      );
+      if (mounted) {
+        await savedCardsCubit.refreshAll();
       }
     }
 
     if (!mounted) return;
-    await _load();
+    await _loadGroups();
     if (!mounted) return;
 
     final cardCount = result.selectedCardIds.length;
@@ -120,6 +119,15 @@ class _EventGroupsPageState extends State<EventGroupsPage> {
 
   @override
   Widget build(BuildContext context) {
+    return BlocBuilder<SavedCardsCubit, SavedCardsState>(
+      builder: (context, savedState) {
+        final savedCards = SavedCardsCatalog.displayCards(savedState.cards);
+        return _buildContent(context, savedCards);
+      },
+    );
+  }
+
+  Widget _buildContent(BuildContext context, List<SavedCard> savedCards) {
     final theme = Theme.of(context);
     final textTheme = theme.textTheme;
     final colorScheme = theme.colorScheme;
@@ -167,7 +175,7 @@ class _EventGroupsPageState extends State<EventGroupsPage> {
       itemCount: _groups.length,
       itemBuilder: (context, index) {
         final group = _groups[index];
-        final cardCount = _savedCardCountForGroup(group.id);
+        final cardCount = _savedCardCountForGroup(group.id, savedCards);
         return Padding(
           padding: const EdgeInsets.only(bottom: 12),
           child: Material(
@@ -240,13 +248,14 @@ class _EventGroupsPageState extends State<EventGroupsPage> {
             builder: (context) => EventGroupDetailPage(
               group: group,
               getEventGroups: widget.getEventGroups,
-              saveEventGroups: widget.saveEventGroups,
+              deleteEventGroup: widget.deleteEventGroup,
+              linkEventGroupCards: widget.linkEventGroupCards,
               getSavedCards: widget.getSavedCards,
               saveSavedCard: widget.saveSavedCard,
               deleteSavedCard: widget.deleteSavedCard,
             ),
           ),
         )
-        .then((_) => _load());
+        .then((_) => _loadGroups());
   }
 }

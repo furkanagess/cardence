@@ -1,0 +1,190 @@
+using Cardence.Application.Common;
+using Cardence.Application.DTOs.EventGroups;
+using Cardence.Application.DTOs.Wallet;
+using Cardence.Application.Interfaces;
+using Cardence.Application.Mapping;
+using Cardence.Domain.Entities;
+using Cardence.Domain.Exceptions;
+using FluentValidation;
+
+namespace Cardence.Application.Services;
+
+public sealed class EventGroupService : IEventGroupService
+{
+    private readonly IEventGroupRepository _eventGroupRepository;
+    private readonly ICurrentUserService _currentUser;
+    private readonly IValidator<SaveEventGroupRequest> _saveValidator;
+    private readonly IValidator<UpdateEventGroupRequest> _updateValidator;
+    private readonly IValidator<LinkEventGroupCardsRequest> _linkValidator;
+
+    public EventGroupService(
+        IEventGroupRepository eventGroupRepository,
+        ICurrentUserService currentUser,
+        IValidator<SaveEventGroupRequest> saveValidator,
+        IValidator<UpdateEventGroupRequest> updateValidator,
+        IValidator<LinkEventGroupCardsRequest> linkValidator)
+    {
+        _eventGroupRepository = eventGroupRepository;
+        _currentUser = currentUser;
+        _saveValidator = saveValidator;
+        _updateValidator = updateValidator;
+        _linkValidator = linkValidator;
+    }
+
+    public async Task<IReadOnlyList<EventGroupDto>> GetAllAsync(
+        CancellationToken cancellationToken = default)
+    {
+        var userId = _currentUser.GetRequiredUserId();
+        var groups = await _eventGroupRepository.GetByUserIdAsync(userId, cancellationToken);
+        var result = new List<EventGroupDto>(groups.Count);
+
+        foreach (var group in groups)
+        {
+            var cardCount = await _eventGroupRepository.CountCardsInGroupAsync(
+                group.Id,
+                cancellationToken);
+            result.Add(EventGroupMapper.ToDto(group, cardCount));
+        }
+
+        return result;
+    }
+
+    public async Task<EventGroupDto> CreateAsync(
+        SaveEventGroupRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        await _saveValidator.ValidateAndThrowAsync(request, cancellationToken);
+
+        var userId = _currentUser.GetRequiredUserId();
+        var name = request.Name.Trim();
+        await EnsureUniqueNameAsync(userId, name, excludeGroupId: null, cancellationToken);
+
+        var entity = new EventGroup
+        {
+            Id = Guid.NewGuid(),
+            UserId = userId,
+            Name = name,
+            CreatedAt = DateTime.UtcNow,
+        };
+
+        await _eventGroupRepository.AddAsync(entity, cancellationToken);
+        return EventGroupMapper.ToDto(entity, cardCount: 0);
+    }
+
+    public async Task<EventGroupDto> UpdateAsync(
+        UpdateEventGroupRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        await _updateValidator.ValidateAndThrowAsync(request, cancellationToken);
+
+        var userId = _currentUser.GetRequiredUserId();
+        var groupId = ParseGroupId(request.Id);
+        var entity = await _eventGroupRepository.GetByUserAndIdAsync(userId, groupId, cancellationToken)
+            ?? throw new NotFoundException("EventGroup", request.Id);
+
+        var name = request.Name.Trim();
+        await EnsureUniqueNameAsync(userId, name, excludeGroupId: groupId, cancellationToken);
+
+        entity.Name = name;
+        await _eventGroupRepository.UpdateAsync(entity, cancellationToken);
+
+        var cardCount = await _eventGroupRepository.CountCardsInGroupAsync(
+            entity.Id,
+            cancellationToken);
+        return EventGroupMapper.ToDto(entity, cardCount);
+    }
+
+    public async Task DeleteAsync(string groupId, CancellationToken cancellationToken = default)
+    {
+        var userId = _currentUser.GetRequiredUserId();
+        var parsedId = ParseGroupId(groupId);
+        var entity = await _eventGroupRepository.GetByUserAndIdAsync(userId, parsedId, cancellationToken)
+            ?? throw new NotFoundException("EventGroup", groupId);
+
+        await _eventGroupRepository.DeleteAsync(entity, cancellationToken);
+    }
+
+    public async Task LinkCardsAsync(
+        LinkEventGroupCardsRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        await _linkValidator.ValidateAndThrowAsync(request, cancellationToken);
+
+        var userId = _currentUser.GetRequiredUserId();
+        var groupId = ParseGroupId(request.Id);
+        _ = await _eventGroupRepository.GetByUserAndIdAsync(userId, groupId, cancellationToken)
+            ?? throw new NotFoundException("EventGroup", request.Id);
+
+        await _eventGroupRepository.LinkCardsAsync(
+            userId,
+            groupId,
+            request.CardIds,
+            cancellationToken);
+    }
+
+    public async Task UnlinkCardAsync(
+        string groupId,
+        string cardId,
+        CancellationToken cancellationToken = default)
+    {
+        var userId = _currentUser.GetRequiredUserId();
+        var parsedGroupId = ParseGroupId(groupId);
+        _ = await _eventGroupRepository.GetByUserAndIdAsync(userId, parsedGroupId, cancellationToken)
+            ?? throw new NotFoundException("EventGroup", groupId);
+
+        await _eventGroupRepository.UnlinkCardAsync(
+            userId,
+            parsedGroupId,
+            cardId,
+            cancellationToken);
+    }
+
+    public async Task<IReadOnlyList<SavedCardDto>> GetCardsAsync(
+        string groupId,
+        CancellationToken cancellationToken = default)
+    {
+        var userId = _currentUser.GetRequiredUserId();
+        var parsedGroupId = ParseGroupId(groupId);
+        _ = await _eventGroupRepository.GetByUserAndIdAsync(userId, parsedGroupId, cancellationToken)
+            ?? throw new NotFoundException("EventGroup", groupId);
+
+        var cards = await _eventGroupRepository.GetCardsInGroupAsync(
+            userId,
+            parsedGroupId,
+            cancellationToken);
+
+        return cards.Select(SavedCardMapper.ToDto).ToList();
+    }
+
+    private async Task EnsureUniqueNameAsync(
+        Guid userId,
+        string name,
+        Guid? excludeGroupId,
+        CancellationToken cancellationToken)
+    {
+        var duplicate = await _eventGroupRepository.GetByUserAndNameAsync(userId, name, cancellationToken);
+        if (duplicate is null)
+        {
+            return;
+        }
+
+        if (excludeGroupId.HasValue && duplicate.Id == excludeGroupId.Value)
+        {
+            return;
+        }
+
+        throw new ConflictException(
+            "An event group with this name already exists.",
+            ErrorCodes.DuplicateEventGroupName);
+    }
+
+    private static Guid ParseGroupId(string groupId)
+    {
+        if (!Guid.TryParse(groupId, out var parsed))
+        {
+            throw new ValidationException("Invalid event group id.");
+        }
+
+        return parsed;
+    }
+}
