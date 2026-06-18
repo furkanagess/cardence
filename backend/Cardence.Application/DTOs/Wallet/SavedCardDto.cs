@@ -1,3 +1,5 @@
+using Cardence.Domain.Constants;
+
 namespace Cardence.Application.DTOs.Wallet;
 
 public sealed class SavedCardDto
@@ -14,6 +16,8 @@ public sealed class SavedCardDto
     public string? School { get; init; }
     public string? About { get; init; }
     public string? Note { get; init; }
+    public string SourceType { get; init; } = SavedCardSourceType.Cardence;
+    public string? PhotoUrl { get; init; }
     public string? AccentColor { get; init; }
     public string? BackgroundColor { get; init; }
     public long? SavedAt { get; init; }

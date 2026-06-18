@@ -40,6 +40,7 @@ class AddSavedCardSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
+    final colorScheme = Theme.of(context).colorScheme;
 
     return SafeArea(
       child: Padding(
@@ -52,7 +53,7 @@ class AddSavedCardSheet extends StatelessWidget {
               'Kart ekle',
               style: textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.w700,
-                color: AppColors.textPrimary,
+                color: colorScheme.onSurface,
               ),
             ),
             const SizedBox(height: 6),
@@ -61,7 +62,9 @@ class AddSavedCardSheet extends StatelessWidget {
                   ? '${quota.remaining} kart daha ekleyebilirsiniz.'
                   : 'Cüzdanınız dolu. Paket yükselterek sınırı artırabilirsiniz.',
               style: textTheme.bodyMedium?.copyWith(
-                color: canAdd ? AppColors.textSecondary : AppColors.warning,
+                color: canAdd
+                    ? colorScheme.onSurfaceVariant
+                    : AppColors.warning,
                 height: 1.35,
               ),
             ),
@@ -122,9 +125,11 @@ class _MethodTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
+    final colorScheme = Theme.of(context).colorScheme;
+    final disabledColor = colorScheme.onSurface.withValues(alpha: 0.38);
 
     return Material(
-      color: AppColors.surfaceVariant.withValues(alpha: 0.45),
+      color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.45),
       borderRadius: BorderRadius.circular(12),
       child: InkWell(
         onTap: onTap,
@@ -137,15 +142,15 @@ class _MethodTile extends StatelessWidget {
                 width: 44,
                 height: 44,
                 decoration: BoxDecoration(
-                  color: enabled ? AppColors.primary : AppColors.outlineVariant,
+                  color: enabled
+                      ? colorScheme.primary
+                      : colorScheme.outlineVariant,
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
                   icon,
                   size: 22,
-                  color: enabled
-                      ? AppColors.textOnPrimary
-                      : AppColors.textDisabled,
+                  color: enabled ? colorScheme.onPrimary : disabledColor,
                 ),
               ),
               const SizedBox(width: 14),
@@ -158,8 +163,8 @@ class _MethodTile extends StatelessWidget {
                       style: textTheme.titleSmall?.copyWith(
                         fontWeight: FontWeight.w700,
                         color: enabled
-                            ? AppColors.textPrimary
-                            : AppColors.textDisabled,
+                            ? colorScheme.onSurface
+                            : disabledColor,
                       ),
                     ),
                     const SizedBox(height: 2),
@@ -168,7 +173,7 @@ class _MethodTile extends StatelessWidget {
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: textTheme.bodySmall?.copyWith(
-                        color: AppColors.textSecondary,
+                        color: colorScheme.onSurfaceVariant,
                         height: 1.3,
                       ),
                     ),
@@ -178,8 +183,8 @@ class _MethodTile extends StatelessWidget {
               Icon(
                 enabled ? Icons.chevron_right_rounded : Icons.lock_outline,
                 color: enabled
-                    ? AppColors.textSecondary
-                    : AppColors.textDisabled,
+                    ? colorScheme.onSurfaceVariant
+                    : disabledColor,
               ),
             ],
           ),

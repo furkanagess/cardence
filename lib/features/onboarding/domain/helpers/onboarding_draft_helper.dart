@@ -8,7 +8,7 @@ class OnboardingDraftHelper {
 
   static OnboardingCardDraft ensureCardId(OnboardingCardDraft draft) {
     if (CardIdGenerator.isValid(draft.cardId)) return draft;
-    return draft.copyWith(cardId: CardIdGenerator.generate());
+    return draft.copyWith(cardId: CardIdGenerator.generateBusinessCandidate());
   }
 
   static OnboardingCardDraft prepareForSave(OnboardingCardDraft draft) {

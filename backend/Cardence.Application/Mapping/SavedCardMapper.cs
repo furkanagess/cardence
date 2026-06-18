@@ -1,4 +1,5 @@
 using Cardence.Application.DTOs.Wallet;
+using Cardence.Domain.Constants;
 using Cardence.Domain.Entities;
 
 namespace Cardence.Application.Mapping;
@@ -19,6 +20,8 @@ public static class SavedCardMapper
         School = entity.School,
         About = entity.About,
         Note = entity.Note,
+        SourceType = SavedCardSourceType.Normalize(entity.SourceType, entity.CardId),
+        PhotoUrl = entity.PhotoUrl,
         AccentColor = entity.AccentColor,
         BackgroundColor = entity.BackgroundColor,
         SavedAt = entity.SavedAt,
@@ -38,13 +41,35 @@ public static class SavedCardMapper
         entity.School = dto.School;
         entity.About = dto.About;
         entity.Note = dto.Note;
+        entity.SourceType = SavedCardSourceType.Normalize(dto.SourceType, dto.CardId);
+        entity.PhotoUrl = dto.PhotoUrl;
         entity.AccentColor = dto.AccentColor;
         entity.BackgroundColor = dto.BackgroundColor;
         entity.LinkedEventGroupIds = dto.LinkedEventGroupIds.ToList();
     }
 
     /// <summary>
+    /// Manuel cüzdan kartının profil alanlarını günceller.
+    /// </summary>
+    public static void ApplyManualProfile(SavedCard entity, SavedCardDto dto)
+    {
+        entity.DisplayName = dto.DisplayName;
+        entity.Email = dto.Email;
+        entity.Phone = dto.Phone;
+        entity.Company = dto.Company;
+        entity.Title = dto.Title;
+        entity.Website = dto.Website;
+        entity.Linkedin = dto.Linkedin;
+        entity.Skills = dto.Skills;
+        entity.School = dto.School;
+        entity.About = dto.About;
+        entity.AccentColor = dto.AccentColor;
+        entity.BackgroundColor = dto.BackgroundColor;
+    }
+
+    /// <summary>
     /// Kaynak kart business_cards tablosundaysa profil alanlarını DB'den uygular.
+    /// Cüzdana özel alanlar (not, source_type) korunur.
     /// </summary>
     public static void HydrateFromBusinessCard(SavedCard entity, BusinessCard source)
     {
@@ -60,5 +85,7 @@ public static class SavedCardMapper
         entity.About = source.About;
         entity.AccentColor = source.AccentColor;
         entity.BackgroundColor = source.BackgroundColor;
+        entity.PhotoUrl = source.PhotoUrl;
+        entity.SourceType = SavedCardSourceType.Cardence;
     }
 }

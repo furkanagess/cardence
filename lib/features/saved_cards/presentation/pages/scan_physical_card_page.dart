@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/atoms/cardence_app_bar.dart';
-import '../../../../core/widgets/atoms/custom_button.dart';
 import '../../../../core/widgets/organisms/cardence_scaffold.dart';
 import '../../data/datasources/camera_permission_datasource.dart';
 import '../../data/datasources/physical_card_ocr_datasource.dart';
@@ -12,6 +10,7 @@ import '../../domain/usecases/add_saved_card.dart';
 import '../cubit/scan_physical_card_cubit.dart';
 import '../cubit/scan_physical_card_state.dart';
 import '../widgets/add_card_ui_helpers.dart';
+import '../widgets/camera_permission_dialog.dart';
 import 'add_manual_card_page.dart';
 
 /// Fiziksel kartvizitin ön yüzünü (zorunlu) ve arka yüzünü (opsiyonel) çekerek
@@ -45,14 +44,45 @@ class _ScanPhysicalCardView extends StatefulWidget {
   State<_ScanPhysicalCardView> createState() => _ScanPhysicalCardViewState();
 }
 
-class _ScanPhysicalCardViewState extends State<_ScanPhysicalCardView> {
+class _ScanPhysicalCardViewState extends State<_ScanPhysicalCardView>
+    with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      context.read<ScanPhysicalCardCubit>().requestCameraPermission();
+      context.read<ScanPhysicalCardCubit>().syncCameraPermissionStatus();
     });
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed && mounted) {
+      context.read<ScanPhysicalCardCubit>().syncCameraPermissionStatus();
+    }
+  }
+
+  Future<void> _captureWithPermission(
+    ScanPhysicalCardState state,
+    Future<void> Function() capture,
+  ) async {
+    if (!state.canCapture) return;
+
+    if (state.cameraPermission != ScanCameraPermissionStatus.granted &&
+        state.cameraPermission !=
+            ScanCameraPermissionStatus.permanentlyDenied) {
+      final confirmed = await showCameraPermissionDialog(context);
+      if (!confirmed || !mounted) return;
+    }
+
+    await capture();
   }
 
   Future<void> _openManualReview(
@@ -89,21 +119,31 @@ class _ScanPhysicalCardViewState extends State<_ScanPhysicalCardView> {
         }
         final message = state.errorMessage;
         if (message == null) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(message),
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
+
+        final cubit = context.read<ScanPhysicalCardCubit>();
+        final openSettings = state.cameraPermission ==
+            ScanCameraPermissionStatus.permanentlyDenied;
+
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(
+            SnackBar(
+              content: Text(message),
+              behavior: SnackBarBehavior.floating,
+              action: openSettings
+                  ? SnackBarAction(
+                      label: 'Ayarlar',
+                      onPressed: cubit.openCameraSettings,
+                    )
+                  : null,
+            ),
+          );
       },
       builder: (context, state) {
         final textTheme = Theme.of(context).textTheme;
+        final colorScheme = Theme.of(context).colorScheme;
         final cubit = context.read<ScanPhysicalCardCubit>();
         final isProcessing = state.step == ScanPhysicalCardStep.processing;
-        final permissionGranted =
-            state.cameraPermission == ScanCameraPermissionStatus.granted;
-        final permissionChecking =
-            state.cameraPermission == ScanCameraPermissionStatus.checking;
 
         return CardenceScaffold(
           appBar: const CardenceAppBar(title: 'Kartvizit fotoğrafla'),
@@ -111,37 +151,21 @@ class _ScanPhysicalCardViewState extends State<_ScanPhysicalCardView> {
           body: Column(
             children: [
               Expanded(
-                child: ListView(
-                  padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
-                  children: [
-                    if (permissionChecking) ...[
-                      const Center(
-                        child: Padding(
-                          padding: EdgeInsets.symmetric(vertical: 48),
-                          child: CircularProgressIndicator(),
-                        ),
-                      ),
-                      Text(
-                        'Kamera izni isteniyor…',
-                        textAlign: TextAlign.center,
-                        style: textTheme.bodyMedium?.copyWith(
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
-                    ] else if (!permissionGranted) ...[
-                      _CameraPermissionBlocked(
-                        status: state.cameraPermission,
-                        onRetry: cubit.requestCameraPermission,
-                        onOpenSettings: cubit.openCameraSettings,
-                      ),
-                    ] else ...[
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
                       AddCardPhotoCaptureZone(
                         label: 'Ön yüz',
                         hint: 'Ön yüzü çekin',
                         required: true,
                         imagePath: state.frontImagePath,
                         enabled: state.canCapture,
-                        onTap: cubit.captureFront,
+                        onTap: () => _captureWithPermission(
+                          state,
+                          cubit.captureFront,
+                        ),
                       ),
                       const SizedBox(height: 20),
                       AddCardPhotoCaptureZone(
@@ -150,108 +174,39 @@ class _ScanPhysicalCardViewState extends State<_ScanPhysicalCardView> {
                         required: false,
                         imagePath: state.backImagePath,
                         enabled: state.canCapture,
-                        onTap: cubit.captureBack,
-                      ),
-                      const SizedBox(height: 20),
-                      const AddCardTipCard.info(
-                        text:
-                            'Fotoğraf net ve düz olmalı. Tüm bilgiler okunabilir ve ışık yansıması minimum düzeyde olmalıdır.',
+                        onTap: () => _captureWithPermission(
+                          state,
+                          cubit.captureBack,
+                        ),
                       ),
                       if (isProcessing) ...[
-                        const SizedBox(height: 28),
+                        const Spacer(),
                         const Center(child: CircularProgressIndicator()),
                         const SizedBox(height: 12),
                         Text(
                           'Bilgiler okunuyor…',
                           textAlign: TextAlign.center,
                           style: textTheme.bodyMedium?.copyWith(
-                            color: AppColors.textSecondary,
+                            color: colorScheme.onSurfaceVariant,
                           ),
                         ),
+                        const Spacer(),
                       ],
                     ],
-                  ],
+                  ),
                 ),
               ),
-              if (permissionGranted && !permissionChecking)
-                AddCardStickyAction(
-                  label: 'Bilgileri oku',
-                  icon: Icons.document_scanner_outlined,
-                  enabled: state.canReadInfo,
-                  isLoading: isProcessing,
-                  onPressed: state.canReadInfo ? cubit.finishScan : null,
-                ),
+              AddCardStickyAction(
+                label: 'Bilgileri oku',
+                icon: Icons.document_scanner_outlined,
+                enabled: state.canReadInfo,
+                isLoading: isProcessing,
+                onPressed: state.canReadInfo ? cubit.finishScan : null,
+              ),
             ],
           ),
         );
       },
-    );
-  }
-}
-
-class _CameraPermissionBlocked extends StatelessWidget {
-  const _CameraPermissionBlocked({
-    required this.status,
-    required this.onRetry,
-    required this.onOpenSettings,
-  });
-
-  final ScanCameraPermissionStatus status;
-  final VoidCallback onRetry;
-  final VoidCallback onOpenSettings;
-
-  @override
-  Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
-    final permanentlyDenied =
-        status == ScanCameraPermissionStatus.permanentlyDenied;
-
-    return Column(
-      children: [
-        const Icon(
-          Icons.photo_camera_outlined,
-          size: 48,
-          color: AppColors.primary,
-        ),
-        const SizedBox(height: 16),
-        Text(
-          'Kamera izni gerekli',
-          style: textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.w700,
-            color: AppColors.textPrimary,
-          ),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          permanentlyDenied
-              ? 'Kartvizit fotoğraflamak için ayarlardan kamera erişimine izin verin.'
-              : 'Kartvizit fotoğraflamak için kamera erişimine izin vermeniz gerekiyor.',
-          textAlign: TextAlign.center,
-          style: textTheme.bodyMedium?.copyWith(
-            color: AppColors.textSecondary,
-            height: 1.4,
-          ),
-        ),
-        const SizedBox(height: 24),
-        if (permanentlyDenied)
-          CustomButton(
-            label: 'Ayarlara git',
-            icon: Icons.settings_outlined,
-            onPressed: onOpenSettings,
-          )
-        else
-          CustomButton(
-            label: 'İzin ver',
-            icon: Icons.check_circle_outline,
-            onPressed: onRetry,
-          ),
-        const SizedBox(height: 10),
-        if (permanentlyDenied)
-          CustomButton.tonal(
-            label: 'Tekrar dene',
-            onPressed: onRetry,
-          ),
-      ],
     );
   }
 }

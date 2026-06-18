@@ -1,3 +1,4 @@
+import '../../../../core/utils/card_contact_visibility.dart';
 import '../entities/onboarding_card_draft.dart';
 
 /// Kart ön/arka yüz görünürlük kuralları.
@@ -41,9 +42,10 @@ class CardVisibilityHelper {
 
   /// Ön yüz alt iletişim satırlarında gösterilecek anahtarlar (değeri olanlar).
   static List<String> visibleFrontContactKeys(OnboardingCardDraft draft) {
-    return draft.resolvedFrontContactFields
-        .where((key) => hasValue(draft, key))
-        .toList();
+    return CardContactVisibility.limitedFrontContactKeys(
+      preferredOrder: draft.resolvedFrontContactFields,
+      hasValue: (key) => hasValue(draft, key),
+    );
   }
 
   static String? visibleContactValue(OnboardingCardDraft draft, String key) {
@@ -72,9 +74,7 @@ class CardVisibilityHelper {
   }
 
   static List<String> normalizeFrontContactFields(List<String> fields) {
-    return fields
-        .where((key) => OnboardingCardDraft.cardFrontContactFieldKeys.contains(key))
-        .toList();
+    return CardContactVisibility.normalizeFrontContactFields(fields);
   }
 
   static List<String> normalizeBackFields(List<String> fields) {

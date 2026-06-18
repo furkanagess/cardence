@@ -86,7 +86,7 @@ class _CardDetailPageState extends State<CardDetailPage> {
     setState(() => _saving = true);
     var draftToSave = _draft;
     if (!CardIdGenerator.isValid(draftToSave.cardId)) {
-      draftToSave = draftToSave.copyWith(cardId: CardIdGenerator.generate());
+      draftToSave = draftToSave.copyWith(cardId: CardIdGenerator.generateBusinessCandidate());
     }
     try {
       final synced = await widget.persistOnboardingCard(draftToSave);
@@ -304,7 +304,7 @@ class _CardDetailPageState extends State<CardDetailPage> {
   Future<OnboardingCardDraft> _ensureShareableDraft() async {
     var draftToSave = _draft;
     if (!CardIdGenerator.isValid(draftToSave.cardId)) {
-      draftToSave = draftToSave.copyWith(cardId: CardIdGenerator.generate());
+      draftToSave = draftToSave.copyWith(cardId: CardIdGenerator.generateBusinessCandidate());
       _applyDraft(draftToSave);
     }
     if (_hasUnsavedChanges || draftToSave.cardId != _savedDraft.cardId) {

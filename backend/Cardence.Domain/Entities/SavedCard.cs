@@ -1,3 +1,5 @@
+using Cardence.Domain.Constants;
+
 namespace Cardence.Domain.Entities;
 
 public sealed class SavedCard
@@ -16,6 +18,8 @@ public sealed class SavedCard
     public string? School { get; set; }
     public string? About { get; set; }
     public string? Note { get; set; }
+    public string SourceType { get; set; } = SavedCardSourceType.Cardence;
+    public string? PhotoUrl { get; set; }
     public string? AccentColor { get; set; }
     public string? BackgroundColor { get; set; }
     public long SavedAt { get; set; }

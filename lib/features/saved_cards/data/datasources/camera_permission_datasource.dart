@@ -8,13 +8,21 @@ enum CameraPermissionOutcome {
 
 /// Kamera erişim iznini yönetir.
 class CameraPermissionDataSource {
+  Future<CameraPermissionOutcome> readCameraAccess() async {
+    final status = await Permission.camera.status;
+    if (status.isGranted) {
+      return CameraPermissionOutcome.granted;
+    }
+    if (status.isPermanentlyDenied) {
+      return CameraPermissionOutcome.permanentlyDenied;
+    }
+    return CameraPermissionOutcome.denied;
+  }
+
   Future<CameraPermissionOutcome> requestCameraAccess() async {
     final current = await Permission.camera.status;
     if (current.isGranted) {
       return CameraPermissionOutcome.granted;
-    }
-    if (current.isPermanentlyDenied) {
-      return CameraPermissionOutcome.permanentlyDenied;
     }
 
     final result = await Permission.camera.request();

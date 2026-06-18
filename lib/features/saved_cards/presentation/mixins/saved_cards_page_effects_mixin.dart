@@ -21,7 +21,7 @@ import '../../domain/usecases/save_saved_card.dart';
 import '../../domain/usecases/upgrade_wallet_plan.dart';
 import '../../../event_groups/domain/usecases/get_event_groups.dart';
 import '../../../event_groups/domain/usecases/delete_event_group.dart';
-import '../../../event_groups/domain/usecases/link_event_group_cards.dart';
+import '../../domain/usecases/link_saved_cards_to_event_group.dart';
 
 /// Kayıtlı kartlar sayfası yan etkileri: snackbar, sheet ve navigasyon.
 mixin SavedCardsPageEffectsMixin<T extends StatefulWidget> on State<T> {
@@ -131,7 +131,7 @@ mixin SavedCardsPageEffectsMixin<T extends StatefulWidget> on State<T> {
     required GetEventGroups getEventGroups,
     required GetSavedCards getSavedCards,
     required DeleteEventGroup deleteEventGroup,
-    required LinkEventGroupCards linkEventGroupCards,
+    required LinkSavedCardsToEventGroup linkSavedCardsToEventGroup,
     required SaveSavedCard saveSavedCard,
     required DeleteSavedCard deleteSavedCard,
   }) async {
@@ -146,7 +146,7 @@ mixin SavedCardsPageEffectsMixin<T extends StatefulWidget> on State<T> {
           getEventGroups: getEventGroups,
           getSavedCards: getSavedCards,
           deleteEventGroup: deleteEventGroup,
-          linkEventGroupCards: linkEventGroupCards,
+          linkSavedCardsToEventGroup: linkSavedCardsToEventGroup,
           saveSavedCard: saveSavedCard,
           deleteSavedCard: deleteSavedCard,
           onSave: cubit.persistCardUpdate,

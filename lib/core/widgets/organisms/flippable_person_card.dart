@@ -116,22 +116,22 @@ class _FlippablePersonCardState extends State<FlippablePersonCard>
                   onTap: widget.onTap,
                   onDoubleTap: widget.onDoubleTap,
                   child: FlipCard(
-                  key: _cardKey,
-                  side: CardSide.FRONT,
-                  direction: FlipDirection.HORIZONTAL,
-                  speed: 400,
-                  flipOnTouch: widget.flipOnTouch,
-                  onFlip: () {
-                    setState(() => _isFlipping = true);
-                  },
-                  onFlipDone: (isFront) {
-                    setState(() => _isFlipping = false);
-                  },
-                  front: _buildFront(context),
-                  back: _buildBack(context),
+                    key: _cardKey,
+                    side: CardSide.FRONT,
+                    direction: FlipDirection.HORIZONTAL,
+                    speed: 400,
+                    flipOnTouch: widget.flipOnTouch,
+                    onFlip: () {
+                      setState(() => _isFlipping = true);
+                    },
+                    onFlipDone: (isFront) {
+                      setState(() => _isFlipping = false);
+                    },
+                    front: _buildFront(context),
+                    back: _buildBack(context),
+                  ),
                 ),
               ),
-            ),
             ),
             if (!_isFlipping)
               Positioned(
@@ -163,8 +163,7 @@ class _FlippablePersonCardState extends State<FlippablePersonCard>
   static const double _flipButtonRight = 6;
   static const double _flipIconSize = 26;
   static const double _flipIconPadding = 6;
-  static const double _flipIconTouchSize =
-      _flipIconPadding * 2 + _flipIconSize;
+  static const double _flipIconTouchSize = _flipIconPadding * 2 + _flipIconSize;
 
   bool get _isProfileBackFace {
     final entries = widget.backEntries;

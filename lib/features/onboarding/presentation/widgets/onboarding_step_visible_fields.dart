@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/constants/app_constants.dart';
+import '../../domain/helpers/card_visibility_helper.dart';
 import '../../domain/entities/onboarding_card_draft.dart';
 
 const Map<String, String> _fieldLabels = {
@@ -52,7 +54,7 @@ class OnboardingStepVisibleFields extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            'Ön yüzde iletişim bilgilerini, arka yüzde isteğe bağlı yetenekleri seç.',
+            'Ön yüzde iletişim bilgilerini (en fazla 3), arka yüzde isteğe bağlı yetenekleri seç.',
             style: textTheme.bodyMedium?.copyWith(
               color: colorScheme.onSurfaceVariant,
             ),
@@ -72,6 +74,8 @@ class OnboardingStepVisibleFields extends StatelessWidget {
             final label = _fieldLabels[key] ?? key;
             final isSelected =
                 draft.resolvedFrontContactFields.contains(key);
+            final atLimit = draft.resolvedFrontContactFields.length >=
+                AppConstants.maxFrontCardFields;
             return Padding(
               padding: const EdgeInsets.only(bottom: 8),
               child: Container(
@@ -84,15 +88,25 @@ class OnboardingStepVisibleFields extends StatelessWidget {
                 ),
                 child: CheckboxListTile(
                   value: isSelected,
-                  onChanged: (v) {
-                    final list = List<String>.from(draft.frontVisibleFields);
-                    if (v == true) {
-                      if (!list.contains(key)) list.add(key);
-                    } else {
-                      list.remove(key);
-                    }
-                    onChanged(draft.copyWith(frontVisibleFields: list));
-                  },
+                  onChanged: isSelected || !atLimit
+                      ? (v) {
+                          final list =
+                              List<String>.from(draft.frontVisibleFields);
+                          if (v == true) {
+                            if (!list.contains(key)) list.add(key);
+                          } else {
+                            list.remove(key);
+                          }
+                          onChanged(
+                            draft.copyWith(
+                              frontVisibleFields:
+                                  CardVisibilityHelper.normalizeFrontContactFields(
+                                list,
+                              ),
+                            ),
+                          );
+                        }
+                      : null,
                   title: Text(label),
                   controlAffinity: ListTileControlAffinity.leading,
                   contentPadding:

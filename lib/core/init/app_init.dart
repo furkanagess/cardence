@@ -47,6 +47,7 @@ import '../../features/saved_cards/data/datasources/wallet_entitlement_local_dat
 import '../../features/saved_cards/data/repositories/saved_card_repository_impl.dart';
 import '../../features/saved_cards/data/repositories/wallet_entitlement_repository_impl.dart';
 import '../../features/saved_cards/domain/usecases/add_saved_card.dart';
+import '../../features/saved_cards/domain/usecases/link_saved_cards_to_event_group.dart';
 import '../../features/saved_cards/domain/usecases/delete_saved_card.dart';
 import '../../features/saved_cards/domain/usecases/get_saved_cards.dart';
 import '../../features/saved_cards/domain/usecases/get_saved_cards_wallet_quota.dart';
@@ -161,6 +162,7 @@ class AppInit {
       addSavedCard: savedCards.addSavedCard,
       deleteSavedCard: savedCards.deleteSavedCard,
       upgradeWalletPlan: savedCards.upgradeWalletPlan,
+      linkSavedCardsToEventGroup: savedCards.linkSavedCardsToEventGroup,
     );
   }
 
@@ -171,18 +173,21 @@ class AppInit {
     AddSavedCard addSavedCard,
     DeleteSavedCard deleteSavedCard,
     UpgradeWalletPlan upgradeWalletPlan,
+    LinkSavedCardsToEventGroup linkSavedCardsToEventGroup,
   }) _initSavedCards({
     required SavedCardRepositoryImpl savedCardRepo,
     required WalletEntitlementRepositoryImpl walletRepo,
   }) {
     final getQuota = GetSavedCardsWalletQuota(savedCardRepo);
+    final saveSavedCard = SaveSavedCard(savedCardRepo);
     return (
       getSavedCards: GetSavedCards(savedCardRepo),
-      saveSavedCard: SaveSavedCard(savedCardRepo),
+      saveSavedCard: saveSavedCard,
       getSavedCardsWalletQuota: getQuota,
       addSavedCard: AddSavedCard(savedCardRepo),
       deleteSavedCard: DeleteSavedCard(savedCardRepo),
       upgradeWalletPlan: UpgradeWalletPlan(walletRepo),
+      linkSavedCardsToEventGroup: LinkSavedCardsToEventGroup(saveSavedCard),
     );
   }
 
@@ -371,6 +376,7 @@ class AppInitResult {
     required this.addSavedCard,
     required this.deleteSavedCard,
     required this.upgradeWalletPlan,
+    required this.linkSavedCardsToEventGroup,
   });
 
   final RestoreAuthSession restoreAuthSession;
@@ -405,4 +411,5 @@ class AppInitResult {
   final AddSavedCard addSavedCard;
   final DeleteSavedCard deleteSavedCard;
   final UpgradeWalletPlan upgradeWalletPlan;
+  final LinkSavedCardsToEventGroup linkSavedCardsToEventGroup;
 }

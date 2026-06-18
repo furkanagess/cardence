@@ -34,7 +34,7 @@ class PersistOnboardingCard {
         return synced;
       } on AuthApiException catch (e) {
         if (_isDuplicateCardIdError(e) && attempt < _maxDuplicateRetries - 1) {
-          prepared = prepared.copyWith(cardId: CardIdGenerator.generate());
+          prepared = prepared.copyWith(cardId: CardIdGenerator.generateBusinessCandidate());
           await _saveOnboardingDraftCard(prepared);
           continue;
         }

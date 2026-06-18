@@ -9,7 +9,7 @@ import '../widgets/create_event_group_sheet.dart';
 import '../../domain/usecases/get_event_groups.dart';
 import '../../domain/usecases/create_event_group.dart';
 import '../../domain/usecases/delete_event_group.dart';
-import '../../domain/usecases/link_event_group_cards.dart';
+import '../../../saved_cards/domain/usecases/link_saved_cards_to_event_group.dart';
 import '../../../saved_cards/domain/entities/saved_card.dart';
 import '../../../saved_cards/domain/usecases/delete_saved_card.dart';
 import '../../../saved_cards/domain/usecases/get_saved_cards.dart';
@@ -23,7 +23,7 @@ class EventGroupsPage extends StatefulWidget {
     required this.getEventGroups,
     required this.createEventGroup,
     required this.deleteEventGroup,
-    required this.linkEventGroupCards,
+    required this.linkSavedCardsToEventGroup,
     required this.getSavedCards,
     required this.saveSavedCard,
     required this.deleteSavedCard,
@@ -33,7 +33,7 @@ class EventGroupsPage extends StatefulWidget {
   final GetEventGroups getEventGroups;
   final CreateEventGroup createEventGroup;
   final DeleteEventGroup deleteEventGroup;
-  final LinkEventGroupCards linkEventGroupCards;
+  final LinkSavedCardsToEventGroup linkSavedCardsToEventGroup;
   final GetSavedCards getSavedCards;
   final SaveSavedCard saveSavedCard;
   final DeleteSavedCard deleteSavedCard;
@@ -81,9 +81,13 @@ class _EventGroupsPageState extends State<EventGroupsPage> {
     final newGroup = await widget.createEventGroup(result.name);
 
     if (result.selectedCardIds.isNotEmpty) {
-      await widget.linkEventGroupCards(
+      final allCards = SavedCardsCatalog.displayCards(
+        savedCardsCubit.state.cards,
+      );
+      await widget.linkSavedCardsToEventGroup(
         groupId: newGroup.id,
-        cardIds: result.selectedCardIds.toList(),
+        allCards: allCards,
+        cardIdsToAdd: result.selectedCardIds.toList(),
       );
       if (mounted) {
         await savedCardsCubit.refreshAll();
@@ -249,7 +253,7 @@ class _EventGroupsPageState extends State<EventGroupsPage> {
               group: group,
               getEventGroups: widget.getEventGroups,
               deleteEventGroup: widget.deleteEventGroup,
-              linkEventGroupCards: widget.linkEventGroupCards,
+              linkSavedCardsToEventGroup: widget.linkSavedCardsToEventGroup,
               getSavedCards: widget.getSavedCards,
               saveSavedCard: widget.saveSavedCard,
               deleteSavedCard: widget.deleteSavedCard,

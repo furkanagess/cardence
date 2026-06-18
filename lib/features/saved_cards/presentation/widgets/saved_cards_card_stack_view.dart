@@ -33,7 +33,9 @@ class SavedCardsCardStackView extends StatelessWidget {
     const extraBottomPadding = 32.0;
     final cardsHeight = displayCards.isEmpty
         ? 0.0
-        : ((displayCards.length - 1) * cardVerticalStep) + 260 + extraBottomPadding;
+        : ((displayCards.length - 1) * cardVerticalStep) +
+            260 +
+            extraBottomPadding;
 
     return SizedBox(
       height: cardsHeight,
@@ -41,7 +43,8 @@ class SavedCardsCardStackView extends StatelessWidget {
         builder: (context, constraints) {
           return Stack(
             children: [
-              for (final i in List<int>.generate(displayCards.length, (index) => index))
+              for (final i
+                  in List<int>.generate(displayCards.length, (index) => index))
                 AnimatedPositioned(
                   duration: dragAnimDuration,
                   curve: dragAnimCurve,
@@ -75,7 +78,8 @@ class SavedCardsCardStackView extends StatelessWidget {
                           width: constraints.maxWidth,
                           height: 1,
                         ),
-                        childWhenDragging: _DragPlaceholder(colorScheme: colorScheme),
+                        childWhenDragging:
+                            _DragPlaceholder(colorScheme: colorScheme),
                         onDragStarted: () {
                           HapticFeedback.mediumImpact();
                           cubit.startDrag(i);
@@ -86,7 +90,7 @@ class SavedCardsCardStackView extends StatelessWidget {
                           card: card,
                           heroTag: heroTag,
                           wrapHero: !isDragging,
-                          onTap: () => onOpenCard(card, heroTag: heroTag),
+                          onDoubleTap: () => onOpenCard(card, heroTag: heroTag),
                         ),
                       );
                     },

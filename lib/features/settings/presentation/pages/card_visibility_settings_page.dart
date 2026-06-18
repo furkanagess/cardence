@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/constants/app_constants.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/atoms/cardence_app_bar.dart';
 import '../../../../core/widgets/atoms/custom_button.dart';
@@ -69,7 +70,10 @@ class _CardVisibilitySettingsPageState extends State<CardVisibilitySettingsPage>
 
     final list = List<String>.from(draft.frontVisibleFields);
     if (selected) {
-      if (!list.contains(key)) list.add(key);
+      if (!list.contains(key) &&
+          list.length < AppConstants.maxFrontCardFields) {
+        list.add(key);
+      }
     } else {
       list.remove(key);
     }
@@ -210,7 +214,7 @@ class _CardVisibilitySettingsPageState extends State<CardVisibilitySettingsPage>
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Kartın alt kısmında hangi iletişim bilgilerinin görüneceğini seçin.',
+                    'Kartın alt kısmında hangi iletişim bilgilerinin görüneceğini seçin (en fazla 3).',
                     style: textTheme.bodySmall?.copyWith(
                       color: colorScheme.onSurfaceVariant,
                       height: 1.35,
@@ -223,6 +227,8 @@ class _CardVisibilitySettingsPageState extends State<CardVisibilitySettingsPage>
                     final hasValue = CardVisibilityHelper.hasValue(draft, key);
                     final isSelected =
                         draft.resolvedFrontContactFields.contains(key);
+                    final atLimit = draft.resolvedFrontContactFields.length >=
+                        AppConstants.maxFrontCardFields;
 
                     return Padding(
                       padding: const EdgeInsets.only(bottom: 8),
@@ -232,7 +238,7 @@ class _CardVisibilitySettingsPageState extends State<CardVisibilitySettingsPage>
                             ? null
                             : 'Profilde bu alanı doldurun',
                         value: isSelected,
-                        enabled: hasValue,
+                        enabled: hasValue && (isSelected || !atLimit),
                         onChanged: (value) => _toggleFrontField(key, value),
                       ),
                     );

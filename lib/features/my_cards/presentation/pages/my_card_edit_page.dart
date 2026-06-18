@@ -59,7 +59,7 @@ class _MyCardEditPageState extends State<MyCardEditPage> {
     super.initState();
     final d = widget.initialDraft;
     _baselineDraft = d;
-    _cardId = CardIdGenerator.isValid(d.cardId) ? d.cardId!.trim() : CardIdGenerator.generate();
+    _cardId = CardIdGenerator.isValid(d.cardId) ? d.cardId!.trim() : CardIdGenerator.generateBusinessCandidate();
     _cardNameController =
         TextEditingController(text: d.cardName ?? d.listTitle);
     _nameController = TextEditingController(text: d.displayName ?? '');

@@ -11,7 +11,7 @@ import '../../../../core/widgets/organisms/flippable_person_card.dart';
 import '../../../event_groups/domain/entities/event_group.dart';
 import '../../../event_groups/domain/usecases/get_event_groups.dart';
 import '../../../event_groups/domain/usecases/delete_event_group.dart';
-import '../../../event_groups/domain/usecases/link_event_group_cards.dart';
+import '../../domain/usecases/link_saved_cards_to_event_group.dart';
 import '../../../event_groups/presentation/pages/event_group_detail_page.dart';
 import '../../../event_groups/presentation/widgets/pick_event_groups_for_card_sheet.dart';
 import '../../../auth/data/datasources/auth_remote_datasource.dart';
@@ -19,10 +19,8 @@ import '../../domain/entities/saved_card.dart';
 import '../../domain/usecases/delete_saved_card.dart';
 import '../../domain/usecases/get_saved_cards.dart';
 import '../../domain/usecases/save_saved_card.dart';
-import '../widgets/saved_card_origin_badge.dart';
 import '../../domain/extensions/saved_card_preview_colors.dart';
 import '../../domain/extensions/saved_card_preview_entries.dart';
-import '../widgets/saved_cards_physical_photo_preview.dart';
 
 /// Kaydedilen bir kisinin tam detay ekrani: onizleme, hizli aksiyonlar, tum alanlar.
 class SavedCardDetailPage extends StatefulWidget {
@@ -33,7 +31,7 @@ class SavedCardDetailPage extends StatefulWidget {
     required this.getEventGroups,
     this.getSavedCards,
     this.deleteEventGroup,
-    this.linkEventGroupCards,
+    this.linkSavedCardsToEventGroup,
     this.saveSavedCard,
     this.deleteSavedCard,
     this.heroTag,
@@ -44,7 +42,7 @@ class SavedCardDetailPage extends StatefulWidget {
   final GetEventGroups getEventGroups;
   final GetSavedCards? getSavedCards;
   final DeleteEventGroup? deleteEventGroup;
-  final LinkEventGroupCards? linkEventGroupCards;
+  final LinkSavedCardsToEventGroup? linkSavedCardsToEventGroup;
   final SaveSavedCard? saveSavedCard;
   final DeleteSavedCard? deleteSavedCard;
   final String? heroTag;
@@ -87,7 +85,7 @@ class _SavedCardDetailPageState extends State<SavedCardDetailPage> {
   bool get _canOpenGroupDetail =>
       widget.getSavedCards != null &&
       widget.deleteEventGroup != null &&
-      widget.linkEventGroupCards != null &&
+      widget.linkSavedCardsToEventGroup != null &&
       widget.saveSavedCard != null &&
       widget.deleteSavedCard != null;
 
@@ -157,7 +155,7 @@ class _SavedCardDetailPageState extends State<SavedCardDetailPage> {
           group: group,
           getEventGroups: widget.getEventGroups,
           deleteEventGroup: widget.deleteEventGroup!,
-          linkEventGroupCards: widget.linkEventGroupCards!,
+          linkSavedCardsToEventGroup: widget.linkSavedCardsToEventGroup!,
           getSavedCards: widget.getSavedCards!,
           saveSavedCard: widget.saveSavedCard!,
           deleteSavedCard: widget.deleteSavedCard!,
@@ -551,15 +549,7 @@ class _SavedCardDetailPageState extends State<SavedCardDetailPage> {
     final showQuickActions = hasLinkedIn || hasEmail || hasPhone;
     final companyName = _card.company?.trim();
 
-    final frontPhoto = _card.frontImagePath?.trim();
-    final hasPhysicalPhoto = frontPhoto != null && frontPhoto.isNotEmpty;
-
-    final cardPreview = hasPhysicalPhoto
-        ? SavedCardsPhysicalPhotoPreview(
-            frontImagePath: frontPhoto,
-            backImagePath: _card.backImagePath,
-          )
-        : FlippablePersonCard(
+    final cardPreview = FlippablePersonCard(
             title: _displayName,
             titleSecondary: companyName,
             jobTitle: _card.title?.trim(),
@@ -570,7 +560,6 @@ class _SavedCardDetailPageState extends State<SavedCardDetailPage> {
             backEntries: _previewBackEntries,
             emptyMessage: 'Kart bilgisi yok',
             cardId: _card.cardId,
-            showAppLogo: _card.isCardenceLinked,
             contactEmail: _card.email,
             contactPhone: _card.phone,
             contactWebsite: _card.website,
@@ -607,10 +596,6 @@ class _SavedCardDetailPageState extends State<SavedCardDetailPage> {
             )
           else
             preview,
-          if (_card.isManualEntry) ...[
-            const SizedBox(height: 12),
-            const ManualEntryDetailBanner(),
-          ],
           if (showQuickActions) ...[
             const SizedBox(height: 20),
             _CircularQuickActionsRow(

@@ -12,6 +12,7 @@ import '../../../saved_cards/domain/usecases/add_saved_card.dart';
 import '../../../saved_cards/domain/usecases/delete_saved_card.dart';
 import '../../../saved_cards/domain/usecases/get_saved_cards.dart';
 import '../../../saved_cards/domain/usecases/get_saved_cards_wallet_quota.dart';
+import '../../../saved_cards/domain/usecases/link_saved_cards_to_event_group.dart';
 import '../../../saved_cards/domain/usecases/save_saved_card.dart';
 import '../../../saved_cards/domain/usecases/upgrade_wallet_plan.dart';
 import '../../../event_groups/presentation/pages/event_groups_page.dart';
@@ -41,6 +42,7 @@ class MainShellPage extends StatefulWidget {
     required this.createEventGroup,
     required this.deleteEventGroup,
     required this.linkEventGroupCards,
+    required this.linkSavedCardsToEventGroup,
     required this.getSavedCards,
     required this.saveSavedCard,
     required this.getSavedCardsWalletQuota,
@@ -62,6 +64,7 @@ class MainShellPage extends StatefulWidget {
   final CreateEventGroup createEventGroup;
   final DeleteEventGroup deleteEventGroup;
   final LinkEventGroupCards linkEventGroupCards;
+  final LinkSavedCardsToEventGroup linkSavedCardsToEventGroup;
   final GetSavedCards getSavedCards;
   final SaveSavedCard saveSavedCard;
   final GetSavedCardsWalletQuota getSavedCardsWalletQuota;
@@ -156,7 +159,7 @@ class _MainShellPageState extends State<MainShellPage> {
               getEventGroups: widget.getEventGroups,
               getSavedCards: widget.getSavedCards,
               deleteEventGroup: widget.deleteEventGroup,
-              linkEventGroupCards: widget.linkEventGroupCards,
+              linkSavedCardsToEventGroup: widget.linkSavedCardsToEventGroup,
               saveSavedCard: widget.saveSavedCard,
               deleteSavedCard: widget.deleteSavedCard,
               addSavedCard: widget.addSavedCard,
@@ -171,7 +174,7 @@ class _MainShellPageState extends State<MainShellPage> {
               getEventGroups: widget.getEventGroups,
               createEventGroup: widget.createEventGroup,
               deleteEventGroup: widget.deleteEventGroup,
-              linkEventGroupCards: widget.linkEventGroupCards,
+              linkSavedCardsToEventGroup: widget.linkSavedCardsToEventGroup,
               getSavedCards: widget.getSavedCards,
               saveSavedCard: widget.saveSavedCard,
               deleteSavedCard: widget.deleteSavedCard,

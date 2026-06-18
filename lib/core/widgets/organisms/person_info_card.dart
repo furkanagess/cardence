@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../utils/card_contact_visibility.dart';
 import '../../utils/contact_launcher.dart';
 import '../atoms/card_watermark.dart';
 import '../atoms/custom_button.dart';
@@ -786,9 +787,34 @@ class _CompactBusinessCardFace extends StatelessWidget {
 
   String? get _skillsText => _valueForLabels(['Yetenekler', 'Skills']);
 
+  bool _hasContactValue(String key) {
+    switch (key) {
+      case 'email':
+        final fromEntry = _email;
+        if (fromEntry != null && fromEntry.trim().isNotEmpty) return true;
+        return contactEmail?.trim().isNotEmpty == true;
+      case 'phone':
+        final fromEntry = _phone;
+        if (fromEntry != null && fromEntry.trim().isNotEmpty) return true;
+        return contactPhone?.trim().isNotEmpty == true;
+      case 'website':
+        return contactWebsite?.trim().isNotEmpty == true;
+      case 'linkedin':
+        return contactLinkedin?.trim().isNotEmpty == true;
+      default:
+        return false;
+    }
+  }
+
+  List<String> _limitedContactKeys() {
+    return CardContactVisibility.limitedFrontContactKeys(
+      preferredOrder: visibleContactFields,
+      hasValue: _hasContactValue,
+    );
+  }
+
   bool _shouldShowContact(String key) {
-    if (visibleContactFields.isEmpty) return true;
-    return visibleContactFields.contains(key);
+    return _limitedContactKeys().contains(key);
   }
 
   String? _resolveContact(String? fromEntry, String? direct, String key) {
@@ -1154,49 +1180,53 @@ class _CompactBusinessCardFace extends StatelessWidget {
       lines.add(line);
     }
 
-    if (email != null && email.trim().isNotEmpty) {
-      final value = email.trim();
-      addLine(
-        _buildContactLine(
-          textTheme,
-          icon: Icons.mail_outline_rounded,
-          value: value,
-          onTap: () => ContactLauncher.launchEmail(context, value),
-        ),
-      );
-    }
-    if (phone != null && phone.trim().isNotEmpty) {
-      final value = phone.trim();
-      addLine(
-        _buildContactLine(
-          textTheme,
-          icon: Icons.phone_outlined,
-          value: value,
-          onTap: () => ContactLauncher.launchPhone(context, value),
-        ),
-      );
-    }
-    if (linkedin != null && linkedin.trim().isNotEmpty) {
-      final value = linkedin.trim();
-      addLine(
-        _buildContactLine(
-          textTheme,
-          icon: Icons.link_rounded,
-          value: value,
-          onTap: () => ContactLauncher.launchWebUrl(context, value),
-        ),
-      );
-    }
-    if (website != null && website.trim().isNotEmpty) {
-      final value = website.trim();
-      addLine(
-        _buildContactLine(
-          textTheme,
-          icon: Icons.language_rounded,
-          value: value,
-          onTap: () => ContactLauncher.launchWebUrl(context, value),
-        ),
-      );
+    for (final key in _limitedContactKeys()) {
+      switch (key) {
+        case 'email':
+          if (email == null || email.trim().isEmpty) continue;
+          final value = email.trim();
+          addLine(
+            _buildContactLine(
+              textTheme,
+              icon: Icons.mail_outline_rounded,
+              value: value,
+              onTap: () => ContactLauncher.launchEmail(context, value),
+            ),
+          );
+        case 'phone':
+          if (phone == null || phone.trim().isEmpty) continue;
+          final value = phone.trim();
+          addLine(
+            _buildContactLine(
+              textTheme,
+              icon: Icons.phone_outlined,
+              value: value,
+              onTap: () => ContactLauncher.launchPhone(context, value),
+            ),
+          );
+        case 'linkedin':
+          if (linkedin == null || linkedin.trim().isEmpty) continue;
+          final value = linkedin.trim();
+          addLine(
+            _buildContactLine(
+              textTheme,
+              icon: Icons.link_rounded,
+              value: value,
+              onTap: () => ContactLauncher.launchWebUrl(context, value),
+            ),
+          );
+        case 'website':
+          if (website == null || website.trim().isEmpty) continue;
+          final value = website.trim();
+          addLine(
+            _buildContactLine(
+              textTheme,
+              icon: Icons.language_rounded,
+              value: value,
+              onTap: () => ContactLauncher.launchWebUrl(context, value),
+            ),
+          );
+      }
     }
     if (lines.isEmpty) return const SizedBox.shrink();
 

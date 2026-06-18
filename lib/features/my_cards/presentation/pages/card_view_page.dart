@@ -247,7 +247,7 @@ class _CardViewPageState extends State<CardViewPage> {
 
   Future<void> _createNewCard() async {
     final current = _draft ?? const OnboardingCardDraft();
-    final newId = CardIdGenerator.generate();
+    final newId = CardIdGenerator.generateBusinessCandidate();
     final copy = current.copyWith(
       cardId: newId,
       cardName: 'Yeni kart',

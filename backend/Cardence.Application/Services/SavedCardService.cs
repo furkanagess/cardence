@@ -37,6 +37,7 @@ public sealed class SavedCardService : ISavedCardService
     {
         var userId = _currentUser.GetRequiredUserId();
         var cards = await _savedCardRepository.GetByUserIdAsync(userId, cancellationToken);
+        await RefreshLinkedCardenceProfilesAsync(cards, cancellationToken);
         return cards.Select(SavedCardMapper.ToDto).ToList();
     }
 
@@ -63,6 +64,12 @@ public sealed class SavedCardService : ISavedCardService
 
         existing.Note = request.Note;
         existing.LinkedEventGroupIds = request.LinkedEventGroupIds.ToList();
+
+        if (SavedCardSourceType.IsManual(existing.SourceType))
+        {
+            SavedCardMapper.ApplyManualProfile(existing, request);
+        }
+
         await _savedCardRepository.UpdateAsync(existing, cancellationToken);
         await _eventGroupRepository.SyncSavedCardLinksAsync(
             userId,
@@ -138,8 +145,32 @@ public sealed class SavedCardService : ISavedCardService
                 ErrorCodes.WalletLimitReached);
         }
 
-        var businessCard = await _businessCardRepository.GetByCardIdAsync(cardId, cancellationToken);
-        if (businessCard is null && IsStubRequest(request))
+        var sourceType = SavedCardSourceType.Normalize(request.SourceType, cardId);
+        var isManual = SavedCardSourceType.IsManual(sourceType);
+
+        if (isManual && !CardIdGenerator.IsManualWalletId(cardId))
+        {
+            throw new ValidationException([
+                new ValidationFailure(
+                    "cardId",
+                    "Manual wallet cards must use a 900000–999999 id."),
+            ]);
+        }
+
+        if (!isManual && CardIdGenerator.IsManualWalletId(cardId))
+        {
+            throw new ValidationException([
+                new ValidationFailure(
+                    "cardId",
+                    "This id is reserved for manual wallet entries."),
+            ]);
+        }
+
+        var businessCard = isManual
+            ? null
+            : await _businessCardRepository.GetByCardIdAsync(cardId, cancellationToken);
+
+        if (!isManual && businessCard is null && IsStubRequest(request))
         {
             throw new ValidationException([
                 new ValidationFailure(
@@ -153,16 +184,20 @@ public sealed class SavedCardService : ISavedCardService
             Id = Guid.NewGuid(),
             UserId = userId,
             CardId = cardId,
+            SourceType = sourceType,
             SavedAt = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
             SortOrder = usedCount,
             LinkedEventGroupIds = request.LinkedEventGroupIds.ToList(),
         };
 
         SavedCardMapper.ApplyDto(entity, request);
+        entity.SourceType = sourceType;
 
         if (businessCard is not null)
         {
+            var note = entity.Note;
             SavedCardMapper.HydrateFromBusinessCard(entity, businessCard);
+            entity.Note = note;
         }
 
         if (string.IsNullOrWhiteSpace(entity.DisplayName) &&
@@ -214,6 +249,7 @@ public sealed class SavedCardService : ISavedCardService
             return new SavedCardDto
             {
                 CardId = shareId!,
+                SourceType = SavedCardSourceType.Cardence,
                 DisplayName = ReadOptionalString(body, "n", "displayName", "DisplayName"),
                 Email = ReadOptionalString(body, "e", "email", "Email"),
                 Phone = ReadOptionalString(body, "p", "phone", "Phone"),
@@ -226,6 +262,7 @@ public sealed class SavedCardService : ISavedCardService
                 About = ReadOptionalString(body, "h", "about", "About"),
                 AccentColor = ReadOptionalString(body, "tc", "accentColor", "AccentColor"),
                 BackgroundColor = ReadOptionalString(body, "bc", "backgroundColor", "BackgroundColor"),
+                PhotoUrl = ReadOptionalString(body, "ph", "photoUrl", "PhotoUrl"),
             };
         }
 
@@ -235,6 +272,31 @@ public sealed class SavedCardService : ISavedCardService
             ]);
 
         return dto;
+    }
+
+    private async Task RefreshLinkedCardenceProfilesAsync(
+        IReadOnlyList<SavedCard> cards,
+        CancellationToken cancellationToken)
+    {
+        foreach (var card in cards)
+        {
+            if (!SavedCardSourceType.IsCardence(card.SourceType))
+            {
+                continue;
+            }
+
+            var businessCard = await _businessCardRepository.GetByCardIdAsync(
+                card.CardId,
+                cancellationToken);
+            if (businessCard is null)
+            {
+                continue;
+            }
+
+            var note = card.Note;
+            SavedCardMapper.HydrateFromBusinessCard(card, businessCard);
+            card.Note = note;
+        }
     }
 
     private static string? ReadOptionalString(JsonElement body, params string[] keys)

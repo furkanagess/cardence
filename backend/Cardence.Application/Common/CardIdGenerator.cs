@@ -21,8 +21,20 @@ public static class CardIdGenerator
 
     public static string GenerateCandidate()
     {
-        return Random.Shared.Next(0, 1_000_000).ToString($"D{BusinessCardConstants.CardIdLength}");
+        return Random.Shared.Next(0, WalletConstants.BusinessCardIdMaxExclusive)
+            .ToString($"D{BusinessCardConstants.CardIdLength}");
     }
+
+    public static string GenerateManualWalletCandidate()
+    {
+        return Random.Shared.Next(
+                WalletConstants.ManualWalletCardIdMin,
+                WalletConstants.ManualWalletCardIdMaxExclusive)
+            .ToString($"D{BusinessCardConstants.CardIdLength}");
+    }
+
+    public static bool IsManualWalletId(string? cardId) =>
+        WalletConstants.IsManualWalletCardId(cardId);
 
     public static async Task<string> GenerateUniqueAsync(
         Func<string, CancellationToken, Task<bool>> existsAsync,

@@ -119,7 +119,7 @@ class _ProfilePageState extends State<ProfilePage> {
     final template = _cards.isNotEmpty ? _cards.first : widget.draft;
     final base = template ?? const OnboardingCardDraft();
     final newCard = base.copyWith(
-      cardId: CardIdGenerator.generate(),
+      cardId: CardIdGenerator.generateBusinessCandidate(),
       cardName: 'Yeni kart',
       frontVisibleFields: base.shouldMigrateFrontFields
           ? List<String>.from(OnboardingCardDraft.defaultFrontVisibleFields)

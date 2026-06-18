@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/card_id_generator.dart';
 import '../../../../core/widgets/atoms/cardence_app_bar.dart';
 import '../../../../core/widgets/atoms/custom_text_field.dart';
@@ -83,6 +82,7 @@ class _AddCardByIdPageState extends State<AddCardByIdPage> {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
+    final colorScheme = Theme.of(context).colorScheme;
 
     return CardenceScaffold(
       appBar: const CardenceAppBar(title: 'Kart ID ile ekle'),
@@ -100,13 +100,13 @@ class _AddCardByIdPageState extends State<AddCardByIdPage> {
                       width: 72,
                       height: 72,
                       decoration: BoxDecoration(
-                        color: AppColors.primary,
+                        color: colorScheme.primary,
                         borderRadius: BorderRadius.circular(18),
                       ),
-                      child: const Icon(
+                      child: Icon(
                         Icons.badge_outlined,
                         size: 36,
-                        color: AppColors.textOnPrimary,
+                        color: colorScheme.onPrimary,
                       ),
                     ),
                   ),
@@ -115,7 +115,7 @@ class _AddCardByIdPageState extends State<AddCardByIdPage> {
                     'Paylaşılan kart kimliğini girin. Bilgiler sunucudaki güncel kartvizitten alınır.',
                     textAlign: TextAlign.center,
                     style: textTheme.bodyMedium?.copyWith(
-                      color: AppColors.textSecondary,
+                      color: colorScheme.onSurfaceVariant,
                       height: 1.45,
                     ),
                   ),
@@ -124,7 +124,7 @@ class _AddCardByIdPageState extends State<AddCardByIdPage> {
                     'KART ID',
                     style: textTheme.labelMedium?.copyWith(
                       fontWeight: FontWeight.w700,
-                      color: AppColors.textSecondary,
+                      color: colorScheme.onSurfaceVariant,
                       letterSpacing: 0.8,
                     ),
                   ),
@@ -140,7 +140,7 @@ class _AddCardByIdPageState extends State<AddCardByIdPage> {
                     ],
                     decoration: CustomTextField.themedDecoration(
                       context,
-                      hintText: '482917',
+                      hintText: '000000',
                       prefixIcon: const Icon(Icons.perm_identity_outlined),
                       maxLength: CardIdGenerator.length,
                     ),
@@ -156,7 +156,7 @@ class _AddCardByIdPageState extends State<AddCardByIdPage> {
                   Text(
                     'Sadece sayısal karakterler kabul edilir.',
                     style: textTheme.bodySmall?.copyWith(
-                      color: AppColors.textSecondary,
+                      color: colorScheme.onSurfaceVariant,
                     ),
                   ),
                   const SizedBox(height: 24),

@@ -44,6 +44,7 @@ void main() async {
     createEventGroup: result.createEventGroup,
     deleteEventGroup: result.deleteEventGroup,
     linkEventGroupCards: result.linkEventGroupCards,
+    linkSavedCardsToEventGroup: result.linkSavedCardsToEventGroup,
     getSavedCards: result.getSavedCards,
     saveSavedCard: result.saveSavedCard,
     getSavedCardsWalletQuota: result.getSavedCardsWalletQuota,

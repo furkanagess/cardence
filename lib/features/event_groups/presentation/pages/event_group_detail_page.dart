@@ -16,7 +16,7 @@ import '../../../saved_cards/presentation/saved_cards_catalog.dart';
 import '../../domain/entities/event_group.dart';
 import '../../domain/usecases/get_event_groups.dart';
 import '../../domain/usecases/delete_event_group.dart';
-import '../../domain/usecases/link_event_group_cards.dart';
+import '../../../saved_cards/domain/usecases/link_saved_cards_to_event_group.dart';
 import '../widgets/pick_saved_cards_for_group_sheet.dart';
 
 /// Bir etkinlik grubunun detayı: bu gruba bağlı kayıtlı kartlar listelenir.
@@ -26,7 +26,7 @@ class EventGroupDetailPage extends StatefulWidget {
     required this.group,
     required this.getEventGroups,
     required this.deleteEventGroup,
-    required this.linkEventGroupCards,
+    required this.linkSavedCardsToEventGroup,
     required this.getSavedCards,
     required this.saveSavedCard,
     required this.deleteSavedCard,
@@ -35,7 +35,7 @@ class EventGroupDetailPage extends StatefulWidget {
   final EventGroup group;
   final GetEventGroups getEventGroups;
   final DeleteEventGroup deleteEventGroup;
-  final LinkEventGroupCards linkEventGroupCards;
+  final LinkSavedCardsToEventGroup linkSavedCardsToEventGroup;
   final GetSavedCards getSavedCards;
   final SaveSavedCard saveSavedCard;
   final DeleteSavedCard deleteSavedCard;
@@ -84,7 +84,7 @@ class _EventGroupDetailPageState extends State<EventGroupDetailPage> {
           getEventGroups: widget.getEventGroups,
           getSavedCards: widget.getSavedCards,
           deleteEventGroup: widget.deleteEventGroup,
-          linkEventGroupCards: widget.linkEventGroupCards,
+          linkSavedCardsToEventGroup: widget.linkSavedCardsToEventGroup,
           saveSavedCard: widget.saveSavedCard,
           deleteSavedCard: widget.deleteSavedCard,
           onSave: _persistCardUpdate,
@@ -114,9 +114,13 @@ class _EventGroupDetailPageState extends State<EventGroupDetailPage> {
     );
     if (!mounted || selectedIds == null || selectedIds.isEmpty) return;
 
-    await widget.linkEventGroupCards(
+    final allCards = SavedCardsCatalog.displayCards(
+      await widget.getSavedCards(),
+    );
+    await widget.linkSavedCardsToEventGroup(
       groupId: widget.group.id,
-      cardIds: selectedIds.toList(),
+      allCards: allCards,
+      cardIdsToAdd: selectedIds.toList(),
     );
     final addedCount = selectedIds.length;
     await widget.getSavedCards();

@@ -19,17 +19,34 @@ class AddManualCardCubit extends Cubit<AddManualCardState> {
   final AddSavedCard _addSavedCard;
   final PhysicalCardImageStore _imageStore;
 
+  void setPage(int index) {
+    if (index < 0 || index >= AddManualCardState.stepCount) return;
+    emit(state.copyWith(currentPageIndex: index, clearError: true));
+  }
+
   void updateDraft(ManualSavedCardDraft draft) {
     emit(state.copyWith(draft: draft, clearError: true));
+  }
+
+  void nextPage() {
+    if (state.currentPageIndex < AddManualCardState.stepCount - 1) {
+      setPage(state.currentPageIndex + 1);
+    }
+  }
+
+  void previousPage() {
+    if (state.currentPageIndex > 0) {
+      setPage(state.currentPageIndex - 1);
+    }
   }
 
   Future<AddSavedCardResult?> submit() async {
     if (state.isSubmitting) return null;
 
-    if (!state.draft.hasContactInfo) {
+    if (!state.canFinish) {
       emit(
         state.copyWith(
-          errorMessage: 'En az ad soyad, e-posta veya telefon girin.',
+          errorMessage: 'Lütfen zorunlu alanları doldurun.',
         ),
       );
       return null;
@@ -37,7 +54,7 @@ class AddManualCardCubit extends Cubit<AddManualCardState> {
 
     emit(state.copyWith(isSubmitting: true, clearError: true));
 
-    final cardId = CardIdGenerator.generate();
+    final cardId = CardIdGenerator.generateManualWallet();
     final savedAt = DateTime.now().millisecondsSinceEpoch;
 
     String? frontPath = state.draft.frontImagePath;

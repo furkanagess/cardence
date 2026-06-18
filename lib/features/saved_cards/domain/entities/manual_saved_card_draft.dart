@@ -12,6 +12,10 @@ class ManualSavedCardDraft {
     this.website,
     this.linkedin,
     this.about,
+    this.skills,
+    this.note,
+    this.accentColor,
+    this.backgroundColor,
     this.frontImagePath,
     this.backImagePath,
   });
@@ -23,13 +27,22 @@ class ManualSavedCardDraft {
   final String? title;
   final String? website;
   final String? linkedin;
+  /// Kart sahibinin hakkımda metni (OCR arka yüz vb.).
   final String? about;
+  final String? skills;
+  /// Kaydeden kullanıcının kişisel notu.
+  final String? note;
+  final String? accentColor;
+  final String? backgroundColor;
   final String? frontImagePath;
   final String? backImagePath;
 
   bool get hasContactInfo {
     return _has(displayName) || _has(email) || _has(phone);
   }
+
+  bool get hasScanPhotos =>
+      _has(frontImagePath) || _has(backImagePath);
 
   ManualSavedCardDraft copyWith({
     String? displayName,
@@ -40,6 +53,12 @@ class ManualSavedCardDraft {
     String? website,
     String? linkedin,
     String? about,
+    String? skills,
+    String? note,
+    String? accentColor,
+    bool clearAccentColor = false,
+    String? backgroundColor,
+    bool clearBackgroundColor = false,
     String? frontImagePath,
     String? backImagePath,
   }) {
@@ -52,6 +71,12 @@ class ManualSavedCardDraft {
       website: website ?? this.website,
       linkedin: linkedin ?? this.linkedin,
       about: about ?? this.about,
+      skills: skills ?? this.skills,
+      note: note ?? this.note,
+      accentColor: clearAccentColor ? null : (accentColor ?? this.accentColor),
+      backgroundColor: clearBackgroundColor
+          ? null
+          : (backgroundColor ?? this.backgroundColor),
       frontImagePath: frontImagePath ?? this.frontImagePath,
       backImagePath: backImagePath ?? this.backImagePath,
     );
@@ -72,6 +97,10 @@ class ManualSavedCardDraft {
       website: _trimOrNull(website),
       linkedin: _trimOrNull(linkedin),
       about: _trimOrNull(about),
+      skills: _trimOrNull(skills),
+      note: _trimOrNull(note),
+      accentColor: _trimOrNull(accentColor),
+      backgroundColor: _trimOrNull(backgroundColor),
       frontImagePath: frontImagePath,
       backImagePath: backImagePath,
       savedAt: savedAt,

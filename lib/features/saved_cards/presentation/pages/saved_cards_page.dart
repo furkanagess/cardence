@@ -4,7 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/widgets/organisms/cardence_scaffold.dart';
 import '../../../event_groups/domain/usecases/get_event_groups.dart';
 import '../../../event_groups/domain/usecases/delete_event_group.dart';
-import '../../../event_groups/domain/usecases/link_event_group_cards.dart';
+import '../../domain/usecases/link_saved_cards_to_event_group.dart';
 import '../../domain/usecases/add_saved_card.dart';
 import '../../domain/usecases/delete_saved_card.dart';
 import '../../domain/usecases/get_saved_cards.dart';
@@ -35,7 +35,7 @@ class SavedCardsPage extends StatefulWidget {
     required this.getEventGroups,
     required this.getSavedCards,
     required this.deleteEventGroup,
-    required this.linkEventGroupCards,
+    required this.linkSavedCardsToEventGroup,
     required this.saveSavedCard,
     required this.deleteSavedCard,
   });
@@ -49,7 +49,7 @@ class SavedCardsPage extends StatefulWidget {
   final GetEventGroups getEventGroups;
   final GetSavedCards getSavedCards;
   final DeleteEventGroup deleteEventGroup;
-  final LinkEventGroupCards linkEventGroupCards;
+  final LinkSavedCardsToEventGroup linkSavedCardsToEventGroup;
   final SaveSavedCard saveSavedCard;
   final DeleteSavedCard deleteSavedCard;
 
@@ -153,8 +153,8 @@ class _SavedCardsPageState extends State<SavedCardsPage>
                                         getEventGroups: widget.getEventGroups,
                                         getSavedCards: widget.getSavedCards,
                                         deleteEventGroup: widget.deleteEventGroup,
-                                        linkEventGroupCards:
-                                            widget.linkEventGroupCards,
+                                        linkSavedCardsToEventGroup:
+                                            widget.linkSavedCardsToEventGroup,
                                         saveSavedCard: widget.saveSavedCard,
                                         deleteSavedCard: widget.deleteSavedCard,
                                       ),
@@ -178,8 +178,8 @@ class _SavedCardsPageState extends State<SavedCardsPage>
                                           getEventGroups: widget.getEventGroups,
                                           getSavedCards: widget.getSavedCards,
                                           deleteEventGroup: widget.deleteEventGroup,
-                                        linkEventGroupCards:
-                                            widget.linkEventGroupCards,
+                                        linkSavedCardsToEventGroup:
+                                            widget.linkSavedCardsToEventGroup,
                                           saveSavedCard: widget.saveSavedCard,
                                           deleteSavedCard: widget.deleteSavedCard,
                                         ),

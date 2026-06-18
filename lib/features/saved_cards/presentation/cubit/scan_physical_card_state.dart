@@ -5,6 +5,7 @@ import '../../domain/entities/manual_saved_card_draft.dart';
 enum ScanPhysicalCardStep { front, back, processing }
 
 enum ScanCameraPermissionStatus {
+  unknown,
   checking,
   granted,
   denied,
@@ -19,7 +20,7 @@ class ScanPhysicalCardState extends Equatable {
     this.isBusy = false,
     this.errorMessage,
     this.completedDraft,
-    this.cameraPermission = ScanCameraPermissionStatus.checking,
+    this.cameraPermission = ScanCameraPermissionStatus.unknown,
   });
 
   final ScanPhysicalCardStep step;
@@ -31,7 +32,7 @@ class ScanPhysicalCardState extends Equatable {
   final ScanCameraPermissionStatus cameraPermission;
 
   bool get canCapture =>
-      cameraPermission == ScanCameraPermissionStatus.granted && !isBusy;
+      !isBusy && step != ScanPhysicalCardStep.processing;
 
   bool get canReadInfo =>
       frontImagePath != null &&

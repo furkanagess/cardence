@@ -2,6 +2,8 @@ import 'dart:convert';
 
 import '../../domain/entities/saved_card.dart';
 import '../../domain/entities/saved_card_origin.dart';
+import '../../../../core/utils/card_id_generator.dart';
+import '../../domain/helpers/saved_card_event_group_link.dart';
 
 class SavedCardModel {
   SavedCardModel({
@@ -110,6 +112,7 @@ class SavedCardModel {
         if (school != null) 'school': school,
         if (about != null) 'about': about,
         if (note != null) 'note': note,
+        'sourceType': SavedCardEventGroupLink.sourceTypeFromOrigin(origin),
         if (photoUrl != null) 'photoUrl': photoUrl,
         if (accentColor != null) 'accentColor': accentColor,
         if (backgroundColor != null) 'backgroundColor': backgroundColor,
@@ -148,6 +151,11 @@ class SavedCardModel {
   }
 
   static SavedCardOrigin _parseOrigin(Map<String, dynamic> json) {
+    final sourceType = json['sourceType'] as String? ?? json['SourceType'] as String?;
+    if (sourceType != null) {
+      return SavedCardEventGroupLink.originFromSourceType(sourceType);
+    }
+
     final raw = json['origin'] as String?;
     if (raw == SavedCardOrigin.manual.name) {
       return SavedCardOrigin.manual;
@@ -156,6 +164,10 @@ class SavedCardModel {
       return SavedCardOrigin.cardence;
     }
     if (json['frontImagePath'] != null || json['backImagePath'] != null) {
+      return SavedCardOrigin.manual;
+    }
+    final cardId = (json['cardId'] ?? json['CardId'])?.toString();
+    if (CardIdGenerator.isManualWalletId(cardId)) {
       return SavedCardOrigin.manual;
     }
     return SavedCardOrigin.cardence;

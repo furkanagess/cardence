@@ -48,6 +48,9 @@ class AddCardStickyAction extends StatelessWidget {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(14),
               ),
+              disabledBackgroundColor: colorScheme.surfaceContainerHighest,
+              disabledForegroundColor:
+                  colorScheme.onSurface.withValues(alpha: 0.38),
             ),
           ),
         ),
@@ -77,12 +80,13 @@ class AddCardTipCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
+    final colorScheme = Theme.of(context).colorScheme;
     final isSecurity = this.isSecurity;
 
     final background = isSecurity
-        ? AppColors.surfaceVariant.withValues(alpha: 0.55)
-        : AppColors.primaryContainer.withValues(alpha: 0.45);
-    final iconColor = isSecurity ? AppColors.success : AppColors.info;
+        ? colorScheme.surfaceContainerHighest.withValues(alpha: 0.55)
+        : colorScheme.primaryContainer.withValues(alpha: 0.45);
+    final iconColor = isSecurity ? AppColors.success : colorScheme.primary;
     final icon = isSecurity
         ? Icons.verified_user_outlined
         : Icons.info_outline_rounded;
@@ -95,8 +99,8 @@ class AddCardTipCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: isSecurity
-              ? AppColors.outlineVariant
-              : AppColors.primaryContainer,
+              ? colorScheme.outlineVariant
+              : colorScheme.primaryContainer,
         ),
       ),
       child: Row(
@@ -113,7 +117,7 @@ class AddCardTipCard extends StatelessWidget {
                     title!,
                     style: textTheme.titleSmall?.copyWith(
                       fontWeight: FontWeight.w700,
-                      color: AppColors.textPrimary,
+                      color: colorScheme.onSurface,
                     ),
                   ),
                   const SizedBox(height: 4),
@@ -121,7 +125,7 @@ class AddCardTipCard extends StatelessWidget {
                 Text(
                   text,
                   style: textTheme.bodySmall?.copyWith(
-                    color: AppColors.textSecondary,
+                    color: colorScheme.onSurfaceVariant,
                     height: 1.4,
                   ),
                 ),
@@ -155,10 +159,11 @@ class AddCardPhotoCaptureZone extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
+    final colorScheme = Theme.of(context).colorScheme;
     final hasImage = imagePath != null && imagePath!.isNotEmpty;
 
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Row(
           children: [
@@ -166,10 +171,10 @@ class AddCardPhotoCaptureZone extends StatelessWidget {
               label,
               style: textTheme.titleSmall?.copyWith(
                 fontWeight: FontWeight.w700,
-                color: AppColors.textPrimary,
+                color: colorScheme.onSurface,
               ),
             ),
-            const SizedBox(width: 8),
+            const Spacer(),
             _CaptureBadge(required: required),
           ],
         ),
@@ -181,7 +186,8 @@ class AddCardPhotoCaptureZone extends StatelessWidget {
             borderRadius: BorderRadius.circular(14),
             child: CustomPaint(
               painter: _DashedBorderPainter(
-                color: AppColors.outline,
+                color: colorScheme.outline,
+                disabledColor: colorScheme.outlineVariant,
                 radius: 14,
                 enabled: enabled,
               ),
@@ -203,7 +209,7 @@ class AddCardPhotoCaptureZone extends StatelessWidget {
                                   begin: Alignment.bottomCenter,
                                   end: Alignment.center,
                                   colors: [
-                                    AppColors.primaryDark.withValues(alpha: 0.55),
+                                    colorScheme.onSurface.withValues(alpha: 0.55),
                                     Colors.transparent,
                                   ],
                                 ),
@@ -215,16 +221,16 @@ class AddCardPhotoCaptureZone extends StatelessWidget {
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  const Icon(
+                                  Icon(
                                     Icons.refresh_rounded,
                                     size: 18,
-                                    color: AppColors.textOnPrimary,
+                                    color: colorScheme.surface,
                                   ),
                                   const SizedBox(width: 6),
                                   Text(
                                     'Yeniden çek',
                                     style: textTheme.labelLarge?.copyWith(
-                                      color: AppColors.textOnPrimary,
+                                      color: colorScheme.surface,
                                       fontWeight: FontWeight.w600,
                                     ),
                                   ),
@@ -236,19 +242,16 @@ class AddCardPhotoCaptureZone extends StatelessWidget {
                       : Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(
-                              Icons.photo_camera_outlined,
-                              size: 36,
-                              color: enabled
-                                  ? AppColors.primary
-                                  : AppColors.textDisabled,
+                            _CaptureZoneIcon(
+                              required: required,
+                              enabled: enabled,
                             ),
-                            const SizedBox(height: 10),
+                            const SizedBox(height: 12),
                             Text(
                               hint,
                               textAlign: TextAlign.center,
                               style: textTheme.bodyMedium?.copyWith(
-                                color: AppColors.textSecondary,
+                                color: colorScheme.onSurfaceVariant,
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
@@ -264,6 +267,54 @@ class AddCardPhotoCaptureZone extends StatelessWidget {
   }
 }
 
+class _CaptureZoneIcon extends StatelessWidget {
+  const _CaptureZoneIcon({
+    required this.required,
+    required this.enabled,
+  });
+
+  final bool required;
+  final bool enabled;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final disabledColor = colorScheme.onSurface.withValues(alpha: 0.38);
+
+    if (required) {
+      return Container(
+        width: 56,
+        height: 56,
+        decoration: BoxDecoration(
+          color: enabled
+              ? colorScheme.primaryContainer.withValues(alpha: 0.85)
+              : colorScheme.surfaceContainerHighest,
+          shape: BoxShape.circle,
+        ),
+        child: Icon(
+          Icons.photo_camera_outlined,
+          size: 28,
+          color: enabled ? colorScheme.primary : disabledColor,
+        ),
+      );
+    }
+
+    return Container(
+      width: 56,
+      height: 56,
+      decoration: BoxDecoration(
+        color: colorScheme.surfaceContainerHighest,
+        shape: BoxShape.circle,
+      ),
+      child: Icon(
+        Icons.add_photo_alternate_outlined,
+        size: 28,
+        color: enabled ? colorScheme.onSurfaceVariant : disabledColor,
+      ),
+    );
+  }
+}
+
 class _CaptureBadge extends StatelessWidget {
   const _CaptureBadge({required this.required});
 
@@ -272,25 +323,16 @@ class _CaptureBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
-    final color = required ? AppColors.error : AppColors.textSecondary;
-    final bg = required
-        ? AppColors.error.withValues(alpha: 0.1)
-        : AppColors.surfaceVariant;
+    final colorScheme = Theme.of(context).colorScheme;
+    final color = required ? colorScheme.error : colorScheme.onSurfaceVariant;
 
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-      decoration: BoxDecoration(
-        color: bg,
-        borderRadius: BorderRadius.circular(6),
-      ),
-      child: Text(
-        required ? 'ZORUNLU' : 'OPSİYONEL',
-        style: textTheme.labelSmall?.copyWith(
-          color: color,
-          fontWeight: FontWeight.w700,
-          letterSpacing: 0.4,
-          fontSize: 10,
-        ),
+    return Text(
+      required ? 'ZORUNLU' : 'OPSİYONEL',
+      style: textTheme.labelSmall?.copyWith(
+        color: color,
+        fontWeight: FontWeight.w700,
+        letterSpacing: 0.6,
+        fontSize: 11,
       ),
     );
   }
@@ -299,18 +341,20 @@ class _CaptureBadge extends StatelessWidget {
 class _DashedBorderPainter extends CustomPainter {
   _DashedBorderPainter({
     required this.color,
+    required this.disabledColor,
     required this.radius,
     required this.enabled,
   });
 
   final Color color;
+  final Color disabledColor;
   final double radius;
   final bool enabled;
 
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = enabled ? color : AppColors.outlineVariant
+      ..color = enabled ? color : disabledColor
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1.5;
 
@@ -340,6 +384,7 @@ class _DashedBorderPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant _DashedBorderPainter oldDelegate) {
     return oldDelegate.color != color ||
+        oldDelegate.disabledColor != disabledColor ||
         oldDelegate.radius != radius ||
         oldDelegate.enabled != enabled;
   }

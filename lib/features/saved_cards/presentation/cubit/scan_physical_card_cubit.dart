@@ -21,24 +21,9 @@ class ScanPhysicalCardCubit extends Cubit<ScanPhysicalCardState> {
   final CameraPermissionDataSource _cameraPermissionDataSource;
   final ImagePicker _imagePicker;
 
-  Future<void> requestCameraPermission() async {
-    emit(
-      state.copyWith(
-        cameraPermission: ScanCameraPermissionStatus.checking,
-        clearError: true,
-      ),
-    );
-
-    final outcome = await _cameraPermissionDataSource.requestCameraAccess();
-    if (isClosed) return;
-
-    final status = switch (outcome) {
-      CameraPermissionOutcome.granted => ScanCameraPermissionStatus.granted,
-      CameraPermissionOutcome.denied => ScanCameraPermissionStatus.denied,
-      CameraPermissionOutcome.permanentlyDenied =>
-        ScanCameraPermissionStatus.permanentlyDenied,
-    };
-
+  Future<void> syncCameraPermissionStatus() async {
+    final status = await _readPermissionStatus();
+    if (isClosed || status == state.cameraPermission) return;
     emit(state.copyWith(cameraPermission: status));
   }
 
@@ -57,19 +42,29 @@ class ScanPhysicalCardCubit extends Cubit<ScanPhysicalCardState> {
   Future<void> _capture({required bool isFront}) async {
     if (state.isBusy) return;
 
+    emit(state.copyWith(isBusy: true, clearError: true));
+
     if (state.cameraPermission != ScanCameraPermissionStatus.granted) {
-      await requestCameraPermission();
-      if (state.cameraPermission != ScanCameraPermissionStatus.granted) {
+      final outcome = await _cameraPermissionDataSource.requestCameraAccess();
+      if (isClosed) return;
+
+      final status = _statusFromOutcome(outcome);
+      if (status != ScanCameraPermissionStatus.granted) {
         emit(
           state.copyWith(
-            errorMessage: 'Kartvizit çekmek için kamera izni gerekli.',
+            isBusy: false,
+            cameraPermission: status,
+            errorMessage: status == ScanCameraPermissionStatus.permanentlyDenied
+                ? 'Kamera izni kapalı. Ayarlardan izin verip tekrar deneyin.'
+                : 'Kartvizit çekmek için kamera izni gerekli.',
           ),
         );
         return;
       }
+
+      emit(state.copyWith(cameraPermission: status));
     }
 
-    emit(state.copyWith(isBusy: true, clearError: true));
     try {
       final image = await _imagePicker.pickImage(
         source: ImageSource.camera,
@@ -172,5 +167,19 @@ class ScanPhysicalCardCubit extends Cubit<ScanPhysicalCardState> {
         cameraPermission: state.cameraPermission,
       ),
     );
+  }
+
+  Future<ScanCameraPermissionStatus> _readPermissionStatus() async {
+    final outcome = await _cameraPermissionDataSource.readCameraAccess();
+    return _statusFromOutcome(outcome);
+  }
+
+  ScanCameraPermissionStatus _statusFromOutcome(CameraPermissionOutcome outcome) {
+    return switch (outcome) {
+      CameraPermissionOutcome.granted => ScanCameraPermissionStatus.granted,
+      CameraPermissionOutcome.denied => ScanCameraPermissionStatus.denied,
+      CameraPermissionOutcome.permanentlyDenied =>
+        ScanCameraPermissionStatus.permanentlyDenied,
+    };
   }
 }

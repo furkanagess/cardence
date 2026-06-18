@@ -31,6 +31,7 @@ import 'features/saved_cards/domain/usecases/add_saved_card.dart';
 import 'features/saved_cards/domain/usecases/delete_saved_card.dart';
 import 'features/saved_cards/domain/usecases/get_saved_cards.dart';
 import 'features/saved_cards/domain/usecases/get_saved_cards_wallet_quota.dart';
+import 'features/saved_cards/domain/usecases/link_saved_cards_to_event_group.dart';
 import 'features/saved_cards/domain/usecases/save_saved_card.dart';
 import 'features/saved_cards/domain/usecases/upgrade_wallet_plan.dart';
 import 'features/settings/domain/entities/theme_preference.dart';
@@ -70,6 +71,7 @@ class App extends StatefulWidget {
     required this.createEventGroup,
     required this.deleteEventGroup,
     required this.linkEventGroupCards,
+    required this.linkSavedCardsToEventGroup,
     required this.getSavedCards,
     required this.saveSavedCard,
     required this.getSavedCardsWalletQuota,
@@ -103,6 +105,7 @@ class App extends StatefulWidget {
   final CreateEventGroup createEventGroup;
   final DeleteEventGroup deleteEventGroup;
   final LinkEventGroupCards linkEventGroupCards;
+  final LinkSavedCardsToEventGroup linkSavedCardsToEventGroup;
   final GetSavedCards getSavedCards;
   final SaveSavedCard saveSavedCard;
   final GetSavedCardsWalletQuota getSavedCardsWalletQuota;
@@ -231,6 +234,7 @@ class _AppState extends State<App> {
           createEventGroup: widget.createEventGroup,
           deleteEventGroup: widget.deleteEventGroup,
           linkEventGroupCards: widget.linkEventGroupCards,
+          linkSavedCardsToEventGroup: widget.linkSavedCardsToEventGroup,
           getSavedCards: widget.getSavedCards,
           saveSavedCard: widget.saveSavedCard,
           getSavedCardsWalletQuota: widget.getSavedCardsWalletQuota,

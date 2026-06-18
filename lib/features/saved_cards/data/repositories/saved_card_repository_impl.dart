@@ -51,7 +51,7 @@ class SavedCardRepositoryImpl implements SavedCardRepository {
     if (local == null) return remote;
     return SavedCardModel(
       cardId: remote.cardId,
-      origin: local.origin,
+      origin: remote.origin,
       displayName: remote.displayName,
       email: remote.email,
       phone: remote.phone,
@@ -63,7 +63,7 @@ class SavedCardRepositoryImpl implements SavedCardRepository {
       school: remote.school,
       about: remote.about,
       note: remote.note ?? local.note,
-      photoUrl: remote.photoUrl,
+      photoUrl: remote.photoUrl ?? local.photoUrl,
       accentColor: remote.accentColor ?? local.accentColor,
       backgroundColor: remote.backgroundColor ?? local.backgroundColor,
       savedAt: remote.savedAt,
