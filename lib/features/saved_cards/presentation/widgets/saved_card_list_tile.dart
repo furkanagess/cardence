@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/widgets/atoms/profile_avatar.dart';
 import '../../domain/entities/saved_card.dart';
 
 /// Kaydedilen kartlar ekranındaki liste satırı.
@@ -45,12 +46,10 @@ class SavedCardListTile extends StatelessWidget {
           ? colorScheme.primaryContainer.withValues(alpha: 0.35)
           : null,
       child: ListTile(
-        leading: CircleAvatar(
-          backgroundColor: colorScheme.primaryContainer,
-          child: Text(
-            title.isNotEmpty ? title[0].toUpperCase() : '?',
-            style: TextStyle(color: colorScheme.onPrimaryContainer),
-          ),
+        leading: ProfileAvatar(
+          photoUrl: card.photoUrl,
+          displayName: title,
+          size: 40,
         ),
         title: Text(title),
         subtitle: subtitle == null ? null : Text(subtitle),
