@@ -83,4 +83,14 @@ class UserProfileModel {
         savedCards: savedCards.map((card) => card.toEntity()).toList(),
         businessCards: businessCards.map((card) => card.toEntity()).toList(),
       );
+
+  /// Ayarlar / offline geri dönüş için hafif profil önbelleği.
+  Map<String, dynamic> toCacheJson() => {
+        'userId': userId,
+        'displayName': displayName,
+        'email': email,
+        'phone': phone,
+        'photoUrl': photoUrl,
+        'onboardingCompleted': onboardingCompleted,
+      };
 }

@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 
+import '../auth/session_expired_handler.dart';
 import 'api_config.dart';
 import 'api_response_parser.dart';
 import 'auth_api_exception.dart';
@@ -20,6 +21,10 @@ class DioApiClient {
         },
       );
 
+  void _handleAuthFailure(AuthApiException error) {
+    SessionExpiredHandler.instance.handleIfNeeded(error);
+  }
+
   Future<Map<String, dynamic>> get(
     String path, {
     String? accessToken,
@@ -36,10 +41,13 @@ class DioApiClient {
         fallbackError,
         requireData: requireData,
       );
-    } on AuthApiException {
+    } on AuthApiException catch (e) {
+      _handleAuthFailure(e);
       rethrow;
     } on DioException catch (e) {
-      throw ApiResponseParser.fromDioException(e, fallbackError);
+      final error = ApiResponseParser.fromDioException(e, fallbackError);
+      _handleAuthFailure(error);
+      throw error;
     }
   }
 
@@ -63,10 +71,13 @@ class DioApiClient {
         fallbackError,
         requireData: requireData,
       );
-    } on AuthApiException {
+    } on AuthApiException catch (e) {
+      _handleAuthFailure(e);
       rethrow;
     } on DioException catch (e) {
-      throw ApiResponseParser.fromDioException(e, fallbackError);
+      final error = ApiResponseParser.fromDioException(e, fallbackError);
+      _handleAuthFailure(error);
+      throw error;
     }
   }
 
@@ -88,10 +99,13 @@ class DioApiClient {
         fallbackError,
         requireData: requireData,
       );
-    } on AuthApiException {
+    } on AuthApiException catch (e) {
+      _handleAuthFailure(e);
       rethrow;
     } on DioException catch (e) {
-      throw ApiResponseParser.fromDioException(e, fallbackError);
+      final error = ApiResponseParser.fromDioException(e, fallbackError);
+      _handleAuthFailure(error);
+      throw error;
     }
   }
 
@@ -117,10 +131,13 @@ class DioApiClient {
       if (data is Map<String, dynamic>) return data;
       if (data is Map) return Map<String, dynamic>.from(data);
       throw AuthApiException(fallbackError);
-    } on AuthApiException {
+    } on AuthApiException catch (e) {
+      _handleAuthFailure(e);
       rethrow;
     } on DioException catch (e) {
-      throw ApiResponseParser.fromDioException(e, fallbackError);
+      final error = ApiResponseParser.fromDioException(e, fallbackError);
+      _handleAuthFailure(error);
+      throw error;
     }
   }
 
@@ -141,10 +158,13 @@ class DioApiClient {
         fallbackError,
         requireData: false,
       );
-    } on AuthApiException {
+    } on AuthApiException catch (e) {
+      _handleAuthFailure(e);
       rethrow;
     } on DioException catch (e) {
-      throw ApiResponseParser.fromDioException(e, fallbackError);
+      final error = ApiResponseParser.fromDioException(e, fallbackError);
+      _handleAuthFailure(error);
+      throw error;
     }
   }
 }

@@ -20,6 +20,8 @@ public sealed class BusinessCard
     public string? AccentColor { get; set; }
     public string? BackgroundColor { get; set; }
     public string? LastUsedPaletteBackgroundColor { get; set; }
+    /// <summary>Başka kullanıcıların cüzdanına ekleme sayısı.</summary>
+    public int SaveCount { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
 

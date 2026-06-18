@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../theme/app_colors.dart';
+import '../../utils/skills_format.dart';
 import '../../validation/app_validators.dart';
 import '../atoms/custom_text_field.dart';
 
@@ -21,16 +22,9 @@ class SkillsChipInput extends StatefulWidget {
   final String hintText;
 
   /// Virgülle ayrılmış string'i trim'lenmiş, boş olmayan liste yapar.
-  static List<String> _parse(String? s) {
-    if (s == null || s.trim().isEmpty) return [];
-    return s
-        .split(RegExp(r'[,،،\n]+'))
-        .map((e) => e.trim())
-        .where((e) => e.isNotEmpty)
-        .toList();
-  }
+  static List<String> _parse(String? s) => SkillsFormat.parse(s);
 
-  static String _join(List<String> list) => list.join(', ');
+  static String _join(List<String> list) => SkillsFormat.join(list);
 
   @override
   State<SkillsChipInput> createState() => _SkillsChipInputState();

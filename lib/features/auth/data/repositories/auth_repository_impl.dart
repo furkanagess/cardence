@@ -2,6 +2,7 @@ import '../../domain/entities/auth_session.dart';
 import '../../domain/entities/restore_session_result.dart';
 import '../../domain/entities/user_profile.dart';
 import '../../domain/repositories/auth_repository.dart';
+import '../../../../core/network/auth_api_exception.dart';
 import '../datasources/auth_local_datasource.dart';
 import '../datasources/auth_remote_datasource.dart';
 import '../models/auth_session_model.dart';
@@ -44,8 +45,47 @@ class AuthRepositoryImpl implements AuthRepository {
     final entity = profile.toEntity();
     final enriched = _mergeProfile(session, entity);
     await _local.saveSession(enriched);
+    await _local.saveCachedProfile(profile);
     await _onProfileSynced?.call(entity);
     return entity;
+  }
+
+  UserProfile _profileFromSession(AuthSession session) {
+    return UserProfile(
+      userId: session.userId,
+      displayName: session.displayName,
+      email: session.email,
+      phone: session.phone,
+    );
+  }
+
+  Future<UserProfile?> _readCachedProfile() async {
+    final cached = await _local.getCachedProfile();
+    return cached?.toEntity();
+  }
+
+  Future<UserProfile> _resolveProfile(AuthSessionModel session) async {
+    try {
+      return await _fetchAndPersistProfile(session);
+    } on AuthApiException catch (e) {
+      if (e.isUnauthorized) {
+        final refreshed = await _tryRefresh(session.toEntity());
+        if (refreshed != null) {
+          return _fetchAndPersistProfile(
+            AuthSessionModel.fromEntity(refreshed),
+          );
+        }
+        throw AuthApiException('Oturum bulunamadı. Lütfen tekrar giriş yapın.');
+      }
+
+      final cached = await _readCachedProfile();
+      if (cached != null) return cached;
+      return _profileFromSession(session.toEntity());
+    } catch (_) {
+      final cached = await _readCachedProfile();
+      if (cached != null) return cached;
+      return _profileFromSession(session.toEntity());
+    }
   }
 
   Future<AuthSession?> _tryRefresh(AuthSession session) async {
@@ -79,7 +119,7 @@ class AuthRepositoryImpl implements AuthRepository {
     }
 
     try {
-      final profile = await _fetchAndPersistProfile(
+      final profile = await _resolveProfile(
         AuthSessionModel.fromEntity(session),
       );
       return RestoreSessionResult(
@@ -91,7 +131,7 @@ class AuthRepositoryImpl implements AuthRepository {
         final refreshed = await _tryRefresh(session);
         if (refreshed != null) {
           try {
-            final profile = await _fetchAndPersistProfile(
+            final profile = await _resolveProfile(
               AuthSessionModel.fromEntity(refreshed),
             );
             return RestoreSessionResult(
@@ -103,12 +143,21 @@ class AuthRepositoryImpl implements AuthRepository {
             return const RestoreSessionResult(isAuthenticated: false);
           }
         }
+        await clearSession();
+        return const RestoreSessionResult(isAuthenticated: false);
       }
-      await clearSession();
-      return const RestoreSessionResult(isAuthenticated: false);
+
+      final cached = await _readCachedProfile();
+      return RestoreSessionResult(
+        isAuthenticated: true,
+        onboardingCompleted: cached?.onboardingCompleted,
+      );
     } catch (_) {
-      await clearSession();
-      return const RestoreSessionResult(isAuthenticated: false);
+      final cached = await _readCachedProfile();
+      return RestoreSessionResult(
+        isAuthenticated: true,
+        onboardingCompleted: cached?.onboardingCompleted,
+      );
     }
   }
 
@@ -194,7 +243,7 @@ class AuthRepositoryImpl implements AuthRepository {
     if (session == null || !session.isValid) {
       throw AuthApiException('Oturum bulunamadı. Lütfen tekrar giriş yapın.');
     }
-    return _fetchAndPersistProfile(AuthSessionModel.fromEntity(session));
+    return _resolveProfile(AuthSessionModel.fromEntity(session));
   }
 
   @override
@@ -214,6 +263,7 @@ class AuthRepositoryImpl implements AuthRepository {
       entity,
     );
     await _local.saveSession(enriched);
+    await _local.saveCachedProfile(profile);
     await _onProfileSynced?.call(entity);
     return entity;
   }
@@ -231,6 +281,7 @@ class AuthRepositoryImpl implements AuthRepository {
       entity,
     );
     await _local.saveSession(enriched);
+    await _local.saveCachedProfile(profile);
     await _onProfileSynced?.call(entity);
   }
 

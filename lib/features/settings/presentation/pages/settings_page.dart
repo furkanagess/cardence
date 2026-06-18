@@ -6,12 +6,15 @@ import '../../../../core/widgets/atoms/custom_button.dart';
 import '../../../../core/widgets/molecules/cardence_confirm_dialog.dart';
 import '../../../../core/widgets/organisms/cardence_scaffold.dart';
 import '../../../auth/domain/usecases/upload_profile_photo.dart';
+import '../../../auth/presentation/pages/privacy_policy_page.dart';
 import '../../domain/entities/theme_preference.dart';
-import '../widgets/settings_menu_tile.dart';
+import '../pages/settings_about_page.dart';
+import '../widgets/settings_menu_group.dart';
 import '../widgets/settings_profile_header.dart';
+import '../widgets/settings_section_label.dart';
 import '../widgets/settings_theme_selector.dart';
 
-/// Ayarlar sayfası – tema, destek ve çıkış.
+/// Ayarlar sayfası – profil, tema, yardım ve çıkış.
 class SettingsPage extends StatefulWidget {
   const SettingsPage({
     super.key,
@@ -20,7 +23,6 @@ class SettingsPage extends StatefulWidget {
     required this.onLogout,
     required this.onOpenSupport,
     required this.uploadProfilePhoto,
-    this.onOpenCardVisibility,
     this.userDisplayName,
     this.userEmail,
     this.userPhotoUrl,
@@ -32,7 +34,6 @@ class SettingsPage extends StatefulWidget {
   final Future<void> Function() onLogout;
   final VoidCallback onOpenSupport;
   final UploadProfilePhoto uploadProfilePhoto;
-  final VoidCallback? onOpenCardVisibility;
   final String? userDisplayName;
   final String? userEmail;
   final String? userPhotoUrl;
@@ -67,10 +68,24 @@ class _SettingsPageState extends State<SettingsPage> {
     }
   }
 
+  void _openPrivacyPolicy() {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => const PrivacyPolicyPage(),
+      ),
+    );
+  }
+
+  void _openAbout() {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => const SettingsAboutPage(),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
     final displayName = widget.userDisplayName?.trim();
     final email = widget.userEmail?.trim();
 
@@ -78,68 +93,57 @@ class _SettingsPageState extends State<SettingsPage> {
       appBar: const CardenceAppBar(
         title: 'Ayarlar',
       ),
-      body: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
+      body: SafeArea(
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            SettingsProfileHeader(
-              displayName: (displayName == null || displayName.isEmpty)
-                  ? 'Cardence kullanıcısı'
-                  : displayName,
-              email: email,
-              photoUrl: widget.userPhotoUrl,
-              uploadProfilePhoto: widget.uploadProfilePhoto,
-              onPhotoUpdated: widget.onPhotoUpdated,
-            ),
-            const SizedBox(height: 24),
-            Text(
-              'Görünüm',
-              style: textTheme.titleSmall?.copyWith(
-                color: colorScheme.onSurfaceVariant,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            const SizedBox(height: 12),
-            SettingsThemeSelector(
-              current: widget.currentTheme,
-              onChanged: widget.onThemeChanged,
-            ),
-            if (widget.onOpenCardVisibility != null) ...[
-              const SizedBox(height: 24),
-              Text(
-                'Kart',
-                style: textTheme.titleSmall?.copyWith(
-                  color: colorScheme.onSurfaceVariant,
-                  fontWeight: FontWeight.w600,
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    SettingsProfileHeader(
+                      displayName: (displayName == null || displayName.isEmpty)
+                          ? 'Cardence kullanıcısı'
+                          : displayName,
+                      email: email,
+                      photoUrl: widget.userPhotoUrl,
+                      uploadProfilePhoto: widget.uploadProfilePhoto,
+                      onPhotoUpdated: widget.onPhotoUpdated,
+                    ),
+                    const SizedBox(height: 28),
+                    const SettingsSectionLabel(label: 'Görünüm'),
+                    SettingsThemeSelector(
+                      current: widget.currentTheme,
+                      onChanged: widget.onThemeChanged,
+                    ),
+                    const SizedBox(height: 28),
+                    const SettingsSectionLabel(label: 'Yardım ve destek'),
+                    SettingsMenuGroup(
+                      items: [
+                        SettingsMenuGroupItem(
+                          icon: Icons.help_outline_rounded,
+                          title: 'Destek ve Yardım',
+                          onTap: widget.onOpenSupport,
+                        ),
+                        SettingsMenuGroupItem(
+                          icon: Icons.shield_outlined,
+                          title: 'Gizlilik Politikası',
+                          onTap: _openPrivacyPolicy,
+                        ),
+                        SettingsMenuGroupItem(
+                          icon: Icons.verified_outlined,
+                          title: 'Hakkında',
+                          onTap: _openAbout,
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(height: 12),
-              SettingsMenuTile(
-                icon: Icons.visibility_outlined,
-                title: 'Kart görünümü',
-                subtitle: 'Ön yüz iletişim ve arka yüz yetenekler',
-                onTap: widget.onOpenCardVisibility!,
-              ),
-            ],
-            const SizedBox(height: 24),
-            Text(
-              'Yardım',
-              style: textTheme.titleSmall?.copyWith(
-                color: colorScheme.onSurfaceVariant,
-                fontWeight: FontWeight.w600,
-              ),
             ),
-            const SizedBox(height: 12),
-            SettingsMenuTile(
-              icon: Icons.support_agent_rounded,
-              title: 'Destek',
-              subtitle: 'Sorun bildir veya öneri gönder',
-              onTap: widget.onOpenSupport,
-            ),
-            const Spacer(),
-            SafeArea(
-              top: false,
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
               child: CustomButton(
                 label: 'Çıkış yap',
                 icon: Icons.logout_rounded,
@@ -149,6 +153,9 @@ class _SettingsPageState extends State<SettingsPage> {
                 style: FilledButton.styleFrom(
                   backgroundColor: AppColors.error,
                   foregroundColor: AppColors.textOnPrimary,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                 ),
               ),
             ),

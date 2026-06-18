@@ -4,6 +4,8 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/contact_launcher.dart';
+import '../../../../core/utils/skills_format.dart';
+import '../../../../core/widgets/molecules/skills_chip_display.dart';
 import '../../../../core/widgets/atoms/custom_button.dart';
 import '../../../../core/widgets/atoms/cardence_app_bar.dart';
 import '../../../../core/widgets/organisms/cardence_scaffold.dart';
@@ -336,13 +338,6 @@ class _SavedCardDetailPageState extends State<SavedCardDetailPage> {
           icon: Icons.work_outline_rounded,
           trailing: _ContactTrailingAction.copy,
         ),
-      if (_has(_card.skills))
-        _ContactFieldData(
-          label: 'Yetenekler',
-          value: _card.skills!.trim(),
-          icon: Icons.auto_awesome_outlined,
-          trailing: _ContactTrailingAction.copy,
-        ),
       if (_has(_card.school))
         _ContactFieldData(
           label: 'Okul',
@@ -352,6 +347,9 @@ class _SavedCardDetailPageState extends State<SavedCardDetailPage> {
         ),
     ];
   }
+
+  List<String> get _skills =>
+      SkillsFormat.parse(_card.skills);
 
   List<String> get _visibleContactFields {
     final keys = <String>[];
@@ -635,6 +633,16 @@ class _SavedCardDetailPageState extends State<SavedCardDetailPage> {
                     ],
                   ),
           ),
+          if (_skills.isNotEmpty) ...[
+            const SizedBox(height: 24),
+            _DetailSection(
+              title: 'Yetenekler',
+              child: SkillsChipDisplay(
+                skills: _skills,
+                onSkillTap: (skill) => _copyToClipboard('Yetenek', skill),
+              ),
+            ),
+          ],
           const SizedBox(height: 24),
           _DetailSection(
             title: 'Etkinlik grupları',

@@ -1,32 +1,37 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/utils/card_id_generator.dart';
-import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/atoms/custom_button.dart';
-import '../../../my_cards/presentation/pages/card_view_page.dart';
 import '../../../my_cards/presentation/pages/my_card_edit_page.dart';
+import '../../../settings/presentation/pages/card_visibility_settings_page.dart';
 import '../../../onboarding/domain/entities/onboarding_card_draft.dart';
 import '../../../onboarding/domain/usecases/get_onboarding_draft_cards.dart';
 import '../../../onboarding/presentation/widgets/onboarding_card_preview_frame.dart';
 import '../../../business_cards/domain/usecases/persist_onboarding_card.dart';
+import '../../domain/entities/profile_stats.dart';
+import '../../domain/usecases/get_profile_stats.dart';
+import '../widgets/profile_my_cards_list.dart';
+import '../widgets/profile_interaction_stats.dart';
 
 const double _profileCarouselViewportFraction = 0.88;
 const double _profileCarouselHorizontalPadding = 12;
 const double _profileCarouselVerticalPadding = 14;
 
-/// Profil: kullanicinin kartlari yatay carousel ile listelenir.
+/// Profil: kart carousel, aksiyonlar ve etkileşim istatistikleri.
 class ProfilePage extends StatefulWidget {
   const ProfilePage({
     super.key,
     this.draft,
     required this.getOnboardingDraftCards,
     required this.persistOnboardingCard,
+    required this.getProfileStats,
     this.onDraftUpdated,
   });
 
   final OnboardingCardDraft? draft;
   final GetOnboardingDraftCards getOnboardingDraftCards;
   final PersistOnboardingCard persistOnboardingCard;
+  final GetProfileStats getProfileStats;
   final ValueChanged<OnboardingCardDraft>? onDraftUpdated;
 
   @override
@@ -35,6 +40,7 @@ class ProfilePage extends StatefulWidget {
 
 class _ProfilePageState extends State<ProfilePage> {
   List<OnboardingCardDraft> _cards = [];
+  ProfileStats? _stats;
   bool _loading = true;
   int _selectedIndex = 0;
   late final PageController _pageController = PageController(
@@ -44,7 +50,7 @@ class _ProfilePageState extends State<ProfilePage> {
   @override
   void initState() {
     super.initState();
-    _loadCards();
+    _loadPageData();
   }
 
   @override
@@ -53,12 +59,19 @@ class _ProfilePageState extends State<ProfilePage> {
     super.dispose();
   }
 
-  Future<void> _loadCards() async {
+  Future<void> _loadPageData() async {
+    setState(() => _loading = true);
     try {
-      final list = await widget.getOnboardingDraftCards();
+      final results = await Future.wait([
+        widget.getOnboardingDraftCards(),
+        widget.getProfileStats(),
+      ]);
       if (!mounted) return;
+      final list = results[0] as List<OnboardingCardDraft>;
+      final stats = results[1] as ProfileStats;
       setState(() {
         _cards = list;
+        _stats = stats;
         if (_selectedIndex >= list.length) {
           _selectedIndex = list.isEmpty ? 0 : list.length - 1;
         }
@@ -76,6 +89,10 @@ class _ProfilePageState extends State<ProfilePage> {
       if (!mounted) return;
       setState(() {
         _cards = [];
+        _stats = const ProfileStats(
+          totalWalletSaveCount: 0,
+          eventGroupCount: 0,
+        );
         _loading = false;
       });
     }
@@ -98,7 +115,7 @@ class _ProfilePageState extends State<ProfilePage> {
       ),
     );
     if (!mounted) return;
-    await _loadCards();
+    await _loadPageData();
     if (result != null) {
       widget.onDraftUpdated?.call(result);
       final idx = _cards.indexWhere((c) => c.cardId == result.cardId);
@@ -112,6 +129,18 @@ class _ProfilePageState extends State<ProfilePage> {
           );
         }
       }
+    }
+  }
+
+  Future<void> _selectCardIndex(int index) async {
+    if (index < 0 || index >= _cards.length) return;
+    setState(() => _selectedIndex = index);
+    if (_pageController.hasClients && _cards.length > 1) {
+      await _pageController.animateToPage(
+        index,
+        duration: const Duration(milliseconds: 280),
+        curve: Curves.easeOutCubic,
+      );
     }
   }
 
@@ -141,34 +170,25 @@ class _ProfilePageState extends State<ProfilePage> {
       return const Center(child: CircularProgressIndicator());
     }
 
+    final stats = _stats ??
+        const ProfileStats(totalWalletSaveCount: 0, eventGroupCount: 0);
+
     return RefreshIndicator(
-      onRefresh: _loadCards,
+      onRefresh: _loadPageData,
       child: ListView(
         physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsets.fromLTRB(0, 16, 0, 32),
+        padding: const EdgeInsets.fromLTRB(0, 8, 0, 32),
         children: [
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Text(
-                  'Kartlarım',
-                  style: textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  _cards.length > 1
-                      ? 'Yatay kaydırarak kartlar arasında geçin; düzenlemek için karta çift dokunun.'
-                      : 'Düzenlemek için karta çift dokunun.',
-                  style: textTheme.bodyMedium?.copyWith(
-                    color: colorScheme.onSurfaceVariant,
-                    height: 1.4,
-                  ),
-                ),
-              ],
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
+            child: Text(
+              _cards.length > 1
+                  ? 'Yatay kaydırarak kartlar arasında geçin; düzenlemek için karta çift dokunun.'
+                  : 'Düzenlemek için karta çift dokunun.',
+              style: textTheme.bodyMedium?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+                height: 1.4,
+              ),
             ),
           ),
           const SizedBox(height: 16),
@@ -185,16 +205,20 @@ class _ProfilePageState extends State<ProfilePage> {
               onPageChanged: (index) => setState(() => _selectedIndex = index),
               onCardTap: _openCardEditor,
             ),
-            const SizedBox(height: 12),
             _ProfileCarouselFooter(
               card: _selectedCard!,
               cardCount: _cards.length,
               selectedIndex: _selectedIndex,
               onEdit: () => _openCardEditor(_selectedCard!),
             ),
+            ProfileMyCardsList(
+              cards: _cards,
+              selectedIndex: _selectedIndex,
+              onCardSelected: _selectCardIndex,
+            ),
           ],
           Padding(
-            padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
+            padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
             child: CustomButton(
               label: 'Yeni kart',
               icon: Icons.add_rounded,
@@ -202,17 +226,17 @@ class _ProfilePageState extends State<ProfilePage> {
             ),
           ),
           if (_cards.isNotEmpty) ...[
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: CustomButton(
+              child: CustomButton.tonal(
                 label: 'Kart yüzü ve alan düzeni',
                 icon: Icons.view_carousel_outlined,
                 onPressed: () {
                   Navigator.of(context)
                       .push(
                         MaterialPageRoute<void>(
-                          builder: (context) => CardViewPage(
+                          builder: (context) => CardVisibilitySettingsPage(
                             getOnboardingDraftCards:
                                 widget.getOnboardingDraftCards,
                             persistOnboardingCard:
@@ -221,16 +245,18 @@ class _ProfilePageState extends State<ProfilePage> {
                           ),
                         ),
                       )
-                      .then((_) => _loadCards());
+                      .then((_) => _loadPageData());
                 },
-                style: FilledButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  foregroundColor: AppColors.textOnPrimary,
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                ),
               ),
             ),
           ],
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 28, 20, 0),
+            child: ProfileInteractionStats(
+              eventGroupCount: stats.eventGroupCount,
+              totalWalletSaveCount: stats.totalWalletSaveCount,
+            ),
+          ),
         ],
       ),
     );
@@ -241,7 +267,7 @@ class _ProfilePageState extends State<ProfilePage> {
       elevation: 0,
       margin: const EdgeInsets.only(bottom: 16),
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(16),
         side: BorderSide(color: colorScheme.outlineVariant),
       ),
       child: Padding(
@@ -401,6 +427,7 @@ class _ProfileCarouselFooter extends StatelessWidget {
       child: Column(
         children: [
           if (cardCount > 1) ...[
+            const SizedBox(height: 12),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: List.generate(cardCount, (index) {
@@ -420,8 +447,8 @@ class _ProfileCarouselFooter extends StatelessWidget {
                 );
               }),
             ),
-            const SizedBox(height: 12),
           ],
+          const SizedBox(height: 12),
           Row(
             children: [
               Expanded(

@@ -32,6 +32,9 @@ public sealed class BusinessCardConfiguration : IEntityTypeConfiguration<Busines
         builder.Property(x => x.LastUsedPaletteBackgroundColor)
             .HasMaxLength(7)
             .HasColumnName("last_used_palette_background_color");
+        builder.Property(x => x.SaveCount)
+            .HasColumnName("save_count")
+            .HasDefaultValue(0);
         builder.Property(x => x.CreatedAt).HasColumnName("created_at");
         builder.Property(x => x.UpdatedAt).HasColumnName("updated_at");
 

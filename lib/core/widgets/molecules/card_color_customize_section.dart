@@ -16,6 +16,9 @@ class CardColorCustomizeSection extends StatelessWidget {
     required this.onBackgroundColorChanged,
     required this.onAccentColorChanged,
     this.onLastUsedPaletteBackgroundChanged,
+    this.showBackgroundSection = true,
+    this.showTextSection = true,
+    this.useAutomaticTextPill = false,
   });
 
   final String? backgroundColor;
@@ -24,6 +27,9 @@ class CardColorCustomizeSection extends StatelessWidget {
   final ValueChanged<String?> onBackgroundColorChanged;
   final ValueChanged<String?> onAccentColorChanged;
   final ValueChanged<String>? onLastUsedPaletteBackgroundChanged;
+  final bool showBackgroundSection;
+  final bool showTextSection;
+  final bool useAutomaticTextPill;
 
   static String _colorToHex(Color c) {
     final r = (c.r * 255).round().clamp(0, 255);
@@ -126,70 +132,79 @@ class CardColorCustomizeSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text(
-          'KART RENGİ',
-          style: textTheme.labelMedium?.copyWith(
-            color: colorScheme.onSurfaceVariant,
-            fontWeight: FontWeight.w700,
-            letterSpacing: 0.8,
-          ),
-        ),
-        const SizedBox(height: 12),
-        Wrap(
-          spacing: 12,
-          runSpacing: 12,
-          children: [
-            _BackgroundChip(
-              hex: null,
-              selected: backgroundColor == null,
-              onTap: () => onBackgroundColorChanged(null),
-            ),
-            ...cardBackgroundColorOptions.map(
-              (hex) => _BackgroundChip(
-                hex: hex,
-                selected: backgroundColor == hex,
-                onTap: () => onBackgroundColorChanged(hex),
+        if (showBackgroundSection) ...[
+          if (!useAutomaticTextPill)
+            Text(
+              'KART RENGİ',
+              style: textTheme.labelMedium?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 0.8,
               ),
             ),
-            if (_hasLastUsed)
+          if (!useAutomaticTextPill) const SizedBox(height: 12),
+          Wrap(
+            spacing: 12,
+            runSpacing: 12,
+            children: [
               _BackgroundChip(
-                hex: lastUsedPaletteBackgroundColor,
-                selected: backgroundColor == lastUsedPaletteBackgroundColor,
-                onTap: () =>
-                    onBackgroundColorChanged(lastUsedPaletteBackgroundColor),
+                hex: null,
+                selected: backgroundColor == null,
+                onTap: () => onBackgroundColorChanged(null),
               ),
-            _PaletteButton(onTap: () => _openBackgroundPalette(context)),
-          ],
-        ),
-        const SizedBox(height: 20),
-        Text(
-          'METİN RENGİ',
-          style: textTheme.labelMedium?.copyWith(
-            color: colorScheme.onSurfaceVariant,
-            fontWeight: FontWeight.w700,
-            letterSpacing: 0.8,
+              ...cardBackgroundColorOptions.map(
+                (hex) => _BackgroundChip(
+                  hex: hex,
+                  selected: backgroundColor == hex,
+                  onTap: () => onBackgroundColorChanged(hex),
+                ),
+              ),
+              if (_hasLastUsed)
+                _BackgroundChip(
+                  hex: lastUsedPaletteBackgroundColor,
+                  selected:
+                      backgroundColor == lastUsedPaletteBackgroundColor,
+                  onTap: () =>
+                      onBackgroundColorChanged(lastUsedPaletteBackgroundColor),
+                ),
+              _PaletteButton(onTap: () => _openBackgroundPalette(context)),
+            ],
           ),
-        ),
-        const SizedBox(height: 12),
-        Wrap(
-          spacing: 12,
-          runSpacing: 12,
-          children: [
-            _TextColorChip(
-              hex: null,
-              selected: accentColor == null,
-              onTap: () => onAccentColorChanged(null),
-            ),
-            ...cardTextColorOptions.map(
-              (hex) => _TextColorChip(
-                hex: hex,
-                selected: accentColor == hex,
-                onTap: () => onAccentColorChanged(hex),
+        ],
+        if (showBackgroundSection && showTextSection) const SizedBox(height: 20),
+        if (showTextSection) ...[
+          if (!useAutomaticTextPill)
+            Text(
+              'METİN RENGİ',
+              style: textTheme.labelMedium?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 0.8,
               ),
             ),
-            _PaletteButton(onTap: () => _openTextPalette(context)),
-          ],
-        ),
+          if (!useAutomaticTextPill) const SizedBox(height: 12),
+          Wrap(
+            spacing: 12,
+            runSpacing: 12,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: [
+              _TextColorChip(
+                hex: null,
+                selected: accentColor == null,
+                onTap: () => onAccentColorChanged(null),
+                useAutomaticPill: useAutomaticTextPill,
+              ),
+              ...cardTextColorOptions.map(
+                (hex) => _TextColorChip(
+                  hex: hex,
+                  selected: accentColor == hex,
+                  onTap: () => onAccentColorChanged(hex),
+                ),
+              ),
+              _PaletteButton(onTap: () => _openTextPalette(context)),
+            ],
+          ),
+        ],
       ],
     );
   }
@@ -253,16 +268,54 @@ class _TextColorChip extends StatelessWidget {
     required this.hex,
     required this.selected,
     required this.onTap,
+    this.useAutomaticPill = false,
   });
 
   final String? hex;
   final bool selected;
   final VoidCallback onTap;
+  final bool useAutomaticPill;
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
     final isDefault = hex == null;
+
+    if (isDefault && useAutomaticPill) {
+      return Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(999),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 180),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            decoration: BoxDecoration(
+              color: selected
+                  ? colorScheme.primaryContainer
+                  : colorScheme.surfaceContainerHighest,
+              borderRadius: BorderRadius.circular(999),
+              border: Border.all(
+                color: selected
+                    ? AppColors.primary.withValues(alpha: 0.35)
+                    : colorScheme.outlineVariant.withValues(alpha: 0.5),
+              ),
+            ),
+            child: Text(
+              'Otomatik',
+              style: textTheme.labelLarge?.copyWith(
+                fontWeight: FontWeight.w600,
+                color: selected
+                    ? AppColors.primary
+                    : colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
     final color = hex != null
         ? MyCardPreviewHelpers.parseHexColor(hex)
         : colorScheme.surfaceContainerHighest;

@@ -51,5 +51,6 @@ void main() async {
     addSavedCard: result.addSavedCard,
     deleteSavedCard: result.deleteSavedCard,
     upgradeWalletPlan: result.upgradeWalletPlan,
+    getProfileStats: result.getProfileStats,
   ));
 }

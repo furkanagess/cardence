@@ -13,6 +13,12 @@ class AuthApiException implements Exception {
 
   bool get isUnauthorized => statusCode == 401;
 
+  /// Oturum yenilenemez; kullanıcı tekrar giriş yapmalı.
+  bool get requiresReLogin =>
+      isUnauthorized ||
+      message.contains('Oturum süresi doldu') ||
+      message.contains('Oturum bulunamadı');
+
   @override
   String toString() => message;
 }

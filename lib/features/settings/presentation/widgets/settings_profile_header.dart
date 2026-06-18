@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
-import '../../../../core/constants/app_constants.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/atoms/profile_avatar.dart';
 import '../../../auth/domain/usecases/upload_profile_photo.dart';
 
+/// Ayarlar profil kartı — fotoğraf kendi kart(lar)ı ile senkronize edilir.
 class SettingsProfileHeader extends StatefulWidget {
   const SettingsProfileHeader({
     super.key,
@@ -66,7 +66,7 @@ class _SettingsProfileHeaderState extends State<SettingsProfileHeader> {
         ..hideCurrentSnackBar()
         ..showSnackBar(
           const SnackBar(
-            content: Text('Profil fotoğrafı güncellendi.'),
+            content: Text('Profil fotoğrafı kartlarınıza da uygulandı.'),
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -91,91 +91,69 @@ class _SettingsProfileHeaderState extends State<SettingsProfileHeader> {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return Container(
-      padding: const EdgeInsets.all(18),
+    return DecoratedBox(
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            colorScheme.primaryContainer.withValues(alpha: 0.9),
-            colorScheme.surfaceContainerHighest,
-          ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
+        color: colorScheme.surface,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: colorScheme.outline.withValues(alpha: 0.2),
+          color: isDark ? AppColors.outlineDark : AppColors.outlineVariant,
         ),
       ),
-      child: Row(
-        children: [
-          Stack(
-            alignment: Alignment.center,
-            children: [
-              ProfileAvatar(
-                photoUrl: _photoUrl,
-                displayName: widget.displayName,
-                size: 72,
-                onTap: _uploading ? null : _pickAndUploadPhoto,
-                showEditBadge: !_uploading,
-              ),
-              if (_uploading)
-                Container(
-                  width: 72,
-                  height: 72,
-                  decoration: BoxDecoration(
-                    color: colorScheme.surface.withValues(alpha: 0.55),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: const Padding(
-                    padding: EdgeInsets.all(20),
-                    child: CircularProgressIndicator(strokeWidth: 2.5),
-                  ),
-                ),
-            ],
-          ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(20, 28, 20, 24),
+        child: Column(
+          children: [
+            Stack(
+              alignment: Alignment.center,
               children: [
-                Text(
-                  widget.displayName,
-                  style: textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w700,
-                    color: colorScheme.onSurface,
-                  ),
+                ProfileAvatar(
+                  photoUrl: _photoUrl,
+                  displayName: widget.displayName,
+                  size: 96,
+                  circular: true,
+                  onTap: _uploading ? null : _pickAndUploadPhoto,
+                  showEditBadge: !_uploading,
                 ),
-                if (widget.email != null && widget.email!.isNotEmpty) ...[
-                  const SizedBox(height: 2),
-                  Text(
-                    widget.email!,
-                    style: textTheme.bodySmall?.copyWith(
-                      color: colorScheme.onSurfaceVariant,
+                if (_uploading)
+                  Container(
+                    width: 96,
+                    height: 96,
+                    decoration: BoxDecoration(
+                      color: colorScheme.surface.withValues(alpha: 0.6),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Padding(
+                      padding: EdgeInsets.all(28),
+                      child: CircularProgressIndicator(strokeWidth: 2.5),
                     ),
                   ),
-                ],
-                const SizedBox(height: 6),
-                Text(
-                  '${AppConstants.appName} v${AppConstants.appVersion}',
-                  style: textTheme.labelSmall?.copyWith(
-                    color: colorScheme.onSurfaceVariant,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  'Fotoğrafa dokunarak değiştir',
-                  style: textTheme.labelSmall?.copyWith(
-                    color: AppColors.primary,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
               ],
             ),
-          ),
-        ],
+            const SizedBox(height: 16),
+            Text(
+              widget.displayName,
+              textAlign: TextAlign.center,
+              style: textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.w700,
+                color: isDark
+                    ? AppColors.textPrimaryDark
+                    : AppColors.textPrimary,
+              ),
+            ),
+            if (widget.email != null && widget.email!.trim().isNotEmpty) ...[
+              const SizedBox(height: 4),
+              Text(
+                widget.email!.trim(),
+                textAlign: TextAlign.center,
+                style: textTheme.bodyMedium?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ],
+          ],
+        ),
       ),
     );
   }

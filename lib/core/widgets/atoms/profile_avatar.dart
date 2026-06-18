@@ -11,6 +11,7 @@ class ProfileAvatar extends StatelessWidget {
     required this.size,
     this.onTap,
     this.showEditBadge = false,
+    this.circular = false,
   });
 
   final String? photoUrl;
@@ -18,6 +19,7 @@ class ProfileAvatar extends StatelessWidget {
   final double size;
   final VoidCallback? onTap;
   final bool showEditBadge;
+  final bool circular;
 
   String get _initial {
     final name = displayName?.trim();
@@ -35,7 +37,9 @@ class ProfileAvatar extends StatelessWidget {
       height: size,
       decoration: BoxDecoration(
         color: colorScheme.primaryContainer,
-        borderRadius: BorderRadius.circular(size * 0.28),
+        shape: circular ? BoxShape.circle : BoxShape.rectangle,
+        borderRadius:
+            circular ? null : BorderRadius.circular(size * 0.28),
         border: Border.all(
           color: colorScheme.outline.withValues(alpha: 0.25),
         ),
@@ -65,7 +69,14 @@ class ProfileAvatar extends StatelessWidget {
         color: Colors.transparent,
         child: InkWell(
           onTap: onTap,
-          borderRadius: BorderRadius.circular(size * 0.28),
+          borderRadius: circular
+              ? null
+              : BorderRadius.circular(size * 0.28),
+          customBorder: circular
+              ? const CircleBorder()
+              : RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(size * 0.28),
+                ),
           child: avatar,
         ),
       );

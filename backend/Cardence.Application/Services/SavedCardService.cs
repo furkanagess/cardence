@@ -212,6 +212,12 @@ public sealed class SavedCardService : ISavedCardService
         }
 
         await _savedCardRepository.AddAsync(entity, cancellationToken);
+        if (businessCard is not null && businessCard.UserId != userId)
+        {
+            await _businessCardRepository.IncrementSaveCountAsync(
+                businessCard.Id,
+                cancellationToken);
+        }
         await _eventGroupRepository.SyncSavedCardLinksAsync(
             userId,
             entity.Id,

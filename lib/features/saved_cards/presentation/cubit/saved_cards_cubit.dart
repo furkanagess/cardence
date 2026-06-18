@@ -116,6 +116,28 @@ class SavedCardsCubit extends Cubit<SavedCardsState> {
     );
   }
 
+  void setSearchQuery(String query) {
+    if (state.searchQuery == query) return;
+    emit(
+      state.copyWith(
+        searchQuery: query,
+        clearDraggingCardIndex: true,
+        clearHoverTargetIndex: true,
+      ),
+    );
+  }
+
+  void clearSearch() {
+    if (!state.hasActiveSearch) return;
+    emit(
+      state.copyWith(
+        searchQuery: '',
+        clearDraggingCardIndex: true,
+        clearHoverTargetIndex: true,
+      ),
+    );
+  }
+
   List<({String value, String label})> eventFilterOptionsForSource(
     List<SavedCard> sourceCards,
   ) {
@@ -126,9 +148,10 @@ class SavedCardsCubit extends Cubit<SavedCardsState> {
   }
 
   List<SavedCard> displayCardsFor(List<SavedCard> sourceCards) {
-    return SavedCardsListLogic.applyFiltersAndSort(
+    return SavedCardsListLogic.applyFiltersSortAndSearch(
       cards: sourceCards,
       filter: state.filter,
+      searchQuery: state.searchQuery,
     );
   }
 

@@ -79,6 +79,15 @@ public sealed class BusinessCardsController : ControllerBase
         return NoContent();
     }
 
+    [HttpGet("ProfileStats")]
+    [ProducesResponseType(typeof(ApiResponse<ProfileStatsDto>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<ApiResponse<ProfileStatsDto>>> GetProfileStats(
+        CancellationToken cancellationToken)
+    {
+        var stats = await _businessCardService.GetProfileStatsAsync(cancellationToken);
+        return Ok(ApiResponse<ProfileStatsDto>.Ok(stats, HttpContext.TraceIdentifier));
+    }
+
     [HttpGet("BusinessCardShare")]
     [ProducesResponseType(typeof(ApiResponse<IReadOnlyDictionary<string, object?>>), StatusCodes.Status200OK)]
     public async Task<ActionResult<ApiResponse<IReadOnlyDictionary<string, object?>>>> GetBusinessCardShare(

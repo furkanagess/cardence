@@ -13,17 +13,20 @@ public sealed class BusinessCardService : IBusinessCardService
 {
     private readonly IBusinessCardRepository _repository;
     private readonly IUserRepository _userRepository;
+    private readonly IEventGroupRepository _eventGroupRepository;
     private readonly ICurrentUserService _currentUser;
     private readonly IValidator<BusinessCardDto> _validator;
 
     public BusinessCardService(
         IBusinessCardRepository repository,
         IUserRepository userRepository,
+        IEventGroupRepository eventGroupRepository,
         ICurrentUserService currentUser,
         IValidator<BusinessCardDto> validator)
     {
         _repository = repository;
         _userRepository = userRepository;
+        _eventGroupRepository = eventGroupRepository;
         _currentUser = currentUser;
         _validator = validator;
     }
@@ -159,6 +162,22 @@ public sealed class BusinessCardService : IBusinessCardService
     public async Task<bool> PublicCardExistsAsync(string cardId, CancellationToken cancellationToken = default)
     {
         return await _repository.GetByCardIdAsync(cardId, cancellationToken) is not null;
+    }
+
+    public async Task<ProfileStatsDto> GetProfileStatsAsync(
+        CancellationToken cancellationToken = default)
+    {
+        var userId = _currentUser.GetRequiredUserId();
+        var totalWalletSaveCount = await _repository.SumSaveCountByUserIdAsync(
+            userId,
+            cancellationToken);
+        var groups = await _eventGroupRepository.GetByUserIdAsync(userId, cancellationToken);
+
+        return new ProfileStatsDto
+        {
+            TotalWalletSaveCount = totalWalletSaveCount,
+            EventGroupCount = groups.Count,
+        };
     }
 
     private async Task ApplyProfilePhotoFallbackAsync(

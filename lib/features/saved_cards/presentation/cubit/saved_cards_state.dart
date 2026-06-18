@@ -26,6 +26,7 @@ class SavedCardsState extends Equatable {
       dateFilter: SavedCardsDateFilter.all,
       nameSort: SavedCardsNameSort.asc,
     ),
+    this.searchQuery = '',
     this.draggingCardIndex,
     this.hoverTargetIndex,
     this.effectType = SavedCardsEffectType.none,
@@ -39,6 +40,7 @@ class SavedCardsState extends Equatable {
   final SavedCardsWalletQuota? quota;
   final bool isLoadingCards;
   final SavedCardsFilterSelection filter;
+  final String searchQuery;
   final int? draggingCardIndex;
   final int? hoverTargetIndex;
   final SavedCardsEffectType effectType;
@@ -46,6 +48,7 @@ class SavedCardsState extends Equatable {
   final AddSavedCardResult? lastAddCardResult;
 
   bool get hasActiveFilters => filter.hasActiveFilters;
+  bool get hasActiveSearch => searchQuery.trim().isNotEmpty;
   int get activeFilterCount => filter.activeCount();
 
   SavedCardsState copyWith({
@@ -55,6 +58,7 @@ class SavedCardsState extends Equatable {
     SavedCardsWalletQuota? quota,
     bool? isLoadingCards,
     SavedCardsFilterSelection? filter,
+    String? searchQuery,
     int? draggingCardIndex,
     int? hoverTargetIndex,
     bool clearDraggingCardIndex = false,
@@ -72,6 +76,7 @@ class SavedCardsState extends Equatable {
       quota: quota ?? this.quota,
       isLoadingCards: isLoadingCards ?? this.isLoadingCards,
       filter: filter ?? this.filter,
+      searchQuery: searchQuery ?? this.searchQuery,
       draggingCardIndex: clearDraggingCardIndex
           ? null
           : (draggingCardIndex ?? this.draggingCardIndex),
@@ -96,6 +101,7 @@ class SavedCardsState extends Equatable {
         quota,
         isLoadingCards,
         filter,
+        searchQuery,
         draggingCardIndex,
         hoverTargetIndex,
         effectType,

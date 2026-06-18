@@ -18,6 +18,7 @@ import '../widgets/saved_card_list_tile.dart';
 import '../widgets/saved_cards_add_card_fab.dart';
 import '../widgets/saved_cards_card_stack_view.dart';
 import '../widgets/saved_cards_empty_results_view.dart';
+import '../widgets/saved_cards_list_header.dart';
 import '../widgets/saved_cards_loading_shimmer.dart';
 import '../widgets/saved_cards_screen_toolbar.dart';
 import '../widgets/saved_cards_wallet_strip.dart';
@@ -27,9 +28,9 @@ class SavedCardsPage extends StatefulWidget {
   const SavedCardsPage({
     super.key,
     required this.showFlippableView,
+    required this.onViewModeChanged,
     required this.filterTrigger,
     this.addCardTrigger = 0,
-    required this.onViewModeChanged,
     required this.addSavedCard,
     required this.upgradeWalletPlan,
     required this.getEventGroups,
@@ -41,9 +42,9 @@ class SavedCardsPage extends StatefulWidget {
   });
 
   final bool showFlippableView;
+  final ValueChanged<bool> onViewModeChanged;
   final int filterTrigger;
   final int addCardTrigger;
-  final ValueChanged<bool> onViewModeChanged;
   final AddSavedCard addSavedCard;
   final UpgradeWalletPlan upgradeWalletPlan;
   final GetEventGroups getEventGroups;
@@ -119,9 +120,12 @@ class _SavedCardsPageState extends State<SavedCardsPage>
                   ),
                   SavedCardsScreenToolbar(
                     showFlippableView: widget.showFlippableView,
-                    hasActiveFilters: state.hasActiveFilters,
-                    activeFilterCount: state.activeFilterCount,
                     onViewModeChanged: widget.onViewModeChanged,
+                    searchQuery: state.searchQuery,
+                    onSearchQueryChanged: cubit.setSearchQuery,
+                    hasActiveFilters: state.hasActiveFilters,
+                    hasActiveSearch: state.hasActiveSearch,
+                    activeFilterCount: state.activeFilterCount,
                     onOpenFilters: cubit.requestOpenFilters,
                   ),
                   Expanded(
@@ -130,7 +134,9 @@ class _SavedCardsPageState extends State<SavedCardsPage>
                         : displayCards.isEmpty
                             ? SavedCardsEmptyResultsView(
                                 hasFilters: state.hasActiveFilters,
+                                hasSearch: state.hasActiveSearch,
                                 onClearFilters: cubit.clearFilters,
+                                onClearSearch: cubit.clearSearch,
                               )
                             : widget.showFlippableView
                                 ? SingleChildScrollView(
@@ -160,31 +166,58 @@ class _SavedCardsPageState extends State<SavedCardsPage>
                                       ),
                                     ),
                                   )
-                                : ListView.builder(
-                                    padding: const EdgeInsets.fromLTRB(
-                                      20,
-                                      4,
-                                      20,
-                                      contentBottomInset,
-                                    ),
-                                    itemCount: displayCards.length,
-                                    itemBuilder: (context, index) {
-                                      final card = displayCards[index];
-                                      return SavedCardListTile(
-                                        card: card,
-                                        onTap: () => openSavedCardDetail(
-                                          context,
-                                          card: card,
-                                          getEventGroups: widget.getEventGroups,
-                                          getSavedCards: widget.getSavedCards,
-                                          deleteEventGroup: widget.deleteEventGroup,
-                                        linkSavedCardsToEventGroup:
-                                            widget.linkSavedCardsToEventGroup,
-                                          saveSavedCard: widget.saveSavedCard,
-                                          deleteSavedCard: widget.deleteSavedCard,
+                                : CustomScrollView(
+                                    slivers: [
+                                      SliverPadding(
+                                        padding: const EdgeInsets.fromLTRB(
+                                          horizontalPadding,
+                                          topPadding,
+                                          horizontalPadding,
+                                          0,
                                         ),
-                                      );
-                                    },
+                                        sliver: SliverToBoxAdapter(
+                                          child: SavedCardsListHeader(
+                                            count: displayCards.length,
+                                          ),
+                                        ),
+                                      ),
+                                      SliverPadding(
+                                        padding: const EdgeInsets.fromLTRB(
+                                          horizontalPadding,
+                                          0,
+                                          horizontalPadding,
+                                          contentBottomInset,
+                                        ),
+                                        sliver: SliverList(
+                                          delegate: SliverChildBuilderDelegate(
+                                            (context, index) {
+                                              final card = displayCards[index];
+                                              return SavedCardListTile(
+                                                card: card,
+                                                onTap: () => openSavedCardDetail(
+                                                  context,
+                                                  card: card,
+                                                  getEventGroups:
+                                                      widget.getEventGroups,
+                                                  getSavedCards:
+                                                      widget.getSavedCards,
+                                                  deleteEventGroup:
+                                                      widget.deleteEventGroup,
+                                                  linkSavedCardsToEventGroup:
+                                                      widget
+                                                          .linkSavedCardsToEventGroup,
+                                                  saveSavedCard:
+                                                      widget.saveSavedCard,
+                                                  deleteSavedCard:
+                                                      widget.deleteSavedCard,
+                                                ),
+                                              );
+                                            },
+                                            childCount: displayCards.length,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
                                   ),
                   ),
                 ],

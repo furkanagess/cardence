@@ -29,7 +29,7 @@ class SettingsThemeSelector extends StatelessWidget {
         Expanded(
           child: _ThemeOptionCard(
             label: 'Koyu',
-            icon: Icons.nights_stay_outlined,
+            icon: Icons.dark_mode_outlined,
             selected: current == ThemePreference.dark,
             onTap: () => onChanged(ThemePreference.dark),
           ),
@@ -38,7 +38,7 @@ class SettingsThemeSelector extends StatelessWidget {
         Expanded(
           child: _ThemeOptionCard(
             label: 'Sistem',
-            icon: Icons.phone_iphone_rounded,
+            icon: Icons.desktop_windows_outlined,
             selected: current == ThemePreference.system,
             onTap: () => onChanged(ThemePreference.system),
           ),
@@ -65,46 +65,73 @@ class _ThemeOptionCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Material(
-      color: selected
-          ? colorScheme.primaryContainer.withValues(alpha: 0.75)
-          : colorScheme.surfaceContainerHighest,
+      color: colorScheme.surface,
       borderRadius: BorderRadius.circular(16),
       child: InkWell(
         borderRadius: BorderRadius.circular(16),
         onTap: onTap,
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: selected
-                  ? AppColors.primary
-                  : colorScheme.outline.withValues(alpha: 0.3),
-              width: selected ? 2 : 1,
-            ),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                icon,
-                color: selected ? AppColors.primary : colorScheme.onSurfaceVariant,
-                size: 24,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                label,
-                style: textTheme.labelMedium?.copyWith(
-                  fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+        child: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 8),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
                   color: selected
-                      ? colorScheme.onPrimaryContainer
-                      : colorScheme.onSurfaceVariant,
+                      ? AppColors.primary
+                      : (isDark
+                          ? AppColors.outlineDark
+                          : AppColors.outlineVariant),
+                  width: selected ? 2 : 1,
                 ),
               ),
-            ],
-          ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    icon,
+                    color: selected
+                        ? AppColors.primary
+                        : colorScheme.onSurfaceVariant,
+                    size: 26,
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    label,
+                    style: textTheme.labelLarge?.copyWith(
+                      fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+                      color: selected
+                          ? AppColors.primary
+                          : colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            if (selected)
+              Positioned(
+                top: -6,
+                right: -6,
+                child: Container(
+                  width: 22,
+                  height: 22,
+                  decoration: const BoxDecoration(
+                    color: AppColors.primary,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.check_rounded,
+                    size: 14,
+                    color: AppColors.textOnPrimary,
+                  ),
+                ),
+              ),
+          ],
         ),
       ),
     );

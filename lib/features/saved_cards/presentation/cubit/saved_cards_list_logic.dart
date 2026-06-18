@@ -6,6 +6,39 @@ import 'saved_cards_filter_models.dart';
 class SavedCardsListLogic {
   SavedCardsListLogic._();
 
+  static List<SavedCard> applyFiltersSortAndSearch({
+    required List<SavedCard> cards,
+    required SavedCardsFilterSelection filter,
+    required String searchQuery,
+  }) {
+    final filtered = applyFiltersAndSort(cards: cards, filter: filter);
+    return applySearch(cards: filtered, query: searchQuery);
+  }
+
+  static List<SavedCard> applySearch({
+    required List<SavedCard> cards,
+    required String query,
+  }) {
+    final normalized = query.trim().toLowerCase();
+    if (normalized.isEmpty) return cards;
+
+    return cards.where((card) {
+      return _searchableText(card).contains(normalized);
+    }).toList();
+  }
+
+  static String _searchableText(SavedCard card) {
+    return [
+      card.displayName,
+      card.company,
+      card.title,
+      card.email,
+      card.phone,
+      card.cardId,
+      card.note,
+    ].whereType<String>().join(' ').toLowerCase();
+  }
+
   static List<SavedCard> applyFiltersAndSort({
     required List<SavedCard> cards,
     required SavedCardsFilterSelection filter,

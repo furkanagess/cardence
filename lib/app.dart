@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'core/auth/session_expired_handler.dart';
 import 'core/constants/app_constants.dart';
 import 'core/theme/app_theme.dart';
 import 'core/widgets/molecules/chuck_fab_overlay.dart';
@@ -37,6 +38,7 @@ import 'features/saved_cards/domain/usecases/upgrade_wallet_plan.dart';
 import 'features/settings/domain/entities/theme_preference.dart';
 import 'features/settings/domain/usecases/get_theme_preference.dart';
 import 'features/settings/domain/usecases/set_theme_preference.dart';
+import 'features/profile/domain/usecases/get_profile_stats.dart';
 import 'features/support/domain/usecases/submit_support_request.dart';
 import 'features/shell/presentation/pages/main_shell_page.dart';
 
@@ -78,6 +80,7 @@ class App extends StatefulWidget {
     required this.addSavedCard,
     required this.deleteSavedCard,
     required this.upgradeWalletPlan,
+    required this.getProfileStats,
   });
 
   final GlobalKey<NavigatorState> rootNavigatorKey;
@@ -112,6 +115,7 @@ class App extends StatefulWidget {
   final AddSavedCard addSavedCard;
   final DeleteSavedCard deleteSavedCard;
   final UpgradeWalletPlan upgradeWalletPlan;
+  final GetProfileStats getProfileStats;
 
   @override
   State<App> createState() => _AppState();
@@ -124,6 +128,10 @@ class _AppState extends State<App> {
   @override
   void initState() {
     super.initState();
+    SessionExpiredHandler.instance.configure(
+      navigatorKey: widget.rootNavigatorKey,
+      onForceLogout: _onLogout,
+    );
     _bootstrap();
     _loadTheme();
   }
@@ -247,6 +255,7 @@ class _AppState extends State<App> {
           onLogout: _onLogout,
           uploadProfilePhoto: widget.uploadProfilePhoto,
           submitSupportRequest: widget.submitSupportRequest,
+          getProfileStats: widget.getProfileStats,
         );
     }
   }

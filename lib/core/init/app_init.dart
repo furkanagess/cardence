@@ -24,6 +24,9 @@ import '../../features/business_cards/domain/usecases/get_business_cards.dart';
 import '../../features/business_cards/domain/usecases/persist_onboarding_card.dart';
 import '../../features/business_cards/domain/usecases/save_business_card.dart';
 import '../../features/business_cards/domain/usecases/upsert_business_card.dart';
+import '../../features/profile/data/datasources/profile_remote_datasource.dart';
+import '../../features/profile/data/repositories/profile_repository_impl.dart';
+import '../../features/profile/domain/usecases/get_profile_stats.dart';
 import 'complete_onboarding_flow.dart';
 import '../../features/event_groups/data/datasources/event_group_local_datasource.dart';
 import '../../features/event_groups/data/repositories/event_group_repository_impl.dart';
@@ -120,6 +123,7 @@ class AppInit {
     );
     final theme = _initTheme(prefs);
     final support = _initSupport(authLocal);
+    final profile = _initProfile(authLocal);
 
     final eventGroups = _initEventGroups(
       local: eventGroupLocal,
@@ -163,6 +167,7 @@ class AppInit {
       deleteSavedCard: savedCards.deleteSavedCard,
       upgradeWalletPlan: savedCards.upgradeWalletPlan,
       linkSavedCardsToEventGroup: savedCards.linkSavedCardsToEventGroup,
+      getProfileStats: profile.getProfileStats,
     );
   }
 
@@ -339,6 +344,18 @@ class AppInit {
       submitSupportRequest: SubmitSupportRequest(repo),
     );
   }
+
+  static ({GetProfileStats getProfileStats}) _initProfile(
+    AuthLocalDataSource authLocal,
+  ) {
+    final repo = ProfileRepositoryImpl(
+      remote: ProfileRemoteDataSourceImpl(),
+      authLocal: authLocal,
+    );
+    return (
+      getProfileStats: GetProfileStats(repo),
+    );
+  }
 }
 
 /// [AppInit.init] sonucu; [App] ve gerekirse diğer yerler tarafından kullanılır.
@@ -377,6 +394,7 @@ class AppInitResult {
     required this.deleteSavedCard,
     required this.upgradeWalletPlan,
     required this.linkSavedCardsToEventGroup,
+    required this.getProfileStats,
   });
 
   final RestoreAuthSession restoreAuthSession;
@@ -412,4 +430,5 @@ class AppInitResult {
   final DeleteSavedCard deleteSavedCard;
   final UpgradeWalletPlan upgradeWalletPlan;
   final LinkSavedCardsToEventGroup linkSavedCardsToEventGroup;
+  final GetProfileStats getProfileStats;
 }

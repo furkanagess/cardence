@@ -14,6 +14,8 @@ public sealed class BusinessCardServiceTests
 {
     private readonly IBusinessCardRepository _repository = Substitute.For<IBusinessCardRepository>();
     private readonly IUserRepository _userRepository = Substitute.For<IUserRepository>();
+    private readonly IEventGroupRepository _eventGroupRepository =
+        Substitute.For<IEventGroupRepository>();
     private readonly ICurrentUserService _currentUser = Substitute.For<ICurrentUserService>();
     private readonly BusinessCardService _service;
     private readonly Guid _userId = Guid.NewGuid();
@@ -24,6 +26,7 @@ public sealed class BusinessCardServiceTests
         _service = new BusinessCardService(
             _repository,
             _userRepository,
+            _eventGroupRepository,
             _currentUser,
             new BusinessCardDtoValidator());
     }

@@ -126,6 +126,12 @@ namespace Cardence.Infrastructure.Migrations
                         .HasColumnType("character varying(2048)")
                         .HasColumnName("photo_url");
 
+                    b.Property<int>("SaveCount")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(0)
+                        .HasColumnName("save_count");
+
                     b.Property<string>("School")
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)")

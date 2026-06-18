@@ -12,4 +12,5 @@ public interface IBusinessCardService
     Task<IReadOnlyDictionary<string, object?>> GetSharePayloadAsync(string cardId, CancellationToken cancellationToken = default);
     Task<IReadOnlyDictionary<string, object?>> GetPublicSharePayloadAsync(string cardId, CancellationToken cancellationToken = default);
     Task<bool> PublicCardExistsAsync(string cardId, CancellationToken cancellationToken = default);
+    Task<ProfileStatsDto> GetProfileStatsAsync(CancellationToken cancellationToken = default);
 }

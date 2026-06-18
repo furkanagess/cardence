@@ -74,4 +74,27 @@ public sealed class BusinessCardRepository : IBusinessCardRepository
         _dbContext.BusinessCards.Remove(card);
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
+
+    public async Task IncrementSaveCountAsync(
+        Guid businessCardId,
+        CancellationToken cancellationToken = default)
+    {
+        await _dbContext.BusinessCards
+            .Where(card => card.Id == businessCardId)
+            .ExecuteUpdateAsync(
+                setters => setters.SetProperty(
+                    card => card.SaveCount,
+                    card => card.SaveCount + 1),
+                cancellationToken);
+    }
+
+    public async Task<int> SumSaveCountByUserIdAsync(
+        Guid userId,
+        CancellationToken cancellationToken = default)
+    {
+        return await _dbContext.BusinessCards
+            .AsNoTracking()
+            .Where(card => card.UserId == userId)
+            .SumAsync(card => card.SaveCount, cancellationToken);
+    }
 }

@@ -17,6 +17,7 @@ import '../../../saved_cards/domain/usecases/save_saved_card.dart';
 import '../../../saved_cards/domain/usecases/upgrade_wallet_plan.dart';
 import '../../../event_groups/presentation/pages/event_groups_page.dart';
 import '../../../onboarding/domain/entities/onboarding_card_draft.dart';
+import '../../../profile/domain/usecases/get_profile_stats.dart';
 import '../../../profile/presentation/pages/profile_page.dart';
 import '../../../onboarding/domain/usecases/get_onboarding_draft_card.dart';
 import '../../../onboarding/domain/usecases/get_onboarding_draft_cards.dart';
@@ -27,7 +28,6 @@ import '../../../auth/domain/usecases/get_current_user.dart';
 import '../../../auth/domain/usecases/upload_profile_photo.dart';
 import '../../../settings/domain/entities/theme_preference.dart';
 import '../../../settings/presentation/pages/settings_page.dart';
-import '../../../settings/presentation/pages/card_visibility_settings_page.dart';
 import '../../../support/domain/usecases/submit_support_request.dart';
 import '../../../support/presentation/pages/support_page.dart';
 
@@ -55,6 +55,7 @@ class MainShellPage extends StatefulWidget {
     required this.onLogout,
     required this.uploadProfilePhoto,
     required this.submitSupportRequest,
+    required this.getProfileStats,
   });
 
   final GetOnboardingDraftCard getOnboardingDraftCard;
@@ -77,6 +78,7 @@ class MainShellPage extends StatefulWidget {
   final Future<void> Function() onLogout;
   final UploadProfilePhoto uploadProfilePhoto;
   final SubmitSupportRequest submitSupportRequest;
+  final GetProfileStats getProfileStats;
 
   @override
   State<MainShellPage> createState() => _MainShellPageState();
@@ -85,7 +87,7 @@ class MainShellPage extends StatefulWidget {
 class _MainShellPageState extends State<MainShellPage> {
   int _currentIndex = 0;
   OnboardingCardDraft? _myCardDraft;
-  bool _showSavedCardsFlippableView = true;
+  bool _showSavedCardsFlippableView = false;
   int _savedCardsFilterTrigger = 0;
   int _savedCardsAddCardTrigger = 0;
   int _eventGroupsCreateTrigger = 0;
@@ -109,7 +111,7 @@ class _MainShellPageState extends State<MainShellPage> {
       case 1:
         return 'Etkinlik grupları';
       case 2:
-        return 'Profil';
+        return 'Kartlarım';
       default:
         return AppConstants.appName;
     }
@@ -184,7 +186,9 @@ class _MainShellPageState extends State<MainShellPage> {
               draft: _myCardDraft,
               getOnboardingDraftCards: widget.getOnboardingDraftCards,
               persistOnboardingCard: widget.persistOnboardingCard,
-              onDraftUpdated: (updated) => setState(() => _myCardDraft = updated),
+              getProfileStats: widget.getProfileStats,
+              onDraftUpdated: (updated) =>
+                  setState(() => _myCardDraft = updated),
             ),
           ],
         ),
@@ -208,19 +212,37 @@ class _MainShellPageState extends State<MainShellPage> {
     final user = await widget.getCurrentUser();
     if (!context.mounted) return;
 
+    final draft = _myCardDraft;
+    final displayName = user.displayName?.trim().isNotEmpty == true
+        ? user.displayName!
+        : (draft?.displayName?.trim().isNotEmpty == true
+            ? draft!.displayName!
+            : (draft?.cardName?.trim().isNotEmpty == true
+                ? draft!.cardName!
+                : 'Kullanıcı'));
+
     Navigator.of(context).push(
       MaterialPageRoute<void>(
         builder: (context) => SettingsPage(
           currentTheme: widget.themePreference,
           onThemeChanged: widget.onThemeChanged,
           onLogout: widget.onLogout,
-          userDisplayName: user.displayName,
-          userEmail: user.email,
-          userPhotoUrl: user.photoUrl,
+          userDisplayName: displayName,
+          userEmail: user.email ?? draft?.email,
+          userPhotoUrl: draft?.photoUrl ?? user.photoUrl,
           uploadProfilePhoto: widget.uploadProfilePhoto,
-          onPhotoUpdated: (_) => _loadMyCardDraft(),
-          onOpenSupport: () => _openSupport(context, user.email),
-          onOpenCardVisibility: () => _openCardVisibility(context),
+          onPhotoUpdated: (photoUrl) {
+            if (photoUrl != null && draft != null) {
+              setState(
+                () => _myCardDraft = draft.copyWith(photoUrl: photoUrl),
+              );
+            }
+            _loadMyCardDraft();
+          },
+          onOpenSupport: () => _openSupport(
+            context,
+            user.email ?? draft?.email,
+          ),
         ),
       ),
     );
@@ -232,18 +254,6 @@ class _MainShellPageState extends State<MainShellPage> {
         builder: (context) => SupportPage(
           submitSupportRequest: widget.submitSupportRequest,
           initialEmail: initialEmail,
-        ),
-      ),
-    );
-  }
-
-  void _openCardVisibility(BuildContext context) {
-    Navigator.of(context).push(
-      MaterialPageRoute<void>(
-        builder: (context) => CardVisibilitySettingsPage(
-          getOnboardingDraftCards: widget.getOnboardingDraftCards,
-          persistOnboardingCard: widget.persistOnboardingCard,
-          onDraftUpdated: (_) => _loadMyCardDraft(),
         ),
       ),
     );
@@ -411,8 +421,7 @@ class _NavItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final unselectedColor =
-        theme.colorScheme.onSurface.withValues(alpha: 0.75);
+    final unselectedColor = theme.colorScheme.onSurface.withValues(alpha: 0.75);
 
     return Material(
       color: Colors.transparent,

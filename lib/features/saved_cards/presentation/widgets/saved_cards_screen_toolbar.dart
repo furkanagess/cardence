@@ -1,23 +1,79 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/widgets/atoms/custom_text_field.dart';
 
-/// Görünüm modu ve hızlı filtre erişimi.
-class SavedCardsScreenToolbar extends StatelessWidget {
+/// Görünüm modu, genişleyen arama ve filtre erişimi.
+class SavedCardsScreenToolbar extends StatefulWidget {
   const SavedCardsScreenToolbar({
     super.key,
     required this.showFlippableView,
-    required this.hasActiveFilters,
-    required this.activeFilterCount,
     required this.onViewModeChanged,
+    required this.searchQuery,
+    required this.onSearchQueryChanged,
+    required this.hasActiveFilters,
+    required this.hasActiveSearch,
+    required this.activeFilterCount,
     required this.onOpenFilters,
   });
 
   final bool showFlippableView;
-  final bool hasActiveFilters;
-  final int activeFilterCount;
   final ValueChanged<bool> onViewModeChanged;
+  final String searchQuery;
+  final ValueChanged<String> onSearchQueryChanged;
+  final bool hasActiveFilters;
+  final bool hasActiveSearch;
+  final int activeFilterCount;
   final VoidCallback onOpenFilters;
+
+  @override
+  State<SavedCardsScreenToolbar> createState() =>
+      _SavedCardsScreenToolbarState();
+}
+
+class _SavedCardsScreenToolbarState extends State<SavedCardsScreenToolbar> {
+  bool _searchExpanded = false;
+  late final TextEditingController _searchController;
+  late final FocusNode _searchFocusNode;
+
+  @override
+  void initState() {
+    super.initState();
+    _searchController = TextEditingController(text: widget.searchQuery);
+    _searchFocusNode = FocusNode();
+  }
+
+  @override
+  void didUpdateWidget(covariant SavedCardsScreenToolbar oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.searchQuery != _searchController.text) {
+      _searchController.text = widget.searchQuery;
+    }
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    _searchFocusNode.dispose();
+    super.dispose();
+  }
+
+  void _expandSearch() {
+    setState(() => _searchExpanded = true);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      _searchFocusNode.requestFocus();
+    });
+  }
+
+  void _collapseSearch({bool clearQuery = false}) {
+    _searchFocusNode.unfocus();
+    if (clearQuery && _searchController.text.isNotEmpty) {
+      _searchController.clear();
+      widget.onSearchQueryChanged('');
+    }
+    setState(() => _searchExpanded = false);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -25,52 +81,93 @@ class SavedCardsScreenToolbar extends StatelessWidget {
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
-      child: Row(
-        children: [
-          Expanded(
-            child: SegmentedButton<bool>(
-              segments: const [
-                ButtonSegment(
-                  value: true,
-                  label: Text('Kart'),
-                  icon: Icon(Icons.style_rounded, size: 18),
+      child: AnimatedSize(
+        duration: const Duration(milliseconds: 220),
+        curve: Curves.easeOutCubic,
+        alignment: Alignment.topCenter,
+        child: Row(
+          children: [
+            Expanded(
+              child: _searchExpanded
+                  ? CustomTextField(
+                      controller: _searchController,
+                      focusNode: _searchFocusNode,
+                      hintText: 'İsim, şirket, e-posta…',
+                      prefixIcon: const Icon(Icons.search_rounded, size: 22),
+                      suffixIcon: IconButton(
+                        tooltip: 'Aramayı kapat',
+                        onPressed: () => _collapseSearch(clearQuery: true),
+                        icon: const Icon(Icons.close_rounded, size: 20),
+                        visualDensity: VisualDensity.compact,
+                      ),
+                      textInputAction: TextInputAction.search,
+                      onChanged: widget.onSearchQueryChanged,
+                      onSubmitted: widget.onSearchQueryChanged,
+                    )
+                  : SegmentedButton<bool>(
+                      segments: const [
+                        ButtonSegment(
+                          value: true,
+                          label: Text('Kart'),
+                          icon: Icon(Icons.style_rounded, size: 18),
+                        ),
+                        ButtonSegment(
+                          value: false,
+                          label: Text('Liste'),
+                          icon: Icon(Icons.view_list_rounded, size: 18),
+                        ),
+                      ],
+                      selected: {widget.showFlippableView},
+                      onSelectionChanged: (set) =>
+                          widget.onViewModeChanged(set.first),
+                      style: ButtonStyle(
+                        visualDensity: VisualDensity.compact,
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      ),
+                    ),
+            ),
+            if (!_searchExpanded) ...[
+              IconButton(
+                tooltip: widget.hasActiveSearch ? 'Arama aktif' : 'Ara',
+                onPressed: _expandSearch,
+                icon: Badge(
+                  isLabelVisible: widget.hasActiveSearch,
+                  backgroundColor: AppColors.primary,
+                  child: Icon(
+                    Icons.search_rounded,
+                    color: widget.hasActiveSearch
+                        ? AppColors.primary
+                        : colorScheme.onSurfaceVariant,
+                  ),
                 ),
-                ButtonSegment(
-                  value: false,
-                  label: Text('Liste'),
-                  icon: Icon(Icons.view_list_rounded, size: 18),
+                style: IconButton.styleFrom(
+                  visualDensity: VisualDensity.compact,
                 ),
-              ],
-              selected: {showFlippableView},
-              onSelectionChanged: (set) => onViewModeChanged(set.first),
-              style: ButtonStyle(
+              ),
+            ],
+            IconButton(
+              tooltip: widget.hasActiveFilters
+                  ? 'Filtre (${widget.activeFilterCount})'
+                  : 'Filtrele',
+              onPressed: widget.onOpenFilters,
+              icon: Badge(
+                isLabelVisible: widget.hasActiveFilters,
+                label: Text('${widget.activeFilterCount}'),
+                backgroundColor: AppColors.primary,
+                textColor: AppColors.textOnPrimary,
+                child: Icon(
+                  Icons.tune_rounded,
+                  color: widget.hasActiveFilters
+                      ? AppColors.primary
+                      : colorScheme.onSurfaceVariant,
+                ),
+              ),
+              style: IconButton.styleFrom(
                 visualDensity: VisualDensity.compact,
-                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
               ),
             ),
-          ),
-          IconButton(
-            tooltip: hasActiveFilters
-                ? 'Filtre ($activeFilterCount)'
-                : 'Filtrele',
-            onPressed: onOpenFilters,
-            icon: Badge(
-              isLabelVisible: hasActiveFilters,
-              label: Text('$activeFilterCount'),
-              backgroundColor: AppColors.primary,
-              textColor: AppColors.textOnPrimary,
-              child: Icon(
-                Icons.tune_rounded,
-                color: hasActiveFilters
-                    ? AppColors.primary
-                    : colorScheme.onSurfaceVariant,
-              ),
-            ),
-            style: IconButton.styleFrom(
-              visualDensity: VisualDensity.compact,
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
