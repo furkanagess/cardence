@@ -15,6 +15,9 @@ public sealed class SavedCard
     public string? Skills { get; set; }
     public string? School { get; set; }
     public string? About { get; set; }
+    public string? Note { get; set; }
+    public string? AccentColor { get; set; }
+    public string? BackgroundColor { get; set; }
     public long SavedAt { get; set; }
     public int SortOrder { get; set; }
     /// <summary>

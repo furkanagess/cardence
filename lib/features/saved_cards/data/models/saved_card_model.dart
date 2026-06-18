@@ -17,7 +17,10 @@ class SavedCardModel {
     this.skills,
     this.school,
     this.about,
+    this.note,
     this.photoUrl,
+    this.accentColor,
+    this.backgroundColor,
     this.savedAt,
     this.frontImagePath,
     this.backImagePath,
@@ -36,7 +39,10 @@ class SavedCardModel {
   final String? skills;
   final String? school;
   final String? about;
+  final String? note;
   final String? photoUrl;
+  final String? accentColor;
+  final String? backgroundColor;
   final int? savedAt;
   final String? frontImagePath;
   final String? backImagePath;
@@ -56,7 +62,10 @@ class SavedCardModel {
       skills: entity.skills,
       school: entity.school,
       about: entity.about,
+      note: entity.note,
       photoUrl: entity.photoUrl,
+      accentColor: entity.accentColor,
+      backgroundColor: entity.backgroundColor,
       savedAt: entity.savedAt,
       frontImagePath: entity.frontImagePath,
       backImagePath: entity.backImagePath,
@@ -77,7 +86,10 @@ class SavedCardModel {
         skills: skills,
         school: school,
         about: about,
+        note: note,
         photoUrl: photoUrl,
+        accentColor: accentColor,
+        backgroundColor: backgroundColor,
         savedAt: savedAt,
         frontImagePath: frontImagePath,
         backImagePath: backImagePath,
@@ -97,7 +109,10 @@ class SavedCardModel {
         if (skills != null) 'skills': skills,
         if (school != null) 'school': school,
         if (about != null) 'about': about,
+        if (note != null) 'note': note,
         if (photoUrl != null) 'photoUrl': photoUrl,
+        if (accentColor != null) 'accentColor': accentColor,
+        if (backgroundColor != null) 'backgroundColor': backgroundColor,
         if (savedAt != null) 'savedAt': savedAt,
         if (frontImagePath != null) 'frontImagePath': frontImagePath,
         if (backImagePath != null) 'backImagePath': backImagePath,
@@ -118,8 +133,13 @@ class SavedCardModel {
       linkedin: json['linkedin'] as String?,
       skills: json['skills'] as String?,
       school: json['school'] as String?,
-      about: json['about'] as String?,
+      about: json['about'] as String? ?? json['About'] as String?,
+      note: json['note'] as String? ?? json['Note'] as String?,
       photoUrl: json['photoUrl'] as String?,
+      accentColor:
+          json['accentColor'] as String? ?? json['AccentColor'] as String?,
+      backgroundColor: json['backgroundColor'] as String? ??
+          json['BackgroundColor'] as String?,
       savedAt: json['savedAt'] as int?,
       frontImagePath: json['frontImagePath'] as String?,
       backImagePath: json['backImagePath'] as String?,

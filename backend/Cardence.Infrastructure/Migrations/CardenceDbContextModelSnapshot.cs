@@ -204,6 +204,16 @@ namespace Cardence.Infrastructure.Migrations
                         .HasColumnType("text")
                         .HasColumnName("about");
 
+                    b.Property<string>("AccentColor")
+                        .HasMaxLength(7)
+                        .HasColumnType("character varying(7)")
+                        .HasColumnName("accent_color");
+
+                    b.Property<string>("BackgroundColor")
+                        .HasMaxLength(7)
+                        .HasColumnType("character varying(7)")
+                        .HasColumnName("background_color");
+
                     b.Property<string>("CardId")
                         .IsRequired()
                         .HasMaxLength(6)
@@ -229,6 +239,10 @@ namespace Cardence.Infrastructure.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("character varying(500)")
                         .HasColumnName("linkedin");
+
+                    b.Property<string>("Note")
+                        .HasColumnType("text")
+                        .HasColumnName("note");
 
                     b.Property<string>("Phone")
                         .HasMaxLength(20)

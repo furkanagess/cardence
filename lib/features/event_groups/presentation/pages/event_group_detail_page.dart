@@ -6,6 +6,8 @@ import '../../../../core/widgets/atoms/custom_button.dart';
 import '../../../../core/widgets/organisms/cardence_scaffold.dart';
 import '../../../../core/widgets/organisms/flippable_person_card.dart';
 import '../../../saved_cards/domain/entities/saved_card.dart';
+import '../../../saved_cards/domain/extensions/saved_card_preview_colors.dart';
+import '../../../saved_cards/domain/extensions/saved_card_preview_entries.dart';
 import '../../../saved_cards/domain/usecases/delete_saved_card.dart';
 import '../../../saved_cards/domain/usecases/get_saved_cards.dart';
 import '../../../saved_cards/domain/usecases/save_saved_card.dart';
@@ -175,7 +177,7 @@ class _EventGroupDetailPageState extends State<EventGroupDetailPage> {
   }
 
   Future<void> _openAddNoteModal(SavedCard card) async {
-    var draftNote = card.about ?? '';
+    var draftNote = card.note ?? '';
     final note = await showModalBottomSheet<String>(
       context: context,
       isScrollControlled: true,
@@ -230,8 +232,8 @@ class _EventGroupDetailPageState extends State<EventGroupDetailPage> {
     if (!mounted || note == null) return;
     await _persistCardUpdate(
       card.copyWith(
-        about: note.isEmpty ? null : note,
-        clearAbout: note.isEmpty,
+        note: note.isEmpty ? null : note,
+        clearNote: note.isEmpty,
       ),
     );
   }
@@ -403,24 +405,16 @@ class _SavedCardPreviewTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final hasNote = card.about != null && card.about!.trim().isNotEmpty;
     final displayName = card.displayName?.trim().isEmpty ?? true
         ? 'Kart ${card.cardId}'
         : card.displayName!;
     final companyName = card.company?.trim();
 
-    final frontEntries = <({String label, String value})>[
-      if (card.title != null && card.title!.trim().isNotEmpty)
-        (label: 'Ünvan', value: card.title!.trim()),
-      if (card.email != null && card.email!.trim().isNotEmpty)
-        (label: 'E-posta', value: card.email!.trim()),
-      if (card.phone != null && card.phone!.trim().isNotEmpty)
-        (label: 'Telefon', value: card.phone!.trim()),
-    ];
-
-    final backEntries = <({String label, String value})>[
-      if (card.about != null && card.about!.trim().isNotEmpty)
-        (label: 'Notlar', value: card.about!.trim()),
+    final visibleContacts = <String>[
+      if (card.email != null && card.email!.trim().isNotEmpty) 'email',
+      if (card.phone != null && card.phone!.trim().isNotEmpty) 'phone',
+      if (card.linkedin != null && card.linkedin!.trim().isNotEmpty) 'linkedin',
+      if (card.website != null && card.website!.trim().isNotEmpty) 'website',
     ];
 
     return GestureDetector(
@@ -428,15 +422,20 @@ class _SavedCardPreviewTile extends StatelessWidget {
       child: FlippablePersonCard(
         title: displayName,
         titleSecondary: companyName,
+        jobTitle: card.title?.trim(),
         photoUrl: card.photoUrl,
-        frontEntries: frontEntries,
-        backEntries: backEntries,
+        accentColor: card.previewAccentColor,
+        backgroundColor: card.previewBackgroundColor,
+        frontEntries: const [],
+        backEntries: card.backAboutEntries,
         emptyMessage: 'Kart bilgisi yok',
-        backEmptyMessage: 'Bu kişi için not bulunmuyor.',
-        backEmptyActionLabel: 'Not ekle',
-        onBackEmptyActionTap: hasNote ? null : onAddNote,
-        onBackEditTap: hasNote ? onAddNote : null,
+        cardId: card.cardId,
         onTap: onTap,
+        contactEmail: card.email,
+        contactPhone: card.phone,
+        contactWebsite: card.website,
+        contactLinkedin: card.linkedin,
+        visibleContactFields: visibleContacts,
       ),
     );
   }

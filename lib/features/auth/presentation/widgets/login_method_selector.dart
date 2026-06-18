@@ -20,10 +20,13 @@ class LoginMethodSelector extends StatelessWidget {
     return DecoratedBox(
       decoration: BoxDecoration(
         color: colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(
+          color: colorScheme.outlineVariant,
+        ),
       ),
       child: Padding(
-        padding: const EdgeInsets.all(4),
+        padding: const EdgeInsets.all(3),
         child: Row(
           children: [
             _Segment(
@@ -73,25 +76,16 @@ class _Segment extends StatelessWidget {
         duration: const Duration(milliseconds: 220),
         curve: Curves.easeOutCubic,
         decoration: BoxDecoration(
-          color: selected ? colorScheme.surface : Colors.transparent,
-          borderRadius: BorderRadius.circular(10),
-          boxShadow: selected
-              ? [
-                  BoxShadow(
-                    color: colorScheme.shadow.withValues(alpha: 0.08),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
-                  ),
-                ]
-              : null,
+          color: selected ? colorScheme.primary : Colors.transparent,
+          borderRadius: BorderRadius.circular(999),
         ),
         child: Material(
           color: Colors.transparent,
           child: InkWell(
             onTap: onTap,
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(999),
             child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 12),
+              padding: const EdgeInsets.symmetric(vertical: 10),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -99,7 +93,7 @@ class _Segment extends StatelessWidget {
                     icon,
                     size: 18,
                     color: selected
-                        ? colorScheme.primary
+                        ? colorScheme.onPrimary
                         : colorScheme.onSurfaceVariant,
                   ),
                   const SizedBox(width: 8),
@@ -108,7 +102,7 @@ class _Segment extends StatelessWidget {
                     style: textTheme.labelLarge?.copyWith(
                       fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
                       color: selected
-                          ? colorScheme.onSurface
+                          ? colorScheme.onPrimary
                           : colorScheme.onSurfaceVariant,
                     ),
                   ),

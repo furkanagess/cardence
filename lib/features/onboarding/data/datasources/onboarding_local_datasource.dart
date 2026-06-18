@@ -72,7 +72,8 @@ class OnboardingLocalDataSourceImpl implements OnboardingLocalDataSource {
     } else {
       final legacySingle = _prefs.getString(_legacyKeyDraftCard);
       if (legacySingle != null && legacySingle.isNotEmpty) {
-        await _prefs.setString(cardsKey, jsonEncode([jsonDecode(legacySingle)]));
+        await _prefs.setString(
+            cardsKey, jsonEncode([jsonDecode(legacySingle)]));
         await _prefs.remove(_legacyKeyDraftCard);
       }
     }
@@ -174,7 +175,8 @@ class OnboardingLocalDataSourceImpl implements OnboardingLocalDataSource {
       jsonEncode(drafts.map((e) => e.toJson()).toList()),
     );
     if (drafts.isNotEmpty) {
-      await _prefs.setString(await _draftCardKey(), drafts.first.toJsonString());
+      await _prefs.setString(
+          await _draftCardKey(), drafts.first.toJsonString());
     } else {
       await _prefs.remove(await _draftCardKey());
     }

@@ -12,15 +12,18 @@ namespace Cardence.Application.Services;
 public sealed class BusinessCardService : IBusinessCardService
 {
     private readonly IBusinessCardRepository _repository;
+    private readonly IUserRepository _userRepository;
     private readonly ICurrentUserService _currentUser;
     private readonly IValidator<BusinessCardDto> _validator;
 
     public BusinessCardService(
         IBusinessCardRepository repository,
+        IUserRepository userRepository,
         ICurrentUserService currentUser,
         IValidator<BusinessCardDto> validator)
     {
         _repository = repository;
+        _userRepository = userRepository;
         _currentUser = currentUser;
         _validator = validator;
     }
@@ -68,6 +71,7 @@ public sealed class BusinessCardService : IBusinessCardService
         };
 
         BusinessCardMapper.ApplyDto(entity, request);
+        await ApplyProfilePhotoFallbackAsync(entity, userId, cancellationToken);
         await _repository.AddAsync(entity, cancellationToken);
 
         return BusinessCardMapper.ToDto(entity);
@@ -106,6 +110,7 @@ public sealed class BusinessCardService : IBusinessCardService
                 Skills = request.Skills,
                 School = request.School,
                 About = request.About,
+                PhotoUrl = request.PhotoUrl,
                 AccentColor = request.AccentColor,
                 BackgroundColor = request.BackgroundColor,
                 LastUsedPaletteBackgroundColor = request.LastUsedPaletteBackgroundColor,
@@ -115,6 +120,7 @@ public sealed class BusinessCardService : IBusinessCardService
         }
 
         BusinessCardMapper.ApplyDto(existing, request);
+        await ApplyProfilePhotoFallbackAsync(existing, userId, cancellationToken);
         await _repository.UpdateAsync(existing, cancellationToken);
 
         return BusinessCardMapper.ToDto(existing);
@@ -153,5 +159,22 @@ public sealed class BusinessCardService : IBusinessCardService
     public async Task<bool> PublicCardExistsAsync(string cardId, CancellationToken cancellationToken = default)
     {
         return await _repository.GetByCardIdAsync(cardId, cancellationToken) is not null;
+    }
+
+    private async Task ApplyProfilePhotoFallbackAsync(
+        BusinessCard entity,
+        Guid userId,
+        CancellationToken cancellationToken)
+    {
+        if (!string.IsNullOrWhiteSpace(entity.PhotoUrl))
+        {
+            return;
+        }
+
+        var user = await _userRepository.GetByIdAsync(userId, cancellationToken);
+        if (!string.IsNullOrWhiteSpace(user?.PhotoUrl))
+        {
+            entity.PhotoUrl = user!.PhotoUrl;
+        }
     }
 }

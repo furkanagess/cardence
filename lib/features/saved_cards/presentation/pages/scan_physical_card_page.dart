@@ -1,8 +1,7 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/atoms/cardence_app_bar.dart';
 import '../../../../core/widgets/atoms/custom_button.dart';
 import '../../../../core/widgets/organisms/cardence_scaffold.dart';
@@ -12,6 +11,7 @@ import '../../domain/entities/add_saved_card_result.dart';
 import '../../domain/usecases/add_saved_card.dart';
 import '../cubit/scan_physical_card_cubit.dart';
 import '../cubit/scan_physical_card_state.dart';
+import '../widgets/add_card_ui_helpers.dart';
 import 'add_manual_card_page.dart';
 
 /// Fiziksel kartvizitin ön yüzünü (zorunlu) ve arka yüzünü (opsiyonel) çekerek
@@ -97,7 +97,6 @@ class _ScanPhysicalCardViewState extends State<_ScanPhysicalCardView> {
         );
       },
       builder: (context, state) {
-        final colorScheme = Theme.of(context).colorScheme;
         final textTheme = Theme.of(context).textTheme;
         final cubit = context.read<ScanPhysicalCardCubit>();
         final isProcessing = state.step == ScanPhysicalCardStep.processing;
@@ -108,128 +107,85 @@ class _ScanPhysicalCardViewState extends State<_ScanPhysicalCardView> {
 
         return CardenceScaffold(
           appBar: const CardenceAppBar(title: 'Kartvizit fotoğrafla'),
-          body: ListView(
-            padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
+          resizeToAvoidBottomInset: true,
+          body: Column(
             children: [
-              if (permissionChecking) ...[
-                const Center(
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(vertical: 32),
-                    child: CircularProgressIndicator(),
-                  ),
+              Expanded(
+                child: ListView(
+                  padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+                  children: [
+                    if (permissionChecking) ...[
+                      const Center(
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(vertical: 48),
+                          child: CircularProgressIndicator(),
+                        ),
+                      ),
+                      Text(
+                        'Kamera izni isteniyor…',
+                        textAlign: TextAlign.center,
+                        style: textTheme.bodyMedium?.copyWith(
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                    ] else if (!permissionGranted) ...[
+                      _CameraPermissionBlocked(
+                        status: state.cameraPermission,
+                        onRetry: cubit.requestCameraPermission,
+                        onOpenSettings: cubit.openCameraSettings,
+                      ),
+                    ] else ...[
+                      AddCardPhotoCaptureZone(
+                        label: 'Ön yüz',
+                        hint: 'Ön yüzü çekin',
+                        required: true,
+                        imagePath: state.frontImagePath,
+                        enabled: state.canCapture,
+                        onTap: cubit.captureFront,
+                      ),
+                      const SizedBox(height: 20),
+                      AddCardPhotoCaptureZone(
+                        label: 'Arka yüz',
+                        hint: 'Arka yüzü ekleyin (varsa)',
+                        required: false,
+                        imagePath: state.backImagePath,
+                        enabled: state.canCapture,
+                        onTap: cubit.captureBack,
+                      ),
+                      const SizedBox(height: 20),
+                      const AddCardTipCard.info(
+                        text:
+                            'Fotoğraf net ve düz olmalı. Tüm bilgiler okunabilir ve ışık yansıması minimum düzeyde olmalıdır.',
+                      ),
+                      if (isProcessing) ...[
+                        const SizedBox(height: 28),
+                        const Center(child: CircularProgressIndicator()),
+                        const SizedBox(height: 12),
+                        Text(
+                          'Bilgiler okunuyor…',
+                          textAlign: TextAlign.center,
+                          style: textTheme.bodyMedium?.copyWith(
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ],
                 ),
-                const SizedBox(height: 8),
-                Text(
-                  'Kamera izni isteniyor…',
-                  textAlign: TextAlign.center,
-                  style: textTheme.bodyMedium?.copyWith(
-                    color: colorScheme.onSurfaceVariant,
-                  ),
+              ),
+              if (permissionGranted && !permissionChecking)
+                AddCardStickyAction(
+                  label: 'Bilgileri oku',
+                  icon: Icons.document_scanner_outlined,
+                  enabled: state.canReadInfo,
+                  isLoading: isProcessing,
+                  onPressed: state.canReadInfo ? cubit.finishScan : null,
                 ),
-              ] else if (!permissionGranted) ...[
-                _CameraPermissionBlocked(
-                  status: state.cameraPermission,
-                  onRetry: cubit.requestCameraPermission,
-                  onOpenSettings: cubit.openCameraSettings,
-                ),
-              ] else ...[
-                Text(
-                  _stepTitle(state.step),
-                  style: textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  _stepSubtitle(state.step),
-                  style: textTheme.bodyMedium?.copyWith(
-                    color: colorScheme.onSurfaceVariant,
-                    height: 1.4,
-                  ),
-                ),
-                const SizedBox(height: 20),
-                _CaptureProgress(
-                  hasFront: state.frontImagePath != null,
-                  hasBack: state.backImagePath != null,
-                ),
-                if (state.frontImagePath != null) ...[
-                  const SizedBox(height: 16),
-                  _CapturedPreview(
-                    label: 'Ön yüz',
-                    path: state.frontImagePath!,
-                  ),
-                ],
-                if (state.backImagePath != null) ...[
-                  const SizedBox(height: 12),
-                  _CapturedPreview(
-                    label: 'Arka yüz (opsiyonel)',
-                    path: state.backImagePath!,
-                  ),
-                ],
-                const SizedBox(height: 24),
-                if (isProcessing)
-                  const Center(
-                    child: Padding(
-                      padding: EdgeInsets.symmetric(vertical: 24),
-                      child: CircularProgressIndicator(),
-                    ),
-                  )
-                else if (state.step == ScanPhysicalCardStep.front)
-                  CustomButton(
-                    label: 'Ön yüzü çek',
-                    icon: Icons.photo_camera_outlined,
-                    onPressed: state.canCapture ? cubit.captureFront : null,
-                    isLoading: state.isBusy,
-                  )
-                else ...[
-                  CustomButton(
-                    label: 'Devam et',
-                    icon: Icons.arrow_forward_rounded,
-                    onPressed: state.canCapture ? cubit.finishScan : null,
-                    isLoading: state.isBusy,
-                  ),
-                  const SizedBox(height: 10),
-                  CustomButton.tonal(
-                    label: state.backImagePath == null
-                        ? 'Arka yüzü çek (opsiyonel)'
-                        : 'Arka yüzü yeniden çek',
-                    icon: Icons.flip_camera_ios_outlined,
-                    onPressed: state.canCapture ? cubit.captureBack : null,
-                  ),
-                  const SizedBox(height: 10),
-                  CustomButton.tonal(
-                    label: 'Ön yüzü yeniden çek',
-                    onPressed: state.canCapture ? cubit.retakeFront : null,
-                  ),
-                ],
-              ],
             ],
           ),
         );
       },
     );
-  }
-
-  String _stepTitle(ScanPhysicalCardStep step) {
-    switch (step) {
-      case ScanPhysicalCardStep.front:
-        return 'Ön yüzü çekin';
-      case ScanPhysicalCardStep.back:
-        return 'Arka yüz opsiyonel';
-      case ScanPhysicalCardStep.processing:
-        return 'Bilgiler okunuyor';
-    }
-  }
-
-  String _stepSubtitle(ScanPhysicalCardStep step) {
-    switch (step) {
-      case ScanPhysicalCardStep.front:
-        return 'Kartviziti düz bir zeminde, iyi ışıkta tutun ve ön yüzünü fotoğraflayın.';
-      case ScanPhysicalCardStep.back:
-        return 'Arka yüzü çekmek zorunlu değil. Hazırsanız doğrudan devam edebilirsiniz.';
-      case ScanPhysicalCardStep.processing:
-        return 'Metin tanıma çalışıyor; ardından bilgileri onaylayabilirsiniz.';
-    }
   }
 }
 
@@ -246,22 +202,24 @@ class _CameraPermissionBlocked extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final permanentlyDenied =
         status == ScanCameraPermissionStatus.permanentlyDenied;
 
     return Column(
       children: [
-        Icon(
+        const Icon(
           Icons.photo_camera_outlined,
           size: 48,
-          color: colorScheme.primary,
+          color: AppColors.primary,
         ),
         const SizedBox(height: 16),
         Text(
           'Kamera izni gerekli',
-          style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
+          style: textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.w700,
+            color: AppColors.textPrimary,
+          ),
         ),
         const SizedBox(height: 8),
         Text(
@@ -270,7 +228,7 @@ class _CameraPermissionBlocked extends StatelessWidget {
               : 'Kartvizit fotoğraflamak için kamera erişimine izin vermeniz gerekiyor.',
           textAlign: TextAlign.center,
           style: textTheme.bodyMedium?.copyWith(
-            color: colorScheme.onSurfaceVariant,
+            color: AppColors.textSecondary,
             height: 1.4,
           ),
         ),
@@ -293,136 +251,6 @@ class _CameraPermissionBlocked extends StatelessWidget {
             label: 'Tekrar dene',
             onPressed: onRetry,
           ),
-      ],
-    );
-  }
-}
-
-class _CaptureProgress extends StatelessWidget {
-  const _CaptureProgress({
-    required this.hasFront,
-    required this.hasBack,
-  });
-
-  final bool hasFront;
-  final bool hasBack;
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    return Row(
-      children: [
-        _StepDot(
-          label: '1',
-          title: 'Ön',
-          active: true,
-          done: hasFront,
-          colorScheme: colorScheme,
-        ),
-        Expanded(
-          child: Container(
-            height: 2,
-            color: hasFront
-                ? colorScheme.primary.withValues(alpha: 0.4)
-                : colorScheme.surfaceContainerHighest,
-          ),
-        ),
-        _StepDot(
-          label: '2',
-          title: 'Arka',
-          subtitle: 'Opsiyonel',
-          active: hasFront,
-          done: hasBack,
-          optional: true,
-          colorScheme: colorScheme,
-        ),
-      ],
-    );
-  }
-}
-
-class _StepDot extends StatelessWidget {
-  const _StepDot({
-    required this.label,
-    required this.title,
-    required this.active,
-    required this.done,
-    required this.colorScheme,
-    this.subtitle,
-    this.optional = false,
-  });
-
-  final String label;
-  final String title;
-  final String? subtitle;
-  final bool active;
-  final bool done;
-  final bool optional;
-  final ColorScheme colorScheme;
-
-  @override
-  Widget build(BuildContext context) {
-    final bg = done
-        ? colorScheme.primary
-        : active
-            ? colorScheme.primaryContainer
-            : colorScheme.surfaceContainerHighest;
-    final fg = done
-        ? colorScheme.onPrimary
-        : active
-            ? colorScheme.onPrimaryContainer
-            : colorScheme.onSurfaceVariant;
-
-    return Column(
-      children: [
-        CircleAvatar(
-          radius: 16,
-          backgroundColor: bg,
-          child: done
-              ? Icon(Icons.check_rounded, size: 18, color: fg)
-              : Text(
-                  label,
-                  style: TextStyle(color: fg, fontWeight: FontWeight.w700),
-                ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          title,
-          style: Theme.of(context).textTheme.labelSmall?.copyWith(color: fg),
-        ),
-        if (optional && subtitle != null)
-          Text(
-            subtitle!,
-            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: colorScheme.onSurfaceVariant,
-                  fontSize: 10,
-                ),
-          ),
-      ],
-    );
-  }
-}
-
-class _CapturedPreview extends StatelessWidget {
-  const _CapturedPreview({required this.label, required this.path});
-
-  final String label;
-  final String path;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(label, style: Theme.of(context).textTheme.labelLarge),
-        const SizedBox(height: 8),
-        ClipRRect(
-          borderRadius: BorderRadius.circular(14),
-          child: AspectRatio(
-            aspectRatio: 1.6,
-            child: Image.file(File(path), fit: BoxFit.cover),
-          ),
-        ),
       ],
     );
   }

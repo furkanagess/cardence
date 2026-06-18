@@ -61,6 +61,8 @@ public static class BusinessCardMapper
         AddIfNotEmpty(payload, "o", entity.School);
         AddIfNotEmpty(payload, "h", entity.About);
         AddIfNotEmpty(payload, "ph", entity.PhotoUrl);
+        AddIfNotEmpty(payload, "tc", entity.AccentColor);
+        AddIfNotEmpty(payload, "bc", entity.BackgroundColor);
 
         return payload;
     }

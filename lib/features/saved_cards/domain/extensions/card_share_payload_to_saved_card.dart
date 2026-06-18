@@ -18,6 +18,8 @@ extension CardSharePayloadToSavedCard on CardSharePayload {
       school: o,
       about: h,
       photoUrl: ph,
+      accentColor: tc,
+      backgroundColor: bc,
       savedAt: DateTime.now().millisecondsSinceEpoch,
     );
   }

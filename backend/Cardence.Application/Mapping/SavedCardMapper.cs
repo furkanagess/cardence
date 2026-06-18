@@ -18,6 +18,9 @@ public static class SavedCardMapper
         Skills = entity.Skills,
         School = entity.School,
         About = entity.About,
+        Note = entity.Note,
+        AccentColor = entity.AccentColor,
+        BackgroundColor = entity.BackgroundColor,
         SavedAt = entity.SavedAt,
         LinkedEventGroupIds = entity.LinkedEventGroupIds,
     };
@@ -34,6 +37,9 @@ public static class SavedCardMapper
         entity.Skills = dto.Skills;
         entity.School = dto.School;
         entity.About = dto.About;
+        entity.Note = dto.Note;
+        entity.AccentColor = dto.AccentColor;
+        entity.BackgroundColor = dto.BackgroundColor;
         entity.LinkedEventGroupIds = dto.LinkedEventGroupIds.ToList();
     }
 
@@ -52,5 +58,7 @@ public static class SavedCardMapper
         entity.Skills = source.Skills;
         entity.School = source.School;
         entity.About = source.About;
+        entity.AccentColor = source.AccentColor;
+        entity.BackgroundColor = source.BackgroundColor;
     }
 }

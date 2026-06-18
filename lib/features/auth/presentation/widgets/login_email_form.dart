@@ -17,7 +17,8 @@ class LoginEmailForm extends StatefulWidget {
   });
 
   final bool isLoading;
-  final void Function({required String email, required String password}) onSubmit;
+  final void Function({required String email, required String password})
+      onSubmit;
   final VoidCallback? onForgotPassword;
   final bool showSubmitButton;
   final bool showForgotPasswordLink;
@@ -100,17 +101,22 @@ class LoginEmailFormState extends State<LoginEmailForm> {
             if (_passwordError != null) setState(() => _passwordError = null);
           },
         ),
-        if (widget.showForgotPasswordLink && widget.onForgotPassword != null)
-          ...[
-            const SizedBox(height: 6),
-            Align(
-              alignment: Alignment.centerRight,
-              child: TextButton(
-                onPressed: widget.isLoading ? null : widget.onForgotPassword,
-                child: const Text('Şifremi unuttum'),
+        if (widget.showForgotPasswordLink &&
+            widget.onForgotPassword != null) ...[
+          const SizedBox(height: 2),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: TextButton(
+              onPressed: widget.isLoading ? null : widget.onForgotPassword,
+              style: TextButton.styleFrom(
+                padding: EdgeInsets.zero,
+                minimumSize: const Size(0, 32),
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
               ),
+              child: const Text('Şifremi unuttum'),
             ),
-          ],
+          ),
+        ],
         if (widget.showSubmitButton) ...[
           const SizedBox(height: 16),
           CustomButton(

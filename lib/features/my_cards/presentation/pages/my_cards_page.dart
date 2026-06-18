@@ -107,7 +107,7 @@ class _MyCardItem extends StatelessWidget {
     return MyCardPreviewHelpers.flippableCard(
       draft: draft,
       emptyMessage: 'Kart bilgisi yok',
-      onTap: () {
+      onDoubleTap: () {
         Navigator.of(context).push(
           MaterialPageRoute<void>(
             builder: (context) => CardDetailPage(

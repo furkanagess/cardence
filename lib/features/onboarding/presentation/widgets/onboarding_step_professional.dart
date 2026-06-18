@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/widgets/atoms/custom_text_field.dart';
 import '../../domain/entities/onboarding_card_draft.dart';
+import 'onboarding_card_preview_frame.dart';
 import 'onboarding_step_shell.dart';
 
 class OnboardingStepProfessional extends StatefulWidget {
@@ -23,7 +24,8 @@ class OnboardingStepProfessional extends StatefulWidget {
       _OnboardingStepProfessionalState();
 }
 
-class _OnboardingStepProfessionalState extends State<OnboardingStepProfessional> {
+class _OnboardingStepProfessionalState
+    extends State<OnboardingStepProfessional> {
   late final TextEditingController _companyController;
   late final TextEditingController _titleController;
 
@@ -32,8 +34,7 @@ class _OnboardingStepProfessionalState extends State<OnboardingStepProfessional>
     super.initState();
     _companyController =
         TextEditingController(text: widget.draft.company ?? '');
-    _titleController =
-        TextEditingController(text: widget.draft.title ?? '');
+    _titleController = TextEditingController(text: widget.draft.title ?? '');
   }
 
   @override
@@ -56,10 +57,24 @@ class _OnboardingStepProfessionalState extends State<OnboardingStepProfessional>
     super.dispose();
   }
 
+  void _notifyChanged() {
+    widget.onChanged(
+      widget.draft.copyWith(
+        company: _companyController.text.trim().isEmpty
+            ? null
+            : _companyController.text.trim(),
+        title: _titleController.text.trim().isEmpty
+            ? null
+            : _titleController.text.trim(),
+      ),
+    );
+    setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
     return OnboardingStepShell(
-      title: 'İş bilgileri',
+      subtitle: 'Kartınızın ön yüzünde görünecek bilgiler',
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -69,11 +84,9 @@ class _OnboardingStepProfessionalState extends State<OnboardingStepProfessional>
             autofocus: true,
             textCapitalization: TextCapitalization.words,
             textInputAction: TextInputAction.next,
-            hintText: 'Örn. Cardence A.Ş.',
+            hintText: 'Şirket adını giriniz',
             prefixIcon: const Icon(Icons.business_outlined),
-            onChanged: (value) => widget.onChanged(
-              widget.draft.copyWith(company: value.isEmpty ? null : value.trim()),
-            ),
+            onChanged: (_) => _notifyChanged(),
           ),
           const SizedBox(height: 16),
           const OnboardingFieldLabel(label: 'Pozisyon', required: true),
@@ -81,11 +94,13 @@ class _OnboardingStepProfessionalState extends State<OnboardingStepProfessional>
             controller: _titleController,
             textCapitalization: TextCapitalization.words,
             textInputAction: TextInputAction.done,
-            hintText: 'Örn. Ürün Müdürü',
+            hintText: 'Pozisyonunuzu giriniz',
             prefixIcon: const Icon(Icons.work_outline_rounded),
-            onChanged: (value) => widget.onChanged(
-              widget.draft.copyWith(title: value.isEmpty ? null : value.trim()),
-            ),
+            onChanged: (_) => _notifyChanged(),
+          ),
+          const SizedBox(height: 24),
+          Center(
+            child: OnboardingCardPreviewFrame(draft: widget.draft),
           ),
         ],
       ),

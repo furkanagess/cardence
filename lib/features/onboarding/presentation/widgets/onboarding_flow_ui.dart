@@ -60,6 +60,31 @@ class OnboardingProgressHeader extends StatelessWidget {
   }
 }
 
+/// AppBar'da isteğe bağlı adım rozeti.
+class OnboardingOptionalBadge extends StatelessWidget {
+  const OnboardingOptionalBadge({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: colorScheme.primaryContainer,
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: Text(
+        'Opsiyonel',
+        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+              color: colorScheme.onPrimaryContainer,
+              fontWeight: FontWeight.w600,
+            ),
+      ),
+    );
+  }
+}
+
 /// Alt aksiyon çubuğu (ilerleme noktaları + birincil buton).
 class OnboardingBottomBar extends StatelessWidget {
   const OnboardingBottomBar({
@@ -71,6 +96,7 @@ class OnboardingBottomBar extends StatelessWidget {
     this.isLoading = false,
     this.enabled = true,
     this.showStepIndicator = true,
+    this.onStepSelected,
   });
 
   final int stepCount;
@@ -80,6 +106,7 @@ class OnboardingBottomBar extends StatelessWidget {
   final bool isLoading;
   final bool enabled;
   final bool showStepIndicator;
+  final ValueChanged<int>? onStepSelected;
 
   /// İçeriğin alt bar arkasından kayması için alt boşluk.
   static double contentBottomInset(
@@ -89,9 +116,7 @@ class OnboardingBottomBar extends StatelessWidget {
     final bottomSafe = MediaQuery.paddingOf(context).bottom;
     const barPadding = 12.0 + 48.0 + 16.0;
     const indicatorBlock = 6.0 + 14.0;
-    return barPadding +
-        bottomSafe +
-        (showStepIndicator ? indicatorBlock : 0);
+    return barPadding + bottomSafe + (showStepIndicator ? indicatorBlock : 0);
   }
 
   @override
@@ -103,9 +128,11 @@ class OnboardingBottomBar extends StatelessWidget {
       letterSpacing: 0.1,
     );
 
-    return SafeArea(
-      top: false,
-      child: Padding(
+    return Material(
+      color: Theme.of(context).scaffoldBackgroundColor,
+      child: SafeArea(
+        top: false,
+        child: Padding(
           padding: const EdgeInsets.fromLTRB(20, 12, 20, 16),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -115,18 +142,28 @@ class OnboardingBottomBar extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: List.generate(
                     stepCount,
-                    (i) => AnimatedContainer(
-                      duration: const Duration(milliseconds: 200),
-                      margin: const EdgeInsets.symmetric(horizontal: 3),
-                      width: currentIndex == i ? 18 : 6,
-                      height: 6,
-                      decoration: BoxDecoration(
-                        color: currentIndex == i
-                            ? colorScheme.primary
-                            : colorScheme.onSurface.withValues(alpha: 0.2),
-                        borderRadius: BorderRadius.circular(3),
-                      ),
-                    ),
+                    (i) {
+                      final isActive = currentIndex == i;
+                      final canNavigateBack =
+                          onStepSelected != null && i < currentIndex;
+
+                      return GestureDetector(
+                        onTap:
+                            canNavigateBack ? () => onStepSelected!(i) : null,
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 200),
+                          margin: const EdgeInsets.symmetric(horizontal: 3),
+                          width: isActive ? 18 : 6,
+                          height: 6,
+                          decoration: BoxDecoration(
+                            color: isActive
+                                ? colorScheme.primary
+                                : colorScheme.onSurface.withValues(alpha: 0.2),
+                            borderRadius: BorderRadius.circular(3),
+                          ),
+                        ),
+                      );
+                    },
                   ),
                 ),
                 const SizedBox(height: 14),
@@ -141,58 +178,7 @@ class OnboardingBottomBar extends StatelessWidget {
             ],
           ),
         ),
-    );
-  }
-}
-
-/// Adım başlığı; isteğe bağlı kısa alt metin.
-class OnboardingStepIntro extends StatelessWidget {
-  const OnboardingStepIntro({
-    super.key,
-    required this.title,
-    this.subtitle,
-    this.trailing,
-  });
-
-  final String title;
-  final String? subtitle;
-  final Widget? trailing;
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
-    final hasSubtitle = subtitle != null && subtitle!.trim().isNotEmpty;
-
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title,
-                style: textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.w700,
-                  height: 1.2,
-                ),
-              ),
-              if (hasSubtitle) ...[
-                const SizedBox(height: 4),
-                Text(
-                  subtitle!,
-                  style: textTheme.bodyMedium?.copyWith(
-                    color: colorScheme.onSurfaceVariant,
-                    height: 1.35,
-                  ),
-                ),
-              ],
-            ],
-          ),
-        ),
-        if (trailing != null) trailing!,
-      ],
+      ),
     );
   }
 }

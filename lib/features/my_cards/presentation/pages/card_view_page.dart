@@ -255,7 +255,7 @@ class _CardViewPageState extends State<CardViewPage> {
           ? List<String>.from(OnboardingCardDraft.defaultFrontVisibleFields)
           : List.from(current.frontVisibleFields),
       backVisibleFields: current.backVisibleFields.isEmpty
-          ? List<String>.from(OnboardingCardDraft.backFieldKeys.take(3))
+          ? List<String>.from(OnboardingCardDraft.defaultBackVisibleFields)
           : List.from(current.backVisibleFields),
     );
     final synced = await widget.persistOnboardingCard(copy);

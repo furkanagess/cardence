@@ -127,10 +127,11 @@ class CardColorCustomizeSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Text(
-          'Kart rengi',
-          style: textTheme.titleSmall?.copyWith(
+          'KART RENGİ',
+          style: textTheme.labelMedium?.copyWith(
             color: colorScheme.onSurfaceVariant,
-            fontWeight: FontWeight.w600,
+            fontWeight: FontWeight.w700,
+            letterSpacing: 0.8,
           ),
         ),
         const SizedBox(height: 12),
@@ -162,10 +163,11 @@ class CardColorCustomizeSection extends StatelessWidget {
         ),
         const SizedBox(height: 20),
         Text(
-          'Metin rengi',
-          style: textTheme.titleSmall?.copyWith(
+          'METİN RENGİ',
+          style: textTheme.labelMedium?.copyWith(
             color: colorScheme.onSurfaceVariant,
-            fontWeight: FontWeight.w600,
+            fontWeight: FontWeight.w700,
+            letterSpacing: 0.8,
           ),
         ),
         const SizedBox(height: 12),
@@ -230,14 +232,11 @@ class _BackgroundChip extends StatelessWidget {
         child: isDefault
             ? Icon(
                 selected ? Icons.check_rounded : Icons.palette_outlined,
-                color: selected
-                    ? AppColors.primary
-                    : colorScheme.onSurfaceVariant,
+                color:
+                    selected ? AppColors.primary : colorScheme.onSurfaceVariant,
                 size: 22,
               )
-            : (selected &&
-                    color != null &&
-                    color.computeLuminance() > 0.5)
+            : (selected && color != null && color.computeLuminance() > 0.5)
                 ? const Icon(
                     Icons.check_rounded,
                     color: AppColors.textPrimary,
@@ -286,9 +285,8 @@ class _TextColorChip extends StatelessWidget {
         child: isDefault
             ? Icon(
                 selected ? Icons.check_rounded : Icons.title_outlined,
-                color: selected
-                    ? AppColors.primary
-                    : colorScheme.onSurfaceVariant,
+                color:
+                    selected ? AppColors.primary : colorScheme.onSurfaceVariant,
                 size: 22,
               )
             : Center(

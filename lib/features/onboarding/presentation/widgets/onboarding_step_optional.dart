@@ -38,10 +38,8 @@ class _OnboardingStepOptionalState extends State<OnboardingStepOptional> {
         TextEditingController(text: widget.draft.website ?? '');
     _linkedinController =
         TextEditingController(text: widget.draft.linkedin ?? '');
-    _schoolController =
-        TextEditingController(text: widget.draft.school ?? '');
-    _aboutController =
-        TextEditingController(text: widget.draft.about ?? '');
+    _schoolController = TextEditingController(text: widget.draft.school ?? '');
+    _aboutController = TextEditingController(text: widget.draft.about ?? '');
   }
 
   @override
@@ -88,8 +86,7 @@ class _OnboardingStepOptionalState extends State<OnboardingStepOptional> {
   @override
   Widget build(BuildContext context) {
     return OnboardingStepShell(
-      title: 'Ek bilgiler',
-      optionalHint: 'Opsiyonel',
+      subtitle: 'İsterseniz şimdi ekleyin, sonra da düzenleyebilirsiniz',
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -100,7 +97,7 @@ class _OnboardingStepOptionalState extends State<OnboardingStepOptional> {
             showCountryFlag: true,
             decoration: CustomTextField.themedDecoration(
               context,
-              hintText: 'Telefon numaranız',
+              hintText: '5xx xxx xx xx',
             ),
             onChanged: (phone) => widget.onChanged(
               widget.draft.copyWith(
@@ -114,7 +111,7 @@ class _OnboardingStepOptionalState extends State<OnboardingStepOptional> {
             controller: _websiteController,
             keyboardType: TextInputType.url,
             autocorrect: false,
-            hintText: 'https://sirketiniz.com',
+            hintText: 'www.example.com',
             prefixIcon: const Icon(Icons.language_outlined),
             onChanged: (value) => widget.onChanged(
               widget.draft.copyWith(website: value.isEmpty ? null : value),
@@ -126,22 +123,10 @@ class _OnboardingStepOptionalState extends State<OnboardingStepOptional> {
             controller: _linkedinController,
             keyboardType: TextInputType.url,
             autocorrect: false,
-            hintText: 'LinkedIn profil linki',
+            hintText: 'linkedin.com/in/username',
             prefixIcon: const Icon(Icons.link_rounded),
             onChanged: (value) => widget.onChanged(
               widget.draft.copyWith(linkedin: value.isEmpty ? null : value),
-            ),
-          ),
-          const SizedBox(height: 16),
-          const OnboardingFieldLabel(label: 'Yetenekler'),
-          SkillsChipInput(
-            label: '',
-            hintText: 'Yetenek ekle (örn. Flutter)',
-            value: widget.draft.skills,
-            onChanged: (s) => widget.onChanged(
-              widget.draft.copyWith(
-                skills: (s ?? '').trim().isEmpty ? null : s,
-              ),
             ),
           ),
           const SizedBox(height: 16),
@@ -149,7 +134,7 @@ class _OnboardingStepOptionalState extends State<OnboardingStepOptional> {
           CustomTextField(
             controller: _schoolController,
             textCapitalization: TextCapitalization.words,
-            hintText: 'Örn. İstanbul Üniversitesi',
+            hintText: 'Üniversite veya lise adı',
             prefixIcon: const Icon(Icons.school_outlined),
             onChanged: (value) => widget.onChanged(
               widget.draft.copyWith(school: value.isEmpty ? null : value),
@@ -163,9 +148,21 @@ class _OnboardingStepOptionalState extends State<OnboardingStepOptional> {
             maxLines: 5,
             maxLength: 200,
             textCapitalization: TextCapitalization.sentences,
-            hintText: 'Kısaca kendinizi tanıtın',
+            hintText: 'Kendinizden kısaca bahsedin...',
             onChanged: (value) => widget.onChanged(
               widget.draft.copyWith(about: value.isEmpty ? null : value),
+            ),
+          ),
+          const SizedBox(height: 16),
+          const OnboardingFieldLabel(label: 'Beceriler'),
+          SkillsChipInput(
+            label: '',
+            hintText: 'Beceri ekle',
+            value: widget.draft.skills,
+            onChanged: (s) => widget.onChanged(
+              widget.draft.copyWith(
+                skills: (s ?? '').trim().isEmpty ? null : s,
+              ),
             ),
           ),
         ],

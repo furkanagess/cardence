@@ -642,7 +642,7 @@ main
     "ClientId": "YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com"
   },
   "AppleAuth": {
-    "ClientId": "com.furkanages.cardence"
+    "ClientId": "com.furkanages.cardenceapp"
   },
   "Cors": {
     "AllowedOrigins": ["http://localhost:*"]

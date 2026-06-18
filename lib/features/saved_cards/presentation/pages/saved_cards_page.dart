@@ -158,11 +158,6 @@ class _SavedCardsPageState extends State<SavedCardsPage>
                                         saveSavedCard: widget.saveSavedCard,
                                         deleteSavedCard: widget.deleteSavedCard,
                                       ),
-                                      onEditNote: (card) =>
-                                          openSavedCardNoteEditor(
-                                        context,
-                                        card: card,
-                                      ),
                                     ),
                                   )
                                 : ListView.builder(

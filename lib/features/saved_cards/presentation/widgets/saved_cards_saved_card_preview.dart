@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import '../../../../core/widgets/organisms/flippable_person_card.dart';
 import '../../domain/entities/saved_card.dart';
 import '../../domain/entities/saved_card_origin.dart';
+import '../../domain/extensions/saved_card_preview_colors.dart';
+import '../../domain/extensions/saved_card_preview_entries.dart';
 import 'saved_card_origin_badge.dart';
 import 'saved_cards_physical_photo_preview.dart';
 
@@ -13,14 +15,12 @@ class SavedCardsSavedCardPreview extends StatelessWidget {
     this.onTap,
     this.heroTag,
     this.wrapHero = false,
-    this.onEditNote,
   });
 
   final SavedCard card;
   final VoidCallback? onTap;
   final String? heroTag;
   final bool wrapHero;
-  final VoidCallback? onEditNote;
 
   @override
   Widget build(BuildContext context) {
@@ -29,23 +29,15 @@ class SavedCardsSavedCardPreview extends StatelessWidget {
         : card.displayName!;
     final companyName = card.company?.trim();
 
-    final frontEntries = <({String label, String value})>[
-      if (card.title != null && card.title!.trim().isNotEmpty)
-        (label: 'Ünvan', value: card.title!.trim()),
-      if (card.email != null && card.email!.trim().isNotEmpty)
-        (label: 'E-posta', value: card.email!.trim()),
-      if (card.phone != null && card.phone!.trim().isNotEmpty)
-        (label: 'Telefon', value: card.phone!.trim()),
-    ];
-
-    final backEntries = <({String label, String value})>[
-      if (card.about != null && card.about!.trim().isNotEmpty)
-        (label: 'Notlar', value: card.about!.trim()),
-    ];
-
-    final hasNote = card.about != null && card.about!.trim().isNotEmpty;
     final frontPhoto = card.frontImagePath?.trim();
     final hasPhysicalPhoto = frontPhoto != null && frontPhoto.isNotEmpty;
+
+    final visibleContacts = <String>[
+      if (card.email != null && card.email!.trim().isNotEmpty) 'email',
+      if (card.phone != null && card.phone!.trim().isNotEmpty) 'phone',
+      if (card.linkedin != null && card.linkedin!.trim().isNotEmpty) 'linkedin',
+      if (card.website != null && card.website!.trim().isNotEmpty) 'website',
+    ];
 
     final Widget cardWidget = hasPhysicalPhoto
         ? SavedCardsPhysicalPhotoPreview(
@@ -56,16 +48,21 @@ class SavedCardsSavedCardPreview extends StatelessWidget {
         : FlippablePersonCard(
             title: displayName,
             titleSecondary: companyName,
+            jobTitle: card.title?.trim(),
             photoUrl: card.photoUrl,
-            frontEntries: frontEntries,
-            backEntries: backEntries,
+            accentColor: card.previewAccentColor,
+            backgroundColor: card.previewBackgroundColor,
+            frontEntries: const [],
+            backEntries: card.backAboutEntries,
             emptyMessage: 'Kart bilgisi yok',
-            backEmptyMessage: 'Bu kisi icin not bulunmuyor.',
-            backEmptyActionLabel: 'Not ekle',
-            onBackEmptyActionTap: onEditNote,
-            onBackEditTap: hasNote ? onEditNote : null,
+            cardId: card.cardId,
             onTap: onTap,
             showAppLogo: card.isCardenceLinked,
+            contactEmail: card.email,
+            contactPhone: card.phone,
+            contactWebsite: card.website,
+            contactLinkedin: card.linkedin,
+            visibleContactFields: visibleContacts,
           );
 
     final previewWithOrigin = _SavedCardPreviewWithOrigin(

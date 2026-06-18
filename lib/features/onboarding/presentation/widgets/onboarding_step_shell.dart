@@ -1,56 +1,39 @@
 import 'package:flutter/material.dart';
 
-import 'onboarding_flow_ui.dart';
-
-/// Onboarding adımlarında ortak başlık ve form alanı düzeni.
+/// Onboarding adımlarında ortak form alanı düzeni.
 class OnboardingStepShell extends StatelessWidget {
   const OnboardingStepShell({
     super.key,
-    required this.title,
     required this.child,
     this.subtitle,
-    this.optionalHint,
   });
 
-  final String title;
   final String? subtitle;
   final Widget child;
-  final String? optionalHint;
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    final keyboardInset = MediaQuery.viewInsetsOf(context).bottom;
+    final hasSubtitle = subtitle != null && subtitle!.trim().isNotEmpty;
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
+      padding: EdgeInsets.fromLTRB(20, 8, 20, 24 + keyboardInset),
       keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          OnboardingStepIntro(
-            title: title,
-            subtitle: subtitle,
-            trailing: optionalHint == null
-                ? null
-                : Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: colorScheme.primaryContainer,
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                    child: Text(
-                      optionalHint!,
-                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                            color: colorScheme.onPrimaryContainer,
-                            fontWeight: FontWeight.w600,
-                          ),
-                    ),
-                  ),
-          ),
-          const SizedBox(height: 16),
+          if (hasSubtitle) ...[
+            Text(
+              subtitle!,
+              style: textTheme.bodyMedium?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+                height: 1.35,
+              ),
+            ),
+            const SizedBox(height: 16),
+          ],
           child,
         ],
       ),

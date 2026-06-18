@@ -1,32 +1,22 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/constants/app_constants.dart';
 import '../../domain/entities/onboarding_card_draft.dart';
 
 const Map<String, String> _fieldLabels = {
-  'displayName': 'Ad',
   'email': 'E-posta',
   'phone': 'Telefon',
-  'company': 'Şirket',
-  'title': 'Ünvan',
-  'website': 'Web sitesi',
   'linkedin': 'LinkedIn',
+  'website': 'Web sitesi',
   'skills': 'Yetenekler',
-  'school': 'Okul',
-  'about': 'Hakkımda',
 };
 
 bool _hasValue(OnboardingCardDraft draft, String key) {
   final v = switch (key) {
     'email' => draft.email,
     'phone' => draft.phone,
-    'company' => draft.company,
-    'title' => draft.title,
-    'website' => draft.website,
     'linkedin' => draft.linkedin,
+    'website' => draft.website,
     'skills' => draft.skills,
-    'school' => draft.school,
-    'about' => draft.about,
     _ => null,
   };
   return v != null && v.trim().isNotEmpty;
@@ -62,46 +52,42 @@ class OnboardingStepVisibleFields extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            'Ön ve arka yüzde en fazla ${AppConstants.maxFrontCardFields} alan seç. Checkbox ile işaretle.',
+            'Ön yüzde iletişim bilgilerini, arka yüzde isteğe bağlı yetenekleri seç.',
             style: textTheme.bodyMedium?.copyWith(
               color: colorScheme.onSurfaceVariant,
             ),
           ),
           const SizedBox(height: 24),
           Text(
-            'Ön yüz',
+            'Ön yüz — iletişim',
             style: textTheme.titleSmall?.copyWith(
               fontWeight: FontWeight.w600,
               color: colorScheme.onSurface,
             ),
           ),
-          const SizedBox(height: 4),
-          Text(
-            'En fazla ${AppConstants.maxFrontCardFields} alan',
-            style: textTheme.bodySmall?.copyWith(
-              color: colorScheme.onSurfaceVariant,
-            ),
-          ),
           const SizedBox(height: 8),
-          ...OnboardingCardDraft.frontFieldKeys.where((key) => _hasValue(draft, key)).map((key) {
+          ...OnboardingCardDraft.cardFrontContactFieldKeys
+              .where((key) => _hasValue(draft, key))
+              .map((key) {
             final label = _fieldLabels[key] ?? key;
-            final isSelected = draft.frontVisibleFields.contains(key);
-            final canAdd = draft.frontVisibleFields.length < AppConstants.maxFrontCardFields;
+            final isSelected =
+                draft.resolvedFrontContactFields.contains(key);
             return Padding(
               padding: const EdgeInsets.only(bottom: 8),
               child: Container(
                 decoration: BoxDecoration(
-                  color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+                  color: colorScheme.surfaceContainerHighest
+                      .withValues(alpha: 0.5),
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: colorScheme.outline.withValues(alpha: 0.2)),
+                  border: Border.all(
+                      color: colorScheme.outline.withValues(alpha: 0.2)),
                 ),
                 child: CheckboxListTile(
                   value: isSelected,
                   onChanged: (v) {
-                    if (v == true && !canAdd) return;
                     final list = List<String>.from(draft.frontVisibleFields);
                     if (v == true) {
-                      list.add(key);
+                      if (!list.contains(key)) list.add(key);
                     } else {
                       list.remove(key);
                     }
@@ -109,7 +95,8 @@ class OnboardingStepVisibleFields extends StatelessWidget {
                   },
                   title: Text(label),
                   controlAffinity: ListTileControlAffinity.leading,
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
+                  contentPadding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
                   dense: true,
                 ),
               ),
@@ -125,44 +112,39 @@ class OnboardingStepVisibleFields extends StatelessWidget {
           ),
           const SizedBox(height: 4),
           Text(
-            'En fazla ${AppConstants.maxBackCardFields} alan',
+            'Hakkımda her zaman gösterilir.',
             style: textTheme.bodySmall?.copyWith(
               color: colorScheme.onSurfaceVariant,
             ),
           ),
           const SizedBox(height: 8),
-          ...OnboardingCardDraft.backFieldKeys.where((key) => _hasValue(draft, key)).map((key) {
-            final label = _fieldLabels[key] ?? key;
-            final isSelected = draft.backVisibleFields.contains(key);
-            final canAdd = draft.backVisibleFields.length < AppConstants.maxBackCardFields;
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 8),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: colorScheme.outline.withValues(alpha: 0.2)),
-                ),
-                child: CheckboxListTile(
-                  value: isSelected,
-                  onChanged: (v) {
-                    if (v == true && !canAdd) return;
-                    final list = List<String>.from(draft.backVisibleFields);
-                    if (v == true) {
-                      list.add(key);
-                    } else {
-                      list.remove(key);
-                    }
-                    onChanged(draft.copyWith(backVisibleFields: list));
-                  },
-                  title: Text(label),
-                  controlAffinity: ListTileControlAffinity.leading,
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
-                  dense: true,
-                ),
+          if (_hasValue(draft, 'skills'))
+            Container(
+              decoration: BoxDecoration(
+                color: colorScheme.surfaceContainerHighest
+                    .withValues(alpha: 0.5),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                    color: colorScheme.outline.withValues(alpha: 0.2)),
               ),
-            );
-          }),
+              child: CheckboxListTile(
+                value: draft.showSkillsOnBack,
+                onChanged: (v) {
+                  final list = List<String>.from(draft.backVisibleFields);
+                  if (v == true) {
+                    if (!list.contains('skills')) list.add('skills');
+                  } else {
+                    list.remove('skills');
+                  }
+                  onChanged(draft.copyWith(backVisibleFields: list));
+                },
+                title: const Text('Yetenekler'),
+                controlAffinity: ListTileControlAffinity.leading,
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
+                dense: true,
+              ),
+            ),
         ],
       ),
     );

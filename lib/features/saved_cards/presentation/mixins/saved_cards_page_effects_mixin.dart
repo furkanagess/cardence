@@ -164,13 +164,13 @@ mixin SavedCardsPageEffectsMixin<T extends StatefulWidget> on State<T> {
     final cubit = context.read<SavedCardsCubit>();
     final note = await SavedCardsNoteEditorSheet.show(
       context,
-      initialNote: card.about ?? '',
+      initialNote: card.note ?? '',
     );
     if (!context.mounted || note == null) return;
     await cubit.persistCardUpdate(
       card.copyWith(
-        about: note.isEmpty ? null : note,
-        clearAbout: note.isEmpty,
+        note: note.isEmpty ? null : note,
+        clearNote: note.isEmpty,
       ),
     );
   }

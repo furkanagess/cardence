@@ -2,8 +2,10 @@ import 'dart:convert';
 
 import 'package:cardence/core/theme/app_colors.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:qr_flutter/qr_flutter.dart';
+import 'package:share_plus/share_plus.dart';
 import '../../../../core/network/auth_api_exception.dart';
 import '../../../../core/utils/card_id_generator.dart';
 import '../../../../core/widgets/atoms/cardence_app_bar.dart';
@@ -38,6 +40,7 @@ class _CardDetailPageState extends State<CardDetailPage> {
   late OnboardingCardDraft _draft;
   late OnboardingCardDraft _savedDraft;
   bool _saving = false;
+  bool _sharing = false;
   String? get _selectedBackground => _draft.backgroundColor;
   String? get _selectedTextColor => _draft.accentColor;
 
@@ -271,12 +274,98 @@ class _CardDetailPageState extends State<CardDetailPage> {
     );
   }
 
-  void _showShareQrDialog() {
-    String cardId = _draft.cardId ?? '';
-    if (!CardIdGenerator.isValid(cardId)) {
-      cardId = CardIdGenerator.generate();
-      _applyDraft(_draft.copyWith(cardId: cardId));
+  String? get _visibleCardId {
+    final id = _draft.cardId?.trim();
+    if (id == null || id.isEmpty || !CardIdGenerator.isValid(id)) return null;
+    return id;
+  }
+
+  Future<void> _copyCardId(String cardId) async {
+    await Clipboard.setData(ClipboardData(text: cardId));
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Kart ID kopyalandı'),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
+
+  String _shareMessage(String cardId) {
+    final name = _draft.listTitle;
+    return 'Merhaba! Cardence kartımı seninle paylaşıyorum.\n\n'
+        'Kart: $name\n'
+        'Kart ID: $cardId\n\n'
+        'Cardence uygulamasında Kayıtlı Kartlar bölümünden '
+        '"Kart ID ile ekle" seçeneğine bu numarayı yazarak '
+        'kartımı kaydedebilirsin.';
+  }
+
+  Future<OnboardingCardDraft> _ensureShareableDraft() async {
+    var draftToSave = _draft;
+    if (!CardIdGenerator.isValid(draftToSave.cardId)) {
+      draftToSave = draftToSave.copyWith(cardId: CardIdGenerator.generate());
+      _applyDraft(draftToSave);
     }
+    if (_hasUnsavedChanges || draftToSave.cardId != _savedDraft.cardId) {
+      final synced = await widget.persistOnboardingCard(draftToSave);
+      if (!mounted) return synced;
+      setState(() {
+        _draft = synced;
+        _savedDraft = synced;
+      });
+      widget.onDraftUpdated?.call(synced);
+      return synced;
+    }
+    return draftToSave;
+  }
+
+  Future<void> _shareCard() async {
+    if (_sharing) return;
+    setState(() => _sharing = true);
+    try {
+      final synced = await _ensureShareableDraft();
+      final cardId = synced.cardId?.trim();
+      if (!mounted || cardId == null || !CardIdGenerator.isValid(cardId)) {
+        throw AuthApiException('Kart ID oluşturulamadı. Lütfen tekrar deneyin.');
+      }
+      await Share.share(_shareMessage(cardId), subject: 'Cardence kartım');
+    } on AuthApiException catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(e.message),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => _sharing = false);
+    }
+  }
+
+  Future<void> _showShareQrDialog() async {
+    if (_sharing) return;
+    setState(() => _sharing = true);
+    String cardId;
+    try {
+      final synced = await _ensureShareableDraft();
+      cardId = synced.cardId?.trim() ?? '';
+      if (!CardIdGenerator.isValid(cardId)) {
+        throw AuthApiException('Kart ID oluşturulamadı. Lütfen tekrar deneyin.');
+      }
+    } on AuthApiException catch (e) {
+      if (!mounted) return;
+      setState(() => _sharing = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(e.message),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+    if (!mounted) return;
+    setState(() => _sharing = false);
     final payload = CardSharePayload(
       id: cardId,
       n: _draft.displayName?.trim().isEmpty ?? true ? null : _draft.displayName,
@@ -437,13 +526,21 @@ class _CardDetailPageState extends State<CardDetailPage> {
                       _SectionHeader(
                         title: 'Kartınızı paylaşın',
                         subtitle:
-                            'Başka biri Cardence ile QR\'ı okutarak kartınızı kaydedebilir.',
+                            'Kart ID\'nizi gönderin; karşı taraf Cardence\'te kartınızı ekleyebilir.',
+                      ),
+                      const SizedBox(height: 12),
+                      _CardIdTile(
+                        cardId: _visibleCardId,
+                        onCopy: _visibleCardId == null
+                            ? null
+                            : () => _copyCardId(_visibleCardId!),
                       ),
                       const SizedBox(height: 12),
                       CustomButton(
-                        label: 'QR ile paylaş',
-                        icon: Icons.qr_code_2_rounded,
-                        onPressed: _showShareQrDialog,
+                        label: 'Kartı paylaş',
+                        icon: Icons.share_outlined,
+                        onPressed: _shareCard,
+                        isLoading: _sharing,
                         style: FilledButton.styleFrom(
                           backgroundColor: AppColors.primary,
                           foregroundColor: AppColors.textOnPrimary,
@@ -452,6 +549,13 @@ class _CardDetailPageState extends State<CardDetailPage> {
                             borderRadius: BorderRadius.circular(12),
                           ),
                         ),
+                      ),
+                      const SizedBox(height: 8),
+                      CustomButton.tonal(
+                        label: 'QR ile paylaş',
+                        icon: Icons.qr_code_2_rounded,
+                        onPressed: _sharing ? null : _showShareQrDialog,
+                        enabled: !_sharing,
                       ),
                     ],
                   ),
@@ -779,6 +883,98 @@ class _DetailSection extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: 24),
       child: child,
+    );
+  }
+}
+
+class _CardIdTile extends StatelessWidget {
+  const _CardIdTile({
+    required this.cardId,
+    this.onCopy,
+  });
+
+  final String? cardId;
+  final VoidCallback? onCopy;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    final hasId = cardId != null;
+
+    return Material(
+      color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.45),
+      borderRadius: BorderRadius.circular(12),
+      child: InkWell(
+        onTap: onCopy,
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(14, 12, 8, 12),
+          child: Row(
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: colorScheme.primaryContainer.withValues(alpha: 0.55),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(
+                  Icons.badge_outlined,
+                  size: 20,
+                  color: colorScheme.primary,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Kart ID',
+                      style: textTheme.labelMedium?.copyWith(
+                        color: colorScheme.onSurfaceVariant,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      hasId ? cardId! : 'Paylaşınca oluşturulur',
+                      style: textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: hasId ? 2 : 0,
+                        fontFeatures: hasId
+                            ? const [FontFeature.tabularFigures()]
+                            : null,
+                      ),
+                    ),
+                    if (!hasId) ...[
+                      const SizedBox(height: 4),
+                      Text(
+                        'Kartı paylaş dediğinizde benzersiz bir numara atanır.',
+                        style: textTheme.labelSmall?.copyWith(
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+              if (hasId)
+                IconButton(
+                  tooltip: 'Kopyala',
+                  visualDensity: VisualDensity.compact,
+                  onPressed: onCopy,
+                  icon: Icon(
+                    Icons.copy_all_rounded,
+                    size: 20,
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

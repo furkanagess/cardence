@@ -28,8 +28,7 @@ class _OnboardingStepContactState extends State<OnboardingStepContact> {
   @override
   void initState() {
     super.initState();
-    _emailController =
-        TextEditingController(text: widget.draft.email ?? '');
+    _emailController = TextEditingController(text: widget.draft.email ?? '');
   }
 
   @override
@@ -49,28 +48,54 @@ class _OnboardingStepContactState extends State<OnboardingStepContact> {
 
   @override
   Widget build(BuildContext context) {
-    return OnboardingStepShell(
-      title: 'E-posta',
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          const OnboardingFieldLabel(label: 'E-posta', required: true),
-          CustomTextField(
-            controller: _emailController,
-            autofocus: true,
-            keyboardType: TextInputType.emailAddress,
-            autocorrect: false,
-            textInputAction: TextInputAction.done,
-            hintText: 'ornek@sirket.com',
-            prefixIcon: const Icon(Icons.alternate_email_rounded),
-            onChanged: (value) => widget.onChanged(
-              widget.draft.copyWith(
-                email: value.isEmpty ? null : value.trim(),
-              ),
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
+    return Stack(
+      children: [
+        Positioned(
+          left: 0,
+          right: 0,
+          top: 48,
+          child: IgnorePointer(
+            child: Icon(
+              Icons.alternate_email_rounded,
+              size: 180,
+              color: colorScheme.primary.withValues(alpha: 0.06),
             ),
           ),
-        ],
-      ),
+        ),
+        OnboardingStepShell(
+          subtitle: 'İletişim için e-posta adresiniz',
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const OnboardingFieldLabel(label: 'E-posta', required: true),
+              CustomTextField(
+                controller: _emailController,
+                autofocus: true,
+                keyboardType: TextInputType.emailAddress,
+                autocorrect: false,
+                textInputAction: TextInputAction.done,
+                hintText: 'E-posta',
+                prefixIcon: const Icon(Icons.alternate_email_rounded),
+                onChanged: (value) => widget.onChanged(
+                  widget.draft.copyWith(
+                    email: value.isEmpty ? null : value.trim(),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'İş ortaklıkları ve güvenlik bildirimleri için gereklidir.',
+                style: textTheme.labelSmall?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }

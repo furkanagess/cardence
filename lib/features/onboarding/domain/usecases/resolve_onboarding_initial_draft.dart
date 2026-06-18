@@ -1,5 +1,6 @@
 import '../../../auth/domain/usecases/get_current_user.dart';
 import '../entities/onboarding_card_draft.dart';
+import '../helpers/onboarding_draft_helper.dart';
 import '../onboarding_draft_seeder.dart';
 import 'get_onboarding_draft_card.dart';
 
@@ -24,6 +25,6 @@ class ResolveOnboardingInitialDraft {
       // Profil alınamazsa mevcut taslak veya varsayılan ile devam.
     }
 
-    return draft;
+    return OnboardingDraftHelper.ensureCardId(draft);
   }
 }

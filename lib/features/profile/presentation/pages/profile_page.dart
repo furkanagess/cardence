@@ -3,12 +3,11 @@ import 'package:flutter/material.dart';
 import '../../../../core/utils/card_id_generator.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/atoms/custom_button.dart';
-import '../../../../core/widgets/organisms/flippable_person_card.dart';
 import '../../../my_cards/presentation/pages/card_view_page.dart';
 import '../../../my_cards/presentation/pages/my_card_edit_page.dart';
-import '../../../my_cards/presentation/widgets/my_card_preview_helpers.dart';
 import '../../../onboarding/domain/entities/onboarding_card_draft.dart';
 import '../../../onboarding/domain/usecases/get_onboarding_draft_cards.dart';
+import '../../../onboarding/presentation/widgets/onboarding_card_preview_frame.dart';
 import '../../../business_cards/domain/usecases/persist_onboarding_card.dart';
 
 const double _profileCarouselViewportFraction = 0.88;
@@ -126,9 +125,7 @@ class _ProfilePageState extends State<ProfilePage> {
           ? List<String>.from(OnboardingCardDraft.defaultFrontVisibleFields)
           : List.from(base.frontVisibleFields),
       backVisibleFields: base.backVisibleFields.isEmpty
-          ? List<String>.from(
-              OnboardingCardDraft.backFieldKeys.take(3),
-            )
+          ? List<String>.from(OnboardingCardDraft.defaultBackVisibleFields)
           : List.from(base.backVisibleFields),
     );
     await _openCardEditor(newCard, isNew: true);
@@ -164,8 +161,8 @@ class _ProfilePageState extends State<ProfilePage> {
                 const SizedBox(height: 4),
                 Text(
                   _cards.length > 1
-                      ? 'Yatay kaydırarak kartlar arasında geçin; düzenlemek için karta dokunun.'
-                      : 'Düzenlemek için karta dokunun.',
+                      ? 'Yatay kaydırarak kartlar arasında geçin; düzenlemek için karta çift dokunun.'
+                      : 'Düzenlemek için karta çift dokunun.',
                   style: textTheme.bodyMedium?.copyWith(
                     color: colorScheme.onSurfaceVariant,
                     height: 1.4,
@@ -297,77 +294,86 @@ class _ProfileCardsCarousel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const carouselHeight = FlippablePersonCard.fixedHeight +
-        _profileCarouselVerticalPadding * 2;
+    if (cards.isEmpty) return const SizedBox.shrink();
 
-    if (cards.length == 1) {
-      return Padding(
-        padding: const EdgeInsets.symmetric(
-          horizontal: _profileCarouselHorizontalPadding + 8,
-        ),
-        child: SizedBox(
-          height: carouselHeight,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(
-              vertical: _profileCarouselVerticalPadding,
-            ),
-            child: MyCardPreviewHelpers.flippableCard(
-              draft: cards.first,
-              onTap: () => onCardTap(cards.first),
-              emptyMessage: 'Kart bilgisi yok — düzenlemek için dokunun',
-            ),
-          ),
-        ),
-      );
-    }
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final pageWidth = constraints.maxWidth;
+        final cardWidth = pageWidth * _profileCarouselViewportFraction;
+        final carouselHeight =
+            OnboardingCardPreviewFrame.heightForWidth(cardWidth) +
+                _profileCarouselVerticalPadding * 2;
 
-    return SizedBox(
-      height: carouselHeight,
-      child: PageView.builder(
-        controller: pageController,
-        itemCount: cards.length,
-        onPageChanged: onPageChanged,
-        padEnds: false,
-        itemBuilder: (context, index) {
-          final card = cards[index];
-          return AnimatedBuilder(
-            animation: pageController,
-            builder: (context, child) {
-              double t = 0;
-              if (pageController.position.haveDimensions) {
-                final page =
-                    pageController.page ?? pageController.initialPage.toDouble();
-                t = (page - index).abs().clamp(0.0, 1.0);
-              }
-              const maxScaleDelta = 0.06;
-              const maxFadeDelta = 0.18;
-              final scale = 1.0 - (t * maxScaleDelta);
-              final opacity = 1.0 - (t * maxFadeDelta);
-
-              return Opacity(
-                opacity: opacity,
-                child: Transform.scale(
-                  scale: scale,
-                  alignment: Alignment.center,
-                  child: child,
+        if (cards.length == 1) {
+          return Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: SizedBox(
+              height: carouselHeight,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  vertical: _profileCarouselVerticalPadding,
                 ),
-              );
-            },
-            child: Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: _profileCarouselHorizontalPadding,
-                vertical: _profileCarouselVerticalPadding,
-              ),
-              child: MyCardPreviewHelpers.flippableCard(
-                key: ValueKey(card.cardId),
-                draft: card,
-                onTap: () => onCardTap(card),
-                emptyMessage: 'Kart bilgisi yok — düzenlemek için dokunun',
+                child: OnboardingCardPreviewFrame(
+                  draft: cards.first,
+                  onDoubleTap: () => onCardTap(cards.first),
+                  emptyMessage: 'Alanlar doldukça görünür',
+                  normalizeForDisplay: true,
+                ),
               ),
             ),
           );
-        },
-      ),
+        }
+
+        return SizedBox(
+          height: carouselHeight,
+          child: PageView.builder(
+            controller: pageController,
+            itemCount: cards.length,
+            onPageChanged: onPageChanged,
+            padEnds: false,
+            itemBuilder: (context, index) {
+              final card = cards[index];
+              return AnimatedBuilder(
+                animation: pageController,
+                builder: (context, child) {
+                  double t = 0;
+                  if (pageController.position.haveDimensions) {
+                    final page = pageController.page ??
+                        pageController.initialPage.toDouble();
+                    t = (page - index).abs().clamp(0.0, 1.0);
+                  }
+                  const maxScaleDelta = 0.06;
+                  const maxFadeDelta = 0.18;
+                  final scale = 1.0 - (t * maxScaleDelta);
+                  final opacity = 1.0 - (t * maxFadeDelta);
+
+                  return Opacity(
+                    opacity: opacity,
+                    child: Transform.scale(
+                      scale: scale,
+                      alignment: Alignment.center,
+                      child: child,
+                    ),
+                  );
+                },
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: _profileCarouselHorizontalPadding,
+                    vertical: _profileCarouselVerticalPadding,
+                  ),
+                  child: OnboardingCardPreviewFrame(
+                    key: ValueKey(card.cardId),
+                    draft: card,
+                    onDoubleTap: () => onCardTap(card),
+                    emptyMessage: 'Alanlar doldukça görünür',
+                    normalizeForDisplay: true,
+                  ),
+                ),
+              );
+            },
+          ),
+        );
+      },
     );
   }
 }

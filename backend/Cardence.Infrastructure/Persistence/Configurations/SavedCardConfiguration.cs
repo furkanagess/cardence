@@ -25,6 +25,9 @@ public sealed class SavedCardConfiguration : IEntityTypeConfiguration<SavedCard>
         builder.Property(x => x.Skills).HasColumnName("skills");
         builder.Property(x => x.School).HasMaxLength(200).HasColumnName("school");
         builder.Property(x => x.About).HasColumnName("about");
+        builder.Property(x => x.Note).HasColumnName("note");
+        builder.Property(x => x.AccentColor).HasMaxLength(7).HasColumnName("accent_color");
+        builder.Property(x => x.BackgroundColor).HasMaxLength(7).HasColumnName("background_color");
         builder.Property(x => x.SavedAt).HasColumnName("saved_at");
         builder.Property(x => x.SortOrder).HasColumnName("sort_order");
         builder.Ignore(x => x.LinkedEventGroupIds);

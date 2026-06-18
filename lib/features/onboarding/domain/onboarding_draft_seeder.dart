@@ -9,6 +9,11 @@ class OnboardingDraftSeeder {
         frontVisibleFields: List<String>.from(
           OnboardingCardDraft.defaultFrontVisibleFields,
         ),
+        backVisibleFields: List<String>.from(
+          OnboardingCardDraft.defaultBackVisibleFields,
+        ),
+        backgroundColor: '#1B365D',
+        accentColor: '#FFFFFF',
       );
 
   static OnboardingCardDraft applyUserProfile(

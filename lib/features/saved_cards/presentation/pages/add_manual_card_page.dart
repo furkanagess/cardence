@@ -4,15 +4,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
 
+import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/atoms/cardence_app_bar.dart';
-import '../../../../core/widgets/atoms/custom_button.dart';
+import '../../../../core/widgets/atoms/custom_text_field.dart';
 import '../../../../core/widgets/organisms/cardence_scaffold.dart';
+import '../../../onboarding/presentation/widgets/onboarding_step_shell.dart';
 import '../../data/datasources/physical_card_image_store.dart';
 import '../../domain/entities/add_saved_card_result.dart';
 import '../../domain/entities/manual_saved_card_draft.dart';
 import '../../domain/usecases/add_saved_card.dart';
 import '../cubit/add_manual_card_cubit.dart';
 import '../cubit/add_manual_card_state.dart';
+import '../widgets/add_card_ui_helpers.dart';
 
 /// Elle girilen bilgilerle başkasının kartını cüzdana ekleme.
 class AddManualCardPage extends StatefulWidget {
@@ -146,8 +149,8 @@ class _AddManualCardPageState extends State<AddManualCardPage> {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final colorScheme = Theme.of(context).colorScheme;
     final hasPhotos = widget.initialDraft?.frontImagePath != null;
 
     return BlocProvider(
@@ -163,135 +166,163 @@ class _AddManualCardPageState extends State<AddManualCardPage> {
           if (message == null) return;
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-                content: Text(message), behavior: SnackBarBehavior.floating),
+              content: Text(message),
+              behavior: SnackBarBehavior.floating,
+            ),
           );
         },
         child: CardenceScaffold(
           appBar: const CardenceAppBar(title: 'Manuel kart ekle'),
-          body: Form(
-            key: _formKey,
-            child: ListView(
-              padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
-              children: [
-                Text(
-                  hasPhotos
-                      ? 'Fotoğraftan okunan bilgileri kontrol edin, gerekirse düzenleyin.'
-                      : 'Karşınızdaki kişinin kartvizit bilgilerini girin.',
-                  style: textTheme.bodyMedium?.copyWith(
-                    color: colorScheme.onSurfaceVariant,
-                    height: 1.4,
-                  ),
-                ),
-                if (hasPhotos) ...[
-                  const SizedBox(height: 16),
-                  _PhotoPreviewRow(
-                    frontPath: widget.initialDraft!.frontImagePath!,
-                    backPath: widget.initialDraft!.backImagePath,
-                  ),
-                ],
-                const SizedBox(height: 20),
-                _buildField('Ad Soyad', _nameController, required: true),
-                _buildField(
-                  'E-posta',
-                  _emailController,
-                  keyboardType: TextInputType.emailAddress,
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 14),
-                  child: IntlPhoneField(
-                    initialCountryCode: _initialCountryCode,
-                    initialValue: _initialPhoneNational,
-                    keyboardType: TextInputType.phone,
-                    disableLengthCheck: true,
-                    decoration: InputDecoration(
-                      labelText: 'Telefon',
-                      counterText: '',
-                      filled: true,
-                      fillColor: colorScheme.surfaceContainerHighest
-                          .withValues(alpha: 0.4),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        borderSide: BorderSide.none,
-                      ),
-                    ),
-                    onChanged: (phone) {
-                      _phoneFullNumber =
-                          phone.number.isEmpty ? null : phone.completeNumber;
-                    },
-                  ),
-                ),
-                _buildField('Şirket', _companyController),
-                _buildField('Ünvan', _titleController),
-                _buildField(
-                  'Web sitesi',
-                  _websiteController,
-                  keyboardType: TextInputType.url,
-                ),
-                _buildField(
-                  'LinkedIn',
-                  _linkedInController,
-                  keyboardType: TextInputType.url,
-                ),
-                _buildField(
-                  'Not',
-                  _aboutController,
-                  minLines: 3,
-                  maxLines: 6,
-                ),
-                const SizedBox(height: 8),
-                BlocBuilder<AddManualCardCubit, AddManualCardState>(
-                  builder: (context, state) {
-                    return CustomButton(
-                      label: 'Cüzdana ekle',
-                      onPressed: () => _submit(context),
-                      isLoading: state.isSubmitting,
-                      style: FilledButton.styleFrom(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+          resizeToAvoidBottomInset: true,
+          body: Column(
+            children: [
+              Expanded(
+                child: Form(
+                  key: _formKey,
+                  child: ListView(
+                    padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+                    keyboardDismissBehavior:
+                        ScrollViewKeyboardDismissBehavior.onDrag,
+                    children: [
+                      Text(
+                        hasPhotos
+                            ? 'Fotoğraftan okunan bilgileri kontrol edin'
+                            : 'Kartvizitteki bilgileri girin',
+                        style: textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.textPrimary,
                         ),
                       ),
-                    );
-                  },
+                      const SizedBox(height: 6),
+                      Text(
+                        hasPhotos
+                            ? 'Gerekirse alanları düzenleyip kartı kaydedin.'
+                            : 'Lütfen kart sahibine ait profesyonel detayları doldurun.',
+                        style: textTheme.bodyMedium?.copyWith(
+                          color: AppColors.textSecondary,
+                          height: 1.4,
+                        ),
+                      ),
+                      if (hasPhotos) ...[
+                        const SizedBox(height: 16),
+                        _PhotoPreviewRow(
+                          frontPath: widget.initialDraft!.frontImagePath!,
+                          backPath: widget.initialDraft!.backImagePath,
+                        ),
+                      ],
+                      const SizedBox(height: 20),
+                      const OnboardingFieldLabel(label: 'Ad Soyad', required: true),
+                      TextFormField(
+                        controller: _nameController,
+                        textCapitalization: TextCapitalization.words,
+                        textInputAction: TextInputAction.next,
+                        validator: (value) {
+                          if ((value ?? '').trim().isEmpty) {
+                            return 'Ad Soyad zorunludur';
+                          }
+                          return null;
+                        },
+                        decoration: CustomTextField.themedDecoration(
+                          context,
+                          hintText: 'Örn: Ahmet Yılmaz',
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      const OnboardingFieldLabel(label: 'Şirket'),
+                      CustomTextField(
+                        controller: _companyController,
+                        hintText: 'Şirket adı',
+                        textInputAction: TextInputAction.next,
+                      ),
+                      const SizedBox(height: 16),
+                      const OnboardingFieldLabel(label: 'Pozisyon'),
+                      CustomTextField(
+                        controller: _titleController,
+                        hintText: 'Ünvan',
+                        textInputAction: TextInputAction.next,
+                      ),
+                      const SizedBox(height: 16),
+                      const OnboardingFieldLabel(label: 'E-posta'),
+                      CustomTextField(
+                        controller: _emailController,
+                        keyboardType: TextInputType.emailAddress,
+                        textInputAction: TextInputAction.next,
+                        autocorrect: false,
+                        hintText: 'isim@sirket.com',
+                        prefixIcon: Icon(
+                          Icons.mail_outline_rounded,
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      const OnboardingFieldLabel(label: 'Telefon'),
+                      IntlPhoneField(
+                        initialCountryCode: _initialCountryCode,
+                        initialValue: _initialPhoneNational,
+                        keyboardType: TextInputType.phone,
+                        disableLengthCheck: true,
+                        showCountryFlag: true,
+                        decoration: CustomTextField.themedDecoration(
+                          context,
+                          hintText: '+90 5XX XXX XX XX',
+                          decoration: const InputDecoration(counterText: ''),
+                        ),
+                        onChanged: (phone) {
+                          _phoneFullNumber =
+                              phone.number.isEmpty ? null : phone.completeNumber;
+                        },
+                      ),
+                      const SizedBox(height: 16),
+                      const OnboardingFieldLabel(label: 'Web sitesi'),
+                      CustomTextField(
+                        controller: _websiteController,
+                        keyboardType: TextInputType.url,
+                        textInputAction: TextInputAction.next,
+                        autocorrect: false,
+                        hintText: 'www.sirket.com',
+                        prefixIcon: Icon(
+                          Icons.language_outlined,
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      const OnboardingFieldLabel(label: 'LinkedIn'),
+                      CustomTextField(
+                        controller: _linkedInController,
+                        keyboardType: TextInputType.url,
+                        textInputAction: TextInputAction.next,
+                        autocorrect: false,
+                        hintText: 'linkedin.com/in/kullanici',
+                        prefixIcon: Icon(
+                          Icons.link_rounded,
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      const OnboardingFieldLabel(label: 'Not'),
+                      CustomTextField(
+                        controller: _aboutController,
+                        minLines: 4,
+                        maxLines: 6,
+                        hintText:
+                            'Bu kişi hakkında eklemek istediğiniz notlar...',
+                        textCapitalization: TextCapitalization.sentences,
+                      ),
+                    ],
+                  ),
                 ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildField(
-    String label,
-    TextEditingController controller, {
-    bool required = false,
-    TextInputType? keyboardType,
-    int minLines = 1,
-    int maxLines = 1,
-  }) {
-    final colorScheme = Theme.of(context).colorScheme;
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 14),
-      child: TextFormField(
-        controller: controller,
-        keyboardType: keyboardType,
-        minLines: minLines,
-        maxLines: maxLines,
-        validator: required
-            ? (value) {
-                if ((value ?? '').trim().isEmpty) {
-                  return '$label zorunludur';
-                }
-                return null;
-              }
-            : null,
-        decoration: InputDecoration(
-          labelText: label,
-          filled: true,
-          fillColor: colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(10),
-            borderSide: BorderSide.none,
+              ),
+              BlocBuilder<AddManualCardCubit, AddManualCardState>(
+                builder: (context, state) {
+                  return AddCardStickyAction(
+                    label: 'Kartı kaydet',
+                    icon: Icons.credit_card_rounded,
+                    isLoading: state.isSubmitting,
+                    onPressed: () => _submit(context),
+                  );
+                },
+              ),
+            ],
           ),
         ),
       ),
@@ -332,14 +363,13 @@ class _PhotoThumb extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Text(
           label,
           style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                color: colorScheme.onSurfaceVariant,
+                color: AppColors.textSecondary,
               ),
         ),
         const SizedBox(height: 6),
@@ -362,14 +392,13 @@ class _PhotoPlaceholder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Text(
           label,
           style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                color: colorScheme.onSurfaceVariant,
+                color: AppColors.textSecondary,
               ),
         ),
         const SizedBox(height: 6),
@@ -377,12 +406,12 @@ class _PhotoPlaceholder extends StatelessWidget {
           aspectRatio: 1.6,
           child: DecoratedBox(
             decoration: BoxDecoration(
-              color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
+              color: AppColors.surfaceVariant.withValues(alpha: 0.5),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: Icon(
+            child: const Icon(
               Icons.image_not_supported_outlined,
-              color: colorScheme.onSurfaceVariant,
+              color: AppColors.textDisabled,
             ),
           ),
         ),

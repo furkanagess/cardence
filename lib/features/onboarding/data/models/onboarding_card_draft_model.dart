@@ -173,7 +173,8 @@ class OnboardingCardDraftModel {
       backVisibleFields: back,
       accentColor: json['accentColor'] as String?,
       backgroundColor: json['backgroundColor'] as String?,
-      lastUsedPaletteBackgroundColor: json['lastUsedPaletteBackgroundColor'] as String?,
+      lastUsedPaletteBackgroundColor:
+          json['lastUsedPaletteBackgroundColor'] as String?,
       linkedEventGroupIds: (json['linkedEventGroupIds'] as List<dynamic>?)
               ?.map((e) => e as String)
               .toList() ??

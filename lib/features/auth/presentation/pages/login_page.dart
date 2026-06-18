@@ -1,11 +1,10 @@
 import 'dart:math' as math;
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/constants/app_constants.dart';
-import '../../../../core/network/api_config.dart';
+import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/atoms/cardence_app_bar.dart';
 import '../../../../core/widgets/atoms/custom_button.dart';
 import '../../../../core/widgets/organisms/cardence_connect_animation.dart';
@@ -22,6 +21,7 @@ import '../widgets/login_email_form.dart';
 import '../widgets/login_method_selector.dart';
 import '../widgets/login_phone_form.dart';
 import '../widgets/register_form.dart';
+import '../widgets/register_legal_notice.dart';
 import 'forgot_password_page.dart';
 
 class LoginPage extends StatelessWidget {
@@ -156,8 +156,7 @@ class _AuthViewState extends State<_AuthView>
             body: SafeArea(
               child: LayoutBuilder(
                 builder: (context, constraints) {
-                  final bottomInset =
-                      MediaQuery.viewInsetsOf(context).bottom;
+                  final bottomInset = MediaQuery.viewInsetsOf(context).bottom;
                   final keyboardVisible = bottomInset > 0;
                   final logoSize = keyboardVisible
                       ? 72.0
@@ -166,7 +165,7 @@ class _AuthViewState extends State<_AuthView>
                             constraints.maxWidth * 0.58,
                             constraints.maxHeight * 0.26,
                           )
-                          .clamp(140.0, 200.0);
+                          .clamp(112.0, 132.0);
 
                   return Padding(
                     padding: const EdgeInsets.fromLTRB(24, 4, 24, 0),
@@ -213,8 +212,8 @@ class _RegisterScreenContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final colorScheme = Theme.of(context).colorScheme;
 
     final registerForm = RegisterForm(
       isLoading: state.isLoading,
@@ -241,30 +240,43 @@ class _RegisterScreenContent extends StatelessWidget {
           child: SingleChildScrollView(
             keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
             padding: EdgeInsets.only(
-              top: 8,
+              top: 6,
               bottom: keyboardVisible ? bottomInset + 16 : 8,
             ),
-            child: registerForm,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  "Cardence'a Katılın",
+                  style: textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.w800,
+                    color: colorScheme.primary,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Profesyonel kimliğinizi yönetmek için yeni bir hesap oluşturun.',
+                  style: textTheme.bodyMedium?.copyWith(
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+                ),
+                const SizedBox(height: 18),
+                registerForm,
+              ],
+            ),
           ),
         ),
         if (!keyboardVisible) ...[
+          const Padding(
+            padding: EdgeInsets.only(top: 6),
+            child: RegisterLegalNotice(),
+          ),
           _AuthModeLink(
             isRegister: true,
             onTap: () => context
                 .read<LoginBloc>()
                 .add(const AuthScreenModeChanged(AuthScreenMode.login)),
           ),
-          if (kDebugMode)
-            Padding(
-              padding: const EdgeInsets.only(top: 4),
-              child: Text(
-                'API: ${ApiConfig.baseUrl}',
-                textAlign: TextAlign.center,
-                style: textTheme.labelSmall?.copyWith(
-                  color: colorScheme.onSurfaceVariant,
-                ),
-              ),
-            ),
         ],
       ],
     );
@@ -330,10 +342,10 @@ class _LoginScreenContent extends StatelessWidget {
                 textAlign: TextAlign.center,
                 style: (keyboardVisible
                         ? textTheme.titleSmall
-                        : textTheme.titleMedium)
+                        : textTheme.bodyLarge)
                     ?.copyWith(
-                  color: colorScheme.primary,
-                  fontWeight: FontWeight.w600,
+                  color: AppColors.textSecondary,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
             ],
@@ -345,6 +357,7 @@ class _LoginScreenContent extends StatelessWidget {
             state: state,
             expandToFill: !keyboardVisible,
             bottomInset: bottomInset,
+            showExtendedFooter: !keyboardVisible,
             onForgotPassword: onForgotPassword,
           ),
         ),
@@ -353,17 +366,6 @@ class _LoginScreenContent extends StatelessWidget {
             isRegister: false,
             onTap: onRegisterTap,
           ),
-          if (kDebugMode)
-            Padding(
-              padding: const EdgeInsets.only(top: 4),
-              child: Text(
-                'API: ${ApiConfig.baseUrl}',
-                textAlign: TextAlign.center,
-                style: textTheme.labelSmall?.copyWith(
-                  color: colorScheme.onSurfaceVariant,
-                ),
-              ),
-            ),
         ],
       ],
     );
@@ -398,10 +400,10 @@ class _AuthModeLink extends StatelessWidget {
               TextSpan(
                 text: isRegister
                     ? 'Zaten hesabınız var mı? '
-                    : 'Henüz hesabınız yok mu? ',
+                    : 'Hesabınız yok mu? ',
               ),
               TextSpan(
-                text: isRegister ? 'Giriş yapın' : 'Kayıt olun',
+                text: isRegister ? 'Giriş yap' : 'Kayıt ol',
                 style: TextStyle(
                   color: colorScheme.primary,
                   fontWeight: FontWeight.w700,
@@ -420,12 +422,14 @@ class _LoginFormContent extends StatefulWidget {
   const _LoginFormContent({
     required this.state,
     required this.onForgotPassword,
+    required this.showExtendedFooter,
     this.expandToFill = false,
     this.bottomInset = 0,
   });
 
   final LoginState state;
   final VoidCallback onForgotPassword;
+  final bool showExtendedFooter;
   final bool expandToFill;
   final double bottomInset;
 
@@ -484,10 +488,86 @@ class _LoginFormContentState extends State<_LoginFormContent> {
     );
   }
 
+  Widget _buildSocialButton({
+    required Widget icon,
+    required VoidCallback? onPressed,
+  }) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Expanded(
+      child: SizedBox(
+        height: 44,
+        child: OutlinedButton(
+          onPressed: onPressed,
+          style: OutlinedButton.styleFrom(
+            side: BorderSide(color: colorScheme.outlineVariant),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+          ),
+          child: icon,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildExtendedFooter() {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const SizedBox(height: 14),
+        Row(
+          children: [
+            Expanded(child: Divider(color: colorScheme.outlineVariant)),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              child: Text(
+                'veya',
+                style: textTheme.labelMedium?.copyWith(
+                  color: AppColors.textSecondary,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+            Expanded(child: Divider(color: colorScheme.outlineVariant)),
+          ],
+        ),
+        const SizedBox(height: 14),
+        Row(
+          children: [
+            _buildSocialButton(
+              onPressed: null,
+              icon: Text(
+                'G',
+                style: textTheme.titleLarge?.copyWith(
+                  color: colorScheme.onSurface,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            _buildSocialButton(
+              onPressed: null,
+              icon: Icon(
+                Icons.apple_rounded,
+                size: 20,
+                color: colorScheme.onSurface,
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final fields = _buildFields();
     final submitButton = _buildSubmitButton();
+    final extendedFooter = widget.showExtendedFooter
+        ? _buildExtendedFooter()
+        : const SizedBox.shrink();
 
     if (widget.expandToFill) {
       return Column(
@@ -503,6 +583,7 @@ class _LoginFormContentState extends State<_LoginFormContent> {
           const Spacer(),
           const SizedBox(height: 8),
           submitButton,
+          extendedFooter,
         ],
       );
     }
@@ -522,6 +603,7 @@ class _LoginFormContentState extends State<_LoginFormContent> {
           fields,
           const SizedBox(height: 8),
           submitButton,
+          extendedFooter,
         ],
       ),
     );

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/theme/app_colors.dart';
 import '../../domain/entities/saved_cards_wallet_quota.dart';
 
 /// Kart ekleme yöntemi seçimi.
@@ -28,13 +29,16 @@ class AddSavedCardSheet extends StatelessWidget {
     return showModalBottomSheet<AddSavedCardMethod>(
       context: context,
       showDragHandle: true,
+      backgroundColor: Theme.of(context).colorScheme.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
       builder: (context) => AddSavedCardSheet(quota: quota, canAdd: canAdd),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
     return SafeArea(
@@ -46,7 +50,10 @@ class AddSavedCardSheet extends StatelessWidget {
           children: [
             Text(
               'Kart ekle',
-              style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600),
+              style: textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.w700,
+                color: AppColors.textPrimary,
+              ),
             ),
             const SizedBox(height: 6),
             Text(
@@ -54,14 +61,15 @@ class AddSavedCardSheet extends StatelessWidget {
                   ? '${quota.remaining} kart daha ekleyebilirsiniz.'
                   : 'Cüzdanınız dolu. Paket yükselterek sınırı artırabilirsiniz.',
               style: textTheme.bodyMedium?.copyWith(
-                color: colorScheme.onSurfaceVariant,
+                color: canAdd ? AppColors.textSecondary : AppColors.warning,
+                height: 1.35,
               ),
             ),
             const SizedBox(height: 20),
             _MethodTile(
-              icon: Icons.edit_note_outlined,
+              icon: Icons.edit_note_rounded,
               title: 'Bilgileri elle gir',
-              subtitle: 'Kartvizitteki ad, e-posta ve diğer bilgileri yazın',
+              subtitle: 'Kartvizit bilgilerini manuel yazın',
               enabled: canAdd,
               onTap: canAdd
                   ? () =>
@@ -72,7 +80,7 @@ class AddSavedCardSheet extends StatelessWidget {
             _MethodTile(
               icon: Icons.photo_camera_outlined,
               title: 'Kartvizit fotoğrafla',
-              subtitle: 'Ön yüz zorunlu; arka yüz opsiyonel. Bilgiler otomatik okunur',
+              subtitle: 'Kamerayı kullanarak bilgileri tara',
               enabled: canAdd,
               onTap: canAdd
                   ? () =>
@@ -83,7 +91,7 @@ class AddSavedCardSheet extends StatelessWidget {
             _MethodTile(
               icon: Icons.badge_outlined,
               title: 'Kart ID ile ekle',
-              subtitle: '6 haneli Cardence kart kimliğini girin',
+              subtitle: '6 haneli özel kimlik ile ekle',
               enabled: canAdd,
               onTap: canAdd
                   ? () => Navigator.of(context).pop(AddSavedCardMethod.cardId)
@@ -113,35 +121,31 @@ class _MethodTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
     return Material(
-      color: enabled
-          ? colorScheme.surfaceContainerHighest.withValues(alpha: 0.45)
-          : colorScheme.surfaceContainerHighest.withValues(alpha: 0.2),
-      borderRadius: BorderRadius.circular(14),
+      color: AppColors.surfaceVariant.withValues(alpha: 0.45),
+      borderRadius: BorderRadius.circular(12),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(12),
         child: Padding(
-          padding: const EdgeInsets.all(14),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
           child: Row(
             children: [
               Container(
                 width: 44,
                 height: 44,
                 decoration: BoxDecoration(
-                  color: colorScheme.primary.withValues(
-                    alpha: enabled ? 0.12 : 0.06,
-                  ),
-                  borderRadius: BorderRadius.circular(12),
+                  color: enabled ? AppColors.primary : AppColors.outlineVariant,
+                  shape: BoxShape.circle,
                 ),
                 child: Icon(
                   icon,
+                  size: 22,
                   color: enabled
-                      ? colorScheme.primary
-                      : colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
+                      ? AppColors.textOnPrimary
+                      : AppColors.textDisabled,
                 ),
               ),
               const SizedBox(width: 14),
@@ -152,17 +156,19 @@ class _MethodTile extends StatelessWidget {
                     Text(
                       title,
                       style: textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w600,
+                        fontWeight: FontWeight.w700,
                         color: enabled
-                            ? colorScheme.onSurface
-                            : colorScheme.onSurfaceVariant,
+                            ? AppColors.textPrimary
+                            : AppColors.textDisabled,
                       ),
                     ),
                     const SizedBox(height: 2),
                     Text(
                       subtitle,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                       style: textTheme.bodySmall?.copyWith(
-                        color: colorScheme.onSurfaceVariant,
+                        color: AppColors.textSecondary,
                         height: 1.3,
                       ),
                     ),
@@ -170,8 +176,10 @@ class _MethodTile extends StatelessWidget {
                 ),
               ),
               Icon(
-                Icons.chevron_right_rounded,
-                color: colorScheme.onSurfaceVariant,
+                enabled ? Icons.chevron_right_rounded : Icons.lock_outline,
+                color: enabled
+                    ? AppColors.textSecondary
+                    : AppColors.textDisabled,
               ),
             ],
           ),

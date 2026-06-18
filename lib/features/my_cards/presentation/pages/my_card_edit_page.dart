@@ -528,8 +528,10 @@ class _MyCardEditPageState extends State<MyCardEditPage> {
         initialCountryCode: _countryCodeFromFullPhone(_phoneFullNumber),
         initialValue: _nationalNumberFromFullPhone(_phoneFullNumber),
         showCountryFlag: true,
+        disableLengthCheck: true,
         decoration: InputDecoration(
           labelText: _labels['phone'],
+          counterText: '',
           filled: true,
           fillColor: colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
           border: OutlineInputBorder(

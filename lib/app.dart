@@ -219,6 +219,7 @@ class _AppState extends State<App> {
           completeOnboarding: widget.completeOnboarding,
           resolveInitialDraft: widget.resolveOnboardingInitialDraft,
           persistOnboardingCard: widget.persistOnboardingCard,
+          uploadProfilePhoto: widget.uploadProfilePhoto,
           onFinish: _onOnboardingFinish,
         );
       case _AppDestination.main:

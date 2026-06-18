@@ -14,6 +14,8 @@ class CardSharePayload {
     this.o,
     this.h,
     this.ph,
+    this.tc,
+    this.bc,
   });
 
   /// Kart benzersiz id (cardId).
@@ -40,6 +42,10 @@ class CardSharePayload {
   final String? h;
   /// photoUrl
   final String? ph;
+  /// accentColor (metin rengi)
+  final String? tc;
+  /// backgroundColor (kart arka planı)
+  final String? bc;
 
   Map<String, dynamic> toJson() => {
         'id': id,
@@ -54,6 +60,8 @@ class CardSharePayload {
         if (o != null && o!.isNotEmpty) 'o': o,
         if (h != null && h!.isNotEmpty) 'h': h,
         if (ph != null && ph!.isNotEmpty) 'ph': ph,
+        if (tc != null && tc!.isNotEmpty) 'tc': tc,
+        if (bc != null && bc!.isNotEmpty) 'bc': bc,
       };
 
   static CardSharePayload? fromJson(Map<String, dynamic>? json) {
@@ -71,6 +79,8 @@ class CardSharePayload {
       o: json['o'] as String?,
       h: json['h'] as String?,
       ph: json['ph'] as String?,
+      tc: json['tc'] as String?,
+      bc: json['bc'] as String?,
     );
   }
 }

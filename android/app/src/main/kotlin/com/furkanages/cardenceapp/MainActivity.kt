@@ -1,4 +1,4 @@
-package com.furkanages.cardence
+package com.furkanages.cardenceapp
 
 import io.flutter.embedding.android.FlutterActivity
 

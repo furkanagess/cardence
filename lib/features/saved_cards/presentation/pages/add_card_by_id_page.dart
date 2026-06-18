@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/card_id_generator.dart';
 import '../../../../core/widgets/atoms/cardence_app_bar.dart';
-import '../../../../core/widgets/atoms/custom_button.dart';
 import '../../../../core/widgets/atoms/custom_text_field.dart';
 import '../../../../core/widgets/organisms/cardence_scaffold.dart';
 import '../../domain/entities/add_saved_card_result.dart';
 import '../../domain/entities/saved_card.dart';
 import '../../domain/entities/saved_card_origin.dart';
 import '../../domain/usecases/add_saved_card.dart';
+import '../widgets/add_card_ui_helpers.dart';
 
 /// Kart ID ile cüzdana kart ekleme.
 class AddCardByIdPage extends StatefulWidget {
@@ -81,56 +82,100 @@ class _AddCardByIdPageState extends State<AddCardByIdPage> {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
     return CardenceScaffold(
       appBar: const CardenceAppBar(title: 'Kart ID ile ekle'),
-      body: Form(
-        key: _formKey,
-        child: ListView(
-          padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
-          children: [
-            Text(
-              'Paylaşılan kart kimliğini girin. Bilgiler sunucudaki güncel kartvizitten alınır.',
-              style: textTheme.bodyMedium?.copyWith(
-                color: colorScheme.onSurfaceVariant,
-                height: 1.4,
+      resizeToAvoidBottomInset: true,
+      body: Column(
+        children: [
+          Expanded(
+            child: Form(
+              key: _formKey,
+              child: ListView(
+                padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
+                children: [
+                  Center(
+                    child: Container(
+                      width: 72,
+                      height: 72,
+                      decoration: BoxDecoration(
+                        color: AppColors.primary,
+                        borderRadius: BorderRadius.circular(18),
+                      ),
+                      child: const Icon(
+                        Icons.badge_outlined,
+                        size: 36,
+                        color: AppColors.textOnPrimary,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  Text(
+                    'Paylaşılan kart kimliğini girin. Bilgiler sunucudaki güncel kartvizitten alınır.',
+                    textAlign: TextAlign.center,
+                    style: textTheme.bodyMedium?.copyWith(
+                      color: AppColors.textSecondary,
+                      height: 1.45,
+                    ),
+                  ),
+                  const SizedBox(height: 28),
+                  Text(
+                    'KART ID',
+                    style: textTheme.labelMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.textSecondary,
+                      letterSpacing: 0.8,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  TextFormField(
+                    controller: _cardIdController,
+                    validator: _validateCardId,
+                    keyboardType: TextInputType.number,
+                    maxLength: CardIdGenerator.length,
+                    inputFormatters: [
+                      FilteringTextInputFormatter.digitsOnly,
+                      LengthLimitingTextInputFormatter(CardIdGenerator.length),
+                    ],
+                    decoration: CustomTextField.themedDecoration(
+                      context,
+                      hintText: '482917',
+                      prefixIcon: const Icon(Icons.perm_identity_outlined),
+                      maxLength: CardIdGenerator.length,
+                    ),
+                    textInputAction: TextInputAction.done,
+                    autocorrect: false,
+                    style: textTheme.headlineSmall?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: 2,
+                    ),
+                    onFieldSubmitted: (_) => _submit(),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Sadece sayısal karakterler kabul edilir.',
+                    style: textTheme.bodySmall?.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  const AddCardTipCard.security(
+                    title: 'Güvenli Paylaşım',
+                    text:
+                        'Cardence ağındaki tüm veri transferleri uçtan uca şifrelenir ve kimlik doğrulama protokolleri ile korunur.',
+                  ),
+                ],
               ),
             ),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: _cardIdController,
-              validator: _validateCardId,
-              keyboardType: TextInputType.number,
-              maxLength: CardIdGenerator.length,
-              inputFormatters: [
-                FilteringTextInputFormatter.digitsOnly,
-                LengthLimitingTextInputFormatter(CardIdGenerator.length),
-              ],
-              decoration: CustomTextField.themedDecoration(
-                context,
-                labelText: 'Kart ID',
-                hintText: '482917',
-                prefixIcon: const Icon(Icons.badge_outlined),
-                maxLength: CardIdGenerator.length,
-              ),
-              textInputAction: TextInputAction.done,
-              autocorrect: false,
-            ),
-            const SizedBox(height: 24),
-            CustomButton(
-              label: 'Cüzdana ekle',
-              onPressed: _submit,
-              isLoading: _submitting,
-              style: FilledButton.styleFrom(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-            ),
-          ],
-        ),
+          ),
+          AddCardStickyAction(
+            label: 'Kartı ekle',
+            icon: Icons.add_card_rounded,
+            onPressed: _submit,
+            isLoading: _submitting,
+          ),
+        ],
       ),
     );
   }

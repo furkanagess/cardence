@@ -26,6 +26,7 @@ import '../../../auth/domain/usecases/get_current_user.dart';
 import '../../../auth/domain/usecases/upload_profile_photo.dart';
 import '../../../settings/domain/entities/theme_preference.dart';
 import '../../../settings/presentation/pages/settings_page.dart';
+import '../../../settings/presentation/pages/card_visibility_settings_page.dart';
 import '../../../support/domain/usecases/submit_support_request.dart';
 import '../../../support/presentation/pages/support_page.dart';
 
@@ -216,6 +217,7 @@ class _MainShellPageState extends State<MainShellPage> {
           uploadProfilePhoto: widget.uploadProfilePhoto,
           onPhotoUpdated: (_) => _loadMyCardDraft(),
           onOpenSupport: () => _openSupport(context, user.email),
+          onOpenCardVisibility: () => _openCardVisibility(context),
         ),
       ),
     );
@@ -227,6 +229,18 @@ class _MainShellPageState extends State<MainShellPage> {
         builder: (context) => SupportPage(
           submitSupportRequest: widget.submitSupportRequest,
           initialEmail: initialEmail,
+        ),
+      ),
+    );
+  }
+
+  void _openCardVisibility(BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (context) => CardVisibilitySettingsPage(
+          getOnboardingDraftCards: widget.getOnboardingDraftCards,
+          persistOnboardingCard: widget.persistOnboardingCard,
+          onDraftUpdated: (_) => _loadMyCardDraft(),
         ),
       ),
     );

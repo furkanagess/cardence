@@ -8,7 +8,7 @@
 PRODUCT_NAME = cardence
 
 // The application's bundle identifier
-PRODUCT_BUNDLE_IDENTIFIER = com.example.cardence
+PRODUCT_BUNDLE_IDENTIFIER = com.furkanages.cardenceapp
 
 // The copyright displayed in application information
 PRODUCT_COPYRIGHT = Copyright © 2025 com.example. All rights reserved.

@@ -61,7 +61,8 @@ public sealed class SavedCardService : ISavedCardService
             cancellationToken)
             ?? throw new NotFoundException("SavedCard", request.CardId);
 
-        SavedCardMapper.ApplyDto(existing, request);
+        existing.Note = request.Note;
+        existing.LinkedEventGroupIds = request.LinkedEventGroupIds.ToList();
         await _savedCardRepository.UpdateAsync(existing, cancellationToken);
         await _eventGroupRepository.SyncSavedCardLinksAsync(
             userId,
@@ -223,6 +224,8 @@ public sealed class SavedCardService : ISavedCardService
                 Skills = ReadOptionalString(body, "s", "skills", "Skills"),
                 School = ReadOptionalString(body, "o", "school", "School"),
                 About = ReadOptionalString(body, "h", "about", "About"),
+                AccentColor = ReadOptionalString(body, "tc", "accentColor", "AccentColor"),
+                BackgroundColor = ReadOptionalString(body, "bc", "backgroundColor", "BackgroundColor"),
             };
         }
 

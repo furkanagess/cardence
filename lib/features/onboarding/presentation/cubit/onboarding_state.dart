@@ -21,7 +21,7 @@ class OnboardingState extends Equatable {
   final bool isSaving;
   final String? errorMessage;
 
-  /// name, professional, contact, optional, preview + renk
+  /// name, professional, photo, optional, preview
   static const int stepCount = 5;
 
   bool get isLastPage => currentPageIndex >= stepCount - 1;
@@ -36,8 +36,9 @@ class OnboardingState extends Equatable {
         return OnboardingValidation.validateCompany(draft.company) ??
             OnboardingValidation.validateTitle(draft.title);
       case 2:
-        return OnboardingValidation.validateEmail(draft.email);
+        return null;
       case 3:
+        return null;
       case 4:
         return null;
       default:
@@ -54,8 +55,7 @@ class OnboardingState extends Equatable {
     return validationErrorForCurrentStep == null;
   }
 
-  bool get canFinish =>
-      OnboardingValidation.hasRequiredFields(
+  bool get canFinish => OnboardingValidation.hasRequiredFields(
         displayName: draft.displayName,
         company: draft.company,
         title: draft.title,

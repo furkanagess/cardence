@@ -15,7 +15,6 @@ class SavedCardsCardStackView extends StatelessWidget {
     required this.cubit,
     required this.useDummyCards,
     required this.onOpenCard,
-    required this.onEditNote,
   });
 
   static const Duration dragAnimDuration = Duration(milliseconds: 320);
@@ -27,7 +26,6 @@ class SavedCardsCardStackView extends StatelessWidget {
   final SavedCardsCubit cubit;
   final bool useDummyCards;
   final void Function(SavedCard card, {String? heroTag}) onOpenCard;
-  final void Function(SavedCard card) onEditNote;
 
   @override
   Widget build(BuildContext context) {
@@ -89,7 +87,6 @@ class SavedCardsCardStackView extends StatelessWidget {
                           heroTag: heroTag,
                           wrapHero: !isDragging,
                           onTap: () => onOpenCard(card, heroTag: heroTag),
-                          onEditNote: () => onEditNote(card),
                         ),
                       );
                     },

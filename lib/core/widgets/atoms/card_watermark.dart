@@ -30,7 +30,7 @@ class CardWatermark extends StatelessWidget {
   double get _size {
     switch (variant) {
       case CardWatermarkVariant.cardCompact:
-        return 130;
+        return 172;
       case CardWatermarkVariant.card:
         return 168;
       case CardWatermarkVariant.screen:
@@ -43,7 +43,7 @@ class CardWatermark extends StatelessWidget {
     switch (variant) {
       case CardWatermarkVariant.cardCompact:
       case CardWatermarkVariant.card:
-        return isDark ? 0.12 : 0.08;
+        return isDark ? 0.14 : 0.1;
       case CardWatermarkVariant.screen:
         return isDark ? 0.07 : 0.05;
     }
@@ -82,7 +82,7 @@ class CardenceCardCornerWatermark extends StatelessWidget {
   final Color surfaceColor;
   final bool compact;
 
-  double get _size => compact ? 88 : 112;
+  double get _size => compact ? 52 : 112;
 
   double get _opacity {
     final isDark = surfaceColor.computeLuminance() < 0.35;

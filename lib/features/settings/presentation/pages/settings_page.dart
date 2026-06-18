@@ -20,6 +20,7 @@ class SettingsPage extends StatefulWidget {
     required this.onLogout,
     required this.onOpenSupport,
     required this.uploadProfilePhoto,
+    this.onOpenCardVisibility,
     this.userDisplayName,
     this.userEmail,
     this.userPhotoUrl,
@@ -31,6 +32,7 @@ class SettingsPage extends StatefulWidget {
   final Future<void> Function() onLogout;
   final VoidCallback onOpenSupport;
   final UploadProfilePhoto uploadProfilePhoto;
+  final VoidCallback? onOpenCardVisibility;
   final String? userDisplayName;
   final String? userEmail;
   final String? userPhotoUrl;
@@ -103,6 +105,23 @@ class _SettingsPageState extends State<SettingsPage> {
               current: widget.currentTheme,
               onChanged: widget.onThemeChanged,
             ),
+            if (widget.onOpenCardVisibility != null) ...[
+              const SizedBox(height: 24),
+              Text(
+                'Kart',
+                style: textTheme.titleSmall?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 12),
+              SettingsMenuTile(
+                icon: Icons.visibility_outlined,
+                title: 'Kart görünümü',
+                subtitle: 'Ön yüz iletişim ve arka yüz yetenekler',
+                onTap: widget.onOpenCardVisibility!,
+              ),
+            ],
             const SizedBox(height: 24),
             Text(
               'Yardım',

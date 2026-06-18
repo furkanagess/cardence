@@ -33,6 +33,11 @@ class ScanPhysicalCardState extends Equatable {
   bool get canCapture =>
       cameraPermission == ScanCameraPermissionStatus.granted && !isBusy;
 
+  bool get canReadInfo =>
+      frontImagePath != null &&
+      !isBusy &&
+      step != ScanPhysicalCardStep.processing;
+
   ScanPhysicalCardState copyWith({
     ScanPhysicalCardStep? step,
     String? frontImagePath,

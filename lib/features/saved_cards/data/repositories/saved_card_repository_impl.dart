@@ -44,14 +44,50 @@ class SavedCardRepositoryImpl implements SavedCardRepository {
     await _local.replaceAll(cards);
   }
 
+  SavedCardModel _mergeLocalFields(
+    SavedCardModel remote,
+    SavedCardModel? local,
+  ) {
+    if (local == null) return remote;
+    return SavedCardModel(
+      cardId: remote.cardId,
+      origin: local.origin,
+      displayName: remote.displayName,
+      email: remote.email,
+      phone: remote.phone,
+      company: remote.company,
+      title: remote.title,
+      website: remote.website,
+      linkedin: remote.linkedin,
+      skills: remote.skills,
+      school: remote.school,
+      about: remote.about,
+      note: remote.note ?? local.note,
+      photoUrl: remote.photoUrl,
+      accentColor: remote.accentColor ?? local.accentColor,
+      backgroundColor: remote.backgroundColor ?? local.backgroundColor,
+      savedAt: remote.savedAt,
+      frontImagePath: local.frontImagePath ?? remote.frontImagePath,
+      backImagePath: local.backImagePath ?? remote.backImagePath,
+      linkedEventGroupIds: remote.linkedEventGroupIds,
+    );
+  }
+
   @override
   Future<List<SavedCard>> getSavedCards() async {
     final token = await _tryAccessToken();
     if (token != null) {
       try {
         final remoteCards = await _remote.getSavedCards(accessToken: token);
-        await _cacheCards(remoteCards);
-        return remoteCards.map((model) => model.toEntity()).toList();
+        final localCards = await _local.getSavedCards();
+        final localById = {
+          for (final card in localCards) card.cardId: card,
+        };
+        final mergedCards = remoteCards
+            .map((remote) => _mergeLocalFields(remote, localById[remote.cardId]))
+            .toList();
+        await _cacheCards(mergedCards);
+        return mergedCards.map((model) => model.toEntity()).toList();
       } on AuthApiException {
         rethrow;
       } catch (_) {
@@ -80,6 +116,7 @@ class SavedCardRepositoryImpl implements SavedCardRepository {
       origin: card.origin,
       frontImagePath: card.frontImagePath,
       backImagePath: card.backImagePath,
+      note: card.note,
     );
     await _local.saveCard(SavedCardModel.fromEntity(merged));
     return merged;
@@ -96,6 +133,7 @@ class SavedCardRepositoryImpl implements SavedCardRepository {
       origin: card.origin,
       frontImagePath: card.frontImagePath,
       backImagePath: card.backImagePath,
+      note: updated.note ?? card.note,
     );
     await _local.saveCard(SavedCardModel.fromEntity(merged));
   }

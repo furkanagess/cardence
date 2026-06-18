@@ -4,8 +4,6 @@ import 'package:intl_phone_field/intl_phone_field.dart';
 import '../../../../core/validation/app_validators.dart';
 import '../../../../core/widgets/atoms/custom_button.dart';
 import '../../../../core/widgets/atoms/custom_text_field.dart';
-import '../../../onboarding/presentation/onboarding_name_helper.dart';
-import '../../../onboarding/presentation/onboarding_validation.dart';
 import '../../../onboarding/presentation/widgets/onboarding_step_shell.dart';
 import 'auth_password_field.dart';
 
@@ -29,73 +27,56 @@ class RegisterForm extends StatefulWidget {
 }
 
 class _RegisterFormState extends State<RegisterForm> {
-  final _firstNameController = TextEditingController();
-  final _lastNameController = TextEditingController();
+  final _displayNameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  final _confirmPasswordController = TextEditingController();
   String _phoneNumber = '';
-  String? _firstNameError;
-  String? _lastNameError;
+  String? _displayNameError;
   String? _emailError;
   String? _phoneError;
   String? _passwordError;
-  String? _confirmPasswordError;
 
   @override
   void dispose() {
-    _firstNameController.dispose();
-    _lastNameController.dispose();
+    _displayNameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
-    _confirmPasswordController.dispose();
     super.dispose();
   }
 
   void _submit() {
-    final firstName = _firstNameController.text;
-    final lastName = _lastNameController.text;
-    final displayName = OnboardingNameHelper.combine(firstName, lastName);
+    final displayName = _displayNameController.text.trim();
     final email = _emailController.text.trim().toLowerCase();
     final password = _passwordController.text;
-    final confirmPassword = _confirmPasswordController.text;
     final phone = _phoneNumber.trim();
 
-    final firstNameError = OnboardingValidation.validateFirstName(firstName);
-    final lastNameError = OnboardingValidation.validateLastName(lastName);
+    String? displayNameError;
     String? emailError;
     String? phoneError;
     String? passwordError;
-    String? confirmPasswordError;
+    if (displayName.length < 3) {
+      displayNameError = 'Ad soyad en az 3 karakter olmalıdır.';
+    }
     if (!AppValidators.matches(AppValidators.email, email)) {
       emailError = 'Geçerli bir e-posta girin.';
     }
-    if (phone.isNotEmpty && phone.length < 8) {
-      phoneError = 'Geçerli bir telefon numarası girin.';
-    }
+    phoneError = AppValidators.optionalPhoneError(phone);
     if (!AppValidators.isValidPassword(password)) {
       passwordError =
           'Şifre en az ${AppValidators.minPasswordLength} karakter olmalıdır.';
     }
-    if (password != confirmPassword) {
-      confirmPasswordError = 'Şifreler eşleşmiyor.';
-    }
 
     setState(() {
-      _firstNameError = firstNameError;
-      _lastNameError = lastNameError;
+      _displayNameError = displayNameError;
       _emailError = emailError;
       _phoneError = phoneError;
       _passwordError = passwordError;
-      _confirmPasswordError = confirmPasswordError;
     });
 
-    if (firstNameError != null ||
-        lastNameError != null ||
+    if (displayNameError != null ||
         emailError != null ||
         phoneError != null ||
-        passwordError != null ||
-        confirmPasswordError != null) {
+        passwordError != null) {
       return;
     }
 
@@ -110,44 +91,29 @@ class _RegisterFormState extends State<RegisterForm> {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
 
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const OnboardingFieldLabel(label: 'Ad', required: true),
+        const OnboardingFieldLabel(label: 'Ad Soyad', required: true),
         CustomTextField(
-          controller: _firstNameController,
-          hintText: 'Örn. Ayşe',
+          controller: _displayNameController,
+          hintText: 'Adınızı ve soyadınızı girin',
           textInputAction: TextInputAction.next,
           textCapitalization: TextCapitalization.words,
           prefixIcon: Icon(
             Icons.person_outline_rounded,
             color: colorScheme.onSurfaceVariant,
           ),
-          errorText: _firstNameError,
+          errorText: _displayNameError,
           onChanged: (_) {
-            if (_firstNameError != null) setState(() => _firstNameError = null);
+            if (_displayNameError != null) {
+              setState(() => _displayNameError = null);
+            }
           },
         ),
-        const SizedBox(height: 8),
-        const OnboardingFieldLabel(label: 'Soyad', required: true),
-        CustomTextField(
-          controller: _lastNameController,
-          hintText: 'Örn. Yılmaz',
-          textInputAction: TextInputAction.next,
-          textCapitalization: TextCapitalization.words,
-          prefixIcon: Icon(
-            Icons.person_outline_rounded,
-            color: colorScheme.onSurfaceVariant,
-          ),
-          errorText: _lastNameError,
-          onChanged: (_) {
-            if (_lastNameError != null) setState(() => _lastNameError = null);
-          },
-        ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 12),
         const OnboardingFieldLabel(label: 'E-posta', required: true),
         CustomTextField(
           controller: _emailController,
@@ -164,22 +130,27 @@ class _RegisterFormState extends State<RegisterForm> {
             if (_emailError != null) setState(() => _emailError = null);
           },
         ),
-        const SizedBox(height: 8),
-        const OnboardingFieldLabel(label: 'Telefon (isteğe bağlı)'),
+        const SizedBox(height: 12),
+        const OnboardingFieldLabel(label: 'Telefon'),
         IntlPhoneField(
           decoration: CustomTextField.themedDecoration(
             context,
             hintText: '5XX XXX XX XX',
             errorText: _phoneError,
+            prefixIcon: Icon(
+              Icons.phone_outlined,
+              size: 18,
+              color: colorScheme.onSurfaceVariant,
+            ),
           ),
           initialCountryCode: 'TR',
-          disableLengthCheck: true,
+          invalidNumberMessage: 'Geçerli bir telefon numarası girin.',
           onChanged: (phone) {
             _phoneNumber = phone.completeNumber;
             if (_phoneError != null) setState(() => _phoneError = null);
           },
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 12),
         AuthPasswordField(
           controller: _passwordController,
           errorText: _passwordError,
@@ -188,29 +159,12 @@ class _RegisterFormState extends State<RegisterForm> {
             if (_passwordError != null) setState(() => _passwordError = null);
           },
         ),
-        const SizedBox(height: 8),
-        AuthPasswordField(
-          controller: _confirmPasswordController,
-          label: 'Şifre tekrar',
-          hintText: 'Şifrenizi tekrar girin',
-          errorText: _confirmPasswordError,
-          textInputAction: TextInputAction.done,
-          onSubmitted: (_) => _submit(),
-          onChanged: (_) {
-            if (_confirmPasswordError != null) {
-              setState(() => _confirmPasswordError = null);
-            }
-          },
-        ),
-        const SizedBox(height: 14),
+        const SizedBox(height: 18),
         CustomButton(
-          label: 'Hesap oluştur',
+          label: 'Kayıt ol',
           height: 48,
           isLoading: widget.isLoading,
           onPressed: _submit,
-          labelStyle: textTheme.titleSmall?.copyWith(
-            fontWeight: FontWeight.w700,
-          ),
         ),
       ],
     );

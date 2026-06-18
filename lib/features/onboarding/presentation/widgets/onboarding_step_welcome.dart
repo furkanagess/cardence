@@ -48,10 +48,12 @@ class _OnboardingStepWelcomeState extends State<OnboardingStepWelcome>
       padding: const EdgeInsets.symmetric(horizontal: 24),
       child: LayoutBuilder(
         builder: (context, constraints) {
-          final animationSize = math.min(
-            constraints.maxWidth,
-            constraints.maxHeight * 0.72,
-          ).clamp(200.0, 300.0);
+          final animationSize = math
+              .min(
+                constraints.maxWidth,
+                constraints.maxHeight * 0.72,
+              )
+              .clamp(200.0, 300.0);
 
           return Column(
             mainAxisAlignment: MainAxisAlignment.center,

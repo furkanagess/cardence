@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/widgets/molecules/card_color_customize_section.dart';
-import '../../../../core/widgets/organisms/flippable_person_card.dart';
 import '../../domain/entities/onboarding_card_draft.dart';
-import '../onboarding_preview_helpers.dart';
+import 'onboarding_card_preview_frame.dart';
 import 'onboarding_step_shell.dart';
 
 class OnboardingStepPreview extends StatelessWidget {
@@ -22,32 +21,30 @@ class OnboardingStepPreview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    final colorScheme = Theme.of(context).colorScheme;
+
     return OnboardingStepShell(
-      title: 'Kart önizlemesi',
-      subtitle: 'Kartınızın görünümünü kontrol edin ve renkleri seçin.',
+      subtitle: 'Kartınızın dijital kimliğini özelleştirin.',
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 420),
-              child: OnboardingPreviewHelpers.preview(draft),
-            ),
-          ),
+          OnboardingCardPreviewFrame(draft: draft),
           const SizedBox(height: 8),
           Center(
             child: Text(
-              'Canlı önizleme',
-              style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
+              'Kartı çevirmek için sağ alttaki ikona dokunun',
+              style: textTheme.labelMedium?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+              ),
             ),
           ),
           const SizedBox(height: 24),
           CardColorCustomizeSection(
             backgroundColor: draft.backgroundColor,
             accentColor: draft.accentColor,
-            lastUsedPaletteBackgroundColor: draft.lastUsedPaletteBackgroundColor,
+            lastUsedPaletteBackgroundColor:
+                draft.lastUsedPaletteBackgroundColor,
             onBackgroundColorChanged: (hex) {
               onChanged(
                 hex == null
@@ -68,7 +65,6 @@ class OnboardingStepPreview extends StatelessWidget {
               );
             },
           ),
-          const SizedBox(height: FlippablePersonCard.fixedHeight * 0.05),
         ],
       ),
     );

@@ -1,8 +1,12 @@
 # iOS TestFlight / App Store Archive
 
-## Hata: `Invalid Signature` — `App.framework` / `Flutter.framework`
+## Hata: `Invalid Signature` — `App.framework` / `Flutter.framework` / `objective_c.framework` / `Runner`
 
-Bu hata, gömülü Flutter framework'lerinin **development** sertifikasıyla imzalanıp archive'ın **distribution** ile gönderilmesinden kaynaklanır.
+Bu hatalar genelde şu nedenlerle oluşur:
+
+1. Gömülü framework'ler **Apple Development** ile imzalanmış (App Store **Apple Distribution** ister).
+2. Framework'ler yeniden imzalandıktan sonra **Runner.app** mührü tazelenmemiş.
+3. `objective_c.framework` Flutter native asset'idir; diğer framework'lerle birlikte imzalanmalıdır.
 
 ## Önerilen yol (Flutter CLI)
 
@@ -32,7 +36,15 @@ Oluşan IPA: `build/ios/ipa/*.ipa` — Transporter veya Xcode Organizer ile yük
 6. **Product → Archive**.
 7. Organizer → **Distribute App** → App Store Connect.
 
-`Runner` hedefinde **Sign Embedded Frameworks** build phase'i archive sırasında framework'leri yeniden imzalar (`--timestamp=none`; aksi halde bazı Xcode sürümlerinde `Only HTTP timestamp URLs are supported` hatası oluşur).
+`Runner` hedefinde **Sign Embedded Frameworks** build phase'i (son adım):
+
+- Tüm `Frameworks/*.framework` dosyalarını (App, Flutter, objective_c, …) imzalar
+- Ardından **Runner.app**'i yeniden mühürler
+- Release archive'da Development kimliği algılanırsa keychain'deki **Apple Distribution** sertifikasına geçer
+
+**Keychain:** Archive almadan önce **Apple Distribution** sertifikasının yüklü olduğundan emin olun (Xcode → Settings → Accounts → Manage Certificates).
+
+**Önemli:** Xcode Organizer'dan validate başarısız oluyorsa önce `flutter build ipa --release` ile üretilen `build/ios/ipa/*.ipa` dosyasını Transporter ile yüklemeyi deneyin.
 
 ## Xcode kontrol listesi
 
@@ -40,7 +52,7 @@ Oluşan IPA: `build/ios/ipa/*.ipa` — Transporter veya Xcode Organizer ile yük
 |------|--------|
 | Team | `4NZ23FB632` |
 | Signing | Automatic |
-| Bundle ID | `com.furkanages.cardence` |
+| Bundle ID | `com.furkanages.cardenceapp` |
 | Archive configuration | **Release** |
 | Build configuration (Archive) | Release (Scheme → Archive) |
 

@@ -13,6 +13,7 @@ namespace Cardence.Tests.Services;
 public sealed class BusinessCardServiceTests
 {
     private readonly IBusinessCardRepository _repository = Substitute.For<IBusinessCardRepository>();
+    private readonly IUserRepository _userRepository = Substitute.For<IUserRepository>();
     private readonly ICurrentUserService _currentUser = Substitute.For<ICurrentUserService>();
     private readonly BusinessCardService _service;
     private readonly Guid _userId = Guid.NewGuid();
@@ -22,6 +23,7 @@ public sealed class BusinessCardServiceTests
         _currentUser.GetRequiredUserId().Returns(_userId);
         _service = new BusinessCardService(
             _repository,
+            _userRepository,
             _currentUser,
             new BusinessCardDtoValidator());
     }

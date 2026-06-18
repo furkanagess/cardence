@@ -44,14 +44,17 @@ class OnboardingCardDraft {
   final String? about;
   final String? photoUrl;
   final List<String> visibleFields;
+
   /// Ön yüzde gösterilecek alanlar (en fazla 3).
   final List<String> frontVisibleFields;
+
   /// Arka yüzde gösterilecek alanlar (en fazla 3).
   final List<String> backVisibleFields;
   final String? accentColor;
   final String? backgroundColor;
   final String? lastUsedPaletteBackgroundColor;
   final List<String> linkedEventGroupIds;
+
   /// QR / paylaşım için benzersiz kart id; yoksa oluşturulur.
   final String? cardId;
 
@@ -86,11 +89,10 @@ class OnboardingCardDraft {
     'about',
   ];
 
-  /// Ön yüzde varsayılan gösterilecek alanlar (şirket, pozisyon, e-posta).
+  /// Ön yüz alt iletişim satırları için varsayılan (e-posta + telefon).
   static const List<String> defaultFrontVisibleFields = [
-    'company',
-    'title',
     'email',
+    'phone',
   ];
 
   /// Eski varsayılan ön yüz (geçiş için).
@@ -100,45 +102,55 @@ class OnboardingCardDraft {
     'email',
   ];
 
-  /// Ön yüz için seçilebilir alan anahtarları.
-  static const List<String> frontFieldKeys = [
-    'title',
+  /// Ön yüz alt kısımda seçilebilir iletişim alanları.
+  static const List<String> cardFrontContactFieldKeys = [
     'email',
     'phone',
-    'company',
-    'skills',
-    'school',
-    'about',
-  ];
-  /// Arka yüz için seçilebilir alan anahtarları.
-  static const List<String> backFieldKeys = [
-    'email', 'phone', 'website', 'linkedin',
+    'linkedin',
+    'website',
   ];
 
-  /// Ön yüzde gösterilecek alanlar; boş veya eski varsayılanda [defaultFrontVisibleFields].
-  List<String> get resolvedFrontVisibleFields {
-    if (frontVisibleFields.isEmpty) {
-      return defaultFrontVisibleFields;
-    }
-    if (frontVisibleFields.length == legacyDefaultFrontVisibleFields.length &&
+  /// Ön yüz için seçilebilir alan anahtarları (ayarlar UI).
+  static const List<String> frontFieldKeys = cardFrontContactFieldKeys;
+
+  /// Arka yüzde varsayılan: yalnızca Hakkımda.
+  static const List<String> defaultBackVisibleFields = ['about'];
+
+  /// Arka yüz için seçilebilir ek alan anahtarları (Hakkımda her zaman gösterilir).
+  static const List<String> backFieldKeys = [
+    'skills',
+  ];
+
+  /// Ön yüz alt iletişim satırları; boş veya eski formatta varsayılan kullanılır.
+  List<String> get resolvedFrontContactFields {
+    final contactOnly = frontVisibleFields
+        .where((k) => cardFrontContactFieldKeys.contains(k))
+        .toList();
+    if (contactOnly.isNotEmpty) return contactOnly;
+    if (frontVisibleFields.isEmpty ||
         _listEquals(frontVisibleFields, legacyDefaultFrontVisibleFields)) {
-      return defaultFrontVisibleFields;
+      return List<String>.from(defaultFrontVisibleFields);
     }
-    return frontVisibleFields;
+    return List<String>.from(defaultFrontVisibleFields);
   }
+
+  /// Geriye dönük uyumluluk.
+  List<String> get resolvedFrontVisibleFields => resolvedFrontContactFields;
 
   bool get shouldMigrateFrontFields =>
       frontVisibleFields.isEmpty ||
-      (frontVisibleFields.length == legacyDefaultFrontVisibleFields.length &&
-          _listEquals(frontVisibleFields, legacyDefaultFrontVisibleFields));
+      _listEquals(frontVisibleFields, legacyDefaultFrontVisibleFields);
 
-  /// Ön yüzü ünvan + e-posta + telefon varsayılanına günceller.
+  /// Ön yüz iletişim alanlarını güncel varsayılana taşır.
   OnboardingCardDraft withStandardFrontFields() {
     if (!shouldMigrateFrontFields) return this;
     return copyWith(
       frontVisibleFields: List<String>.from(defaultFrontVisibleFields),
     );
   }
+
+  /// Arka yüzde yetenekler gösterilsin mi.
+  bool get showSkillsOnBack => backVisibleFields.contains('skills');
 
   static bool _listEquals(List<String> a, List<String> b) {
     if (a.length != b.length) return false;
@@ -164,7 +176,8 @@ class OnboardingCardDraft {
         photoUrl == other.photoUrl &&
         accentColor == other.accentColor &&
         backgroundColor == other.backgroundColor &&
-        lastUsedPaletteBackgroundColor == other.lastUsedPaletteBackgroundColor &&
+        lastUsedPaletteBackgroundColor ==
+            other.lastUsedPaletteBackgroundColor &&
         cardId == other.cardId &&
         _listEquals(visibleFields, other.visibleFields) &&
         _listEquals(frontVisibleFields, other.frontVisibleFields) &&
@@ -214,8 +227,11 @@ class OnboardingCardDraft {
       frontVisibleFields: frontVisibleFields ?? this.frontVisibleFields,
       backVisibleFields: backVisibleFields ?? this.backVisibleFields,
       accentColor: clearAccentColor ? null : (accentColor ?? this.accentColor),
-      backgroundColor: clearBackgroundColor ? null : (backgroundColor ?? this.backgroundColor),
-      lastUsedPaletteBackgroundColor: lastUsedPaletteBackgroundColor ?? this.lastUsedPaletteBackgroundColor,
+      backgroundColor: clearBackgroundColor
+          ? null
+          : (backgroundColor ?? this.backgroundColor),
+      lastUsedPaletteBackgroundColor:
+          lastUsedPaletteBackgroundColor ?? this.lastUsedPaletteBackgroundColor,
       linkedEventGroupIds: linkedEventGroupIds ?? this.linkedEventGroupIds,
       cardId: cardId ?? this.cardId,
     );

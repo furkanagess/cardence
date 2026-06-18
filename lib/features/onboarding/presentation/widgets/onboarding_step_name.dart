@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/widgets/atoms/custom_text_field.dart';
 import '../../domain/entities/onboarding_card_draft.dart';
 import '../onboarding_name_helper.dart';
+import 'onboarding_card_preview_frame.dart';
 import 'onboarding_step_shell.dart';
 
 class OnboardingStepName extends StatefulWidget {
@@ -68,10 +69,20 @@ class _OnboardingStepNameState extends State<OnboardingStepName> {
     );
   }
 
+  OnboardingCardDraft get _previewDraft {
+    final combined = OnboardingNameHelper.combine(
+      _firstNameController.text,
+      _lastNameController.text,
+    );
+    return widget.draft.copyWith(
+      displayName: combined.isEmpty ? null : combined,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return OnboardingStepShell(
-      title: 'Adınız',
+      subtitle: 'Kartınızda görünecek adınızı girin',
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -81,9 +92,12 @@ class _OnboardingStepNameState extends State<OnboardingStepName> {
             autofocus: true,
             textCapitalization: TextCapitalization.words,
             textInputAction: TextInputAction.next,
-            hintText: 'Örn. Ayşe',
+            hintText: 'Örn: Mehmet',
             prefixIcon: const Icon(Icons.person_outline),
-            onChanged: (_) => _emitDisplayName(),
+            onChanged: (_) {
+              _emitDisplayName();
+              setState(() {});
+            },
           ),
           const SizedBox(height: 16),
           const OnboardingFieldLabel(label: 'Soyad', required: true),
@@ -91,9 +105,16 @@ class _OnboardingStepNameState extends State<OnboardingStepName> {
             controller: _lastNameController,
             textCapitalization: TextCapitalization.words,
             textInputAction: TextInputAction.done,
-            hintText: 'Örn. Yılmaz',
+            hintText: 'Örn: Yılmaz',
             prefixIcon: const Icon(Icons.person_outline),
-            onChanged: (_) => _emitDisplayName(),
+            onChanged: (_) {
+              _emitDisplayName();
+              setState(() {});
+            },
+          ),
+          const SizedBox(height: 24),
+          Center(
+            child: OnboardingCardPreviewFrame(draft: _previewDraft),
           ),
         ],
       ),

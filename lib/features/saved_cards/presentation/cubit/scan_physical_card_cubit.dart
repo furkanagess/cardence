@@ -85,7 +85,6 @@ class ScanPhysicalCardCubit extends Cubit<ScanPhysicalCardState> {
         emit(
           state.copyWith(
             frontImagePath: image.path,
-            step: ScanPhysicalCardStep.back,
             isBusy: false,
           ),
         );
@@ -93,11 +92,9 @@ class ScanPhysicalCardCubit extends Cubit<ScanPhysicalCardState> {
         emit(
           state.copyWith(
             backImagePath: image.path,
-            step: ScanPhysicalCardStep.back,
             isBusy: false,
           ),
         );
-        await finishScan();
       }
     } catch (_) {
       emit(

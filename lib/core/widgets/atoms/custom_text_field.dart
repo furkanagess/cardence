@@ -78,7 +78,7 @@ class CustomTextField extends StatelessWidget {
           prefixIcon: prefixIcon,
           suffixIcon: suffixIcon,
           alignLabelWithHint: alignLabelWithHint,
-          counterText: maxLength != null ? '' : null,
+          counterText: '',
         );
     return base.applyDefaults(Theme.of(context).inputDecorationTheme);
   }

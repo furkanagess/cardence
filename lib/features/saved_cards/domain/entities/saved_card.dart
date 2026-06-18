@@ -15,7 +15,10 @@ class SavedCard {
     this.skills,
     this.school,
     this.about,
+    this.note,
     this.photoUrl,
+    this.accentColor,
+    this.backgroundColor,
     this.savedAt,
     this.frontImagePath,
     this.backImagePath,
@@ -34,7 +37,13 @@ class SavedCard {
   final String? skills;
   final String? school;
   final String? about;
+  /// Kaydeden kullanıcının kişisel notu (kart sahibinin Hakkımda alanı değil).
+  final String? note;
   final String? photoUrl;
+  /// Kart metin rengi (hex, örn. #FFFFFF).
+  final String? accentColor;
+  /// Kart arka plan rengi (hex, örn. #1B365D).
+  final String? backgroundColor;
   /// Kaydedilme zamanı (ms since epoch).
   final int? savedAt;
   /// Yerel fiziksel kartvizit ön yüz fotoğrafı (yalnızca cihazda).
@@ -62,7 +71,11 @@ class SavedCard {
     String? school,
     String? about,
     bool clearAbout = false,
+    String? note,
+    bool clearNote = false,
     String? photoUrl,
+    String? accentColor,
+    String? backgroundColor,
     int? savedAt,
     String? frontImagePath,
     String? backImagePath,
@@ -81,7 +94,10 @@ class SavedCard {
       skills: skills ?? this.skills,
       school: school ?? this.school,
       about: clearAbout ? null : (about ?? this.about),
+      note: clearNote ? null : (note ?? this.note),
       photoUrl: photoUrl ?? this.photoUrl,
+      accentColor: accentColor ?? this.accentColor,
+      backgroundColor: backgroundColor ?? this.backgroundColor,
       savedAt: savedAt ?? this.savedAt,
       frontImagePath: frontImagePath ?? this.frontImagePath,
       backImagePath: backImagePath ?? this.backImagePath,

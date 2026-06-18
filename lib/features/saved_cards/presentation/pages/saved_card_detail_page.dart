@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../../../../core/constants/app_constants.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/utils/contact_launcher.dart';
 import '../../../../core/widgets/atoms/custom_button.dart';
 import '../../../../core/widgets/atoms/cardence_app_bar.dart';
 import '../../../../core/widgets/organisms/cardence_scaffold.dart';
@@ -20,6 +20,8 @@ import '../../domain/usecases/delete_saved_card.dart';
 import '../../domain/usecases/get_saved_cards.dart';
 import '../../domain/usecases/save_saved_card.dart';
 import '../widgets/saved_card_origin_badge.dart';
+import '../../domain/extensions/saved_card_preview_colors.dart';
+import '../../domain/extensions/saved_card_preview_entries.dart';
 import '../widgets/saved_cards_physical_photo_preview.dart';
 
 /// Kaydedilen bir kisinin tam detay ekrani: onizleme, hizli aksiyonlar, tum alanlar.
@@ -276,40 +278,6 @@ class _SavedCardDetailPageState extends State<SavedCardDetailPage> {
     }
   }
 
-  Future<void> _confirmUnlinkFromGroup(EventGroup group) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Gruptan çıkar'),
-        content: Text(
-          '"${group.name}" grubundan bu kartı kaldırmak istiyor musunuz?',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('İptal'),
-          ),
-          CustomButton(
-            label: 'Çıkar',
-            onPressed: () => Navigator.of(context).pop(true),
-            fullWidth: false,
-          ),
-        ],
-      ),
-    );
-    if (!mounted || confirmed != true) return;
-
-    final ids = List<String>.from(_card.linkedEventGroupIds)..remove(group.id);
-    await _persistCard(_card.copyWith(linkedEventGroupIds: ids));
-    if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('"${group.name}" grubundan çıkarıldı'),
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
-  }
-
   Future<void> _persistCard(SavedCard updated) async {
     await widget.onSave(updated);
     if (!mounted) return;
@@ -326,35 +294,26 @@ class _SavedCardDetailPageState extends State<SavedCardDetailPage> {
 
   List<_ContactFieldData> get _contactFields {
     return [
-      if (_has(_card.title))
-        _ContactFieldData(
-          label: 'Ünvan',
-          value: _card.title!.trim(),
-          icon: Icons.badge_outlined,
-        ),
-      if (_has(_card.company))
-        _ContactFieldData(
-          label: 'Şirket',
-          value: _card.company!.trim(),
-          icon: Icons.apartment_rounded,
-        ),
       if (_has(_card.email))
         _ContactFieldData(
           label: 'E-posta',
           value: _card.email!.trim(),
           icon: Icons.mail_outline_rounded,
+          trailing: _ContactTrailingAction.copy,
         ),
       if (_has(_card.phone))
         _ContactFieldData(
           label: 'Telefon',
           value: _card.phone!.trim(),
           icon: Icons.phone_outlined,
+          trailing: _ContactTrailingAction.copy,
         ),
       if (_has(_card.website))
         _ContactFieldData(
-          label: 'Web sitesi',
+          label: 'Web',
           value: _card.website!.trim(),
           icon: Icons.language_rounded,
+          trailing: _ContactTrailingAction.openLink,
           onTap: () => _launchWebsite(_card.website!.trim()),
         ),
       if (_has(_card.linkedin))
@@ -362,35 +321,51 @@ class _SavedCardDetailPageState extends State<SavedCardDetailPage> {
           label: 'LinkedIn',
           value: _card.linkedin!.trim(),
           icon: Icons.link_rounded,
+          trailing: _ContactTrailingAction.openLink,
           onTap: () => _launchWebsite(_card.linkedin!.trim()),
+        ),
+      if (_has(_card.company))
+        _ContactFieldData(
+          label: 'Şirket',
+          value: _card.company!.trim(),
+          icon: Icons.apartment_rounded,
+          trailing: _ContactTrailingAction.copy,
+        ),
+      if (_has(_card.title))
+        _ContactFieldData(
+          label: 'Pozisyon',
+          value: _card.title!.trim(),
+          icon: Icons.work_outline_rounded,
+          trailing: _ContactTrailingAction.copy,
         ),
       if (_has(_card.skills))
         _ContactFieldData(
           label: 'Yetenekler',
           value: _card.skills!.trim(),
           icon: Icons.auto_awesome_outlined,
+          trailing: _ContactTrailingAction.copy,
         ),
       if (_has(_card.school))
         _ContactFieldData(
           label: 'Okul',
           value: _card.school!.trim(),
           icon: Icons.school_outlined,
+          trailing: _ContactTrailingAction.copy,
         ),
     ];
   }
 
-  List<({String label, String value})> get _previewFrontEntries {
-    return [
-      if (_has(_card.title)) (label: 'Ünvan', value: _card.title!.trim()),
-      if (_has(_card.email)) (label: 'E-posta', value: _card.email!.trim()),
-      if (_has(_card.phone)) (label: 'Telefon', value: _card.phone!.trim()),
-    ];
+  List<String> get _visibleContactFields {
+    final keys = <String>[];
+    if (_has(_card.email)) keys.add('email');
+    if (_has(_card.phone)) keys.add('phone');
+    if (_has(_card.linkedin)) keys.add('linkedin');
+    if (_has(_card.website)) keys.add('website');
+    return keys;
   }
 
-  List<({String label, String value})> get _previewBackEntries {
-    if (!_has(_card.about)) return const [];
-    return [(label: 'Notlar', value: _card.about!.trim())];
-  }
+  List<({String label, String value})> get _previewBackEntries =>
+      _card.backAboutEntries;
 
   bool _has(String? value) => value != null && value.trim().isNotEmpty;
 
@@ -398,27 +373,25 @@ class _SavedCardDetailPageState extends State<SavedCardDetailPage> {
     if (ms == null) return 'Bilinmiyor';
     final dt = DateTime.fromMillisecondsSinceEpoch(ms);
     const months = [
-      'Ocak',
-      'Şubat',
-      'Mart',
-      'Nisan',
-      'Mayıs',
-      'Haziran',
-      'Temmuz',
-      'Ağustos',
-      'Eylül',
-      'Ekim',
-      'Kasım',
-      'Aralık',
+      'Oca',
+      'Şub',
+      'Mar',
+      'Nis',
+      'May',
+      'Haz',
+      'Tem',
+      'Ağu',
+      'Eyl',
+      'Eki',
+      'Kas',
+      'Ara',
     ];
     return '${dt.day} ${months[dt.month - 1]} ${dt.year}';
   }
 
   String _savedAtDescription(int? ms) {
-    if (ms == null) {
-      return '${AppConstants.appName} ile kaydedildi · tarih bilinmiyor';
-    }
-    return '${_formatSavedAt(ms)} tarihinde ${AppConstants.appName} ile kaydedildi';
+    if (ms == null) return 'Kaydedildi: tarih bilinmiyor';
+    return 'Kaydedildi: ${_formatSavedAt(ms)}';
   }
 
   Future<void> _copyToClipboard(String label, String value) async {
@@ -433,16 +406,6 @@ class _SavedCardDetailPageState extends State<SavedCardDetailPage> {
     );
   }
 
-  bool _isGithubUrl(String url) {
-    return url.toLowerCase().contains('github.com');
-  }
-
-  _ThirdQuickLinkType get _thirdQuickLinkType {
-    if (!_has(_card.website)) return _ThirdQuickLinkType.none;
-    if (_isGithubUrl(_card.website!)) return _ThirdQuickLinkType.github;
-    return _ThirdQuickLinkType.website;
-  }
-
   Future<void> _launchLinkedIn() async {
     final linkedin = _card.linkedin?.trim();
     if (linkedin == null || linkedin.isEmpty) return;
@@ -452,11 +415,13 @@ class _SavedCardDetailPageState extends State<SavedCardDetailPage> {
   Future<void> _launchEmail() async {
     final email = _card.email?.trim();
     if (email == null || email.isEmpty) return;
-    final uri = Uri(scheme: 'mailto', path: email);
-    if (!await launchUrl(uri)) {
-      if (!mounted) return;
-      _showLaunchError('E-posta uygulaması açılamadı');
-    }
+    await ContactLauncher.launchEmail(context, email);
+  }
+
+  Future<void> _launchPhone() async {
+    final phone = _card.phone?.trim();
+    if (phone == null || phone.isEmpty) return;
+    await ContactLauncher.launchPhone(context, phone);
   }
 
   Future<void> _launchWebsite(
@@ -476,15 +441,6 @@ class _SavedCardDetailPageState extends State<SavedCardDetailPage> {
     }
   }
 
-  Future<void> _launchThirdLink() async {
-    final website = _card.website?.trim();
-    if (website == null || website.isEmpty) return;
-    final message = _thirdQuickLinkType == _ThirdQuickLinkType.github
-        ? 'GitHub açılamadı'
-        : 'Web sitesi açılamadı';
-    await _launchWebsite(website, errorMessage: message);
-  }
-
   void _showLaunchError(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(message), behavior: SnackBarBehavior.floating),
@@ -492,7 +448,7 @@ class _SavedCardDetailPageState extends State<SavedCardDetailPage> {
   }
 
   Future<void> _openNoteEditor() async {
-    var draftNote = _card.about ?? '';
+    var draftNote = _card.note ?? '';
     final note = await showModalBottomSheet<String>(
       context: context,
       isScrollControlled: true,
@@ -571,8 +527,8 @@ class _SavedCardDetailPageState extends State<SavedCardDetailPage> {
 
     if (!mounted || note == null) return;
     final updated = _card.copyWith(
-      about: note.isEmpty ? null : note,
-      clearAbout: note.isEmpty,
+      note: note.isEmpty ? null : note,
+      clearNote: note.isEmpty,
     );
     await _persistCard(updated);
     if (!mounted) return;
@@ -591,16 +547,14 @@ class _SavedCardDetailPageState extends State<SavedCardDetailPage> {
     final textTheme = theme.textTheme;
     final hasLinkedIn = _has(_card.linkedin);
     final hasEmail = _has(_card.email);
-    final thirdLinkType = _thirdQuickLinkType;
-    final showQuickActions =
-        hasLinkedIn || hasEmail || thirdLinkType != _ThirdQuickLinkType.none;
+    final hasPhone = _has(_card.phone);
+    final showQuickActions = hasLinkedIn || hasEmail || hasPhone;
     final companyName = _card.company?.trim();
-    final hasNote = _has(_card.about);
 
     final frontPhoto = _card.frontImagePath?.trim();
     final hasPhysicalPhoto = frontPhoto != null && frontPhoto.isNotEmpty;
 
-    final preview = hasPhysicalPhoto
+    final cardPreview = hasPhysicalPhoto
         ? SavedCardsPhysicalPhotoPreview(
             frontImagePath: frontPhoto,
             backImagePath: _card.backImagePath,
@@ -608,16 +562,28 @@ class _SavedCardDetailPageState extends State<SavedCardDetailPage> {
         : FlippablePersonCard(
             title: _displayName,
             titleSecondary: companyName,
+            jobTitle: _card.title?.trim(),
             photoUrl: _card.photoUrl,
-            frontEntries: _previewFrontEntries,
+            accentColor: _card.previewAccentColor,
+            backgroundColor: _card.previewBackgroundColor,
+            frontEntries: const [],
             backEntries: _previewBackEntries,
             emptyMessage: 'Kart bilgisi yok',
-            backEmptyMessage: 'Bu kişi için not bulunmuyor.',
-            backEmptyActionLabel: 'Not ekle',
-            onBackEmptyActionTap: _openNoteEditor,
-            onBackEditTap: hasNote ? _openNoteEditor : null,
+            cardId: _card.cardId,
             showAppLogo: _card.isCardenceLinked,
+            contactEmail: _card.email,
+            contactPhone: _card.phone,
+            contactWebsite: _card.website,
+            contactLinkedin: _card.linkedin,
+            visibleContactFields: _visibleContactFields,
           );
+
+    final preview = Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 420),
+        child: cardPreview,
+      ),
+    );
 
     final bottomInset = _deleteBarInset(context);
 
@@ -629,7 +595,7 @@ class _SavedCardDetailPageState extends State<SavedCardDetailPage> {
         fit: StackFit.expand,
         children: [
           ListView(
-        padding: EdgeInsets.fromLTRB(16, 12, 16, 32 + bottomInset),
+        padding: EdgeInsets.fromLTRB(20, 12, 20, 32 + bottomInset),
         children: [
           if (widget.heroTag != null)
             Hero(
@@ -645,17 +611,18 @@ class _SavedCardDetailPageState extends State<SavedCardDetailPage> {
             const SizedBox(height: 12),
             const ManualEntryDetailBanner(),
           ],
-          const SizedBox(height: 20),
-          if (showQuickActions)
-            _QuickActionsRow(
+          if (showQuickActions) ...[
+            const SizedBox(height: 20),
+            _CircularQuickActionsRow(
               hasLinkedIn: hasLinkedIn,
               hasEmail: hasEmail,
-              thirdLinkType: thirdLinkType,
+              hasPhone: hasPhone,
               onLinkedIn: _launchLinkedIn,
               onEmail: _launchEmail,
-              onThirdLink: _launchThirdLink,
+              onPhone: _launchPhone,
             ),
-          if (showQuickActions) const SizedBox(height: 20),
+          ],
+          const SizedBox(height: 24),
           _DetailSection(
             title: 'İletişim bilgileri',
             child: _contactFields.isEmpty
@@ -669,7 +636,6 @@ class _SavedCardDetailPageState extends State<SavedCardDetailPage> {
                         if (i > 0)
                           Divider(
                             height: 1,
-                            indent: 56,
                             color: colorScheme.outlineVariant
                                 .withValues(alpha: 0.5),
                           ),
@@ -684,14 +650,9 @@ class _SavedCardDetailPageState extends State<SavedCardDetailPage> {
                     ],
                   ),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 24),
           _DetailSection(
             title: 'Etkinlik grupları',
-            actionLabel:
-                _hasLinkedGroups && _canAddToMoreGroups ? 'Ekle' : null,
-            onAction: _hasLinkedGroups && _canAddToMoreGroups
-                ? _openAddToEventGroupsSheet
-                : null,
             child: AnimatedSwitcher(
               duration: const Duration(milliseconds: 220),
               switchInCurve: Curves.easeOut,
@@ -700,43 +661,25 @@ class _SavedCardDetailPageState extends State<SavedCardDetailPage> {
                   ? const _EventGroupsLoadingSkeleton(
                       key: ValueKey('event_groups_loading'),
                     )
-                  : !_hasLinkedGroups
-                      ? _DetailEmptyActionCard(
-                          key: const ValueKey('event_groups_empty'),
-                          icon: Icons.event_note_outlined,
-                          message: 'Henüz gruba eklenmedi',
-                          buttonLabel: 'Gruba ekle',
-                          onPressed: _openAddToEventGroupsSheet,
-                        )
-                      : _LinkedEventGroupsCard(
-                          key: ValueKey(
-                            'event_groups_linked_${_linkedGroups.length}',
-                          ),
-                          groups: _linkedGroups,
-                          canOpenDetail: _canOpenGroupDetail,
-                          canAddMore: _canAddToMoreGroups,
-                          onGroupTap: _openEventGroupDetail,
-                          onUnlink: _confirmUnlinkFromGroup,
-                          onAddMore: _openAddToEventGroupsSheet,
-                        ),
+                  : _EventGroupsChipRow(
+                      key: ValueKey(
+                        'event_groups_chips_${_linkedGroups.length}',
+                      ),
+                      groups: _linkedGroups,
+                      canOpenDetail: _canOpenGroupDetail,
+                      canAddMore: _canAddToMoreGroups || !_hasLinkedGroups,
+                      onGroupTap: _openEventGroupDetail,
+                      onAdd: _openAddToEventGroupsSheet,
+                    ),
             ),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 24),
           _DetailSection(
             title: 'Notlar',
-            actionLabel: hasNote ? 'Düzenle' : null,
-            onAction: hasNote ? _openNoteEditor : null,
-            child: hasNote
-                ? _NoteFilledCard(
-                    note: _card.about!.trim(),
-                    onTap: _openNoteEditor,
-                  )
-                : _DetailEmptyActionCard(
-                    icon: Icons.note_add_outlined,
-                    message: 'Henüz not eklenmedi',
-                    buttonLabel: 'Not ekle',
-                    onPressed: _openNoteEditor,
-                  ),
+            child: _NotesContainer(
+              note: _card.note,
+              onAddOrEdit: _openNoteEditor,
+            ),
           ),
           const SizedBox(height: 12),
           Center(
@@ -768,14 +711,18 @@ class _ContactFieldData {
     required this.label,
     required this.value,
     required this.icon,
+    this.trailing = _ContactTrailingAction.copy,
     this.onTap,
   });
 
   final String label;
   final String value;
   final IconData icon;
+  final _ContactTrailingAction trailing;
   final VoidCallback? onTap;
 }
+
+enum _ContactTrailingAction { copy, openLink }
 
 class _DetailSection extends StatelessWidget {
   const _DetailSection({
@@ -804,11 +751,11 @@ class _DetailSection extends StatelessWidget {
             children: [
               Expanded(
                 child: Text(
-                  title,
-                  style: textTheme.titleSmall?.copyWith(
+                  title.toUpperCase(),
+                  style: textTheme.labelSmall?.copyWith(
                     fontWeight: FontWeight.w700,
-                    letterSpacing: -0.2,
-                    color: colorScheme.onSurface,
+                    letterSpacing: 1.1,
+                    color: colorScheme.onSurfaceVariant,
                   ),
                 ),
               ),
@@ -863,147 +810,97 @@ class _GroupedInfoCard extends StatelessWidget {
   }
 }
 
-enum _ThirdQuickLinkType { none, github, website }
-
-class _QuickActionsRow extends StatelessWidget {
-  const _QuickActionsRow({
+class _CircularQuickActionsRow extends StatelessWidget {
+  const _CircularQuickActionsRow({
     required this.hasLinkedIn,
     required this.hasEmail,
-    required this.thirdLinkType,
+    required this.hasPhone,
     required this.onLinkedIn,
     required this.onEmail,
-    required this.onThirdLink,
+    required this.onPhone,
   });
 
   final bool hasLinkedIn;
   final bool hasEmail;
-  final _ThirdQuickLinkType thirdLinkType;
+  final bool hasPhone;
   final VoidCallback onLinkedIn;
   final VoidCallback onEmail;
-  final VoidCallback onThirdLink;
+  final VoidCallback onPhone;
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final actions = <Widget>[];
+    final buttons = <Widget>[];
 
-    void addAction(Widget action) {
-      if (actions.isNotEmpty) {
-        actions.add(
-          Container(
-            width: 1,
-            height: 40,
-            color: colorScheme.outlineVariant.withValues(alpha: 0.5),
-          ),
-        );
-      }
-      actions.add(action);
+    void addButton(Widget button) {
+      if (buttons.isNotEmpty) buttons.add(const SizedBox(width: 20));
+      buttons.add(button);
     }
 
     if (hasLinkedIn) {
-      addAction(
-        _QuickActionButton(
-          icon: Icons.business_center_outlined,
-          label: 'LinkedIn',
-          color: AppColors.primary,
+      addButton(
+        _CircularQuickActionButton(
+          icon: Icons.link_rounded,
           onTap: onLinkedIn,
         ),
       );
     }
     if (hasEmail) {
-      addAction(
-        _QuickActionButton(
-          icon: Icons.mail_rounded,
-          label: 'E-posta',
-          color: AppColors.info,
+      addButton(
+        _CircularQuickActionButton(
+          icon: Icons.mail_outline_rounded,
           onTap: onEmail,
         ),
       );
     }
-    if (thirdLinkType == _ThirdQuickLinkType.github) {
-      addAction(
-        _QuickActionButton(
-          icon: Icons.code_rounded,
-          label: 'GitHub',
-          color: AppColors.secondary,
-          onTap: onThirdLink,
-        ),
-      );
-    } else if (thirdLinkType == _ThirdQuickLinkType.website) {
-      addAction(
-        _QuickActionButton(
-          icon: Icons.language_rounded,
-          label: 'Web sitesi',
-          color: AppColors.success,
-          onTap: onThirdLink,
+    if (hasPhone) {
+      addButton(
+        _CircularQuickActionButton(
+          icon: Icons.phone_outlined,
+          onTap: onPhone,
         ),
       );
     }
 
-    if (actions.isEmpty) return const SizedBox.shrink();
+    if (buttons.isEmpty) return const SizedBox.shrink();
 
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: colorScheme.surface,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: colorScheme.outlineVariant.withValues(alpha: 0.45),
-        ),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: actions,
-        ),
-      ),
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: buttons,
     );
   }
 }
 
-class _QuickActionButton extends StatelessWidget {
-  const _QuickActionButton({
+class _CircularQuickActionButton extends StatelessWidget {
+  const _CircularQuickActionButton({
     required this.icon,
-    required this.label,
-    required this.color,
     required this.onTap,
   });
 
   final IconData icon;
-  final String label;
-  final Color color;
   final VoidCallback onTap;
+
+  static const double _size = 56;
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
 
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 52,
-              height: 52,
-              decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.12),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(icon, color: color, size: 26),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              label,
-              style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: colorScheme.onSurface,
-                  ),
-            ),
-          ],
+    return Material(
+      color: colorScheme.surface,
+      elevation: 2,
+      shadowColor: colorScheme.shadow.withValues(alpha: 0.12),
+      shape: const CircleBorder(),
+      child: InkWell(
+        customBorder: const CircleBorder(),
+        onTap: onTap,
+        child: SizedBox(
+          width: _size,
+          height: _size,
+          child: Icon(
+            icon,
+            size: 24,
+            color: colorScheme.onSurfaceVariant,
+          ),
         ),
       ),
     );
@@ -1024,28 +921,30 @@ class _ContactFieldRow extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final canOpen = field.onTap != null;
+    final trailingIcon = field.trailing == _ContactTrailingAction.openLink
+        ? Icons.open_in_new_rounded
+        : Icons.copy_all_rounded;
 
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        onTap: field.onTap ?? onCopy,
-        onLongPress: field.onTap != null ? onCopy : null,
+        onTap: field.onTap,
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(14, 12, 8, 12),
+          padding: const EdgeInsets.fromLTRB(14, 14, 10, 14),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
-                width: 40,
-                height: 40,
+                width: 36,
+                height: 36,
                 decoration: BoxDecoration(
-                  color: colorScheme.primaryContainer.withValues(alpha: 0.55),
-                  borderRadius: BorderRadius.circular(10),
+                  color: colorScheme.surfaceContainerHighest,
+                  shape: BoxShape.circle,
                 ),
                 child: Icon(
                   field.icon,
-                  size: 20,
-                  color: colorScheme.primary,
+                  size: 18,
+                  color: colorScheme.onSurfaceVariant,
                 ),
               ),
               const SizedBox(width: 12),
@@ -1063,29 +962,20 @@ class _ContactFieldRow extends StatelessWidget {
                     const SizedBox(height: 2),
                     Text(
                       field.value,
-                      style: textTheme.bodyLarge?.copyWith(
-                        fontWeight: FontWeight.w500,
+                      style: textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
                         height: 1.3,
                       ),
                     ),
-                    if (canOpen) ...[
-                      const SizedBox(height: 4),
-                      Text(
-                        'Açmak için dokunun',
-                        style: textTheme.labelSmall?.copyWith(
-                          color: colorScheme.primary,
-                        ),
-                      ),
-                    ],
                   ],
                 ),
               ),
               IconButton(
-                tooltip: 'Kopyala',
+                tooltip: canOpen ? 'Aç' : 'Kopyala',
                 visualDensity: VisualDensity.compact,
-                onPressed: onCopy,
+                onPressed: canOpen ? field.onTap : onCopy,
                 icon: Icon(
-                  Icons.copy_all_rounded,
+                  trailingIcon,
                   size: 20,
                   color: colorScheme.onSurfaceVariant,
                 ),
@@ -1098,48 +988,59 @@ class _ContactFieldRow extends StatelessWidget {
   }
 }
 
-class _NoteFilledCard extends StatelessWidget {
-  const _NoteFilledCard({
+class _NotesContainer extends StatelessWidget {
+  const _NotesContainer({
     required this.note,
-    required this.onTap,
+    required this.onAddOrEdit,
   });
 
-  final String note;
-  final VoidCallback onTap;
+  final String? note;
+  final VoidCallback onAddOrEdit;
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final trimmed = note?.trim();
+    final hasNote = trimmed != null && trimmed.isNotEmpty;
 
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
-        child: Ink(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                colorScheme.primaryContainer.withValues(alpha: 0.35),
-                colorScheme.surface,
-              ],
-            ),
-            border: Border.all(
-              color: colorScheme.primary.withValues(alpha: 0.25),
-            ),
-          ),
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.45),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: colorScheme.outlineVariant.withValues(alpha: 0.55),
+        ),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: hasNote ? onAddOrEdit : null,
+          borderRadius: BorderRadius.circular(14),
           child: Padding(
             padding: const EdgeInsets.all(16),
-            child: Text(
-              note,
-              style: textTheme.bodyLarge?.copyWith(
-                height: 1.45,
-              ),
-            ),
+            child: hasNote
+                ? Text(
+                    '"$trimmed"',
+                    style: textTheme.bodyMedium?.copyWith(
+                      height: 1.45,
+                      fontStyle: FontStyle.italic,
+                      color: colorScheme.onSurface.withValues(alpha: 0.88),
+                    ),
+                  )
+                : Center(
+                    child: CustomButton.tonal(
+                      label: 'Not ekle',
+                      icon: Icons.add_rounded,
+                      onPressed: onAddOrEdit,
+                      fullWidth: false,
+                      style: FilledButton.styleFrom(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                    ),
+                  ),
           ),
         ),
       ),
@@ -1147,72 +1048,68 @@ class _NoteFilledCard extends StatelessWidget {
   }
 }
 
-/// Boş not / etkinlik grubu gibi bölümlerde ortak kesik çizgili kart + tam genişlik CTA.
-class _DetailEmptyActionCard extends StatelessWidget {
-  const _DetailEmptyActionCard({
+class _EventGroupsChipRow extends StatelessWidget {
+  const _EventGroupsChipRow({
     super.key,
-    required this.icon,
-    required this.message,
-    required this.buttonLabel,
-    required this.onPressed,
+    required this.groups,
+    required this.canOpenDetail,
+    required this.canAddMore,
+    required this.onGroupTap,
+    required this.onAdd,
   });
 
-  final IconData icon;
-  final String message;
-  final String buttonLabel;
-  final VoidCallback onPressed;
+  final List<EventGroup> groups;
+  final bool canOpenDetail;
+  final bool canAddMore;
+  final void Function(EventGroup group) onGroupTap;
+  final VoidCallback onAdd;
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onPressed,
-        borderRadius: BorderRadius.circular(16),
-        child: CustomPaint(
-          painter: _DashedBorderPainter(
-            color: colorScheme.outlineVariant,
-            radius: 16,
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Center(
-                  child: Icon(
-                    icon,
-                    size: 36,
-                    color: colorScheme.primary.withValues(alpha: 0.8),
-                  ),
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  message,
-                  textAlign: TextAlign.center,
-                  style: textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                CustomButton.tonal(
-                  label: buttonLabel,
-                  icon: Icons.add_rounded,
-                  onPressed: onPressed,
-                  style: FilledButton.styleFrom(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                ),
-              ],
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: [
+        for (final group in groups)
+          ActionChip(
+            label: Text(group.name),
+            onPressed: canOpenDetail ? () => onGroupTap(group) : null,
+            backgroundColor: colorScheme.surfaceContainerHighest,
+            labelStyle: textTheme.labelLarge?.copyWith(
+              fontWeight: FontWeight.w600,
+              color: colorScheme.onSurface,
+            ),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+              side: BorderSide(
+                color: colorScheme.outlineVariant.withValues(alpha: 0.5),
+              ),
             ),
           ),
-        ),
-      ),
+        if (canAddMore)
+          ActionChip(
+            avatar: Icon(
+              Icons.add_rounded,
+              size: 18,
+              color: colorScheme.primary,
+            ),
+            label: Text(
+              'Gruba ekle',
+              style: TextStyle(color: colorScheme.primary),
+            ),
+            onPressed: onAdd,
+            backgroundColor: colorScheme.primaryContainer.withValues(alpha: 0.35),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+              side: BorderSide(
+                color: colorScheme.primary.withValues(alpha: 0.25),
+              ),
+            ),
+          ),
+      ],
     );
   }
 }
@@ -1271,210 +1168,6 @@ class _SkeletonBar extends StatelessWidget {
   }
 }
 
-class _LinkedEventGroupsCard extends StatelessWidget {
-  const _LinkedEventGroupsCard({
-    super.key,
-    required this.groups,
-    required this.canOpenDetail,
-    required this.canAddMore,
-    required this.onGroupTap,
-    required this.onUnlink,
-    required this.onAddMore,
-  });
-
-  final List<EventGroup> groups;
-  final bool canOpenDetail;
-  final bool canAddMore;
-  final void Function(EventGroup group) onGroupTap;
-  final void Function(EventGroup group) onUnlink;
-  final VoidCallback onAddMore;
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
-
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: colorScheme.surface,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: colorScheme.outlineVariant.withValues(alpha: 0.45),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: colorScheme.shadow.withValues(alpha: 0.04),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 14, 16, 4),
-              child: Text(
-                groups.length == 1
-                    ? '1 etkinlik grubunda'
-                    : '${groups.length} etkinlik grubunda',
-                style: textTheme.labelMedium?.copyWith(
-                  color: colorScheme.onSurfaceVariant,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ),
-            for (var i = 0; i < groups.length; i++) ...[
-              if (i > 0)
-                Divider(
-                  height: 1,
-                  indent: 68,
-                  endIndent: 16,
-                  color: colorScheme.outlineVariant.withValues(alpha: 0.5),
-                ),
-              _LinkedEventGroupTile(
-                group: groups[i],
-                tappable: canOpenDetail,
-                onTap: () => onGroupTap(groups[i]),
-                onUnlink: () => onUnlink(groups[i]),
-              ),
-            ],
-            if (canAddMore) ...[
-              Divider(
-                height: 1,
-                color: colorScheme.outlineVariant.withValues(alpha: 0.5),
-              ),
-              Material(
-                color: Colors.transparent,
-                child: InkWell(
-                  onTap: onAddMore,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 14,
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.add_rounded,
-                          size: 20,
-                          color: colorScheme.primary,
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          'Başka gruba ekle',
-                          style: textTheme.labelLarge?.copyWith(
-                            color: colorScheme.primary,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _LinkedEventGroupTile extends StatelessWidget {
-  const _LinkedEventGroupTile({
-    required this.group,
-    required this.tappable,
-    required this.onTap,
-    required this.onUnlink,
-  });
-
-  final EventGroup group;
-  final bool tappable;
-  final VoidCallback onTap;
-  final VoidCallback onUnlink;
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
-
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: tappable ? onTap : null,
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(14, 10, 8, 10),
-          child: Row(
-            children: [
-              Container(
-                width: 44,
-                height: 44,
-                decoration: BoxDecoration(
-                  color: AppColors.primary.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: const Icon(
-                  Icons.event_rounded,
-                  color: AppColors.primary,
-                  size: 22,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      group.name,
-                      style: textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      tappable
-                          ? 'Grubu ve kartları görüntüle'
-                          : 'Etkinlik grubu',
-                      style: textTheme.bodySmall?.copyWith(
-                        color: colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              IconButton(
-                tooltip: 'Gruptan çıkar',
-                onPressed: onUnlink,
-                icon: Icon(
-                  Icons.close_rounded,
-                  size: 20,
-                  color: colorScheme.onSurfaceVariant.withValues(alpha: 0.85),
-                ),
-                style: IconButton.styleFrom(
-                  minimumSize: const Size(40, 40),
-                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                ),
-              ),
-              if (tappable)
-                Icon(
-                  Icons.chevron_right_rounded,
-                  color: colorScheme.onSurfaceVariant,
-                  size: 24,
-                ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 class _EmptyStateCard extends StatelessWidget {
   const _EmptyStateCard({
     required this.icon,
@@ -1513,45 +1206,4 @@ class _EmptyStateCard extends StatelessWidget {
       ],
     );
   }
-}
-
-class _DashedBorderPainter extends CustomPainter {
-  _DashedBorderPainter({required this.color, required this.radius});
-
-  final Color color;
-  final double radius;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = color
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.5;
-
-    final path = Path()
-      ..addRRect(
-        RRect.fromRectAndRadius(
-          Rect.fromLTWH(1, 1, size.width - 2, size.height - 2),
-          Radius.circular(radius),
-        ),
-      );
-
-    const dashWidth = 6.0;
-    const dashSpace = 4.0;
-    for (final metric in path.computeMetrics()) {
-      var distance = 0.0;
-      while (distance < metric.length) {
-        final next = distance + dashWidth;
-        canvas.drawPath(
-          metric.extractPath(distance, next.clamp(0.0, metric.length)),
-          paint,
-        );
-        distance = next + dashSpace;
-      }
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant _DashedBorderPainter oldDelegate) =>
-      oldDelegate.color != color;
 }
