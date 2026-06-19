@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
 
+import '../../../../core/media/profile_photo_image_picker.dart';
+import '../../../../core/permissions/media_permission_datasource.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/atoms/profile_avatar.dart';
 import '../../../auth/domain/usecases/upload_profile_photo.dart';
@@ -25,8 +26,11 @@ class OnboardingPhotoPicker extends StatefulWidget {
 }
 
 class _OnboardingPhotoPickerState extends State<OnboardingPhotoPicker> {
+  final _photoPicker = ProfilePhotoImagePicker();
+  static const _mediaPermission = MediaPermissionDataSource();
+
   String? _photoUrl;
-  bool _uploading = false;
+  bool _busy = false;
 
   @override
   void initState() {
@@ -42,38 +46,43 @@ class _OnboardingPhotoPickerState extends State<OnboardingPhotoPicker> {
     }
   }
 
+  void _showError(String message, {bool openSettings = false}) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Text(message),
+          behavior: SnackBarBehavior.floating,
+          action: openSettings
+              ? SnackBarAction(
+                  label: 'Ayarlar',
+                  onPressed: _mediaPermission.openSettings,
+                )
+              : null,
+        ),
+      );
+  }
+
   Future<void> _pickAndUploadPhoto() async {
-    if (_uploading) return;
+    if (_busy) return;
 
-    final picker = ImagePicker();
-    final image = await picker.pickImage(
-      source: ImageSource.gallery,
-      maxWidth: 1024,
-      maxHeight: 1024,
-      imageQuality: 85,
-    );
-    if (image == null || !mounted) return;
-
-    setState(() => _uploading = true);
+    setState(() => _busy = true);
     try {
-      final profile = await widget.uploadProfilePhoto(image.path);
+      final path = await _photoPicker.pickImagePath(
+        context,
+        onError: _showError,
+      );
+      if (path == null || !mounted) return;
+
+      final profile = await widget.uploadProfilePhoto(path);
       if (!mounted) return;
       setState(() => _photoUrl = profile.photoUrl);
       widget.onPhotoUrlChanged(profile.photoUrl);
     } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context)
-        ..hideCurrentSnackBar()
-        ..showSnackBar(
-          SnackBar(
-            content: Text(
-              e.toString().replaceFirst('AuthApiException: ', ''),
-            ),
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
+      _showError(e.toString().replaceFirst('AuthApiException: ', ''));
     } finally {
-      if (mounted) setState(() => _uploading = false);
+      if (mounted) setState(() => _busy = false);
     }
   }
 
@@ -91,10 +100,10 @@ class _OnboardingPhotoPickerState extends State<OnboardingPhotoPicker> {
               photoUrl: _photoUrl,
               displayName: widget.displayName,
               size: 72,
-              onTap: _uploading ? null : _pickAndUploadPhoto,
-              showEditBadge: !_uploading,
+              onTap: _busy ? null : _pickAndUploadPhoto,
+              showEditBadge: !_busy,
             ),
-            if (_uploading)
+            if (_busy)
               Container(
                 width: 72,
                 height: 72,
@@ -119,7 +128,7 @@ class _OnboardingPhotoPickerState extends State<OnboardingPhotoPicker> {
         ),
         const SizedBox(height: 2),
         Text(
-          'Kartınızda görünür',
+          'Kamera veya galeriden ekleyin',
           style: textTheme.labelSmall?.copyWith(
             color: AppColors.primary,
             fontWeight: FontWeight.w600,

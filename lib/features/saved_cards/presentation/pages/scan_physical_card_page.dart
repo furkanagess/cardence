@@ -10,7 +10,6 @@ import '../../domain/usecases/add_saved_card.dart';
 import '../cubit/scan_physical_card_cubit.dart';
 import '../cubit/scan_physical_card_state.dart';
 import '../widgets/add_card_ui_helpers.dart';
-import '../widgets/camera_permission_dialog.dart';
 import 'add_manual_card_page.dart';
 
 /// Fiziksel kartvizitin ön yüzünü (zorunlu) ve arka yüzünü (opsiyonel) çekerek
@@ -74,14 +73,6 @@ class _ScanPhysicalCardViewState extends State<_ScanPhysicalCardView>
     Future<void> Function() capture,
   ) async {
     if (!state.canCapture) return;
-
-    if (state.cameraPermission != ScanCameraPermissionStatus.granted &&
-        state.cameraPermission !=
-            ScanCameraPermissionStatus.permanentlyDenied) {
-      final confirmed = await showCameraPermissionDialog(context);
-      if (!confirmed || !mounted) return;
-    }
-
     await capture();
   }
 

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
 
+import '../../../../core/media/profile_photo_image_picker.dart';
+import '../../../../core/permissions/media_permission_datasource.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/atoms/profile_avatar.dart';
 import '../../../auth/domain/usecases/upload_profile_photo.dart';
@@ -27,8 +28,11 @@ class SettingsProfileHeader extends StatefulWidget {
 }
 
 class _SettingsProfileHeaderState extends State<SettingsProfileHeader> {
+  final _photoPicker = ProfilePhotoImagePicker();
+  static const _mediaPermission = MediaPermissionDataSource();
+
   String? _photoUrl;
-  bool _uploading = false;
+  bool _busy = false;
 
   @override
   void initState() {
@@ -44,21 +48,36 @@ class _SettingsProfileHeaderState extends State<SettingsProfileHeader> {
     }
   }
 
+  void _showError(String message, {bool openSettings = false}) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Text(message),
+          behavior: SnackBarBehavior.floating,
+          action: openSettings
+              ? SnackBarAction(
+                  label: 'Ayarlar',
+                  onPressed: _mediaPermission.openSettings,
+                )
+              : null,
+        ),
+      );
+  }
+
   Future<void> _pickAndUploadPhoto() async {
-    if (_uploading) return;
+    if (_busy) return;
 
-    final picker = ImagePicker();
-    final image = await picker.pickImage(
-      source: ImageSource.gallery,
-      maxWidth: 1024,
-      maxHeight: 1024,
-      imageQuality: 85,
-    );
-    if (image == null || !mounted) return;
-
-    setState(() => _uploading = true);
+    setState(() => _busy = true);
     try {
-      final profile = await widget.uploadProfilePhoto(image.path);
+      final path = await _photoPicker.pickImagePath(
+        context,
+        onError: _showError,
+      );
+      if (path == null || !mounted) return;
+
+      final profile = await widget.uploadProfilePhoto(path);
       if (!mounted) return;
       setState(() => _photoUrl = profile.photoUrl);
       widget.onPhotoUpdated?.call(profile.photoUrl);
@@ -71,19 +90,9 @@ class _SettingsProfileHeaderState extends State<SettingsProfileHeader> {
           ),
         );
     } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context)
-        ..hideCurrentSnackBar()
-        ..showSnackBar(
-          SnackBar(
-            content: Text(
-              e.toString().replaceFirst('AuthApiException: ', ''),
-            ),
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
+      _showError(e.toString().replaceFirst('AuthApiException: ', ''));
     } finally {
-      if (mounted) setState(() => _uploading = false);
+      if (mounted) setState(() => _busy = false);
     }
   }
 
@@ -113,10 +122,10 @@ class _SettingsProfileHeaderState extends State<SettingsProfileHeader> {
                   displayName: widget.displayName,
                   size: 96,
                   circular: true,
-                  onTap: _uploading ? null : _pickAndUploadPhoto,
-                  showEditBadge: !_uploading,
+                  onTap: _busy ? null : _pickAndUploadPhoto,
+                  showEditBadge: !_busy,
                 ),
-                if (_uploading)
+                if (_busy)
                   Container(
                     width: 96,
                     height: 96,

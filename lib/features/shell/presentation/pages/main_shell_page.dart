@@ -87,7 +87,7 @@ class MainShellPage extends StatefulWidget {
 class _MainShellPageState extends State<MainShellPage> {
   int _currentIndex = 0;
   OnboardingCardDraft? _myCardDraft;
-  bool _showSavedCardsFlippableView = false;
+  bool _savedCardsPreferListView = true;
   int _savedCardsFilterTrigger = 0;
   int _savedCardsAddCardTrigger = 0;
   int _eventGroupsCreateTrigger = 0;
@@ -166,9 +166,9 @@ class _MainShellPageState extends State<MainShellPage> {
               deleteSavedCard: widget.deleteSavedCard,
               addSavedCard: widget.addSavedCard,
               upgradeWalletPlan: widget.upgradeWalletPlan,
-              showFlippableView: _showSavedCardsFlippableView,
+              showFlippableView: !_savedCardsPreferListView,
               onViewModeChanged: (flippable) =>
-                  setState(() => _showSavedCardsFlippableView = flippable),
+                  setState(() => _savedCardsPreferListView = !flippable),
               filterTrigger: _savedCardsFilterTrigger,
               addCardTrigger: _savedCardsAddCardTrigger,
             ),

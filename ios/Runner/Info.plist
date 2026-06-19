@@ -17,11 +17,11 @@
 		<key>CFBundlePackageType</key>
 		<string>APPL</string>
 		<key>CFBundleShortVersionString</key>
-		<string>$(FLUTTER_BUILD_NAME)</string>
+		<string>1.0.0</string>
 		<key>CFBundleSignature</key>
 		<string>????</string>
 		<key>CFBundleVersion</key>
-		<string>$(FLUTTER_BUILD_NUMBER)</string>
+		<string>3</string>
 		<key>LSRequiresIPhoneOS</key>
 		<true/>
 		<key>UILaunchStoryboardName</key>
@@ -46,9 +46,9 @@
 		<key>UIApplicationSupportsIndirectInputEvents</key>
 		<true/>
 		<key>NSCameraUsageDescription</key>
-		<string>Fiziksel kartvizit fotoğrafı çekmek için kamera kullanılır.</string>
+		<string>Profil fotoğrafı ve kartvizit çekimi için kamera kullanılır.</string>
 		<key>NSPhotoLibraryUsageDescription</key>
-		<string>Kartvizit fotoğrafı seçmek için galeri erişimi gerekir.</string>
+		<string>Profil fotoğrafı ve kartvizit görseli seçmek için galeri erişimi gerekir.</string>
 		<key>UIStatusBarHidden</key>
 		<false/>
 		<key>NSAppTransportSecurity</key>

@@ -104,22 +104,22 @@ class _SavedCardsScreenToolbarState extends State<SavedCardsScreenToolbar> {
                       onChanged: widget.onSearchQueryChanged,
                       onSubmitted: widget.onSearchQueryChanged,
                     )
-                  : SegmentedButton<bool>(
+                  : SegmentedButton<int>(
                       segments: const [
                         ButtonSegment(
-                          value: true,
+                          value: 0,
                           label: Text('Kart'),
                           icon: Icon(Icons.style_rounded, size: 18),
                         ),
                         ButtonSegment(
-                          value: false,
+                          value: 1,
                           label: Text('Liste'),
                           icon: Icon(Icons.view_list_rounded, size: 18),
                         ),
                       ],
-                      selected: {widget.showFlippableView},
+                      selected: {widget.showFlippableView ? 0 : 1},
                       onSelectionChanged: (set) =>
-                          widget.onViewModeChanged(set.first),
+                          widget.onViewModeChanged(set.first == 0),
                       style: ButtonStyle(
                         visualDensity: VisualDensity.compact,
                         tapTargetSize: MaterialTapTargetSize.shrinkWrap,

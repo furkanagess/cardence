@@ -10,7 +10,6 @@ import '../../../onboarding/presentation/widgets/onboarding_card_preview_frame.d
 import '../../../business_cards/domain/usecases/persist_onboarding_card.dart';
 import '../../domain/entities/profile_stats.dart';
 import '../../domain/usecases/get_profile_stats.dart';
-import '../widgets/profile_my_cards_list.dart';
 import '../widgets/profile_interaction_stats.dart';
 
 const double _profileCarouselViewportFraction = 0.88;
@@ -98,11 +97,6 @@ class _ProfilePageState extends State<ProfilePage> {
     }
   }
 
-  OnboardingCardDraft? get _selectedCard {
-    if (_cards.isEmpty) return null;
-    return _cards[_selectedIndex.clamp(0, _cards.length - 1)];
-  }
-
   Future<void> _openCardEditor(OnboardingCardDraft card, {bool isNew = false}) async {
     final result = await Navigator.of(context).push<OnboardingCardDraft>(
       MaterialPageRoute(
@@ -129,18 +123,6 @@ class _ProfilePageState extends State<ProfilePage> {
           );
         }
       }
-    }
-  }
-
-  Future<void> _selectCardIndex(int index) async {
-    if (index < 0 || index >= _cards.length) return;
-    setState(() => _selectedIndex = index);
-    if (_pageController.hasClients && _cards.length > 1) {
-      await _pageController.animateToPage(
-        index,
-        duration: const Duration(milliseconds: 280),
-        curve: Curves.easeOutCubic,
-      );
     }
   }
 
@@ -172,12 +154,13 @@ class _ProfilePageState extends State<ProfilePage> {
 
     final stats = _stats ??
         const ProfileStats(totalWalletSaveCount: 0, eventGroupCount: 0);
+    final bottomInset = MediaQuery.paddingOf(context).bottom + 96;
 
     return RefreshIndicator(
       onRefresh: _loadPageData,
       child: ListView(
         physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsets.fromLTRB(0, 8, 0, 32),
+        padding: EdgeInsets.fromLTRB(0, 8, 0, 32 + bottomInset),
         children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
@@ -204,17 +187,6 @@ class _ProfilePageState extends State<ProfilePage> {
               selectedIndex: _selectedIndex,
               onPageChanged: (index) => setState(() => _selectedIndex = index),
               onCardTap: _openCardEditor,
-            ),
-            _ProfileCarouselFooter(
-              card: _selectedCard!,
-              cardCount: _cards.length,
-              selectedIndex: _selectedIndex,
-              onEdit: () => _openCardEditor(_selectedCard!),
-            ),
-            ProfileMyCardsList(
-              cards: _cards,
-              selectedIndex: _selectedIndex,
-              onCardSelected: _selectCardIndex,
             ),
           ],
           Padding(
@@ -400,92 +372,6 @@ class _ProfileCardsCarousel extends StatelessWidget {
           ),
         );
       },
-    );
-  }
-}
-
-class _ProfileCarouselFooter extends StatelessWidget {
-  const _ProfileCarouselFooter({
-    required this.card,
-    required this.cardCount,
-    required this.selectedIndex,
-    required this.onEdit,
-  });
-
-  final OnboardingCardDraft card;
-  final int cardCount;
-  final int selectedIndex;
-  final VoidCallback onEdit;
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: Column(
-        children: [
-          if (cardCount > 1) ...[
-            const SizedBox(height: 12),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: List.generate(cardCount, (index) {
-                final isActive = index == selectedIndex;
-                return AnimatedContainer(
-                  duration: const Duration(milliseconds: 220),
-                  curve: Curves.easeOutCubic,
-                  margin: const EdgeInsets.symmetric(horizontal: 4),
-                  width: isActive ? 20 : 8,
-                  height: 8,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(4),
-                    color: isActive
-                        ? colorScheme.primary
-                        : colorScheme.outlineVariant,
-                  ),
-                );
-              }),
-            ),
-          ],
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      card.listTitle,
-                      style: textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    if (card.listSubtitle != null) ...[
-                      const SizedBox(height: 2),
-                      Text(
-                        card.listSubtitle!,
-                        style: textTheme.bodySmall?.copyWith(
-                          color: colorScheme.onSurfaceVariant,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-              TextButton.icon(
-                onPressed: onEdit,
-                icon: const Icon(Icons.edit_outlined, size: 18),
-                label: const Text('Düzenle'),
-              ),
-            ],
-          ),
-        ],
-      ),
     );
   }
 }
