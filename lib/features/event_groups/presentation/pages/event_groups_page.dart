@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../core/network/auth_api_exception.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../saved_cards/presentation/cubit/saved_cards_cubit.dart';
 import '../../../saved_cards/presentation/cubit/saved_cards_state.dart';
 import '../../../saved_cards/presentation/saved_cards_catalog.dart';
+import '../../../saved_cards/presentation/wallet_paywall_flow.dart';
+import '../../../subscriptions/domain/usecases/restore_wallet_purchases.dart';
 import '../../domain/entities/event_group.dart';
 import '../widgets/create_event_group_sheet.dart';
 import '../../domain/usecases/get_event_groups.dart';
@@ -27,6 +30,7 @@ class EventGroupsPage extends StatefulWidget {
     required this.getSavedCards,
     required this.saveSavedCard,
     required this.deleteSavedCard,
+    required this.restoreWalletPurchases,
     this.createGroupTrigger = 0,
   });
 
@@ -37,6 +41,7 @@ class EventGroupsPage extends StatefulWidget {
   final GetSavedCards getSavedCards;
   final SaveSavedCard saveSavedCard;
   final DeleteSavedCard deleteSavedCard;
+  final RestoreWalletPurchases restoreWalletPurchases;
   final int createGroupTrigger;
 
   @override
@@ -70,6 +75,16 @@ class _EventGroupsPageState extends State<EventGroupsPage> {
   }
 
   Future<void> _createNewEventGroup() async {
+    final savedCardsCubit = context.read<SavedCardsCubit>();
+    final quota = savedCardsCubit.state.quota;
+    if (quota != null && !quota.canAddEventGroup) {
+      await WalletPaywallFlow.show(
+        context,
+        cubit: savedCardsCubit,
+      );
+      return;
+    }
+
     final result = await CreateEventGroupSheet.show(
       context,
       existingNames: _groups.map((g) => g.name).toList(),
@@ -77,8 +92,26 @@ class _EventGroupsPageState extends State<EventGroupsPage> {
     );
     if (!mounted || result == null) return;
 
-    final savedCardsCubit = context.read<SavedCardsCubit>();
-    final newGroup = await widget.createEventGroup(result.name);
+    EventGroup newGroup;
+    try {
+      newGroup = await widget.createEventGroup(result.name);
+    } on AuthApiException catch (e) {
+      if (!mounted) return;
+      if (e.errorCode == 'PREMIUM_REQUIRED') {
+        await WalletPaywallFlow.show(
+          context,
+          cubit: savedCardsCubit,
+        );
+        return;
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(e.message),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
 
     if (result.selectedCardIds.isNotEmpty) {
       final allCards = SavedCardsCatalog.displayCards(

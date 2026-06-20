@@ -77,4 +77,13 @@ public sealed class SavedCardsController : ControllerBase
         var quota = await _savedCardService.GetWalletQuotaAsync(cancellationToken);
         return Ok(ApiResponse<WalletQuotaDto>.Ok(quota, HttpContext.TraceIdentifier));
     }
+
+    [HttpPost("UpgradeWalletPlan")]
+    [ProducesResponseType(typeof(ApiResponse<WalletQuotaDto>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<ApiResponse<WalletQuotaDto>>> UpgradeWalletPlan(
+        CancellationToken cancellationToken)
+    {
+        var quota = await _savedCardService.UpgradeWalletPlanAsync(cancellationToken);
+        return Ok(ApiResponse<WalletQuotaDto>.Ok(quota, HttpContext.TraceIdentifier));
+    }
 }

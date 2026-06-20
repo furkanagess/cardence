@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
 
+import '../../../../core/utils/intl_phone_field_helpers.dart';
 import '../../../../core/validation/app_validators.dart';
 import '../../../../core/widgets/atoms/custom_button.dart';
 import '../../../../core/widgets/atoms/custom_text_field.dart';
+import '../../../onboarding/presentation/onboarding_name_helper.dart';
+import '../../../onboarding/presentation/onboarding_validation.dart';
 import '../../../onboarding/presentation/widgets/onboarding_step_shell.dart';
 import 'auth_password_field.dart';
 
@@ -12,9 +15,13 @@ class RegisterForm extends StatefulWidget {
     super.key,
     required this.isLoading,
     required this.onSubmit,
+    this.initialEmail,
+    this.initialPhone,
   });
 
   final bool isLoading;
+  final String? initialEmail;
+  final String? initialPhone;
   final void Function({
     required String displayName,
     required String email,
@@ -27,36 +34,69 @@ class RegisterForm extends StatefulWidget {
 }
 
 class _RegisterFormState extends State<RegisterForm> {
-  final _displayNameController = TextEditingController();
+  final _firstNameController = TextEditingController();
+  final _lastNameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   String _phoneNumber = '';
-  String? _displayNameError;
+  String? _firstNameError;
+  String? _lastNameError;
   String? _emailError;
   String? _phoneError;
   String? _passwordError;
 
   @override
+  void initState() {
+    super.initState();
+    final email = widget.initialEmail?.trim();
+    if (email != null && email.isNotEmpty) {
+      _emailController.text = email;
+    }
+    final phone = widget.initialPhone?.trim();
+    if (phone != null && phone.isNotEmpty) {
+      _phoneNumber = phone;
+    }
+  }
+
+  @override
+  void didUpdateWidget(RegisterForm oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final email = widget.initialEmail?.trim();
+    if (email != null &&
+        email.isNotEmpty &&
+        email != _emailController.text.trim()) {
+      _emailController.text = email;
+    }
+    final phone = widget.initialPhone?.trim();
+    if (phone != null &&
+        phone.isNotEmpty &&
+        phone != _phoneNumber.trim()) {
+      setState(() => _phoneNumber = phone);
+    }
+  }
+
+  @override
   void dispose() {
-    _displayNameController.dispose();
+    _firstNameController.dispose();
+    _lastNameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
 
   void _submit() {
-    final displayName = _displayNameController.text.trim();
+    final firstName = _firstNameController.text.trim();
+    final lastName = _lastNameController.text.trim();
+    final displayName = OnboardingNameHelper.combine(firstName, lastName);
     final email = _emailController.text.trim().toLowerCase();
     final password = _passwordController.text;
     final phone = _phoneNumber.trim();
 
-    String? displayNameError;
+    final firstNameError = OnboardingValidation.validateFirstName(firstName);
+    final lastNameError = OnboardingValidation.validateLastName(lastName);
     String? emailError;
     String? phoneError;
     String? passwordError;
-    if (displayName.length < 3) {
-      displayNameError = 'Ad soyad en az 3 karakter olmalıdır.';
-    }
     if (!AppValidators.matches(AppValidators.email, email)) {
       emailError = 'Geçerli bir e-posta girin.';
     }
@@ -67,13 +107,15 @@ class _RegisterFormState extends State<RegisterForm> {
     }
 
     setState(() {
-      _displayNameError = displayNameError;
+      _firstNameError = firstNameError;
+      _lastNameError = lastNameError;
       _emailError = emailError;
       _phoneError = phoneError;
       _passwordError = passwordError;
     });
 
-    if (displayNameError != null ||
+    if (firstNameError != null ||
+        lastNameError != null ||
         emailError != null ||
         phoneError != null ||
         passwordError != null) {
@@ -96,20 +138,38 @@ class _RegisterFormState extends State<RegisterForm> {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const OnboardingFieldLabel(label: 'Ad Soyad', required: true),
+        const OnboardingFieldLabel(label: 'Ad', required: true),
         CustomTextField(
-          controller: _displayNameController,
-          hintText: 'Adınızı ve soyadınızı girin',
+          controller: _firstNameController,
+          hintText: 'Örn: Mehmet',
           textInputAction: TextInputAction.next,
           textCapitalization: TextCapitalization.words,
           prefixIcon: Icon(
             Icons.person_outline_rounded,
             color: colorScheme.onSurfaceVariant,
           ),
-          errorText: _displayNameError,
+          errorText: _firstNameError,
           onChanged: (_) {
-            if (_displayNameError != null) {
-              setState(() => _displayNameError = null);
+            if (_firstNameError != null) {
+              setState(() => _firstNameError = null);
+            }
+          },
+        ),
+        const SizedBox(height: 12),
+        const OnboardingFieldLabel(label: 'Soyad', required: true),
+        CustomTextField(
+          controller: _lastNameController,
+          hintText: 'Örn: Yılmaz',
+          textInputAction: TextInputAction.next,
+          textCapitalization: TextCapitalization.words,
+          prefixIcon: Icon(
+            Icons.person_outline_rounded,
+            color: colorScheme.onSurfaceVariant,
+          ),
+          errorText: _lastNameError,
+          onChanged: (_) {
+            if (_lastNameError != null) {
+              setState(() => _lastNameError = null);
             }
           },
         ),
@@ -133,6 +193,7 @@ class _RegisterFormState extends State<RegisterForm> {
         const SizedBox(height: 12),
         const OnboardingFieldLabel(label: 'Telefon'),
         IntlPhoneField(
+          key: ValueKey(_phoneNumber),
           decoration: CustomTextField.themedDecoration(
             context,
             hintText: '5XX XXX XX XX',
@@ -143,7 +204,9 @@ class _RegisterFormState extends State<RegisterForm> {
               color: colorScheme.onSurfaceVariant,
             ),
           ),
-          initialCountryCode: 'TR',
+          initialCountryCode:
+              IntlPhoneFieldHelpers.countryCodeFromPhone(_phoneNumber),
+          initialValue: IntlPhoneFieldHelpers.nationalFromPhone(_phoneNumber),
           invalidNumberMessage: 'Geçerli bir telefon numarası girin.',
           onChanged: (phone) {
             _phoneNumber = phone.completeNumber;

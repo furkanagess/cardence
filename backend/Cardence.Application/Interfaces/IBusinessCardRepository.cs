@@ -13,4 +13,5 @@ public interface IBusinessCardRepository
     Task DeleteAsync(BusinessCard card, CancellationToken cancellationToken = default);
     Task IncrementSaveCountAsync(Guid businessCardId, CancellationToken cancellationToken = default);
     Task<int> SumSaveCountByUserIdAsync(Guid userId, CancellationToken cancellationToken = default);
+    Task<int> CountByUserIdAsync(Guid userId, CancellationToken cancellationToken = default);
 }

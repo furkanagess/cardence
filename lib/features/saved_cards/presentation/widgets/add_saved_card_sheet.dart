@@ -8,6 +8,7 @@ enum AddSavedCardMethod {
   manualEntry,
   physicalScan,
   cardId,
+  openPaywall,
 }
 
 /// Manuel giriş, fotoğraf veya kart ID ile ekleme alt sayfası.
@@ -16,15 +17,18 @@ class AddSavedCardSheet extends StatelessWidget {
     super.key,
     required this.quota,
     required this.canAdd,
+    required this.canAddManualSavedCard,
   });
 
   final SavedCardsWalletQuota quota;
   final bool canAdd;
+  final bool canAddManualSavedCard;
 
   static Future<AddSavedCardMethod?> show(
     BuildContext context, {
     required SavedCardsWalletQuota quota,
     required bool canAdd,
+    required bool canAddManualSavedCard,
   }) {
     return showModalBottomSheet<AddSavedCardMethod>(
       context: context,
@@ -33,7 +37,11 @@ class AddSavedCardSheet extends StatelessWidget {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
-      builder: (context) => AddSavedCardSheet(quota: quota, canAdd: canAdd),
+      builder: (context) => AddSavedCardSheet(
+        quota: quota,
+        canAdd: canAdd,
+        canAddManualSavedCard: canAddManualSavedCard,
+      ),
     );
   }
 
@@ -59,7 +67,9 @@ class AddSavedCardSheet extends StatelessWidget {
             const SizedBox(height: 6),
             Text(
               canAdd
-                  ? '${quota.remaining} kart daha ekleyebilirsiniz.'
+                  ? (quota.hasUnlimitedWallet
+                      ? 'Sınırsız kart ekleyebilirsiniz.'
+                      : '${quota.remaining} kart daha ekleyebilirsiniz.')
                   : 'Cüzdanınız dolu. Paket yükselterek sınırı artırabilirsiniz.',
               style: textTheme.bodyMedium?.copyWith(
                 color: canAdd
@@ -72,23 +82,33 @@ class AddSavedCardSheet extends StatelessWidget {
             _MethodTile(
               icon: Icons.edit_note_rounded,
               title: 'Bilgileri elle gir',
-              subtitle: 'Kartvizit bilgilerini manuel yazın',
-              enabled: canAdd,
-              onTap: canAdd
+              subtitle: quota.manualEntryMethodSubtitle,
+              enabled: canAdd && canAddManualSavedCard,
+              premiumLocked: !canAddManualSavedCard,
+              onTap: canAdd && canAddManualSavedCard
                   ? () =>
                       Navigator.of(context).pop(AddSavedCardMethod.manualEntry)
-                  : null,
+                  : !canAddManualSavedCard
+                      ? () => Navigator.of(context).pop(
+                            AddSavedCardMethod.openPaywall,
+                          )
+                      : null,
             ),
             const SizedBox(height: 10),
             _MethodTile(
               icon: Icons.photo_camera_outlined,
               title: 'Kartvizit fotoğrafla',
-              subtitle: 'Kamerayı kullanarak bilgileri tara',
-              enabled: canAdd,
-              onTap: canAdd
+              subtitle: quota.photoScanMethodSubtitle,
+              enabled: canAdd && canAddManualSavedCard,
+              premiumLocked: !canAddManualSavedCard,
+              onTap: canAdd && canAddManualSavedCard
                   ? () =>
                       Navigator.of(context).pop(AddSavedCardMethod.physicalScan)
-                  : null,
+                  : !canAddManualSavedCard
+                      ? () => Navigator.of(context).pop(
+                            AddSavedCardMethod.openPaywall,
+                          )
+                      : null,
             ),
             const SizedBox(height: 10),
             _MethodTile(
@@ -114,6 +134,7 @@ class _MethodTile extends StatelessWidget {
     required this.subtitle,
     required this.enabled,
     this.onTap,
+    this.premiumLocked = false,
   });
 
   final IconData icon;
@@ -121,6 +142,7 @@ class _MethodTile extends StatelessWidget {
   final String subtitle;
   final bool enabled;
   final VoidCallback? onTap;
+  final bool premiumLocked;
 
   @override
   Widget build(BuildContext context) {
@@ -181,10 +203,16 @@ class _MethodTile extends StatelessWidget {
                 ),
               ),
               Icon(
-                enabled ? Icons.chevron_right_rounded : Icons.lock_outline,
+                enabled
+                    ? Icons.chevron_right_rounded
+                    : premiumLocked
+                        ? Icons.workspace_premium_outlined
+                        : Icons.lock_outline,
                 color: enabled
                     ? colorScheme.onSurfaceVariant
-                    : disabledColor,
+                    : premiumLocked
+                        ? colorScheme.primary
+                        : disabledColor,
               ),
             ],
           ),

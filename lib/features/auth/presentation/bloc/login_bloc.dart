@@ -1,6 +1,8 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../data/datasources/auth_remote_datasource.dart';
+import '../../domain/entities/last_login_credentials.dart';
+import '../../domain/usecases/get_last_login_credentials.dart';
 import '../../domain/usecases/login_with_email.dart';
 import '../../domain/usecases/login_with_phone.dart';
 import '../../domain/usecases/register_user.dart';
@@ -12,10 +14,13 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     required LoginWithEmail loginWithEmail,
     required LoginWithPhone loginWithPhone,
     required RegisterUser registerUser,
+    required GetLastLoginCredentials getLastLoginCredentials,
   })  : _loginWithEmail = loginWithEmail,
         _loginWithPhone = loginWithPhone,
         _registerUser = registerUser,
+        _getLastLoginCredentials = getLastLoginCredentials,
         super(const LoginState()) {
+    on<LoginStarted>(_onStarted);
     on<AuthScreenModeChanged>(_onScreenModeChanged);
     on<LoginMethodChanged>(_onMethodChanged);
     on<LoginEmailSubmitted>(_onEmailSubmitted);
@@ -26,6 +31,30 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
   final LoginWithEmail _loginWithEmail;
   final LoginWithPhone _loginWithPhone;
   final RegisterUser _registerUser;
+  final GetLastLoginCredentials _getLastLoginCredentials;
+
+  Future<void> _onStarted(
+    LoginStarted event,
+    Emitter<LoginState> emit,
+  ) async {
+    final credentials = await _getLastLoginCredentials();
+    if (isClosed) return;
+
+    emit(
+      state.copyWith(
+        lastEmail: credentials.email,
+        lastPhone: credentials.phone,
+        method: _methodFromCredentials(credentials),
+        credentialsLoaded: true,
+      ),
+    );
+  }
+
+  LoginMethod _methodFromCredentials(LastLoginCredentials credentials) {
+    return credentials.lastMethod == LastLoginMethod.phone
+        ? LoginMethod.phone
+        : LoginMethod.email;
+  }
 
   void _onScreenModeChanged(
     AuthScreenModeChanged event,

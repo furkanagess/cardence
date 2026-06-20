@@ -10,6 +10,7 @@ import '../../../../core/widgets/atoms/custom_button.dart';
 import '../../../../core/widgets/organisms/cardence_connect_animation.dart';
 import '../../../../core/widgets/organisms/cardence_scaffold.dart';
 import '../../domain/usecases/forgot_password.dart';
+import '../../domain/usecases/get_last_login_credentials.dart';
 import '../../domain/usecases/login_with_email.dart';
 import '../../domain/usecases/login_with_phone.dart';
 import '../../domain/usecases/register_user.dart';
@@ -30,6 +31,7 @@ class LoginPage extends StatelessWidget {
     required this.loginWithEmail,
     required this.loginWithPhone,
     required this.registerUser,
+    required this.getLastLoginCredentials,
     required this.forgotPassword,
     required this.resetPassword,
     required this.onLoginSuccess,
@@ -38,6 +40,7 @@ class LoginPage extends StatelessWidget {
   final LoginWithEmail loginWithEmail;
   final LoginWithPhone loginWithPhone;
   final RegisterUser registerUser;
+  final GetLastLoginCredentials getLastLoginCredentials;
   final ForgotPassword forgotPassword;
   final ResetPassword resetPassword;
   final VoidCallback onLoginSuccess;
@@ -49,7 +52,8 @@ class LoginPage extends StatelessWidget {
         loginWithEmail: loginWithEmail,
         loginWithPhone: loginWithPhone,
         registerUser: registerUser,
-      ),
+        getLastLoginCredentials: getLastLoginCredentials,
+      )..add(const LoginStarted()),
       child: _AuthView(
         forgotPassword: forgotPassword,
         resetPassword: resetPassword,
@@ -106,11 +110,13 @@ class _AuthViewState extends State<_AuthView>
   }
 
   void _openForgotPassword(BuildContext context) {
+    final initialEmail = context.read<LoginBloc>().state.lastEmail;
     Navigator.of(context).push(
       MaterialPageRoute<void>(
         builder: (_) => ForgotPasswordPage(
           forgotPassword: widget.forgotPassword,
           resetPassword: widget.resetPassword,
+          initialEmail: initialEmail,
           onResetSuccess: widget.onAuthSuccess,
         ),
       ),
@@ -142,7 +148,7 @@ class _AuthViewState extends State<_AuthView>
       child: BlocBuilder<LoginBloc, LoginState>(
         builder: (context, state) {
           return CardenceScaffold(
-            resizeToAvoidBottomInset: false,
+            resizeToAvoidBottomInset: state.isRegisterMode,
             appBar: state.isRegisterMode
                 ? CardenceAppBar(
                     title: 'Kayıt ol',
@@ -217,6 +223,8 @@ class _RegisterScreenContent extends StatelessWidget {
 
     final registerForm = RegisterForm(
       isLoading: state.isLoading,
+      initialEmail: state.lastEmail,
+      initialPhone: state.lastPhone,
       onSubmit: ({
         required displayName,
         required email,
@@ -240,27 +248,29 @@ class _RegisterScreenContent extends StatelessWidget {
           child: SingleChildScrollView(
             keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
             padding: EdgeInsets.only(
-              top: 6,
-              bottom: keyboardVisible ? bottomInset + 16 : 8,
+              top: keyboardVisible ? 0 : 6,
+              bottom: bottomInset + 16,
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Text(
-                  "Cardence'a Katılın",
-                  style: textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.w800,
-                    color: colorScheme.primary,
+                if (!keyboardVisible) ...[
+                  Text(
+                    "Cardence'a Katılın",
+                    style: textTheme.headlineSmall?.copyWith(
+                      fontWeight: FontWeight.w800,
+                      color: colorScheme.primary,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Profesyonel kimliğinizi yönetmek için yeni bir hesap oluşturun.',
-                  style: textTheme.bodyMedium?.copyWith(
-                    color: colorScheme.onSurfaceVariant,
+                  const SizedBox(height: 8),
+                  Text(
+                    'Profesyonel kimliğinizi yönetmek için yeni bir hesap oluşturun.',
+                    style: textTheme.bodyMedium?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 18),
+                  const SizedBox(height: 18),
+                ],
                 registerForm,
               ],
             ),
@@ -270,12 +280,6 @@ class _RegisterScreenContent extends StatelessWidget {
           const Padding(
             padding: EdgeInsets.only(top: 6),
             child: RegisterLegalNotice(),
-          ),
-          _AuthModeLink(
-            isRegister: true,
-            onTap: () => context
-                .read<LoginBloc>()
-                .add(const AuthScreenModeChanged(AuthScreenMode.login)),
           ),
         ],
       ],
@@ -456,6 +460,7 @@ class _LoginFormContentState extends State<_LoginFormContent> {
       return LoginEmailForm(
         key: _emailFormKey,
         isLoading: state.isLoading,
+        initialEmail: state.lastEmail,
         showSubmitButton: false,
         onForgotPassword: widget.onForgotPassword,
         onSubmit: ({required email, required password}) =>
@@ -468,6 +473,7 @@ class _LoginFormContentState extends State<_LoginFormContent> {
     return LoginPhoneForm(
       key: _phoneFormKey,
       isLoading: state.isLoading,
+      initialPhone: state.lastPhone,
       showSubmitButton: false,
       onSubmit: ({required phone, required password}) =>
           context.read<LoginBloc>().add(

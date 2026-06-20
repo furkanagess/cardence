@@ -10,6 +10,8 @@ import '../../domain/usecases/delete_saved_card.dart';
 import '../../domain/usecases/get_saved_cards.dart';
 import '../../domain/usecases/save_saved_card.dart';
 import '../../domain/usecases/upgrade_wallet_plan.dart';
+import '../../../subscriptions/domain/usecases/restore_wallet_purchases.dart';
+import '../../../ads/domain/usecases/show_interstitial_ad.dart';
 import '../cubit/saved_cards_cubit.dart';
 import '../cubit/saved_cards_state.dart';
 import '../mixins/saved_cards_page_effects_mixin.dart';
@@ -33,6 +35,8 @@ class SavedCardsPage extends StatefulWidget {
     this.addCardTrigger = 0,
     required this.addSavedCard,
     required this.upgradeWalletPlan,
+    required this.restoreWalletPurchases,
+    required this.showInterstitialAd,
     required this.getEventGroups,
     required this.getSavedCards,
     required this.deleteEventGroup,
@@ -47,6 +51,8 @@ class SavedCardsPage extends StatefulWidget {
   final int addCardTrigger;
   final AddSavedCard addSavedCard;
   final UpgradeWalletPlan upgradeWalletPlan;
+  final RestoreWalletPurchases restoreWalletPurchases;
+  final ShowInterstitialAd showInterstitialAd;
   final GetEventGroups getEventGroups;
   final GetSavedCards getSavedCards;
   final DeleteEventGroup deleteEventGroup;
@@ -88,6 +94,8 @@ class _SavedCardsPageState extends State<SavedCardsPage>
           state,
           addSavedCard: widget.addSavedCard,
           upgradeWalletPlan: widget.upgradeWalletPlan,
+          restoreWalletPurchases: widget.restoreWalletPurchases,
+          showInterstitialAd: widget.showInterstitialAd,
           sourceCards: cubit.sourceCards,
         );
       },

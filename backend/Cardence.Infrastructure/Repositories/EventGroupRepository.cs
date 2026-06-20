@@ -57,6 +57,14 @@ public sealed class EventGroupRepository : IEventGroupRepository
             .CountAsync(link => link.EventGroupId == groupId, cancellationToken);
     }
 
+    public async Task<int> CountByUserIdAsync(
+        Guid userId,
+        CancellationToken cancellationToken = default)
+    {
+        return await _dbContext.EventGroups
+            .CountAsync(group => group.UserId == userId, cancellationToken);
+    }
+
     public async Task AddAsync(EventGroup group, CancellationToken cancellationToken = default)
     {
         _dbContext.EventGroups.Add(group);

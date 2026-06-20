@@ -55,6 +55,7 @@ class _AddCardByIdPageState extends State<AddCardByIdPage> {
       case AddSavedCardDuplicate():
         _showError('Bu kart zaten cüzdanınızda.');
       case AddSavedCardLimitReached():
+      case AddSavedCardPremiumRequired():
         Navigator.of(context).pop(result);
       case AddSavedCardInvalidPayload(:final message):
         _showError(message);

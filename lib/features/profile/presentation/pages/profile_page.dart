@@ -9,6 +9,8 @@ import '../../../onboarding/domain/usecases/get_onboarding_draft_cards.dart';
 import '../../../onboarding/presentation/widgets/onboarding_card_preview_frame.dart';
 import '../../../business_cards/domain/usecases/persist_onboarding_card.dart';
 import '../../domain/entities/profile_stats.dart';
+import '../../../saved_cards/domain/entities/saved_cards_wallet_quota.dart';
+import '../../../saved_cards/domain/usecases/get_saved_cards_wallet_quota.dart';
 import '../../domain/usecases/get_profile_stats.dart';
 import '../widgets/profile_interaction_stats.dart';
 
@@ -24,6 +26,7 @@ class ProfilePage extends StatefulWidget {
     required this.getOnboardingDraftCards,
     required this.persistOnboardingCard,
     required this.getProfileStats,
+    required this.getSavedCardsWalletQuota,
     this.onDraftUpdated,
   });
 
@@ -31,6 +34,7 @@ class ProfilePage extends StatefulWidget {
   final GetOnboardingDraftCards getOnboardingDraftCards;
   final PersistOnboardingCard persistOnboardingCard;
   final GetProfileStats getProfileStats;
+  final GetSavedCardsWalletQuota getSavedCardsWalletQuota;
   final ValueChanged<OnboardingCardDraft>? onDraftUpdated;
 
   @override
@@ -41,6 +45,7 @@ class _ProfilePageState extends State<ProfilePage> {
   List<OnboardingCardDraft> _cards = [];
   ProfileStats? _stats;
   bool _loading = true;
+  bool _canAddBusinessCard = true;
   int _selectedIndex = 0;
   late final PageController _pageController = PageController(
     viewportFraction: _profileCarouselViewportFraction,
@@ -64,13 +69,16 @@ class _ProfilePageState extends State<ProfilePage> {
       final results = await Future.wait([
         widget.getOnboardingDraftCards(),
         widget.getProfileStats(),
+        widget.getSavedCardsWalletQuota(),
       ]);
       if (!mounted) return;
       final list = results[0] as List<OnboardingCardDraft>;
       final stats = results[1] as ProfileStats;
+      final quota = results[2] as SavedCardsWalletQuota;
       setState(() {
         _cards = list;
         _stats = stats;
+        _canAddBusinessCard = quota.canAddBusinessCard;
         if (_selectedIndex >= list.length) {
           _selectedIndex = list.isEmpty ? 0 : list.length - 1;
         }
@@ -92,6 +100,7 @@ class _ProfilePageState extends State<ProfilePage> {
           totalWalletSaveCount: 0,
           eventGroupCount: 0,
         );
+        _canAddBusinessCard = true;
         _loading = false;
       });
     }
@@ -127,6 +136,19 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   Future<void> _createNewCard() async {
+    if (!_canAddBusinessCard) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Ücretsiz planda yalnızca 1 kart oluşturabilirsiniz. Premium ile daha fazla kart ekleyin.',
+          ),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+
     final template = _cards.isNotEmpty ? _cards.first : widget.draft;
     final base = template ?? const OnboardingCardDraft();
     final newCard = base.copyWith(
@@ -197,6 +219,19 @@ class _ProfilePageState extends State<ProfilePage> {
               onPressed: _createNewCard,
             ),
           ),
+          if (!_canAddBusinessCard) ...[
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
+              child: Text(
+                'Ücretsiz planda tek kart oluşturabilirsiniz. Premium ile daha fazla kart ekleyin.',
+                style: textTheme.bodySmall?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
+                  height: 1.35,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ],
           if (_cards.isNotEmpty) ...[
             const SizedBox(height: 12),
             Padding(

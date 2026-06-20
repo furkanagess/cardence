@@ -266,6 +266,8 @@ class SavedCardsCubit extends Cubit<SavedCardsState> {
         );
       case AddSavedCardLimitReached():
         emit(state.copyWith(effectType: SavedCardsEffectType.openUpgradeSheet));
+      case AddSavedCardPremiumRequired():
+        emit(state.copyWith(effectType: SavedCardsEffectType.openUpgradeSheet));
       case AddSavedCardInvalidPayload(:final message):
         emit(
           state.copyWith(
@@ -277,16 +279,18 @@ class SavedCardsCubit extends Cubit<SavedCardsState> {
   }
 
   Future<bool> upgradeWallet() async {
-    await _upgradeWalletPlan();
+    final success = await _upgradeWalletPlan();
     if (isClosed) return false;
     await _loadQuota();
     if (isClosed) return false;
-    emit(
-      state.copyWith(
-        effectType: SavedCardsEffectType.showSnackbar,
-        snackbarMessage: 'Premium cüzdan etkinleştirildi',
-      ),
-    );
-    return true;
+    if (success) {
+      emit(
+        state.copyWith(
+          effectType: SavedCardsEffectType.showSnackbar,
+          snackbarMessage: 'Premium cüzdan etkinleştirildi',
+        ),
+      );
+    }
+    return success;
   }
 }

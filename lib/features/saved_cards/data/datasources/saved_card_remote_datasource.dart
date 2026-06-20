@@ -19,6 +19,8 @@ abstract class SavedCardRemoteDataSource {
 
   Future<WalletQuotaModel> getWalletQuota({required String accessToken});
 
+  Future<WalletQuotaModel> upgradeWalletPlan({required String accessToken});
+
   Future<void> deleteSavedCard({
     required String cardId,
     required String accessToken,
@@ -108,6 +110,18 @@ class SavedCardRemoteDataSourceImpl implements SavedCardRemoteDataSource {
       '/WalletQuota',
       accessToken: accessToken,
       fallbackError: 'Cüzdan kotası alınamadı.',
+    );
+    return _parseQuota(json);
+  }
+
+  @override
+  Future<WalletQuotaModel> upgradeWalletPlan({
+    required String accessToken,
+  }) async {
+    final json = await _client.post(
+      '/UpgradeWalletPlan',
+      accessToken: accessToken,
+      fallbackError: 'Premium cüzdan etkinleştirilemedi.',
     );
     return _parseQuota(json);
   }

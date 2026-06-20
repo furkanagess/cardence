@@ -8,7 +8,7 @@ import '../cubit/saved_cards_filter_models.dart';
 import '../cubit/saved_cards_state.dart';
 import '../widgets/add_saved_card_sheet.dart';
 import '../widgets/saved_cards_filter_sheet.dart';
-import '../widgets/wallet_upgrade_sheet.dart';
+import '../wallet_paywall_flow.dart';
 import '../pages/add_card_by_id_page.dart';
 import '../pages/add_manual_card_page.dart';
 import '../pages/scan_physical_card_page.dart';
@@ -19,6 +19,8 @@ import '../../domain/usecases/delete_saved_card.dart';
 import '../../domain/usecases/get_saved_cards.dart';
 import '../../domain/usecases/save_saved_card.dart';
 import '../../domain/usecases/upgrade_wallet_plan.dart';
+import '../../../ads/domain/usecases/show_interstitial_ad.dart';
+import '../../../subscriptions/domain/usecases/restore_wallet_purchases.dart';
 import '../../../event_groups/domain/usecases/get_event_groups.dart';
 import '../../../event_groups/domain/usecases/delete_event_group.dart';
 import '../../domain/usecases/link_saved_cards_to_event_group.dart';
@@ -30,6 +32,8 @@ mixin SavedCardsPageEffectsMixin<T extends StatefulWidget> on State<T> {
     SavedCardsState state, {
     required AddSavedCard addSavedCard,
     required UpgradeWalletPlan upgradeWalletPlan,
+    required RestoreWalletPurchases restoreWalletPurchases,
+    required ShowInterstitialAd showInterstitialAd,
     required List<SavedCard> sourceCards,
   }) {
     switch (state.effectType) {
@@ -50,10 +54,20 @@ mixin SavedCardsPageEffectsMixin<T extends StatefulWidget> on State<T> {
         _openFiltersSheet(context, sourceCards);
         context.read<SavedCardsCubit>().clearEffect();
       case SavedCardsEffectType.openAddCard:
-        _openAddCardFlow(context, addSavedCard: addSavedCard);
+        _openAddCardFlow(
+          context,
+          addSavedCard: addSavedCard,
+          showInterstitialAd: showInterstitialAd,
+          upgradeWalletPlan: upgradeWalletPlan,
+          restoreWalletPurchases: restoreWalletPurchases,
+        );
         context.read<SavedCardsCubit>().clearEffect();
       case SavedCardsEffectType.openUpgradeSheet:
-        _openUpgradeSheet(context, upgradeWalletPlan: upgradeWalletPlan);
+        _openUpgradeSheet(
+          context,
+          upgradeWalletPlan: upgradeWalletPlan,
+          restoreWalletPurchases: restoreWalletPurchases,
+        );
         context.read<SavedCardsCubit>().clearEffect();
     }
   }
@@ -86,6 +100,9 @@ mixin SavedCardsPageEffectsMixin<T extends StatefulWidget> on State<T> {
   Future<void> _openAddCardFlow(
     BuildContext context, {
     required AddSavedCard addSavedCard,
+    required ShowInterstitialAd showInterstitialAd,
+    required UpgradeWalletPlan upgradeWalletPlan,
+    required RestoreWalletPurchases restoreWalletPurchases,
   }) async {
     final cubit = context.read<SavedCardsCubit>();
     final quota = cubit.state.quota;
@@ -95,11 +112,23 @@ mixin SavedCardsPageEffectsMixin<T extends StatefulWidget> on State<T> {
       context,
       quota: quota,
       canAdd: quota.canAddMore,
+      canAddManualSavedCard: quota.canAddManualSavedCard,
     );
     if (!context.mounted || method == null) return;
 
+    if (method == AddSavedCardMethod.openPaywall) {
+      await _openUpgradeSheet(
+        context,
+        upgradeWalletPlan: upgradeWalletPlan,
+        restoreWalletPurchases: restoreWalletPurchases,
+      );
+      return;
+    }
+
     AddSavedCardResult? result;
     switch (method) {
+      case AddSavedCardMethod.openPaywall:
+        return;
       case AddSavedCardMethod.manualEntry:
         result = await Navigator.of(context).push<AddSavedCardResult>(
           MaterialPageRoute(
@@ -122,6 +151,12 @@ mixin SavedCardsPageEffectsMixin<T extends StatefulWidget> on State<T> {
 
     if (!context.mounted) return;
     await cubit.handleAddCardResult(result);
+
+    if (!context.mounted) return;
+    if (result is AddSavedCardSuccess &&
+        cubit.state.quota?.isPremium != true) {
+      await showInterstitialAd();
+    }
   }
 
   Future<void> openSavedCardDetail(
@@ -178,17 +213,11 @@ mixin SavedCardsPageEffectsMixin<T extends StatefulWidget> on State<T> {
   Future<void> _openUpgradeSheet(
     BuildContext context, {
     required UpgradeWalletPlan upgradeWalletPlan,
+    required RestoreWalletPurchases restoreWalletPurchases,
   }) async {
-    final cubit = context.read<SavedCardsCubit>();
-    final upgraded = await WalletUpgradeSheet.show(
+    await WalletPaywallFlow.show(
       context,
-      upgradeWalletPlan: upgradeWalletPlan,
+      cubit: context.read<SavedCardsCubit>(),
     );
-    if (!context.mounted) return;
-    if (upgraded == true) {
-      await cubit.upgradeWallet();
-    } else {
-      await cubit.refreshAll();
-    }
   }
 }

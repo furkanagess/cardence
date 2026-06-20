@@ -6,8 +6,10 @@ import 'core/theme/app_theme.dart';
 import 'core/widgets/molecules/chuck_fab_overlay.dart';
 import 'core/widgets/organisms/cardence_connect_animation.dart';
 import 'core/widgets/organisms/cardence_scaffold.dart';
+import 'features/auth/domain/usecases/get_auth_session.dart';
 import 'features/auth/domain/usecases/forgot_password.dart';
 import 'features/auth/domain/usecases/get_current_user.dart';
+import 'features/auth/domain/usecases/get_last_login_credentials.dart';
 import 'features/auth/domain/usecases/login_with_email.dart';
 import 'features/auth/domain/usecases/login_with_phone.dart';
 import 'features/auth/domain/usecases/logout.dart';
@@ -35,6 +37,9 @@ import 'features/saved_cards/domain/usecases/get_saved_cards_wallet_quota.dart';
 import 'features/saved_cards/domain/usecases/link_saved_cards_to_event_group.dart';
 import 'features/saved_cards/domain/usecases/save_saved_card.dart';
 import 'features/saved_cards/domain/usecases/upgrade_wallet_plan.dart';
+import 'features/subscriptions/domain/usecases/identify_subscription_user.dart';
+import 'features/subscriptions/domain/usecases/restore_wallet_purchases.dart';
+import 'features/ads/domain/usecases/show_interstitial_ad.dart';
 import 'features/settings/domain/entities/theme_preference.dart';
 import 'features/settings/domain/usecases/get_theme_preference.dart';
 import 'features/settings/domain/usecases/set_theme_preference.dart';
@@ -50,9 +55,12 @@ class App extends StatefulWidget {
     super.key,
     required this.rootNavigatorKey,
     required this.restoreAuthSession,
+    required this.getAuthSession,
+    required this.identifySubscriptionUser,
     required this.loginWithEmail,
     required this.loginWithPhone,
     required this.registerUser,
+    required this.getLastLoginCredentials,
     required this.forgotPassword,
     required this.resetPassword,
     required this.getCurrentUser,
@@ -80,14 +88,19 @@ class App extends StatefulWidget {
     required this.addSavedCard,
     required this.deleteSavedCard,
     required this.upgradeWalletPlan,
+    required this.restoreWalletPurchases,
     required this.getProfileStats,
+    required this.showInterstitialAd,
   });
 
   final GlobalKey<NavigatorState> rootNavigatorKey;
   final RestoreAuthSession restoreAuthSession;
+  final GetAuthSession getAuthSession;
+  final IdentifySubscriptionUser identifySubscriptionUser;
   final LoginWithEmail loginWithEmail;
   final LoginWithPhone loginWithPhone;
   final RegisterUser registerUser;
+  final GetLastLoginCredentials getLastLoginCredentials;
   final ForgotPassword forgotPassword;
   final ResetPassword resetPassword;
   final GetCurrentUser getCurrentUser;
@@ -115,7 +128,9 @@ class App extends StatefulWidget {
   final AddSavedCard addSavedCard;
   final DeleteSavedCard deleteSavedCard;
   final UpgradeWalletPlan upgradeWalletPlan;
+  final RestoreWalletPurchases restoreWalletPurchases;
   final GetProfileStats getProfileStats;
+  final ShowInterstitialAd showInterstitialAd;
 
   @override
   State<App> createState() => _AppState();
@@ -181,7 +196,14 @@ class _AppState extends State<App> {
   }
 
   void _onLoginSuccess() {
+    _identifySubscriptionUser();
     _resolvePostLoginDestination();
+  }
+
+  Future<void> _identifySubscriptionUser() async {
+    final session = await widget.getAuthSession();
+    if (session == null || session.userId.isEmpty) return;
+    await widget.identifySubscriptionUser(session.userId);
   }
 
   void _onOnboardingFinish() {
@@ -221,6 +243,7 @@ class _AppState extends State<App> {
           loginWithEmail: widget.loginWithEmail,
           loginWithPhone: widget.loginWithPhone,
           registerUser: widget.registerUser,
+          getLastLoginCredentials: widget.getLastLoginCredentials,
           forgotPassword: widget.forgotPassword,
           resetPassword: widget.resetPassword,
           onLoginSuccess: _onLoginSuccess,
@@ -249,6 +272,7 @@ class _AppState extends State<App> {
           addSavedCard: widget.addSavedCard,
           deleteSavedCard: widget.deleteSavedCard,
           upgradeWalletPlan: widget.upgradeWalletPlan,
+          restoreWalletPurchases: widget.restoreWalletPurchases,
           getCurrentUser: widget.getCurrentUser,
           themePreference: _themePreference,
           onThemeChanged: _onThemeChanged,
@@ -256,6 +280,7 @@ class _AppState extends State<App> {
           uploadProfilePhoto: widget.uploadProfilePhoto,
           submitSupportRequest: widget.submitSupportRequest,
           getProfileStats: widget.getProfileStats,
+          showInterstitialAd: widget.showInterstitialAd,
         );
     }
   }

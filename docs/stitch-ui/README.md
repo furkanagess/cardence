@@ -67,6 +67,7 @@ Bu klasör, Cardence mobil uygulamasının her ekranı için **Google Stitch** (
 |-------|---------|
 | [27-confirm-dialog.md](./27-confirm-dialog.md) | Onay diyaloğu |
 | [28-wallet-quota-sheets.md](./28-wallet-quota-sheets.md) | Cüzdan kotası / yükseltme |
+| [29-paywall.md](./29-paywall.md) | Premium paywall (tam ekran + sheet) |
 
 ## Önerilen üretim sırası (flow)
 

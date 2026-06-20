@@ -3,6 +3,7 @@ using Cardence.Application.DTOs.EventGroups;
 using Cardence.Application.DTOs.Wallet;
 using Cardence.Application.Interfaces;
 using Cardence.Application.Mapping;
+using Cardence.Domain.Constants;
 using Cardence.Domain.Entities;
 using Cardence.Domain.Exceptions;
 using FluentValidation;
@@ -12,6 +13,7 @@ namespace Cardence.Application.Services;
 public sealed class EventGroupService : IEventGroupService
 {
     private readonly IEventGroupRepository _eventGroupRepository;
+    private readonly IWalletEntitlementRepository _walletRepository;
     private readonly ICurrentUserService _currentUser;
     private readonly IValidator<SaveEventGroupRequest> _saveValidator;
     private readonly IValidator<UpdateEventGroupRequest> _updateValidator;
@@ -19,12 +21,14 @@ public sealed class EventGroupService : IEventGroupService
 
     public EventGroupService(
         IEventGroupRepository eventGroupRepository,
+        IWalletEntitlementRepository walletRepository,
         ICurrentUserService currentUser,
         IValidator<SaveEventGroupRequest> saveValidator,
         IValidator<UpdateEventGroupRequest> updateValidator,
         IValidator<LinkEventGroupCardsRequest> linkValidator)
     {
         _eventGroupRepository = eventGroupRepository;
+        _walletRepository = walletRepository;
         _currentUser = currentUser;
         _saveValidator = saveValidator;
         _updateValidator = updateValidator;
@@ -58,6 +62,7 @@ public sealed class EventGroupService : IEventGroupService
         var userId = _currentUser.GetRequiredUserId();
         var name = request.Name.Trim();
         await EnsureUniqueNameAsync(userId, name, excludeGroupId: null, cancellationToken);
+        await EnsureCanCreateEventGroupAsync(userId, cancellationToken);
 
         var entity = new EventGroup
         {
@@ -176,6 +181,27 @@ public sealed class EventGroupService : IEventGroupService
         throw new ConflictException(
             "An event group with this name already exists.",
             ErrorCodes.DuplicateEventGroupName);
+    }
+
+    private async Task EnsureCanCreateEventGroupAsync(
+        Guid userId,
+        CancellationToken cancellationToken)
+    {
+        var entitlement = await _walletRepository.GetOrCreateAsync(userId, cancellationToken);
+        if (WalletConstants.HasUnlimitedEventGroups(entitlement.Tier))
+        {
+            return;
+        }
+
+        var eventGroupCount = await _eventGroupRepository.CountByUserIdAsync(
+            userId,
+            cancellationToken);
+        if (eventGroupCount >= WalletConstants.FreeMaxEventGroups)
+        {
+            throw new ForbiddenException(
+                "Event group limit reached.",
+                ErrorCodes.PremiumRequired);
+        }
     }
 
     private static Guid ParseGroupId(string groupId)

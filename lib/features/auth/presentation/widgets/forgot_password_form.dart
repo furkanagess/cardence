@@ -15,11 +15,13 @@ class ForgotPasswordForm extends StatefulWidget {
     required this.onRequestOtp,
     required this.onResetPassword,
     required this.onBack,
+    this.initialEmail,
   });
 
   final bool isLoading;
   final bool isOtpStep;
   final String? pendingEmail;
+  final String? initialEmail;
   final ValueChanged<String> onRequestOtp;
   final void Function({
     required String email,
@@ -41,6 +43,15 @@ class _ForgotPasswordFormState extends State<ForgotPasswordForm> {
   String? _otpError;
   String? _passwordError;
   String? _confirmError;
+
+  @override
+  void initState() {
+    super.initState();
+    final email = widget.initialEmail?.trim();
+    if (email != null && email.isNotEmpty) {
+      _emailController.text = email;
+    }
+  }
 
   @override
   void dispose() {

@@ -1,4 +1,5 @@
 import '../entities/auth_session.dart';
+import '../entities/last_login_credentials.dart';
 import '../entities/restore_session_result.dart';
 import '../entities/user_profile.dart';
 
@@ -36,6 +37,8 @@ abstract class AuthRepository {
   });
 
   Future<UserProfile> getCurrentUser();
+
+  Future<LastLoginCredentials> getLastLoginCredentials();
 
   Future<UserProfile> uploadProfilePhoto(String filePath);
 

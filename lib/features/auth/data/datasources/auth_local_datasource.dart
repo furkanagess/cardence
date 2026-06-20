@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../domain/entities/last_login_credentials.dart';
 import '../models/auth_session_model.dart';
 import '../models/user_profile_model.dart';
 
@@ -14,6 +15,14 @@ abstract class AuthLocalDataSource {
 
   Future<void> saveCachedProfile(UserProfileModel profile);
 
+  Future<LastLoginCredentials> getLastLoginCredentials();
+
+  Future<void> saveLastLoginCredentials({
+    String? email,
+    String? phone,
+    LastLoginMethod? method,
+  });
+
   Future<void> clearSession();
 }
 
@@ -22,6 +31,9 @@ class AuthLocalDataSourceImpl implements AuthLocalDataSource {
 
   static const _sessionKey = 'auth_session';
   static const _cachedProfileKey = 'auth_cached_profile';
+  static const _lastLoginEmailKey = 'auth_last_login_email';
+  static const _lastLoginPhoneKey = 'auth_last_login_phone';
+  static const _lastLoginMethodKey = 'auth_last_login_method';
 
   final SharedPreferences _prefs;
 
@@ -60,6 +72,42 @@ class AuthLocalDataSourceImpl implements AuthLocalDataSource {
       _cachedProfileKey,
       jsonEncode(profile.toCacheJson()),
     );
+  }
+
+  @override
+  Future<LastLoginCredentials> getLastLoginCredentials() async {
+    final email = _prefs.getString(_lastLoginEmailKey);
+    final phone = _prefs.getString(_lastLoginPhoneKey);
+    final methodRaw = _prefs.getString(_lastLoginMethodKey);
+    LastLoginMethod? method;
+    if (methodRaw == LastLoginMethod.email.name) {
+      method = LastLoginMethod.email;
+    } else if (methodRaw == LastLoginMethod.phone.name) {
+      method = LastLoginMethod.phone;
+    }
+
+    return LastLoginCredentials(
+      email: email?.trim().isNotEmpty == true ? email!.trim() : null,
+      phone: phone?.trim().isNotEmpty == true ? phone!.trim() : null,
+      lastMethod: method,
+    );
+  }
+
+  @override
+  Future<void> saveLastLoginCredentials({
+    String? email,
+    String? phone,
+    LastLoginMethod? method,
+  }) async {
+    if (email != null && email.isNotEmpty) {
+      await _prefs.setString(_lastLoginEmailKey, email);
+    }
+    if (phone != null && phone.isNotEmpty) {
+      await _prefs.setString(_lastLoginPhoneKey, phone);
+    }
+    if (method != null) {
+      await _prefs.setString(_lastLoginMethodKey, method.name);
+    }
   }
 
   @override

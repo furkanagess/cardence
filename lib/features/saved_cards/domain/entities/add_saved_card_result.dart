@@ -19,6 +19,12 @@ class AddSavedCardLimitReached extends AddSavedCardResult {
   final SavedCardsWalletQuota quota;
 }
 
+class AddSavedCardPremiumRequired extends AddSavedCardResult {
+  const AddSavedCardPremiumRequired(this.quota);
+
+  final SavedCardsWalletQuota quota;
+}
+
 class AddSavedCardInvalidPayload extends AddSavedCardResult {
   const AddSavedCardInvalidPayload(this.message);
 

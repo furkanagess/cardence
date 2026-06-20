@@ -1,0 +1,17 @@
+import '../entities/wallet_paywall_result.dart';
+
+abstract class SubscriptionRepository {
+  Future<void> configure();
+
+  Future<void> identifyUser(String userId);
+
+  Future<void> logoutUser();
+
+  Future<bool> purchaseWalletPremium();
+
+  Future<WalletPaywallResult> presentWalletPaywall();
+
+  Future<bool> restorePurchases();
+
+  Future<bool> hasPremiumWalletEntitlement();
+}

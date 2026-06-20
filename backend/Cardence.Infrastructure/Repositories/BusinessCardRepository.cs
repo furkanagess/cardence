@@ -97,4 +97,13 @@ public sealed class BusinessCardRepository : IBusinessCardRepository
             .Where(card => card.UserId == userId)
             .SumAsync(card => card.SaveCount, cancellationToken);
     }
+
+    public async Task<int> CountByUserIdAsync(
+        Guid userId,
+        CancellationToken cancellationToken = default)
+    {
+        return await _dbContext.BusinessCards
+            .AsNoTracking()
+            .CountAsync(card => card.UserId == userId, cancellationToken);
+    }
 }

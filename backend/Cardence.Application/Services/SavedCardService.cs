@@ -100,9 +100,29 @@ public sealed class SavedCardService : ISavedCardService
         var userId = _currentUser.GetRequiredUserId();
         var entitlement = await _walletRepository.GetOrCreateAsync(userId, cancellationToken);
         var usedCount = await _savedCardRepository.CountByUserIdAsync(userId, cancellationToken);
-        var maxCards = entitlement.MaxCards;
-        var remaining = Math.Max(0, maxCards - usedCount);
-        var usageFraction = maxCards == 0 ? 0 : Math.Clamp((double)usedCount / maxCards, 0, 1);
+        var businessCardCount = await _businessCardRepository.CountByUserIdAsync(
+            userId,
+            cancellationToken);
+        var isPremium = IsPremiumTier(entitlement.Tier);
+        var canAddManualSavedCard = await CanAddManualSavedCardAsync(
+            userId,
+            entitlement.Tier,
+            cancellationToken);
+        var eventGroupCount = await _eventGroupRepository.CountByUserIdAsync(
+            userId,
+            cancellationToken);
+        var unlimitedEventGroups = WalletConstants.HasUnlimitedEventGroups(entitlement.Tier);
+        var unlimitedWallet = WalletConstants.HasUnlimitedWalletCards(entitlement.Tier);
+        var maxCards = unlimitedWallet
+            ? WalletConstants.PremiumMaxCards
+            : entitlement.MaxCards;
+        var maxBusinessCards = GetMaxBusinessCards(entitlement.Tier);
+        var remaining = unlimitedWallet
+            ? 0
+            : Math.Max(0, entitlement.MaxCards - usedCount);
+        var usageFraction = unlimitedWallet || entitlement.MaxCards <= 0
+            ? 0
+            : Math.Clamp((double)usedCount / entitlement.MaxCards, 0, 1);
 
         return new WalletQuotaDto
         {
@@ -110,10 +130,30 @@ public sealed class SavedCardService : ISavedCardService
             UsedCount = usedCount,
             MaxCards = maxCards,
             Remaining = remaining,
-            CanAddMore = usedCount < maxCards,
-            IsNearLimit = maxCards > 0 && usedCount >= (int)Math.Ceiling(maxCards * 0.85),
+            CanAddMore = unlimitedWallet || usedCount < entitlement.MaxCards,
+            IsNearLimit = !unlimitedWallet &&
+                entitlement.MaxCards > 0 &&
+                usedCount >= (int)Math.Ceiling(entitlement.MaxCards * 0.85),
             UsageFraction = usageFraction,
+            BusinessCardCount = businessCardCount,
+            MaxBusinessCards = maxBusinessCards,
+            CanAddBusinessCard = businessCardCount < maxBusinessCards,
+            CanAddManualSavedCard = canAddManualSavedCard,
+            EventGroupCount = eventGroupCount,
+            MaxEventGroups = unlimitedEventGroups
+                ? 0
+                : WalletConstants.FreeMaxEventGroups,
+            CanAddEventGroup = unlimitedEventGroups ||
+                eventGroupCount < WalletConstants.FreeMaxEventGroups,
         };
+    }
+
+    public async Task<WalletQuotaDto> UpgradeWalletPlanAsync(
+        CancellationToken cancellationToken = default)
+    {
+        var userId = _currentUser.GetRequiredUserId();
+        await _walletRepository.UpgradeToPremiumAsync(userId, cancellationToken);
+        return await GetWalletQuotaAsync(cancellationToken);
     }
 
     private async Task<SavedCardDto> CreateAsync(
@@ -138,7 +178,8 @@ public sealed class SavedCardService : ISavedCardService
 
         var entitlement = await _walletRepository.GetOrCreateAsync(userId, cancellationToken);
         var usedCount = await _savedCardRepository.CountByUserIdAsync(userId, cancellationToken);
-        if (usedCount >= entitlement.MaxCards)
+        if (!WalletConstants.HasUnlimitedWalletCards(entitlement.Tier) &&
+            usedCount >= entitlement.MaxCards)
         {
             throw new ForbiddenException(
                 "Wallet card limit reached.",
@@ -147,6 +188,14 @@ public sealed class SavedCardService : ISavedCardService
 
         var sourceType = SavedCardSourceType.Normalize(request.SourceType, cardId);
         var isManual = SavedCardSourceType.IsManual(sourceType);
+
+        if (isManual &&
+            !await CanAddManualSavedCardAsync(userId, entitlement.Tier, cancellationToken))
+        {
+            throw new ForbiddenException(
+                "Manual wallet entries require a premium plan after the free trial.",
+                ErrorCodes.PremiumRequired);
+        }
 
         if (isManual && !CardIdGenerator.IsManualWalletId(cardId))
         {
@@ -340,6 +389,30 @@ public sealed class SavedCardService : ISavedCardService
         value = text;
         return true;
     }
+
+    private static bool IsPremiumTier(string tier) =>
+        string.Equals(tier, WalletConstants.PremiumTier, StringComparison.OrdinalIgnoreCase);
+
+    private async Task<bool> CanAddManualSavedCardAsync(
+        Guid userId,
+        string tier,
+        CancellationToken cancellationToken)
+    {
+        if (IsPremiumTier(tier))
+        {
+            return true;
+        }
+
+        var manualCount = await _savedCardRepository.CountManualByUserIdAsync(
+            userId,
+            cancellationToken);
+        return manualCount < WalletConstants.FreeMaxManualSavedCards;
+    }
+
+    private static int GetMaxBusinessCards(string tier) =>
+        IsPremiumTier(tier)
+            ? WalletConstants.PremiumMaxBusinessCards
+            : WalletConstants.FreeMaxBusinessCards;
 
     private static void ValidateCardId(string? cardId)
     {

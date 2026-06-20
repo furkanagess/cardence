@@ -11,12 +11,14 @@ class LoginEmailForm extends StatefulWidget {
     super.key,
     required this.isLoading,
     required this.onSubmit,
+    this.initialEmail,
     this.onForgotPassword,
     this.showSubmitButton = true,
     this.showForgotPasswordLink = true,
   });
 
   final bool isLoading;
+  final String? initialEmail;
   final void Function({required String email, required String password})
       onSubmit;
   final VoidCallback? onForgotPassword;
@@ -32,6 +34,26 @@ class LoginEmailFormState extends State<LoginEmailForm> {
   final _passwordController = TextEditingController();
   String? _emailError;
   String? _passwordError;
+
+  @override
+  void initState() {
+    super.initState();
+    final email = widget.initialEmail?.trim();
+    if (email != null && email.isNotEmpty) {
+      _emailController.text = email;
+    }
+  }
+
+  @override
+  void didUpdateWidget(LoginEmailForm oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final email = widget.initialEmail?.trim();
+    if (email != null &&
+        email.isNotEmpty &&
+        email != _emailController.text.trim()) {
+      _emailController.text = email;
+    }
+  }
 
   @override
   void dispose() {

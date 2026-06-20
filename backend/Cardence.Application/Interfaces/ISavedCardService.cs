@@ -18,4 +18,6 @@ public interface ISavedCardService
     Task DeleteAsync(string cardId, CancellationToken cancellationToken = default);
 
     Task<WalletQuotaDto> GetWalletQuotaAsync(CancellationToken cancellationToken = default);
+
+    Task<WalletQuotaDto> UpgradeWalletPlanAsync(CancellationToken cancellationToken = default);
 }

@@ -1,4 +1,5 @@
 using Cardence.Application.Interfaces;
+using Cardence.Domain.Constants;
 using Cardence.Domain.Entities;
 using Cardence.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
@@ -50,6 +51,17 @@ public sealed class SavedCardRepository : ISavedCardRepository
     {
         return await _dbContext.SavedCards
             .CountAsync(card => card.UserId == userId, cancellationToken);
+    }
+
+    public async Task<int> CountManualByUserIdAsync(
+        Guid userId,
+        CancellationToken cancellationToken = default)
+    {
+        return await _dbContext.SavedCards
+            .CountAsync(
+                card => card.UserId == userId &&
+                        card.SourceType == SavedCardSourceType.Manual,
+                cancellationToken);
     }
 
     public async Task AddAsync(SavedCard card, CancellationToken cancellationToken = default)

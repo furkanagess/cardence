@@ -15,6 +15,8 @@ import '../../../saved_cards/domain/usecases/get_saved_cards_wallet_quota.dart';
 import '../../../saved_cards/domain/usecases/link_saved_cards_to_event_group.dart';
 import '../../../saved_cards/domain/usecases/save_saved_card.dart';
 import '../../../saved_cards/domain/usecases/upgrade_wallet_plan.dart';
+import '../../../subscriptions/domain/usecases/restore_wallet_purchases.dart';
+import '../../../ads/domain/usecases/show_interstitial_ad.dart';
 import '../../../event_groups/presentation/pages/event_groups_page.dart';
 import '../../../onboarding/domain/entities/onboarding_card_draft.dart';
 import '../../../profile/domain/usecases/get_profile_stats.dart';
@@ -49,7 +51,9 @@ class MainShellPage extends StatefulWidget {
     required this.addSavedCard,
     required this.deleteSavedCard,
     required this.upgradeWalletPlan,
+    required this.restoreWalletPurchases,
     required this.getCurrentUser,
+    required this.showInterstitialAd,
     required this.themePreference,
     required this.onThemeChanged,
     required this.onLogout,
@@ -72,7 +76,9 @@ class MainShellPage extends StatefulWidget {
   final AddSavedCard addSavedCard;
   final DeleteSavedCard deleteSavedCard;
   final UpgradeWalletPlan upgradeWalletPlan;
+  final RestoreWalletPurchases restoreWalletPurchases;
   final GetCurrentUser getCurrentUser;
+  final ShowInterstitialAd showInterstitialAd;
   final ThemePreference themePreference;
   final ValueChanged<ThemePreference> onThemeChanged;
   final Future<void> Function() onLogout;
@@ -166,6 +172,8 @@ class _MainShellPageState extends State<MainShellPage> {
               deleteSavedCard: widget.deleteSavedCard,
               addSavedCard: widget.addSavedCard,
               upgradeWalletPlan: widget.upgradeWalletPlan,
+              restoreWalletPurchases: widget.restoreWalletPurchases,
+              showInterstitialAd: widget.showInterstitialAd,
               showFlippableView: !_savedCardsPreferListView,
               onViewModeChanged: (flippable) =>
                   setState(() => _savedCardsPreferListView = !flippable),
@@ -180,6 +188,7 @@ class _MainShellPageState extends State<MainShellPage> {
               getSavedCards: widget.getSavedCards,
               saveSavedCard: widget.saveSavedCard,
               deleteSavedCard: widget.deleteSavedCard,
+              restoreWalletPurchases: widget.restoreWalletPurchases,
               createGroupTrigger: _eventGroupsCreateTrigger,
             ),
             ProfilePage(
@@ -187,6 +196,7 @@ class _MainShellPageState extends State<MainShellPage> {
               getOnboardingDraftCards: widget.getOnboardingDraftCards,
               persistOnboardingCard: widget.persistOnboardingCard,
               getProfileStats: widget.getProfileStats,
+              getSavedCardsWalletQuota: widget.getSavedCardsWalletQuota,
               onDraftUpdated: (updated) =>
                   setState(() => _myCardDraft = updated),
             ),

@@ -2,6 +2,7 @@ using Cardence.Application.Common;
 using Cardence.Application.DTOs.Cards;
 using Cardence.Application.Interfaces;
 using Cardence.Application.Mapping;
+using Cardence.Domain.Constants;
 using Cardence.Domain.Entities;
 using Cardence.Domain.Exceptions;
 using FluentValidation;
@@ -14,6 +15,7 @@ public sealed class BusinessCardService : IBusinessCardService
     private readonly IBusinessCardRepository _repository;
     private readonly IUserRepository _userRepository;
     private readonly IEventGroupRepository _eventGroupRepository;
+    private readonly IWalletEntitlementRepository _walletRepository;
     private readonly ICurrentUserService _currentUser;
     private readonly IValidator<BusinessCardDto> _validator;
 
@@ -21,12 +23,14 @@ public sealed class BusinessCardService : IBusinessCardService
         IBusinessCardRepository repository,
         IUserRepository userRepository,
         IEventGroupRepository eventGroupRepository,
+        IWalletEntitlementRepository walletRepository,
         ICurrentUserService currentUser,
         IValidator<BusinessCardDto> validator)
     {
         _repository = repository;
         _userRepository = userRepository;
         _eventGroupRepository = eventGroupRepository;
+        _walletRepository = walletRepository;
         _currentUser = currentUser;
         _validator = validator;
     }
@@ -62,6 +66,8 @@ public sealed class BusinessCardService : IBusinessCardService
         {
             throw new ConflictException($"Card id '{cardId}' is already in use.", ErrorCodes.DuplicateCardId);
         }
+
+        await EnsureCanCreateBusinessCardAsync(userId, cancellationToken);
 
         var now = DateTime.UtcNow;
         var entity = new BusinessCard
@@ -196,4 +202,25 @@ public sealed class BusinessCardService : IBusinessCardService
             entity.PhotoUrl = user!.PhotoUrl;
         }
     }
+
+    private async Task EnsureCanCreateBusinessCardAsync(
+        Guid userId,
+        CancellationToken cancellationToken)
+    {
+        var entitlement = await _walletRepository.GetOrCreateAsync(userId, cancellationToken);
+        var businessCardCount = await _repository.CountByUserIdAsync(userId, cancellationToken);
+        var maxBusinessCards = GetMaxBusinessCards(entitlement.Tier);
+
+        if (businessCardCount >= maxBusinessCards)
+        {
+            throw new ForbiddenException(
+                "Business card limit reached.",
+                ErrorCodes.BusinessCardLimitReached);
+        }
+    }
+
+    private static int GetMaxBusinessCards(string tier) =>
+        string.Equals(tier, WalletConstants.PremiumTier, StringComparison.OrdinalIgnoreCase)
+            ? WalletConstants.PremiumMaxBusinessCards
+            : WalletConstants.FreeMaxBusinessCards;
 }

@@ -25,12 +25,12 @@ class SavedCardsChromeState {
   String get subtitle {
     if (quota == null) return 'Yükleniyor…';
     if (isDemoMode) {
-      return 'Örnek kartlar · ${quota!.remaining} boş slot';
+      return 'Örnek kartlar · ${quota!.remainingSlotsLabel}';
     }
     if (hasActiveFilters) {
       return '$displayCount / $totalCount kart gösteriliyor';
     }
-    return '${quota!.usedCount} kart · ${quota!.remaining} boş slot';
+    return '${quota!.usedCount} kart · ${quota!.remainingSlotsLabel}';
   }
 
   @override

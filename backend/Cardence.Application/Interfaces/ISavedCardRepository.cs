@@ -17,6 +17,10 @@ public interface ISavedCardRepository
         Guid userId,
         CancellationToken cancellationToken = default);
 
+    Task<int> CountManualByUserIdAsync(
+        Guid userId,
+        CancellationToken cancellationToken = default);
+
     Task AddAsync(SavedCard card, CancellationToken cancellationToken = default);
 
     Task UpdateAsync(SavedCard card, CancellationToken cancellationToken = default);

@@ -1,4 +1,5 @@
 import 'wallet_plan_tier.dart';
+import '../saved_cards_wallet_limits.dart';
 
 /// Kullanıcının kayıtlı kart kotası özeti.
 class SavedCardsWalletQuota {
@@ -6,25 +7,67 @@ class SavedCardsWalletQuota {
     required this.tier,
     required this.usedCount,
     required this.maxCards,
+    this.businessCardCount = 0,
+    this.maxBusinessCards = SavedCardsWalletLimits.freeMaxOwnBusinessCards,
+    this.canAddBusinessCard = true,
+    this.canAddManualSavedCard = false,
+    this.eventGroupCount = 0,
+    this.maxEventGroups = SavedCardsWalletLimits.freeMaxEventGroups,
+    this.canAddEventGroup = true,
   });
 
   final WalletPlanTier tier;
   final int usedCount;
   final int maxCards;
+  final int businessCardCount;
+  final int maxBusinessCards;
+  final bool canAddBusinessCard;
+  final bool canAddManualSavedCard;
+  final int eventGroupCount;
+  final int maxEventGroups;
+  final bool canAddEventGroup;
 
-  int get remaining => (maxCards - usedCount).clamp(0, maxCards);
+  bool get hasUnlimitedWallet => isPremium;
 
-  bool get canAddMore => usedCount < maxCards;
+  bool get hasUnlimitedEventGroups => isPremium;
+
+  int get remaining =>
+      hasUnlimitedWallet ? 0 : (maxCards - usedCount).clamp(0, maxCards);
+
+  bool get canAddMore => hasUnlimitedWallet || usedCount < maxCards;
 
   bool get isNearLimit {
-    if (maxCards <= 0) return false;
+    if (hasUnlimitedWallet || maxCards <= 0) return false;
     return usedCount >= (maxCards * 0.85).ceil();
   }
 
-  double get usageFraction =>
-      maxCards == 0 ? 0 : (usedCount / maxCards).clamp(0.0, 1.0);
+  double get usageFraction => hasUnlimitedWallet || maxCards <= 0
+      ? 0
+      : (usedCount / maxCards).clamp(0.0, 1.0);
 
   bool get isPremium => tier == WalletPlanTier.premium;
+
+  String get walletCapacityLabel =>
+      hasUnlimitedWallet ? 'Sınırsız' : '$maxCards';
+
+  String get remainingSlotsLabel =>
+      hasUnlimitedWallet ? 'Sınırsız' : '$remaining boş slot';
+
+  String get manualEntryMethodSubtitle {
+    if (isPremium) return 'Kartvizit bilgilerini manuel yazın';
+    if (canAddManualSavedCard) {
+      return '1 ücretsiz deneme · sonrasında Premium gerekir';
+    }
+    return 'Ücretsiz hakkınız doldu · Premium gerekli';
+  }
+
+  String get photoScanMethodSubtitle {
+    if (isPremium) return 'Kamerayı kullanarak bilgileri tara';
+    if (canAddManualSavedCard) {
+      return '1 ücretsiz deneme · sonrasında Premium gerekir';
+    }
+    return 'Ücretsiz hakkınız doldu · Premium gerekli';
+  }
 
   @override
   bool operator ==(Object other) {
@@ -32,9 +75,27 @@ class SavedCardsWalletQuota {
         other is SavedCardsWalletQuota &&
             other.tier == tier &&
             other.usedCount == usedCount &&
-            other.maxCards == maxCards;
+            other.maxCards == maxCards &&
+            other.businessCardCount == businessCardCount &&
+            other.maxBusinessCards == maxBusinessCards &&
+            other.canAddBusinessCard == canAddBusinessCard &&
+            other.canAddManualSavedCard == canAddManualSavedCard &&
+            other.eventGroupCount == eventGroupCount &&
+            other.maxEventGroups == maxEventGroups &&
+            other.canAddEventGroup == canAddEventGroup;
   }
 
   @override
-  int get hashCode => Object.hash(tier, usedCount, maxCards);
+  int get hashCode => Object.hash(
+        tier,
+        usedCount,
+        maxCards,
+        businessCardCount,
+        maxBusinessCards,
+        canAddBusinessCard,
+        canAddManualSavedCard,
+        eventGroupCount,
+        maxEventGroups,
+        canAddEventGroup,
+      );
 }

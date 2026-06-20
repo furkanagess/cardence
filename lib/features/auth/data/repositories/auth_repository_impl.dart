@@ -1,4 +1,5 @@
 import '../../domain/entities/auth_session.dart';
+import '../../domain/entities/last_login_credentials.dart';
 import '../../domain/entities/restore_session_result.dart';
 import '../../domain/entities/user_profile.dart';
 import '../../domain/repositories/auth_repository.dart';
@@ -26,6 +27,18 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<AuthSession> _persist(AuthSessionModel model) async {
     await _local.saveSession(model);
     return model.toEntity();
+  }
+
+  Future<void> _rememberLogin({
+    String? email,
+    String? phone,
+    LastLoginMethod? method,
+  }) async {
+    await _local.saveLastLoginCredentials(
+      email: email?.trim().isNotEmpty == true ? email!.trim().toLowerCase() : null,
+      phone: phone?.trim().isNotEmpty == true ? phone!.trim() : null,
+      method: method,
+    );
   }
 
   AuthSessionModel _mergeProfile(AuthSessionModel session, UserProfile profile) {
@@ -174,6 +187,10 @@ class AuthRepositoryImpl implements AuthRepository {
     try {
       await _fetchAndPersistProfile(model);
     } catch (_) {}
+    await _rememberLogin(
+      email: email,
+      method: LastLoginMethod.email,
+    );
     return session;
   }
 
@@ -190,6 +207,10 @@ class AuthRepositoryImpl implements AuthRepository {
     try {
       await _fetchAndPersistProfile(model);
     } catch (_) {}
+    await _rememberLogin(
+      phone: phone,
+      method: LastLoginMethod.phone,
+    );
     return session;
   }
 
@@ -210,6 +231,11 @@ class AuthRepositoryImpl implements AuthRepository {
     try {
       await _fetchAndPersistProfile(model);
     } catch (_) {}
+    await _rememberLogin(
+      email: email,
+      phone: phone,
+      method: LastLoginMethod.email,
+    );
     return session;
   }
 
@@ -234,6 +260,11 @@ class AuthRepositoryImpl implements AuthRepository {
     try {
       await _fetchAndPersistProfile(model);
     } catch (_) {}
+    await _rememberLogin(
+      email: email,
+      phone: phone,
+      method: email != null ? LastLoginMethod.email : LastLoginMethod.phone,
+    );
     return session;
   }
 
@@ -244,6 +275,11 @@ class AuthRepositoryImpl implements AuthRepository {
       throw AuthApiException('Oturum bulunamadı. Lütfen tekrar giriş yapın.');
     }
     return _resolveProfile(AuthSessionModel.fromEntity(session));
+  }
+
+  @override
+  Future<LastLoginCredentials> getLastLoginCredentials() async {
+    return _local.getLastLoginCredentials();
   }
 
   @override

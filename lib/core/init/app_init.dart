@@ -11,6 +11,7 @@ import '../../features/auth/domain/usecases/complete_onboarding_remote.dart';
 import '../../features/auth/domain/usecases/forgot_password.dart';
 import '../../features/auth/domain/usecases/get_auth_session.dart';
 import '../../features/auth/domain/usecases/get_current_user.dart';
+import '../../features/auth/domain/usecases/get_last_login_credentials.dart';
 import '../../features/auth/domain/usecases/login_with_email.dart';
 import '../../features/auth/domain/usecases/login_with_phone.dart';
 import '../../features/auth/domain/usecases/logout.dart';
@@ -46,9 +47,7 @@ import '../../features/onboarding/domain/usecases/resolve_onboarding_initial_dra
 import '../../features/onboarding/domain/usecases/save_onboarding_draft_card.dart';
 import '../../features/saved_cards/data/datasources/saved_card_local_datasource.dart';
 import '../../features/saved_cards/data/datasources/saved_card_remote_datasource.dart';
-import '../../features/saved_cards/data/datasources/wallet_entitlement_local_datasource.dart';
 import '../../features/saved_cards/data/repositories/saved_card_repository_impl.dart';
-import '../../features/saved_cards/data/repositories/wallet_entitlement_repository_impl.dart';
 import '../../features/saved_cards/domain/usecases/add_saved_card.dart';
 import '../../features/saved_cards/domain/usecases/link_saved_cards_to_event_group.dart';
 import '../../features/saved_cards/domain/usecases/delete_saved_card.dart';
@@ -56,6 +55,14 @@ import '../../features/saved_cards/domain/usecases/get_saved_cards.dart';
 import '../../features/saved_cards/domain/usecases/get_saved_cards_wallet_quota.dart';
 import '../../features/saved_cards/domain/usecases/save_saved_card.dart';
 import '../../features/saved_cards/domain/usecases/upgrade_wallet_plan.dart';
+import '../../features/subscriptions/data/repositories/subscription_repository_impl.dart';
+import '../../features/subscriptions/domain/usecases/configure_subscriptions.dart';
+import '../../features/subscriptions/domain/usecases/identify_subscription_user.dart';
+import '../../features/subscriptions/domain/usecases/logout_subscription_user.dart';
+import '../../features/subscriptions/domain/usecases/restore_wallet_purchases.dart';
+import '../../features/ads/data/repositories/interstitial_ad_repository_impl.dart';
+import '../../features/ads/domain/usecases/initialize_mobile_ads.dart';
+import '../../features/ads/domain/usecases/show_interstitial_ad.dart';
 import '../../features/settings/data/datasources/theme_local_datasource.dart';
 import '../../features/settings/data/repositories/theme_repository_impl.dart';
 import '../../features/settings/domain/usecases/get_theme_preference.dart';
@@ -78,6 +85,19 @@ class AppInit {
     final prefs = await _initSharedPreferences();
     final authLocal = AuthLocalDataSourceImpl(prefs);
 
+    final subscriptionRepo = SubscriptionRepositoryImpl();
+    final configureSubscriptions = ConfigureSubscriptions(subscriptionRepo);
+    await configureSubscriptions();
+    final identifySubscriptionUser = IdentifySubscriptionUser(subscriptionRepo);
+    final logoutSubscriptionUser = LogoutSubscriptionUser(subscriptionRepo);
+
+    final interstitialAdRepo = InterstitialAdRepositoryImpl();
+    await InitializeMobileAds(interstitialAdRepo)();
+    final showInterstitialAd = ShowInterstitialAd(
+      interstitialAdRepo,
+      subscriptionRepo,
+    );
+
     final onboardingLocal = OnboardingLocalDataSourceImpl(prefs, authLocal);
     final onboardingRepo = OnboardingRepositoryImpl(onboardingLocal);
     final syncOnboardingFromServer = SyncOnboardingFromServer(onboardingRepo);
@@ -88,8 +108,6 @@ class AppInit {
       remote: SavedCardRemoteDataSourceImpl(),
       authLocal: authLocal,
     );
-    final walletLocal = WalletEntitlementLocalDataSourceImpl(prefs);
-    final walletRepo = WalletEntitlementRepositoryImpl(walletLocal);
     final eventGroupLocal = EventGroupLocalDataSourceImpl(prefs, authLocal);
 
     final syncUserProfileCards = SyncUserProfileCards(
@@ -108,7 +126,10 @@ class AppInit {
     final auth = _initAuth(
       authLocal: authLocal,
       onProfileSynced: syncUserProfileCards.call,
-      onLogout: () => clearUserScopedLocalData(),
+      onLogout: () async {
+        await logoutSubscriptionUser();
+        await clearUserScopedLocalData();
+      },
     );
     final businessCards = _initBusinessCards(prefs, authLocal);
     final onboarding = _initOnboarding(
@@ -131,17 +152,29 @@ class AppInit {
     );
     final savedCards = _initSavedCards(
       savedCardRepo: savedCardRepo,
-      walletRepo: walletRepo,
+      subscriptionRepo: subscriptionRepo,
     );
+    final restoreWalletPurchases = RestoreWalletPurchases(
+      subscriptionRepo,
+      savedCardRepo,
+    );
+
+    final session = await authLocal.getSession();
+    if (session != null && session.userId.isNotEmpty) {
+      await identifySubscriptionUser(session.userId);
+    }
+
     return AppInitResult(
       restoreAuthSession: auth.restoreAuthSession,
       getAuthSession: auth.getAuthSession,
+      identifySubscriptionUser: identifySubscriptionUser,
       loginWithEmail: auth.loginWithEmail,
       loginWithPhone: auth.loginWithPhone,
       registerUser: auth.registerUser,
       forgotPassword: auth.forgotPassword,
       resetPassword: auth.resetPassword,
       getCurrentUser: auth.getCurrentUser,
+      getLastLoginCredentials: auth.getLastLoginCredentials,
       logout: auth.logout,
       uploadProfilePhoto: auth.uploadProfilePhoto,
       getOnboardingCompleted: onboarding.getOnboardingCompleted,
@@ -166,8 +199,10 @@ class AppInit {
       addSavedCard: savedCards.addSavedCard,
       deleteSavedCard: savedCards.deleteSavedCard,
       upgradeWalletPlan: savedCards.upgradeWalletPlan,
+      restoreWalletPurchases: restoreWalletPurchases,
       linkSavedCardsToEventGroup: savedCards.linkSavedCardsToEventGroup,
       getProfileStats: profile.getProfileStats,
+      showInterstitialAd: showInterstitialAd,
     );
   }
 
@@ -181,7 +216,7 @@ class AppInit {
     LinkSavedCardsToEventGroup linkSavedCardsToEventGroup,
   }) _initSavedCards({
     required SavedCardRepositoryImpl savedCardRepo,
-    required WalletEntitlementRepositoryImpl walletRepo,
+    required SubscriptionRepositoryImpl subscriptionRepo,
   }) {
     final getQuota = GetSavedCardsWalletQuota(savedCardRepo);
     final saveSavedCard = SaveSavedCard(savedCardRepo);
@@ -191,7 +226,7 @@ class AppInit {
       getSavedCardsWalletQuota: getQuota,
       addSavedCard: AddSavedCard(savedCardRepo),
       deleteSavedCard: DeleteSavedCard(savedCardRepo),
-      upgradeWalletPlan: UpgradeWalletPlan(walletRepo),
+      upgradeWalletPlan: UpgradeWalletPlan(subscriptionRepo, savedCardRepo),
       linkSavedCardsToEventGroup: LinkSavedCardsToEventGroup(saveSavedCard),
     );
   }
@@ -237,6 +272,7 @@ class AppInit {
     ForgotPassword forgotPassword,
     ResetPassword resetPassword,
     GetCurrentUser getCurrentUser,
+    GetLastLoginCredentials getLastLoginCredentials,
     Logout logout,
     UploadProfilePhoto uploadProfilePhoto,
     CompleteOnboardingRemote completeOnboardingRemote,
@@ -261,6 +297,7 @@ class AppInit {
       forgotPassword: ForgotPassword(repo),
       resetPassword: ResetPassword(repo),
       getCurrentUser: GetCurrentUser(repo),
+      getLastLoginCredentials: GetLastLoginCredentials(repo),
       logout: Logout(repo),
       uploadProfilePhoto: UploadProfilePhoto(repo),
       completeOnboardingRemote: CompleteOnboardingRemote(repo),
@@ -363,12 +400,14 @@ class AppInitResult {
   const AppInitResult({
     required this.restoreAuthSession,
     required this.getAuthSession,
+    required this.identifySubscriptionUser,
     required this.loginWithEmail,
     required this.loginWithPhone,
     required this.registerUser,
     required this.forgotPassword,
     required this.resetPassword,
     required this.getCurrentUser,
+    required this.getLastLoginCredentials,
     required this.logout,
     required this.uploadProfilePhoto,
     required this.getOnboardingCompleted,
@@ -393,18 +432,22 @@ class AppInitResult {
     required this.addSavedCard,
     required this.deleteSavedCard,
     required this.upgradeWalletPlan,
+    required this.restoreWalletPurchases,
     required this.linkSavedCardsToEventGroup,
     required this.getProfileStats,
+    required this.showInterstitialAd,
   });
 
   final RestoreAuthSession restoreAuthSession;
   final GetAuthSession getAuthSession;
+  final IdentifySubscriptionUser identifySubscriptionUser;
   final LoginWithEmail loginWithEmail;
   final LoginWithPhone loginWithPhone;
   final RegisterUser registerUser;
   final ForgotPassword forgotPassword;
   final ResetPassword resetPassword;
   final GetCurrentUser getCurrentUser;
+  final GetLastLoginCredentials getLastLoginCredentials;
   final Logout logout;
   final UploadProfilePhoto uploadProfilePhoto;
   final GetOnboardingCompleted getOnboardingCompleted;
@@ -429,6 +472,8 @@ class AppInitResult {
   final AddSavedCard addSavedCard;
   final DeleteSavedCard deleteSavedCard;
   final UpgradeWalletPlan upgradeWalletPlan;
+  final RestoreWalletPurchases restoreWalletPurchases;
   final LinkSavedCardsToEventGroup linkSavedCardsToEventGroup;
   final GetProfileStats getProfileStats;
+  final ShowInterstitialAd showInterstitialAd;
 }

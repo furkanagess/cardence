@@ -72,6 +72,7 @@ class _AddManualCardPageState extends State<AddManualCardPage> {
           ),
         );
       case AddSavedCardLimitReached():
+      case AddSavedCardPremiumRequired():
         Navigator.of(context).pop(result);
       case AddSavedCardInvalidPayload(:final message):
         ScaffoldMessenger.of(context).showSnackBar(

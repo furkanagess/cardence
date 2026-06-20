@@ -22,6 +22,10 @@ public interface IEventGroupRepository
         Guid groupId,
         CancellationToken cancellationToken = default);
 
+    Task<int> CountByUserIdAsync(
+        Guid userId,
+        CancellationToken cancellationToken = default);
+
     Task AddAsync(EventGroup group, CancellationToken cancellationToken = default);
 
     Task UpdateAsync(EventGroup group, CancellationToken cancellationToken = default);

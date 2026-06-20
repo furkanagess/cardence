@@ -37,6 +37,12 @@ class AddSavedCard {
         final quota = await _cardRepository.getWalletQuota();
         return AddSavedCardLimitReached(quota);
       }
+      if (e.statusCode == 403 &&
+          (e.errorCode == 'PREMIUM_REQUIRED' ||
+              e.errorCode == 'BUSINESS_CARD_LIMIT_REACHED')) {
+        final quota = await _cardRepository.getWalletQuota();
+        return AddSavedCardPremiumRequired(quota);
+      }
       if (e.statusCode == 400 ||
           e.errorCode == 'VALIDATION_ERROR' ||
           e.errorCode == 'INVALID_CARD_PAYLOAD') {

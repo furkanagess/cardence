@@ -56,5 +56,7 @@
 			<key>NSAllowsLocalNetworking</key>
 			<true/>
 		</dict>
+		<key>GADApplicationIdentifier</key>
+		<string>ca-app-pub-3499593115543692~2845897015</string>
 	</dict>
 </plist>

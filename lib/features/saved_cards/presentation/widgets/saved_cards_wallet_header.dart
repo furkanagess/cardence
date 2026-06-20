@@ -57,7 +57,7 @@ class SavedCardsWalletHeader extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    ' / ${quota.maxCards} kart',
+                    ' / ${quota.walletCapacityLabel} kart',
                     style: textTheme.bodyMedium?.copyWith(
                       color: colorScheme.onSurfaceVariant,
                     ),

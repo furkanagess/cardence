@@ -16,11 +16,13 @@ class ForgotPasswordPage extends StatelessWidget {
     required this.forgotPassword,
     required this.resetPassword,
     required this.onResetSuccess,
+    this.initialEmail,
   });
 
   final ForgotPassword forgotPassword;
   final ResetPassword resetPassword;
   final VoidCallback onResetSuccess;
+  final String? initialEmail;
 
   @override
   Widget build(BuildContext context) {
@@ -29,15 +31,22 @@ class ForgotPasswordPage extends StatelessWidget {
         forgotPassword: forgotPassword,
         resetPassword: resetPassword,
       ),
-      child: _ForgotPasswordView(onResetSuccess: onResetSuccess),
+      child: _ForgotPasswordView(
+        initialEmail: initialEmail,
+        onResetSuccess: onResetSuccess,
+      ),
     );
   }
 }
 
 class _ForgotPasswordView extends StatelessWidget {
-  const _ForgotPasswordView({required this.onResetSuccess});
+  const _ForgotPasswordView({
+    required this.onResetSuccess,
+    this.initialEmail,
+  });
 
   final VoidCallback onResetSuccess;
+  final String? initialEmail;
 
   @override
   Widget build(BuildContext context) {
@@ -85,6 +94,7 @@ class _ForgotPasswordView extends StatelessWidget {
                     isLoading: state.isLoading,
                     isOtpStep: state.isOtpStep,
                     pendingEmail: state.pendingEmail,
+                    initialEmail: initialEmail,
                     onRequestOtp: (email) => context
                         .read<ForgotPasswordBloc>()
                         .add(ForgotPasswordOtpRequested(email: email)),

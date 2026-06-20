@@ -21,9 +21,12 @@ void main() async {
   runApp(App(
     rootNavigatorKey: rootNavigatorKey,
     restoreAuthSession: result.restoreAuthSession,
+    getAuthSession: result.getAuthSession,
+    identifySubscriptionUser: result.identifySubscriptionUser,
     loginWithEmail: result.loginWithEmail,
     loginWithPhone: result.loginWithPhone,
     registerUser: result.registerUser,
+    getLastLoginCredentials: result.getLastLoginCredentials,
     forgotPassword: result.forgotPassword,
     resetPassword: result.resetPassword,
     getCurrentUser: result.getCurrentUser,
@@ -51,6 +54,8 @@ void main() async {
     addSavedCard: result.addSavedCard,
     deleteSavedCard: result.deleteSavedCard,
     upgradeWalletPlan: result.upgradeWalletPlan,
+    restoreWalletPurchases: result.restoreWalletPurchases,
     getProfileStats: result.getProfileStats,
+    showInterstitialAd: result.showInterstitialAd,
   ));
 }

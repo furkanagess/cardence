@@ -1,27 +1,34 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/widgets/atoms/custom_button.dart';
-import '../../domain/saved_cards_wallet_limits.dart';
-import '../../domain/usecases/upgrade_wallet_plan.dart';
+import '../../../subscriptions/domain/usecases/restore_wallet_purchases.dart';
 
-/// Premium paket simülasyonu (yerel); gerçek ödeme entegrasyonu için yer tutucu.
+enum WalletUpgradeSheetResult {
+  cancelled,
+  purchaseRequested,
+  restored,
+}
+
+/// Premium cüzdan avantajları; satın alma doğrudan mağaza diyaloğu ile yapılır.
 class WalletUpgradeSheet extends StatelessWidget {
   const WalletUpgradeSheet({
     super.key,
-    required this.upgradeWalletPlan,
+    required this.restoreWalletPurchases,
   });
 
-  final UpgradeWalletPlan upgradeWalletPlan;
+  final RestoreWalletPurchases restoreWalletPurchases;
 
-  static Future<bool?> show(
+  static Future<WalletUpgradeSheetResult?> show(
     BuildContext context, {
-    required UpgradeWalletPlan upgradeWalletPlan,
+    required RestoreWalletPurchases restoreWalletPurchases,
   }) {
-    return showModalBottomSheet<bool>(
+    return showModalBottomSheet<WalletUpgradeSheetResult>(
       context: context,
       showDragHandle: true,
       isScrollControlled: true,
-      builder: (context) => WalletUpgradeSheet(upgradeWalletPlan: upgradeWalletPlan),
+      builder: (context) => WalletUpgradeSheet(
+        restoreWalletPurchases: restoreWalletPurchases,
+      ),
     );
   }
 
@@ -51,8 +58,7 @@ class WalletUpgradeSheet extends StatelessWidget {
             const SizedBox(height: 20),
             _BenefitRow(
               icon: Icons.credit_card_rounded,
-              text:
-                  '${SavedCardsWalletLimits.premiumMaxCards} karta kadar kayıt',
+              text: 'Sınırsız kart kaydı',
             ),
             const SizedBox(height: 10),
             _BenefitRow(
@@ -61,16 +67,21 @@ class WalletUpgradeSheet extends StatelessWidget {
             ),
             const SizedBox(height: 10),
             _BenefitRow(
+              icon: Icons.edit_note_rounded,
+              text: 'Sınırsız elle ve fotoğrafla kart ekleme',
+            ),
+            const SizedBox(height: 10),
+            _BenefitRow(
               icon: Icons.qr_code_scanner_rounded,
               text: 'QR ve kart ID ile hızlı ekleme',
             ),
             const SizedBox(height: 24),
             CustomButton(
-              label: 'Premium\'u etkinleştir (demo)',
-              onPressed: () async {
-                await upgradeWalletPlan();
-                if (!context.mounted) return;
-                Navigator.of(context).pop(true);
+              label: 'Premium\'a geç',
+              onPressed: () {
+                Navigator.of(context).pop(
+                  WalletUpgradeSheetResult.purchaseRequested,
+                );
               },
               style: FilledButton.styleFrom(
                 shape: RoundedRectangleBorder(
@@ -79,8 +90,26 @@ class WalletUpgradeSheet extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 8),
+            TextButton(
+              onPressed: () async {
+                final restored = await restoreWalletPurchases();
+                if (!context.mounted) return;
+                if (restored) {
+                  Navigator.of(context).pop(WalletUpgradeSheetResult.restored);
+                  return;
+                }
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Geri yüklenecek satın alım bulunamadı.'),
+                    behavior: SnackBarBehavior.floating,
+                  ),
+                );
+              },
+              child: const Text('Satın alımları geri yükle'),
+            ),
+            const SizedBox(height: 4),
             Text(
-              'Gerçek uygulamada App Store / Play Store üzerinden satın alınır.',
+              'App Store / Play Store üzerinden güvenli ödeme.',
               style: textTheme.labelSmall?.copyWith(
                 color: colorScheme.onSurfaceVariant,
               ),

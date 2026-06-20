@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
 
+import '../../../../core/utils/intl_phone_field_helpers.dart';
 import '../../../../core/validation/app_validators.dart';
 import '../../../../core/widgets/atoms/custom_button.dart';
 import '../../../../core/widgets/atoms/custom_text_field.dart';
@@ -12,11 +13,13 @@ class LoginPhoneForm extends StatefulWidget {
     super.key,
     required this.isLoading,
     required this.onSubmit,
+    this.initialPhone,
     this.showSubmitButton = true,
     this.reserveForgotPasswordSlot = false,
   });
 
   final bool isLoading;
+  final String? initialPhone;
   final void Function({required String phone, required String password}) onSubmit;
   final bool showSubmitButton;
   final bool reserveForgotPasswordSlot;
@@ -30,6 +33,26 @@ class LoginPhoneFormState extends State<LoginPhoneForm> {
   String _phoneNumber = '';
   String? _phoneError;
   String? _passwordError;
+
+  @override
+  void initState() {
+    super.initState();
+    final phone = widget.initialPhone?.trim();
+    if (phone != null && phone.isNotEmpty) {
+      _phoneNumber = phone;
+    }
+  }
+
+  @override
+  void didUpdateWidget(LoginPhoneForm oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final phone = widget.initialPhone?.trim();
+    if (phone != null &&
+        phone.isNotEmpty &&
+        phone != _phoneNumber.trim()) {
+      setState(() => _phoneNumber = phone);
+    }
+  }
 
   @override
   void dispose() {
@@ -74,12 +97,15 @@ class LoginPhoneFormState extends State<LoginPhoneForm> {
       children: [
         const OnboardingFieldLabel(label: 'Telefon', required: true),
         IntlPhoneField(
+          key: ValueKey(_phoneNumber),
           decoration: CustomTextField.themedDecoration(
             context,
             hintText: '5XX XXX XX XX',
             errorText: _phoneError,
           ),
-          initialCountryCode: 'TR',
+          initialCountryCode:
+              IntlPhoneFieldHelpers.countryCodeFromPhone(_phoneNumber),
+          initialValue: IntlPhoneFieldHelpers.nationalFromPhone(_phoneNumber),
           disableLengthCheck: true,
           onChanged: (phone) {
             _phoneNumber = phone.completeNumber;

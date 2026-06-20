@@ -3,6 +3,7 @@ using Xunit;
 using Cardence.Application.Interfaces;
 using Cardence.Application.Services;
 using Cardence.Application.Validators;
+using Cardence.Domain.Constants;
 using Cardence.Domain.Entities;
 using Cardence.Domain.Exceptions;
 using FluentAssertions;
@@ -16,6 +17,8 @@ public sealed class BusinessCardServiceTests
     private readonly IUserRepository _userRepository = Substitute.For<IUserRepository>();
     private readonly IEventGroupRepository _eventGroupRepository =
         Substitute.For<IEventGroupRepository>();
+    private readonly IWalletEntitlementRepository _walletRepository =
+        Substitute.For<IWalletEntitlementRepository>();
     private readonly ICurrentUserService _currentUser = Substitute.For<ICurrentUserService>();
     private readonly BusinessCardService _service;
     private readonly Guid _userId = Guid.NewGuid();
@@ -23,10 +26,19 @@ public sealed class BusinessCardServiceTests
     public BusinessCardServiceTests()
     {
         _currentUser.GetRequiredUserId().Returns(_userId);
+        _repository.CountByUserIdAsync(_userId, Arg.Any<CancellationToken>()).Returns(0);
+        _walletRepository.GetOrCreateAsync(_userId, Arg.Any<CancellationToken>())
+            .Returns(new WalletEntitlement
+            {
+                UserId = _userId,
+                Tier = WalletConstants.FreeTier,
+                MaxCards = WalletConstants.FreeMaxCards,
+            });
         _service = new BusinessCardService(
             _repository,
             _userRepository,
             _eventGroupRepository,
+            _walletRepository,
             _currentUser,
             new BusinessCardDtoValidator());
     }
@@ -58,6 +70,17 @@ public sealed class BusinessCardServiceTests
         var act = () => _service.CreateAsync(request);
 
         await act.Should().ThrowAsync<ConflictException>();
+    }
+
+    [Fact]
+    public async Task CreateAsync_ThrowsForbidden_WhenFreeBusinessCardLimitReached()
+    {
+        _repository.CountByUserIdAsync(_userId, Arg.Any<CancellationToken>())
+            .Returns(WalletConstants.FreeMaxBusinessCards);
+
+        var act = () => _service.CreateAsync(ValidCardRequest());
+
+        await act.Should().ThrowAsync<ForbiddenException>();
     }
 
     [Fact]

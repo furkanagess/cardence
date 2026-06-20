@@ -153,6 +153,12 @@ class SavedCardRepositoryImpl implements SavedCardRepository {
   }
 
   @override
+  Future<void> syncWalletPremium() async {
+    final token = await _requireAccessToken();
+    await _remote.upgradeWalletPlan(accessToken: token);
+  }
+
+  @override
   Future<void> cacheFromProfile(List<SavedCard> cards) async {
     await _local.replaceAll(
       cards.map(SavedCardModel.fromEntity).toList(growable: false),

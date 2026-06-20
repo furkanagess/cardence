@@ -11,6 +11,10 @@ abstract class LoginEvent extends Equatable {
   List<Object?> get props => [];
 }
 
+class LoginStarted extends LoginEvent {
+  const LoginStarted();
+}
+
 class AuthScreenModeChanged extends LoginEvent {
   const AuthScreenModeChanged(this.mode);
 
