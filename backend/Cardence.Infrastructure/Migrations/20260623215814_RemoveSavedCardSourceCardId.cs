@@ -11,17 +11,17 @@ namespace Cardence.Infrastructure.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropForeignKey(
-                name: "FK_saved_cards_cards_source_card_id",
-                table: "saved_cards");
+            // SplitSavedCardsFromCardsTable never created source_card_id on saved_cards;
+            // use idempotent drops so fresh databases and partial deploys both succeed.
+            migrationBuilder.Sql("""
+                ALTER TABLE saved_cards
+                    DROP CONSTRAINT IF EXISTS "FK_saved_cards_cards_source_card_id";
 
-            migrationBuilder.DropIndex(
-                name: "IX_saved_cards_source_card_id",
-                table: "saved_cards");
+                DROP INDEX IF EXISTS "IX_saved_cards_source_card_id";
 
-            migrationBuilder.DropColumn(
-                name: "source_card_id",
-                table: "saved_cards");
+                ALTER TABLE saved_cards
+                    DROP COLUMN IF EXISTS source_card_id;
+                """);
         }
 
         /// <inheritdoc />

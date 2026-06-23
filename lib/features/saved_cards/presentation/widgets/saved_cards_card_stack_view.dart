@@ -88,84 +88,87 @@ class _SavedCardsCardStackViewState extends State<SavedCardsCardStackView> {
 
     return SizedBox(
       height: cardsHeight,
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SavedCardsFocusArrowTrack(
-            trackHeight: cardsHeight,
-            slotCenterYs: slotCenters,
-            focusedIndex: _focusedIndex,
-            onFocusedIndexChanged: (index) {
-              setState(() => _focusedIndex = index);
-            },
-          ),
-          const SizedBox(width: 4),
-          Expanded(
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                return Stack(
-                  clipBehavior: Clip.none,
-                  children: [
-                    for (final i in _paintOrder(
-                      widget.displayCards.length,
-                      _focusedIndex,
-                    ))
-                      AnimatedPositioned(
-                        duration: SavedCardsCardStackView.dragAnimDuration,
-                        curve: SavedCardsCardStackView.dragAnimCurve,
-                        top: _cardTopFor(i),
-                        left: i == _focusedIndex && !isDragging ? 0 : 6,
-                        right: i == _focusedIndex && !isDragging ? 0 : 6,
-                        child: _StackCardSlot(
-                          index: i,
-                          displayCards: widget.displayCards,
-                          state: widget.state,
-                          cubit: widget.cubit,
-                          useDummyCards: widget.useDummyCards,
-                          isFocused: i == _focusedIndex && !isDragging,
-                          maxWidth: constraints.maxWidth,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          return Stack(
+            clipBehavior: Clip.none,
+            children: [
+              Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  for (final i in _paintOrder(
+                    widget.displayCards.length,
+                    _focusedIndex,
+                  ))
+                    AnimatedPositioned(
+                      duration: SavedCardsCardStackView.dragAnimDuration,
+                      curve: SavedCardsCardStackView.dragAnimCurve,
+                      top: _cardTopFor(i),
+                      left: 0,
+                      right: 0,
+                      child: _StackCardSlot(
+                        index: i,
+                        displayCards: widget.displayCards,
+                        state: widget.state,
+                        cubit: widget.cubit,
+                        useDummyCards: widget.useDummyCards,
+                        isFocused: i == _focusedIndex && !isDragging,
+                        maxWidth: constraints.maxWidth,
+                        colorScheme: colorScheme,
+                        onOpenCard: widget.onOpenCard,
+                      ),
+                    ),
+                  if (widget.state.draggingCardIndex != null &&
+                      widget.state.hoverTargetIndex != null &&
+                      widget.state.draggingCardIndex !=
+                          widget.state.hoverTargetIndex &&
+                      widget.state.draggingCardIndex! >= 0 &&
+                      widget.state.draggingCardIndex! <
+                          widget.displayCards.length)
+                    AnimatedPositioned(
+                      duration: SavedCardsCardStackView.dragAnimDuration,
+                      curve: SavedCardsCardStackView.dragAnimCurve,
+                      top: (widget.state.hoverTargetIndex ?? 0) *
+                          SavedCardsCardStackView.cardVerticalStep,
+                      left: 0,
+                      right: 0,
+                      child: IgnorePointer(
+                        child: _DropSlotCardPreview(
+                          card: widget
+                              .displayCards[widget.state.draggingCardIndex!],
                           colorScheme: colorScheme,
-                          onOpenCard: widget.onOpenCard,
+                          hoverTargetIndex: widget.state.hoverTargetIndex,
                         ),
                       ),
-                    if (widget.state.draggingCardIndex != null &&
-                        widget.state.hoverTargetIndex != null &&
-                        widget.state.draggingCardIndex !=
-                            widget.state.hoverTargetIndex &&
-                        widget.state.draggingCardIndex! >= 0 &&
-                        widget.state.draggingCardIndex! <
-                            widget.displayCards.length)
-                      AnimatedPositioned(
-                        duration: SavedCardsCardStackView.dragAnimDuration,
-                        curve: SavedCardsCardStackView.dragAnimCurve,
-                        top: (widget.state.hoverTargetIndex ?? 0) *
-                            SavedCardsCardStackView.cardVerticalStep,
-                        left: 0,
-                        right: 0,
-                        child: IgnorePointer(
-                          child: _DropSlotCardPreview(
-                            card: widget
-                                .displayCards[widget.state.draggingCardIndex!],
-                            colorScheme: colorScheme,
-                            hoverTargetIndex: widget.state.hoverTargetIndex,
-                          ),
-                        ),
+                    ),
+                  if (widget.state.draggingCardIndex != null)
+                    Positioned(
+                      left: 0,
+                      right: 0,
+                      bottom: 8,
+                      child: IgnorePointer(
+                        child: _DragHintChip(colorScheme: colorScheme),
                       ),
-                    if (widget.state.draggingCardIndex != null)
-                      Positioned(
-                        left: 0,
-                        right: 0,
-                        bottom: 8,
-                        child: IgnorePointer(
-                          child: _DragHintChip(colorScheme: colorScheme),
-                        ),
-                      ),
-                  ],
-                );
-              },
-            ),
-          ),
-        ],
+                    ),
+                ],
+              ),
+              Positioned(
+                left: 0,
+                top: 0,
+                width: SavedCardsFocusArrowTrack.width,
+                height: cardsHeight,
+                child: SavedCardsFocusArrowTrack(
+                  trackHeight: cardsHeight,
+                  slotCenterYs: slotCenters,
+                  focusedIndex: _focusedIndex,
+                  onFocusedIndexChanged: (index) {
+                    setState(() => _focusedIndex = index);
+                  },
+                ),
+              ),
+            ],
+          );
+        },
       ),
     );
   }
@@ -199,8 +202,6 @@ class _StackCardSlot extends StatelessWidget {
     final isDragging = state.draggingCardIndex == index;
     final card = displayCards[index];
     final heroTag = 'saved-card-${card.cardId}';
-    final opacity = isFocused ? 1.0 : 0.42;
-    final scale = isFocused ? 1.0 : 0.94;
 
     return DragTarget<int>(
       onWillAcceptWithDetails: (details) => details.data != index,
@@ -232,34 +233,26 @@ class _StackCardSlot extends StatelessWidget {
           },
           onDragEnd: (_) => cubit.endDrag(),
           onDraggableCanceled: (_, __) => cubit.endDrag(),
-          child: AnimatedOpacity(
-            duration: SavedCardsCardStackView.dragAnimDuration,
-            curve: SavedCardsCardStackView.dragAnimCurve,
-            opacity: isDragging ? 0.35 : opacity,
-            child: AnimatedScale(
-              duration: SavedCardsCardStackView.dragAnimDuration,
-              curve: SavedCardsCardStackView.dragAnimCurve,
-              scale: isDragging ? 0.96 : scale,
-              alignment: Alignment.topCenter,
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: isFocused && !isDragging
-                      ? [
-                          BoxShadow(
-                            color: colorScheme.shadow.withValues(alpha: 0.14),
-                            blurRadius: 18,
-                            offset: const Offset(0, 8),
-                          ),
-                        ]
-                      : null,
-                ),
-                child: SavedCardsSavedCardPreview(
-                  card: card,
-                  heroTag: heroTag,
-                  wrapHero: !isDragging && isFocused,
-                  onDoubleTap: () => onOpenCard(card, heroTag: heroTag),
-                ),
+          child: Opacity(
+            opacity: isDragging ? 0.35 : 1,
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: isFocused && !isDragging
+                    ? [
+                        BoxShadow(
+                          color: colorScheme.shadow.withValues(alpha: 0.14),
+                          blurRadius: 18,
+                          offset: const Offset(0, 8),
+                        ),
+                      ]
+                    : null,
+              ),
+              child: SavedCardsSavedCardPreview(
+                card: card,
+                heroTag: heroTag,
+                wrapHero: !isDragging && isFocused,
+                onDoubleTap: () => onOpenCard(card, heroTag: heroTag),
               ),
             ),
           ),

@@ -4,6 +4,7 @@ import 'core/auth/session_expired_handler.dart';
 import 'core/constants/app_constants.dart';
 import 'core/theme/app_theme.dart';
 import 'core/theme/splash_theme.dart';
+import 'core/widgets/molecules/chuck_fab_overlay.dart';
 import 'core/widgets/organisms/cardence_connect_animation.dart';
 import 'core/widgets/organisms/cardence_scaffold.dart';
 import 'features/auth/domain/usecases/get_auth_session.dart';
@@ -306,6 +307,11 @@ class _AppState extends State<App> {
       darkTheme: AppTheme.darkTheme,
       themeMode: _themeMode,
       debugShowCheckedModeBanner: false,
+      builder: (context, child) {
+        return ChuckFabOverlay(
+          child: child ?? const SizedBox.shrink(),
+        );
+      },
       home: _buildHome(),
     );
   }

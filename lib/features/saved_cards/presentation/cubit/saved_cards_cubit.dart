@@ -1,5 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../core/network/auth_api_exception.dart';
 import '../../../event_groups/domain/usecases/get_event_groups.dart';
 import '../../domain/entities/add_saved_card_result.dart';
 import '../../domain/entities/saved_card.dart';
@@ -41,10 +42,44 @@ class SavedCardsCubit extends Cubit<SavedCardsState> {
 
   Future<void> refreshAll() async {
     await Future.wait([
-      _loadCards(),
-      _loadEventGroups(),
-      _loadQuota(),
+      _loadCardsSafely(),
+      _loadEventGroupsSafely(),
+      _loadQuotaSafely(),
     ]);
+  }
+
+  Future<void> _loadCardsSafely() async {
+    try {
+      await _loadCards();
+    } on AuthApiException catch (error) {
+      if (isClosed) return;
+      emit(
+        state.copyWith(
+          isLoadingCards: false,
+          effectType: SavedCardsEffectType.showSnackbar,
+          snackbarMessage: error.message,
+        ),
+      );
+    } catch (_) {
+      if (isClosed) return;
+      emit(state.copyWith(isLoadingCards: false));
+    }
+  }
+
+  Future<void> _loadEventGroupsSafely() async {
+    try {
+      await _loadEventGroups();
+    } on AuthApiException {
+      // Etkinlik grupları yüklenemezse filtreler yerel veriyle çalışmaya devam eder.
+    } catch (_) {}
+  }
+
+  Future<void> _loadQuotaSafely() async {
+    try {
+      await _loadQuota();
+    } on AuthApiException {
+      // Kota alınamazsa mevcut kota değeri korunur.
+    } catch (_) {}
   }
 
   Future<void> _loadQuota() async {

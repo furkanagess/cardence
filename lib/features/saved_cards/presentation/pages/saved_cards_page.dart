@@ -16,10 +16,11 @@ import '../cubit/saved_cards_cubit.dart';
 import '../cubit/saved_cards_state.dart';
 import '../mixins/saved_cards_page_effects_mixin.dart';
 import '../saved_cards_catalog.dart';
+import '../widgets/saved_card_list_tile.dart';
 import '../widgets/saved_cards_add_card_fab.dart';
 import '../widgets/saved_cards_card_stack_view.dart';
-import '../widgets/saved_cards_focus_stack_view.dart';
 import '../widgets/saved_cards_empty_results_view.dart';
+import '../widgets/saved_cards_list_header.dart';
 import '../widgets/saved_cards_loading_shimmer.dart';
 import '../widgets/saved_cards_screen_toolbar.dart';
 import '../widgets/saved_cards_wallet_strip.dart';
@@ -173,24 +174,58 @@ class _SavedCardsPageState extends State<SavedCardsPage>
                                       ),
                                     ),
                                   )
-                                : SavedCardsFocusStackView(
-                                    displayCards: displayCards,
-                                    horizontalPadding: horizontalPadding,
-                                    topPadding: topPadding,
-                                    bottomPadding: contentBottomInset,
-                                    onOpenCard: (card, {heroTag}) =>
-                                        openSavedCardDetail(
-                                      context,
-                                      card: card,
-                                      heroTag: heroTag,
-                                      getEventGroups: widget.getEventGroups,
-                                      getSavedCards: widget.getSavedCards,
-                                      deleteEventGroup: widget.deleteEventGroup,
-                                      linkSavedCardsToEventGroup:
-                                          widget.linkSavedCardsToEventGroup,
-                                      saveSavedCard: widget.saveSavedCard,
-                                      deleteSavedCard: widget.deleteSavedCard,
-                                    ),
+                                : CustomScrollView(
+                                    slivers: [
+                                      SliverPadding(
+                                        padding: const EdgeInsets.fromLTRB(
+                                          horizontalPadding,
+                                          topPadding,
+                                          horizontalPadding,
+                                          0,
+                                        ),
+                                        sliver: SliverToBoxAdapter(
+                                          child: SavedCardsListHeader(
+                                            count: displayCards.length,
+                                          ),
+                                        ),
+                                      ),
+                                      SliverPadding(
+                                        padding: const EdgeInsets.fromLTRB(
+                                          horizontalPadding,
+                                          0,
+                                          horizontalPadding,
+                                          contentBottomInset,
+                                        ),
+                                        sliver: SliverList(
+                                          delegate: SliverChildBuilderDelegate(
+                                            (context, index) {
+                                              final card = displayCards[index];
+                                              return SavedCardListTile(
+                                                card: card,
+                                                onTap: () => openSavedCardDetail(
+                                                  context,
+                                                  card: card,
+                                                  getEventGroups:
+                                                      widget.getEventGroups,
+                                                  getSavedCards:
+                                                      widget.getSavedCards,
+                                                  deleteEventGroup:
+                                                      widget.deleteEventGroup,
+                                                  linkSavedCardsToEventGroup:
+                                                      widget
+                                                          .linkSavedCardsToEventGroup,
+                                                  saveSavedCard:
+                                                      widget.saveSavedCard,
+                                                  deleteSavedCard:
+                                                      widget.deleteSavedCard,
+                                                ),
+                                              );
+                                            },
+                                            childCount: displayCards.length,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
                                   ),
                   ),
                 ],
