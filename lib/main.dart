@@ -42,7 +42,9 @@ void main() async {
     resolveOnboardingInitialDraft: result.resolveOnboardingInitialDraft,
     getThemePreference: result.getThemePreference,
     setThemePreference: result.setThemePreference,
+    initialThemePreference: result.initialThemePreference,
     submitSupportRequest: result.submitSupportRequest,
+    requestAppReview: result.requestAppReview,
     getEventGroups: result.getEventGroups,
     createEventGroup: result.createEventGroup,
     deleteEventGroup: result.deleteEventGroup,
@@ -56,6 +58,6 @@ void main() async {
     upgradeWalletPlan: result.upgradeWalletPlan,
     restoreWalletPurchases: result.restoreWalletPurchases,
     getProfileStats: result.getProfileStats,
-    showInterstitialAd: result.showInterstitialAd,
+    showPostAddCardMonetization: result.showPostAddCardMonetization,
   ));
 }

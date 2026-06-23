@@ -16,7 +16,7 @@ import '../../../saved_cards/domain/usecases/link_saved_cards_to_event_group.dar
 import '../../../saved_cards/domain/usecases/save_saved_card.dart';
 import '../../../saved_cards/domain/usecases/upgrade_wallet_plan.dart';
 import '../../../subscriptions/domain/usecases/restore_wallet_purchases.dart';
-import '../../../ads/domain/usecases/show_interstitial_ad.dart';
+import '../../../ads/domain/usecases/show_post_add_card_monetization.dart';
 import '../../../event_groups/presentation/pages/event_groups_page.dart';
 import '../../../onboarding/domain/entities/onboarding_card_draft.dart';
 import '../../../profile/domain/usecases/get_profile_stats.dart';
@@ -31,6 +31,7 @@ import '../../../auth/domain/usecases/get_current_user.dart';
 import '../../../auth/domain/usecases/upload_profile_photo.dart';
 import '../../../settings/domain/entities/theme_preference.dart';
 import '../../../settings/presentation/pages/settings_page.dart';
+import '../../../settings/domain/usecases/request_app_review.dart';
 import '../../../support/domain/usecases/submit_support_request.dart';
 import '../../../support/presentation/pages/support_page.dart';
 
@@ -55,12 +56,13 @@ class MainShellPage extends StatefulWidget {
     required this.upgradeWalletPlan,
     required this.restoreWalletPurchases,
     required this.getCurrentUser,
-    required this.showInterstitialAd,
+    required this.showPostAddCardMonetization,
     required this.themePreference,
     required this.onThemeChanged,
     required this.onLogout,
     required this.uploadProfilePhoto,
     required this.submitSupportRequest,
+    required this.requestAppReview,
     required this.getProfileStats,
   });
 
@@ -81,12 +83,13 @@ class MainShellPage extends StatefulWidget {
   final UpgradeWalletPlan upgradeWalletPlan;
   final RestoreWalletPurchases restoreWalletPurchases;
   final GetCurrentUser getCurrentUser;
-  final ShowInterstitialAd showInterstitialAd;
+  final ShowPostAddCardMonetization showPostAddCardMonetization;
   final ThemePreference themePreference;
   final ValueChanged<ThemePreference> onThemeChanged;
   final Future<void> Function() onLogout;
   final UploadProfilePhoto uploadProfilePhoto;
   final SubmitSupportRequest submitSupportRequest;
+  final RequestAppReview requestAppReview;
   final GetProfileStats getProfileStats;
 
   @override
@@ -99,7 +102,7 @@ class _MainShellPageState extends State<MainShellPage> {
   bool _savedCardsPreferListView = true;
   int _savedCardsFilterTrigger = 0;
   int _savedCardsAddCardTrigger = 0;
-  int _eventGroupsCreateTrigger = 0;
+  bool _openingSettings = false;
 
   @override
   void initState() {
@@ -132,20 +135,11 @@ class _MainShellPageState extends State<MainShellPage> {
     return CardenceAppBar(
       variant: CardenceAppBarVariant.root,
       title: _appBarTitle,
-      leading: _currentIndex == 1
-          ? CardenceAppBar.iconAction(
-              icon: Icons.add_rounded,
-              tooltip: 'Yeni etkinlik grubu',
-              onPressed: () {
-                setState(() => _eventGroupsCreateTrigger++);
-              },
-            )
-          : null,
       actions: [
         CardenceAppBar.iconAction(
           icon: Icons.settings_outlined,
           tooltip: 'Ayarlar',
-          onPressed: () => _openSettings(context),
+          onPressed: _openingSettings ? null : () => _openSettings(context),
         ),
       ],
     );
@@ -178,7 +172,7 @@ class _MainShellPageState extends State<MainShellPage> {
               addSavedCard: widget.addSavedCard,
               upgradeWalletPlan: widget.upgradeWalletPlan,
               restoreWalletPurchases: widget.restoreWalletPurchases,
-              showInterstitialAd: widget.showInterstitialAd,
+              showPostAddCardMonetization: widget.showPostAddCardMonetization,
               showFlippableView: !_savedCardsPreferListView,
               onViewModeChanged: (flippable) =>
                   setState(() => _savedCardsPreferListView = !flippable),
@@ -194,7 +188,6 @@ class _MainShellPageState extends State<MainShellPage> {
               saveSavedCard: widget.saveSavedCard,
               deleteSavedCard: widget.deleteSavedCard,
               restoreWalletPurchases: widget.restoreWalletPurchases,
-              createGroupTrigger: _eventGroupsCreateTrigger,
             ),
             ProfilePage(
               draft: _myCardDraft,
@@ -225,43 +218,51 @@ class _MainShellPageState extends State<MainShellPage> {
   }
 
   Future<void> _openSettings(BuildContext context) async {
-    final user = await widget.getCurrentUser();
-    if (!context.mounted) return;
+    if (_openingSettings) return;
+    setState(() => _openingSettings = true);
 
-    final draft = _myCardDraft;
-    final displayName = user.displayName?.trim().isNotEmpty == true
-        ? user.displayName!
-        : (draft?.displayName?.trim().isNotEmpty == true
-            ? draft!.displayName!
-            : (draft?.cardName?.trim().isNotEmpty == true
-                ? draft!.cardName!
-                : 'Kullanıcı'));
+    try {
+      final user = await widget.getCurrentUser();
+      if (!context.mounted) return;
 
-    Navigator.of(context).push(
-      MaterialPageRoute<void>(
-        builder: (context) => SettingsPage(
-          currentTheme: widget.themePreference,
-          onThemeChanged: widget.onThemeChanged,
-          onLogout: widget.onLogout,
-          userDisplayName: displayName,
-          userEmail: user.email ?? draft?.email,
-          userPhotoUrl: draft?.photoUrl ?? user.photoUrl,
-          uploadProfilePhoto: widget.uploadProfilePhoto,
-          onPhotoUpdated: (photoUrl) {
-            if (photoUrl != null && draft != null) {
-              setState(
-                () => _myCardDraft = draft.copyWith(photoUrl: photoUrl),
-              );
-            }
-            _loadMyCardDraft();
-          },
-          onOpenSupport: () => _openSupport(
-            context,
-            user.email ?? draft?.email,
+      final draft = _myCardDraft;
+      final displayName = user.displayName?.trim().isNotEmpty == true
+          ? user.displayName!
+          : (draft?.displayName?.trim().isNotEmpty == true
+              ? draft!.displayName!
+              : (draft?.cardName?.trim().isNotEmpty == true
+                  ? draft!.cardName!
+                  : 'Kullanıcı'));
+
+      await Navigator.of(context).push(
+        MaterialPageRoute<void>(
+          builder: (context) => SettingsPage(
+            currentTheme: widget.themePreference,
+            onThemeChanged: widget.onThemeChanged,
+            onLogout: widget.onLogout,
+            userDisplayName: displayName,
+            userEmail: user.email ?? draft?.email,
+            userPhotoUrl: draft?.photoUrl ?? user.photoUrl,
+            uploadProfilePhoto: widget.uploadProfilePhoto,
+            onPhotoUpdated: (photoUrl) {
+              if (photoUrl != null && draft != null) {
+                setState(
+                  () => _myCardDraft = draft.copyWith(photoUrl: photoUrl),
+                );
+              }
+              _loadMyCardDraft();
+            },
+            onOpenSupport: () => _openSupport(
+              context,
+              user.email ?? draft?.email,
+            ),
+            requestAppReview: widget.requestAppReview,
           ),
         ),
-      ),
-    );
+      );
+    } finally {
+      if (mounted) setState(() => _openingSettings = false);
+    }
   }
 
   void _openSupport(BuildContext context, String? initialEmail) {

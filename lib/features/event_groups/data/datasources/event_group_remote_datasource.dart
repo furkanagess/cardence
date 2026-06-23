@@ -1,6 +1,7 @@
 import '../../../../core/network/api_response_parser.dart';
 import '../../../../core/network/auth_api_exception.dart';
 import '../../../../core/network/dio_api_client.dart';
+import 'package:dio/dio.dart';
 import '../models/event_group_model.dart';
 
 abstract class EventGroupRemoteDataSource {
@@ -8,6 +9,14 @@ abstract class EventGroupRemoteDataSource {
 
   Future<EventGroupModel> createEventGroup({
     required String name,
+    String? location,
+    DateTime? eventDate,
+    required String accessToken,
+  });
+
+  Future<EventGroupModel> uploadEventGroupPhoto({
+    required String groupId,
+    required String filePath,
     required String accessToken,
   });
 
@@ -71,13 +80,45 @@ class EventGroupRemoteDataSourceImpl implements EventGroupRemoteDataSource {
   @override
   Future<EventGroupModel> createEventGroup({
     required String name,
+    String? location,
+    DateTime? eventDate,
     required String accessToken,
   }) async {
+    final body = <String, dynamic>{
+      'name': name,
+      if (location != null && location.trim().isNotEmpty)
+        'location': location.trim(),
+      if (eventDate != null)
+        'eventDate': DateTime.utc(
+          eventDate.year,
+          eventDate.month,
+          eventDate.day,
+        ).toIso8601String(),
+    };
+
     final json = await _client.post(
       '/SaveEventGroup',
-      body: {'name': name},
+      body: body,
       accessToken: accessToken,
       fallbackError: 'Etkinlik grubu oluşturulamadı.',
+    );
+    return _parseGroup(json);
+  }
+
+  @override
+  Future<EventGroupModel> uploadEventGroupPhoto({
+    required String groupId,
+    required String filePath,
+    required String accessToken,
+  }) async {
+    final formData = FormData.fromMap({
+      'photo': await MultipartFile.fromFile(filePath),
+    });
+    final json = await _client.postMultipart(
+      '/UploadEventGroupPhoto?id=${Uri.encodeQueryComponent(groupId)}',
+      formData: formData,
+      accessToken: accessToken,
+      fallbackError: 'Etkinlik fotoğrafı yüklenemedi.',
     );
     return _parseGroup(json);
   }

@@ -1,14 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/network/auth_api_exception.dart';
-import '../../../../core/theme/app_colors.dart';
 import '../../../saved_cards/presentation/cubit/saved_cards_cubit.dart';
 import '../../../saved_cards/presentation/cubit/saved_cards_state.dart';
 import '../../../saved_cards/presentation/saved_cards_catalog.dart';
 import '../../../saved_cards/presentation/wallet_paywall_flow.dart';
 import '../../../subscriptions/domain/usecases/restore_wallet_purchases.dart';
 import '../../domain/entities/event_group.dart';
+import '../helpers/event_group_meta_formatter.dart';
 import '../widgets/create_event_group_sheet.dart';
+import '../widgets/event_group_cover_thumbnail.dart';
+import '../widgets/event_groups_loading_shimmer.dart';
+import '../widgets/event_groups_draggable_fab.dart';
+import '../../domain/entities/event_group_create_input.dart';
 import '../../domain/usecases/get_event_groups.dart';
 import '../../domain/usecases/create_event_group.dart';
 import '../../domain/usecases/delete_event_group.dart';
@@ -31,7 +35,6 @@ class EventGroupsPage extends StatefulWidget {
     required this.saveSavedCard,
     required this.deleteSavedCard,
     required this.restoreWalletPurchases,
-    this.createGroupTrigger = 0,
   });
 
   final GetEventGroups getEventGroups;
@@ -42,7 +45,6 @@ class EventGroupsPage extends StatefulWidget {
   final SaveSavedCard saveSavedCard;
   final DeleteSavedCard deleteSavedCard;
   final RestoreWalletPurchases restoreWalletPurchases;
-  final int createGroupTrigger;
 
   @override
   State<EventGroupsPage> createState() => _EventGroupsPageState();
@@ -51,6 +53,9 @@ class EventGroupsPage extends StatefulWidget {
 class _EventGroupsPageState extends State<EventGroupsPage> {
   List<EventGroup> _groups = [];
   bool _loading = true;
+  bool _creatingGroup = false;
+
+  static const double _contentBottomInset = 128;
 
   @override
   void initState() {
@@ -75,82 +80,86 @@ class _EventGroupsPageState extends State<EventGroupsPage> {
   }
 
   Future<void> _createNewEventGroup() async {
-    final savedCardsCubit = context.read<SavedCardsCubit>();
-    final quota = savedCardsCubit.state.quota;
-    if (quota != null && !quota.canAddEventGroup) {
-      await WalletPaywallFlow.show(
-        context,
-        cubit: savedCardsCubit,
-      );
-      return;
-    }
+    if (_creatingGroup) return;
+    setState(() => _creatingGroup = true);
 
-    final result = await CreateEventGroupSheet.show(
-      context,
-      existingNames: _groups.map((g) => g.name).toList(),
-      getSavedCards: widget.getSavedCards,
-    );
-    if (!mounted || result == null) return;
-
-    EventGroup newGroup;
     try {
-      newGroup = await widget.createEventGroup(result.name);
-    } on AuthApiException catch (e) {
-      if (!mounted) return;
-      if (e.errorCode == 'PREMIUM_REQUIRED') {
+      final savedCardsCubit = context.read<SavedCardsCubit>();
+      final quota = savedCardsCubit.state.quota;
+      if (quota != null && !quota.canAddEventGroup) {
         await WalletPaywallFlow.show(
           context,
           cubit: savedCardsCubit,
         );
         return;
       }
+
+      final result = await CreateEventGroupSheet.show(
+        context,
+        existingNames: _groups.map((g) => g.name).toList(),
+        getSavedCards: widget.getSavedCards,
+      );
+      if (!mounted || result == null) return;
+
+      EventGroup newGroup;
+      try {
+        newGroup = await widget.createEventGroup(
+          EventGroupCreateInput(
+            name: result.name,
+            location: result.location,
+            eventDate: result.eventDate,
+            photoFilePath: result.photoFilePath,
+          ),
+        );
+      } on AuthApiException catch (e) {
+        if (!mounted) return;
+        if (e.errorCode == 'PREMIUM_REQUIRED') {
+          await WalletPaywallFlow.show(
+            context,
+            cubit: savedCardsCubit,
+          );
+          return;
+        }
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(e.message),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+        return;
+      }
+
+      if (result.selectedCardIds.isNotEmpty) {
+        final allCards = SavedCardsCatalog.displayCards(
+          savedCardsCubit.state.cards,
+        );
+        await widget.linkSavedCardsToEventGroup(
+          groupId: newGroup.id,
+          allCards: allCards,
+          cardIdsToAdd: result.selectedCardIds.toList(),
+        );
+        if (mounted) {
+          await savedCardsCubit.refreshAll();
+        }
+      }
+
+      if (!mounted) return;
+      await _loadGroups();
+      if (!mounted) return;
+
+      final cardCount = result.selectedCardIds.length;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(e.message),
+          content: Text(
+            cardCount == 0
+                ? '"${result.name}" etkinlik grubu oluşturuldu'
+                : '"${result.name}" grubu $cardCount kartla oluşturuldu',
+          ),
           behavior: SnackBarBehavior.floating,
         ),
       );
-      return;
-    }
-
-    if (result.selectedCardIds.isNotEmpty) {
-      final allCards = SavedCardsCatalog.displayCards(
-        savedCardsCubit.state.cards,
-      );
-      await widget.linkSavedCardsToEventGroup(
-        groupId: newGroup.id,
-        allCards: allCards,
-        cardIdsToAdd: result.selectedCardIds.toList(),
-      );
-      if (mounted) {
-        await savedCardsCubit.refreshAll();
-      }
-    }
-
-    if (!mounted) return;
-    await _loadGroups();
-    if (!mounted) return;
-
-    final cardCount = result.selectedCardIds.length;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          cardCount == 0
-              ? '"${result.name}" etkinlik grubu oluşturuldu'
-              : '"${result.name}" grubu $cardCount kartla oluşturuldu',
-        ),
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
-  }
-
-  @override
-  void didUpdateWidget(covariant EventGroupsPage oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.createGroupTrigger != widget.createGroupTrigger) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) _createNewEventGroup();
-      });
+    } finally {
+      if (mounted) setState(() => _creatingGroup = false);
     }
   }
 
@@ -159,7 +168,21 @@ class _EventGroupsPageState extends State<EventGroupsPage> {
     return BlocBuilder<SavedCardsCubit, SavedCardsState>(
       builder: (context, savedState) {
         final savedCards = SavedCardsCatalog.displayCards(savedState.cards);
-        return _buildContent(context, savedCards);
+        final canAddGroup = savedState.quota?.canAddEventGroup ?? true;
+
+        return Stack(
+          children: [
+            Positioned.fill(
+              child: _buildContent(context, savedCards),
+            ),
+            Positioned.fill(
+              child: EventGroupsDraggableFab(
+                canAddGroup: canAddGroup,
+                onPressed: _createNewEventGroup,
+              ),
+            ),
+          ],
+        );
       },
     );
   }
@@ -170,7 +193,7 @@ class _EventGroupsPageState extends State<EventGroupsPage> {
     final colorScheme = theme.colorScheme;
 
     if (_loading) {
-      return const Center(child: CircularProgressIndicator());
+      return const EventGroupsLoadingShimmer();
     }
 
     if (_groups.isEmpty) {
@@ -195,7 +218,7 @@ class _EventGroupsPageState extends State<EventGroupsPage> {
               ),
               const SizedBox(height: 8),
               Text(
-                'Sol üstteki + ile yeni etkinlik grubu oluşturabilirsiniz.',
+                'Sağ alttaki + ile yeni etkinlik grubu oluşturabilirsiniz.',
                 style: textTheme.bodySmall?.copyWith(
                   color: colorScheme.onSurfaceVariant,
                 ),
@@ -208,11 +231,16 @@ class _EventGroupsPageState extends State<EventGroupsPage> {
     }
 
     return ListView.builder(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      padding: const EdgeInsets.fromLTRB(20, 16, 20, _contentBottomInset),
       itemCount: _groups.length,
       itemBuilder: (context, index) {
         final group = _groups[index];
         final cardCount = _savedCardCountForGroup(group.id, savedCards);
+        final meta = EventGroupMetaFormatter.summaryFor(group);
+        final subtitle = [
+          if (meta != null) meta,
+          if (cardCount == 0) 'Bu grupta kart yok' else '$cardCount kayıtlı kart',
+        ].join(' · ');
         return Padding(
           padding: const EdgeInsets.only(bottom: 12),
           child: Material(
@@ -226,17 +254,12 @@ class _EventGroupsPageState extends State<EventGroupsPage> {
                     const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                 child: Row(
                   children: [
-                    Container(
+                    SizedBox(
                       width: 44,
                       height: 44,
-                      decoration: BoxDecoration(
-                        color: AppColors.primary.withValues(alpha: 0.15),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: const Icon(
-                        Icons.event_rounded,
-                        color: AppColors.primary,
-                        size: 24,
+                      child: EventGroupCoverThumbnail(
+                        photoUrl: group.photoUrl,
+                        size: 44,
                       ),
                     ),
                     const SizedBox(width: 14),
@@ -253,9 +276,7 @@ class _EventGroupsPageState extends State<EventGroupsPage> {
                           ),
                           const SizedBox(height: 2),
                           Text(
-                            cardCount == 0
-                                ? 'Bu grupta kart yok'
-                                : '$cardCount kayıtlı kart',
+                            subtitle,
                             style: textTheme.bodySmall?.copyWith(
                               color: colorScheme.onSurfaceVariant,
                             ),

@@ -13,5 +13,9 @@ public sealed class UpdateEventGroupRequestValidator : AbstractValidator<UpdateE
         RuleFor(x => x.Name)
             .NotEmpty()
             .MaximumLength(200);
+
+        RuleFor(x => x.Location)
+            .MaximumLength(500)
+            .When(x => !string.IsNullOrWhiteSpace(x.Location));
     }
 }

@@ -60,6 +60,7 @@ public static class DependencyInjection
         services.AddScoped<IEventGroupRepository, EventGroupRepository>();
         services.AddScoped<IHealthStatusReader, HealthStatusReader>();
         services.AddScoped<IProfilePhotoStorage, LocalProfilePhotoStorage>();
+        services.AddScoped<IEventGroupPhotoStorage, LocalEventGroupPhotoStorage>();
 
         return services;
     }

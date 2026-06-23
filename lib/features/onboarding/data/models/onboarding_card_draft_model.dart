@@ -16,6 +16,14 @@ class OnboardingCardDraftModel {
     this.skills,
     this.school,
     this.about,
+    this.address,
+    this.city,
+    this.country,
+    this.department,
+    this.attendedEvents,
+    this.twitter,
+    this.instagram,
+    this.birthday,
     this.photoUrl,
     List<String>? visibleFields,
     List<String>? frontVisibleFields,
@@ -41,6 +49,14 @@ class OnboardingCardDraftModel {
   final String? skills;
   final String? school;
   final String? about;
+  final String? address;
+  final String? city;
+  final String? country;
+  final String? department;
+  final String? attendedEvents;
+  final String? twitter;
+  final String? instagram;
+  final String? birthday;
   final String? photoUrl;
   final List<String> visibleFields;
   final List<String> frontVisibleFields;
@@ -67,6 +83,14 @@ class OnboardingCardDraftModel {
       skills: entity.skills,
       school: entity.school,
       about: entity.about,
+      address: entity.address,
+      city: entity.city,
+      country: entity.country,
+      department: entity.department,
+      attendedEvents: entity.attendedEvents,
+      twitter: entity.twitter,
+      instagram: entity.instagram,
+      birthday: entity.birthday,
       photoUrl: entity.photoUrl,
       visibleFields: union,
       frontVisibleFields: front,
@@ -92,6 +116,14 @@ class OnboardingCardDraftModel {
       skills: skills,
       school: school,
       about: about,
+      address: address,
+      city: city,
+      country: country,
+      department: department,
+      attendedEvents: attendedEvents,
+      twitter: twitter,
+      instagram: instagram,
+      birthday: birthday,
       photoUrl: photoUrl,
       visibleFields: List.from(visibleFields),
       frontVisibleFields: List.from(frontVisibleFields),
@@ -117,6 +149,14 @@ class OnboardingCardDraftModel {
       'skills': skills,
       'school': school,
       'about': about,
+      'address': address,
+      'city': city,
+      'country': country,
+      'department': department,
+      'attendedEvents': attendedEvents,
+      'twitter': twitter,
+      'instagram': instagram,
+      'birthday': birthday,
       'photoUrl': photoUrl,
       'visibleFields': visibleFields,
       'frontVisibleFields': frontVisibleFields,
@@ -167,6 +207,14 @@ class OnboardingCardDraftModel {
       skills: json['skills'] as String?,
       school: json['school'] as String?,
       about: json['about'] as String?,
+      address: json['address'] as String?,
+      city: json['city'] as String?,
+      country: json['country'] as String?,
+      department: json['department'] as String?,
+      attendedEvents: json['attendedEvents'] as String?,
+      twitter: json['twitter'] as String?,
+      instagram: json['instagram'] as String?,
+      birthday: json['birthday'] as String?,
       photoUrl: json['photoUrl'] as String?,
       visibleFields: visibleFields,
       frontVisibleFields: front,

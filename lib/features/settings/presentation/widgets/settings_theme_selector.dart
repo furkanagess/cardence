@@ -15,41 +15,60 @@ class SettingsThemeSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-          child: _ThemeOptionCard(
-            label: 'Açık',
-            icon: Icons.wb_sunny_outlined,
-            selected: current == ThemePreference.light,
-            onTap: () => onChanged(ThemePreference.light),
-          ),
+    final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: colorScheme.surfaceContainerLowest.withValues(
+          alpha: isDark ? 0.55 : 0.85,
         ),
-        const SizedBox(width: 10),
-        Expanded(
-          child: _ThemeOptionCard(
-            label: 'Koyu',
-            icon: Icons.dark_mode_outlined,
-            selected: current == ThemePreference.dark,
-            onTap: () => onChanged(ThemePreference.dark),
-          ),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: isDark
+              ? AppColors.outlineDark.withValues(alpha: 0.35)
+              : AppColors.outlineVariant.withValues(alpha: 0.65),
         ),
-        const SizedBox(width: 10),
-        Expanded(
-          child: _ThemeOptionCard(
-            label: 'Sistem',
-            icon: Icons.desktop_windows_outlined,
-            selected: current == ThemePreference.system,
-            onTap: () => onChanged(ThemePreference.system),
-          ),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(6),
+        child: Row(
+          children: [
+            Expanded(
+              child: _ThemeOptionChip(
+                label: 'Açık',
+                icon: Icons.wb_sunny_outlined,
+                selected: current == ThemePreference.light,
+                onTap: () => onChanged(ThemePreference.light),
+              ),
+            ),
+            const SizedBox(width: 6),
+            Expanded(
+              child: _ThemeOptionChip(
+                label: 'Koyu',
+                icon: Icons.dark_mode_outlined,
+                selected: current == ThemePreference.dark,
+                onTap: () => onChanged(ThemePreference.dark),
+              ),
+            ),
+            const SizedBox(width: 6),
+            Expanded(
+              child: _ThemeOptionChip(
+                label: 'Sistem',
+                icon: Icons.smartphone_outlined,
+                selected: current == ThemePreference.system,
+                onTap: () => onChanged(ThemePreference.system),
+              ),
+            ),
+          ],
         ),
-      ],
+      ),
     );
   }
 }
 
-class _ThemeOptionCard extends StatelessWidget {
-  const _ThemeOptionCard({
+class _ThemeOptionChip extends StatelessWidget {
+  const _ThemeOptionChip({
     required this.label,
     required this.icon,
     required this.selected,
@@ -67,71 +86,48 @@ class _ThemeOptionCard extends StatelessWidget {
     final textTheme = Theme.of(context).textTheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
+    final selectedFill = isDark
+        ? AppColors.primaryDarkTheme.withValues(alpha: 0.22)
+        : AppColors.primaryContainer.withValues(alpha: 0.75);
+    final selectedForeground =
+        isDark ? AppColors.primaryDarkTheme : AppColors.primary;
+
     return Material(
-      color: colorScheme.surface,
-      borderRadius: BorderRadius.circular(16),
+      color: Colors.transparent,
       child: InkWell(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(14),
         onTap: onTap,
-        child: Stack(
-          clipBehavior: Clip.none,
-          children: [
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 8),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.easeOutCubic,
+          padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 6),
+          decoration: BoxDecoration(
+            color: selected ? selectedFill : Colors.transparent,
+            borderRadius: BorderRadius.circular(14),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                icon,
+                size: 22,
+                color: selected
+                    ? selectedForeground
+                    : colorScheme.onSurfaceVariant,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                label,
+                style: textTheme.labelLarge?.copyWith(
+                  fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
+                  letterSpacing: -0.1,
                   color: selected
-                      ? AppColors.primary
-                      : (isDark
-                          ? AppColors.outlineDark
-                          : AppColors.outlineVariant),
-                  width: selected ? 2 : 1,
+                      ? selectedForeground
+                      : colorScheme.onSurfaceVariant,
                 ),
               ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    icon,
-                    color: selected
-                        ? AppColors.primary
-                        : colorScheme.onSurfaceVariant,
-                    size: 26,
-                  ),
-                  const SizedBox(height: 10),
-                  Text(
-                    label,
-                    style: textTheme.labelLarge?.copyWith(
-                      fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
-                      color: selected
-                          ? AppColors.primary
-                          : colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            if (selected)
-              Positioned(
-                top: -6,
-                right: -6,
-                child: Container(
-                  width: 22,
-                  height: 22,
-                  decoration: const BoxDecoration(
-                    color: AppColors.primary,
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(
-                    Icons.check_rounded,
-                    size: 14,
-                    color: AppColors.textOnPrimary,
-                  ),
-                ),
-              ),
-          ],
+            ],
+          ),
         ),
       ),
     );

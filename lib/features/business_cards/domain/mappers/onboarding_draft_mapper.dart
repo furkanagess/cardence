@@ -4,32 +4,36 @@ import '../entities/business_card.dart';
 class OnboardingDraftMapper {
   OnboardingDraftMapper._();
 
+  static String? _trimOrNull(String? value) {
+    final trimmed = value?.trim();
+    if (trimmed == null || trimmed.isEmpty) return null;
+    return trimmed;
+  }
+
   static BusinessCard toBusinessCard(OnboardingCardDraft draft) {
     return BusinessCard(
       cardName: draft.cardName?.trim().isNotEmpty == true
           ? draft.cardName!.trim()
           : draft.listTitle,
-      displayName: draft.displayName?.trim(),
-      email: draft.email?.trim(),
-      phone: draft.phone?.trim().isNotEmpty == true ? draft.phone!.trim() : null,
-      company: draft.company?.trim(),
-      title: draft.title?.trim(),
-      website: draft.website?.trim().isNotEmpty == true
-          ? draft.website!.trim()
-          : null,
-      linkedin: draft.linkedin?.trim().isNotEmpty == true
-          ? draft.linkedin!.trim()
-          : null,
-      skills: draft.skills?.trim().isNotEmpty == true
-          ? draft.skills!.trim()
-          : null,
-      school: draft.school?.trim().isNotEmpty == true
-          ? draft.school!.trim()
-          : null,
-      about: draft.about?.trim().isNotEmpty == true ? draft.about!.trim() : null,
-      photoUrl: draft.photoUrl?.trim().isNotEmpty == true
-          ? draft.photoUrl!.trim()
-          : null,
+      displayName: _trimOrNull(draft.displayName),
+      email: _trimOrNull(draft.email),
+      phone: _trimOrNull(draft.phone),
+      company: _trimOrNull(draft.company),
+      title: _trimOrNull(draft.title),
+      website: _trimOrNull(draft.website),
+      linkedin: _trimOrNull(draft.linkedin),
+      skills: _trimOrNull(draft.skills),
+      school: _trimOrNull(draft.school),
+      about: _trimOrNull(draft.about),
+      address: _trimOrNull(draft.address),
+      city: _trimOrNull(draft.city),
+      country: _trimOrNull(draft.country),
+      department: _trimOrNull(draft.department),
+      attendedEvents: _trimOrNull(draft.attendedEvents),
+      twitter: _trimOrNull(draft.twitter),
+      instagram: _trimOrNull(draft.instagram),
+      birthday: _trimOrNull(draft.birthday),
+      photoUrl: _trimOrNull(draft.photoUrl),
       accentColor: draft.accentColor,
       backgroundColor: draft.backgroundColor,
       lastUsedPaletteBackgroundColor: draft.lastUsedPaletteBackgroundColor,

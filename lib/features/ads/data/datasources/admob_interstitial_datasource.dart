@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 import '../../../../core/config/admob_config.dart';
@@ -18,19 +20,7 @@ class AdMobInterstitialDataSource {
       adLoadCallback: InterstitialAdLoadCallback(
         onAdLoaded: (ad) {
           _isLoading = false;
-          _interstitialAd = ad
-            ..fullScreenContentCallback = FullScreenContentCallback(
-              onAdDismissedFullScreenContent: (ad) {
-                ad.dispose();
-                _interstitialAd = null;
-                load();
-              },
-              onAdFailedToShowFullScreenContent: (ad, error) {
-                ad.dispose();
-                _interstitialAd = null;
-                load();
-              },
-            );
+          _interstitialAd = ad;
         },
         onAdFailedToLoad: (_) {
           _isLoading = false;
@@ -39,15 +29,39 @@ class AdMobInterstitialDataSource {
     );
   }
 
-  Future<void> show() async {
+  /// Reklam gösterildi ve kapatıldıysa `true` döner.
+  Future<bool> show() async {
     final ad = _interstitialAd;
     if (ad == null) {
       await load();
-      return;
+      return false;
     }
 
     _interstitialAd = null;
-    await ad.show();
+    final completer = Completer<bool>();
+
+    ad.fullScreenContentCallback = FullScreenContentCallback(
+      onAdDismissedFullScreenContent: (dismissedAd) {
+        dismissedAd.dispose();
+        if (!completer.isCompleted) completer.complete(true);
+        unawaited(load());
+      },
+      onAdFailedToShowFullScreenContent: (failedAd, error) {
+        failedAd.dispose();
+        if (!completer.isCompleted) completer.complete(false);
+        unawaited(load());
+      },
+    );
+
+    try {
+      await ad.show();
+    } catch (_) {
+      if (!completer.isCompleted) completer.complete(false);
+      unawaited(load());
+      return false;
+    }
+
+    return completer.future;
   }
 
   void dispose() {

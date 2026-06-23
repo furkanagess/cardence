@@ -76,6 +76,12 @@ dependencies:
   purchases_flutter: ^10.3.0
   google_mobile_ads: ^5.2.0
   purchases_ui_flutter: ^10.3.0
+  csc_picker:
+    git:
+      url: https://github.com/iamageo/csc_picker.git
+      ref: master
+  intl: ^0.20.2
+  in_app_review: ^2.0.12
 
 dev_dependencies:
   flutter_test:

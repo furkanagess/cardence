@@ -9,6 +9,9 @@ public static class EventGroupMapper
     {
         Id = entity.Id.ToString(),
         Name = entity.Name,
+        Location = entity.Location,
+        EventDate = entity.EventDate,
+        PhotoUrl = entity.PhotoUrl,
         CardCount = cardCount,
         CreatedAt = entity.CreatedAt,
     };

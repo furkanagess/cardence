@@ -23,7 +23,7 @@ class SavedCardsEmptyResultsView extends StatelessWidget {
     return 'Henüz kayıtlı kart yok';
   }
 
-  String get _subtitle {
+  String? get _subtitle {
     if (hasFilters && hasSearch) {
       return 'Arama veya filtre kriterlerini değiştirin.';
     }
@@ -31,7 +31,7 @@ class SavedCardsEmptyResultsView extends StatelessWidget {
     if (hasFilters) {
       return 'Farklı filtre deneyin veya filtreleri temizleyin.';
     }
-    return 'QR okutarak veya kart ID girerek ilk kartınızı ekleyin.';
+    return null;
   }
 
   @override
@@ -60,14 +60,16 @@ class SavedCardsEmptyResultsView extends StatelessWidget {
               ),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 8),
-            Text(
-              _subtitle,
-              style: textTheme.bodyMedium?.copyWith(
-                color: colorScheme.onSurfaceVariant,
+            if (_subtitle != null) ...[
+              const SizedBox(height: 8),
+              Text(
+                _subtitle!,
+                style: textTheme.bodyMedium?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
+                ),
+                textAlign: TextAlign.center,
               ),
-              textAlign: TextAlign.center,
-            ),
+            ],
             const SizedBox(height: 20),
             if (hasFilters && hasSearch)
               Wrap(

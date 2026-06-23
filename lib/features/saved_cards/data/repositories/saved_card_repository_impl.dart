@@ -1,4 +1,4 @@
-import '../../../auth/data/datasources/auth_local_datasource.dart';
+import '../../../../core/auth/auth_token_provider.dart';
 import '../../../auth/data/datasources/auth_remote_datasource.dart';
 import '../../domain/entities/saved_card.dart';
 import '../../domain/entities/saved_cards_wallet_quota.dart';
@@ -13,32 +13,22 @@ class SavedCardRepositoryImpl implements SavedCardRepository {
   SavedCardRepositoryImpl({
     required SavedCardLocalDataSource local,
     required SavedCardRemoteDataSource remote,
-    required AuthLocalDataSource authLocal,
+    required AuthTokenProvider authTokens,
     PublicBusinessCardRemoteDataSource? publicCardRemote,
   })  : _local = local,
         _remote = remote,
-        _authLocal = authLocal,
+        _authTokens = authTokens,
         _publicCardRemote =
             publicCardRemote ?? PublicBusinessCardRemoteDataSourceImpl();
 
   final SavedCardLocalDataSource _local;
   final SavedCardRemoteDataSource _remote;
-  final AuthLocalDataSource _authLocal;
+  final AuthTokenProvider _authTokens;
   final PublicBusinessCardRemoteDataSource _publicCardRemote;
 
-  Future<String?> _tryAccessToken() async {
-    final session = await _authLocal.getSession();
-    if (session == null || session.accessToken.isEmpty) return null;
-    return session.accessToken;
-  }
+  Future<String?> _tryAccessToken() => _authTokens.tryAccessToken();
 
-  Future<String> _requireAccessToken() async {
-    final token = await _tryAccessToken();
-    if (token == null) {
-      throw AuthApiException('Oturum bulunamadı. Lütfen tekrar giriş yapın.');
-    }
-    return token;
-  }
+  Future<String> _requireAccessToken() => _authTokens.requireAccessToken();
 
   Future<void> _cacheCards(List<SavedCardModel> cards) async {
     await _local.replaceAll(cards);

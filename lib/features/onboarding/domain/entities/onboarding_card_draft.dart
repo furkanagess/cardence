@@ -16,6 +16,14 @@ class OnboardingCardDraft {
     this.skills,
     this.school,
     this.about,
+    this.address,
+    this.city,
+    this.country,
+    this.department,
+    this.attendedEvents,
+    this.twitter,
+    this.instagram,
+    this.birthday,
     this.photoUrl,
     List<String>? visibleFields,
     List<String>? frontVisibleFields,
@@ -42,6 +50,14 @@ class OnboardingCardDraft {
   final String? skills;
   final String? school;
   final String? about;
+  final String? address;
+  final String? city;
+  final String? country;
+  final String? department;
+  final String? attendedEvents;
+  final String? twitter;
+  final String? instagram;
+  final String? birthday;
   final String? photoUrl;
   final List<String> visibleFields;
 
@@ -173,6 +189,14 @@ class OnboardingCardDraft {
         skills == other.skills &&
         school == other.school &&
         about == other.about &&
+        address == other.address &&
+        city == other.city &&
+        country == other.country &&
+        department == other.department &&
+        attendedEvents == other.attendedEvents &&
+        twitter == other.twitter &&
+        instagram == other.instagram &&
+        birthday == other.birthday &&
         photoUrl == other.photoUrl &&
         accentColor == other.accentColor &&
         backgroundColor == other.backgroundColor &&
@@ -197,6 +221,14 @@ class OnboardingCardDraft {
     String? skills,
     String? school,
     String? about,
+    String? address,
+    String? city,
+    String? country,
+    String? department,
+    String? attendedEvents,
+    String? twitter,
+    String? instagram,
+    String? birthday,
     String? photoUrl,
     bool clearPhotoUrl = false,
     List<String>? visibleFields,
@@ -222,6 +254,14 @@ class OnboardingCardDraft {
       skills: skills ?? this.skills,
       school: school ?? this.school,
       about: about ?? this.about,
+      address: address ?? this.address,
+      city: city ?? this.city,
+      country: country ?? this.country,
+      department: department ?? this.department,
+      attendedEvents: attendedEvents ?? this.attendedEvents,
+      twitter: twitter ?? this.twitter,
+      instagram: instagram ?? this.instagram,
+      birthday: birthday ?? this.birthday,
       photoUrl: clearPhotoUrl ? null : (photoUrl ?? this.photoUrl),
       visibleFields: visibleFields ?? this.visibleFields,
       frontVisibleFields: frontVisibleFields ?? this.frontVisibleFields,

@@ -29,4 +29,11 @@ public interface IEventGroupService
     Task<IReadOnlyList<SavedCardDto>> GetCardsAsync(
         string groupId,
         CancellationToken cancellationToken = default);
+
+    Task<EventGroupDto> UploadPhotoAsync(
+        string groupId,
+        Stream photoStream,
+        string contentType,
+        long contentLength,
+        CancellationToken cancellationToken = default);
 }

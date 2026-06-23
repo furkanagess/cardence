@@ -1,4 +1,4 @@
-import '../../../auth/data/datasources/auth_local_datasource.dart';
+import '../../../../core/auth/auth_token_provider.dart';
 import '../../../../core/network/auth_api_exception.dart';
 import '../../domain/entities/support_request.dart';
 import '../../domain/entities/support_request_result.dart';
@@ -9,20 +9,14 @@ import '../datasources/support_remote_datasource.dart';
 class SupportRepositoryImpl implements SupportRepository {
   SupportRepositoryImpl({
     required SupportRemoteDataSource remote,
-    required AuthLocalDataSource authLocal,
+    required AuthTokenProvider authTokens,
   })  : _remote = remote,
-        _authLocal = authLocal;
+        _authTokens = authTokens;
 
   final SupportRemoteDataSource _remote;
-  final AuthLocalDataSource _authLocal;
+  final AuthTokenProvider _authTokens;
 
-  Future<String> _requireAccessToken() async {
-    final session = await _authLocal.getSession();
-    if (session == null || session.accessToken.isEmpty) {
-      throw AuthApiException('Oturum bulunamadı. Lütfen tekrar giriş yapın.');
-    }
-    return session.accessToken;
-  }
+  Future<String> _requireAccessToken() => _authTokens.requireAccessToken();
 
   @override
   Future<SupportRequestResult> submit(SupportRequest request) async {

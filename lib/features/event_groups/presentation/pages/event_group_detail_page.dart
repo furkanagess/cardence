@@ -17,6 +17,7 @@ import '../../domain/entities/event_group.dart';
 import '../../domain/usecases/get_event_groups.dart';
 import '../../domain/usecases/delete_event_group.dart';
 import '../../../saved_cards/domain/usecases/link_saved_cards_to_event_group.dart';
+import '../widgets/event_group_info_banner.dart';
 import '../widgets/pick_saved_cards_for_group_sheet.dart';
 
 /// Bir etkinlik grubunun detayı: bu gruba bağlı kayıtlı kartlar listelenir.
@@ -292,17 +293,22 @@ class _EventGroupDetailPageState extends State<EventGroupDetailPage> {
 
     if (_linkedCards.isEmpty) {
       return SingleChildScrollView(
-        padding: EdgeInsets.fromLTRB(24, 24, 24, bottomInset),
-        child: ConstrainedBox(
-          constraints: BoxConstraints(
-            minHeight: MediaQuery.sizeOf(context).height -
-                (MediaQuery.paddingOf(context).top + kToolbarHeight) -
-                bottomInset -
-                48,
-          ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
+        padding: EdgeInsets.fromLTRB(0, 0, 0, bottomInset),
+        child: Column(
+          children: [
+            EventGroupInfoBanner(group: widget.group),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(24, 24, 24, 0),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  minHeight: MediaQuery.sizeOf(context).height -
+                      (MediaQuery.paddingOf(context).top + kToolbarHeight) -
+                      bottomInset -
+                      120,
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
               Icon(
                 Icons.credit_card_off_rounded,
                 size: 64,
@@ -337,19 +343,26 @@ class _EventGroupDetailPageState extends State<EventGroupDetailPage> {
                       const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
                 ),
               ),
-            ],
-          ),
+                  ],
+                ),
+              ),
+            ),
+          ],
         ),
       );
     }
 
     return ListView.builder(
-      padding: EdgeInsets.fromLTRB(20, 16, 20, bottomInset),
-      itemCount: _linkedCards.length,
+      padding: EdgeInsets.fromLTRB(0, 0, 0, bottomInset),
+      itemCount: _linkedCards.length + 1,
       itemBuilder: (context, index) {
-        final card = _linkedCards[index];
+        if (index == 0) {
+          return EventGroupInfoBanner(group: widget.group);
+        }
+
+        final card = _linkedCards[index - 1];
         return Padding(
-          padding: const EdgeInsets.only(bottom: 20),
+          padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
           child: _SavedCardPreviewTile(
             card: card,
             onTap: () => _openCardDetail(card),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/widgets/molecules/purchase_success_dialog.dart';
 import 'cubit/saved_cards_cubit.dart';
 
 /// RevenueCat paywall sunumu ve kota yenileme akışı.
@@ -10,6 +11,8 @@ class WalletPaywallFlow {
     BuildContext context, {
     required SavedCardsCubit cubit,
   }) async {
-    await cubit.upgradeWallet();
+    final success = await cubit.upgradeWallet();
+    if (!context.mounted || !success) return;
+    await PurchaseSuccessDialog.show(context);
   }
 }

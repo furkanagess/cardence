@@ -1,9 +1,9 @@
+import '../../../../core/auth/auth_token_coordinator.dart';
 import '../../domain/entities/auth_session.dart';
 import '../../domain/entities/last_login_credentials.dart';
 import '../../domain/entities/restore_session_result.dart';
 import '../../domain/entities/user_profile.dart';
 import '../../domain/repositories/auth_repository.dart';
-import '../../../../core/network/auth_api_exception.dart';
 import '../datasources/auth_local_datasource.dart';
 import '../datasources/auth_remote_datasource.dart';
 import '../models/auth_session_model.dart';
@@ -24,9 +24,13 @@ class AuthRepositoryImpl implements AuthRepository {
   final Future<void> Function(UserProfile profile)? _onProfileSynced;
   final Future<void> Function()? _onLogout;
 
+  AuthTokenCoordinator? get _coordinator => AuthTokenCoordinator.instance;
+
   Future<AuthSession> _persist(AuthSessionModel model) async {
-    await _local.saveSession(model);
-    return model.toEntity();
+    final withExpiry = model.withComputedExpiry();
+    await _local.saveSession(withExpiry);
+    _coordinator?.resetAfterLogin();
+    return withExpiry.toEntity();
   }
 
   Future<void> _rememberLogin({
@@ -47,6 +51,7 @@ class AuthRepositoryImpl implements AuthRepository {
       refreshToken: session.refreshToken,
       userId: session.userId,
       expiresIn: session.expiresIn,
+      accessTokenExpiresAt: session.accessTokenExpiresAt,
       email: profile.email ?? session.email,
       phone: profile.phone ?? session.phone,
       displayName: profile.displayName ?? session.displayName,
@@ -54,7 +59,8 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   Future<UserProfile> _fetchAndPersistProfile(AuthSessionModel session) async {
-    final profile = await _remote.getMe(session.accessToken);
+    final token = await _coordinator?.getValidAccessToken() ?? session.accessToken;
+    final profile = await _remote.getMe(token);
     final entity = profile.toEntity();
     final enriched = _mergeProfile(session, entity);
     await _local.saveSession(enriched);
@@ -82,11 +88,12 @@ class AuthRepositoryImpl implements AuthRepository {
       return await _fetchAndPersistProfile(session);
     } on AuthApiException catch (e) {
       if (e.isUnauthorized) {
-        final refreshed = await _tryRefresh(session.toEntity());
-        if (refreshed != null) {
-          return _fetchAndPersistProfile(
-            AuthSessionModel.fromEntity(refreshed),
-          );
+        final refreshed = await _coordinator?.refreshSession() ?? false;
+        if (refreshed) {
+          final updated = await _local.getSession();
+          if (updated != null) {
+            return _fetchAndPersistProfile(updated);
+          }
         }
         throw AuthApiException('Oturum bulunamadı. Lütfen tekrar giriş yapın.');
       }
@@ -98,17 +105,6 @@ class AuthRepositoryImpl implements AuthRepository {
       final cached = await _readCachedProfile();
       if (cached != null) return cached;
       return _profileFromSession(session.toEntity());
-    }
-  }
-
-  Future<AuthSession?> _tryRefresh(AuthSession session) async {
-    final refreshToken = session.refreshToken;
-    if (refreshToken == null || refreshToken.isEmpty) return null;
-    try {
-      final model = await _remote.refreshAuthentication(refreshToken);
-      return _persist(model);
-    } catch (_) {
-      return null;
     }
   }
 
@@ -131,40 +127,26 @@ class AuthRepositoryImpl implements AuthRepository {
       return const RestoreSessionResult(isAuthenticated: false);
     }
 
+    final token = await _coordinator?.getValidAccessToken();
+    if (token == null) {
+      await clearSession();
+      return const RestoreSessionResult(isAuthenticated: false);
+    }
+
     try {
-      final profile = await _resolveProfile(
-        AuthSessionModel.fromEntity(session),
-      );
+      final stored = await _local.getSession();
+      if (stored == null) {
+        return const RestoreSessionResult(isAuthenticated: false);
+      }
+
+      final profile = await _resolveProfile(stored);
       return RestoreSessionResult(
         isAuthenticated: true,
         onboardingCompleted: profile.onboardingCompleted,
       );
-    } on AuthApiException catch (e) {
-      if (e.isUnauthorized) {
-        final refreshed = await _tryRefresh(session);
-        if (refreshed != null) {
-          try {
-            final profile = await _resolveProfile(
-              AuthSessionModel.fromEntity(refreshed),
-            );
-            return RestoreSessionResult(
-              isAuthenticated: true,
-              onboardingCompleted: profile.onboardingCompleted,
-            );
-          } catch (_) {
-            await clearSession();
-            return const RestoreSessionResult(isAuthenticated: false);
-          }
-        }
-        await clearSession();
-        return const RestoreSessionResult(isAuthenticated: false);
-      }
-
-      final cached = await _readCachedProfile();
-      return RestoreSessionResult(
-        isAuthenticated: true,
-        onboardingCompleted: cached?.onboardingCompleted,
-      );
+    } on AuthApiException {
+      await clearSession();
+      return const RestoreSessionResult(isAuthenticated: false);
     } catch (_) {
       final cached = await _readCachedProfile();
       return RestoreSessionResult(
@@ -185,7 +167,7 @@ class AuthRepositoryImpl implements AuthRepository {
     );
     final session = await _persist(model);
     try {
-      await _fetchAndPersistProfile(model);
+      await _fetchAndPersistProfile(model.withComputedExpiry());
     } catch (_) {}
     await _rememberLogin(
       email: email,
@@ -205,7 +187,7 @@ class AuthRepositoryImpl implements AuthRepository {
     );
     final session = await _persist(model);
     try {
-      await _fetchAndPersistProfile(model);
+      await _fetchAndPersistProfile(model.withComputedExpiry());
     } catch (_) {}
     await _rememberLogin(
       phone: phone,
@@ -229,7 +211,7 @@ class AuthRepositoryImpl implements AuthRepository {
     );
     final session = await _persist(model);
     try {
-      await _fetchAndPersistProfile(model);
+      await _fetchAndPersistProfile(model.withComputedExpiry());
     } catch (_) {}
     await _rememberLogin(
       email: email,
@@ -258,7 +240,7 @@ class AuthRepositoryImpl implements AuthRepository {
     );
     final session = await _persist(model);
     try {
-      await _fetchAndPersistProfile(model);
+      await _fetchAndPersistProfile(model.withComputedExpiry());
     } catch (_) {}
     await _rememberLogin(
       email: email,
@@ -284,14 +266,15 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Future<UserProfile> uploadProfilePhoto(String filePath) async {
+    final token = await _coordinator?.getValidAccessToken();
     final session = await getStoredSession();
-    if (session == null || !session.isValid) {
+    if (token == null || session == null || !session.isValid) {
       throw AuthApiException('Oturum bulunamadı. Lütfen tekrar giriş yapın.');
     }
 
     final profile = await _remote.uploadProfilePhoto(
       filePath: filePath,
-      accessToken: session.accessToken,
+      accessToken: token,
     );
     final entity = profile.toEntity();
     final enriched = _mergeProfile(
@@ -306,11 +289,12 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Future<void> completeOnboardingOnServer() async {
+    final token = await _coordinator?.getValidAccessToken();
     final session = await getStoredSession();
-    if (session == null || !session.isValid) {
+    if (token == null || session == null || !session.isValid) {
       throw AuthApiException('Oturum bulunamadı.');
     }
-    final profile = await _remote.completeOnboarding(session.accessToken);
+    final profile = await _remote.completeOnboarding(token);
     final entity = profile.toEntity();
     final enriched = _mergeProfile(
       AuthSessionModel.fromEntity(session),

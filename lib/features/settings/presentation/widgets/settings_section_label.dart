@@ -1,27 +1,47 @@
 import 'package:flutter/material.dart';
 
-/// Ayarlar bölüm başlığı (GÖRÜNÜM, YARDIM VE DESTEK).
+import '../../../../core/theme/app_colors.dart';
+
+/// Ayarlar bölüm başlığı.
 class SettingsSectionLabel extends StatelessWidget {
   const SettingsSectionLabel({
     super.key,
     required this.label,
+    this.subtitle,
   });
 
   final String label;
+  final String? subtitle;
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     return Padding(
-      padding: const EdgeInsets.only(left: 4, bottom: 10),
-      child: Text(
-        label.toUpperCase(),
-        style: textTheme.labelMedium?.copyWith(
-          color: Theme.of(context).colorScheme.onSurfaceVariant,
-          fontWeight: FontWeight.w600,
-          letterSpacing: 0.6,
-        ),
+      padding: const EdgeInsets.only(left: 2, bottom: 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: theme.textTheme.titleSmall?.copyWith(
+              fontWeight: FontWeight.w600,
+              letterSpacing: -0.2,
+              color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
+            ),
+          ),
+          if (subtitle != null) ...[
+            const SizedBox(height: 4),
+            Text(
+              subtitle!,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+                height: 1.4,
+              ),
+            ),
+          ],
+        ],
       ),
     );
   }

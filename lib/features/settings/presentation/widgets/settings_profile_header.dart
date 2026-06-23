@@ -102,39 +102,64 @@ class _SettingsProfileHeaderState extends State<SettingsProfileHeader> {
     final textTheme = Theme.of(context).textTheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
+    final gradientStart = isDark
+        ? AppColors.primaryContainerDark.withValues(alpha: 0.45)
+        : AppColors.primaryContainer.withValues(alpha: 0.55);
+    final gradientEnd = colorScheme.surfaceContainerLowest.withValues(
+      alpha: isDark ? 0.35 : 0.9,
+    );
+
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: colorScheme.surface,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(24),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [gradientStart, gradientEnd],
+        ),
         border: Border.all(
-          color: isDark ? AppColors.outlineDark : AppColors.outlineVariant,
+          color: isDark
+              ? AppColors.outlineDark.withValues(alpha: 0.3)
+              : AppColors.outlineVariant.withValues(alpha: 0.55),
         ),
       ),
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 28, 20, 24),
+        padding: const EdgeInsets.fromLTRB(20, 26, 20, 22),
         child: Column(
           children: [
             Stack(
               alignment: Alignment.center,
               children: [
-                ProfileAvatar(
-                  photoUrl: _photoUrl,
-                  displayName: widget.displayName,
-                  size: 96,
-                  circular: true,
-                  onTap: _busy ? null : _pickAndUploadPhoto,
-                  showEditBadge: !_busy,
+                DecoratedBox(
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColors.primary.withValues(alpha: 0.12),
+                        blurRadius: 20,
+                        offset: const Offset(0, 8),
+                      ),
+                    ],
+                  ),
+                  child: ProfileAvatar(
+                    photoUrl: _photoUrl,
+                    displayName: widget.displayName,
+                    size: 88,
+                    circular: true,
+                    onTap: _busy ? null : _pickAndUploadPhoto,
+                    showEditBadge: !_busy,
+                  ),
                 ),
                 if (_busy)
                   Container(
-                    width: 96,
-                    height: 96,
+                    width: 88,
+                    height: 88,
                     decoration: BoxDecoration(
-                      color: colorScheme.surface.withValues(alpha: 0.6),
+                      color: colorScheme.surface.withValues(alpha: 0.55),
                       shape: BoxShape.circle,
                     ),
                     child: const Padding(
-                      padding: EdgeInsets.all(28),
+                      padding: EdgeInsets.all(26),
                       child: CircularProgressIndicator(strokeWidth: 2.5),
                     ),
                   ),
@@ -145,7 +170,8 @@ class _SettingsProfileHeaderState extends State<SettingsProfileHeader> {
               widget.displayName,
               textAlign: TextAlign.center,
               style: textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.w700,
+                fontWeight: FontWeight.w600,
+                letterSpacing: -0.3,
                 color: isDark
                     ? AppColors.textPrimaryDark
                     : AppColors.textPrimary,
@@ -158,6 +184,7 @@ class _SettingsProfileHeaderState extends State<SettingsProfileHeader> {
                 textAlign: TextAlign.center,
                 style: textTheme.bodyMedium?.copyWith(
                   color: colorScheme.onSurfaceVariant,
+                  height: 1.35,
                 ),
               ),
             ],

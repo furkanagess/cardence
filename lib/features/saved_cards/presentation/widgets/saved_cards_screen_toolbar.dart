@@ -118,12 +118,9 @@ class _SavedCardsScreenToolbarState extends State<SavedCardsScreenToolbar> {
                         ),
                       ],
                       selected: {widget.showFlippableView ? 0 : 1},
+                      showSelectedIcon: false,
                       onSelectionChanged: (set) =>
                           widget.onViewModeChanged(set.first == 0),
-                      style: ButtonStyle(
-                        visualDensity: VisualDensity.compact,
-                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      ),
                     ),
             ),
             if (!_searchExpanded) ...[

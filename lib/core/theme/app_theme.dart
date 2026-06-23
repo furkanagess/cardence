@@ -210,6 +210,46 @@ class AppTheme {
         iconColor: isLight ? AppColors.textSecondary : AppColors.textSecondaryDark,
         textColor: isLight ? AppColors.textPrimary : AppColors.textPrimaryDark,
       ),
+      segmentedButtonTheme: SegmentedButtonThemeData(
+        style: _segmentedButtonStyle(isLight),
+      ),
+    );
+  }
+
+  /// Kart / Liste gibi görünüm seçicilerinde seçili segmentin net ayrışması.
+  static ButtonStyle _segmentedButtonStyle(bool isLight) {
+    final selectedBackground =
+        isLight ? AppColors.surfaceLight : AppColors.surfaceVariantDark;
+    final selectedForeground =
+        isLight ? AppColors.primary : AppColors.primaryDarkTheme;
+    final unselectedForeground =
+        isLight ? AppColors.textSecondary : AppColors.textSecondaryDark;
+
+    return ButtonStyle(
+      visualDensity: VisualDensity.compact,
+      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      backgroundColor: WidgetStateProperty.resolveWith((states) {
+        if (states.contains(WidgetState.selected)) {
+          return selectedBackground;
+        }
+        if (states.contains(WidgetState.disabled)) {
+          return Colors.transparent;
+        }
+        return Colors.transparent;
+      }),
+      foregroundColor: WidgetStateProperty.resolveWith((states) {
+        if (states.contains(WidgetState.selected)) {
+          return selectedForeground;
+        }
+        if (states.contains(WidgetState.disabled)) {
+          return unselectedForeground.withValues(alpha: 0.45);
+        }
+        return unselectedForeground;
+      }),
+      side: WidgetStateProperty.all(BorderSide.none),
+      shape: WidgetStateProperty.all(
+        RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      ),
     );
   }
 

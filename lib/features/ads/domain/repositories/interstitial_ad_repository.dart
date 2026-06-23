@@ -3,5 +3,5 @@ abstract class InterstitialAdRepository {
 
   Future<void> preload();
 
-  Future<void> show();
+  Future<bool> show();
 }

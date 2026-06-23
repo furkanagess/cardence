@@ -6,6 +6,7 @@ class AuthSession extends Equatable {
     required this.userId,
     this.refreshToken,
     this.expiresIn = 0,
+    this.accessTokenExpiresAt,
     this.email,
     this.phone,
     this.displayName,
@@ -15,6 +16,7 @@ class AuthSession extends Equatable {
   final String? refreshToken;
   final String userId;
   final int expiresIn;
+  final int? accessTokenExpiresAt;
   final String? email;
   final String? phone;
   final String? displayName;
@@ -27,6 +29,7 @@ class AuthSession extends Equatable {
         refreshToken,
         userId,
         expiresIn,
+        accessTokenExpiresAt,
         email,
         phone,
         displayName,

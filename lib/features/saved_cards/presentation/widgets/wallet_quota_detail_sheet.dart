@@ -4,6 +4,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/atoms/custom_button.dart';
 import '../../domain/entities/saved_cards_wallet_quota.dart';
 import '../../domain/saved_cards_wallet_limits.dart';
+import 'wallet_quota_shared.dart';
 
 class WalletQuotaDetailSheet extends StatelessWidget {
   const WalletQuotaDetailSheet({
@@ -26,6 +27,11 @@ class WalletQuotaDetailSheet extends StatelessWidget {
     return showModalBottomSheet<void>(
       context: context,
       showDragHandle: true,
+      isScrollControlled: true,
+      backgroundColor: Theme.of(context).colorScheme.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
       builder: (context) => WalletQuotaDetailSheet(
         quota: quota,
         isDemoMode: isDemoMode,
@@ -38,124 +44,73 @@ class WalletQuotaDetailSheet extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
-    final atLimit = !quota.canAddMore;
+    final atLimit = !quota.canAddMore && !quota.isPremium;
 
     return SafeArea(
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 4, 20, 24),
+        padding: EdgeInsets.fromLTRB(
+          20,
+          4,
+          20,
+          20 + MediaQuery.viewPaddingOf(context).bottom,
+        ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text(
-              'Cüzdan kotası',
-              style: textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.w700,
-                letterSpacing: -0.3,
-              ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              quota.isPremium
-                  ? 'Premium ile sınırsız kart saklayabilirsiniz.'
-                  : 'Ücretsiz planda ${SavedCardsWalletLimits.freeMaxCards} karta kadar kayıt yapılır.',
-              style: textTheme.bodyMedium?.copyWith(
-                color: colorScheme.onSurfaceVariant,
-                height: 1.4,
-              ),
+            Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Cüzdan kotanız',
+                        style: textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: -0.3,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        quota.isPremium
+                            ? 'Premium ile tüm limitler kalktı'
+                            : 'Ücretsiz plandaki haklarınız',
+                        style: textTheme.bodyMedium?.copyWith(
+                          color: colorScheme.onSurfaceVariant,
+                          height: 1.35,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                WalletQuotaPlanChip(isPremium: quota.isPremium),
+              ],
             ),
             const SizedBox(height: 20),
-            DecoratedBox(
-              decoration: BoxDecoration(
-                color: AppColors.surfaceVariant.withValues(alpha: 0.45),
-                borderRadius: BorderRadius.circular(14),
-                border: Border.all(
-                  color: AppColors.outlineVariant.withValues(alpha: 0.7),
-                ),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        Text(
-                          isDemoMode ? '0' : '${quota.usedCount}',
-                          style: textTheme.displaySmall?.copyWith(
-                            fontWeight: FontWeight.w700,
-                            height: 1,
-                            color: atLimit && !quota.isPremium
-                                ? AppColors.error
-                                : null,
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: 4, left: 4),
-                          child: Text(
-                            '/ ${quota.walletCapacityLabel} kart',
-                            style: textTheme.titleMedium?.copyWith(
-                              color: colorScheme.onSurfaceVariant,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    if (!quota.hasUnlimitedWallet) ...[
-                      const SizedBox(height: 12),
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(6),
-                        child: LinearProgressIndicator(
-                          value: quota.usageFraction,
-                          minHeight: 8,
-                          backgroundColor:
-                              AppColors.surfaceVariant.withValues(alpha: 0.8),
-                          color: atLimit
-                              ? AppColors.error
-                              : AppColors.primary,
-                        ),
-                      ),
-                    ],
-                    if (!quota.hasUnlimitedWallet && !isDemoMode) ...[
-                      const SizedBox(height: 10),
-                      Text(
-                        quota.remainingSlotsLabel,
-                        style: textTheme.labelLarge?.copyWith(
-                          color: colorScheme.onSurfaceVariant,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-            ),
+            _LimitsSection(quota: quota, isDemoMode: isDemoMode),
             if (isDemoMode) ...[
-              const SizedBox(height: 14),
-              Text(
-                'Şu an örnek kartlar gösteriliyor. İlk kartınızı eklediğinizde gerçek cüzdanınız başlar.',
-                style: textTheme.bodyMedium?.copyWith(
-                  color: colorScheme.onSurfaceVariant,
-                  height: 1.4,
-                ),
+              const SizedBox(height: 12),
+              _HintCard(
+                icon: Icons.lightbulb_outline_rounded,
+                message:
+                    'Şu an örnek kartlar görüyorsunuz. İlk kartınızı eklediğinizde gerçek kotanız burada görünür.',
+                tone: _HintTone.neutral,
               ),
-            ] else if (atLimit && !quota.isPremium) ...[
-              const SizedBox(height: 14),
-              Text(
-                'Limit doldu. Premium ile sınırsız kart kaydedebilir, elle ve fotoğrafla eklemeye devam edebilirsiniz.',
-                style: textTheme.bodyMedium?.copyWith(
-                  color: colorScheme.onSurfaceVariant,
-                  height: 1.4,
-                ),
+            ] else if (atLimit) ...[
+              const SizedBox(height: 12),
+              _HintCard(
+                icon: Icons.info_outline_rounded,
+                message:
+                    'Kayıtlı kart limitiniz doldu. Premium ile sınırsız kart saklayabilir ve manuel / fotoğrafla eklemeye devam edebilirsiniz.',
+                tone: _HintTone.warning,
               ),
             ],
             if (!quota.isPremium && onUpgradeTap != null) ...[
               const SizedBox(height: 20),
               CustomButton(
-                label: 'Sınırsız ol',
-                icon: Icons.auto_awesome_rounded,
+                label: 'Cardence Pro ol',
+                icon: Icons.workspace_premium_rounded,
                 onPressed: () {
                   Navigator.of(context).pop();
                   onUpgradeTap!();
@@ -172,6 +127,148 @@ class WalletQuotaDetailSheet extends StatelessWidget {
             ],
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _LimitsSection extends StatelessWidget {
+  const _LimitsSection({
+    required this.quota,
+    required this.isDemoMode,
+  });
+
+  final SavedCardsWalletQuota quota;
+  final bool isDemoMode;
+
+  @override
+  Widget build(BuildContext context) {
+    final usedWallet = isDemoMode ? 0 : quota.usedCount;
+    final savedCardsAtLimit = !quota.isPremium && !quota.canAddMore && !isDemoMode;
+    final savedCardsNearLimit = !quota.isPremium && quota.isNearLimit && !savedCardsAtLimit;
+    final manualLabel = quota.isPremium
+        ? 'Sınırsız'
+        : quota.canAddManualSavedCard
+            ? '1 deneme'
+            : 'Premium gerekli';
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        WalletQuotaLimitRow(
+          icon: Icons.credit_card_outlined,
+          title: 'Kayıtlı kartlar',
+          valueLabel: quota.hasUnlimitedWallet
+              ? 'Sınırsız'
+              : '$usedWallet / ${quota.maxCards}',
+          subtitle: isDemoMode
+              ? 'Henüz kart eklenmedi'
+              : walletQuotaRemainingLabel(quota),
+          tone: quota.hasUnlimitedWallet
+              ? WalletQuotaLimitTone.success
+              : savedCardsAtLimit
+                  ? WalletQuotaLimitTone.error
+                  : savedCardsNearLimit
+                      ? WalletQuotaLimitTone.warning
+                      : WalletQuotaLimitTone.neutral,
+        ),
+        const SizedBox(height: 10),
+        WalletQuotaLimitRow(
+          icon: Icons.badge_outlined,
+          title: 'Kendi kartlarım',
+          valueLabel: quota.isPremium
+              ? '${quota.businessCardCount} / ${quota.maxBusinessCards}'
+              : '${quota.businessCardCount} / ${SavedCardsWalletLimits.freeMaxOwnBusinessCards}',
+          subtitle: quota.canAddBusinessCard
+              ? 'Yeni kart oluşturabilirsiniz'
+              : 'Kart limitine ulaşıldı',
+          tone: quota.canAddBusinessCard
+              ? WalletQuotaLimitTone.neutral
+              : WalletQuotaLimitTone.error,
+        ),
+        const SizedBox(height: 10),
+        WalletQuotaLimitRow(
+          icon: Icons.folder_outlined,
+          title: 'Etkinlik grupları',
+          valueLabel: quota.hasUnlimitedEventGroups
+              ? 'Sınırsız'
+              : '${quota.eventGroupCount} / ${quota.maxEventGroups}',
+          subtitle: quota.hasUnlimitedEventGroups
+              ? 'İstediğiniz kadar grup oluşturun'
+              : quota.canAddEventGroup
+                  ? '${quota.maxEventGroups - quota.eventGroupCount} grup hakkı kaldı'
+                  : 'Grup limitine ulaşıldı',
+          tone: quota.hasUnlimitedEventGroups
+              ? WalletQuotaLimitTone.success
+              : quota.canAddEventGroup
+                  ? WalletQuotaLimitTone.neutral
+                  : WalletQuotaLimitTone.error,
+        ),
+        const SizedBox(height: 10),
+        WalletQuotaLimitRow(
+          icon: Icons.document_scanner_outlined,
+          title: 'Manuel & fotoğraf ekleme',
+          valueLabel: manualLabel,
+          subtitle: quota.isPremium
+              ? 'İstediğiniz kadar ekleyin'
+              : 'Ücretsiz planda sınırlı deneme',
+          tone: quota.isPremium
+              ? WalletQuotaLimitTone.success
+              : quota.canAddManualSavedCard
+                  ? WalletQuotaLimitTone.neutral
+                  : WalletQuotaLimitTone.error,
+        ),
+      ],
+    );
+  }
+}
+
+enum _HintTone { neutral, warning }
+
+class _HintCard extends StatelessWidget {
+  const _HintCard({
+    required this.icon,
+    required this.message,
+    required this.tone,
+  });
+
+  final IconData icon;
+  final String message;
+  final _HintTone tone;
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    final isWarning = tone == _HintTone.warning;
+    final background = isWarning
+        ? AppColors.warning.withValues(alpha: 0.1)
+        : Theme.of(context).colorScheme.surfaceContainerHighest
+            .withValues(alpha: 0.5);
+    final foreground =
+        isWarning ? AppColors.warning : Theme.of(context).colorScheme.onSurfaceVariant;
+
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: background,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, size: 20, color: foreground),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              message,
+              style: textTheme.bodySmall?.copyWith(
+                color: foreground,
+                height: 1.4,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

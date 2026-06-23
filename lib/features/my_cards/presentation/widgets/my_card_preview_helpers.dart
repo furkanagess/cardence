@@ -18,6 +18,14 @@ class MyCardPreviewHelpers {
     'skills': 'Yetenekler',
     'school': 'Okul',
     'about': 'Hakkımda',
+    'address': 'Adres',
+    'city': 'Şehir',
+    'country': 'Ülke',
+    'department': 'Departman',
+    'attendedEvents': 'Katıldığı etkinlikler',
+    'twitter': 'Twitter / X',
+    'instagram': 'Instagram',
+    'birthday': 'Doğum günü',
   };
 
   static Color? parseHexColor(String? hex) {

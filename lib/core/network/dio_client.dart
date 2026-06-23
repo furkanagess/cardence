@@ -1,7 +1,6 @@
 import 'package:dio/dio.dart';
 
 import 'interceptors/chuck_interceptor_service.dart';
-import 'interceptors/session_expired_interceptor.dart';
 
 /// Uygulama genelinde paylaşılan Dio istemcisi.
 class DioClient {
@@ -22,8 +21,6 @@ class DioClient {
         },
       ),
     );
-
-    dio.interceptors.add(SessionExpiredInterceptor());
 
     final chuckInterceptor = ChuckInterceptorService.instance.dioInterceptor;
     if (chuckInterceptor != null) {

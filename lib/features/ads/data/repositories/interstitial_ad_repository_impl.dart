@@ -14,5 +14,5 @@ class InterstitialAdRepositoryImpl implements InterstitialAdRepository {
   Future<void> preload() => _dataSource.load();
 
   @override
-  Future<void> show() => _dataSource.show();
+  Future<bool> show() => _dataSource.show();
 }

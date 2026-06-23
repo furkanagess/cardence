@@ -282,15 +282,6 @@ class SavedCardsCubit extends Cubit<SavedCardsState> {
     final success = await _upgradeWalletPlan();
     if (isClosed) return false;
     await _loadQuota();
-    if (isClosed) return false;
-    if (success) {
-      emit(
-        state.copyWith(
-          effectType: SavedCardsEffectType.showSnackbar,
-          snackbarMessage: 'Premium cüzdan etkinleştirildi',
-        ),
-      );
-    }
     return success;
   }
 }

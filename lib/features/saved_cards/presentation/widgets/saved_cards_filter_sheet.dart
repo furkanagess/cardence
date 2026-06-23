@@ -271,13 +271,10 @@ class SavedCardsFilterSheet extends StatelessWidget {
                       ),
                     ],
                     selected: {tempSort},
+                    showSelectedIcon: false,
                     onSelectionChanged: (selection) {
                       setModalState(() => tempSort = selection.first);
                     },
-                    style: ButtonStyle(
-                      visualDensity: VisualDensity.compact,
-                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    ),
                   ),
                 ),
                 const SizedBox(height: 24),

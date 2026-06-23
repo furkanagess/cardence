@@ -1,6 +1,7 @@
-import '../../../auth/data/datasources/auth_local_datasource.dart';
+import '../../../../core/auth/auth_token_provider.dart';
 import '../../../../core/network/auth_api_exception.dart';
 import '../../domain/entities/event_group.dart';
+import '../../domain/entities/event_group_create_input.dart';
 import '../../domain/repositories/event_group_repository.dart';
 import '../datasources/event_group_local_datasource.dart';
 import '../datasources/event_group_remote_datasource.dart';
@@ -10,28 +11,18 @@ class EventGroupRepositoryImpl implements EventGroupRepository {
   EventGroupRepositoryImpl({
     required EventGroupLocalDataSource local,
     required EventGroupRemoteDataSource remote,
-    required AuthLocalDataSource authLocal,
+    required AuthTokenProvider authTokens,
   })  : _local = local,
         _remote = remote,
-        _authLocal = authLocal;
+        _authTokens = authTokens;
 
   final EventGroupLocalDataSource _local;
   final EventGroupRemoteDataSource _remote;
-  final AuthLocalDataSource _authLocal;
+  final AuthTokenProvider _authTokens;
 
-  Future<String?> _tryAccessToken() async {
-    final session = await _authLocal.getSession();
-    if (session == null || session.accessToken.isEmpty) return null;
-    return session.accessToken;
-  }
+  Future<String?> _tryAccessToken() => _authTokens.tryAccessToken();
 
-  Future<String> _requireAccessToken() async {
-    final token = await _tryAccessToken();
-    if (token == null) {
-      throw AuthApiException('Oturum bulunamadı. Lütfen tekrar giriş yapın.');
-    }
-    return token;
-  }
+  Future<String> _requireAccessToken() => _authTokens.requireAccessToken();
 
   Future<void> _cacheGroups(List<EventGroupModel> groups) async {
     await _local.replaceAll(groups);
@@ -57,12 +48,24 @@ class EventGroupRepositoryImpl implements EventGroupRepository {
   }
 
   @override
-  Future<EventGroup> createEventGroup(String name) async {
+  Future<EventGroup> createEventGroup(EventGroupCreateInput input) async {
     final token = await _requireAccessToken();
-    final created = await _remote.createEventGroup(
-      name: name,
+    var created = await _remote.createEventGroup(
+      name: input.name,
+      location: input.location,
+      eventDate: input.eventDate,
       accessToken: token,
     );
+
+    final photoFilePath = input.photoFilePath?.trim();
+    if (photoFilePath != null && photoFilePath.isNotEmpty) {
+      created = await _remote.uploadEventGroupPhoto(
+        groupId: created.id,
+        filePath: photoFilePath,
+        accessToken: token,
+      );
+    }
+
     final localGroups = await _local.getEventGroups();
     final updated = [...localGroups, created];
     await _cacheGroups(updated);

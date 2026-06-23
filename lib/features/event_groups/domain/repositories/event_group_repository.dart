@@ -1,10 +1,11 @@
 import '../entities/event_group.dart';
+import '../entities/event_group_create_input.dart';
 
 /// Etkinlik grupları – sunucu birincil, yerel önbellek yedek.
 abstract class EventGroupRepository {
   Future<List<EventGroup>> getEventGroups();
 
-  Future<EventGroup> createEventGroup(String name);
+  Future<EventGroup> createEventGroup(EventGroupCreateInput input);
 
   Future<void> deleteEventGroup(String groupId);
 

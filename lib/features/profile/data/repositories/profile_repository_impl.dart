@@ -1,5 +1,4 @@
-import '../../../auth/data/datasources/auth_local_datasource.dart';
-import '../../../auth/data/datasources/auth_remote_datasource.dart';
+import '../../../../core/auth/auth_token_provider.dart';
 import '../../domain/entities/profile_stats.dart';
 import '../../domain/repositories/profile_repository.dart';
 import '../datasources/profile_remote_datasource.dart';
@@ -7,20 +6,14 @@ import '../datasources/profile_remote_datasource.dart';
 class ProfileRepositoryImpl implements ProfileRepository {
   ProfileRepositoryImpl({
     required ProfileRemoteDataSource remote,
-    required AuthLocalDataSource authLocal,
+    required AuthTokenProvider authTokens,
   })  : _remote = remote,
-        _authLocal = authLocal;
+        _authTokens = authTokens;
 
   final ProfileRemoteDataSource _remote;
-  final AuthLocalDataSource _authLocal;
+  final AuthTokenProvider _authTokens;
 
-  Future<String> _requireAccessToken() async {
-    final session = await _authLocal.getSession();
-    if (session == null || session.accessToken.isEmpty) {
-      throw AuthApiException('Oturum bulunamadı. Lütfen tekrar giriş yapın.');
-    }
-    return session.accessToken;
-  }
+  Future<String> _requireAccessToken() => _authTokens.requireAccessToken();
 
   @override
   Future<ProfileStats> getProfileStats() async {

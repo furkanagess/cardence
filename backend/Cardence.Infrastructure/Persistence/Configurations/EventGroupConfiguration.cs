@@ -14,6 +14,9 @@ public sealed class EventGroupConfiguration : IEntityTypeConfiguration<EventGrou
 
         builder.Property(x => x.UserId).HasColumnName("user_id");
         builder.Property(x => x.Name).HasMaxLength(200).HasColumnName("name");
+        builder.Property(x => x.Location).HasMaxLength(500).HasColumnName("location");
+        builder.Property(x => x.EventDate).HasColumnName("event_date");
+        builder.Property(x => x.PhotoUrl).HasMaxLength(2048).HasColumnName("photo_url");
         builder.Property(x => x.CreatedAt).HasColumnName("created_at");
 
         builder.HasIndex(x => x.UserId);

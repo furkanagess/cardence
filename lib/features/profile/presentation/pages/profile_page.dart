@@ -13,6 +13,7 @@ import '../../../saved_cards/domain/entities/saved_cards_wallet_quota.dart';
 import '../../../saved_cards/domain/usecases/get_saved_cards_wallet_quota.dart';
 import '../../domain/usecases/get_profile_stats.dart';
 import '../widgets/profile_interaction_stats.dart';
+import '../widgets/profile_loading_shimmer.dart';
 
 const double _profileCarouselViewportFraction = 0.88;
 const double _profileCarouselHorizontalPadding = 12;
@@ -109,7 +110,8 @@ class _ProfilePageState extends State<ProfilePage> {
     }
   }
 
-  Future<void> _openCardEditor(OnboardingCardDraft card, {bool isNew = false}) async {
+  Future<void> _openCardEditor(OnboardingCardDraft card,
+      {bool isNew = false}) async {
     final result = await Navigator.of(context).push<OnboardingCardDraft>(
       MaterialPageRoute(
         builder: (context) => MyCardEditPage(
@@ -174,7 +176,7 @@ class _ProfilePageState extends State<ProfilePage> {
     final colorScheme = theme.colorScheme;
 
     if (_loading) {
-      return const Center(child: CircularProgressIndicator());
+      return const ProfileLoadingShimmer();
     }
 
     final stats = _stats ??
@@ -250,8 +252,7 @@ class _ProfilePageState extends State<ProfilePage> {
                           builder: (context) => CardVisibilitySettingsPage(
                             getOnboardingDraftCards:
                                 widget.getOnboardingDraftCards,
-                            persistOnboardingCard:
-                                widget.persistOnboardingCard,
+                            persistOnboardingCard: widget.persistOnboardingCard,
                             onDraftUpdated: widget.onDraftUpdated,
                           ),
                         ),

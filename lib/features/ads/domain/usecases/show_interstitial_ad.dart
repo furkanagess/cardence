@@ -10,11 +10,11 @@ class ShowInterstitialAd {
   final InterstitialAdRepository _adRepository;
   final SubscriptionRepository _subscriptionRepository;
 
-  Future<void> call() async {
+  Future<bool> call() async {
     if (await _subscriptionRepository.hasPremiumWalletEntitlement()) {
-      return;
+      return false;
     }
 
-    await _adRepository.show();
+    return _adRepository.show();
   }
 }

@@ -7,6 +7,9 @@ import '../../../../core/widgets/atoms/custom_button.dart';
 import '../../../../core/widgets/organisms/cardence_scaffold.dart';
 import '../../../../core/widgets/molecules/cardence_confirm_dialog.dart';
 import '../../../../core/widgets/molecules/card_color_customize_section.dart';
+import '../../../../core/widgets/molecules/birthday_picker_field.dart';
+import '../../../../core/widgets/molecules/comma_separated_chip_input.dart';
+import '../../../../core/widgets/molecules/country_city_picker_field.dart';
 import '../../../../core/widgets/molecules/skills_chip_input.dart';
 import '../widgets/collapsible_card_preview_panel.dart';
 import '../widgets/my_card_preview_helpers.dart';
@@ -46,7 +49,15 @@ class _MyCardEditPageState extends State<MyCardEditPage> {
   late TextEditingController _linkedInController;
   late TextEditingController _schoolController;
   late TextEditingController _aboutController;
+  late TextEditingController _addressController;
+  late TextEditingController _departmentController;
+  late TextEditingController _twitterController;
+  late TextEditingController _instagramController;
   String? _skillsValue;
+  String? _countryValue;
+  String? _cityValue;
+  String? _attendedEventsValue;
+  String? _birthdayValue;
   String? _phoneFullNumber;
   bool _saving = false;
 
@@ -70,7 +81,15 @@ class _MyCardEditPageState extends State<MyCardEditPage> {
     _linkedInController = TextEditingController(text: d.linkedin ?? '');
     _schoolController = TextEditingController(text: d.school ?? '');
     _aboutController = TextEditingController(text: d.about ?? '');
+    _addressController = TextEditingController(text: d.address ?? '');
+    _departmentController = TextEditingController(text: d.department ?? '');
+    _twitterController = TextEditingController(text: d.twitter ?? '');
+    _instagramController = TextEditingController(text: d.instagram ?? '');
     _skillsValue = d.skills;
+    _countryValue = d.country;
+    _cityValue = d.city;
+    _attendedEventsValue = d.attendedEvents;
+    _birthdayValue = d.birthday;
     _phoneFullNumber = d.phone;
   }
 
@@ -85,6 +104,10 @@ class _MyCardEditPageState extends State<MyCardEditPage> {
     _linkedInController.dispose();
     _schoolController.dispose();
     _aboutController.dispose();
+    _addressController.dispose();
+    _departmentController.dispose();
+    _twitterController.dispose();
+    _instagramController.dispose();
     super.dispose();
   }
 
@@ -123,6 +146,26 @@ class _MyCardEditPageState extends State<MyCardEditPage> {
       about: _aboutController.text.trim().isEmpty
           ? null
           : _aboutController.text.trim(),
+      address: _addressController.text.trim().isEmpty
+          ? null
+          : _addressController.text.trim(),
+      city: (_cityValue ?? '').trim().isEmpty ? null : _cityValue!.trim(),
+      country:
+          (_countryValue ?? '').trim().isEmpty ? null : _countryValue!.trim(),
+      department: _departmentController.text.trim().isEmpty
+          ? null
+          : _departmentController.text.trim(),
+      attendedEvents: (_attendedEventsValue ?? '').trim().isEmpty
+          ? null
+          : _attendedEventsValue!.trim(),
+      twitter: _twitterController.text.trim().isEmpty
+          ? null
+          : _twitterController.text.trim(),
+      instagram: _instagramController.text.trim().isEmpty
+          ? null
+          : _instagramController.text.trim(),
+      birthday:
+          (_birthdayValue ?? '').trim().isEmpty ? null : _birthdayValue!.trim(),
     );
   }
 
@@ -456,6 +499,66 @@ class _MyCardEditPageState extends State<MyCardEditPage> {
                     ],
                   ),
                   _buildFormSection(
+                    title: 'Ek bilgiler',
+                    subtitle:
+                        'Adres, sosyal medya ve etkinlik gibi isteğe bağlı alanlar.',
+                    colorScheme: colorScheme,
+                    textTheme: textTheme,
+                    children: [
+                      _buildField(
+                        _labels['address']!,
+                        _addressController,
+                        colorScheme,
+                        minLines: 2,
+                        maxLines: 4,
+                      ),
+                      CountryCityPickerField(
+                        countryLabel: _labels['country']!,
+                        stateLabel: 'İl',
+                        districtLabel: 'İlçe',
+                        country: _countryValue,
+                        city: _cityValue,
+                        onCountryChanged: (value) =>
+                            setState(() => _countryValue = value),
+                        onCityChanged: (value) =>
+                            setState(() => _cityValue = value),
+                      ),
+                      _buildField(
+                        _labels['department']!,
+                        _departmentController,
+                        colorScheme,
+                      ),
+                      CommaSeparatedChipInput(
+                        label: _labels['attendedEvents']!,
+                        value: _attendedEventsValue,
+                        hintText: 'Etkinlik ekle (örn. Web Summit)',
+                        prefixIcon: Icons.event_outlined,
+                        chipIcon: Icons.event_outlined,
+                        canAddItem: (text) => text.trim().length >= 2,
+                        onChanged: (value) =>
+                            setState(() => _attendedEventsValue = value),
+                      ),
+                      _buildField(
+                        _labels['twitter']!,
+                        _twitterController,
+                        colorScheme,
+                        keyboardType: TextInputType.url,
+                      ),
+                      _buildField(
+                        _labels['instagram']!,
+                        _instagramController,
+                        colorScheme,
+                        keyboardType: TextInputType.url,
+                      ),
+                      BirthdayPickerField(
+                        label: _labels['birthday']!,
+                        value: _birthdayValue,
+                        onChanged: (value) =>
+                            setState(() => _birthdayValue = value),
+                      ),
+                    ],
+                  ),
+                  _buildFormSection(
                     title: 'Tasarım',
                     subtitle: 'Kart ve metin rengini düzenleyin.',
                     colorScheme: colorScheme,
@@ -496,6 +599,7 @@ class _MyCardEditPageState extends State<MyCardEditPage> {
     int? maxLength,
     int? minLines,
     int? maxLines,
+    String? hintText,
   }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 14),
@@ -507,6 +611,7 @@ class _MyCardEditPageState extends State<MyCardEditPage> {
         maxLines: maxLines,
         decoration: InputDecoration(
           labelText: label,
+          hintText: hintText,
           filled: true,
           fillColor: colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
           border: OutlineInputBorder(

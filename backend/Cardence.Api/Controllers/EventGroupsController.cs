@@ -61,6 +61,32 @@ public sealed class EventGroupsController : ControllerBase
         return NoContent();
     }
 
+    [HttpPost("UploadEventGroupPhoto")]
+    [RequestSizeLimit(5 * 1024 * 1024)]
+    [ProducesResponseType(typeof(ApiResponse<EventGroupDto>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<ApiResponse<EventGroupDto>>> UploadEventGroupPhoto(
+        [FromQuery] string id,
+        IFormFile photo,
+        CancellationToken cancellationToken)
+    {
+        if (photo is null || photo.Length == 0)
+        {
+            return BadRequest(ApiResponse<EventGroupDto>.Fail(
+                "InvalidPhoto",
+                "Etkinlik fotoğrafı seçilmedi.",
+                traceId: HttpContext.TraceIdentifier));
+        }
+
+        await using var stream = photo.OpenReadStream();
+        var group = await _eventGroupService.UploadPhotoAsync(
+            id,
+            stream,
+            photo.ContentType,
+            photo.Length,
+            cancellationToken);
+        return Ok(ApiResponse<EventGroupDto>.Ok(group, HttpContext.TraceIdentifier));
+    }
+
     [HttpPost("LinkEventGroupCards")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     public async Task<IActionResult> LinkEventGroupCards(

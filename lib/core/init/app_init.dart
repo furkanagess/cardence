@@ -61,15 +61,21 @@ import '../../features/subscriptions/domain/usecases/identify_subscription_user.
 import '../../features/subscriptions/domain/usecases/logout_subscription_user.dart';
 import '../../features/subscriptions/domain/usecases/restore_wallet_purchases.dart';
 import '../../features/ads/data/repositories/interstitial_ad_repository_impl.dart';
+import '../../features/ads/data/datasources/post_add_card_ad_counter_local_datasource.dart';
 import '../../features/ads/domain/usecases/initialize_mobile_ads.dart';
-import '../../features/ads/domain/usecases/show_interstitial_ad.dart';
+import '../../features/ads/domain/usecases/show_post_add_card_monetization.dart';
+import '../../features/settings/data/repositories/app_review_repository_impl.dart';
 import '../../features/settings/data/datasources/theme_local_datasource.dart';
 import '../../features/settings/data/repositories/theme_repository_impl.dart';
+import '../../features/settings/domain/entities/theme_preference.dart';
 import '../../features/settings/domain/usecases/get_theme_preference.dart';
+import '../../features/settings/domain/usecases/request_app_review.dart';
 import '../../features/settings/domain/usecases/set_theme_preference.dart';
 import '../../features/support/data/datasources/support_remote_datasource.dart';
 import '../../features/support/data/repositories/support_repository_impl.dart';
 import '../../features/support/domain/usecases/submit_support_request.dart';
+import '../auth/auth_token_coordinator.dart';
+import '../auth/auth_token_provider.dart';
 import '../user_data/clear_user_scoped_local_data.dart';
 import '../user_data/sync_user_profile_cards.dart';
 
@@ -84,6 +90,13 @@ class AppInit {
     await _initFirebase();
     final prefs = await _initSharedPreferences();
     final authLocal = AuthLocalDataSourceImpl(prefs);
+    final authTokenProvider = AuthTokenProvider(authLocal);
+    AuthTokenCoordinator.install(
+      AuthTokenCoordinator(
+        local: authLocal,
+        onSessionCleared: authLocal.clearSession,
+      ),
+    );
 
     final subscriptionRepo = SubscriptionRepositoryImpl();
     final configureSubscriptions = ConfigureSubscriptions(subscriptionRepo);
@@ -93,9 +106,12 @@ class AppInit {
 
     final interstitialAdRepo = InterstitialAdRepositoryImpl();
     await InitializeMobileAds(interstitialAdRepo)();
-    final showInterstitialAd = ShowInterstitialAd(
+    final postAddCardAdCounter = PostAddCardAdCounterLocalDataSource(prefs);
+    final showPostAddCardMonetization = ShowPostAddCardMonetization(
       interstitialAdRepo,
       subscriptionRepo,
+      postAddCardAdCounter,
+      authLocal,
     );
 
     final onboardingLocal = OnboardingLocalDataSourceImpl(prefs, authLocal);
@@ -106,7 +122,7 @@ class AppInit {
     final savedCardRepo = SavedCardRepositoryImpl(
       local: savedCardLocal,
       remote: SavedCardRemoteDataSourceImpl(),
-      authLocal: authLocal,
+      authTokens: authTokenProvider,
     );
     final eventGroupLocal = EventGroupLocalDataSourceImpl(prefs, authLocal);
 
@@ -127,11 +143,16 @@ class AppInit {
       authLocal: authLocal,
       onProfileSynced: syncUserProfileCards.call,
       onLogout: () async {
+        final session = await authLocal.getSession();
+        final userId = session?.userId;
+        if (userId != null && userId.isNotEmpty) {
+          await postAddCardAdCounter.clearForUser(userId);
+        }
         await logoutSubscriptionUser();
         await clearUserScopedLocalData();
       },
     );
-    final businessCards = _initBusinessCards(prefs, authLocal);
+    final businessCards = _initBusinessCards(authTokenProvider);
     final onboarding = _initOnboarding(
       onboardingRepo: onboardingRepo,
       syncOnboardingFromServer: syncOnboardingFromServer,
@@ -143,12 +164,14 @@ class AppInit {
       businessCards.upsertBusinessCard,
     );
     final theme = _initTheme(prefs);
-    final support = _initSupport(authLocal);
-    final profile = _initProfile(authLocal);
+    final initialThemePreference = await theme.getThemePreference();
+    final appReview = _initAppReview();
+    final support = _initSupport(authTokenProvider);
+    final profile = _initProfile(authTokenProvider);
 
     final eventGroups = _initEventGroups(
       local: eventGroupLocal,
-      authLocal: authLocal,
+      authTokens: authTokenProvider,
     );
     final savedCards = _initSavedCards(
       savedCardRepo: savedCardRepo,
@@ -188,7 +211,9 @@ class AppInit {
       resolveOnboardingInitialDraft: onboarding.resolveOnboardingInitialDraft,
       getThemePreference: theme.getThemePreference,
       setThemePreference: theme.setThemePreference,
+      initialThemePreference: initialThemePreference,
       submitSupportRequest: support.submitSupportRequest,
+      requestAppReview: appReview.requestAppReview,
       getEventGroups: eventGroups.getEventGroups,
       createEventGroup: eventGroups.createEventGroup,
       deleteEventGroup: eventGroups.deleteEventGroup,
@@ -202,7 +227,7 @@ class AppInit {
       restoreWalletPurchases: restoreWalletPurchases,
       linkSavedCardsToEventGroup: savedCards.linkSavedCardsToEventGroup,
       getProfileStats: profile.getProfileStats,
-      showInterstitialAd: showInterstitialAd,
+      showPostAddCardMonetization: showPostAddCardMonetization,
     );
   }
 
@@ -238,12 +263,12 @@ class AppInit {
     LinkEventGroupCards linkEventGroupCards,
   }) _initEventGroups({
     required EventGroupLocalDataSource local,
-    required AuthLocalDataSource authLocal,
+    required AuthTokenProvider authTokens,
   }) {
     final repo = EventGroupRepositoryImpl(
       local: local,
       remote: EventGroupRemoteDataSourceImpl(),
-      authLocal: authLocal,
+      authTokens: authTokens,
     );
     return (
       getEventGroups: GetEventGroups(repo),
@@ -308,14 +333,11 @@ class AppInit {
     SaveBusinessCard saveBusinessCard,
     GetBusinessCards getBusinessCards,
     UpsertBusinessCard upsertBusinessCard,
-  }) _initBusinessCards(
-    SharedPreferences prefs,
-    AuthLocalDataSource authLocal,
-  ) {
+  }) _initBusinessCards(AuthTokenProvider authTokens) {
     final remote = BusinessCardRemoteDataSourceImpl();
     final repo = BusinessCardRepositoryImpl(
       remote: remote,
-      authLocal: authLocal,
+      authTokens: authTokens,
     );
     return (
       saveBusinessCard: SaveBusinessCard(repo),
@@ -370,12 +392,17 @@ class AppInit {
     );
   }
 
+  static ({RequestAppReview requestAppReview}) _initAppReview() {
+    final repo = AppReviewRepositoryImpl();
+    return (requestAppReview: RequestAppReview(repo));
+  }
+
   static ({SubmitSupportRequest submitSupportRequest}) _initSupport(
-    AuthLocalDataSource authLocal,
+    AuthTokenProvider authTokens,
   ) {
     final repo = SupportRepositoryImpl(
       remote: SupportRemoteDataSourceImpl(),
-      authLocal: authLocal,
+      authTokens: authTokens,
     );
     return (
       submitSupportRequest: SubmitSupportRequest(repo),
@@ -383,11 +410,11 @@ class AppInit {
   }
 
   static ({GetProfileStats getProfileStats}) _initProfile(
-    AuthLocalDataSource authLocal,
+    AuthTokenProvider authTokens,
   ) {
     final repo = ProfileRepositoryImpl(
       remote: ProfileRemoteDataSourceImpl(),
-      authLocal: authLocal,
+      authTokens: authTokens,
     );
     return (
       getProfileStats: GetProfileStats(repo),
@@ -421,7 +448,9 @@ class AppInitResult {
     required this.resolveOnboardingInitialDraft,
     required this.getThemePreference,
     required this.setThemePreference,
+    required this.initialThemePreference,
     required this.submitSupportRequest,
+    required this.requestAppReview,
     required this.getEventGroups,
     required this.createEventGroup,
     required this.deleteEventGroup,
@@ -435,7 +464,7 @@ class AppInitResult {
     required this.restoreWalletPurchases,
     required this.linkSavedCardsToEventGroup,
     required this.getProfileStats,
-    required this.showInterstitialAd,
+    required this.showPostAddCardMonetization,
   });
 
   final RestoreAuthSession restoreAuthSession;
@@ -461,7 +490,9 @@ class AppInitResult {
   final ResolveOnboardingInitialDraft resolveOnboardingInitialDraft;
   final GetThemePreference getThemePreference;
   final SetThemePreference setThemePreference;
+  final ThemePreference initialThemePreference;
   final SubmitSupportRequest submitSupportRequest;
+  final RequestAppReview requestAppReview;
   final GetEventGroups getEventGroups;
   final CreateEventGroup createEventGroup;
   final DeleteEventGroup deleteEventGroup;
@@ -475,5 +506,5 @@ class AppInitResult {
   final RestoreWalletPurchases restoreWalletPurchases;
   final LinkSavedCardsToEventGroup linkSavedCardsToEventGroup;
   final GetProfileStats getProfileStats;
-  final ShowInterstitialAd showInterstitialAd;
+  final ShowPostAddCardMonetization showPostAddCardMonetization;
 }

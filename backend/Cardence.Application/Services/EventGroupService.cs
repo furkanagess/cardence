@@ -12,10 +12,19 @@ namespace Cardence.Application.Services;
 
 public sealed class EventGroupService : IEventGroupService
 {
+    private static readonly HashSet<string> AllowedPhotoContentTypes = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "image/jpeg",
+        "image/jpg",
+        "image/png",
+        "image/webp",
+    };
+
     private readonly IEventGroupRepository _eventGroupRepository;
     private readonly IBusinessCardRepository _businessCardRepository;
     private readonly IWalletEntitlementRepository _walletRepository;
     private readonly ICurrentUserService _currentUser;
+    private readonly IEventGroupPhotoStorage _eventGroupPhotoStorage;
     private readonly IValidator<SaveEventGroupRequest> _saveValidator;
     private readonly IValidator<UpdateEventGroupRequest> _updateValidator;
     private readonly IValidator<LinkEventGroupCardsRequest> _linkValidator;
@@ -25,6 +34,7 @@ public sealed class EventGroupService : IEventGroupService
         IBusinessCardRepository businessCardRepository,
         IWalletEntitlementRepository walletRepository,
         ICurrentUserService currentUser,
+        IEventGroupPhotoStorage eventGroupPhotoStorage,
         IValidator<SaveEventGroupRequest> saveValidator,
         IValidator<UpdateEventGroupRequest> updateValidator,
         IValidator<LinkEventGroupCardsRequest> linkValidator)
@@ -33,6 +43,7 @@ public sealed class EventGroupService : IEventGroupService
         _businessCardRepository = businessCardRepository;
         _walletRepository = walletRepository;
         _currentUser = currentUser;
+        _eventGroupPhotoStorage = eventGroupPhotoStorage;
         _saveValidator = saveValidator;
         _updateValidator = updateValidator;
         _linkValidator = linkValidator;
@@ -72,6 +83,8 @@ public sealed class EventGroupService : IEventGroupService
             Id = Guid.NewGuid(),
             UserId = userId,
             Name = name,
+            Location = NormalizeOptionalText(request.Location),
+            EventDate = NormalizeEventDate(request.EventDate),
             CreatedAt = DateTime.UtcNow,
         };
 
@@ -94,6 +107,16 @@ public sealed class EventGroupService : IEventGroupService
         await EnsureUniqueNameAsync(userId, name, excludeGroupId: groupId, cancellationToken);
 
         entity.Name = name;
+        entity.Location = NormalizeOptionalText(request.Location);
+        entity.EventDate = NormalizeEventDate(request.EventDate);
+        if (request.ClearPhoto)
+        {
+            await _eventGroupPhotoStorage.DeleteEventGroupPhotoAsync(
+                userId,
+                entity.Id,
+                cancellationToken);
+            entity.PhotoUrl = null;
+        }
         await _eventGroupRepository.UpdateAsync(entity, cancellationToken);
 
         var cardCount = await _eventGroupRepository.CountCardsInGroupAsync(
@@ -173,6 +196,48 @@ public sealed class EventGroupService : IEventGroupService
             .ToList();
     }
 
+    public async Task<EventGroupDto> UploadPhotoAsync(
+        string groupId,
+        Stream photoStream,
+        string contentType,
+        long contentLength,
+        CancellationToken cancellationToken = default)
+    {
+        if (contentLength <= 0 || contentLength > 5 * 1024 * 1024)
+        {
+            throw new ValidationException("Event photo must be at most 5 MB.");
+        }
+
+        if (!AllowedPhotoContentTypes.Contains(contentType))
+        {
+            throw new ValidationException(
+                "Only JPEG, PNG, or WebP images are supported for event photos.");
+        }
+
+        var userId = _currentUser.GetRequiredUserId();
+        var parsedGroupId = ParseGroupId(groupId);
+        var entity = await _eventGroupRepository.GetByUserAndIdAsync(
+                userId,
+                parsedGroupId,
+                cancellationToken)
+            ?? throw new NotFoundException("EventGroup", groupId);
+
+        var photoUrl = await _eventGroupPhotoStorage.SaveEventGroupPhotoAsync(
+            userId,
+            parsedGroupId,
+            photoStream,
+            contentType,
+            cancellationToken);
+
+        entity.PhotoUrl = photoUrl;
+        await _eventGroupRepository.UpdateAsync(entity, cancellationToken);
+
+        var cardCount = await _eventGroupRepository.CountCardsInGroupAsync(
+            entity.Id,
+            cancellationToken);
+        return EventGroupMapper.ToDto(entity, cardCount);
+    }
+
     private async Task EnsureUniqueNameAsync(
         Guid userId,
         string name,
@@ -214,6 +279,34 @@ public sealed class EventGroupService : IEventGroupService
                 "Event group limit reached.",
                 ErrorCodes.PremiumRequired);
         }
+    }
+
+    private static string? NormalizeOptionalText(string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return null;
+        }
+
+        return value.Trim();
+    }
+
+    private static DateTime? NormalizeEventDate(DateTime? value)
+    {
+        if (!value.HasValue)
+        {
+            return null;
+        }
+
+        var date = value.Value;
+        if (date.Kind == DateTimeKind.Unspecified)
+        {
+            date = DateTime.SpecifyKind(date, DateTimeKind.Utc);
+        }
+
+        return date.Kind == DateTimeKind.Utc
+            ? date.Date
+            : date.ToUniversalTime().Date;
     }
 
     private static Guid ParseGroupId(string groupId)

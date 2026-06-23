@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/widgets/molecules/recommend_app_share_tile.dart';
 import '../../domain/entities/saved_cards_wallet_quota.dart';
 
 /// Kart ekleme yöntemi seçimi.
@@ -32,6 +33,7 @@ class AddSavedCardSheet extends StatelessWidget {
   }) {
     return showModalBottomSheet<AddSavedCardMethod>(
       context: context,
+      isScrollControlled: true,
       showDragHandle: true,
       backgroundColor: Theme.of(context).colorScheme.surface,
       shape: const RoundedRectangleBorder(
@@ -49,14 +51,22 @@ class AddSavedCardSheet extends StatelessWidget {
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
     final colorScheme = Theme.of(context).colorScheme;
+    final maxHeight = MediaQuery.sizeOf(context).height * 0.88;
 
     return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 4, 20, 24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
+      child: ConstrainedBox(
+        constraints: BoxConstraints(maxHeight: maxHeight),
+        child: SingleChildScrollView(
+          padding: EdgeInsets.fromLTRB(
+            20,
+            4,
+            20,
+            24 + MediaQuery.viewInsetsOf(context).bottom,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
             Text(
               'Kart ekle',
               style: textTheme.titleLarge?.copyWith(
@@ -120,7 +130,15 @@ class AddSavedCardSheet extends StatelessWidget {
                   ? () => Navigator.of(context).pop(AddSavedCardMethod.cardId)
                   : null,
             ),
-          ],
+            const SizedBox(height: 20),
+            Divider(
+              height: 1,
+              color: colorScheme.outlineVariant.withValues(alpha: 0.75),
+            ),
+            const SizedBox(height: 16),
+            const RecommendAppShareTile(),
+            ],
+          ),
         ),
       ),
     );

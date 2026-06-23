@@ -13,6 +13,14 @@ class BusinessCardModel {
     this.skills,
     this.school,
     this.about,
+    this.address,
+    this.city,
+    this.country,
+    this.department,
+    this.attendedEvents,
+    this.twitter,
+    this.instagram,
+    this.birthday,
     this.photoUrl,
     this.accentColor,
     this.backgroundColor,
@@ -31,6 +39,14 @@ class BusinessCardModel {
   final String? skills;
   final String? school;
   final String? about;
+  final String? address;
+  final String? city;
+  final String? country;
+  final String? department;
+  final String? attendedEvents;
+  final String? twitter;
+  final String? instagram;
+  final String? birthday;
   final String? photoUrl;
   final String? accentColor;
   final String? backgroundColor;
@@ -50,6 +66,14 @@ class BusinessCardModel {
       skills: entity.skills,
       school: entity.school,
       about: entity.about,
+      address: entity.address,
+      city: entity.city,
+      country: entity.country,
+      department: entity.department,
+      attendedEvents: entity.attendedEvents,
+      twitter: entity.twitter,
+      instagram: entity.instagram,
+      birthday: entity.birthday,
       photoUrl: entity.photoUrl,
       accentColor: entity.accentColor,
       backgroundColor: entity.backgroundColor,
@@ -70,6 +94,14 @@ class BusinessCardModel {
         skills: skills,
         school: school,
         about: about,
+        address: address,
+        city: city,
+        country: country,
+        department: department,
+        attendedEvents: attendedEvents,
+        twitter: twitter,
+        instagram: instagram,
+        birthday: birthday,
         photoUrl: photoUrl,
         accentColor: accentColor,
         backgroundColor: backgroundColor,
@@ -90,6 +122,14 @@ class BusinessCardModel {
       'skills': skills,
       'school': school,
       'about': about,
+      'address': address,
+      'city': city,
+      'country': country,
+      'department': department,
+      'attendedEvents': attendedEvents,
+      'twitter': twitter,
+      'instagram': instagram,
+      'birthday': birthday,
       'photoUrl': photoUrl,
       'accentColor': accentColor,
       'backgroundColor': backgroundColor,
@@ -100,25 +140,38 @@ class BusinessCardModel {
     return json;
   }
 
+  static String? _str(dynamic value) =>
+      value == null ? null : value.toString();
+
   factory BusinessCardModel.fromJson(Map<String, dynamic> json) {
     return BusinessCardModel(
-      cardName: json['cardName']?.toString(),
-      displayName: json['displayName']?.toString(),
-      email: json['email']?.toString(),
-      phone: json['phone']?.toString(),
-      company: json['company']?.toString(),
-      title: json['title']?.toString(),
-      website: json['website']?.toString(),
-      linkedin: json['linkedin']?.toString(),
-      skills: json['skills']?.toString(),
-      school: json['school']?.toString(),
-      about: json['about']?.toString(),
-      photoUrl: json['photoUrl']?.toString(),
-      accentColor: json['accentColor']?.toString(),
-      backgroundColor: json['backgroundColor']?.toString(),
-      lastUsedPaletteBackgroundColor:
-          json['lastUsedPaletteBackgroundColor']?.toString(),
-      cardId: json['cardId']?.toString(),
+      cardName: _str(json['cardName'] ?? json['CardName']),
+      displayName: _str(json['displayName'] ?? json['DisplayName']),
+      email: _str(json['email'] ?? json['Email']),
+      phone: _str(json['phone'] ?? json['Phone']),
+      company: _str(json['company'] ?? json['Company']),
+      title: _str(json['title'] ?? json['Title']),
+      website: _str(json['website'] ?? json['Website']),
+      linkedin: _str(json['linkedin'] ?? json['Linkedin']),
+      skills: _str(json['skills'] ?? json['Skills']),
+      school: _str(json['school'] ?? json['School']),
+      about: _str(json['about'] ?? json['About']),
+      address: _str(json['address'] ?? json['Address']),
+      city: _str(json['city'] ?? json['City']),
+      country: _str(json['country'] ?? json['Country']),
+      department: _str(json['department'] ?? json['Department']),
+      attendedEvents: _str(json['attendedEvents'] ?? json['AttendedEvents']),
+      twitter: _str(json['twitter'] ?? json['Twitter']),
+      instagram: _str(json['instagram'] ?? json['Instagram']),
+      birthday: _str(json['birthday'] ?? json['Birthday']),
+      photoUrl: _str(json['photoUrl'] ?? json['PhotoUrl']),
+      accentColor: _str(json['accentColor'] ?? json['AccentColor']),
+      backgroundColor: _str(json['backgroundColor'] ?? json['BackgroundColor']),
+      lastUsedPaletteBackgroundColor: _str(
+        json['lastUsedPaletteBackgroundColor'] ??
+            json['LastUsedPaletteBackgroundColor'],
+      ),
+      cardId: _str(json['cardId'] ?? json['CardId']),
     );
   }
 }

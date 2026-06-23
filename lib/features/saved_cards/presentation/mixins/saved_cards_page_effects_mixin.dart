@@ -19,7 +19,7 @@ import '../../domain/usecases/delete_saved_card.dart';
 import '../../domain/usecases/get_saved_cards.dart';
 import '../../domain/usecases/save_saved_card.dart';
 import '../../domain/usecases/upgrade_wallet_plan.dart';
-import '../../../ads/domain/usecases/show_interstitial_ad.dart';
+import '../../../ads/domain/usecases/show_post_add_card_monetization.dart';
 import '../../../subscriptions/domain/usecases/restore_wallet_purchases.dart';
 import '../../../event_groups/domain/usecases/get_event_groups.dart';
 import '../../../event_groups/domain/usecases/delete_event_group.dart';
@@ -33,7 +33,7 @@ mixin SavedCardsPageEffectsMixin<T extends StatefulWidget> on State<T> {
     required AddSavedCard addSavedCard,
     required UpgradeWalletPlan upgradeWalletPlan,
     required RestoreWalletPurchases restoreWalletPurchases,
-    required ShowInterstitialAd showInterstitialAd,
+    required ShowPostAddCardMonetization showPostAddCardMonetization,
     required List<SavedCard> sourceCards,
   }) {
     switch (state.effectType) {
@@ -57,7 +57,7 @@ mixin SavedCardsPageEffectsMixin<T extends StatefulWidget> on State<T> {
         _openAddCardFlow(
           context,
           addSavedCard: addSavedCard,
-          showInterstitialAd: showInterstitialAd,
+          showPostAddCardMonetization: showPostAddCardMonetization,
           upgradeWalletPlan: upgradeWalletPlan,
           restoreWalletPurchases: restoreWalletPurchases,
         );
@@ -100,7 +100,7 @@ mixin SavedCardsPageEffectsMixin<T extends StatefulWidget> on State<T> {
   Future<void> _openAddCardFlow(
     BuildContext context, {
     required AddSavedCard addSavedCard,
-    required ShowInterstitialAd showInterstitialAd,
+    required ShowPostAddCardMonetization showPostAddCardMonetization,
     required UpgradeWalletPlan upgradeWalletPlan,
     required RestoreWalletPurchases restoreWalletPurchases,
   }) async {
@@ -153,9 +153,14 @@ mixin SavedCardsPageEffectsMixin<T extends StatefulWidget> on State<T> {
     await cubit.handleAddCardResult(result);
 
     if (!context.mounted) return;
-    if (result is AddSavedCardSuccess &&
-        cubit.state.quota?.isPremium != true) {
-      await showInterstitialAd();
+    if (result is AddSavedCardSuccess) {
+      await showPostAddCardMonetization(
+        showPaywall: () => _openUpgradeSheet(
+          context,
+          upgradeWalletPlan: upgradeWalletPlan,
+          restoreWalletPurchases: restoreWalletPurchases,
+        ),
+      );
     }
   }
 

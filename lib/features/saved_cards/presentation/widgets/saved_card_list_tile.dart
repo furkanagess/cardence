@@ -76,19 +76,29 @@ class SavedCardListTile extends StatelessWidget {
     final accentColor =
         _parseHexColor(card.backgroundColor) ?? AppColors.primary;
     final groupCount = card.linkedEventGroupIds.length;
+    final selectedFill = isDark
+        ? AppColors.primaryDarkTheme.withValues(alpha: 0.14)
+        : Color.alphaBlend(
+            AppColors.primary.withValues(alpha: 0.16),
+            AppColors.primaryContainer,
+          );
+    final selectedBorder =
+        isDark ? AppColors.primaryDarkTheme : AppColors.primary;
+    final selectedIconColor =
+        isDark ? AppColors.primaryDarkTheme : AppColors.primary;
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
       child: Material(
-        color: colorScheme.surface,
+        color: selectable && isSelected ? selectedFill : colorScheme.surface,
         elevation: 0,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
           side: BorderSide(
             color: selectable && isSelected
-                ? AppColors.primary
+                ? selectedBorder
                 : (isDark ? AppColors.outlineDark : AppColors.outlineVariant),
-            width: selectable && isSelected ? 1.5 : 1,
+            width: selectable && isSelected ? 2 : 1,
           ),
         ),
         clipBehavior: Clip.antiAlias,
@@ -192,13 +202,14 @@ class SavedCardListTile extends StatelessWidget {
                           selectable
                               ? (isSelected
                                   ? Icons.check_circle_rounded
-                                  : Icons.circle_outlined)
+                                  : Icons.radio_button_unchecked_rounded)
                               : Icons.chevron_right_rounded,
                           color: selectable
                               ? (isSelected
-                                  ? colorScheme.primary
+                                  ? selectedIconColor
                                   : colorScheme.onSurfaceVariant)
                               : colorScheme.onSurfaceVariant,
+                          size: selectable ? 24 : null,
                         ),
                       ],
                     ),

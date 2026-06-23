@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'core/auth/session_expired_handler.dart';
 import 'core/constants/app_constants.dart';
 import 'core/theme/app_theme.dart';
-import 'core/widgets/molecules/chuck_fab_overlay.dart';
+import 'core/theme/splash_theme.dart';
 import 'core/widgets/organisms/cardence_connect_animation.dart';
 import 'core/widgets/organisms/cardence_scaffold.dart';
 import 'features/auth/domain/usecases/get_auth_session.dart';
@@ -39,9 +39,10 @@ import 'features/saved_cards/domain/usecases/save_saved_card.dart';
 import 'features/saved_cards/domain/usecases/upgrade_wallet_plan.dart';
 import 'features/subscriptions/domain/usecases/identify_subscription_user.dart';
 import 'features/subscriptions/domain/usecases/restore_wallet_purchases.dart';
-import 'features/ads/domain/usecases/show_interstitial_ad.dart';
+import 'features/ads/domain/usecases/show_post_add_card_monetization.dart';
 import 'features/settings/domain/entities/theme_preference.dart';
 import 'features/settings/domain/usecases/get_theme_preference.dart';
+import 'features/settings/domain/usecases/request_app_review.dart';
 import 'features/settings/domain/usecases/set_theme_preference.dart';
 import 'features/profile/domain/usecases/get_profile_stats.dart';
 import 'features/support/domain/usecases/submit_support_request.dart';
@@ -76,7 +77,9 @@ class App extends StatefulWidget {
     required this.resolveOnboardingInitialDraft,
     required this.getThemePreference,
     required this.setThemePreference,
+    required this.initialThemePreference,
     required this.submitSupportRequest,
+    required this.requestAppReview,
     required this.getEventGroups,
     required this.createEventGroup,
     required this.deleteEventGroup,
@@ -90,7 +93,7 @@ class App extends StatefulWidget {
     required this.upgradeWalletPlan,
     required this.restoreWalletPurchases,
     required this.getProfileStats,
-    required this.showInterstitialAd,
+    required this.showPostAddCardMonetization,
   });
 
   final GlobalKey<NavigatorState> rootNavigatorKey;
@@ -116,7 +119,9 @@ class App extends StatefulWidget {
   final ResolveOnboardingInitialDraft resolveOnboardingInitialDraft;
   final GetThemePreference getThemePreference;
   final SetThemePreference setThemePreference;
+  final ThemePreference initialThemePreference;
   final SubmitSupportRequest submitSupportRequest;
+  final RequestAppReview requestAppReview;
   final GetEventGroups getEventGroups;
   final CreateEventGroup createEventGroup;
   final DeleteEventGroup deleteEventGroup;
@@ -130,7 +135,7 @@ class App extends StatefulWidget {
   final UpgradeWalletPlan upgradeWalletPlan;
   final RestoreWalletPurchases restoreWalletPurchases;
   final GetProfileStats getProfileStats;
-  final ShowInterstitialAd showInterstitialAd;
+  final ShowPostAddCardMonetization showPostAddCardMonetization;
 
   @override
   State<App> createState() => _AppState();
@@ -138,12 +143,13 @@ class App extends StatefulWidget {
 
 class _AppState extends State<App> {
   _AppDestination _destination = _AppDestination.loading;
-  ThemePreference _themePreference = ThemePreference.system;
+  late ThemePreference _themePreference;
   bool _showPostOnboardingPaywall = false;
 
   @override
   void initState() {
     super.initState();
+    _themePreference = widget.initialThemePreference;
     SessionExpiredHandler.instance.configure(
       navigatorKey: widget.rootNavigatorKey,
       onForceLogout: _onLogout,
@@ -284,8 +290,9 @@ class _AppState extends State<App> {
           onLogout: _onLogout,
           uploadProfilePhoto: widget.uploadProfilePhoto,
           submitSupportRequest: widget.submitSupportRequest,
+          requestAppReview: widget.requestAppReview,
           getProfileStats: widget.getProfileStats,
-          showInterstitialAd: widget.showInterstitialAd,
+          showPostAddCardMonetization: widget.showPostAddCardMonetization,
         );
     }
   }
@@ -299,11 +306,6 @@ class _AppState extends State<App> {
       darkTheme: AppTheme.darkTheme,
       themeMode: _themeMode,
       debugShowCheckedModeBanner: false,
-      builder: (context, child) {
-        return ChuckFabOverlay(
-          child: child ?? const SizedBox.shrink(),
-        );
-      },
       home: _buildHome(),
     );
   }
@@ -315,17 +317,20 @@ class _SplashContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final backgroundColor = SplashTheme.background(theme.brightness);
 
     return CardenceScaffold(
-      showWatermark: false,
-      backgroundColor: theme.scaffoldBackgroundColor,
+      showWatermark: !isDark,
+      backgroundColor: backgroundColor,
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const CardenceConnectAnimation(
+            CardenceConnectAnimation(
               size: 220,
               repeat: true,
+              logoAssetPath: SplashTheme.darkLogoAsset,
             ),
             const SizedBox(height: 24),
             Text(
@@ -341,6 +346,17 @@ class _SplashContent extends StatelessWidget {
               AppConstants.appTagline,
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(height: 28),
+            SizedBox(
+              width: 28,
+              height: 28,
+              child: CircularProgressIndicator(
+                strokeWidth: 2.5,
+                color: theme.colorScheme.primary.withValues(
+                  alpha: isDark ? 0.9 : 0.75,
+                ),
               ),
             ),
           ],

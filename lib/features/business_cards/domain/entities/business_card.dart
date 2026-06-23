@@ -12,6 +12,14 @@ class BusinessCard {
     this.skills,
     this.school,
     this.about,
+    this.address,
+    this.city,
+    this.country,
+    this.department,
+    this.attendedEvents,
+    this.twitter,
+    this.instagram,
+    this.birthday,
     this.photoUrl,
     this.accentColor,
     this.backgroundColor,
@@ -30,6 +38,14 @@ class BusinessCard {
   final String? skills;
   final String? school;
   final String? about;
+  final String? address;
+  final String? city;
+  final String? country;
+  final String? department;
+  final String? attendedEvents;
+  final String? twitter;
+  final String? instagram;
+  final String? birthday;
   final String? photoUrl;
   final String? accentColor;
   final String? backgroundColor;
