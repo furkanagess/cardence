@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/widgets/atoms/premium_owner_badge.dart';
 import '../../../../core/widgets/atoms/profile_avatar.dart';
 import '../../domain/entities/saved_card.dart';
 
@@ -118,16 +119,26 @@ class SavedCardListTile extends StatelessWidget {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
-                                title,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: textTheme.titleSmall?.copyWith(
-                                  fontWeight: FontWeight.w700,
-                                  color: isDark
-                                      ? AppColors.textPrimaryDark
-                                      : AppColors.textPrimary,
-                                ),
+                              Row(
+                                children: [
+                                  if (card.isOwnerPremium) ...[
+                                    const PremiumOwnerBadge(size: 18),
+                                    const SizedBox(width: 6),
+                                  ],
+                                  Expanded(
+                                    child: Text(
+                                      title,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: textTheme.titleSmall?.copyWith(
+                                        fontWeight: FontWeight.w700,
+                                        color: isDark
+                                            ? AppColors.textPrimaryDark
+                                            : AppColors.textPrimary,
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
                               if (subtitle != null) ...[
                                 const SizedBox(height: 3),

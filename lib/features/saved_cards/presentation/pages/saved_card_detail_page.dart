@@ -21,8 +21,10 @@ import '../../domain/entities/saved_card.dart';
 import '../../domain/usecases/delete_saved_card.dart';
 import '../../domain/usecases/get_saved_cards.dart';
 import '../../domain/usecases/save_saved_card.dart';
+import '../../domain/helpers/saved_card_field_catalog.dart';
 import '../../domain/extensions/saved_card_preview_colors.dart';
 import '../../domain/extensions/saved_card_preview_entries.dart';
+import '../widgets/saved_card_add_field_sheet.dart';
 
 /// Kaydedilen bir kisinin tam detay ekrani: onizleme, hizli aksiyonlar, tum alanlar.
 class SavedCardDetailPage extends StatefulWidget {
@@ -292,60 +294,83 @@ class _SavedCardDetailPageState extends State<SavedCardDetailPage> {
     return name;
   }
 
+  bool get _canAddFields =>
+      !_isDemoCard &&
+      SavedCardFieldCatalog.addableFields(_card).isNotEmpty;
+
+  List<SavedCardFieldDefinition> get _infoFields {
+    return SavedCardFieldCatalog.filledFields(_card)
+        .where((def) => def.key != SavedCardFieldKey.skills)
+        .toList();
+  }
+
+  Future<void> _openAddFieldFlow() async {
+    final key = await SavedCardAddFieldSheet.pickFieldToAdd(
+      context,
+      card: _card,
+    );
+    if (!mounted || key == null) return;
+    final def = SavedCardFieldCatalog.byKey(key);
+    if (def == null) return;
+    await _openEditField(def);
+  }
+
+  Future<void> _openEditField(SavedCardFieldDefinition def) async {
+    if (!def.isEditable(_card)) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Bu alan Cardence kartında düzenlenemez'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+
+    final value = await SavedCardAddFieldSheet.editFieldValue(
+      context,
+      definition: def,
+      initialValue: def.readValue(_card),
+    );
+    if (!mounted || value == null) return;
+
+    final updated = def.writeValue(_card, value);
+    await _persistCard(updated);
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('${def.label} kaydedildi'),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
+
+  _ContactFieldData _contactDataFor(SavedCardFieldDefinition def) {
+    final value = def.readValue(_card)!.trim();
+    VoidCallback? onTap;
+    var trailing = _ContactTrailingAction.copy;
+
+    if (def.isLink) {
+      trailing = _ContactTrailingAction.openLink;
+      onTap = () => _launchWebsite(value);
+    } else if (def.key == SavedCardFieldKey.email) {
+      onTap = _launchEmail;
+    } else if (def.key == SavedCardFieldKey.phone) {
+      onTap = _launchPhone;
+    }
+
+    return _ContactFieldData(
+      label: def.label,
+      value: value,
+      icon: SavedCardFieldIcons.iconFor(def.iconName),
+      trailing: trailing,
+      onTap: onTap,
+      onEdit: def.isEditable(_card) ? () => _openEditField(def) : null,
+    );
+  }
+
   List<_ContactFieldData> get _contactFields {
-    return [
-      if (_has(_card.email))
-        _ContactFieldData(
-          label: 'E-posta',
-          value: _card.email!.trim(),
-          icon: Icons.mail_outline_rounded,
-          trailing: _ContactTrailingAction.copy,
-        ),
-      if (_has(_card.phone))
-        _ContactFieldData(
-          label: 'Telefon',
-          value: _card.phone!.trim(),
-          icon: Icons.phone_outlined,
-          trailing: _ContactTrailingAction.copy,
-        ),
-      if (_has(_card.website))
-        _ContactFieldData(
-          label: 'Web',
-          value: _card.website!.trim(),
-          icon: Icons.language_rounded,
-          trailing: _ContactTrailingAction.openLink,
-          onTap: () => _launchWebsite(_card.website!.trim()),
-        ),
-      if (_has(_card.linkedin))
-        _ContactFieldData(
-          label: 'LinkedIn',
-          value: _card.linkedin!.trim(),
-          icon: Icons.link_rounded,
-          trailing: _ContactTrailingAction.openLink,
-          onTap: () => _launchWebsite(_card.linkedin!.trim()),
-        ),
-      if (_has(_card.company))
-        _ContactFieldData(
-          label: 'Şirket',
-          value: _card.company!.trim(),
-          icon: Icons.apartment_rounded,
-          trailing: _ContactTrailingAction.copy,
-        ),
-      if (_has(_card.title))
-        _ContactFieldData(
-          label: 'Pozisyon',
-          value: _card.title!.trim(),
-          icon: Icons.work_outline_rounded,
-          trailing: _ContactTrailingAction.copy,
-        ),
-      if (_has(_card.school))
-        _ContactFieldData(
-          label: 'Okul',
-          value: _card.school!.trim(),
-          icon: Icons.school_outlined,
-          trailing: _ContactTrailingAction.copy,
-        ),
-    ];
+    return _infoFields.map(_contactDataFor).toList();
   }
 
   List<String> get _skills =>
@@ -607,11 +632,17 @@ class _SavedCardDetailPageState extends State<SavedCardDetailPage> {
           ],
           const SizedBox(height: 24),
           _DetailSection(
-            title: 'İletişim bilgileri',
+            title: 'Bilgiler',
+            actionLabel: _canAddFields ? 'Bilgi ekle' : null,
+            onAction: _canAddFields ? _openAddFieldFlow : null,
             child: _contactFields.isEmpty
                 ? _EmptyStateCard(
                     icon: Icons.contact_page_outlined,
-                    message: 'Bu kartta ek iletişim bilgisi yok.',
+                    message: _canAddFields
+                        ? 'Henüz ek bilgi yok. Bilgi ekle ile adres, etkinlik ve daha fazlasını ekleyin.'
+                        : 'Bu kartta ek bilgi yok.',
+                    actionLabel: _canAddFields ? 'Bilgi ekle' : null,
+                    onAction: _canAddFields ? _openAddFieldFlow : null,
                   )
                 : _GroupedInfoCard(
                     children: [
@@ -637,6 +668,16 @@ class _SavedCardDetailPageState extends State<SavedCardDetailPage> {
             const SizedBox(height: 24),
             _DetailSection(
               title: 'Yetenekler',
+              actionLabel: SavedCardFieldCatalog.byKey(SavedCardFieldKey.skills)!
+                      .isEditable(_card)
+                  ? 'Düzenle'
+                  : null,
+              onAction: SavedCardFieldCatalog.byKey(SavedCardFieldKey.skills)!
+                      .isEditable(_card)
+                  ? () => _openEditField(
+                        SavedCardFieldCatalog.byKey(SavedCardFieldKey.skills)!,
+                      )
+                  : null,
               child: SkillsChipDisplay(
                 skills: _skills,
                 onSkillTap: (skill) => _copyToClipboard('Yetenek', skill),
@@ -645,7 +686,7 @@ class _SavedCardDetailPageState extends State<SavedCardDetailPage> {
           ],
           const SizedBox(height: 24),
           _DetailSection(
-            title: 'Etkinlik grupları',
+            title: 'Katıldığı etkinlikler',
             child: AnimatedSwitcher(
               duration: const Duration(milliseconds: 220),
               switchInCurve: Curves.easeOut,
@@ -706,6 +747,7 @@ class _ContactFieldData {
     required this.icon,
     this.trailing = _ContactTrailingAction.copy,
     this.onTap,
+    this.onEdit,
   });
 
   final String label;
@@ -713,6 +755,7 @@ class _ContactFieldData {
   final IconData icon;
   final _ContactTrailingAction trailing;
   final VoidCallback? onTap;
+  final VoidCallback? onEdit;
 }
 
 enum _ContactTrailingAction { copy, openLink }
@@ -914,6 +957,7 @@ class _ContactFieldRow extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final canOpen = field.onTap != null;
+    final canEdit = field.onEdit != null;
     final trailingIcon = field.trailing == _ContactTrailingAction.openLink
         ? Icons.open_in_new_rounded
         : Icons.copy_all_rounded;
@@ -921,7 +965,8 @@ class _ContactFieldRow extends StatelessWidget {
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        onTap: field.onTap,
+        onTap: canEdit ? field.onEdit : field.onTap,
+        onLongPress: canEdit ? field.onEdit : null,
         child: Padding(
           padding: const EdgeInsets.fromLTRB(14, 14, 10, 14),
           child: Row(
@@ -963,16 +1008,28 @@ class _ContactFieldRow extends StatelessWidget {
                   ],
                 ),
               ),
-              IconButton(
-                tooltip: canOpen ? 'Aç' : 'Kopyala',
-                visualDensity: VisualDensity.compact,
-                onPressed: canOpen ? field.onTap : onCopy,
-                icon: Icon(
-                  trailingIcon,
-                  size: 20,
-                  color: colorScheme.onSurfaceVariant,
+              if (canEdit)
+                IconButton(
+                  tooltip: 'Düzenle',
+                  visualDensity: VisualDensity.compact,
+                  onPressed: field.onEdit,
+                  icon: Icon(
+                    Icons.edit_outlined,
+                    size: 20,
+                    color: colorScheme.onSurfaceVariant,
+                  ),
                 ),
-              ),
+              if (canOpen || !canEdit)
+                IconButton(
+                  tooltip: canOpen ? 'Aç' : 'Kopyala',
+                  visualDensity: VisualDensity.compact,
+                  onPressed: canOpen ? field.onTap : onCopy,
+                  icon: Icon(
+                    trailingIcon,
+                    size: 20,
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+                ),
             ],
           ),
         ),
@@ -1165,10 +1222,14 @@ class _EmptyStateCard extends StatelessWidget {
   const _EmptyStateCard({
     required this.icon,
     required this.message,
+    this.actionLabel,
+    this.onAction,
   });
 
   final IconData icon;
   final String message;
+  final String? actionLabel;
+  final VoidCallback? onAction;
 
   @override
   Widget build(BuildContext context) {
@@ -1193,6 +1254,20 @@ class _EmptyStateCard extends StatelessWidget {
                       color: colorScheme.onSurfaceVariant,
                     ),
               ),
+              if (actionLabel != null && onAction != null) ...[
+                const SizedBox(height: 14),
+                CustomButton.tonal(
+                  label: actionLabel!,
+                  icon: Icons.add_rounded,
+                  onPressed: onAction,
+                  fullWidth: false,
+                  style: FilledButton.styleFrom(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                ),
+              ],
             ],
           ),
         ),

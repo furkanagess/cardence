@@ -1,3 +1,4 @@
+import '../entities/card_creation_method.dart';
 import '../entities/card_share_payload.dart';
 import '../entities/saved_card.dart';
 import '../entities/saved_card_origin.dart';
@@ -7,6 +8,7 @@ extension CardSharePayloadToSavedCard on CardSharePayload {
     return SavedCard(
       cardId: id,
       origin: SavedCardOrigin.cardence,
+      creationMethod: CardCreationMethod.cardenceLink,
       displayName: n,
       email: e,
       phone: p,

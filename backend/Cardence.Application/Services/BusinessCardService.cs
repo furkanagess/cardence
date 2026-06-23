@@ -39,7 +39,11 @@ public sealed class BusinessCardService : IBusinessCardService
     {
         var userId = _currentUser.GetRequiredUserId();
         var cards = await _repository.GetByUserIdAsync(userId, cancellationToken);
-        return cards.Select(BusinessCardMapper.ToDto).ToList();
+        var entitlement = await _walletRepository.GetOrCreateAsync(userId, cancellationToken);
+        var isOwnerPremium = WalletConstants.HasUnlimitedWalletCards(entitlement.Tier);
+        return cards
+            .Select(card => BusinessCardMapper.ToDto(card, isOwnerPremium))
+            .ToList();
     }
 
     public async Task<BusinessCardDto> GetByCardIdAsync(string cardId, CancellationToken cancellationToken = default)
@@ -48,7 +52,9 @@ public sealed class BusinessCardService : IBusinessCardService
         var card = await _repository.GetByUserAndCardIdAsync(userId, cardId, cancellationToken)
             ?? throw new NotFoundException("BusinessCard", cardId);
 
-        return BusinessCardMapper.ToDto(card);
+        var entitlement = await _walletRepository.GetOrCreateAsync(userId, cancellationToken);
+        var isOwnerPremium = WalletConstants.HasUnlimitedWalletCards(entitlement.Tier);
+        return BusinessCardMapper.ToDto(card, isOwnerPremium);
     }
 
     public async Task<BusinessCardDto> CreateAsync(BusinessCardDto request, CancellationToken cancellationToken = default)
@@ -70,11 +76,13 @@ public sealed class BusinessCardService : IBusinessCardService
         await EnsureCanCreateBusinessCardAsync(userId, cancellationToken);
 
         var now = DateTime.UtcNow;
-        var entity = new BusinessCard
+        var entity = new Card
         {
             Id = Guid.NewGuid(),
             UserId = userId,
             CardId = cardId,
+            CardRole = CardRoles.Own,
+            CreationMethod = CardCreationMethods.OwnCard,
             CreatedAt = now,
             UpdatedAt = now,
         };
@@ -187,7 +195,7 @@ public sealed class BusinessCardService : IBusinessCardService
     }
 
     private async Task ApplyProfilePhotoFallbackAsync(
-        BusinessCard entity,
+        Card entity,
         Guid userId,
         CancellationToken cancellationToken)
     {

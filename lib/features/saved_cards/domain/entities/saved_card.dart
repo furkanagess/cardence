@@ -1,10 +1,12 @@
 import 'saved_card_origin.dart';
+import 'card_creation_method.dart';
 
 /// Başka kullanıcıdan ID ile veya manuel olarak kaydedilen kart (framework yok).
 class SavedCard {
   const SavedCard({
     required this.cardId,
     this.origin = SavedCardOrigin.cardence,
+    this.creationMethod,
     this.displayName,
     this.email,
     this.phone,
@@ -15,6 +17,14 @@ class SavedCard {
     this.skills,
     this.school,
     this.about,
+    this.address,
+    this.city,
+    this.country,
+    this.department,
+    this.attendedEvents,
+    this.twitter,
+    this.instagram,
+    this.birthday,
     this.note,
     this.photoUrl,
     this.accentColor,
@@ -22,11 +32,13 @@ class SavedCard {
     this.savedAt,
     this.frontImagePath,
     this.backImagePath,
+    this.isOwnerPremium = false,
     List<String>? linkedEventGroupIds,
   }) : linkedEventGroupIds = linkedEventGroupIds ?? const [];
 
   final String cardId;
   final SavedCardOrigin origin;
+  final CardCreationMethod? creationMethod;
   final String? displayName;
   final String? email;
   final String? phone;
@@ -37,40 +49,77 @@ class SavedCard {
   final String? skills;
   final String? school;
   final String? about;
-  /// Kaydeden kullanıcının kişisel notu (kart sahibinin Hakkımda alanı değil).
+  final String? address;
+  final String? city;
+  final String? country;
+  final String? department;
+  final String? attendedEvents;
+  final String? twitter;
+  final String? instagram;
+  final String? birthday;
   final String? note;
   final String? photoUrl;
-  /// Kart metin rengi (hex, örn. #FFFFFF).
   final String? accentColor;
-  /// Kart arka plan rengi (hex, örn. #1B365D).
   final String? backgroundColor;
-  /// Kaydedilme zamanı (ms since epoch).
   final int? savedAt;
-  /// Yerel fiziksel kartvizit ön yüz fotoğrafı (yalnızca cihazda).
   final String? frontImagePath;
-  /// Yerel fiziksel kartvizit arka yüz fotoğrafı (yalnızca cihazda).
   final String? backImagePath;
-  /// Bağlı etkinlik grubu id'leri.
+  final bool isOwnerPremium;
   final List<String> linkedEventGroupIds;
 
-  bool get isManualEntry => origin == SavedCardOrigin.manual;
+  bool get isManualEntry =>
+      effectiveCreationMethod.isManualEntry;
 
-  bool get isCardenceLinked => origin == SavedCardOrigin.cardence;
+  bool get isCardenceLinked =>
+      effectiveCreationMethod == CardCreationMethod.cardenceLink;
+
+  CardCreationMethod get effectiveCreationMethod {
+    if (creationMethod != null) return creationMethod!;
+    return origin == SavedCardOrigin.manual
+        ? CardCreationMethod.manual
+        : CardCreationMethod.cardenceLink;
+  }
 
   SavedCard copyWith({
     String? cardId,
     SavedCardOrigin? origin,
+    CardCreationMethod? creationMethod,
     String? displayName,
+    bool clearDisplayName = false,
     String? email,
+    bool clearEmail = false,
     String? phone,
+    bool clearPhone = false,
     String? company,
+    bool clearCompany = false,
     String? title,
+    bool clearTitle = false,
     String? website,
+    bool clearWebsite = false,
     String? linkedin,
+    bool clearLinkedin = false,
     String? skills,
+    bool clearSkills = false,
     String? school,
+    bool clearSchool = false,
     String? about,
     bool clearAbout = false,
+    String? address,
+    bool clearAddress = false,
+    String? city,
+    bool clearCity = false,
+    String? country,
+    bool clearCountry = false,
+    String? department,
+    bool clearDepartment = false,
+    String? attendedEvents,
+    bool clearAttendedEvents = false,
+    String? twitter,
+    bool clearTwitter = false,
+    String? instagram,
+    bool clearInstagram = false,
+    String? birthday,
+    bool clearBirthday = false,
     String? note,
     bool clearNote = false,
     String? photoUrl,
@@ -79,21 +128,32 @@ class SavedCard {
     int? savedAt,
     String? frontImagePath,
     String? backImagePath,
+    bool? isOwnerPremium,
     List<String>? linkedEventGroupIds,
   }) {
     return SavedCard(
       cardId: cardId ?? this.cardId,
       origin: origin ?? this.origin,
-      displayName: displayName ?? this.displayName,
-      email: email ?? this.email,
-      phone: phone ?? this.phone,
-      company: company ?? this.company,
-      title: title ?? this.title,
-      website: website ?? this.website,
-      linkedin: linkedin ?? this.linkedin,
-      skills: skills ?? this.skills,
-      school: school ?? this.school,
+      creationMethod: creationMethod ?? this.creationMethod,
+      displayName: clearDisplayName ? null : (displayName ?? this.displayName),
+      email: clearEmail ? null : (email ?? this.email),
+      phone: clearPhone ? null : (phone ?? this.phone),
+      company: clearCompany ? null : (company ?? this.company),
+      title: clearTitle ? null : (title ?? this.title),
+      website: clearWebsite ? null : (website ?? this.website),
+      linkedin: clearLinkedin ? null : (linkedin ?? this.linkedin),
+      skills: clearSkills ? null : (skills ?? this.skills),
+      school: clearSchool ? null : (school ?? this.school),
       about: clearAbout ? null : (about ?? this.about),
+      address: clearAddress ? null : (address ?? this.address),
+      city: clearCity ? null : (city ?? this.city),
+      country: clearCountry ? null : (country ?? this.country),
+      department: clearDepartment ? null : (department ?? this.department),
+      attendedEvents:
+          clearAttendedEvents ? null : (attendedEvents ?? this.attendedEvents),
+      twitter: clearTwitter ? null : (twitter ?? this.twitter),
+      instagram: clearInstagram ? null : (instagram ?? this.instagram),
+      birthday: clearBirthday ? null : (birthday ?? this.birthday),
       note: clearNote ? null : (note ?? this.note),
       photoUrl: photoUrl ?? this.photoUrl,
       accentColor: accentColor ?? this.accentColor,
@@ -101,6 +161,7 @@ class SavedCard {
       savedAt: savedAt ?? this.savedAt,
       frontImagePath: frontImagePath ?? this.frontImagePath,
       backImagePath: backImagePath ?? this.backImagePath,
+      isOwnerPremium: isOwnerPremium ?? this.isOwnerPremium,
       linkedEventGroupIds: linkedEventGroupIds ?? this.linkedEventGroupIds,
     );
   }

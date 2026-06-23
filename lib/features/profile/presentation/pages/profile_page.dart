@@ -46,6 +46,7 @@ class _ProfilePageState extends State<ProfilePage> {
   ProfileStats? _stats;
   bool _loading = true;
   bool _canAddBusinessCard = true;
+  bool _isPremium = false;
   int _selectedIndex = 0;
   late final PageController _pageController = PageController(
     viewportFraction: _profileCarouselViewportFraction,
@@ -79,6 +80,7 @@ class _ProfilePageState extends State<ProfilePage> {
         _cards = list;
         _stats = stats;
         _canAddBusinessCard = quota.canAddBusinessCard;
+        _isPremium = quota.isPremium;
         if (_selectedIndex >= list.length) {
           _selectedIndex = list.isEmpty ? 0 : list.length - 1;
         }
@@ -101,6 +103,7 @@ class _ProfilePageState extends State<ProfilePage> {
           eventGroupCount: 0,
         );
         _canAddBusinessCard = true;
+        _isPremium = false;
         _loading = false;
       });
     }
@@ -207,6 +210,7 @@ class _ProfilePageState extends State<ProfilePage> {
               cards: _cards,
               pageController: _pageController,
               selectedIndex: _selectedIndex,
+              showPremiumBadge: _isPremium,
               onPageChanged: (index) => setState(() => _selectedIndex = index),
               onCardTap: _openCardEditor,
             ),
@@ -315,6 +319,7 @@ class _ProfileCardsCarousel extends StatelessWidget {
     required this.cards,
     required this.pageController,
     required this.selectedIndex,
+    required this.showPremiumBadge,
     required this.onPageChanged,
     required this.onCardTap,
   });
@@ -322,6 +327,7 @@ class _ProfileCardsCarousel extends StatelessWidget {
   final List<OnboardingCardDraft> cards;
   final PageController pageController;
   final int selectedIndex;
+  final bool showPremiumBadge;
   final ValueChanged<int> onPageChanged;
   final void Function(OnboardingCardDraft card) onCardTap;
 
@@ -351,6 +357,7 @@ class _ProfileCardsCarousel extends StatelessWidget {
                   onDoubleTap: () => onCardTap(cards.first),
                   emptyMessage: 'Alanlar doldukça görünür',
                   normalizeForDisplay: true,
+                  showPremiumBadge: showPremiumBadge,
                 ),
               ),
             ),
@@ -400,6 +407,7 @@ class _ProfileCardsCarousel extends StatelessWidget {
                     onDoubleTap: () => onCardTap(card),
                     emptyMessage: 'Alanlar doldukça görünür',
                     normalizeForDisplay: true,
+                    showPremiumBadge: showPremiumBadge,
                   ),
                 ),
               );

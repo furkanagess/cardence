@@ -26,7 +26,6 @@ class SavedCardsWalletStrip extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final atLimit = !quota.canAddMore;
-    final showUpgrade = !quota.isPremium && onUpgradeTap != null;
     final progressColor = atLimit
         ? AppColors.error
         : quota.isNearLimit
@@ -37,11 +36,6 @@ class SavedCardsWalletStrip extends StatelessWidget {
       decoration: BoxDecoration(
         color: inAppBar ? Colors.transparent : colorScheme.surface,
         borderRadius: inAppBar ? BorderRadius.zero : BorderRadius.circular(16),
-        border: inAppBar
-            ? null
-            : Border.all(
-                color: colorScheme.outlineVariant.withValues(alpha: 0.85),
-              ),
       ),
       child: Padding(
         padding: EdgeInsets.fromLTRB(
@@ -171,10 +165,6 @@ class SavedCardsWalletStrip extends StatelessWidget {
                     '${SavedCardsWalletLimits.freeMaxCards} kart limitine ulaştınız. Premium ile sınırsız kaydedin.',
                 tone: _WalletBannerTone.warning,
               ),
-            ],
-            if (showUpgrade) ...[
-              const SizedBox(height: 12),
-              _PremiumUpsellButton(onTap: onUpgradeTap!),
             ],
           ],
         ),
@@ -313,75 +303,6 @@ class _InfoBanner extends StatelessWidget {
   }
 }
 
-class _PremiumUpsellButton extends StatelessWidget {
-  const _PremiumUpsellButton({required this.onTap});
-
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
-    final colorScheme = Theme.of(context).colorScheme;
-
-    return Material(
-      color: colorScheme.primary.withValues(alpha: 0.08),
-      borderRadius: BorderRadius.circular(12),
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-          child: Row(
-            children: [
-              Container(
-                width: 36,
-                height: 36,
-                decoration: BoxDecoration(
-                  color: colorScheme.primary,
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Icon(
-                  Icons.auto_awesome_rounded,
-                  size: 20,
-                  color: colorScheme.onPrimary,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Sınırsız ol',
-                      style: textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w700,
-                        color: colorScheme.primary,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      'Sınırsız kart, elle ekleme ve daha fazlası',
-                      style: textTheme.bodySmall?.copyWith(
-                        color: colorScheme.onSurfaceVariant,
-                        height: 1.3,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Icon(
-                Icons.arrow_forward_rounded,
-                size: 20,
-                color: colorScheme.primary,
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 /// Cüzdan kotası yüklenirken strip ile aynı boyutta iskelet.
 class SavedCardsWalletStripShimmer extends StatelessWidget {
   const SavedCardsWalletStripShimmer({super.key});
@@ -397,9 +318,6 @@ class SavedCardsWalletStripShimmer extends StatelessWidget {
           decoration: BoxDecoration(
             color: colorScheme.surface,
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: colorScheme.outlineVariant.withValues(alpha: 0.85),
-            ),
           ),
           child: const Padding(
             padding: EdgeInsets.all(16),
@@ -434,8 +352,6 @@ class SavedCardsWalletStripShimmer extends StatelessWidget {
                 ShimmerPlaceholder(width: 72, height: 28, borderRadius: 8),
                 SizedBox(height: 10),
                 ShimmerPlaceholder(height: 6, borderRadius: 6),
-                SizedBox(height: 12),
-                ShimmerPlaceholder(height: 56, borderRadius: 12),
               ],
             ),
           ),

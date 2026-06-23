@@ -139,6 +139,7 @@ class App extends StatefulWidget {
 class _AppState extends State<App> {
   _AppDestination _destination = _AppDestination.loading;
   ThemePreference _themePreference = ThemePreference.system;
+  bool _showPostOnboardingPaywall = false;
 
   @override
   void initState() {
@@ -207,7 +208,10 @@ class _AppState extends State<App> {
   }
 
   void _onOnboardingFinish() {
-    setState(() => _destination = _AppDestination.main);
+    setState(() {
+      _showPostOnboardingPaywall = true;
+      _destination = _AppDestination.main;
+    });
   }
 
   Future<void> _onLogout() async {
@@ -258,6 +262,7 @@ class _AppState extends State<App> {
         );
       case _AppDestination.main:
         return MainShellPage(
+          showPostOnboardingPaywall: _showPostOnboardingPaywall,
           getOnboardingDraftCard: widget.getOnboardingDraftCard,
           getOnboardingDraftCards: widget.getOnboardingDraftCards,
           persistOnboardingCard: widget.persistOnboardingCard,

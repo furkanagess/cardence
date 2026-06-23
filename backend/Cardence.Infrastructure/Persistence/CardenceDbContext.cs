@@ -11,13 +11,12 @@ public sealed class CardenceDbContext : DbContext
     }
 
     public DbSet<User> Users => Set<User>();
-    public DbSet<BusinessCard> BusinessCards => Set<BusinessCard>();
-    public DbSet<SavedCard> SavedCards => Set<SavedCard>();
+    public DbSet<Card> Cards => Set<Card>();
     public DbSet<WalletEntitlement> WalletEntitlements => Set<WalletEntitlement>();
     public DbSet<AuthRefreshToken> AuthRefreshTokens => Set<AuthRefreshToken>();
     public DbSet<SupportRequest> SupportRequests => Set<SupportRequest>();
     public DbSet<EventGroup> EventGroups => Set<EventGroup>();
-    public DbSet<SavedCardEventGroup> SavedCardEventGroups => Set<SavedCardEventGroup>();
+    public DbSet<CardEventGroup> CardEventGroups => Set<CardEventGroup>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

@@ -55,7 +55,7 @@ public sealed class BusinessCardServiceTests
 
         result.CardId.Should().MatchRegex(@"^\d{6}$");
         await _repository.Received(1).AddAsync(
-            Arg.Is<BusinessCard>(card => card.UserId == _userId),
+            Arg.Is<Card>(card => card.UserId == _userId && card.CardRole == CardRoles.Own),
             Arg.Any<CancellationToken>());
     }
 
@@ -87,11 +87,13 @@ public sealed class BusinessCardServiceTests
     public async Task UpsertAsync_UpdatesExistingCard()
     {
         var cardId = "482917";
-        var existing = new BusinessCard
+        var existing = new Card
         {
             Id = Guid.NewGuid(),
             UserId = _userId,
             CardId = cardId,
+            CardRole = CardRoles.Own,
+            CreationMethod = CardCreationMethods.OwnCard,
             DisplayName = "Old Name",
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow,
@@ -112,11 +114,13 @@ public sealed class BusinessCardServiceTests
     {
         var cardId = "public-card-id-123";
         _repository.GetByCardIdAsync(cardId, Arg.Any<CancellationToken>())
-            .Returns(new BusinessCard
+            .Returns(new Card
             {
                 Id = Guid.NewGuid(),
                 UserId = _userId,
                 CardId = cardId,
+                CardRole = CardRoles.Own,
+                CreationMethod = CardCreationMethods.OwnCard,
                 DisplayName = "Furkan Çağlar",
                 Email = "furkan@example.com",
                 CreatedAt = DateTime.UtcNow,

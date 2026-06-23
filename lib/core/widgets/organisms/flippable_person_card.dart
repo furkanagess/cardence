@@ -25,6 +25,7 @@ class FlippablePersonCard extends StatefulWidget {
     this.onTap,
     this.onDoubleTap,
     this.showAppLogo = true,
+    this.showPremiumBadge = false,
     this.flipOnTouch = false,
     this.contactEmail,
     this.contactPhone,
@@ -60,6 +61,9 @@ class FlippablePersonCard extends StatefulWidget {
 
   /// false: Cardence köşe logosu gizlenir (elle girilen kartlar).
   final bool showAppLogo;
+
+  /// true: premium kart sahibi rozeti gösterilir.
+  final bool showPremiumBadge;
 
   /// true: karta dokunarak çevirme.
   final bool flipOnTouch;
@@ -188,6 +192,7 @@ class _FlippablePersonCardState extends State<FlippablePersonCard>
       photoUrl: widget.photoUrl,
       bottomRightInset: _flipIconTouchSize,
       showAppLogo: widget.showAppLogo,
+      showPremiumBadge: widget.showPremiumBadge,
       contactEmail: widget.contactEmail,
       contactPhone: widget.contactPhone,
       contactWebsite: widget.contactWebsite,
@@ -238,6 +243,7 @@ class _FlippablePersonCardState extends State<FlippablePersonCard>
             backgroundColor: widget.backgroundColor,
             bottomRightInset: _flipIconTouchSize,
             showAppLogo: widget.showAppLogo,
+            showPremiumBadge: widget.showPremiumBadge,
           );
   }
 

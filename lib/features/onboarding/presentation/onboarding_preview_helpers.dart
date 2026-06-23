@@ -13,6 +13,7 @@ class OnboardingPreviewHelpers {
   static Widget preview(
     OnboardingCardDraft draft, {
     bool flipOnTouch = false,
+    bool showPremiumBadge = false,
     VoidCallback? onTap,
     VoidCallback? onDoubleTap,
     String emptyMessage = 'Alanlar doldukça görünür',
@@ -28,6 +29,7 @@ class OnboardingPreviewHelpers {
       flipOnTouch: flipOnTouch,
       onTap: onTap,
       onDoubleTap: onDoubleTap,
+      showPremiumBadge: showPremiumBadge,
       accentColor: MyCardPreviewHelpers.parseHexColor(draft.accentColor),
       backgroundColor:
           MyCardPreviewHelpers.parseHexColor(draft.backgroundColor),

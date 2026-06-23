@@ -26,6 +26,7 @@ import '../../../onboarding/domain/usecases/get_onboarding_draft_cards.dart';
 import '../../../business_cards/domain/usecases/persist_onboarding_card.dart';
 import '../../../saved_cards/presentation/cubit/saved_cards_cubit.dart';
 import '../../../saved_cards/presentation/pages/saved_cards_page.dart';
+import '../../../saved_cards/presentation/wallet_paywall_flow.dart';
 import '../../../auth/domain/usecases/get_current_user.dart';
 import '../../../auth/domain/usecases/upload_profile_photo.dart';
 import '../../../settings/domain/entities/theme_preference.dart';
@@ -37,6 +38,7 @@ import '../../../support/presentation/pages/support_page.dart';
 class MainShellPage extends StatefulWidget {
   const MainShellPage({
     super.key,
+    this.showPostOnboardingPaywall = false,
     required this.getOnboardingDraftCard,
     required this.getOnboardingDraftCards,
     required this.persistOnboardingCard,
@@ -62,6 +64,7 @@ class MainShellPage extends StatefulWidget {
     required this.getProfileStats,
   });
 
+  final bool showPostOnboardingPaywall;
   final GetOnboardingDraftCard getOnboardingDraftCard;
   final GetOnboardingDraftCards getOnboardingDraftCards;
   final PersistOnboardingCard persistOnboardingCard;
@@ -158,7 +161,9 @@ class _MainShellPageState extends State<MainShellPage> {
         getSavedCardsWalletQuota: widget.getSavedCardsWalletQuota,
         upgradeWalletPlan: widget.upgradeWalletPlan,
       )..load(),
-      child: CardenceScaffold(
+      child: _PostOnboardingPaywallGate(
+        enabled: widget.showPostOnboardingPaywall,
+        child: CardenceScaffold(
         appBar: _buildAppBar(context),
         body: IndexedStack(
           index: _currentIndex,
@@ -215,6 +220,7 @@ class _MainShellPageState extends State<MainShellPage> {
           ),
         ),
       ),
+    ),
     );
   }
 
@@ -455,4 +461,48 @@ class _NavItem extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Onboarding sonrası ilk ana ekran girişinde RevenueCat paywall gösterir.
+class _PostOnboardingPaywallGate extends StatefulWidget {
+  const _PostOnboardingPaywallGate({
+    required this.enabled,
+    required this.child,
+  });
+
+  final bool enabled;
+  final Widget child;
+
+  @override
+  State<_PostOnboardingPaywallGate> createState() =>
+      _PostOnboardingPaywallGateState();
+}
+
+class _PostOnboardingPaywallGateState extends State<_PostOnboardingPaywallGate> {
+  bool _handled = false;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.enabled) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _presentPaywall());
+    }
+  }
+
+  Future<void> _presentPaywall() async {
+    if (!mounted || _handled || !widget.enabled) return;
+    _handled = true;
+
+    final cubit = context.read<SavedCardsCubit>();
+    if (cubit.state.quota?.isPremium == true) return;
+
+    try {
+      await WalletPaywallFlow.show(context, cubit: cubit);
+    } catch (_) {
+      // Paywall açılamazsa uygulama akışı devam eder.
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) => widget.child;
 }

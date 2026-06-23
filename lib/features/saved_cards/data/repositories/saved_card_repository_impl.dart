@@ -52,6 +52,7 @@ class SavedCardRepositoryImpl implements SavedCardRepository {
     return SavedCardModel(
       cardId: remote.cardId,
       origin: remote.origin,
+      creationMethod: remote.creationMethod ?? local.creationMethod,
       displayName: remote.displayName,
       email: remote.email,
       phone: remote.phone,
@@ -114,6 +115,7 @@ class SavedCardRepositoryImpl implements SavedCardRepository {
     );
     final merged = saved.toEntity().copyWith(
       origin: card.origin,
+      creationMethod: card.creationMethod ?? saved.toEntity().creationMethod,
       frontImagePath: card.frontImagePath,
       backImagePath: card.backImagePath,
       note: card.note,

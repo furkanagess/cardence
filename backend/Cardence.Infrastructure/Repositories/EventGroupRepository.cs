@@ -1,4 +1,5 @@
 using Cardence.Application.Interfaces;
+using Cardence.Domain.Constants;
 using Cardence.Domain.Entities;
 using Cardence.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
@@ -53,7 +54,7 @@ public sealed class EventGroupRepository : IEventGroupRepository
         Guid groupId,
         CancellationToken cancellationToken = default)
     {
-        return await _dbContext.SavedCardEventGroups
+        return await _dbContext.CardEventGroups
             .CountAsync(link => link.EventGroupId == groupId, cancellationToken);
     }
 
@@ -105,33 +106,36 @@ public sealed class EventGroupRepository : IEventGroupRepository
             return;
         }
 
-        var savedCards = await _dbContext.SavedCards
-            .Where(card => card.UserId == userId && distinctCardIds.Contains(card.CardId))
+        var walletCards = await _dbContext.Cards
+            .Where(card =>
+                card.UserId == userId &&
+                card.CardRole == CardRoles.Wallet &&
+                distinctCardIds.Contains(card.CardId))
             .Select(card => new { card.Id, card.CardId })
             .ToListAsync(cancellationToken);
 
-        if (savedCards.Count == 0)
+        if (walletCards.Count == 0)
         {
             return;
         }
 
-        var savedCardIds = savedCards.Select(card => card.Id).ToList();
-        var existingLinks = await _dbContext.SavedCardEventGroups
-            .Where(link => link.EventGroupId == groupId && savedCardIds.Contains(link.SavedCardId))
-            .Select(link => link.SavedCardId)
+        var walletCardIds = walletCards.Select(card => card.Id).ToList();
+        var existingLinks = await _dbContext.CardEventGroups
+            .Where(link => link.EventGroupId == groupId && walletCardIds.Contains(link.CardId))
+            .Select(link => link.CardId)
             .ToListAsync(cancellationToken);
 
         var existingSet = existingLinks.ToHashSet();
-        foreach (var savedCard in savedCards)
+        foreach (var walletCard in walletCards)
         {
-            if (existingSet.Contains(savedCard.Id))
+            if (existingSet.Contains(walletCard.Id))
             {
                 continue;
             }
 
-            _dbContext.SavedCardEventGroups.Add(new SavedCardEventGroup
+            _dbContext.CardEventGroups.Add(new CardEventGroup
             {
-                SavedCardId = savedCard.Id,
+                CardId = walletCard.Id,
                 EventGroupId = groupId,
             });
         }
@@ -145,20 +149,22 @@ public sealed class EventGroupRepository : IEventGroupRepository
         string cardId,
         CancellationToken cancellationToken = default)
     {
-        var savedCard = await _dbContext.SavedCards
+        var walletCard = await _dbContext.Cards
             .AsNoTracking()
             .FirstOrDefaultAsync(
-                card => card.UserId == userId && card.CardId == cardId.Trim(),
+                card => card.UserId == userId &&
+                        card.CardId == cardId.Trim() &&
+                        card.CardRole == CardRoles.Wallet,
                 cancellationToken);
 
-        if (savedCard is null)
+        if (walletCard is null)
         {
             return;
         }
 
-        var link = await _dbContext.SavedCardEventGroups
+        var link = await _dbContext.CardEventGroups
             .FirstOrDefaultAsync(
-                entry => entry.EventGroupId == groupId && entry.SavedCardId == savedCard.Id,
+                entry => entry.EventGroupId == groupId && entry.CardId == walletCard.Id,
                 cancellationToken);
 
         if (link is null)
@@ -166,19 +172,20 @@ public sealed class EventGroupRepository : IEventGroupRepository
             return;
         }
 
-        _dbContext.SavedCardEventGroups.Remove(link);
+        _dbContext.CardEventGroups.Remove(link);
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task<IReadOnlyList<SavedCard>> GetCardsInGroupAsync(
+    public async Task<IReadOnlyList<Card>> GetCardsInGroupAsync(
         Guid userId,
         Guid groupId,
         CancellationToken cancellationToken = default)
     {
-        var cards = await _dbContext.SavedCardEventGroups
+        var cards = await _dbContext.CardEventGroups
             .AsNoTracking()
-            .Where(link => link.EventGroupId == groupId && link.SavedCard.UserId == userId)
-            .Select(link => link.SavedCard)
+            .Where(link => link.EventGroupId == groupId && link.Card.UserId == userId)
+            .Select(link => link.Card)
+            .Where(card => card.CardRole == CardRoles.Wallet)
             .OrderBy(card => card.SortOrder)
             .ThenByDescending(card => card.SavedAt)
             .ToListAsync(cancellationToken);
@@ -187,9 +194,9 @@ public sealed class EventGroupRepository : IEventGroupRepository
         return cards;
     }
 
-    public async Task SyncSavedCardLinksAsync(
+    public async Task SyncWalletCardLinksAsync(
         Guid userId,
-        Guid savedCardId,
+        Guid walletCardId,
         IReadOnlyList<string> groupIds,
         CancellationToken cancellationToken = default)
     {
@@ -219,8 +226,8 @@ public sealed class EventGroupRepository : IEventGroupRepository
                 .ToListAsync(cancellationToken);
 
         var ownedSet = ownedGroupIds.ToHashSet();
-        var existingLinks = await _dbContext.SavedCardEventGroups
-            .Where(link => link.SavedCardId == savedCardId)
+        var existingLinks = await _dbContext.CardEventGroups
+            .Where(link => link.CardId == walletCardId)
             .ToListAsync(cancellationToken);
 
         var toRemove = existingLinks
@@ -229,7 +236,7 @@ public sealed class EventGroupRepository : IEventGroupRepository
 
         if (toRemove.Count > 0)
         {
-            _dbContext.SavedCardEventGroups.RemoveRange(toRemove);
+            _dbContext.CardEventGroups.RemoveRange(toRemove);
         }
 
         var existingSet = existingLinks
@@ -243,9 +250,9 @@ public sealed class EventGroupRepository : IEventGroupRepository
                 continue;
             }
 
-            _dbContext.SavedCardEventGroups.Add(new SavedCardEventGroup
+            _dbContext.CardEventGroups.Add(new CardEventGroup
             {
-                SavedCardId = savedCardId,
+                CardId = walletCardId,
                 EventGroupId = groupId,
             });
         }
@@ -257,7 +264,7 @@ public sealed class EventGroupRepository : IEventGroupRepository
     }
 
     public async Task PopulateLinkedGroupIdsAsync(
-        IReadOnlyList<SavedCard> cards,
+        IReadOnlyList<Card> cards,
         CancellationToken cancellationToken = default)
     {
         if (cards.Count == 0)
@@ -265,15 +272,15 @@ public sealed class EventGroupRepository : IEventGroupRepository
             return;
         }
 
-        var savedCardIds = cards.Select(card => card.Id).ToList();
-        var links = await _dbContext.SavedCardEventGroups
+        var cardIds = cards.Select(card => card.Id).ToList();
+        var links = await _dbContext.CardEventGroups
             .AsNoTracking()
-            .Where(link => savedCardIds.Contains(link.SavedCardId))
-            .Select(link => new { link.SavedCardId, link.EventGroupId })
+            .Where(link => cardIds.Contains(link.CardId))
+            .Select(link => new { link.CardId, link.EventGroupId })
             .ToListAsync(cancellationToken);
 
         var linkMap = links
-            .GroupBy(link => link.SavedCardId)
+            .GroupBy(link => link.CardId)
             .ToDictionary(
                 group => group.Key,
                 group => group.Select(link => link.EventGroupId.ToString()).ToList());

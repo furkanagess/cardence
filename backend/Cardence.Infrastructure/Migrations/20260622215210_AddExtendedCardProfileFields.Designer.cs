@@ -3,6 +3,7 @@ using System;
 using Cardence.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Cardence.Infrastructure.Migrations
 {
     [DbContext(typeof(CardenceDbContext))]
-    partial class CardenceDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260622215210_AddExtendedCardProfileFields")]
+    partial class AddExtendedCardProfileFields
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -56,7 +59,7 @@ namespace Cardence.Infrastructure.Migrations
                     b.ToTable("auth_refresh_tokens", (string)null);
                 });
 
-            modelBuilder.Entity("Cardence.Domain.Entities.Card", b =>
+            modelBuilder.Entity("Cardence.Domain.Entities.BusinessCard", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -101,12 +104,6 @@ namespace Cardence.Infrastructure.Migrations
                         .HasColumnType("character varying(200)")
                         .HasColumnName("card_name");
 
-                    b.Property<string>("CardRole")
-                        .IsRequired()
-                        .HasMaxLength(16)
-                        .HasColumnType("character varying(16)")
-                        .HasColumnName("card_role");
-
                     b.Property<string>("City")
                         .HasMaxLength(120)
                         .HasColumnType("character varying(120)")
@@ -125,12 +122,6 @@ namespace Cardence.Infrastructure.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
-
-                    b.Property<string>("CreationMethod")
-                        .IsRequired()
-                        .HasMaxLength(32)
-                        .HasColumnType("character varying(32)")
-                        .HasColumnName("creation_method");
 
                     b.Property<string>("Department")
                         .HasMaxLength(200)
@@ -162,10 +153,6 @@ namespace Cardence.Infrastructure.Migrations
                         .HasColumnType("character varying(500)")
                         .HasColumnName("linkedin");
 
-                    b.Property<string>("Note")
-                        .HasColumnType("text")
-                        .HasColumnName("note");
-
                     b.Property<string>("Phone")
                         .HasMaxLength(20)
                         .HasColumnType("character varying(20)")
@@ -182,10 +169,6 @@ namespace Cardence.Infrastructure.Migrations
                         .HasDefaultValue(0)
                         .HasColumnName("save_count");
 
-                    b.Property<long?>("SavedAt")
-                        .HasColumnType("bigint")
-                        .HasColumnName("saved_at");
-
                     b.Property<string>("School")
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)")
@@ -194,14 +177,6 @@ namespace Cardence.Infrastructure.Migrations
                     b.Property<string>("Skills")
                         .HasColumnType("text")
                         .HasColumnName("skills");
-
-                    b.Property<int>("SortOrder")
-                        .HasColumnType("integer")
-                        .HasColumnName("sort_order");
-
-                    b.Property<Guid?>("SourceCardId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("source_card_id");
 
                     b.Property<string>("Title")
                         .HasMaxLength(200)
@@ -229,38 +204,11 @@ namespace Cardence.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("CardId")
-                        .IsUnique()
-                        .HasFilter("card_role = 'own'");
+                        .IsUnique();
 
-                    b.HasIndex("SourceCardId");
+                    b.HasIndex("UserId", "CardId");
 
-                    b.HasIndex("UserId", "CardId")
-                        .IsUnique()
-                        .HasFilter("card_role = 'wallet'");
-
-                    b.HasIndex("UserId", "CardRole");
-
-                    b.HasIndex("UserId", "SortOrder")
-                        .HasFilter("card_role = 'wallet'");
-
-                    b.ToTable("cards", (string)null);
-                });
-
-            modelBuilder.Entity("Cardence.Domain.Entities.CardEventGroup", b =>
-                {
-                    b.Property<Guid>("CardId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("card_id");
-
-                    b.Property<Guid>("EventGroupId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("event_group_id");
-
-                    b.HasKey("CardId", "EventGroupId");
-
-                    b.HasIndex("EventGroupId");
-
-                    b.ToTable("card_event_groups", (string)null);
+                    b.ToTable("business_cards", (string)null);
                 });
 
             modelBuilder.Entity("Cardence.Domain.Entities.EventGroup", b =>
@@ -292,6 +240,171 @@ namespace Cardence.Infrastructure.Migrations
                         .HasDatabaseName("ux_event_groups_user_name");
 
                     b.ToTable("event_groups", (string)null);
+                });
+
+            modelBuilder.Entity("Cardence.Domain.Entities.SavedCard", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("About")
+                        .HasColumnType("text")
+                        .HasColumnName("about");
+
+                    b.Property<string>("AccentColor")
+                        .HasMaxLength(7)
+                        .HasColumnType("character varying(7)")
+                        .HasColumnName("accent_color");
+
+                    b.Property<string>("Address")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("address");
+
+                    b.Property<string>("AttendedEvents")
+                        .HasColumnType("text")
+                        .HasColumnName("attended_events");
+
+                    b.Property<string>("BackgroundColor")
+                        .HasMaxLength(7)
+                        .HasColumnType("character varying(7)")
+                        .HasColumnName("background_color");
+
+                    b.Property<string>("Birthday")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("birthday");
+
+                    b.Property<string>("CardId")
+                        .IsRequired()
+                        .HasMaxLength(6)
+                        .HasColumnType("character varying(6)")
+                        .HasColumnName("card_id");
+
+                    b.Property<string>("City")
+                        .HasMaxLength(120)
+                        .HasColumnType("character varying(120)")
+                        .HasColumnName("city");
+
+                    b.Property<string>("Company")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("company");
+
+                    b.Property<string>("Country")
+                        .HasMaxLength(120)
+                        .HasColumnType("character varying(120)")
+                        .HasColumnName("country");
+
+                    b.Property<string>("Department")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("department");
+
+                    b.Property<string>("DisplayName")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("display_name");
+
+                    b.Property<string>("Email")
+                        .HasMaxLength(320)
+                        .HasColumnType("character varying(320)")
+                        .HasColumnName("email");
+
+                    b.Property<string>("Instagram")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("instagram");
+
+                    b.Property<string>("Linkedin")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("linkedin");
+
+                    b.Property<string>("Note")
+                        .HasColumnType("text")
+                        .HasColumnName("note");
+
+                    b.Property<string>("Phone")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("phone");
+
+                    b.Property<string>("PhotoUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("photo_url");
+
+                    b.Property<long>("SavedAt")
+                        .HasColumnType("bigint")
+                        .HasColumnName("saved_at");
+
+                    b.Property<string>("School")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("school");
+
+                    b.Property<string>("Skills")
+                        .HasColumnType("text")
+                        .HasColumnName("skills");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("integer")
+                        .HasColumnName("sort_order");
+
+                    b.Property<string>("SourceType")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(16)
+                        .HasColumnType("character varying(16)")
+                        .HasDefaultValue("cardence")
+                        .HasColumnName("source_type");
+
+                    b.Property<string>("Title")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("title");
+
+                    b.Property<string>("Twitter")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("twitter");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_id");
+
+                    b.Property<string>("Website")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("website");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId", "CardId")
+                        .IsUnique();
+
+                    b.HasIndex("UserId", "SortOrder");
+
+                    b.ToTable("saved_cards", (string)null);
+                });
+
+            modelBuilder.Entity("Cardence.Domain.Entities.SavedCardEventGroup", b =>
+                {
+                    b.Property<Guid>("SavedCardId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("saved_card_id");
+
+                    b.Property<Guid>("EventGroupId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("event_group_id");
+
+                    b.HasKey("SavedCardId", "EventGroupId");
+
+                    b.HasIndex("EventGroupId");
+
+                    b.ToTable("saved_card_event_groups", (string)null);
                 });
 
             modelBuilder.Entity("Cardence.Domain.Entities.SupportRequest", b =>
@@ -427,41 +540,15 @@ namespace Cardence.Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Cardence.Domain.Entities.Card", b =>
+            modelBuilder.Entity("Cardence.Domain.Entities.BusinessCard", b =>
                 {
-                    b.HasOne("Cardence.Domain.Entities.Card", "SourceCard")
-                        .WithMany()
-                        .HasForeignKey("SourceCardId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
                     b.HasOne("Cardence.Domain.Entities.User", "User")
-                        .WithMany("Cards")
+                        .WithMany("BusinessCards")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("SourceCard");
-
                     b.Navigation("User");
-                });
-
-            modelBuilder.Entity("Cardence.Domain.Entities.CardEventGroup", b =>
-                {
-                    b.HasOne("Cardence.Domain.Entities.Card", "Card")
-                        .WithMany("EventGroupLinks")
-                        .HasForeignKey("CardId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Cardence.Domain.Entities.EventGroup", "EventGroup")
-                        .WithMany("CardLinks")
-                        .HasForeignKey("EventGroupId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Card");
-
-                    b.Navigation("EventGroup");
                 });
 
             modelBuilder.Entity("Cardence.Domain.Entities.EventGroup", b =>
@@ -473,6 +560,36 @@ namespace Cardence.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Cardence.Domain.Entities.SavedCard", b =>
+                {
+                    b.HasOne("Cardence.Domain.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Cardence.Domain.Entities.SavedCardEventGroup", b =>
+                {
+                    b.HasOne("Cardence.Domain.Entities.EventGroup", "EventGroup")
+                        .WithMany("CardLinks")
+                        .HasForeignKey("EventGroupId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Cardence.Domain.Entities.SavedCard", "SavedCard")
+                        .WithMany("EventGroupLinks")
+                        .HasForeignKey("SavedCardId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("EventGroup");
+
+                    b.Navigation("SavedCard");
                 });
 
             modelBuilder.Entity("Cardence.Domain.Entities.SupportRequest", b =>
@@ -497,19 +614,19 @@ namespace Cardence.Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Cardence.Domain.Entities.Card", b =>
-                {
-                    b.Navigation("EventGroupLinks");
-                });
-
             modelBuilder.Entity("Cardence.Domain.Entities.EventGroup", b =>
                 {
                     b.Navigation("CardLinks");
                 });
 
+            modelBuilder.Entity("Cardence.Domain.Entities.SavedCard", b =>
+                {
+                    b.Navigation("EventGroupLinks");
+                });
+
             modelBuilder.Entity("Cardence.Domain.Entities.User", b =>
                 {
-                    b.Navigation("Cards");
+                    b.Navigation("BusinessCards");
                 });
 #pragma warning restore 612, 618
         }

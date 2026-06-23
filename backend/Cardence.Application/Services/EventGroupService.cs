@@ -13,6 +13,7 @@ namespace Cardence.Application.Services;
 public sealed class EventGroupService : IEventGroupService
 {
     private readonly IEventGroupRepository _eventGroupRepository;
+    private readonly IBusinessCardRepository _businessCardRepository;
     private readonly IWalletEntitlementRepository _walletRepository;
     private readonly ICurrentUserService _currentUser;
     private readonly IValidator<SaveEventGroupRequest> _saveValidator;
@@ -21,6 +22,7 @@ public sealed class EventGroupService : IEventGroupService
 
     public EventGroupService(
         IEventGroupRepository eventGroupRepository,
+        IBusinessCardRepository businessCardRepository,
         IWalletEntitlementRepository walletRepository,
         ICurrentUserService currentUser,
         IValidator<SaveEventGroupRequest> saveValidator,
@@ -28,6 +30,7 @@ public sealed class EventGroupService : IEventGroupService
         IValidator<LinkEventGroupCardsRequest> linkValidator)
     {
         _eventGroupRepository = eventGroupRepository;
+        _businessCardRepository = businessCardRepository;
         _walletRepository = walletRepository;
         _currentUser = currentUser;
         _saveValidator = saveValidator;
@@ -158,7 +161,16 @@ public sealed class EventGroupService : IEventGroupService
             parsedGroupId,
             cancellationToken);
 
-        return cards.Select(SavedCardMapper.ToDto).ToList();
+        await SavedCardEnrichment.HydrateLinkedProfilesAndPremiumAsync(
+            cards,
+            _businessCardRepository,
+            _walletRepository,
+            cancellationToken);
+
+        return SavedCardEnrichment
+            .SortForWalletDisplay(cards)
+            .Select(SavedCardMapper.ToDto)
+            .ToList();
     }
 
     private async Task EnsureUniqueNameAsync(

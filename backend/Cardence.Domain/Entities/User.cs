@@ -12,5 +12,5 @@ public sealed class User
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
 
-    public ICollection<BusinessCard> BusinessCards { get; set; } = [];
+    public ICollection<Card> Cards { get; set; } = [];
 }

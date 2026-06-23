@@ -37,8 +37,15 @@ public sealed class SavedCardService : ISavedCardService
     {
         var userId = _currentUser.GetRequiredUserId();
         var cards = await _savedCardRepository.GetByUserIdAsync(userId, cancellationToken);
-        await RefreshLinkedCardenceProfilesAsync(cards, cancellationToken);
-        return cards.Select(SavedCardMapper.ToDto).ToList();
+        await SavedCardEnrichment.HydrateLinkedProfilesAndPremiumAsync(
+            cards,
+            _businessCardRepository,
+            _walletRepository,
+            cancellationToken);
+        return SavedCardEnrichment
+            .SortForWalletDisplay(cards)
+            .Select(SavedCardMapper.ToDto)
+            .ToList();
     }
 
     public async Task<SavedCardDto> CreateFromJsonAsync(
@@ -65,13 +72,17 @@ public sealed class SavedCardService : ISavedCardService
         existing.Note = request.Note;
         existing.LinkedEventGroupIds = request.LinkedEventGroupIds.ToList();
 
-        if (SavedCardSourceType.IsManual(existing.SourceType))
+        if (CardCreationMethods.IsManualEntry(existing.CreationMethod))
         {
             SavedCardMapper.ApplyManualProfile(existing, request);
         }
+        else
+        {
+            SavedCardMapper.ApplyExtendedProfile(existing, request);
+        }
 
         await _savedCardRepository.UpdateAsync(existing, cancellationToken);
-        await _eventGroupRepository.SyncSavedCardLinksAsync(
+        await _eventGroupRepository.SyncWalletCardLinksAsync(
             userId,
             existing.Id,
             request.LinkedEventGroupIds,
@@ -186,8 +197,12 @@ public sealed class SavedCardService : ISavedCardService
                 ErrorCodes.WalletLimitReached);
         }
 
-        var sourceType = SavedCardSourceType.Normalize(request.SourceType, cardId);
-        var isManual = SavedCardSourceType.IsManual(sourceType);
+        var creationMethod = CardCreationMethods.NormalizeWallet(
+            request.CreationMethod,
+            request.SourceType,
+            cardId,
+            fromQrPayload: false);
+        var isManual = CardCreationMethods.IsManualEntry(creationMethod);
 
         if (isManual &&
             !await CanAddManualSavedCardAsync(userId, entitlement.Tier, cancellationToken))
@@ -215,11 +230,11 @@ public sealed class SavedCardService : ISavedCardService
             ]);
         }
 
-        var businessCard = isManual
+        var ownCard = isManual
             ? null
             : await _businessCardRepository.GetByCardIdAsync(cardId, cancellationToken);
 
-        if (!isManual && businessCard is null && IsStubRequest(request))
+        if (!isManual && ownCard is null && IsStubRequest(request))
         {
             throw new ValidationException([
                 new ValidationFailure(
@@ -228,24 +243,29 @@ public sealed class SavedCardService : ISavedCardService
             ]);
         }
 
-        var entity = new SavedCard
+        var now = DateTime.UtcNow;
+        var entity = new Card
         {
             Id = Guid.NewGuid(),
             UserId = userId,
             CardId = cardId,
-            SourceType = sourceType,
+            CardRole = CardRoles.Wallet,
+            CreationMethod = creationMethod,
             SavedAt = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
             SortOrder = usedCount,
+            CreatedAt = now,
+            UpdatedAt = now,
             LinkedEventGroupIds = request.LinkedEventGroupIds.ToList(),
         };
 
         SavedCardMapper.ApplyDto(entity, request);
-        entity.SourceType = sourceType;
+        entity.CreationMethod = creationMethod;
+        entity.CardRole = CardRoles.Wallet;
 
-        if (businessCard is not null)
+        if (ownCard is not null)
         {
             var note = entity.Note;
-            SavedCardMapper.HydrateFromBusinessCard(entity, businessCard);
+            SavedCardMapper.HydrateFromOwnCard(entity, ownCard);
             entity.Note = note;
         }
 
@@ -261,18 +281,26 @@ public sealed class SavedCardService : ISavedCardService
         }
 
         await _savedCardRepository.AddAsync(entity, cancellationToken);
-        if (businessCard is not null && businessCard.UserId != userId)
+        if (ownCard is not null && ownCard.UserId != userId)
         {
             await _businessCardRepository.IncrementSaveCountAsync(
-                businessCard.Id,
+                ownCard.Id,
                 cancellationToken);
         }
-        await _eventGroupRepository.SyncSavedCardLinksAsync(
+        await _eventGroupRepository.SyncWalletCardLinksAsync(
             userId,
             entity.Id,
             request.LinkedEventGroupIds,
             cancellationToken);
         entity.LinkedEventGroupIds = request.LinkedEventGroupIds.ToList();
+
+        if (ownCard is not null)
+        {
+            entity.IsOwnerPremium = await SavedCardEnrichment.IsUserPremiumAsync(
+                _walletRepository,
+                ownCard.UserId,
+                cancellationToken);
+        }
 
         return SavedCardMapper.ToDto(entity);
     }
@@ -305,6 +333,7 @@ public sealed class SavedCardService : ISavedCardService
             {
                 CardId = shareId!,
                 SourceType = SavedCardSourceType.Cardence,
+                CreationMethod = CardCreationMethods.QrScan,
                 DisplayName = ReadOptionalString(body, "n", "displayName", "DisplayName"),
                 Email = ReadOptionalString(body, "e", "email", "Email"),
                 Phone = ReadOptionalString(body, "p", "phone", "Phone"),
@@ -315,6 +344,18 @@ public sealed class SavedCardService : ISavedCardService
                 Skills = ReadOptionalString(body, "s", "skills", "Skills"),
                 School = ReadOptionalString(body, "o", "school", "School"),
                 About = ReadOptionalString(body, "h", "about", "About"),
+                Address = ReadOptionalString(body, "a", "address", "Address"),
+                City = ReadOptionalString(body, "ci", "city", "City"),
+                Country = ReadOptionalString(body, "co", "country", "Country"),
+                Department = ReadOptionalString(body, "d", "department", "Department"),
+                AttendedEvents = ReadOptionalString(
+                    body,
+                    "ae",
+                    "attendedEvents",
+                    "AttendedEvents"),
+                Twitter = ReadOptionalString(body, "tw", "twitter", "Twitter"),
+                Instagram = ReadOptionalString(body, "ig", "instagram", "Instagram"),
+                Birthday = ReadOptionalString(body, "bd", "birthday", "Birthday"),
                 AccentColor = ReadOptionalString(body, "tc", "accentColor", "AccentColor"),
                 BackgroundColor = ReadOptionalString(body, "bc", "backgroundColor", "BackgroundColor"),
                 PhotoUrl = ReadOptionalString(body, "ph", "photoUrl", "PhotoUrl"),
@@ -327,31 +368,6 @@ public sealed class SavedCardService : ISavedCardService
             ]);
 
         return dto;
-    }
-
-    private async Task RefreshLinkedCardenceProfilesAsync(
-        IReadOnlyList<SavedCard> cards,
-        CancellationToken cancellationToken)
-    {
-        foreach (var card in cards)
-        {
-            if (!SavedCardSourceType.IsCardence(card.SourceType))
-            {
-                continue;
-            }
-
-            var businessCard = await _businessCardRepository.GetByCardIdAsync(
-                card.CardId,
-                cancellationToken);
-            if (businessCard is null)
-            {
-                continue;
-            }
-
-            var note = card.Note;
-            SavedCardMapper.HydrateFromBusinessCard(card, businessCard);
-            card.Note = note;
-        }
     }
 
     private static string? ReadOptionalString(JsonElement body, params string[] keys)

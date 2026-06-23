@@ -1,10 +1,10 @@
 namespace Cardence.Domain.Entities;
 
-public sealed class SavedCardEventGroup
+public sealed class CardEventGroup
 {
-    public Guid SavedCardId { get; set; }
+    public Guid CardId { get; set; }
     public Guid EventGroupId { get; set; }
 
-    public SavedCard SavedCard { get; set; } = null!;
+    public Card Card { get; set; } = null!;
     public EventGroup EventGroup { get; set; } = null!;
 }

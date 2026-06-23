@@ -44,18 +44,18 @@ public interface IEventGroupRepository
         string cardId,
         CancellationToken cancellationToken = default);
 
-    Task<IReadOnlyList<SavedCard>> GetCardsInGroupAsync(
+    Task<IReadOnlyList<Card>> GetCardsInGroupAsync(
         Guid userId,
         Guid groupId,
         CancellationToken cancellationToken = default);
 
-    Task SyncSavedCardLinksAsync(
+    Task SyncWalletCardLinksAsync(
         Guid userId,
-        Guid savedCardId,
+        Guid walletCardId,
         IReadOnlyList<string> groupIds,
         CancellationToken cancellationToken = default);
 
     Task PopulateLinkedGroupIdsAsync(
-        IReadOnlyList<SavedCard> cards,
+        IReadOnlyList<Card> cards,
         CancellationToken cancellationToken = default);
 }

@@ -1,5 +1,6 @@
 import 'saved_card.dart';
 import 'saved_card_origin.dart';
+import 'card_creation_method.dart';
 
 /// Elle veya OCR ile oluşturulan kayıtlı kart taslağı.
 class ManualSavedCardDraft {
@@ -89,6 +90,9 @@ class ManualSavedCardDraft {
     return SavedCard(
       cardId: cardId,
       origin: SavedCardOrigin.manual,
+      creationMethod: hasScanPhotos
+          ? CardCreationMethod.photoScan
+          : CardCreationMethod.manual,
       displayName: _trimOrNull(displayName),
       email: _trimOrNull(email),
       phone: _trimOrNull(phone),

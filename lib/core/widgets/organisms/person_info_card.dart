@@ -4,6 +4,7 @@ import '../../utils/card_contact_visibility.dart';
 import '../../utils/contact_launcher.dart';
 import '../atoms/card_watermark.dart';
 import '../atoms/custom_button.dart';
+import '../atoms/premium_owner_badge.dart';
 import '../atoms/profile_avatar.dart';
 import '../molecules/card_back_id_badge.dart';
 
@@ -25,6 +26,7 @@ class PersonInfoCard extends StatelessWidget {
     this.backgroundColor,
     this.photoUrl,
     this.showAppLogo = true,
+    this.showPremiumBadge = false,
     this.titleRightInset = 0,
     this.bottomRightInset = 0,
     this.compactBackFace = false,
@@ -71,6 +73,9 @@ class PersonInfoCard extends StatelessWidget {
 
   /// Başlık satırının sağında Cardence logosu gösterilir.
   final bool showAppLogo;
+
+  /// Premium kart sahibi rozeti (sol üst köşe).
+  final bool showPremiumBadge;
 
   /// Flip butonu gibi üst sağ öğeler için ek sağ boşluk.
   final double titleRightInset;
@@ -233,6 +238,7 @@ class PersonInfoCard extends StatelessWidget {
         backgroundColor: surfaceColor,
         photoUrl: photoUrl,
         showAppLogo: showAppLogo,
+        showPremiumBadge: showPremiumBadge,
         titleRightInset: titleRightInset,
         bottomRightInset: bottomRightInset,
         onSurface: onSurface,
@@ -292,6 +298,12 @@ class PersonInfoCard extends StatelessWidget {
                   surfaceColor: surfaceColor,
                   compact: false,
                 ),
+              ),
+            if (showPremiumBadge)
+              const Positioned(
+                top: 10,
+                left: 12,
+                child: PremiumOwnerBadge(size: 24),
               ),
             Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -718,6 +730,7 @@ class _CompactBusinessCardFace extends StatelessWidget {
     required this.fillHeight,
     required this.backgroundColor,
     required this.showAppLogo,
+    this.showPremiumBadge = false,
     required this.titleRightInset,
     this.bottomRightInset = 0,
     required this.onSurface,
@@ -767,6 +780,7 @@ class _CompactBusinessCardFace extends StatelessWidget {
   final Color backgroundColor;
   final String? photoUrl;
   final bool showAppLogo;
+  final bool showPremiumBadge;
   final double titleRightInset;
   final double bottomRightInset;
   final Color onSurface;
@@ -930,6 +944,12 @@ class _CompactBusinessCardFace extends StatelessWidget {
                   surfaceColor: backgroundColor,
                   variant: CardWatermarkVariant.cardCompact,
                 ),
+              ),
+            if (showPremiumBadge)
+              const Positioned(
+                top: 8,
+                left: 10,
+                child: PremiumOwnerBadge(size: 20),
               ),
             Positioned.fill(
               child: Padding(

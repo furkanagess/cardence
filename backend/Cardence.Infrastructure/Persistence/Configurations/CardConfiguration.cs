@@ -1,0 +1,79 @@
+using Cardence.Domain.Constants;
+using Cardence.Domain.Entities;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+
+namespace Cardence.Infrastructure.Persistence.Configurations;
+
+public sealed class CardConfiguration : IEntityTypeConfiguration<Card>
+{
+    public void Configure(EntityTypeBuilder<Card> builder)
+    {
+        builder.ToTable("cards");
+
+        builder.HasKey(x => x.Id);
+
+        builder.Property(x => x.UserId).HasColumnName("user_id");
+        builder.Property(x => x.CardId).HasMaxLength(BusinessCardConstants.CardIdLength).HasColumnName("card_id");
+        builder.Property(x => x.CardRole).HasMaxLength(16).HasColumnName("card_role");
+        builder.Property(x => x.CreationMethod).HasMaxLength(32).HasColumnName("creation_method");
+        builder.Property(x => x.SourceCardId).HasColumnName("source_card_id");
+
+        builder.Property(x => x.CardName).HasMaxLength(200).HasColumnName("card_name");
+        builder.Property(x => x.DisplayName).HasMaxLength(200).HasColumnName("display_name");
+        builder.Property(x => x.Email).HasMaxLength(320).HasColumnName("email");
+        builder.Property(x => x.Phone).HasMaxLength(20).HasColumnName("phone");
+        builder.Property(x => x.Company).HasMaxLength(200).HasColumnName("company");
+        builder.Property(x => x.Title).HasMaxLength(200).HasColumnName("title");
+        builder.Property(x => x.Website).HasMaxLength(500).HasColumnName("website");
+        builder.Property(x => x.Linkedin).HasMaxLength(500).HasColumnName("linkedin");
+        builder.Property(x => x.Skills).HasColumnName("skills");
+        builder.Property(x => x.School).HasMaxLength(200).HasColumnName("school");
+        builder.Property(x => x.About).HasColumnName("about");
+        builder.Property(x => x.Address).HasMaxLength(500).HasColumnName("address");
+        builder.Property(x => x.City).HasMaxLength(120).HasColumnName("city");
+        builder.Property(x => x.Country).HasMaxLength(120).HasColumnName("country");
+        builder.Property(x => x.Department).HasMaxLength(200).HasColumnName("department");
+        builder.Property(x => x.AttendedEvents).HasColumnName("attended_events");
+        builder.Property(x => x.Twitter).HasMaxLength(500).HasColumnName("twitter");
+        builder.Property(x => x.Instagram).HasMaxLength(500).HasColumnName("instagram");
+        builder.Property(x => x.Birthday).HasMaxLength(50).HasColumnName("birthday");
+        builder.Property(x => x.Note).HasColumnName("note");
+        builder.Property(x => x.PhotoUrl).HasMaxLength(2048).HasColumnName("photo_url");
+        builder.Property(x => x.AccentColor).HasMaxLength(7).HasColumnName("accent_color");
+        builder.Property(x => x.BackgroundColor).HasMaxLength(7).HasColumnName("background_color");
+        builder.Property(x => x.LastUsedPaletteBackgroundColor)
+            .HasMaxLength(7)
+            .HasColumnName("last_used_palette_background_color");
+        builder.Property(x => x.SavedAt).HasColumnName("saved_at");
+        builder.Property(x => x.SortOrder).HasColumnName("sort_order");
+        builder.Property(x => x.SaveCount).HasColumnName("save_count").HasDefaultValue(0);
+        builder.Property(x => x.CreatedAt).HasColumnName("created_at");
+        builder.Property(x => x.UpdatedAt).HasColumnName("updated_at");
+
+        builder.Ignore(x => x.IsOwnerPremium);
+        builder.Ignore(x => x.LinkedEventGroupIds);
+
+        builder.HasIndex(x => x.CardId)
+            .IsUnique()
+            .HasFilter($"card_role = '{CardRoles.Own}'");
+
+        builder.HasIndex(x => new { x.UserId, x.CardId })
+            .IsUnique()
+            .HasFilter($"card_role = '{CardRoles.Wallet}'");
+
+        builder.HasIndex(x => new { x.UserId, x.CardRole });
+        builder.HasIndex(x => new { x.UserId, x.SortOrder })
+            .HasFilter($"card_role = '{CardRoles.Wallet}'");
+
+        builder.HasOne(x => x.User)
+            .WithMany(x => x.Cards)
+            .HasForeignKey(x => x.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasOne(x => x.SourceCard)
+            .WithMany()
+            .HasForeignKey(x => x.SourceCardId)
+            .OnDelete(DeleteBehavior.SetNull);
+    }
+}

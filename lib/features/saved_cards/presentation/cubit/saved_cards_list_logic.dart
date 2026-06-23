@@ -86,6 +86,9 @@ class SavedCardsListLogic {
     }).toList();
 
     filtered.sort((a, b) {
+      if (a.isOwnerPremium != b.isOwnerPremium) {
+        return a.isOwnerPremium ? -1 : 1;
+      }
       final aName = _sortKey(a);
       final bName = _sortKey(b);
       return filter.nameSort == SavedCardsNameSort.asc

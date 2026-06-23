@@ -561,7 +561,7 @@ public sealed class AuthService : IAuthService
             PhotoUrl = user.PhotoUrl,
             OnboardingCompleted = user.OnboardingCompleted,
             CreatedAt = user.CreatedAt,
-            BusinessCards = businessCards.Select(BusinessCardMapper.ToDto).ToList(),
+            BusinessCards = businessCards.Select(c => BusinessCardMapper.ToDto(c)).ToList(),
             SavedCards = savedCards.Select(SavedCardMapper.ToDto).ToList(),
         };
     }

@@ -16,6 +16,7 @@ class OnboardingCardPreviewFrame extends StatelessWidget {
     this.emptyMessage = 'Alanlar doldukça görünür',
     this.maxWidth = 420,
     this.normalizeForDisplay = false,
+    this.showPremiumBadge = false,
   });
 
   final OnboardingCardDraft draft;
@@ -27,6 +28,9 @@ class OnboardingCardPreviewFrame extends StatelessWidget {
 
   /// Kayıtlı kartlarda görünürlük / cardId normalizasyonu uygula.
   final bool normalizeForDisplay;
+
+  /// Premium kullanıcının kendi kartında yıldız rozeti.
+  final bool showPremiumBadge;
 
   static double heightForWidth(double width) {
     return width / FlippablePersonCard.cardAspectRatio;
@@ -48,6 +52,7 @@ class OnboardingCardPreviewFrame extends StatelessWidget {
           onTap: onTap,
           onDoubleTap: onDoubleTap,
           emptyMessage: emptyMessage,
+          showPremiumBadge: showPremiumBadge,
         ),
       ),
     );

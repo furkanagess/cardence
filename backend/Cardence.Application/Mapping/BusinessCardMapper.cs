@@ -1,11 +1,12 @@
 using Cardence.Application.DTOs.Cards;
+using Cardence.Domain.Constants;
 using Cardence.Domain.Entities;
 
 namespace Cardence.Application.Mapping;
 
 public static class BusinessCardMapper
 {
-    public static BusinessCardDto ToDto(BusinessCard entity) => new()
+    public static BusinessCardDto ToDto(Card entity, bool isOwnerPremium = false) => new()
     {
         CardName = entity.CardName,
         DisplayName = entity.DisplayName,
@@ -18,15 +19,25 @@ public static class BusinessCardMapper
         Skills = entity.Skills,
         School = entity.School,
         About = entity.About,
+        Address = entity.Address,
+        City = entity.City,
+        Country = entity.Country,
+        Department = entity.Department,
+        AttendedEvents = entity.AttendedEvents,
+        Twitter = entity.Twitter,
+        Instagram = entity.Instagram,
+        Birthday = entity.Birthday,
         PhotoUrl = entity.PhotoUrl,
         AccentColor = entity.AccentColor,
         BackgroundColor = entity.BackgroundColor,
         LastUsedPaletteBackgroundColor = entity.LastUsedPaletteBackgroundColor,
         LinkedEventGroupIds = [],
         CardId = entity.CardId,
+        IsOwnerPremium = isOwnerPremium,
+        CreationMethod = entity.CreationMethod,
     };
 
-    public static void ApplyDto(BusinessCard entity, BusinessCardDto dto)
+    public static void ApplyDto(Card entity, BusinessCardDto dto)
     {
         entity.CardName = dto.CardName;
         entity.DisplayName = dto.DisplayName;
@@ -39,6 +50,14 @@ public static class BusinessCardMapper
         entity.Skills = dto.Skills;
         entity.School = dto.School;
         entity.About = dto.About;
+        entity.Address = dto.Address;
+        entity.City = dto.City;
+        entity.Country = dto.Country;
+        entity.Department = dto.Department;
+        entity.AttendedEvents = dto.AttendedEvents;
+        entity.Twitter = dto.Twitter;
+        entity.Instagram = dto.Instagram;
+        entity.Birthday = dto.Birthday;
         entity.PhotoUrl = dto.PhotoUrl;
         entity.AccentColor = dto.AccentColor;
         entity.BackgroundColor = dto.BackgroundColor;
@@ -46,7 +65,7 @@ public static class BusinessCardMapper
         entity.UpdatedAt = DateTime.UtcNow;
     }
 
-    public static Dictionary<string, object?> ToSharePayload(BusinessCard entity)
+    public static Dictionary<string, object?> ToSharePayload(Card entity)
     {
         var payload = new Dictionary<string, object?> { ["id"] = entity.CardId };
 
@@ -60,6 +79,14 @@ public static class BusinessCardMapper
         AddIfNotEmpty(payload, "s", entity.Skills);
         AddIfNotEmpty(payload, "o", entity.School);
         AddIfNotEmpty(payload, "h", entity.About);
+        AddIfNotEmpty(payload, "a", entity.Address);
+        AddIfNotEmpty(payload, "ci", entity.City);
+        AddIfNotEmpty(payload, "co", entity.Country);
+        AddIfNotEmpty(payload, "d", entity.Department);
+        AddIfNotEmpty(payload, "ae", entity.AttendedEvents);
+        AddIfNotEmpty(payload, "tw", entity.Twitter);
+        AddIfNotEmpty(payload, "ig", entity.Instagram);
+        AddIfNotEmpty(payload, "bd", entity.Birthday);
         AddIfNotEmpty(payload, "ph", entity.PhotoUrl);
         AddIfNotEmpty(payload, "tc", entity.AccentColor);
         AddIfNotEmpty(payload, "bc", entity.BackgroundColor);

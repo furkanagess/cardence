@@ -4,11 +4,11 @@ namespace Cardence.Application.Interfaces;
 
 public interface ISavedCardRepository
 {
-    Task<IReadOnlyList<SavedCard>> GetByUserIdAsync(
+    Task<IReadOnlyList<Card>> GetByUserIdAsync(
         Guid userId,
         CancellationToken cancellationToken = default);
 
-    Task<SavedCard?> GetByUserAndCardIdAsync(
+    Task<Card?> GetByUserAndCardIdAsync(
         Guid userId,
         string cardId,
         CancellationToken cancellationToken = default);
@@ -21,9 +21,9 @@ public interface ISavedCardRepository
         Guid userId,
         CancellationToken cancellationToken = default);
 
-    Task AddAsync(SavedCard card, CancellationToken cancellationToken = default);
+    Task AddAsync(Card card, CancellationToken cancellationToken = default);
 
-    Task UpdateAsync(SavedCard card, CancellationToken cancellationToken = default);
+    Task UpdateAsync(Card card, CancellationToken cancellationToken = default);
 
-    Task DeleteAsync(SavedCard card, CancellationToken cancellationToken = default);
+    Task DeleteAsync(Card card, CancellationToken cancellationToken = default);
 }
