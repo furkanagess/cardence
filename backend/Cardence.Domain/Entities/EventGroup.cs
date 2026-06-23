@@ -11,5 +11,5 @@ public sealed class EventGroup
     public DateTime CreatedAt { get; set; }
 
     public User User { get; set; } = null!;
-    public ICollection<CardEventGroup> CardLinks { get; set; } = [];
+    public ICollection<SavedCardEventGroup> SavedCardLinks { get; set; } = [];
 }

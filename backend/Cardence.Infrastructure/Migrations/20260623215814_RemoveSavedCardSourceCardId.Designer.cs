@@ -3,6 +3,7 @@ using System;
 using Cardence.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Cardence.Infrastructure.Migrations
 {
     [DbContext(typeof(CardenceDbContext))]
-    partial class CardenceDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260623215814_RemoveSavedCardSourceCardId")]
+    partial class RemoveSavedCardSourceCardId
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -139,12 +142,6 @@ namespace Cardence.Infrastructure.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("character varying(500)")
                         .HasColumnName("instagram");
-
-                    b.Property<bool>("IsOwnerPremium")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("boolean")
-                        .HasDefaultValue(false)
-                        .HasColumnName("is_owner_premium");
 
                     b.Property<string>("LastUsedPaletteBackgroundColor")
                         .HasMaxLength(7)
@@ -344,12 +341,6 @@ namespace Cardence.Infrastructure.Migrations
                         .HasColumnType("character varying(500)")
                         .HasColumnName("instagram");
 
-                    b.Property<bool>("IsOwnerPremium")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("boolean")
-                        .HasDefaultValue(false)
-                        .HasColumnName("is_owner_premium");
-
                     b.Property<string>("Linkedin")
                         .HasMaxLength(500)
                         .HasColumnType("character varying(500)")
@@ -413,8 +404,6 @@ namespace Cardence.Infrastructure.Migrations
 
                     b.HasIndex("UserId", "CardId")
                         .IsUnique();
-
-                    b.HasIndex("UserId", "IsOwnerPremium");
 
                     b.HasIndex("UserId", "SortOrder");
 

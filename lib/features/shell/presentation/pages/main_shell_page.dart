@@ -208,7 +208,12 @@ class _MainShellPageState extends State<MainShellPage> {
             child: _LiquidGlassBottomNavBar(
               currentIndex: _currentIndex,
               itemCount: 3,
-              onTap: (index) => setState(() => _currentIndex = index),
+              onTap: (index) => setState(() {
+                _currentIndex = index;
+                if (index == 0) {
+                  _savedCardsPreferListView = true;
+                }
+              }),
             ),
           ),
         ),

@@ -37,10 +37,9 @@ public sealed class SavedCardService : ISavedCardService
     {
         var userId = _currentUser.GetRequiredUserId();
         var cards = await _savedCardRepository.GetByUserIdAsync(userId, cancellationToken);
-        await SavedCardEnrichment.HydrateLinkedProfilesAndPremiumAsync(
+        await SavedCardEnrichment.HydrateLinkedProfilesAsync(
             cards,
             _businessCardRepository,
-            _walletRepository,
             cancellationToken);
         return SavedCardEnrichment
             .SortForWalletDisplay(cards)
@@ -164,6 +163,17 @@ public sealed class SavedCardService : ISavedCardService
     {
         var userId = _currentUser.GetRequiredUserId();
         await _walletRepository.UpgradeToPremiumAsync(userId, cancellationToken);
+        await _businessCardRepository.SetOwnerPremiumByUserIdAsync(
+            userId,
+            isOwnerPremium: true,
+            cancellationToken);
+        var cardIds = await _businessCardRepository.GetCardIdsByUserIdAsync(
+            userId,
+            cancellationToken);
+        await _savedCardRepository.SetOwnerPremiumByCardIdsAsync(
+            cardIds,
+            isOwnerPremium: true,
+            cancellationToken);
         return await GetWalletQuotaAsync(cancellationToken);
     }
 
@@ -244,12 +254,11 @@ public sealed class SavedCardService : ISavedCardService
         }
 
         var now = DateTime.UtcNow;
-        var entity = new Card
+        var entity = new SavedCard
         {
             Id = Guid.NewGuid(),
             UserId = userId,
             CardId = cardId,
-            CardRole = CardRoles.Wallet,
             CreationMethod = creationMethod,
             SavedAt = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
             SortOrder = usedCount,
@@ -260,13 +269,13 @@ public sealed class SavedCardService : ISavedCardService
 
         SavedCardMapper.ApplyDto(entity, request);
         entity.CreationMethod = creationMethod;
-        entity.CardRole = CardRoles.Wallet;
 
         if (ownCard is not null)
         {
             var note = entity.Note;
             SavedCardMapper.HydrateFromOwnCard(entity, ownCard);
             entity.Note = note;
+            entity.IsOwnerPremium = ownCard.IsOwnerPremium;
         }
 
         if (string.IsNullOrWhiteSpace(entity.DisplayName) &&
@@ -293,14 +302,6 @@ public sealed class SavedCardService : ISavedCardService
             request.LinkedEventGroupIds,
             cancellationToken);
         entity.LinkedEventGroupIds = request.LinkedEventGroupIds.ToList();
-
-        if (ownCard is not null)
-        {
-            entity.IsOwnerPremium = await SavedCardEnrichment.IsUserPremiumAsync(
-                _walletRepository,
-                ownCard.UserId,
-                cancellationToken);
-        }
 
         return SavedCardMapper.ToDto(entity);
     }

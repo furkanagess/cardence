@@ -1,5 +1,4 @@
 using Cardence.Application.Interfaces;
-using Cardence.Domain.Constants;
 using Cardence.Domain.Entities;
 using Cardence.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
@@ -21,7 +20,7 @@ public sealed class BusinessCardRepository : IBusinessCardRepository
     {
         return await _dbContext.Cards
             .AsNoTracking()
-            .Where(card => card.UserId == userId && card.CardRole == CardRoles.Own)
+            .Where(card => card.UserId == userId)
             .OrderByDescending(card => card.UpdatedAt)
             .ToListAsync(cancellationToken);
     }
@@ -33,9 +32,7 @@ public sealed class BusinessCardRepository : IBusinessCardRepository
     {
         return await _dbContext.Cards
             .FirstOrDefaultAsync(
-                card => card.UserId == userId &&
-                        card.CardId == cardId &&
-                        card.CardRole == CardRoles.Own,
+                card => card.UserId == userId && card.CardId == cardId,
                 cancellationToken);
     }
 
@@ -45,9 +42,7 @@ public sealed class BusinessCardRepository : IBusinessCardRepository
     {
         return await _dbContext.Cards
             .AsNoTracking()
-            .FirstOrDefaultAsync(
-                card => card.CardId == cardId && card.CardRole == CardRoles.Own,
-                cancellationToken);
+            .FirstOrDefaultAsync(card => card.CardId == cardId, cancellationToken);
     }
 
     public async Task<bool> CardIdExistsAsync(
@@ -55,8 +50,7 @@ public sealed class BusinessCardRepository : IBusinessCardRepository
         Guid? excludeId = null,
         CancellationToken cancellationToken = default)
     {
-        var query = _dbContext.Cards.Where(
-            card => card.CardId == cardId && card.CardRole == CardRoles.Own);
+        var query = _dbContext.Cards.Where(card => card.CardId == cardId);
         if (excludeId.HasValue)
         {
             query = query.Where(card => card.Id != excludeId.Value);
@@ -88,7 +82,7 @@ public sealed class BusinessCardRepository : IBusinessCardRepository
         CancellationToken cancellationToken = default)
     {
         await _dbContext.Cards
-            .Where(card => card.Id == ownCardId && card.CardRole == CardRoles.Own)
+            .Where(card => card.Id == ownCardId)
             .ExecuteUpdateAsync(
                 setters => setters.SetProperty(
                     card => card.SaveCount,
@@ -102,7 +96,7 @@ public sealed class BusinessCardRepository : IBusinessCardRepository
     {
         return await _dbContext.Cards
             .AsNoTracking()
-            .Where(card => card.UserId == userId && card.CardRole == CardRoles.Own)
+            .Where(card => card.UserId == userId)
             .SumAsync(card => card.SaveCount, cancellationToken);
     }
 
@@ -112,8 +106,31 @@ public sealed class BusinessCardRepository : IBusinessCardRepository
     {
         return await _dbContext.Cards
             .AsNoTracking()
-            .CountAsync(
-                card => card.UserId == userId && card.CardRole == CardRoles.Own,
+            .CountAsync(card => card.UserId == userId, cancellationToken);
+    }
+
+    public async Task SetOwnerPremiumByUserIdAsync(
+        Guid userId,
+        bool isOwnerPremium,
+        CancellationToken cancellationToken = default)
+    {
+        await _dbContext.Cards
+            .Where(card => card.UserId == userId)
+            .ExecuteUpdateAsync(
+                setters => setters.SetProperty(
+                    card => card.IsOwnerPremium,
+                    isOwnerPremium),
                 cancellationToken);
+    }
+
+    public async Task<IReadOnlyList<string>> GetCardIdsByUserIdAsync(
+        Guid userId,
+        CancellationToken cancellationToken = default)
+    {
+        return await _dbContext.Cards
+            .AsNoTracking()
+            .Where(card => card.UserId == userId)
+            .Select(card => card.CardId)
+            .ToListAsync(cancellationToken);
     }
 }

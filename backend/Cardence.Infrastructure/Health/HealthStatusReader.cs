@@ -2,7 +2,6 @@ using System.Diagnostics;
 using Cardence.Application.Health;
 using Cardence.Application.Interfaces;
 using Cardence.Application.Options;
-using Cardence.Domain.Constants;
 using Cardence.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
@@ -73,17 +72,15 @@ public sealed class HealthStatusReader : IHealthStatusReader
     private async Task<TableCountsSnapshot> ReadTableCountsAsync(CancellationToken cancellationToken)
     {
         var users = await _dbContext.Users.CountAsync(cancellationToken);
-        var ownCards = await _dbContext.Cards
-            .CountAsync(c => c.CardRole == CardRoles.Own, cancellationToken);
-        var walletCards = await _dbContext.Cards
-            .CountAsync(c => c.CardRole == CardRoles.Wallet, cancellationToken);
+        var ownCards = await _dbContext.Cards.CountAsync(cancellationToken);
+        var savedCards = await _dbContext.SavedCards.CountAsync(cancellationToken);
         var walletEntitlements = await _dbContext.WalletEntitlements.CountAsync(cancellationToken);
         var authRefreshTokens = await _dbContext.AuthRefreshTokens.CountAsync(cancellationToken);
 
         return new TableCountsSnapshot(
             users,
             ownCards,
-            walletCards,
+            savedCards,
             walletEntitlements,
             authRefreshTokens);
     }

@@ -19,14 +19,15 @@ public sealed class SavedCardRepository : ISavedCardRepository
         _eventGroupRepository = eventGroupRepository;
     }
 
-    public async Task<IReadOnlyList<Card>> GetByUserIdAsync(
+    public async Task<IReadOnlyList<SavedCard>> GetByUserIdAsync(
         Guid userId,
         CancellationToken cancellationToken = default)
     {
-        var cards = await _dbContext.Cards
+        var cards = await _dbContext.SavedCards
             .AsNoTracking()
-            .Where(card => card.UserId == userId && card.CardRole == CardRoles.Wallet)
-            .OrderBy(card => card.SortOrder)
+            .Where(card => card.UserId == userId)
+            .OrderByDescending(card => card.IsOwnerPremium)
+            .ThenBy(card => card.SortOrder)
             .ThenByDescending(card => card.SavedAt)
             .ToListAsync(cancellationToken);
 
@@ -34,16 +35,14 @@ public sealed class SavedCardRepository : ISavedCardRepository
         return cards;
     }
 
-    public async Task<Card?> GetByUserAndCardIdAsync(
+    public async Task<SavedCard?> GetByUserAndCardIdAsync(
         Guid userId,
         string cardId,
         CancellationToken cancellationToken = default)
     {
-        return await _dbContext.Cards
+        return await _dbContext.SavedCards
             .FirstOrDefaultAsync(
-                card => card.UserId == userId &&
-                        card.CardId == cardId &&
-                        card.CardRole == CardRoles.Wallet,
+                card => card.UserId == userId && card.CardId == cardId,
                 cancellationToken);
     }
 
@@ -51,40 +50,56 @@ public sealed class SavedCardRepository : ISavedCardRepository
         Guid userId,
         CancellationToken cancellationToken = default)
     {
-        return await _dbContext.Cards
-            .CountAsync(
-                card => card.UserId == userId && card.CardRole == CardRoles.Wallet,
-                cancellationToken);
+        return await _dbContext.SavedCards
+            .CountAsync(card => card.UserId == userId, cancellationToken);
     }
 
     public async Task<int> CountManualByUserIdAsync(
         Guid userId,
         CancellationToken cancellationToken = default)
     {
-        return await _dbContext.Cards
+        return await _dbContext.SavedCards
             .CountAsync(
                 card => card.UserId == userId &&
-                        card.CardRole == CardRoles.Wallet &&
                         (card.CreationMethod == CardCreationMethods.Manual ||
                          card.CreationMethod == CardCreationMethods.PhotoScan),
                 cancellationToken);
     }
 
-    public async Task AddAsync(Card card, CancellationToken cancellationToken = default)
+    public async Task AddAsync(SavedCard card, CancellationToken cancellationToken = default)
     {
-        _dbContext.Cards.Add(card);
+        _dbContext.SavedCards.Add(card);
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task UpdateAsync(Card card, CancellationToken cancellationToken = default)
+    public async Task UpdateAsync(SavedCard card, CancellationToken cancellationToken = default)
     {
-        _dbContext.Cards.Update(card);
+        _dbContext.SavedCards.Update(card);
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task DeleteAsync(Card card, CancellationToken cancellationToken = default)
+    public async Task DeleteAsync(SavedCard card, CancellationToken cancellationToken = default)
     {
-        _dbContext.Cards.Remove(card);
+        _dbContext.SavedCards.Remove(card);
         await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    public async Task SetOwnerPremiumByCardIdsAsync(
+        IReadOnlyList<string> cardIds,
+        bool isOwnerPremium,
+        CancellationToken cancellationToken = default)
+    {
+        if (cardIds.Count == 0)
+        {
+            return;
+        }
+
+        await _dbContext.SavedCards
+            .Where(card => cardIds.Contains(card.CardId))
+            .ExecuteUpdateAsync(
+                setters => setters.SetProperty(
+                    card => card.IsOwnerPremium,
+                    isOwnerPremium),
+                cancellationToken);
     }
 }

@@ -4,6 +4,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/atoms/premium_owner_badge.dart';
 import '../../../../core/widgets/atoms/profile_avatar.dart';
 import '../../domain/entities/saved_card.dart';
+import '../../domain/extensions/saved_card_preview_colors.dart';
 
 /// Kaydedilen kartlar ekranındaki liste satırı.
 class SavedCardListTile extends StatelessWidget {
@@ -52,17 +53,6 @@ class SavedCardListTile extends StatelessWidget {
     return Icons.language_rounded;
   }
 
-  static Color? _parseHexColor(String? hex) {
-    if (hex == null || hex.trim().isEmpty) return null;
-    var value = hex.trim();
-    if (value.startsWith('#')) value = value.substring(1);
-    if (value.length == 6) value = 'FF$value';
-    if (value.length != 8) return null;
-    final parsed = int.tryParse(value, radix: 16);
-    if (parsed == null) return null;
-    return Color(parsed);
-  }
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -73,8 +63,7 @@ class SavedCardListTile extends StatelessWidget {
     final subtitle = subtitleFor(card);
     final contactHint = contactHintFor(card);
     final isSelected = selected == true;
-    final accentColor =
-        _parseHexColor(card.backgroundColor) ?? AppColors.primary;
+    final cardColor = card.previewBackgroundColor ?? colorScheme.surface;
     final groupCount = card.linkedEventGroupIds.length;
     final selectedFill = isDark
         ? AppColors.primaryDarkTheme.withValues(alpha: 0.14)
@@ -109,8 +98,18 @@ class SavedCardListTile extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 ColoredBox(
-                  color: accentColor,
-                  child: const SizedBox(width: 4),
+                  color: cardColor,
+                  child: SizedBox(
+                    width: 76,
+                    child: Center(
+                      child: ProfileAvatar(
+                        photoUrl: card.photoUrl,
+                        displayName: title,
+                        size: 52,
+                        circular: true,
+                      ),
+                    ),
+                  ),
                 ),
                 Expanded(
                   child: Padding(
@@ -118,13 +117,6 @@ class SavedCardListTile extends StatelessWidget {
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        ProfileAvatar(
-                          photoUrl: card.photoUrl,
-                          displayName: title,
-                          size: 52,
-                          circular: true,
-                        ),
-                        const SizedBox(width: 14),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,

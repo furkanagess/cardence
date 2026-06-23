@@ -184,10 +184,9 @@ public sealed class EventGroupService : IEventGroupService
             parsedGroupId,
             cancellationToken);
 
-        await SavedCardEnrichment.HydrateLinkedProfilesAndPremiumAsync(
+        await SavedCardEnrichment.HydrateLinkedProfilesAsync(
             cards,
             _businessCardRepository,
-            _walletRepository,
             cancellationToken);
 
         return SavedCardEnrichment

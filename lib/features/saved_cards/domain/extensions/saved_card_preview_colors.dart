@@ -9,6 +9,14 @@ extension SavedCardPreviewColors on SavedCard {
 }
 
 Color? parseSavedCardHexColor(String? hex) {
-  if (hex == null || hex.length != 7 || !hex.startsWith('#')) return null;
-  return Color(int.parse(hex.substring(1), radix: 16) + 0xFF000000);
+  if (hex == null || hex.trim().isEmpty) return null;
+
+  var value = hex.trim();
+  if (value.startsWith('#')) value = value.substring(1);
+  if (value.length == 6) value = 'FF$value';
+  if (value.length != 8) return null;
+
+  final parsed = int.tryParse(value, radix: 16);
+  if (parsed == null) return null;
+  return Color(parsed);
 }

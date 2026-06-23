@@ -1,15 +1,15 @@
 namespace Cardence.Domain.Entities;
 
 /// <summary>
-/// Kullanıcının oluşturduğu kendi kartvizit kartı.
+/// Cüzdana kaydedilen kart kopyası; kullanıcının kendi kartı (<see cref="Card"/>) değildir.
 /// </summary>
-public sealed class Card
+public sealed class SavedCard
 {
     public Guid Id { get; set; }
     public Guid UserId { get; set; }
     public string CardId { get; set; } = string.Empty;
+    public string CreationMethod { get; set; } = string.Empty;
 
-    public string? CardName { get; set; }
     public string? DisplayName { get; set; }
     public string? Email { get; set; }
     public string? Phone { get; set; }
@@ -28,14 +28,19 @@ public sealed class Card
     public string? Twitter { get; set; }
     public string? Instagram { get; set; }
     public string? Birthday { get; set; }
+    public string? Note { get; set; }
     public string? PhotoUrl { get; set; }
     public string? AccentColor { get; set; }
     public string? BackgroundColor { get; set; }
-    public string? LastUsedPaletteBackgroundColor { get; set; }
-    public int SaveCount { get; set; }
+    public long SavedAt { get; set; }
+    public int SortOrder { get; set; }
     public bool IsOwnerPremium { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
 
+    /// <summary>API yanıtı; join tablosundan doldurulur.</summary>
+    public List<string> LinkedEventGroupIds { get; set; } = [];
+
     public User User { get; set; } = null!;
+    public ICollection<SavedCardEventGroup> EventGroupLinks { get; set; } = [];
 }

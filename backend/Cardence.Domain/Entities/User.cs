@@ -13,4 +13,5 @@ public sealed class User
     public DateTime UpdatedAt { get; set; }
 
     public ICollection<Card> Cards { get; set; } = [];
+    public ICollection<SavedCard> SavedCards { get; set; } = [];
 }

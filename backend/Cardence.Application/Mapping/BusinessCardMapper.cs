@@ -1,12 +1,11 @@
 using Cardence.Application.DTOs.Cards;
-using Cardence.Domain.Constants;
 using Cardence.Domain.Entities;
 
 namespace Cardence.Application.Mapping;
 
 public static class BusinessCardMapper
 {
-    public static BusinessCardDto ToDto(Card entity, bool isOwnerPremium = false) => new()
+    public static BusinessCardDto ToDto(Card entity) => new()
     {
         CardName = entity.CardName,
         DisplayName = entity.DisplayName,
@@ -33,8 +32,7 @@ public static class BusinessCardMapper
         LastUsedPaletteBackgroundColor = entity.LastUsedPaletteBackgroundColor,
         LinkedEventGroupIds = [],
         CardId = entity.CardId,
-        IsOwnerPremium = isOwnerPremium,
-        CreationMethod = entity.CreationMethod,
+        IsOwnerPremium = entity.IsOwnerPremium,
     };
 
     public static void ApplyDto(Card entity, BusinessCardDto dto)

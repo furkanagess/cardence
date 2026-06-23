@@ -6,7 +6,7 @@ namespace Cardence.Application.Mapping;
 
 public static class SavedCardMapper
 {
-    public static SavedCardDto ToDto(Card entity) => new()
+    public static SavedCardDto ToDto(SavedCard entity) => new()
     {
         CardId = entity.CardId,
         DisplayName = entity.DisplayName,
@@ -38,7 +38,7 @@ public static class SavedCardMapper
         LinkedEventGroupIds = entity.LinkedEventGroupIds,
     };
 
-    public static void ApplyDto(Card entity, SavedCardDto dto)
+    public static void ApplyDto(SavedCard entity, SavedCardDto dto)
     {
         entity.DisplayName = dto.DisplayName;
         entity.Email = dto.Email;
@@ -70,7 +70,7 @@ public static class SavedCardMapper
         entity.LinkedEventGroupIds = dto.LinkedEventGroupIds.ToList();
     }
 
-    public static void ApplyManualProfile(Card entity, SavedCardDto dto)
+    public static void ApplyManualProfile(SavedCard entity, SavedCardDto dto)
     {
         entity.DisplayName = dto.DisplayName;
         entity.Email = dto.Email;
@@ -102,7 +102,7 @@ public static class SavedCardMapper
         }
     }
 
-    public static void ApplyExtendedProfile(Card entity, SavedCardDto dto)
+    public static void ApplyExtendedProfile(SavedCard entity, SavedCardDto dto)
     {
         entity.Address = dto.Address;
         entity.City = dto.City;
@@ -117,7 +117,7 @@ public static class SavedCardMapper
         entity.Skills = dto.Skills;
     }
 
-    public static void HydrateFromOwnCard(Card walletCard, Card source)
+    public static void HydrateFromOwnCard(SavedCard walletCard, Card source)
     {
         walletCard.DisplayName = source.DisplayName;
         walletCard.Email = source.Email;
@@ -129,7 +129,6 @@ public static class SavedCardMapper
         walletCard.AccentColor = source.AccentColor;
         walletCard.BackgroundColor = source.BackgroundColor;
         walletCard.PhotoUrl = source.PhotoUrl;
-        walletCard.SourceCardId = source.Id;
         walletCard.CreationMethod = CardCreationMethods.CardenceLink;
 
         MergeOptionalField(source.Skills, v => walletCard.Skills = v);

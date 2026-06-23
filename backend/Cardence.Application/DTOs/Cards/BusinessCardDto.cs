@@ -28,5 +28,4 @@ public sealed class BusinessCardDto
     public IReadOnlyList<string> LinkedEventGroupIds { get; init; } = [];
     public string? CardId { get; init; }
     public bool IsOwnerPremium { get; init; }
-    public string? CreationMethod { get; init; }
 }

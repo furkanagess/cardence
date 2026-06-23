@@ -5,18 +5,18 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Cardence.Infrastructure.Persistence.Configurations;
 
-public sealed class CardConfiguration : IEntityTypeConfiguration<Card>
+public sealed class SavedCardConfiguration : IEntityTypeConfiguration<SavedCard>
 {
-    public void Configure(EntityTypeBuilder<Card> builder)
+    public void Configure(EntityTypeBuilder<SavedCard> builder)
     {
-        builder.ToTable("cards");
+        builder.ToTable("saved_cards");
 
         builder.HasKey(x => x.Id);
 
         builder.Property(x => x.UserId).HasColumnName("user_id");
         builder.Property(x => x.CardId).HasMaxLength(BusinessCardConstants.CardIdLength).HasColumnName("card_id");
+        builder.Property(x => x.CreationMethod).HasMaxLength(32).HasColumnName("creation_method");
 
-        builder.Property(x => x.CardName).HasMaxLength(200).HasColumnName("card_name");
         builder.Property(x => x.DisplayName).HasMaxLength(200).HasColumnName("display_name");
         builder.Property(x => x.Email).HasMaxLength(320).HasColumnName("email");
         builder.Property(x => x.Phone).HasMaxLength(20).HasColumnName("phone");
@@ -35,22 +35,24 @@ public sealed class CardConfiguration : IEntityTypeConfiguration<Card>
         builder.Property(x => x.Twitter).HasMaxLength(500).HasColumnName("twitter");
         builder.Property(x => x.Instagram).HasMaxLength(500).HasColumnName("instagram");
         builder.Property(x => x.Birthday).HasMaxLength(50).HasColumnName("birthday");
+        builder.Property(x => x.Note).HasColumnName("note");
         builder.Property(x => x.PhotoUrl).HasMaxLength(2048).HasColumnName("photo_url");
         builder.Property(x => x.AccentColor).HasMaxLength(7).HasColumnName("accent_color");
         builder.Property(x => x.BackgroundColor).HasMaxLength(7).HasColumnName("background_color");
-        builder.Property(x => x.LastUsedPaletteBackgroundColor)
-            .HasMaxLength(7)
-            .HasColumnName("last_used_palette_background_color");
-        builder.Property(x => x.SaveCount).HasColumnName("save_count").HasDefaultValue(0);
+        builder.Property(x => x.SavedAt).HasColumnName("saved_at");
+        builder.Property(x => x.SortOrder).HasColumnName("sort_order");
         builder.Property(x => x.IsOwnerPremium).HasColumnName("is_owner_premium").HasDefaultValue(false);
         builder.Property(x => x.CreatedAt).HasColumnName("created_at");
         builder.Property(x => x.UpdatedAt).HasColumnName("updated_at");
 
-        builder.HasIndex(x => x.CardId).IsUnique();
-        builder.HasIndex(x => new { x.UserId, x.CardId });
+        builder.Ignore(x => x.LinkedEventGroupIds);
+
+        builder.HasIndex(x => new { x.UserId, x.CardId }).IsUnique();
+        builder.HasIndex(x => new { x.UserId, x.SortOrder });
+        builder.HasIndex(x => new { x.UserId, x.IsOwnerPremium });
 
         builder.HasOne(x => x.User)
-            .WithMany(x => x.Cards)
+            .WithMany(x => x.SavedCards)
             .HasForeignKey(x => x.UserId)
             .OnDelete(DeleteBehavior.Cascade);
     }

@@ -14,4 +14,11 @@ public interface IBusinessCardRepository
     Task IncrementSaveCountAsync(Guid ownCardId, CancellationToken cancellationToken = default);
     Task<int> SumSaveCountByUserIdAsync(Guid userId, CancellationToken cancellationToken = default);
     Task<int> CountByUserIdAsync(Guid userId, CancellationToken cancellationToken = default);
+    Task SetOwnerPremiumByUserIdAsync(
+        Guid userId,
+        bool isOwnerPremium,
+        CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<string>> GetCardIdsByUserIdAsync(
+        Guid userId,
+        CancellationToken cancellationToken = default);
 }

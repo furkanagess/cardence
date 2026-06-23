@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../../../core/widgets/organisms/flippable_person_card.dart';
 import '../cubit/saved_cards_cubit.dart';
 import '../cubit/saved_cards_list_logic.dart';
 import '../cubit/saved_cards_state.dart';
 import '../../domain/entities/saved_card.dart';
+import 'saved_cards_focus_arrow_track.dart';
 import 'saved_cards_saved_card_preview.dart';
 
-class SavedCardsCardStackView extends StatelessWidget {
+class SavedCardsCardStackView extends StatefulWidget {
   const SavedCardsCardStackView({
     super.key,
     required this.displayCards,
@@ -28,116 +30,242 @@ class SavedCardsCardStackView extends StatelessWidget {
   final void Function(SavedCard card, {String? heroTag}) onOpenCard;
 
   @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    const extraBottomPadding = 32.0;
-    final cardsHeight = displayCards.isEmpty
-        ? 0.0
-        : ((displayCards.length - 1) * cardVerticalStep) +
-            260 +
-            extraBottomPadding;
+  State<SavedCardsCardStackView> createState() =>
+      _SavedCardsCardStackViewState();
+}
 
-    return SizedBox(
-      height: cardsHeight,
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          return Stack(
-            children: [
-              for (final i
-                  in List<int>.generate(displayCards.length, (index) => index))
-                AnimatedPositioned(
-                  duration: dragAnimDuration,
-                  curve: dragAnimCurve,
-                  top: _cardTopFor(i),
-                  left: 0,
-                  right: 0,
-                  child: DragTarget<int>(
-                    onWillAcceptWithDetails: (details) => details.data != i,
-                    onMove: (_) => cubit.setHoverTarget(i),
-                    onLeave: (_) {
-                      if (state.hoverTargetIndex != i) return;
-                      cubit.setHoverTarget(null);
-                    },
-                    onAcceptWithDetails: (details) {
-                      cubit.reorderCards(
-                        fromIndex: details.data,
-                        toIndex: i,
-                        useDummyCards: useDummyCards,
-                        displayCards: displayCards,
-                      );
-                    },
-                    builder: (context, candidateData, rejectedData) {
-                      final isDragging = state.draggingCardIndex == i;
-                      final card = displayCards[i];
-                      final heroTag = 'saved-card-${card.cardId}';
+class _SavedCardsCardStackViewState extends State<SavedCardsCardStackView> {
+  int _focusedIndex = 0;
 
-                      return LongPressDraggable<int>(
-                        data: i,
-                        dragAnchorStrategy: pointerDragAnchorStrategy,
-                        feedback: SizedBox(
-                          width: constraints.maxWidth,
-                          height: 1,
-                        ),
-                        childWhenDragging:
-                            _DragPlaceholder(colorScheme: colorScheme),
-                        onDragStarted: () {
-                          HapticFeedback.mediumImpact();
-                          cubit.startDrag(i);
-                        },
-                        onDragEnd: (_) => cubit.endDrag(),
-                        onDraggableCanceled: (_, __) => cubit.endDrag(),
-                        child: SavedCardsSavedCardPreview(
-                          card: card,
-                          heroTag: heroTag,
-                          wrapHero: !isDragging,
-                          onDoubleTap: () => onOpenCard(card, heroTag: heroTag),
-                        ),
-                      );
-                    },
-                  ),
-                ),
-              if (state.draggingCardIndex != null &&
-                  state.hoverTargetIndex != null &&
-                  state.draggingCardIndex != state.hoverTargetIndex &&
-                  state.draggingCardIndex! >= 0 &&
-                  state.draggingCardIndex! < displayCards.length)
-                AnimatedPositioned(
-                  duration: dragAnimDuration,
-                  curve: dragAnimCurve,
-                  top: (state.hoverTargetIndex ?? 0) * cardVerticalStep,
-                  left: 0,
-                  right: 0,
-                  child: IgnorePointer(
-                    child: _DropSlotCardPreview(
-                      card: displayCards[state.draggingCardIndex!],
-                      colorScheme: colorScheme,
-                      hoverTargetIndex: state.hoverTargetIndex,
-                    ),
-                  ),
-                ),
-              if (state.draggingCardIndex != null)
-                Positioned(
-                  left: 0,
-                  right: 0,
-                  bottom: 8,
-                  child: IgnorePointer(
-                    child: _DragHintChip(colorScheme: colorScheme),
-                  ),
-                ),
-            ],
-          );
-        },
-      ),
-    );
+  @override
+  void didUpdateWidget(covariant SavedCardsCardStackView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (_focusedIndex >= widget.displayCards.length) {
+      _focusedIndex = widget.displayCards.isEmpty
+          ? 0
+          : widget.displayCards.length - 1;
+    }
+  }
+
+  List<int> _paintOrder(int length, int focused) {
+    final order = <int>[];
+    for (var i = 0; i < length; i++) {
+      if (i != focused) order.add(i);
+    }
+    if (length > 0) order.add(focused);
+    return order;
   }
 
   double _cardTopFor(int index) {
     return SavedCardsListLogic.visualSlotFor(
           index: index,
-          draggingIndex: state.draggingCardIndex,
-          hoverTargetIndex: state.hoverTargetIndex,
+          draggingIndex: widget.state.draggingCardIndex,
+          hoverTargetIndex: widget.state.hoverTargetIndex,
         ) *
-        cardVerticalStep;
+        SavedCardsCardStackView.cardVerticalStep;
+  }
+
+  List<double> _slotCenterYs() {
+    return List<double>.generate(
+      widget.displayCards.length,
+      (index) =>
+          _cardTopFor(index) + FlippablePersonCard.fixedHeight / 2,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    const extraBottomPadding = 32.0;
+    final cardsHeight = widget.displayCards.isEmpty
+        ? 0.0
+        : ((widget.displayCards.length - 1) *
+                SavedCardsCardStackView.cardVerticalStep) +
+            FlippablePersonCard.fixedHeight +
+            extraBottomPadding;
+    final slotCenters = _slotCenterYs();
+    final isDragging = widget.state.draggingCardIndex != null;
+
+    return SizedBox(
+      height: cardsHeight,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SavedCardsFocusArrowTrack(
+            trackHeight: cardsHeight,
+            slotCenterYs: slotCenters,
+            focusedIndex: _focusedIndex,
+            onFocusedIndexChanged: (index) {
+              setState(() => _focusedIndex = index);
+            },
+          ),
+          const SizedBox(width: 4),
+          Expanded(
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                return Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    for (final i in _paintOrder(
+                      widget.displayCards.length,
+                      _focusedIndex,
+                    ))
+                      AnimatedPositioned(
+                        duration: SavedCardsCardStackView.dragAnimDuration,
+                        curve: SavedCardsCardStackView.dragAnimCurve,
+                        top: _cardTopFor(i),
+                        left: i == _focusedIndex && !isDragging ? 0 : 6,
+                        right: i == _focusedIndex && !isDragging ? 0 : 6,
+                        child: _StackCardSlot(
+                          index: i,
+                          displayCards: widget.displayCards,
+                          state: widget.state,
+                          cubit: widget.cubit,
+                          useDummyCards: widget.useDummyCards,
+                          isFocused: i == _focusedIndex && !isDragging,
+                          maxWidth: constraints.maxWidth,
+                          colorScheme: colorScheme,
+                          onOpenCard: widget.onOpenCard,
+                        ),
+                      ),
+                    if (widget.state.draggingCardIndex != null &&
+                        widget.state.hoverTargetIndex != null &&
+                        widget.state.draggingCardIndex !=
+                            widget.state.hoverTargetIndex &&
+                        widget.state.draggingCardIndex! >= 0 &&
+                        widget.state.draggingCardIndex! <
+                            widget.displayCards.length)
+                      AnimatedPositioned(
+                        duration: SavedCardsCardStackView.dragAnimDuration,
+                        curve: SavedCardsCardStackView.dragAnimCurve,
+                        top: (widget.state.hoverTargetIndex ?? 0) *
+                            SavedCardsCardStackView.cardVerticalStep,
+                        left: 0,
+                        right: 0,
+                        child: IgnorePointer(
+                          child: _DropSlotCardPreview(
+                            card: widget
+                                .displayCards[widget.state.draggingCardIndex!],
+                            colorScheme: colorScheme,
+                            hoverTargetIndex: widget.state.hoverTargetIndex,
+                          ),
+                        ),
+                      ),
+                    if (widget.state.draggingCardIndex != null)
+                      Positioned(
+                        left: 0,
+                        right: 0,
+                        bottom: 8,
+                        child: IgnorePointer(
+                          child: _DragHintChip(colorScheme: colorScheme),
+                        ),
+                      ),
+                  ],
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _StackCardSlot extends StatelessWidget {
+  const _StackCardSlot({
+    required this.index,
+    required this.displayCards,
+    required this.state,
+    required this.cubit,
+    required this.useDummyCards,
+    required this.isFocused,
+    required this.maxWidth,
+    required this.colorScheme,
+    required this.onOpenCard,
+  });
+
+  final int index;
+  final List<SavedCard> displayCards;
+  final SavedCardsState state;
+  final SavedCardsCubit cubit;
+  final bool useDummyCards;
+  final bool isFocused;
+  final double maxWidth;
+  final ColorScheme colorScheme;
+  final void Function(SavedCard card, {String? heroTag}) onOpenCard;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDragging = state.draggingCardIndex == index;
+    final card = displayCards[index];
+    final heroTag = 'saved-card-${card.cardId}';
+    final opacity = isFocused ? 1.0 : 0.42;
+    final scale = isFocused ? 1.0 : 0.94;
+
+    return DragTarget<int>(
+      onWillAcceptWithDetails: (details) => details.data != index,
+      onMove: (_) => cubit.setHoverTarget(index),
+      onLeave: (_) {
+        if (state.hoverTargetIndex != index) return;
+        cubit.setHoverTarget(null);
+      },
+      onAcceptWithDetails: (details) {
+        cubit.reorderCards(
+          fromIndex: details.data,
+          toIndex: index,
+          useDummyCards: useDummyCards,
+          displayCards: displayCards,
+        );
+      },
+      builder: (context, candidateData, rejectedData) {
+        return LongPressDraggable<int>(
+          data: index,
+          dragAnchorStrategy: pointerDragAnchorStrategy,
+          feedback: SizedBox(
+            width: maxWidth,
+            height: 1,
+          ),
+          childWhenDragging: _DragPlaceholder(colorScheme: colorScheme),
+          onDragStarted: () {
+            HapticFeedback.mediumImpact();
+            cubit.startDrag(index);
+          },
+          onDragEnd: (_) => cubit.endDrag(),
+          onDraggableCanceled: (_, __) => cubit.endDrag(),
+          child: AnimatedOpacity(
+            duration: SavedCardsCardStackView.dragAnimDuration,
+            curve: SavedCardsCardStackView.dragAnimCurve,
+            opacity: isDragging ? 0.35 : opacity,
+            child: AnimatedScale(
+              duration: SavedCardsCardStackView.dragAnimDuration,
+              curve: SavedCardsCardStackView.dragAnimCurve,
+              scale: isDragging ? 0.96 : scale,
+              alignment: Alignment.topCenter,
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: isFocused && !isDragging
+                      ? [
+                          BoxShadow(
+                            color: colorScheme.shadow.withValues(alpha: 0.14),
+                            blurRadius: 18,
+                            offset: const Offset(0, 8),
+                          ),
+                        ]
+                      : null,
+                ),
+                child: SavedCardsSavedCardPreview(
+                  card: card,
+                  heroTag: heroTag,
+                  wrapHero: !isDragging && isFocused,
+                  onDoubleTap: () => onOpenCard(card, heroTag: heroTag),
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
   }
 }
 

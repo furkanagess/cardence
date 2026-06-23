@@ -39,10 +39,8 @@ public sealed class BusinessCardService : IBusinessCardService
     {
         var userId = _currentUser.GetRequiredUserId();
         var cards = await _repository.GetByUserIdAsync(userId, cancellationToken);
-        var entitlement = await _walletRepository.GetOrCreateAsync(userId, cancellationToken);
-        var isOwnerPremium = WalletConstants.HasUnlimitedWalletCards(entitlement.Tier);
         return cards
-            .Select(card => BusinessCardMapper.ToDto(card, isOwnerPremium))
+            .Select(BusinessCardMapper.ToDto)
             .ToList();
     }
 
@@ -52,9 +50,7 @@ public sealed class BusinessCardService : IBusinessCardService
         var card = await _repository.GetByUserAndCardIdAsync(userId, cardId, cancellationToken)
             ?? throw new NotFoundException("BusinessCard", cardId);
 
-        var entitlement = await _walletRepository.GetOrCreateAsync(userId, cancellationToken);
-        var isOwnerPremium = WalletConstants.HasUnlimitedWalletCards(entitlement.Tier);
-        return BusinessCardMapper.ToDto(card, isOwnerPremium);
+        return BusinessCardMapper.ToDto(card);
     }
 
     public async Task<BusinessCardDto> CreateAsync(BusinessCardDto request, CancellationToken cancellationToken = default)
@@ -75,14 +71,14 @@ public sealed class BusinessCardService : IBusinessCardService
 
         await EnsureCanCreateBusinessCardAsync(userId, cancellationToken);
 
+        var entitlement = await _walletRepository.GetOrCreateAsync(userId, cancellationToken);
         var now = DateTime.UtcNow;
         var entity = new Card
         {
             Id = Guid.NewGuid(),
             UserId = userId,
             CardId = cardId,
-            CardRole = CardRoles.Own,
-            CreationMethod = CardCreationMethods.OwnCard,
+            IsOwnerPremium = WalletConstants.HasUnlimitedWalletCards(entitlement.Tier),
             CreatedAt = now,
             UpdatedAt = now,
         };
