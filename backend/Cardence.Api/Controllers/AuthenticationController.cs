@@ -51,6 +51,16 @@ public sealed class AuthenticationController : ControllerBase
         return Ok(response);
     }
 
+    [HttpPost("LoginWithLinkedIn")]
+    [ProducesResponseType(typeof(AuthServiceResponse<AuthSessionEntity>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<AuthServiceResponse<AuthSessionEntity>>> LoginWithLinkedIn(
+        [FromBody] LoginWithLinkedInRequest request,
+        CancellationToken cancellationToken)
+    {
+        var response = await _authService.LoginWithLinkedInAsync(request, cancellationToken);
+        return Ok(response);
+    }
+
     [HttpPost("SendOTP")]
     [ProducesResponseType(typeof(AuthServiceResponse<object?>), StatusCodes.Status200OK)]
     public async Task<ActionResult<AuthServiceResponse<object?>>> SendOtp(

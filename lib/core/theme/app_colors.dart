@@ -54,4 +54,7 @@ class AppColors {
   // --- Onboarding ---
   static const Color onboardingBackground = Color(0xFFF4F5F7);
   static const Color onboardingAccent = primary;
+
+  // --- Marka (sosyal giriş) ---
+  static const Color linkedInBrand = Color(0xFF0A66C2);
 }

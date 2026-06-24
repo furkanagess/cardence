@@ -197,6 +197,23 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
+  Future<AuthSession> loginWithLinkedIn({
+    required String authorizationCode,
+    required String redirectUri,
+  }) async {
+    final model = await _remote.loginWithLinkedIn(
+      authorizationCode: authorizationCode,
+      redirectUri: redirectUri,
+    );
+    final session = await _persist(model);
+    try {
+      await _fetchAndPersistProfile(model.withComputedExpiry());
+    } catch (_) {}
+    await _rememberLogin(method: LastLoginMethod.linkedin);
+    return session;
+  }
+
+  @override
   Future<AuthSession> register({
     required String displayName,
     required String email,

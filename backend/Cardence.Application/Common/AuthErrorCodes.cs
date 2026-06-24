@@ -10,4 +10,5 @@ public static class AuthErrorCodes
     public const int UserNotFound = 1005;
     public const int InvalidRefreshToken = 1006;
     public const int UserAlreadyExists = 1007;
+    public const int InvalidOAuthToken = 1008;
 }

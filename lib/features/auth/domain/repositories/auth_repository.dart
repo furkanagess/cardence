@@ -20,6 +20,11 @@ abstract class AuthRepository {
     required String password,
   });
 
+  Future<AuthSession> loginWithLinkedIn({
+    required String authorizationCode,
+    required String redirectUri,
+  });
+
   Future<AuthSession> register({
     required String displayName,
     required String email,

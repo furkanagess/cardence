@@ -12,6 +12,7 @@ import 'features/auth/domain/usecases/forgot_password.dart';
 import 'features/auth/domain/usecases/get_current_user.dart';
 import 'features/auth/domain/usecases/get_last_login_credentials.dart';
 import 'features/auth/domain/usecases/login_with_email.dart';
+import 'features/auth/domain/usecases/login_with_linkedin.dart';
 import 'features/auth/domain/usecases/login_with_phone.dart';
 import 'features/auth/domain/usecases/logout.dart';
 import 'features/auth/domain/usecases/register_user.dart';
@@ -61,6 +62,7 @@ class App extends StatefulWidget {
     required this.identifySubscriptionUser,
     required this.loginWithEmail,
     required this.loginWithPhone,
+    required this.loginWithLinkedIn,
     required this.registerUser,
     required this.getLastLoginCredentials,
     required this.forgotPassword,
@@ -103,6 +105,7 @@ class App extends StatefulWidget {
   final IdentifySubscriptionUser identifySubscriptionUser;
   final LoginWithEmail loginWithEmail;
   final LoginWithPhone loginWithPhone;
+  final LoginWithLinkedIn loginWithLinkedIn;
   final RegisterUser registerUser;
   final GetLastLoginCredentials getLastLoginCredentials;
   final ForgotPassword forgotPassword;
@@ -253,6 +256,7 @@ class _AppState extends State<App> {
         return LoginPage(
           loginWithEmail: widget.loginWithEmail,
           loginWithPhone: widget.loginWithPhone,
+          loginWithLinkedIn: widget.loginWithLinkedIn,
           registerUser: widget.registerUser,
           getLastLoginCredentials: widget.getLastLoginCredentials,
           forgotPassword: widget.forgotPassword,

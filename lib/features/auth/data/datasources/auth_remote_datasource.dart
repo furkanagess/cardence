@@ -37,6 +37,11 @@ abstract class AuthRemoteDataSource {
     required String newPassword,
   });
 
+  Future<AuthSessionModel> loginWithLinkedIn({
+    required String authorizationCode,
+    required String redirectUri,
+  });
+
   Future<UserProfileModel> getMe(String accessToken);
 
   Future<UserProfileModel> completeOnboarding(String accessToken);
@@ -108,6 +113,22 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         'password': password,
       },
       fallbackError: 'İşlem başarısız.',
+    );
+    return _parseSession(json);
+  }
+
+  @override
+  Future<AuthSessionModel> loginWithLinkedIn({
+    required String authorizationCode,
+    required String redirectUri,
+  }) async {
+    final json = await _client.post(
+      '/LoginWithLinkedIn',
+      body: {
+        'authorizationCode': authorizationCode,
+        'redirectUri': redirectUri,
+      },
+      fallbackError: 'LinkedIn ile giriş başarısız.',
     );
     return _parseSession(json);
   }

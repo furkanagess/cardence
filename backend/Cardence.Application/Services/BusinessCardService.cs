@@ -126,7 +126,6 @@ public sealed class BusinessCardService : IBusinessCardService
                 PhotoUrl = request.PhotoUrl,
                 AccentColor = request.AccentColor,
                 BackgroundColor = request.BackgroundColor,
-                LastUsedPaletteBackgroundColor = request.LastUsedPaletteBackgroundColor,
                 CardId = cardId,
             };
             return await CreateAsync(createRequest, cancellationToken);

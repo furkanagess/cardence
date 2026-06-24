@@ -1,9 +1,11 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../core/config/linkedin_auth_config.dart';
 import '../../data/datasources/auth_remote_datasource.dart';
 import '../../domain/entities/last_login_credentials.dart';
 import '../../domain/usecases/get_last_login_credentials.dart';
 import '../../domain/usecases/login_with_email.dart';
+import '../../domain/usecases/login_with_linkedin.dart';
 import '../../domain/usecases/login_with_phone.dart';
 import '../../domain/usecases/register_user.dart';
 import 'login_event.dart';
@@ -13,10 +15,12 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
   LoginBloc({
     required LoginWithEmail loginWithEmail,
     required LoginWithPhone loginWithPhone,
+    required LoginWithLinkedIn loginWithLinkedIn,
     required RegisterUser registerUser,
     required GetLastLoginCredentials getLastLoginCredentials,
   })  : _loginWithEmail = loginWithEmail,
         _loginWithPhone = loginWithPhone,
+        _loginWithLinkedIn = loginWithLinkedIn,
         _registerUser = registerUser,
         _getLastLoginCredentials = getLastLoginCredentials,
         super(const LoginState()) {
@@ -25,11 +29,13 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     on<LoginMethodChanged>(_onMethodChanged);
     on<LoginEmailSubmitted>(_onEmailSubmitted);
     on<LoginPhoneSubmitted>(_onPhoneSubmitted);
+    on<LoginLinkedInSubmitted>(_onLinkedInSubmitted);
     on<RegisterSubmitted>(_onRegisterSubmitted);
   }
 
   final LoginWithEmail _loginWithEmail;
   final LoginWithPhone _loginWithPhone;
+  final LoginWithLinkedIn _loginWithLinkedIn;
   final RegisterUser _registerUser;
   final GetLastLoginCredentials _getLastLoginCredentials;
 
@@ -101,6 +107,28 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     emit(state.copyWith(status: LoginStatus.loading, clearError: true));
     try {
       await _loginWithPhone(phone: event.phone, password: event.password);
+      emit(state.copyWith(status: LoginStatus.success));
+    } on AuthApiException catch (e) {
+      emit(
+          state.copyWith(status: LoginStatus.failure, errorMessage: e.message));
+    } catch (_) {
+      emit(state.copyWith(
+        status: LoginStatus.failure,
+        errorMessage: 'Bağlantı hatası. Lütfen tekrar deneyin.',
+      ));
+    }
+  }
+
+  Future<void> _onLinkedInSubmitted(
+    LoginLinkedInSubmitted event,
+    Emitter<LoginState> emit,
+  ) async {
+    emit(state.copyWith(status: LoginStatus.loading, clearError: true));
+    try {
+      await _loginWithLinkedIn(
+        authorizationCode: event.authorizationCode,
+        redirectUri: LinkedInAuthConfig.redirectUri,
+      );
       emit(state.copyWith(status: LoginStatus.success));
     } on AuthApiException catch (e) {
       emit(

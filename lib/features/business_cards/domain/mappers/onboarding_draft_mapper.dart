@@ -36,7 +36,6 @@ class OnboardingDraftMapper {
       photoUrl: _trimOrNull(draft.photoUrl),
       accentColor: draft.accentColor,
       backgroundColor: draft.backgroundColor,
-      lastUsedPaletteBackgroundColor: draft.lastUsedPaletteBackgroundColor,
       cardId: draft.cardId?.trim(),
     );
   }

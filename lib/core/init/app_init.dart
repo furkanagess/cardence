@@ -13,6 +13,7 @@ import '../../features/auth/domain/usecases/get_auth_session.dart';
 import '../../features/auth/domain/usecases/get_current_user.dart';
 import '../../features/auth/domain/usecases/get_last_login_credentials.dart';
 import '../../features/auth/domain/usecases/login_with_email.dart';
+import '../../features/auth/domain/usecases/login_with_linkedin.dart';
 import '../../features/auth/domain/usecases/login_with_phone.dart';
 import '../../features/auth/domain/usecases/logout.dart';
 import '../../features/auth/domain/usecases/register_user.dart';
@@ -193,6 +194,7 @@ class AppInit {
       identifySubscriptionUser: identifySubscriptionUser,
       loginWithEmail: auth.loginWithEmail,
       loginWithPhone: auth.loginWithPhone,
+      loginWithLinkedIn: auth.loginWithLinkedIn,
       registerUser: auth.registerUser,
       forgotPassword: auth.forgotPassword,
       resetPassword: auth.resetPassword,
@@ -293,6 +295,7 @@ class AppInit {
     GetAuthSession getAuthSession,
     LoginWithEmail loginWithEmail,
     LoginWithPhone loginWithPhone,
+    LoginWithLinkedIn loginWithLinkedIn,
     RegisterUser registerUser,
     ForgotPassword forgotPassword,
     ResetPassword resetPassword,
@@ -318,6 +321,7 @@ class AppInit {
       getAuthSession: GetAuthSession(repo),
       loginWithEmail: LoginWithEmail(repo),
       loginWithPhone: LoginWithPhone(repo),
+      loginWithLinkedIn: LoginWithLinkedIn(repo),
       registerUser: RegisterUser(repo),
       forgotPassword: ForgotPassword(repo),
       resetPassword: ResetPassword(repo),
@@ -430,6 +434,7 @@ class AppInitResult {
     required this.identifySubscriptionUser,
     required this.loginWithEmail,
     required this.loginWithPhone,
+    required this.loginWithLinkedIn,
     required this.registerUser,
     required this.forgotPassword,
     required this.resetPassword,
@@ -472,6 +477,7 @@ class AppInitResult {
   final IdentifySubscriptionUser identifySubscriptionUser;
   final LoginWithEmail loginWithEmail;
   final LoginWithPhone loginWithPhone;
+  final LoginWithLinkedIn loginWithLinkedIn;
   final RegisterUser registerUser;
   final ForgotPassword forgotPassword;
   final ResetPassword resetPassword;

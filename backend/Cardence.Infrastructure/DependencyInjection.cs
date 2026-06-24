@@ -22,6 +22,9 @@ public static class DependencyInjection
         services.Configure<JwtOptions>(configuration.GetSection(JwtOptions.SectionName));
         services.Configure<ApiOptions>(configuration.GetSection(ApiOptions.SectionName));
         services.Configure<MonitoringOptions>(configuration.GetSection(MonitoringOptions.SectionName));
+        services.Configure<LinkedInAuthOptions>(configuration.GetSection(LinkedInAuthOptions.SectionName));
+
+        services.AddHttpClient<ILinkedInAuthService, LinkedInAuthService>();
 
         services.AddDbContext<CardenceDbContext>(options =>
         {
@@ -56,6 +59,7 @@ public static class DependencyInjection
         services.AddScoped<ISavedCardRepository, SavedCardRepository>();
         services.AddScoped<IWalletEntitlementRepository, WalletEntitlementRepository>();
         services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<IUserAuthProviderRepository, UserAuthProviderRepository>();
         services.AddScoped<ISupportRequestRepository, SupportRequestRepository>();
         services.AddScoped<IEventGroupRepository, EventGroupRepository>();
         services.AddScoped<IHealthStatusReader, HealthStatusReader>();

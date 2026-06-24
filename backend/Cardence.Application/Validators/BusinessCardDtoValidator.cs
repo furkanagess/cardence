@@ -50,10 +50,6 @@ public sealed class BusinessCardDtoValidator : AbstractValidator<BusinessCardDto
         RuleFor(x => x.BackgroundColor)
             .Matches(ValidationPatterns.HexColor)
             .When(x => !string.IsNullOrWhiteSpace(x.BackgroundColor));
-
-        RuleFor(x => x.LastUsedPaletteBackgroundColor)
-            .Matches(ValidationPatterns.HexColor)
-            .When(x => !string.IsNullOrWhiteSpace(x.LastUsedPaletteBackgroundColor));
     }
 
     private static bool HasValidFullName(string? displayName)

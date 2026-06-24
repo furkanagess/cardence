@@ -1085,7 +1085,8 @@ class _CompactBusinessCardFace extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 if (hasTitle || company != null)
-                  _buildNameCompanyLine(textTheme, hasTitle: hasTitle, company: company),
+                  _buildNameCompanyLine(textTheme,
+                      hasTitle: hasTitle, company: company),
                 if (jobTitle != null) ...[
                   const SizedBox(height: 12),
                   Text(

@@ -12,6 +12,7 @@ import '../../../../core/widgets/organisms/cardence_scaffold.dart';
 import '../../domain/usecases/forgot_password.dart';
 import '../../domain/usecases/get_last_login_credentials.dart';
 import '../../domain/usecases/login_with_email.dart';
+import '../../domain/usecases/login_with_linkedin.dart';
 import '../../domain/usecases/login_with_phone.dart';
 import '../../domain/usecases/register_user.dart';
 import '../../domain/usecases/reset_password.dart';
@@ -21,6 +22,8 @@ import '../bloc/login_state.dart';
 import '../widgets/login_email_form.dart';
 import '../widgets/login_method_selector.dart';
 import '../widgets/login_phone_form.dart';
+import '../oauth/linkedin_auth_flow.dart';
+import '../widgets/login_social_section.dart';
 import '../widgets/register_form.dart';
 import '../widgets/register_legal_notice.dart';
 import 'forgot_password_page.dart';
@@ -30,6 +33,7 @@ class LoginPage extends StatelessWidget {
     super.key,
     required this.loginWithEmail,
     required this.loginWithPhone,
+    required this.loginWithLinkedIn,
     required this.registerUser,
     required this.getLastLoginCredentials,
     required this.forgotPassword,
@@ -39,6 +43,7 @@ class LoginPage extends StatelessWidget {
 
   final LoginWithEmail loginWithEmail;
   final LoginWithPhone loginWithPhone;
+  final LoginWithLinkedIn loginWithLinkedIn;
   final RegisterUser registerUser;
   final GetLastLoginCredentials getLastLoginCredentials;
   final ForgotPassword forgotPassword;
@@ -51,6 +56,7 @@ class LoginPage extends StatelessWidget {
       create: (_) => LoginBloc(
         loginWithEmail: loginWithEmail,
         loginWithPhone: loginWithPhone,
+        loginWithLinkedIn: loginWithLinkedIn,
         registerUser: registerUser,
         getLastLoginCredentials: getLastLoginCredentials,
       )..add(const LoginStarted()),
@@ -123,6 +129,17 @@ class _AuthViewState extends State<_AuthView>
     );
   }
 
+  Future<void> _handleLinkedInLogin(BuildContext context) async {
+    final code = await requestLinkedInAuthorizationCode(context);
+    if (!context.mounted || code == null || code.isEmpty) {
+      return;
+    }
+
+    context.read<LoginBloc>().add(
+          LoginLinkedInSubmitted(authorizationCode: code),
+        );
+  }
+
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
@@ -191,6 +208,7 @@ class _AuthViewState extends State<_AuthView>
                             textTheme: textTheme,
                             onForgotPassword: () =>
                                 _openForgotPassword(context),
+                            onLinkedInPressed: () => _handleLinkedInLogin(context),
                             onRegisterTap: () =>
                                 _switchMode(context, AuthScreenMode.register),
                           ),
@@ -297,6 +315,7 @@ class _LoginScreenContent extends StatelessWidget {
     required this.colorScheme,
     required this.textTheme,
     required this.onForgotPassword,
+    required this.onLinkedInPressed,
     required this.onRegisterTap,
   });
 
@@ -308,6 +327,7 @@ class _LoginScreenContent extends StatelessWidget {
   final ColorScheme colorScheme;
   final TextTheme textTheme;
   final VoidCallback onForgotPassword;
+  final VoidCallback onLinkedInPressed;
   final VoidCallback onRegisterTap;
 
   @override
@@ -361,8 +381,8 @@ class _LoginScreenContent extends StatelessWidget {
             state: state,
             expandToFill: !keyboardVisible,
             bottomInset: bottomInset,
-            showExtendedFooter: !keyboardVisible,
             onForgotPassword: onForgotPassword,
+            onLinkedInPressed: onLinkedInPressed,
           ),
         ),
         if (!keyboardVisible) ...[
@@ -426,14 +446,14 @@ class _LoginFormContent extends StatefulWidget {
   const _LoginFormContent({
     required this.state,
     required this.onForgotPassword,
-    required this.showExtendedFooter,
+    required this.onLinkedInPressed,
     this.expandToFill = false,
     this.bottomInset = 0,
   });
 
   final LoginState state;
   final VoidCallback onForgotPassword;
-  final bool showExtendedFooter;
+  final VoidCallback onLinkedInPressed;
   final bool expandToFill;
   final double bottomInset;
 
@@ -494,76 +514,10 @@ class _LoginFormContentState extends State<_LoginFormContent> {
     );
   }
 
-  Widget _buildSocialButton({
-    required Widget icon,
-    required VoidCallback? onPressed,
-  }) {
-    final colorScheme = Theme.of(context).colorScheme;
-    return Expanded(
-      child: SizedBox(
-        height: 44,
-        child: OutlinedButton(
-          onPressed: onPressed,
-          style: OutlinedButton.styleFrom(
-            side: BorderSide(color: colorScheme.outlineVariant),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
-          ),
-          child: icon,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildExtendedFooter() {
-    final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        const SizedBox(height: 14),
-        Row(
-          children: [
-            Expanded(child: Divider(color: colorScheme.outlineVariant)),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-              child: Text(
-                'veya',
-                style: textTheme.labelMedium?.copyWith(
-                  color: AppColors.textSecondary,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-            Expanded(child: Divider(color: colorScheme.outlineVariant)),
-          ],
-        ),
-        const SizedBox(height: 14),
-        Row(
-          children: [
-            _buildSocialButton(
-              onPressed: null,
-              icon: Text(
-                'G',
-                style: textTheme.titleLarge?.copyWith(
-                  color: colorScheme.onSurface,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ),
-            const SizedBox(width: 12),
-            _buildSocialButton(
-              onPressed: null,
-              icon: Icon(
-                Icons.apple_rounded,
-                size: 20,
-                color: colorScheme.onSurface,
-              ),
-            ),
-          ],
-        ),
-      ],
+  Widget _buildSocialSection() {
+    return LoginSocialSection(
+      isLoading: state.isLoading,
+      onLinkedInPressed: state.isLoading ? null : widget.onLinkedInPressed,
     );
   }
 
@@ -571,9 +525,7 @@ class _LoginFormContentState extends State<_LoginFormContent> {
   Widget build(BuildContext context) {
     final fields = _buildFields();
     final submitButton = _buildSubmitButton();
-    final extendedFooter = widget.showExtendedFooter
-        ? _buildExtendedFooter()
-        : const SizedBox.shrink();
+    final socialSection = _buildSocialSection();
 
     if (widget.expandToFill) {
       return Column(
@@ -589,7 +541,7 @@ class _LoginFormContentState extends State<_LoginFormContent> {
           const Spacer(),
           const SizedBox(height: 8),
           submitButton,
-          extendedFooter,
+          socialSection,
         ],
       );
     }
@@ -609,7 +561,7 @@ class _LoginFormContentState extends State<_LoginFormContent> {
           fields,
           const SizedBox(height: 8),
           submitButton,
-          extendedFooter,
+          socialSection,
         ],
       ),
     );

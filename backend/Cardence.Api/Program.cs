@@ -60,6 +60,14 @@ if (!string.IsNullOrWhiteSpace(railwayPort))
 
 var builder = WebApplication.CreateBuilder(args);
 
+if (builder.Environment.IsDevelopment())
+{
+    builder.Configuration.AddJsonFile(
+        "appsettings.Development.local.json",
+        optional: true,
+        reloadOnChange: true);
+}
+
 builder.Services.Configure<ApiOptions>(builder.Configuration.GetSection(ApiOptions.SectionName));
 
 builder.Services.AddCors(options =>

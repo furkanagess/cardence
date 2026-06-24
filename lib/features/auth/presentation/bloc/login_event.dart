@@ -63,6 +63,15 @@ class LoginEmailSubmitted extends LoginEvent {
   List<Object?> get props => [email, password];
 }
 
+class LoginLinkedInSubmitted extends LoginEvent {
+  const LoginLinkedInSubmitted({required this.authorizationCode});
+
+  final String authorizationCode;
+
+  @override
+  List<Object?> get props => [authorizationCode];
+}
+
 class LoginPhoneSubmitted extends LoginEvent {
   const LoginPhoneSubmitted({
     required this.phone,

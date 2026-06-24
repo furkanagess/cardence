@@ -28,6 +28,10 @@ public interface IAuthService
         RegisterRequest request,
         CancellationToken cancellationToken = default);
 
+    Task<AuthServiceResponse<AuthSessionEntity>> LoginWithLinkedInAsync(
+        LoginWithLinkedInRequest request,
+        CancellationToken cancellationToken = default);
+
     Task<AuthServiceResponse<UserProfileEntity>> GetMeAsync(
         Guid userId,
         CancellationToken cancellationToken = default);

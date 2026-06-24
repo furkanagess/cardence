@@ -3,6 +3,7 @@ using System;
 using Cardence.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Cardence.Infrastructure.Migrations
 {
     [DbContext(typeof(CardenceDbContext))]
-    partial class CardenceDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260624101731_RemoveLastUsedPaletteBackgroundColorFromCards")]
+    partial class RemoveLastUsedPaletteBackgroundColorFromCards
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -531,30 +534,6 @@ namespace Cardence.Infrastructure.Migrations
                     b.ToTable("users", (string)null);
                 });
 
-            modelBuilder.Entity("Cardence.Domain.Entities.UserAuthProvider", b =>
-                {
-                    b.Property<string>("ProviderId")
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)")
-                        .HasColumnName("provider_id");
-
-                    b.Property<string>("ProviderUserId")
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)")
-                        .HasColumnName("provider_user_id");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("user_id");
-
-                    b.HasKey("ProviderId", "ProviderUserId");
-
-                    b.HasIndex("UserId")
-                        .HasDatabaseName("ix_user_auth_providers_user_id");
-
-                    b.ToTable("user_auth_providers", (string)null);
-                });
-
             modelBuilder.Entity("Cardence.Domain.Entities.WalletEntitlement", b =>
                 {
                     b.Property<Guid>("UserId")
@@ -653,17 +632,6 @@ namespace Cardence.Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Cardence.Domain.Entities.UserAuthProvider", b =>
-                {
-                    b.HasOne("Cardence.Domain.Entities.User", "User")
-                        .WithMany("AuthProviders")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("Cardence.Domain.Entities.WalletEntitlement", b =>
                 {
                     b.HasOne("Cardence.Domain.Entities.User", "User")
@@ -687,8 +655,6 @@ namespace Cardence.Infrastructure.Migrations
 
             modelBuilder.Entity("Cardence.Domain.Entities.User", b =>
                 {
-                    b.Navigation("AuthProviders");
-
                     b.Navigation("Cards");
 
                     b.Navigation("SavedCards");

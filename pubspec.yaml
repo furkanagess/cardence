@@ -43,7 +43,8 @@ dependencies:
   # Giriş yöntemleri: Google, Apple, Phone, LinkedIn
   google_sign_in: ^6.2.2
   sign_in_with_apple: ^6.1.3
-  linkedin_login: ^2.2.1
+  linkedin_login: ^2.3.1
+  webview_flutter: ^4.9.0
 
   # State management & onboarding
   flutter_bloc: ^8.1.6

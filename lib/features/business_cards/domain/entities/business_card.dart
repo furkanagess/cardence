@@ -23,7 +23,6 @@ class BusinessCard {
     this.photoUrl,
     this.accentColor,
     this.backgroundColor,
-    this.lastUsedPaletteBackgroundColor,
     this.cardId,
   });
 
@@ -49,6 +48,5 @@ class BusinessCard {
   final String? photoUrl;
   final String? accentColor;
   final String? backgroundColor;
-  final String? lastUsedPaletteBackgroundColor;
   final String? cardId;
 }

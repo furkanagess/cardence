@@ -1,4 +1,4 @@
-enum LastLoginMethod { email, phone }
+enum LastLoginMethod { email, phone, linkedin }
 
 /// Son başarılı girişte kullanılan kimlik bilgileri (şifre saklanmaz).
 class LastLoginCredentials {

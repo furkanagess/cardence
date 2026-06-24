@@ -1,0 +1,5 @@
+{
+  "LinkedInAuth": {
+    "ClientSecret": "YOUR_LINKEDIN_CLIENT_SECRET"
+  }
+}

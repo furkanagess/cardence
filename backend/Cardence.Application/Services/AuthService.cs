@@ -3,6 +3,7 @@ using Cardence.Application.DTOs.Auth;
 using Cardence.Application.Interfaces;
 using Cardence.Application.Mapping;
 using Cardence.Application.Options;
+using Cardence.Domain.Constants;
 using Cardence.Domain.Entities;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -15,6 +16,9 @@ public sealed class AuthService : IAuthService
     private static readonly TimeSpan OtpLifetime = TimeSpan.FromMinutes(5);
 
     private readonly IUserRepository _userRepository;
+    private readonly IUserAuthProviderRepository _userAuthProviderRepository;
+    private readonly IWalletEntitlementRepository _walletEntitlementRepository;
+    private readonly ILinkedInAuthService _linkedInAuthService;
     private readonly IBusinessCardRepository _businessCardRepository;
     private readonly ISavedCardRepository _savedCardRepository;
     private readonly IJwtTokenService _jwtTokenService;
@@ -22,6 +26,7 @@ public sealed class AuthService : IAuthService
     private readonly IPasswordHasher _passwordHasher;
     private readonly IProfilePhotoStorage _profilePhotoStorage;
     private readonly JwtOptions _jwtOptions;
+    private readonly LinkedInAuthOptions _linkedInAuthOptions;
     private readonly ILogger<AuthService> _logger;
 
     private static readonly HashSet<string> AllowedPhotoContentTypes = new(StringComparer.OrdinalIgnoreCase)
@@ -34,6 +39,9 @@ public sealed class AuthService : IAuthService
 
     public AuthService(
         IUserRepository userRepository,
+        IUserAuthProviderRepository userAuthProviderRepository,
+        IWalletEntitlementRepository walletEntitlementRepository,
+        ILinkedInAuthService linkedInAuthService,
         IBusinessCardRepository businessCardRepository,
         ISavedCardRepository savedCardRepository,
         IJwtTokenService jwtTokenService,
@@ -41,9 +49,13 @@ public sealed class AuthService : IAuthService
         IPasswordHasher passwordHasher,
         IProfilePhotoStorage profilePhotoStorage,
         IOptions<JwtOptions> jwtOptions,
+        IOptions<LinkedInAuthOptions> linkedInAuthOptions,
         ILogger<AuthService> logger)
     {
         _userRepository = userRepository;
+        _userAuthProviderRepository = userAuthProviderRepository;
+        _walletEntitlementRepository = walletEntitlementRepository;
+        _linkedInAuthService = linkedInAuthService;
         _businessCardRepository = businessCardRepository;
         _savedCardRepository = savedCardRepository;
         _jwtTokenService = jwtTokenService;
@@ -51,6 +63,7 @@ public sealed class AuthService : IAuthService
         _passwordHasher = passwordHasher;
         _profilePhotoStorage = profilePhotoStorage;
         _jwtOptions = jwtOptions.Value;
+        _linkedInAuthOptions = linkedInAuthOptions.Value;
         _logger = logger;
     }
 
@@ -388,6 +401,185 @@ public sealed class AuthService : IAuthService
         return await CreateSessionAsync(user, "Kayıt başarılı.", cancellationToken);
     }
 
+    public async Task<AuthServiceResponse<AuthSessionEntity>> LoginWithLinkedInAsync(
+        LoginWithLinkedInRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrWhiteSpace(request.AuthorizationCode))
+        {
+            return FailSession(
+                AuthErrorCodes.InvalidRequest,
+                "InvalidRequest",
+                "LinkedIn yetkilendirme kodu gereklidir.");
+        }
+
+        var redirectUri = ResolveLinkedInRedirectUri(request.RedirectUri);
+        if (redirectUri is null)
+        {
+            return FailSession(
+                AuthErrorCodes.InvalidRequest,
+                "InvalidRequest",
+                "Geçersiz yönlendirme adresi.");
+        }
+
+        var linkedInProfile = await _linkedInAuthService.ExchangeAuthorizationCodeAsync(
+            request.AuthorizationCode.Trim(),
+            redirectUri,
+            cancellationToken);
+
+        if (linkedInProfile is null)
+        {
+            return FailSession(
+                AuthErrorCodes.InvalidOAuthToken,
+                "InvalidOAuthToken",
+                "LinkedIn oturumu doğrulanamadı.");
+        }
+
+        var existingProvider = await _userAuthProviderRepository.GetByProviderAsync(
+            AuthProviderIds.LinkedIn,
+            linkedInProfile.Sub,
+            cancellationToken);
+
+        if (existingProvider is not null)
+        {
+            var existingUser = await _userRepository.GetByIdAsync(
+                existingProvider.UserId,
+                cancellationToken);
+
+            if (existingUser is null)
+            {
+                return FailSession(
+                    AuthErrorCodes.UserNotFound,
+                    "UserNotFound",
+                    "LinkedIn hesabına bağlı kullanıcı bulunamadı.");
+            }
+
+            await ApplyLinkedInProfileUpdatesAsync(existingUser, linkedInProfile, cancellationToken);
+            await EnsureLinkedInBusinessCardAsync(existingUser, linkedInProfile, cancellationToken);
+            return await CreateSessionAsync(existingUser, "Giriş başarılı.", cancellationToken);
+        }
+
+        User? user = null;
+        if (!string.IsNullOrWhiteSpace(linkedInProfile.Email))
+        {
+            user = await _userRepository.GetByEmailAsync(linkedInProfile.Email, cancellationToken);
+        }
+
+        if (user is not null)
+        {
+            await _userAuthProviderRepository.AddAsync(
+                new UserAuthProvider
+                {
+                    ProviderId = AuthProviderIds.LinkedIn,
+                    ProviderUserId = linkedInProfile.Sub,
+                    UserId = user.Id,
+                },
+                cancellationToken);
+
+            await ApplyLinkedInProfileUpdatesAsync(user, linkedInProfile, cancellationToken);
+            await EnsureLinkedInBusinessCardAsync(user, linkedInProfile, cancellationToken);
+            return await CreateSessionAsync(user, "Giriş başarılı.", cancellationToken);
+        }
+
+        var now = DateTime.UtcNow;
+        user = new User
+        {
+            Id = Guid.NewGuid(),
+            DisplayName = linkedInProfile.DisplayName,
+            Email = linkedInProfile.Email,
+            PhotoUrl = linkedInProfile.PictureUrl,
+            PasswordHash = null,
+            CreatedAt = now,
+            UpdatedAt = now,
+        };
+
+        await _userRepository.AddAsync(user, cancellationToken);
+        await _userAuthProviderRepository.AddAsync(
+            new UserAuthProvider
+            {
+                ProviderId = AuthProviderIds.LinkedIn,
+                ProviderUserId = linkedInProfile.Sub,
+                UserId = user.Id,
+            },
+            cancellationToken);
+        await _walletEntitlementRepository.GetOrCreateAsync(user.Id, cancellationToken);
+        await EnsureLinkedInBusinessCardAsync(user, linkedInProfile, cancellationToken);
+
+        return await CreateSessionAsync(user, "Giriş başarılı.", cancellationToken);
+    }
+
+    private async Task EnsureLinkedInBusinessCardAsync(
+        User user,
+        LinkedInUserInfo linkedInProfile,
+        CancellationToken cancellationToken)
+    {
+        var cards = await _businessCardRepository.GetByUserIdAsync(user.Id, cancellationToken);
+        if (cards.Count == 0)
+        {
+            var cardId = await CardIdGenerator.GenerateUniqueAsync(
+                (candidate, ct) => _businessCardRepository.CardIdExistsAsync(candidate, cancellationToken: ct),
+                cancellationToken);
+
+            var now = DateTime.UtcNow;
+            var card = new Card
+            {
+                Id = Guid.NewGuid(),
+                UserId = user.Id,
+                CardId = cardId,
+                DisplayName = linkedInProfile.DisplayName ?? user.DisplayName,
+                Email = linkedInProfile.Email ?? user.Email,
+                PhotoUrl = linkedInProfile.PictureUrl ?? user.PhotoUrl,
+                Linkedin = linkedInProfile.ProfileUrl,
+                BackgroundColor = "#1B365D",
+                AccentColor = "#FFFFFF",
+                CreatedAt = now,
+                UpdatedAt = now,
+            };
+
+            await _businessCardRepository.AddAsync(card, cancellationToken);
+            return;
+        }
+
+        var primaryCard = cards.OrderBy(card => card.CreatedAt).First();
+        var updated = false;
+
+        if (string.IsNullOrWhiteSpace(primaryCard.DisplayName)
+            && !string.IsNullOrWhiteSpace(linkedInProfile.DisplayName))
+        {
+            primaryCard.DisplayName = linkedInProfile.DisplayName.Trim();
+            updated = true;
+        }
+
+        if (string.IsNullOrWhiteSpace(primaryCard.Email)
+            && !string.IsNullOrWhiteSpace(linkedInProfile.Email))
+        {
+            primaryCard.Email = linkedInProfile.Email;
+            updated = true;
+        }
+
+        if (string.IsNullOrWhiteSpace(primaryCard.PhotoUrl)
+            && !string.IsNullOrWhiteSpace(linkedInProfile.PictureUrl))
+        {
+            primaryCard.PhotoUrl = linkedInProfile.PictureUrl.Trim();
+            updated = true;
+        }
+
+        if (string.IsNullOrWhiteSpace(primaryCard.Linkedin)
+            && !string.IsNullOrWhiteSpace(linkedInProfile.ProfileUrl))
+        {
+            primaryCard.Linkedin = linkedInProfile.ProfileUrl.Trim();
+            updated = true;
+        }
+
+        if (!updated)
+        {
+            return;
+        }
+
+        primaryCard.UpdatedAt = DateTime.UtcNow;
+        await _businessCardRepository.UpdateAsync(primaryCard, cancellationToken);
+    }
+
     public async Task<AuthServiceResponse<UserProfileEntity>> GetMeAsync(
         Guid userId,
         CancellationToken cancellationToken = default)
@@ -718,6 +910,66 @@ public sealed class AuthService : IAuthService
         return AuthServiceResponse<object?>.Ok(
             null,
             "OTP sent successfully.");
+    }
+
+    private async Task ApplyLinkedInProfileUpdatesAsync(
+        User user,
+        LinkedInUserInfo linkedInProfile,
+        CancellationToken cancellationToken)
+    {
+        var updated = false;
+
+        if (string.IsNullOrWhiteSpace(user.DisplayName)
+            && !string.IsNullOrWhiteSpace(linkedInProfile.DisplayName))
+        {
+            user.DisplayName = linkedInProfile.DisplayName.Trim();
+            updated = true;
+        }
+
+        if (string.IsNullOrWhiteSpace(user.PhotoUrl)
+            && !string.IsNullOrWhiteSpace(linkedInProfile.PictureUrl))
+        {
+            user.PhotoUrl = linkedInProfile.PictureUrl.Trim();
+            updated = true;
+        }
+
+        if (string.IsNullOrWhiteSpace(user.Email)
+            && !string.IsNullOrWhiteSpace(linkedInProfile.Email))
+        {
+            user.Email = linkedInProfile.Email;
+            updated = true;
+        }
+
+        if (!updated)
+        {
+            return;
+        }
+
+        user.UpdatedAt = DateTime.UtcNow;
+        await _userRepository.UpdateAsync(user, cancellationToken);
+    }
+
+    private string? ResolveLinkedInRedirectUri(string? requestedRedirectUri)
+    {
+        var configuredRedirectUri = _linkedInAuthOptions.RedirectUri?.Trim();
+        if (string.IsNullOrWhiteSpace(configuredRedirectUri))
+        {
+            return string.IsNullOrWhiteSpace(requestedRedirectUri)
+                ? null
+                : requestedRedirectUri.Trim();
+        }
+
+        if (string.IsNullOrWhiteSpace(requestedRedirectUri))
+        {
+            return configuredRedirectUri;
+        }
+
+        return string.Equals(
+            requestedRedirectUri.Trim(),
+            configuredRedirectUri,
+            StringComparison.Ordinal)
+            ? configuredRedirectUri
+            : null;
     }
 
     private async Task<AuthServiceResponse<AuthSessionEntity>> CreateSessionAsync(

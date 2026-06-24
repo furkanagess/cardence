@@ -25,6 +25,7 @@ void main() async {
     identifySubscriptionUser: result.identifySubscriptionUser,
     loginWithEmail: result.loginWithEmail,
     loginWithPhone: result.loginWithPhone,
+    loginWithLinkedIn: result.loginWithLinkedIn,
     registerUser: result.registerUser,
     getLastLoginCredentials: result.getLastLoginCredentials,
     forgotPassword: result.forgotPassword,
