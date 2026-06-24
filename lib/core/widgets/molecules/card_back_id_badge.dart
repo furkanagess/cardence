@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/l10n/l10n_extensions.dart';
 import 'package:flutter/services.dart';
 
 import '../../utils/card_id_generator.dart';
@@ -29,7 +30,7 @@ class CardBackIdBadge extends StatelessWidget {
       ..hideCurrentSnackBar()
       ..showSnackBar(
         SnackBar(
-          content: Text('Kart ID kopyalandı: $id'),
+          content: Text(context.l10n.kartIdKopyalandId),
           behavior: SnackBarBehavior.floating,
           duration: const Duration(seconds: 2),
         ),
@@ -53,7 +54,7 @@ class CardBackIdBadge extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                'KART ID',
+                context.l10n.kartId,
                 style: textTheme.labelSmall?.copyWith(
                   color: onSurfaceVariant,
                   fontWeight: FontWeight.w600,

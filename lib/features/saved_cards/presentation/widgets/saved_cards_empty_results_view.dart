@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/l10n/l10n_extensions.dart';
+
 class SavedCardsEmptyResultsView extends StatelessWidget {
   const SavedCardsEmptyResultsView({
     super.key,
@@ -16,20 +18,22 @@ class SavedCardsEmptyResultsView extends StatelessWidget {
 
   bool get _hasConstraints => hasFilters || hasSearch;
 
-  String get _title {
-    if (hasFilters && hasSearch) return 'Sonuç bulunamadı';
-    if (hasSearch) return 'Aramaya uyan kart yok';
-    if (hasFilters) return 'Filtreye uyan kart yok';
-    return 'Henüz kayıtlı kart yok';
+  String _title(BuildContext context) {
+    final l10n = context.l10n;
+    if (hasFilters && hasSearch) return l10n.sonuBulunamad;
+    if (hasSearch) return l10n.aramayaUyanKartYok;
+    if (hasFilters) return l10n.filtreyeUyanKartYok;
+    return l10n.henzKaytlKartYok;
   }
 
-  String? get _subtitle {
+  String? _subtitle(BuildContext context) {
+    final l10n = context.l10n;
     if (hasFilters && hasSearch) {
-      return 'Arama veya filtre kriterlerini değiştirin.';
+      return l10n.aramaVeyaFiltreKriterleriniDeitirin;
     }
-    if (hasSearch) return 'Farklı bir arama terimi deneyin.';
+    if (hasSearch) return l10n.farklBirAramaTerimiDeneyin;
     if (hasFilters) {
-      return 'Farklı filtre deneyin veya filtreleri temizleyin.';
+      return l10n.farklFiltreDeneyinVeyaFiltreleri;
     }
     return null;
   }
@@ -38,6 +42,7 @@ class SavedCardsEmptyResultsView extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final subtitle = _subtitle(context);
 
     return Center(
       child: Padding(
@@ -46,65 +51,50 @@ class SavedCardsEmptyResultsView extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
-              _hasConstraints
-                  ? Icons.search_off_rounded
-                  : Icons.credit_card_outlined,
+              Icons.contact_page_outlined,
               size: 56,
-              color: colorScheme.onSurfaceVariant.withValues(alpha: 0.55),
+              color: colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
             ),
             const SizedBox(height: 16),
             Text(
-              _title,
+              _title(context),
               style: textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.w600,
               ),
               textAlign: TextAlign.center,
             ),
-            if (_subtitle != null) ...[
+            if (subtitle != null) ...[
               const SizedBox(height: 8),
               Text(
-                _subtitle!,
+                subtitle,
                 style: textTheme.bodyMedium?.copyWith(
                   color: colorScheme.onSurfaceVariant,
                 ),
                 textAlign: TextAlign.center,
               ),
             ],
-            const SizedBox(height: 20),
-            if (hasFilters && hasSearch)
-              Wrap(
-                alignment: WrapAlignment.center,
-                spacing: 8,
-                runSpacing: 8,
-                children: [
-                  OutlinedButton(
-                    onPressed: onClearSearch,
-                    child: const Text('Aramayı temizle'),
-                  ),
-                  OutlinedButton(
-                    onPressed: onClearFilters,
-                    child: const Text('Filtreleri temizle'),
-                  ),
-                ],
-              )
-            else if (hasSearch)
-              OutlinedButton(
-                onPressed: onClearSearch,
-                child: const Text('Aramayı temizle'),
-              )
-            else if (hasFilters)
-              OutlinedButton(
-                onPressed: onClearFilters,
-                child: const Text('Filtreleri temizle'),
-              )
-            else
+            if (_hasConstraints) ...[
+              const SizedBox(height: 20),
+              if (hasSearch)
+                TextButton(
+                  onPressed: onClearSearch,
+                  child: Text(context.l10n.aramayTemizle),
+                ),
+              if (hasFilters)
+                TextButton(
+                  onPressed: onClearFilters,
+                  child: Text(context.l10n.filtreleriTemizle),
+                ),
+            ] else ...[
+              const SizedBox(height: 8),
               Text(
-                'Sağ alttaki Ekle ile QR okutun veya kart ID girin',
+                context.l10n.sagAlttakiEkleIleQr,
                 style: textTheme.bodySmall?.copyWith(
                   color: colorScheme.onSurfaceVariant,
                 ),
                 textAlign: TextAlign.center,
               ),
+            ],
           ],
         ),
       ),

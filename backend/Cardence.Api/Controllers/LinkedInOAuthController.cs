@@ -1,20 +1,54 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.WebUtilities;
 
 namespace Cardence.Api.Controllers;
 
 /// <summary>
-/// LinkedIn OAuth redirect hedefi. Mobil WebView code parametresini yakalar;
-/// tarayıcıda açılırsa kullanıcıya kısa bir onay sayfası gösterilir.
+/// LinkedIn OAuth redirect hedefi. Mobil uygulama deep link ile authorization code alır;
+/// tarayıcıda açılırsa kısa bir onay sayfası gösterilir.
 /// </summary>
 [ApiController]
 [Route("auth/linkedin")]
 [Tags("Authentication")]
 public sealed class LinkedInOAuthController : ControllerBase
 {
+    private const string MobileCallbackScheme = "com.furkanages.cardenceapp";
+
     [HttpGet("callback")]
     [Produces("text/html")]
-    public ContentResult Callback()
+    public IActionResult Callback(
+        [FromQuery] string? code,
+        [FromQuery] string? state,
+        [FromQuery] string? error,
+        [FromQuery] string? error_description)
     {
+        if (!string.IsNullOrWhiteSpace(code))
+        {
+            var mobileCallback = QueryHelpers.AddQueryString(
+                $"{MobileCallbackScheme}://auth/linkedin/callback",
+                new Dictionary<string, string?>
+                {
+                    ["code"] = code,
+                    ["state"] = state,
+                });
+
+            return Redirect(mobileCallback);
+        }
+
+        if (!string.IsNullOrWhiteSpace(error))
+        {
+            var mobileErrorCallback = QueryHelpers.AddQueryString(
+                $"{MobileCallbackScheme}://auth/linkedin/callback",
+                new Dictionary<string, string?>
+                {
+                    ["error"] = error,
+                    ["error_description"] = error_description,
+                    ["state"] = state,
+                });
+
+            return Redirect(mobileErrorCallback);
+        }
+
         const string html = """
             <!DOCTYPE html>
             <html lang="tr">

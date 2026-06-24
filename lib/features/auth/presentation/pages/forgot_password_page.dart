@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../../../../core/l10n/api_error_localizer.dart';
+import '../../../../core/l10n/l10n_extensions.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/widgets/atoms/cardence_app_bar.dart';
@@ -61,8 +63,8 @@ class _ForgotPasswordView extends StatelessWidget {
           ScaffoldMessenger.of(context)
             ..hideCurrentSnackBar()
             ..showSnackBar(
-              const SnackBar(
-                content: Text('Sıfırlama kodu gönderildi.'),
+              SnackBar(
+                content: Text(context.l10n.sfrlamaKoduGnderildi),
                 behavior: SnackBarBehavior.floating,
               ),
             );
@@ -73,7 +75,9 @@ class _ForgotPasswordView extends StatelessWidget {
             ..hideCurrentSnackBar()
             ..showSnackBar(
               SnackBar(
-                content: Text(state.errorMessage!),
+                content: Text(
+                  ApiErrorLocalizer.localize(context.l10n, state.errorMessage!),
+                ),
                 behavior: SnackBarBehavior.floating,
               ),
             );
@@ -81,7 +85,7 @@ class _ForgotPasswordView extends StatelessWidget {
       },
       child: CardenceScaffold(
         resizeToAvoidBottomInset: true,
-        appBar: const CardenceAppBar(title: 'Şifremi unuttum'),
+        appBar: CardenceAppBar(title: context.l10n.ifremiUnuttum),
         body: SafeArea(
           child: Padding(
             padding: const EdgeInsets.fromLTRB(24, 8, 24, 24),

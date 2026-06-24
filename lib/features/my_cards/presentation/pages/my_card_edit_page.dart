@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/l10n/l10n_extensions.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/card_id_generator.dart';
@@ -61,7 +62,8 @@ class _MyCardEditPageState extends State<MyCardEditPage> {
   String? _phoneFullNumber;
   bool _saving = false;
 
-  static Map<String, String> get _labels => MyCardPreviewHelpers.fieldLabels;
+  Map<String, String> _labels(BuildContext context) =>
+      MyCardPreviewHelpers.fieldLabels(context.l10n);
 
   bool get _hasUnsavedChanges => !_buildDraft().contentEquals(_baselineDraft);
 
@@ -173,8 +175,8 @@ class _MyCardEditPageState extends State<MyCardEditPage> {
     if (_saving) return;
     if (_cardNameController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Kart adı zorunludur'),
+        SnackBar(
+          content: Text(context.l10n.kartAdZorunludur),
           behavior: SnackBarBehavior.floating,
         ),
       );
@@ -206,8 +208,8 @@ class _MyCardEditPageState extends State<MyCardEditPage> {
       if (!mounted) return;
       setState(() => _saving = false);
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Kart kaydedilemedi. Lütfen tekrar deneyin.'),
+        SnackBar(
+          content: Text(context.l10n.kartKaydedilemediLtfenTekrarDeneyin),
           behavior: SnackBarBehavior.floating,
         ),
       );
@@ -217,11 +219,11 @@ class _MyCardEditPageState extends State<MyCardEditPage> {
   Future<bool> _confirmDiscardChanges() {
     return CardenceConfirmDialog.show(
       context,
-      title: 'Kaydedilmemiş değişiklikler',
+      title: context.l10n.kaydedilmemiDeiiklikler,
       message:
-          'Yaptığınız değişiklikler kaydedilmedi. Çıkmak istediğinize emin misiniz?',
-      confirmLabel: 'Çık',
-      cancelLabel: 'İptal',
+          context.l10n.yaptnzDeiikliklerKaydedilmedikmakIstediinize,
+      confirmLabel: context.l10n.k,
+      cancelLabel: context.l10n.iptal,
       icon: Icons.warning_amber_rounded,
       confirmIsDestructive: true,
     ).then((value) => value == true);
@@ -264,14 +266,14 @@ class _MyCardEditPageState extends State<MyCardEditPage> {
                     ),
                   ),
                   Text(
-                    'Kart renkleri',
+                    context.l10n.kartRenkleri,
                     style: Theme.of(sheetContext).textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.w700,
                         ),
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'Değişiklikler önizlemeye anında yansır; kaydetmek için Kaydet\'e basın.',
+                    context.l10n.changesReflectInPreview,
                     style: Theme.of(sheetContext).textTheme.bodySmall?.copyWith(
                           color: colorScheme.onSurfaceVariant,
                           height: 1.35,
@@ -398,7 +400,7 @@ class _MyCardEditPageState extends State<MyCardEditPage> {
       child: CardenceScaffold(
       appBar: CardenceAppBar(
         variant: CardenceAppBarVariant.editor,
-        title: widget.isNewCard ? 'Yeni kart' : 'Kartı düzenle',
+        title: widget.isNewCard ? context.l10n.newCard : context.l10n.editCard,
       ),
       body: Form(
         key: _formKey,
@@ -407,16 +409,16 @@ class _MyCardEditPageState extends State<MyCardEditPage> {
           children: [
             CollapsibleCardPreviewPanel(
               draft: previewDraft,
-              emptyMessage: 'Bilgi girildikçe kartta görünür',
+              emptyMessage: context.l10n.bilgiGirildikeKarttaGrnr,
             ),
             Expanded(
               child: ListView(
                 padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
                 children: [
                   _buildFormSection(
-                    title: 'Kart adı',
+                    title: context.l10n.kartAd,
                     subtitle:
-                        'Sadece sizin gördüğünüz etiket; kart yüzündeki isim “Ad Soyad” alanıdır.',
+                        context.l10n.sadeceSizinGrdnzEtiketKart,
                     colorScheme: colorScheme,
                     textTheme: textTheme,
                     children: [
@@ -424,7 +426,7 @@ class _MyCardEditPageState extends State<MyCardEditPage> {
                         controller: _cardNameController,
                         textCapitalization: TextCapitalization.sentences,
                         decoration: InputDecoration(
-                          hintText: 'Örn. İş kartım, Konferans 2025',
+                          hintText: context.l10n.rnKartmKonferans2025,
                           filled: true,
                           fillColor: colorScheme.surfaceContainerHighest
                               .withValues(alpha: 0.4),
@@ -438,58 +440,58 @@ class _MyCardEditPageState extends State<MyCardEditPage> {
                     ],
                   ),
                   _buildFormSection(
-                    title: 'Kart bilgileri',
+                    title: context.l10n.kartBilgileri,
                     subtitle:
-                        'Kart yüzünde görünecek iletişim ve profil alanları.',
+                        context.l10n.kartYzndeGrnecekIletiimVe,
                     colorScheme: colorScheme,
                     textTheme: textTheme,
                     children: [
                       _buildField(
-                        _labels['displayName']!,
+                        (_labels(context))['displayName']!,
                         _nameController,
                         colorScheme,
                       ),
                       _buildField(
-                        _labels['email']!,
+                        (_labels(context))['email']!,
                         _emailController,
                         colorScheme,
                         keyboardType: TextInputType.emailAddress,
                       ),
                       _buildPhoneField(colorScheme),
                       _buildField(
-                        _labels['company']!,
+                        (_labels(context))['company']!,
                         _companyController,
                         colorScheme,
                       ),
                       _buildField(
-                        _labels['title']!,
+                        (_labels(context))['title']!,
                         _titleController,
                         colorScheme,
                       ),
                       _buildField(
-                        _labels['website']!,
+                        (_labels(context))['website']!,
                         _websiteController,
                         colorScheme,
                         keyboardType: TextInputType.url,
                       ),
                       _buildField(
-                        _labels['linkedin']!,
+                        (_labels(context))['linkedin']!,
                         _linkedInController,
                         colorScheme,
                         keyboardType: TextInputType.url,
                       ),
                       SkillsChipInput(
-                        label: _labels['skills']!,
+                        label: (_labels(context))['skills']!,
                         value: _skillsValue,
                         onChanged: (s) => setState(() => _skillsValue = s),
                       ),
                       _buildField(
-                        _labels['school']!,
+                        (_labels(context))['school']!,
                         _schoolController,
                         colorScheme,
                       ),
                       _buildField(
-                        _labels['about']!,
+                        (_labels(context))['about']!,
                         _aboutController,
                         colorScheme,
                         maxLength: 200,
@@ -499,21 +501,21 @@ class _MyCardEditPageState extends State<MyCardEditPage> {
                     ],
                   ),
                   _buildFormSection(
-                    title: 'Ek bilgiler',
+                    title: context.l10n.ekBilgiler,
                     subtitle:
-                        'Adres, sosyal medya ve etkinlik gibi isteğe bağlı alanlar.',
+                        context.l10n.adresSosyalMedyaVeEtkinlik,
                     colorScheme: colorScheme,
                     textTheme: textTheme,
                     children: [
                       _buildField(
-                        _labels['address']!,
+                        (_labels(context))['address']!,
                         _addressController,
                         colorScheme,
                         minLines: 2,
                         maxLines: 4,
                       ),
                       CountryCityPickerField(
-                        countryLabel: _labels['country']!,
+                        countryLabel: (_labels(context))['country']!,
                         stateLabel: 'İl',
                         districtLabel: 'İlçe',
                         country: _countryValue,
@@ -524,14 +526,14 @@ class _MyCardEditPageState extends State<MyCardEditPage> {
                             setState(() => _cityValue = value),
                       ),
                       _buildField(
-                        _labels['department']!,
+                        (_labels(context))['department']!,
                         _departmentController,
                         colorScheme,
                       ),
                       CommaSeparatedChipInput(
-                        label: _labels['attendedEvents']!,
+                        label: (_labels(context))['attendedEvents']!,
                         value: _attendedEventsValue,
-                        hintText: 'Etkinlik ekle (örn. Web Summit)',
+                        hintText: context.l10n.etkinlikEklernWebSummit,
                         prefixIcon: Icons.event_outlined,
                         chipIcon: Icons.event_outlined,
                         canAddItem: (text) => text.trim().length >= 2,
@@ -539,19 +541,19 @@ class _MyCardEditPageState extends State<MyCardEditPage> {
                             setState(() => _attendedEventsValue = value),
                       ),
                       _buildField(
-                        _labels['twitter']!,
+                        (_labels(context))['twitter']!,
                         _twitterController,
                         colorScheme,
                         keyboardType: TextInputType.url,
                       ),
                       _buildField(
-                        _labels['instagram']!,
+                        (_labels(context))['instagram']!,
                         _instagramController,
                         colorScheme,
                         keyboardType: TextInputType.url,
                       ),
                       BirthdayPickerField(
-                        label: _labels['birthday']!,
+                        label: (_labels(context))['birthday']!,
                         value: _birthdayValue,
                         onChanged: (value) =>
                             setState(() => _birthdayValue = value),
@@ -559,13 +561,13 @@ class _MyCardEditPageState extends State<MyCardEditPage> {
                     ],
                   ),
                   _buildFormSection(
-                    title: 'Tasarım',
-                    subtitle: 'Kart ve metin rengini düzenleyin.',
+                    title: context.l10n.tasarm,
+                    subtitle: context.l10n.kartVeMetinRenginiDzenleyin,
                     colorScheme: colorScheme,
                     textTheme: textTheme,
                     children: [
                       CustomButton(
-                        label: 'Renkleri düzenle',
+                        label: context.l10n.renkleriDzenle,
                         icon: Icons.palette_outlined,
                         onPressed: _showColorCustomizeBottomSheet,
                         style: FilledButton.styleFrom(
@@ -577,7 +579,7 @@ class _MyCardEditPageState extends State<MyCardEditPage> {
                     ],
                   ),
                   CustomButton(
-                    label: 'Kaydet',
+                    label: context.l10n.kaydet,
                     onPressed: _save,
                     isLoading: _saving,
                   ),
@@ -635,7 +637,7 @@ class _MyCardEditPageState extends State<MyCardEditPage> {
         showCountryFlag: true,
         disableLengthCheck: true,
         decoration: InputDecoration(
-          labelText: _labels['phone'],
+          labelText: (_labels(context))['phone'],
           counterText: '',
           filled: true,
           fillColor: colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),

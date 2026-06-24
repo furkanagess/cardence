@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/l10n/l10n_extensions.dart';
 
 import '../../../../core/widgets/molecules/card_color_customize_section.dart';
 import '../../domain/entities/onboarding_card_draft.dart';
@@ -25,7 +26,7 @@ class OnboardingStepPreview extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
 
     return OnboardingStepShell(
-      subtitle: 'Kartınızın dijital kimliğini özelleştirin.',
+      subtitle: context.l10n.kartnznDijitalKimliinizelletirin,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -33,7 +34,7 @@ class OnboardingStepPreview extends StatelessWidget {
           const SizedBox(height: 8),
           Center(
             child: Text(
-              'Kartı çevirmek için sağ alttaki ikona dokunun',
+              context.l10n.kartevirmekIinSaAlttaki,
               style: textTheme.labelMedium?.copyWith(
                 color: colorScheme.onSurfaceVariant,
               ),

@@ -42,6 +42,8 @@ class OnboardingDraftSeeder {
       website: _prefer(draft.website, card.website),
       linkedin: _prefer(draft.linkedin, card.linkedin),
       about: _prefer(draft.about, card.about),
+      school: _prefer(draft.school, card.school),
+      skills: _prefer(draft.skills, card.skills),
       cardId: _prefer(draft.cardId, card.cardId),
       accentColor: _prefer(draft.accentColor, card.accentColor),
       backgroundColor: _prefer(draft.backgroundColor, card.backgroundColor),
@@ -56,7 +58,9 @@ class OnboardingDraftSeeder {
         _has(draft.email) ||
         _has(draft.linkedin) ||
         _has(draft.company) ||
-        _has(draft.title);
+        _has(draft.title) ||
+        _has(draft.school) ||
+        _has(draft.about);
 
     if (!hasLinkedInData) {
       return draft;
@@ -73,6 +77,9 @@ class OnboardingDraftSeeder {
     final backFields = List<String>.from(draft.backVisibleFields);
     if (_has(draft.about) && !backFields.contains('about')) {
       backFields.insert(0, 'about');
+    }
+    if (_has(draft.skills) && !backFields.contains('skills')) {
+      backFields.add('skills');
     }
 
     return draft.copyWith(

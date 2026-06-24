@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/l10n/l10n_extensions.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/atoms/custom_text_field.dart';
@@ -92,10 +93,10 @@ class _SavedCardsScreenToolbarState extends State<SavedCardsScreenToolbar> {
                   ? CustomTextField(
                       controller: _searchController,
                       focusNode: _searchFocusNode,
-                      hintText: 'İsim, şirket, e-posta…',
+                      hintText: context.l10n.isimirketEPosta,
                       prefixIcon: const Icon(Icons.search_rounded, size: 22),
                       suffixIcon: IconButton(
-                        tooltip: 'Aramayı kapat',
+                        tooltip: context.l10n.aramayKapat,
                         onPressed: () => _collapseSearch(clearQuery: true),
                         icon: const Icon(Icons.close_rounded, size: 20),
                         visualDensity: VisualDensity.compact,
@@ -105,15 +106,15 @@ class _SavedCardsScreenToolbarState extends State<SavedCardsScreenToolbar> {
                       onSubmitted: widget.onSearchQueryChanged,
                     )
                   : SegmentedButton<int>(
-                      segments: const [
+                      segments: [
                         ButtonSegment(
                           value: 0,
-                          label: Text('Kart'),
+                          label: Text(context.l10n.kart),
                           icon: Icon(Icons.style_rounded, size: 18),
                         ),
                         ButtonSegment(
                           value: 1,
-                          label: Text('Liste'),
+                          label: Text(context.l10n.liste),
                           icon: Icon(Icons.view_list_rounded, size: 18),
                         ),
                       ],

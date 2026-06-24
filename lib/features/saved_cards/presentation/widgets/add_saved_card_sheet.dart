@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/l10n/l10n_extensions.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/molecules/recommend_app_share_tile.dart';
@@ -68,7 +69,7 @@ class AddSavedCardSheet extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
             Text(
-              'Kart ekle',
+              context.l10n.kartEkle,
               style: textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.w700,
                 color: colorScheme.onSurface,
@@ -91,7 +92,7 @@ class AddSavedCardSheet extends StatelessWidget {
             const SizedBox(height: 20),
             _MethodTile(
               icon: Icons.edit_note_rounded,
-              title: 'Bilgileri elle gir',
+              title: context.l10n.bilgileriElleGir,
               subtitle: quota.manualEntryMethodSubtitle,
               enabled: canAdd && canAddManualSavedCard,
               premiumLocked: !canAddManualSavedCard,
@@ -107,7 +108,7 @@ class AddSavedCardSheet extends StatelessWidget {
             const SizedBox(height: 10),
             _MethodTile(
               icon: Icons.photo_camera_outlined,
-              title: 'Kartvizit fotoğrafla',
+              title: context.l10n.kartvizitFotorafla,
               subtitle: quota.photoScanMethodSubtitle,
               enabled: canAdd && canAddManualSavedCard,
               premiumLocked: !canAddManualSavedCard,
@@ -123,8 +124,8 @@ class AddSavedCardSheet extends StatelessWidget {
             const SizedBox(height: 10),
             _MethodTile(
               icon: Icons.badge_outlined,
-              title: 'Kart ID ile ekle',
-              subtitle: '6 haneli özel kimlik ile ekle',
+              title: context.l10n.kartIdIleEkle,
+              subtitle: context.l10n.msg6HanelizelKimlikIle,
               enabled: canAdd,
               onTap: canAdd
                   ? () => Navigator.of(context).pop(AddSavedCardMethod.cardId)

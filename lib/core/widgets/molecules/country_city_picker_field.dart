@@ -1,4 +1,5 @@
 import 'dart:convert';
+import '../../../core/l10n/l10n_extensions.dart';
 
 import 'package:csc_picker/dropdown_with_search.dart';
 import 'package:csc_picker/model/select_status_model.dart';
@@ -341,7 +342,7 @@ class _CountryCityPickerFieldState extends State<CountryCityPickerField> {
           enabled: countryEnabled,
           onTap: () => _openPicker(
             title: widget.countryLabel,
-            placeholder: 'Ülke ara',
+            placeholder: context.l10n.lkeAra,
             items: _countryOptions,
             onSelected: _onCountryPicked,
           ),
@@ -354,7 +355,7 @@ class _CountryCityPickerFieldState extends State<CountryCityPickerField> {
           enabled: stateEnabled,
           onTap: () => _openPicker(
             title: widget.stateLabel,
-            placeholder: 'İl ara',
+            placeholder: context.l10n.ilAra,
             items: _stateOptions,
             onSelected: _onStatePicked,
           ),
@@ -367,7 +368,7 @@ class _CountryCityPickerFieldState extends State<CountryCityPickerField> {
           enabled: districtEnabled,
           onTap: () => _openPicker(
             title: widget.districtLabel,
-            placeholder: 'İlçe ara',
+            placeholder: context.l10n.ileAra,
             items: _districtOptions,
             onSelected: _onDistrictPicked,
           ),

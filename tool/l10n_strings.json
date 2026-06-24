@@ -1,0 +1,3698 @@
+[
+  {
+    "key": "appApple",
+    "tr": "Apple",
+    "en": "Apple",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "appCardence",
+    "tr": "Cardence",
+    "en": "Cardence",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "appGoogle",
+    "tr": "Google",
+    "en": "Google",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "appLinkedin",
+    "tr": "LinkedIn",
+    "en": "LinkedIn",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "appShareConnect",
+    "tr": "Share & Connect",
+    "en": "Share & Connect",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "appTelefon",
+    "tr": "Telefon",
+    "en": "Phone",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "auth1HizmetinKapsami",
+    "tr": "1. Hizmetin kapsamı",
+    "en": "1. Scope of service",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "auth1ToplananVeriler",
+    "tr": "1. Toplanan veriler",
+    "en": "1. Data collected",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "auth2HesapOlusturma",
+    "tr": "2. Hesap oluşturma",
+    "en": "2. Account creation",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "auth2VerilerinKullanimi",
+    "tr": "2. Verilerin kullanımı",
+    "en": "2. Use of data",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "auth3KabulEdilebilirKullanim",
+    "tr": "3. Kabul edilebilir kullanım",
+    "en": "3. Acceptable use",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "auth3VeriPaylasimi",
+    "tr": "3. Veri paylaşımı",
+    "en": "3. Data sharing",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "auth4FikriMulkiyet",
+    "tr": "4. Fikri mülkiyet",
+    "en": "4. Intellectual property",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "auth4SaklamaSuresi",
+    "tr": "4. Saklama süresi",
+    "en": "4. Retention period",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "auth5Haklariniz",
+    "tr": "5. Haklarınız",
+    "en": "5. Your rights",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "auth5HizmetDegisiklikleri",
+    "tr": "5. Hizmet değişiklikleri",
+    "en": "5. Service changes",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "auth6Guvenlik",
+    "tr": "6. Güvenlik",
+    "en": "6. Security",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "auth6SorumlulukSiniri",
+    "tr": "6. Sorumluluk sınırı",
+    "en": "6. Limitation of liability",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "auth7Iletisim",
+    "tr": "7. İletişim",
+    "en": "7. Contact",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "auth7PolitikaGuncellemeleri",
+    "tr": "7. Politika güncellemeleri",
+    "en": "7. Policy updates",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "authCardenceDijitalKartvizitOlusturmaPaylasma2",
+    "tr": "Cardence; dijital kartvizit oluşturma, paylaşma ve yönetme hizmeti sunar. Uygulamayı kullanarak bu koşulları kabul etmiş sayılırsınız.",
+    "en": "Cardence provides digital business card creation, sharing, and management. By using the app you agree to these terms.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "authCardenceKatilin",
+    "tr": "Cardence'a Katılın",
+    "en": "Join Cardence",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "authCardenceMarkasiArayuzuYazilimiCardence2",
+    "tr": "Cardence markası, arayüzü ve yazılımı Cardence'e aittir. Oluşturduğunuz kartvizit içeriklerinin hakları size aittir; hizmeti sunmak için gerekli sınırlı kullanım lisansı vermiş olursunuz.",
+    "en": "The Cardence brand, interface, and software belong to Cardence. You own your card content and grant a limited license needed to provide the service.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "authDestekBolumundenBizeUlasabilirsiniz",
+    "tr": "Destek bölümünden bize ulaşabilirsiniz.",
+    "en": "Contact us via the Support section in the app.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "authDogrulamaKodunuGirin",
+    "tr": "Doğrulama kodunu girin.",
+    "en": "Enter the verification code.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "authForgotpassword",
+    "tr": "/ForgotPassword",
+    "en": "/ForgotPassword",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "authGecerliPostaGirin",
+    "tr": "Geçerli bir e-posta girin.",
+    "en": "Enter a valid email address.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "authGizlilikPolitikasi",
+    "tr": "Gizlilik Politikası",
+    "en": "Privacy Policy",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "authHesabinizAktifOlduguSureceVerileriniz2",
+    "tr": "Hesabınız aktif olduğu sürece verileriniz saklanır. Hesabınızı sildiğinizde, yasal yükümlülükler dışında verileriniz makul süre içinde silinir veya anonimleştirilir.",
+    "en": "Your data is kept while your account is active. When you delete your account, data is deleted or anonymized within a reasonable time except where law requires retention.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "authHesapOlustururkenAdSoyadPosta2",
+    "tr": "Hesap oluştururken ad soyad, e-posta ve isteğe bağlı telefon numaranızı toplarız. Kartvizit bilgileriniz ve uygulama kullanımınıza ilişkin teknik veriler hizmetin sunulması için işlenir.",
+    "en": "When you create an account we collect your name, email, and optional phone number. Your business card details and technical usage data are processed to provide the service.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "authHizmetOlduguGibiSunulurMakul2",
+    "tr": "Hizmet \"olduğu gibi\" sunulur. Makul özeni gösteririz; ancak kesintisiz veya hatasız çalışma garantisi verilmez. Yasal olarak izin verilen ölçüde dolaylı zararlardan sorumlu tutulamayız.",
+    "en": "The service is provided \"as is.\" We use reasonable care but do not guarantee uninterrupted or error-free operation. To the extent permitted by law we are not liable for indirect damages.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "authHizmetiYasaDisiYanilticiVeya2",
+    "tr": "Hizmeti yasa dışı, yanıltıcı veya başkalarının haklarını ihlal edecek şekilde kullanamazsınız. Kartvizit içeriklerinden yalnızca siz sorumlusunuz.",
+    "en": "You may not use the service unlawfully, deceptively, or in ways that infringe others' rights. You alone are responsible for your card content.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "authKayitSirasindaVerdiginizBilgilerinDogru2",
+    "tr": "Kayıt sırasında verdiğiniz bilgilerin doğru ve güncel olması sizin sorumluluğunuzdadır. Hesap güvenliğinizi korumak için şifrenizi üçüncü kişilerle paylaşmamalısınız.",
+    "en": "You are responsible for providing accurate, up-to-date registration information. Do not share your password with others.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "authKisiselVerileriniziUcuncuTaraflaraSatmayiz2",
+    "tr": "Kişisel verilerinizi üçüncü taraflara satmayız. Yasal zorunluluklar, hizmet sağlayıcıları (barındırma, analitik) ve açık rızanız kapsamında sınırlı paylaşım yapılabilir.",
+    "en": "We do not sell your personal data to third parties. Limited sharing may occur for legal obligations, service providers (hosting, analytics), and with your explicit consent.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "authKullanimKosullari",
+    "tr": "Kullanım Koşulları",
+    "en": "Terms of Use",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "authKullanimKosullariHakkindaSorularinizUygulama2",
+    "tr": "Kullanım koşulları hakkında sorularınız için uygulama içindeki Destek bölümünden bize ulaşabilirsiniz.",
+    "en": "For questions about these terms, contact us via Support in the app.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "authKvkkKapsamindaVerilerinizeErismeDuzeltme2",
+    "tr": "KVKK kapsamında verilerinize erişme, düzeltme, silme ve işlemeyi kısıtlama haklarına sahipsiniz. Taleplerinizi Destek bölümünden iletebilirsiniz.",
+    "en": "Under applicable privacy law you may access, correct, delete, or restrict processing of your data. Submit requests via Support.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "authLinkedinDevamEt",
+    "tr": "LinkedIn ile devam et",
+    "en": "Continue with LinkedIn",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "authLoginwithlinkedin",
+    "tr": "/LoginWithLinkedIn",
+    "en": "/LoginWithLinkedIn",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "authLoginwithphone",
+    "tr": "/LoginWithPhone",
+    "en": "/LoginWithPhone",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "authNiKabulEtmisSayilirsiniz",
+    "tr": "'nı kabul etmiş sayılırsınız.",
+    "en": "you agree to them.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "authOturumSuresiDolduLutfenTekrar",
+    "tr": "Oturum süresi doldu. Lütfen tekrar giriş yapın.",
+    "en": "Session expired. Please sign in again.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "authOturumYenilenemedi",
+    "tr": "Oturum yenilenemedi.",
+    "en": "Oturum yenilenemedi.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "authOzellikleriGelistirmekVeyaYasalYukumlulukleri2",
+    "tr": "Özellikleri geliştirmek veya yasal yükümlülükleri karşılamak için hizmette değişiklik yapabiliriz. Önemli güncellemeler uygulama içinden veya e-posta yoluyla bildirilebilir.",
+    "en": "We may change the service to improve features or meet legal obligations. Important updates may be communicated in-app or by email.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "authPazarlamaIletisimiYalnizcaAcikRizaniz",
+    "tr": "Pazarlama iletişimi yalnızca açık rızanız varsa gönderilir.",
+    "en": "Marketing messages are sent only with your explicit consent.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "authPolitikayiZamanZamanGuncelleyebilirizOnemli2",
+    "tr": "Bu politikayı zaman zaman güncelleyebiliriz. Önemli değişiklikler uygulama içinden bildirilir. Güncellemeden sonra hizmeti kullanmaya devam etmeniz yeni politikayı kabul ettiğiniz anlamına gelir.",
+    "en": "We may update this policy from time to time. Material changes will be announced in the app. Continued use after an update means you accept the new policy.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "authRegister",
+    "tr": "/Register",
+    "en": "/Register",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "authResetpassword",
+    "tr": "/ResetPassword",
+    "en": "/ResetPassword",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "authSifre",
+    "tr": "Şifre",
+    "en": "Password",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "authSifreEnAzKarakterOlmalidir",
+    "tr": "Şifre en az {minPasswordLength} karakter olmalıdır.",
+    "en": "Password must be at least {minPasswordLength} characters.",
+    "hasPlaceholders": true
+  },
+  {
+    "key": "authSifrelerEslesmiyor",
+    "tr": "Şifreler eşleşmiyor.",
+    "en": "Passwords do not match.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "authUploadprofilephoto",
+    "tr": "/UploadProfilePhoto",
+    "en": "/UploadProfilePhoto",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "authUygulamayiKullanarakKosullariKabulEtmis",
+    "tr": "Uygulamayı kullanarak bu koşulları kabul etmiş sayılırsınız.",
+    "en": "By using the app you agree to these terms.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "authVerilerinizHesabiniziYonetmekKartvizitleriniziPaylasmak2",
+    "tr": "Verileriniz hesabınızı yönetmek, kartvizitlerinizi paylaşmak, güvenliği sağlamak ve hizmeti iyileştirmek amacıyla kullanılır. Pazarlama iletişimi yalnızca açık rızanız varsa gönderilir.",
+    "en": "Your data is used to manage your account, share your business cards, maintain security, and improve the service. Marketing messages are sent only with your explicit consent.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "authVerileriniziKorumakSifrelemeErisimKontrolu2",
+    "tr": "Verilerinizi korumak için şifreleme, erişim kontrolü ve düzenli güvenlik değerlendirmeleri uygularız. Hiçbir sistem %100 güvenli değildir; güçlü bir şifre kullanmanızı öneririz.",
+    "en": "We use encryption, access controls, and regular security reviews. No system is 100% secure; we recommend using a strong password.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "businessCardsBusinesscards",
+    "tr": "/BusinessCards",
+    "en": "/BusinessCards",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "businessCardsKartGuncellenemedi",
+    "tr": "Kart güncellenemedi.",
+    "en": "Could not update card.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "businessCardsKartKaydedilemedi",
+    "tr": "Kart kaydedilemedi.",
+    "en": "Could not save card.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "businessCardsKartKimligiOlusturulamadiLutfenTekrar",
+    "tr": "Kart kimliği oluşturulamadı. Lütfen tekrar deneyin.",
+    "en": "Could not generate card ID. Please try again.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "businessCardsKartSunucuyaKaydedilemediLutfenTekrar",
+    "tr": "Kart sunucuya kaydedilemedi. Lütfen tekrar deneyin.",
+    "en": "Could not save card to server. Please try again.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "businessCardsKartlarAlinamadi",
+    "tr": "Kartlar alınamadı.",
+    "en": "Could not load cards.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "businessCardsSavebusinesscard",
+    "tr": "/SaveBusinessCard",
+    "en": "/SaveBusinessCard",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "businessCardsUpdatebusinesscard",
+    "tr": "/UpdateBusinessCard",
+    "en": "/UpdateBusinessCard",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "coreCode",
+    "tr": "Code",
+    "en": "Code",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "coreEtkinlikAdiBosOlamaz",
+    "tr": "Etkinlik adı boş olamaz",
+    "en": "Event name cannot be empty",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "coreGecerliTelefonNumarasiGirin",
+    "tr": "Geçerli bir telefon numarası girin.",
+    "en": "Enter a valid phone number.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "coreIndir",
+    "tr": "İndir: {storeUrl}",
+    "en": "Download: {storeUrl}",
+    "hasPlaceholders": true
+  },
+  {
+    "key": "coreIptal",
+    "tr": "İptal",
+    "en": "Cancel",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "coreIsimdeEtkinlikGrubuZatenVar",
+    "tr": "Bu isimde bir etkinlik grubu zaten var",
+    "en": "An event group with this name already exists",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "coreOturumBulunamadi",
+    "tr": "Oturum bulunamadı",
+    "en": "Session not found",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "coreOturumSuresiDoldu",
+    "tr": "Oturum süresi doldu",
+    "en": "Session expired",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "corePremiumCuzdaninizEtkinlestirildiArtikTum",
+    "tr": "Premium cüzdanınız etkinleştirildi. Artık tüm premium özelliklerden yararlanabilirsiniz.",
+    "en": "Your Premium wallet is active. Enjoy all premium features.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "coreSatinAlimBasarili",
+    "tr": "Satın alım başarılı",
+    "en": "Purchase successful",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "coreSessionNotFound",
+    "tr": "Session not found",
+    "en": "Session not found",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "coreSunucuYanitiOkunamadi",
+    "tr": "Sunucu yanıtı okunamadı ({statusCode}).",
+    "en": "Could not read server response ({statusCode}).",
+    "hasPlaceholders": true
+  },
+  {
+    "key": "coreTarihSecin",
+    "tr": "Tarih seçin",
+    "en": "Select date",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "coreTelefonNumarasiEnFazlaKarakter",
+    "tr": "Telefon numarası en fazla {maxPhoneLength} karakter olabilir.",
+    "en": "Phone number can be at most {maxPhoneLength} characters.",
+    "hasPlaceholders": true
+  },
+  {
+    "key": "coreYetenekEkleOrnFlutter",
+    "tr": "Yetenek ekle (örn. Flutter)",
+    "en": "Add skill (e.g. Flutter)",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "coreYetenekler",
+    "tr": "Yetenekler",
+    "en": "Skills",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "eventGroupsDeleteeventgroup",
+    "tr": "/DeleteEventGroup",
+    "en": "/DeleteEventGroup",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "eventGroupsEtkinliginAdiniKonumunuTarihiniGirin",
+    "tr": "Etkinliğin adını, konumunu ve tarihini girin.",
+    "en": "Enter the event name, location, and date.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "eventGroupsEtkinlikGrubuOlusturuldu",
+    "tr": "\"{name}\" etkinlik grubu oluşturuldu",
+    "en": "\"{name}\" event group created",
+    "hasPlaceholders": true
+  },
+  {
+    "key": "eventGroupsFotografEkle",
+    "tr": "Fotoğraf ekle",
+    "en": "Add photo",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "eventGroupsFotografiDegistir",
+    "tr": "Fotoğrafı değiştir",
+    "en": "Change photo",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "eventGroupsGrubuKartlaOlusturuldu",
+    "tr": "\"{name}\" grubu {cardCount} kartla oluşturuldu",
+    "en": "\"{name}\" group created with {cardCount} cards",
+    "hasPlaceholders": true
+  },
+  {
+    "key": "eventGroupsGrubuOlustur",
+    "tr": "Grubu oluştur",
+    "en": "Create group",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "eventGroupsGrubunaEklenecekKayitliKartlariSecin",
+    "tr": "{eventGroupName} grubuna eklenecek kayıtlı kartları seçin.",
+    "en": "Select saved cards to add to the {eventGroupName} group.",
+    "hasPlaceholders": true
+  },
+  {
+    "key": "eventGroupsGruplaraEkle",
+    "tr": "Gruplara ekle",
+    "en": "Add to groups",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "eventGroupsGruptakiKartBaglantilariKaldirilir",
+    "tr": "Gruptaki kart bağlantıları kaldırılır.",
+    "en": "Card links in the group will be removed.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "eventGroupsHenuzKartSecilmedi",
+    "tr": "Henüz kart seçilmedi",
+    "en": "No cards selected yet",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "eventGroupsIstersenizKartSecmedenGrubuOlusturabilirsiniz",
+    "tr": "İsterseniz kart seçmeden de grubu oluşturabilirsiniz.",
+    "en": "You can create the group without selecting cards.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "eventGroupsKart",
+    "tr": "Kart {cardId}",
+    "en": "Kart {cardId}",
+    "hasPlaceholders": true
+  },
+  {
+    "key": "eventGroupsKartGrubaEklendi",
+    "tr": "{addedCount} kart gruba eklendi",
+    "en": "{addedCount} cards added to group",
+    "hasPlaceholders": true
+  },
+  {
+    "key": "eventGroupsKartSecildi",
+    "tr": "{selectedCount} kart seçildi",
+    "en": "{selectedCount} cards selected",
+    "hasPlaceholders": true
+  },
+  {
+    "key": "eventGroupsKartiGrubaEkle",
+    "tr": "{selectedCount} kartı gruba ekle",
+    "en": "Add {selectedCount} cards to group",
+    "hasPlaceholders": true
+  },
+  {
+    "key": "eventGroupsKartininEklenebilecegiGruplariIsaretleyin",
+    "tr": "{cardTitle} kartının eklenebileceği grupları işaretleyin.",
+    "en": "Select groups where the {cardTitle} card can be added.",
+    "hasPlaceholders": true
+  },
+  {
+    "key": "eventGroupsKartlaOlustur",
+    "tr": "{selectedCount} kartla oluştur",
+    "en": "Create with {selectedCount} cards",
+    "hasPlaceholders": true
+  },
+  {
+    "key": "eventGroupsKartlariGrubaEkle",
+    "tr": "Kartları gruba ekle",
+    "en": "Add cards to group",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "eventGroupsKayitliKart",
+    "tr": "{cardCount} kayıtlı kart",
+    "en": "{cardCount} saved cards",
+    "hasPlaceholders": true
+  },
+  {
+    "key": "eventGroupsLinkeventgroupcards",
+    "tr": "/LinkEventGroupCards",
+    "en": "/LinkEventGroupCards",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "eventGroupsPremiumRequired",
+    "tr": "PREMIUM_REQUIRED",
+    "en": "PREMIUM_REQUIRED",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "eventGroupsSaveeventgroup",
+    "tr": "/SaveEventGroup",
+    "en": "/SaveEventGroup",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "eventGroupsUnlinkeventgroupcard",
+    "tr": "/UnlinkEventGroupCard",
+    "en": "/UnlinkEventGroupCard",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "eventGroupsUploadeventgroupphotoId",
+    "tr": "/UploadEventGroupPhoto?id={encodeQueryComponentgroupId}",
+    "en": "/UploadEventGroupPhoto?id={encodeQueryComponentgroupId}",
+    "hasPlaceholders": true
+  },
+  {
+    "key": "l10n1KartKaldi",
+    "tr": "1 kart kaldı",
+    "en": "1 card remaining",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10n5xxXxxXxXx",
+    "tr": "5XX XXX XX XX",
+    "en": "5XX XXX XX XX",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10n5xxXxxXxXx2",
+    "tr": "5xx xxx xx xx",
+    "en": "5xx xxx xx xx",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10n6HaneliKod",
+    "tr": "6 haneli kod",
+    "en": "6-digit code",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10n6HaneliOzelKimlikEkle",
+    "tr": "6 haneli özel kimlik ile ekle",
+    "en": "Add with 6-digit unique ID",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nAcik",
+    "tr": "Açık",
+    "en": "Light",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nAdSoyad",
+    "tr": "Ad Soyad",
+    "en": "Full name",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nAdYalnizcaHarfIcermeliEn",
+    "tr": "Ad yalnızca harf içermeli (en az 2 karakter)",
+    "en": "First name must contain only letters (at least 2 characters)",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nAdZorunludur",
+    "tr": "Ad zorunludur",
+    "en": "First name is required",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nAdiniz",
+    "tr": "Adınız",
+    "en": "Your name",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nAdres",
+    "tr": "Adres",
+    "en": "Address",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nAdresSosyalMedyaEtkinlikGibi",
+    "tr": "Adres, sosyal medya ve etkinlik gibi isteğe bağlı alanlar.",
+    "en": "Optional fields such as address, social media, and events.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nAiConsultant",
+    "tr": "AI Consultant",
+    "en": "AI Consultant",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nAlanCardenceKartindaDuzenlenemez",
+    "tr": "Bu alan Cardence kartında düzenlenemez",
+    "en": "This field cannot be edited on a Cardence card",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nAlaniKaldir",
+    "tr": "Alanı kaldır",
+    "en": "Remove field",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nAppStorePlayStoreUzerinden",
+    "tr": "App Store / Play Store üzerinden güvenli ödeme.",
+    "en": "Secure payment via App Store / Play Store.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nAppStoreVeyaPlayStore",
+    "tr": "App Store veya Play Store\\",
+    "en": "App Store or Play Store",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nAppStoreVeyaPlayStore2",
+    "tr": "App Store veya Play Store'da puan verin",
+    "en": "Rate us on the App Store or Play Store",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nAramaVeyaFiltreKriterleriniDegistirin",
+    "tr": "Arama veya filtre kriterlerini değiştirin.",
+    "en": "Change your search or filter criteria.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nAramayaUyanKartYok",
+    "tr": "Aramaya uyan kart yok",
+    "en": "No cards match your search",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nAramayiKapat",
+    "tr": "Aramayı kapat",
+    "en": "Close search",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nAramayiTemizle",
+    "tr": "Aramayı temizle",
+    "en": "Clear search",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nArkaPlanMetinRengiKart",
+    "tr": "Arka plan, metin rengi ve kart stili.",
+    "en": "Background, text color, and card style.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nArkaPlanMetinRengiSecimleri",
+    "tr": "Arka plan ve metin rengi seçimleri anında kaydedilir.",
+    "en": "Background and text color choices are saved instantly.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nArkaYuz",
+    "tr": "Arka yüz",
+    "en": "Back side",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nArkaYuzFotografiYok",
+    "tr": "Arka yüz fotoğrafı yok",
+    "en": "No back photo",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nArkaYuzdeGoster",
+    "tr": "Arka yüzde göster",
+    "en": "Show on back",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nArkadaslarinaOner",
+    "tr": "Arkadaşlarına öner",
+    "en": "Recommend to friends",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nArtDirector",
+    "tr": "Art Director",
+    "en": "Art Director",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nAyarlar",
+    "tr": "Ayarlar",
+    "en": "Settings",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nBaglantiHatasiLutfenTekrarDeneyin",
+    "tr": "Bağlantı hatası. Lütfen tekrar deneyin.",
+    "en": "Connection error. Please try again.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nBaslangic",
+    "tr": "Başlangıç",
+    "en": "Getting started",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nBeceriEkle",
+    "tr": "Beceri ekle",
+    "en": "Add skill",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nBeceriler",
+    "tr": "Beceriler",
+    "en": "Skills",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nBilgiEkle",
+    "tr": "Bilgi ekle",
+    "en": "Add info",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nBilgiler",
+    "tr": "Bilgiler",
+    "en": "Details",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nBilgilerOkunuyor",
+    "tr": "Bilgiler okunuyor…",
+    "en": "Reading details…",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nBilgileriDuzenle",
+    "tr": "Bilgileri düzenle",
+    "en": "Edit details",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nBilgileriElleGir",
+    "tr": "Bilgileri elle gir",
+    "en": "Enter details manually",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nBilgileriOku",
+    "tr": "Bilgileri oku",
+    "en": "Read details",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nBilinmiyor",
+    "tr": "Bilinmiyor",
+    "en": "Unknown",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nBirakmakKonumuSecin",
+    "tr": "Bırakmak için konumu seçin",
+    "en": "Select a position to drop",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nBiziDegerlendirin",
+    "tr": "Bizi değerlendirin",
+    "en": "Rate us",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nBrandStrategist",
+    "tr": "Brand Strategist",
+    "en": "Brand Strategist",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nCardence",
+    "tr": "Cardence\\",
+    "en": "Cardence",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nCardenceDijitalKartvizitleriniziOlusturabilirPaylasabilir",
+    "tr": "Cardence ile dijital kartvizitlerinizi oluşturabilir, paylaşabilir ve cüzdanınızda yönetebilirsiniz.",
+    "en": "With Cardence you can create, share, and manage your digital business cards in your wallet.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nCardencePaylasBirlikteBaglantiKurun",
+    "tr": "Cardence'i paylaş, birlikte bağlantı kurun",
+    "en": "Share Cardence and connect together",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nCardenceProOl",
+    "tr": "Cardence Pro ol",
+    "en": "Get Cardence Pro",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nCik",
+    "tr": "Çık",
+    "en": "Leave",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nCikisYap",
+    "tr": "Çıkış yap",
+    "en": "Log out",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nCuzdanKotaniz",
+    "tr": "Cüzdan kotanız",
+    "en": "Your wallet quota",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nCuzdanKotasiAlinamadi",
+    "tr": "Cüzdan kotası alınamadı.",
+    "en": "Could not load wallet quota.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nCuzdanaEklendi",
+    "tr": "Cüzdana Eklendi",
+    "en": "Added to Wallet",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nDahaFazlaKisiKartiSaklayin",
+    "tr": "Daha fazla kişi kartı saklayın ve etkinliklerinizi ölçeklendirin.",
+    "en": "Let more people save your card and scale your events.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nDataScientist",
+    "tr": "Data Scientist",
+    "en": "Data Scientist",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nDegisikliklerOnizlemeyeAnindaYansirKaydetmek",
+    "tr": "Değişiklikler önizlemeye anında yansır; kaydetmek için Kaydet\\",
+    "en": "Changes reflect in the preview instantly; tap Save to keep them.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nDegisikliklerOnizlemeyeAnindaYansirKaydetmek2",
+    "tr": "Değişiklikler önizlemeye anında yansır; kaydetmek için Kaydet'e basın.",
+    "en": "Changes reflect in the preview instantly; tap Save to keep them.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nDepartman",
+    "tr": "Departman",
+    "en": "Department",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nDestek",
+    "tr": "Destek",
+    "en": "Support",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nDestekGizlilikUygulamaBilgileri",
+    "tr": "Destek, gizlilik ve uygulama bilgileri",
+    "en": "Support, privacy, and app info",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nDestekTalebiGonderilemedi",
+    "tr": "Destek talebi gönderilemedi.",
+    "en": "Could not send support request.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nDestekTalebiGonderilemediLutfenTekrar",
+    "tr": "Destek talebi gönderilemedi. Lütfen tekrar deneyin.",
+    "en": "Could not send support request. Please try again.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nDestekTalebinizAlindiEnKisa",
+    "tr": "Destek talebiniz alındı. En kısa sürede dönüş yapacağız.",
+    "en": "Your support request was received. We will get back to you soon.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nDestekYardim",
+    "tr": "Destek ve yardım",
+    "en": "Support & help",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nDevam",
+    "tr": "Devam",
+    "en": "Continue",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nDevopsEngineer",
+    "tr": "DevOps Engineer",
+    "en": "DevOps Engineer",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nDigerKisiQr",
+    "tr": "Diğer kişi bu QR\\",
+    "en": "Others can scan this QR with Cardence to save your card.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nDigerKisiQrCardenceOkutarak",
+    "tr": "Diğer kişi bu QR'ı Cardence ile okutarak kartınızı kaydedebilir.",
+    "en": "Others can scan this QR with Cardence to save your card.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nDogrulamaKodu",
+    "tr": "Doğrulama kodu",
+    "en": "Verification code",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nDogumGunu",
+    "tr": "Doğum günü",
+    "en": "Birthday",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nDogumGunuSecin",
+    "tr": "Doğum günü seçin",
+    "en": "Select birthday",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nDuzenle",
+    "tr": "Duzenle",
+    "en": "Edit",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nDuzenle2",
+    "tr": "Düzenle",
+    "en": "Edit",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nEkBilgiler",
+    "tr": "Ek bilgiler",
+    "en": "Additional info",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nEkle",
+    "tr": "Ekle",
+    "en": "Add",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nEklenmeTarihi",
+    "tr": "Eklenme tarihi",
+    "en": "Date added",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nEnFazlaAlanSecin",
+    "tr": "En fazla {max} alan seçin",
+    "en": "Select up to {max} fields",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nEtkinlikAdi",
+    "tr": "Etkinlik adı",
+    "en": "Event name",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nEtkinlikEkleOrnWebSummit",
+    "tr": "Etkinlik ekle (örn. Web Summit)",
+    "en": "Add event (e.g. Web Summit)",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nEtkinlikFotografi",
+    "tr": "Etkinlik fotoğrafı",
+    "en": "Event photo",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nEtkinlikFotografiYuklenemedi",
+    "tr": "Etkinlik fotoğrafı yüklenemedi.",
+    "en": "Could not upload event photo.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nEtkinlikGrubu",
+    "tr": "Etkinlik Grubu",
+    "en": "Event Group",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nEtkinlikGrubu2",
+    "tr": "Etkinlik grubu",
+    "en": "Event group",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nEtkinlikGrubuAlinamadi",
+    "tr": "Etkinlik grubu alınamadı.",
+    "en": "Could not load event group.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nEtkinlikGrubuEkle",
+    "tr": "Etkinlik grubu ekle",
+    "en": "Add event group",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nEtkinlikGrubuOlusturulamadi",
+    "tr": "Etkinlik grubu oluşturulamadı.",
+    "en": "Could not create event group.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nEtkinlikGrubuSec",
+    "tr": "Etkinlik grubu seç",
+    "en": "Select event group",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nEtkinlikGrubuSilinemedi",
+    "tr": "Etkinlik grubu silinemedi.",
+    "en": "Could not delete event group.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nEtkinlikGruplari",
+    "tr": "Etkinlik grupları",
+    "en": "Event groups",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nEtkinlikGruplariAlinamadi",
+    "tr": "Etkinlik grupları alınamadı.",
+    "en": "Could not load event groups.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nEtkinlikTarihi",
+    "tr": "Etkinlik tarihi",
+    "en": "Event date",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nFarkliAramaTerimiDeneyin",
+    "tr": "Farklı bir arama terimi deneyin.",
+    "en": "Try a different search term.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nFarkliFiltreDeneyinVeyaFiltreleri",
+    "tr": "Farklı filtre deneyin veya filtreleri temizleyin.",
+    "en": "Try different filters or clear filters.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nFiltreler",
+    "tr": "Filtreler",
+    "en": "Filters",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nFiltreleriTemizle",
+    "tr": "Filtreleri temizle",
+    "en": "Clear filters",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nFiltreyeUyanKartYok",
+    "tr": "Filtreye uyan kart yok",
+    "en": "No cards match your filters",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nFinansAnalisti",
+    "tr": "Finans Analisti",
+    "en": "Finance Analyst",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nFotografiKaldir",
+    "tr": "Fotoğrafı kaldır",
+    "en": "Remove photo",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nFrontendDeveloper",
+    "tr": "Frontend Developer",
+    "en": "Frontend Developer",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nGaleri",
+    "tr": "Galeri",
+    "en": "Gallery",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nGecerliPostaAdresiGirin",
+    "tr": "Geçerli bir e-posta adresi girin",
+    "en": "Enter a valid email address",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nGecerliPozisyonGirin",
+    "tr": "Geçerli bir pozisyon girin",
+    "en": "Enter a valid position",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nGecerliSirketAdiGirin",
+    "tr": "Geçerli bir şirket adı girin",
+    "en": "Enter a valid company name",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nGecersizKartKimligi",
+    "tr": "Geçersiz kart kimliği.",
+    "en": "Invalid card ID.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nGecersizKartYaniti",
+    "tr": "Geçersiz kart yanıtı.",
+    "en": "Invalid card response.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nGecersizOturumYaniti",
+    "tr": "Geçersiz oturum yanıtı.",
+    "en": "Invalid session response.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nGecersizProfilYaniti",
+    "tr": "Geçersiz profil yanıtı.",
+    "en": "Invalid profile response.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nGenel",
+    "tr": "Genel",
+    "en": "General",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nGeri",
+    "tr": "Geri",
+    "en": "Back",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nGeriYuklenecekSatinAlimBulunamadi",
+    "tr": "Geri yüklenecek satın alım bulunamadı.",
+    "en": "No purchases found to restore.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nGirisYap",
+    "tr": "Giriş yap",
+    "en": "Sign in",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nGizlilikPolitikasi",
+    "tr": "Gizlilik politikası",
+    "en": "Privacy policy",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nGorunum",
+    "tr": "Görünüm",
+    "en": "Appearance",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nGrowthManager",
+    "tr": "Growth Manager",
+    "en": "Growth Manager",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nGrubaEkle",
+    "tr": "Gruba ekle",
+    "en": "Add to group",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nGrubaEklenecekKayitliKartKalmadi",
+    "tr": "Gruba eklenecek kayıtlı kart kalmadı",
+    "en": "No saved cards left to add to the group",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nGrubuSil",
+    "tr": "Bu grubu sil",
+    "en": "Delete this group",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nGrubuSil2",
+    "tr": "Grubu sil",
+    "en": "Delete group",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nGruptaKartYok",
+    "tr": "Bu grupta kart yok",
+    "en": "No cards in this group",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nGuvenliPaylasim",
+    "tr": "Güvenli Paylaşım",
+    "en": "Secure sharing",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nGuvenliginizHesabinizaTekrarGirisYapmaniz",
+    "tr": "Güvenliğiniz için hesabınıza tekrar giriş yapmanız gerekiyor.",
+    "en": "For your security, you need to sign in again.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nHakkimdaHerZamanGosterilir",
+    "tr": "Hakkımda her zaman gösterilir.",
+    "en": "About me is always shown.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nHakkinda",
+    "tr": "Hakkında",
+    "en": "About",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nHenuzBilgiYok",
+    "tr": "Henüz bilgi yok",
+    "en": "No info yet",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nHenuzEtkinlikGrubuYok",
+    "tr": "Henüz etkinlik grubu yok",
+    "en": "No event groups yet",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nHenuzEtkinlikGrubuYokEtkinlik",
+    "tr": "Henüz etkinlik grubu yok. Etkinlik grupları sekmesinden yeni grup oluşturabilirsiniz.",
+    "en": "No event groups yet. Create a new group from the Event groups tab.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nHenuzKartYok",
+    "tr": "Henüz kart yok",
+    "en": "No cards yet",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nHenuzKartinYok",
+    "tr": "Henüz kartın yok",
+    "en": "You have no card yet",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nHenuzKartinizYok",
+    "tr": "Henüz kartınız yok",
+    "en": "You have no cards yet",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nHenuzKartinizYokProfildenKart",
+    "tr": "Henüz kartınız yok. Profilden kart oluşturduktan sonra görünüm ayarlarını yapabilirsiniz.",
+    "en": "You have no cards yet. After creating a card from Profile, you can adjust appearance settings.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nHenuzKaydedilmisKartYokKaydedilen",
+    "tr": "Henüz kaydedilmiş kart yok. Kaydedilen Kartlar sekmesinden QR ile kart ekleyebilirsiniz.",
+    "en": "No saved cards yet. Add a card via QR from the Saved Cards tab.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nHenuzKayitliKartYok",
+    "tr": "Henüz kayıtlı kart yok",
+    "en": "No saved cards yet",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nHesabinizaGirisYapin",
+    "tr": "Hesabınıza giriş yapın",
+    "en": "Sign in to your account",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nHrManager",
+    "tr": "HR Manager",
+    "en": "HR Manager",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nIlAra",
+    "tr": "İl ara",
+    "en": "Search province",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nIlceAra",
+    "tr": "İlçe ara",
+    "en": "Search district",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nIletisim",
+    "tr": "İletişim",
+    "en": "Contact",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nIletisimPostaAdresiniz",
+    "tr": "İletişim için e-posta adresiniz",
+    "en": "Your email for contact",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nIletisimProfilKisiselNotBilgilerini",
+    "tr": "İletişim, profil ve kişisel not bilgilerini ekleyin",
+    "en": "Add contact, profile, and personal note details",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nIlkKartiniziOlusturunIsEtkinlik",
+    "tr": "İlk kartınızı oluşturun; iş, etkinlik veya kişisel kullanım için ayrı kartlar ekleyebilirsiniz.",
+    "en": "Create your first card; add separate cards for work, events, or personal use.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nInstagram",
+    "tr": "Instagram",
+    "en": "Instagram",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nIsBilgileri",
+    "tr": "İş bilgileri",
+    "en": "Work info",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nIsOrtakliklariGuvenlikBildirimleriGereklidir",
+    "tr": "İş ortaklıkları ve güvenlik bildirimleri için gereklidir.",
+    "en": "Required for partnerships and security notifications.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nIsimSirketPosta",
+    "tr": "İsim, şirket, e-posta…",
+    "en": "Name, company, email…",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nIslemBasarisiz",
+    "tr": "İşlem başarısız.",
+    "en": "Operation failed.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nIstegeBagliEtkinligiListedeGorsel",
+    "tr": "İsteğe bağlı — etkinliği listede görsel olarak ayırt edin.",
+    "en": "Optional — visually distinguish the event in the list.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nIstersenWebSiteniLinkedinProfilini",
+    "tr": "İstersen web siteni ve LinkedIn profilini ekle.",
+    "en": "Add your website and LinkedIn profile if you like.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nIstersenizSimdiEkleyinSonraDuzenleyebilirsiniz",
+    "tr": "İsterseniz şimdi ekleyin, sonra da düzenleyebilirsiniz",
+    "en": "Add now if you like; you can edit later",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nKamera",
+    "tr": "Kamera",
+    "en": "Camera",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nKameraVeyaGaleridenEkleyin",
+    "tr": "Kamera veya galeriden ekleyin",
+    "en": "Add from camera or gallery",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nKapasiteyiArtir",
+    "tr": "Kapasiteyi artır",
+    "en": "Increase capacity",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nKapat",
+    "tr": "Kapat",
+    "en": "Close",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nKart",
+    "tr": "Kart",
+    "en": "Card",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nKartAdi",
+    "tr": "Kart adı",
+    "en": "Card name",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nKartAdiZorunludur",
+    "tr": "Kart adı zorunludur",
+    "en": "Card name is required",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nKartBilgileri",
+    "tr": "Kart bilgileri",
+    "en": "Card details",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nKartBilgisiAlinamadi",
+    "tr": "Kart bilgisi alınamadı.",
+    "en": "Could not load card info.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nKartBilgisiYok",
+    "tr": "Kart bilgisi yok",
+    "en": "No card info",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nKartBilgisiYokDuzenleEkleyin",
+    "tr": "Kart bilgisi yok — düzenle ile ekleyin",
+    "en": "No card info — add via edit",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nKartBulunamadi",
+    "tr": "Kart bulunamadı.",
+    "en": "Card not found.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nKartCuzdanaEklenemedi",
+    "tr": "Kart cüzdana eklenemedi.",
+    "en": "Could not add card to wallet.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nKartEkle",
+    "tr": "Kart ekle",
+    "en": "Add card",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nKartGorunumu",
+    "tr": "Kart Görünümü",
+    "en": "Card appearance",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nKartGorunumu2",
+    "tr": "Kart görünümü",
+    "en": "Card appearance",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nKartGosteriliyor",
+    "tr": "{shown} / {total} kart gösteriliyor",
+    "en": "{shown} / {total} cards shown",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nKartGruptanCikarilamadi",
+    "tr": "Kart gruptan çıkarılamadı.",
+    "en": "Could not remove card from group.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nKartId",
+    "tr": "KART ID",
+    "en": "CARD ID",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nKartId2",
+    "tr": "Kart ID",
+    "en": "Card ID",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nKartId3",
+    "tr": "Kart ID\\",
+    "en": "Card ID",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nKartId4",
+    "tr": "Kart ID: {cardId}",
+    "en": "Card ID: {cardId}",
+    "hasPlaceholders": true
+  },
+  {
+    "key": "l10nKartIdGirin",
+    "tr": "Kart ID girin",
+    "en": "Enter card ID",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nKartIdKopyalandi",
+    "tr": "Kart ID kopyalandı",
+    "en": "Card ID copied",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nKartIdKopyalandi2",
+    "tr": "Kart ID kopyalandı: {id}",
+    "en": "Card ID copied: {id}",
+    "hasPlaceholders": true
+  },
+  {
+    "key": "l10nKartIdNiziGonderinKarsi",
+    "tr": "Kart ID'nizi gönderin; karşı taraf Cardence'te kartınızı ekleyebilir.",
+    "en": "Share your Card ID; the other person can add your card in Cardence.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nKartIdTam6Haneli",
+    "tr": "Kart ID tam 6 haneli sayı olmalıdır",
+    "en": "Card ID must be a 6-digit number",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nKartKaydedildi",
+    "tr": "Kart kaydedildi",
+    "en": "Card saved",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nKartKayitSayisi",
+    "tr": "Kart kayıt sayısı",
+    "en": "Card save count",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nKartKimligiEksik",
+    "tr": "Kart kimliği eksik.",
+    "en": "Card ID is missing.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nKartKotasiDoldu",
+    "tr": "Kart kotası doldu",
+    "en": "Card quota full",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nKartMetinRenginiDuzenleyin",
+    "tr": "Kart ve metin rengini düzenleyin.",
+    "en": "Edit card and text colors.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nKartOnizleme",
+    "tr": "Kart önizleme",
+    "en": "Card preview",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nKartOnizlemesi",
+    "tr": "Kart önizlemesi",
+    "en": "Card preview",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nKartRengi",
+    "tr": "KART RENGİ",
+    "en": "CARD COLOR",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nKartRengi2",
+    "tr": "Kart rengi",
+    "en": "Card rengi",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nKartRenkleri",
+    "tr": "Kart renkleri",
+    "en": "Card colors",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nKartSahibiHakkindaKisaBilgi",
+    "tr": "Kart sahibi hakkında kısa bilgi...",
+    "en": "Brief info about the card owner...",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nKartSilinemediLutfenTekrarDeneyin",
+    "tr": "Kart silinemedi. Lütfen tekrar deneyin.",
+    "en": "Could not delete card. Please try again.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nKartYuzuAlanDuzeni",
+    "tr": "Kart yüzü ve alan düzeni",
+    "en": "Card face and field layout",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nKartYuzundeGorunecekIletisimProfil",
+    "tr": "Kart yüzünde görünecek iletişim ve profil alanları.",
+    "en": "Contact and profile fields shown on the card face.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nKartYuzundeGosterilecekAlanlar",
+    "tr": "Kart yüzünde gösterilecek alanlar",
+    "en": "Fields shown on card front",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nKartZatenCuzdaninizda",
+    "tr": "Bu kart zaten cüzdanınızda.",
+    "en": "This card is already in your wallet.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nKartZatenKayitli",
+    "tr": "Kart zaten kayıtlı",
+    "en": "Card already saved",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nKartaEklemekIstediginizAlaniSecin",
+    "tr": "Karta eklemek istediğiniz alanı seçin",
+    "en": "Select the field to add to the card",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nKartiCevirmekSagAlttakiIkona",
+    "tr": "Kartı çevirmek için sağ alttaki ikona dokunun",
+    "en": "Tap the icon at bottom right to flip the card",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nKartiCuzdandanSil",
+    "tr": "Kartı cüzdandan sil",
+    "en": "Remove card from wallet",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nKartiDuzenle",
+    "tr": "Kartı düzenle",
+    "en": "Edit card",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nKartiEkle",
+    "tr": "Kartı ekle",
+    "en": "Add card",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nKartiKaydetmedenOnceSonKez",
+    "tr": "Kartı kaydetmeden önce son kez kontrol edin.",
+    "en": "Review once more before saving the card.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nKartiOzellestir",
+    "tr": "Kartı özelleştir",
+    "en": "Customize card",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nKartiPaylas",
+    "tr": "Kartı paylaş",
+    "en": "Share card",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nKartiPaylasDediginizdeBenzersizNumara",
+    "tr": "Kartı paylaş dediğinizde benzersiz bir numara atanır.",
+    "en": "A unique number is assigned when you share the card.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nKartiSil",
+    "tr": "Kartı sil",
+    "en": "Delete card",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nKartindaGorunsun",
+    "tr": "Kartında Görünsün",
+    "en": "Show on card",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nKartinizdaGorunecekAdiniziGirin",
+    "tr": "Kartınızda görünecek adınızı girin",
+    "en": "Enter the name shown on your card",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nKartiniziOlusturunPaylasinAginiziGenisletin",
+    "tr": "Kartınızı oluşturun, paylaşın ve ağınızı genişletin.",
+    "en": "Create your card, share it, and grow your network.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nKartiniziPaylasin",
+    "tr": "Kartınızı paylaşın",
+    "en": "Share your card",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nKartinizinDijitalKimliginiOzellestirin",
+    "tr": "Kartınızın dijital kimliğini özelleştirin.",
+    "en": "Customize your card's digital identity.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nKartinizinYuzundeGorunecekBilgiler",
+    "tr": "Kartınızın ön yüzünde görünecek bilgiler",
+    "en": "Information shown on the front of your card",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nKartlar",
+    "tr": "Kartlar",
+    "en": "Cardlar",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nKartlarGrubaEklenemedi",
+    "tr": "Kartlar gruba eklenemedi.",
+    "en": "Could not add cards to group.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nKartlariSec",
+    "tr": "Kartları seç",
+    "en": "Select cards",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nKartlarim",
+    "tr": "Kartlarım",
+    "en": "My Cards",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nKartvizitFotografla",
+    "tr": "Kartvizit fotoğrafla",
+    "en": "Scan business card",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nKartvizitinYuzundeGorunecekBilgiler",
+    "tr": "Kartvizitin ön yüzünde görünecek bilgiler",
+    "en": "Information shown on the front of the business card",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nKartvizitteGorunenAdiGirin",
+    "tr": "Kartvizitte görünen adı girin",
+    "en": "Enter the name on the business card",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nKatildigiEtkinlikler",
+    "tr": "Katıldığı etkinlikler",
+    "en": "Events attended",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nKaydedildiTarihBilinmiyor",
+    "tr": "Kaydedildi: tarih bilinmiyor",
+    "en": "Saved: date unknown",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nKaydedilenKartlar",
+    "tr": "Kaydedilen Kartlar",
+    "en": "Saved Cards",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nKaydedilenKartlardanSec",
+    "tr": "Kaydedilen kartlardan seç",
+    "en": "Select from saved cards",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nKaydedilenKartlarinizdanSecerekGrubaKart",
+    "tr": "Kaydedilen kartlarınızdan seçerek bu gruba kart ekleyebilirsiniz.",
+    "en": "Add cards to this group from your saved cards.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nKaydedilmemisDegisiklikler",
+    "tr": "Kaydedilmemiş değişiklikler",
+    "en": "Unsaved changes",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nKaydet",
+    "tr": "Kaydet",
+    "en": "Save",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nKayitOl",
+    "tr": "Kayıt ol",
+    "en": "Sign up",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nKayitliKart",
+    "tr": "{count} kayıtlı kart",
+    "en": "{count} saved cards",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nKayitliKartLimitinizDolduPremium",
+    "tr": "Kayıtlı kart limitiniz doldu. Premium ile sınırsız kart saklayabilir ve manuel / fotoğrafla eklemeye devam edebilirsiniz.",
+    "en": "Your saved card limit is full. With Premium you can store unlimited cards and keep adding manually or via photo scan.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nKayitliKartlar",
+    "tr": "Kayıtlı kartlar",
+    "en": "Saved cards",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nKayitliPostaAdresinizeSifirlamaKodu",
+    "tr": "Kayıtlı e-posta adresinize sıfırlama kodu gönderilir.",
+    "en": "A reset code will be sent to your registered email.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nKendiKartlarim",
+    "tr": "Kendi kartlarım",
+    "en": "My own cards",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nKendinizdenKisacaBahsedin",
+    "tr": "Kendinizden kısaca bahsedin...",
+    "en": "Tell us briefly about yourself...",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nKimlik",
+    "tr": "Kimlik",
+    "en": "Identity",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nKisiHakkindaEklemekIstediginizNotlar",
+    "tr": "Bu kişi hakkında eklemek istediğiniz notlar...",
+    "en": "Notes you want to add about this person...",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nKisiHakkindaNotYazin",
+    "tr": "Bu kişi hakkında not yazın",
+    "en": "Write a note about this person",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nKisiHakkindaNotYazin2",
+    "tr": "Bu kisi hakkinda not yazin",
+    "en": "Write a note about this person",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nKisiNotu",
+    "tr": "Kişi notu",
+    "en": "Person note",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nKisiNotu2",
+    "tr": "Kisi notu",
+    "en": "Person note",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nKodGonder",
+    "tr": "Kod gönder",
+    "en": "Send code",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nKodGonderildi",
+    "tr": "Kod gönderildi",
+    "en": "Code sent",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nKonu",
+    "tr": "Konu",
+    "en": "Topic",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nKonum",
+    "tr": "Konum",
+    "en": "Location",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nKopyala",
+    "tr": "Kopyala",
+    "en": "Copy",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nKotaDoldu",
+    "tr": "Kota doldu",
+    "en": "Quota full",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nKoyu",
+    "tr": "Koyu",
+    "en": "Dark",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nLearningDesigner",
+    "tr": "Learning Designer",
+    "en": "Learning Designer",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nLinkedinAcilamadi",
+    "tr": "LinkedIn açılamadı",
+    "en": "Could not open LinkedIn",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nLinkedinGiris",
+    "tr": "LinkedIn ile giriş",
+    "en": "Sign in with LinkedIn",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nLinkedinGirisBasarisiz",
+    "tr": "LinkedIn ile giriş başarısız.",
+    "en": "LinkedIn sign-in failed.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nLinkedinProfilLinki",
+    "tr": "LinkedIn profil linki",
+    "en": "LinkedIn profile link",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nListe",
+    "tr": "Liste",
+    "en": "List",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nListeKartGorunumuneBirlikteUygulanir",
+    "tr": "Liste ve kart görünümüne birlikte uygulanır.",
+    "en": "Applied to both list and card views.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nMagazaSayfasiAcilamadiLutfenTekrar",
+    "tr": "Mağaza sayfası açılamadı. Lütfen tekrar deneyin.",
+    "en": "Could not open store page. Please try again.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nManuelFotografEkleme",
+    "tr": "Manuel & fotoğraf ekleme",
+    "en": "Manual & photo add",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nMarketingSpecialist",
+    "tr": "Marketing Specialist",
+    "en": "Marketing Specialist",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nMesajiniz",
+    "tr": "Mesajınız",
+    "en": "Your message",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nMetinRengi",
+    "tr": "METİN RENGİ",
+    "en": "TEXT COLOR",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nMetinRengi2",
+    "tr": "Metin rengi",
+    "en": "Text color",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nMobileEngineer",
+    "tr": "Mobile Engineer",
+    "en": "Mobile Engineer",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nMotionDesigner",
+    "tr": "Motion Designer",
+    "en": "Motion Designer",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nNot",
+    "tr": "Not",
+    "en": "Note",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nNotEkle",
+    "tr": "Not ekle",
+    "en": "Add note",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nNotKaydedildi",
+    "tr": "Not kaydedildi",
+    "en": "Note saved",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nNotlar",
+    "tr": "Notlar",
+    "en": "Notes",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nNotunuzuBurayaYazin",
+    "tr": "Notunuzu buraya yazın…",
+    "en": "Write your note here…",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nOkul",
+    "tr": "Okul",
+    "en": "School",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nOnboarding",
+    "tr": "Onboarding\\",
+    "en": "Onboarding",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nOnboardingOlusturdugunKartBuradaListelenecek",
+    "tr": "Onboarding'de oluşturduğun kart burada listelenecek.",
+    "en": "Cards you create during onboarding will appear here.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nOnizleme",
+    "tr": "Önizleme",
+    "en": "Preview",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nOperationsManager",
+    "tr": "Operations Manager",
+    "en": "Operations Manager",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nOpsiyonel",
+    "tr": "Opsiyonel",
+    "en": "Optional",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nOrnIsKartimKonferans2025",
+    "tr": "Örn. İş kartım, Konferans 2025",
+    "en": "e.g. Work card, Conference 2025",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nOrnIstanbulKongreMerkezi",
+    "tr": "Örn. İstanbul Kongre Merkezi",
+    "en": "e.g. Istanbul Congress Center",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nOrnMehmet",
+    "tr": "Örn: Mehmet",
+    "en": "e.g. Mehmet",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nOrnWebSummit2026",
+    "tr": "Örn. Web Summit 2026",
+    "en": "e.g. Web Summit 2026",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nOrnYilmaz",
+    "tr": "Örn: Yılmaz",
+    "en": "e.g. Last name",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nOrnekEmailCom",
+    "tr": "ornek@email.com",
+    "en": "name@email.com",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nOrnekKartlar",
+    "tr": "Örnek kartlar",
+    "en": "Sample cards",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nOrnekKartlarGosteriliyorIlkKartinizi",
+    "tr": "Örnek kartlar gösteriliyor. İlk kartınızı eklediğinizde gerçek cüzdanınız başlar.",
+    "en": "Showing sample cards. Your real wallet starts when you add your first card.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nOrnekMailCom",
+    "tr": "ornek@mail.com",
+    "en": "name@mail.com",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nOtomatik",
+    "tr": "Otomatik",
+    "en": "Automatic",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nOtomatikArkaPlanaGoreOkunabilir",
+    "tr": "Otomatik: arka plana göre okunabilir renk.",
+    "en": "Automatic: readable color based on background.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nOturumBilgisiAlinamadi",
+    "tr": "Oturum bilgisi alınamadı.",
+    "en": "Could not retrieve session info.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nOturumBulunamadi",
+    "tr": "Oturum bulunamadı.",
+    "en": "Session not found.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nOturumBulunamadiLutfenTekrarGiris",
+    "tr": "Oturum bulunamadı. Lütfen tekrar giriş yapın.",
+    "en": "Session not found. Please sign in again.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nOturumSonaErdi",
+    "tr": "Oturum sona erdi",
+    "en": "Session ended",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nOturumunuzKapatilacakGirisEkraninaYonlendirileceksiniz",
+    "tr": "Oturumunuz kapatılacak ve giriş ekranına yönlendirileceksiniz. Kayıtlı kartlarınız bir sonraki girişinizde yeniden yüklenecektir.",
+    "en": "You will be signed out and redirected to the sign-in screen. Your saved cards will reload on your next sign-in.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nOzelAralik",
+    "tr": "Özel aralık",
+    "en": "Custom range",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nOzelKartRengi",
+    "tr": "Özel kart rengi",
+    "en": "Custom card color",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nOzelMetinRengi",
+    "tr": "Özel metin rengi",
+    "en": "Custom text color",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nPaylasilanKartKimliginiGirinBilgiler",
+    "tr": "Paylaşılan kart kimliğini girin. Bilgiler sunucudaki güncel kartvizitten alınır.",
+    "en": "Enter the shared card ID. Details are fetched from the latest business card on the server.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nPostaZorunludur",
+    "tr": "E-posta zorunludur",
+    "en": "Email is required",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nPozisyonZorunludur",
+    "tr": "Pozisyon zorunludur",
+    "en": "Position is required",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nPozisyonuGiriniz",
+    "tr": "Pozisyonu giriniz",
+    "en": "Enter position",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nPozisyonunuzuGiriniz",
+    "tr": "Pozisyonunuzu giriniz",
+    "en": "Enter your position",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nPremium",
+    "tr": "Premium\\",
+    "en": "Premium",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nPremiumCuzdan",
+    "tr": "Premium cüzdan",
+    "en": "Premium wallet",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nPremiumGec",
+    "tr": "Premium'a geç",
+    "en": "Go Premium",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nProductDesigner",
+    "tr": "Product Designer",
+    "en": "Product Designer",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nProductManager",
+    "tr": "Product Manager",
+    "en": "Product Manager",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nProfesyonelKimliginiziYonetmekYeniHesap",
+    "tr": "Profesyonel kimliğinizi yönetmek için yeni bir hesap oluşturun.",
+    "en": "Create a new account to manage your professional identity.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nProfilBilgileriniziDoldurupIlkKartinizi",
+    "tr": "Profil bilgilerinizi doldurup ilk kartınızı oluşturun veya aşağıdan yeni kart ekleyin.",
+    "en": "Fill in your profile and create your first card, or add a new card below.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nProfilBilgisiAlinamadi",
+    "tr": "Profil bilgisi alınamadı.",
+    "en": "Could not retrieve profile info.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nProfilFotografi",
+    "tr": "Profil fotoğrafı",
+    "en": "Profile photo",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nProfilFotografiIstegeBagli",
+    "tr": "Profil fotoğrafı (isteğe bağlı)",
+    "en": "Profile photo (optional)",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nProfilFotografiKartlarinizaUygulandi",
+    "tr": "Profil fotoğrafı kartlarınıza da uygulandı.",
+    "en": "Profile photo applied to your cards too.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nProfilFotografiYuklenemedi",
+    "tr": "Profil fotoğrafı yüklenemedi.",
+    "en": "Could not upload profile photo.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nProfilFotografinizKartinizdaGorunurIsterseniz",
+    "tr": "Profil fotoğrafınız kartınızda görünür. İsterseniz atlayabilirsiniz.",
+    "en": "Your profile photo appears on your card. You can skip this step.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nQrPaylas",
+    "tr": "QR ile paylaş",
+    "en": "Share via QR",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nRenkleriDuzenle",
+    "tr": "Renkleri düzenle",
+    "en": "Edit colors",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nSadeceSayisalKarakterlerKabulEdilir",
+    "tr": "Sadece sayısal karakterler kabul edilir.",
+    "en": "Only numeric characters are accepted.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nSadeceSizinGordugunuzEtiketKart",
+    "tr": "Sadece sizin gördüğünüz etiket; kart yüzündeki isim “Ad Soyad” alanıdır.",
+    "en": "Label only you see; the name on the card face is the Full name field.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nSagAlttakiEkleQrOkutun",
+    "tr": "Sağ alttaki Ekle ile QR okutun veya kart ID girin",
+    "en": "Use Add at bottom right to scan QR or enter card ID",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nSagAlttakiYeniEtkinlikGrubu",
+    "tr": "Sağ alttaki + ile yeni etkinlik grubu oluşturabilirsiniz.",
+    "en": "Use + at bottom right to create a new event group.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nSalesLead",
+    "tr": "Sales Lead",
+    "en": "Sales Lead",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nSatinAlimlariGeriYukle",
+    "tr": "Satın alımları geri yükle",
+    "en": "Restore purchases",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nSecurityArchitect",
+    "tr": "Security Architect",
+    "en": "Security Architect",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nSehir",
+    "tr": "Şehir",
+    "en": "City",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nSifirla",
+    "tr": "Sıfırla",
+    "en": "Reset",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nSifirlamaKoduGonderildi",
+    "tr": "Sıfırlama kodu gönderildi.",
+    "en": "Reset code sent.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nSifremiUnuttum",
+    "tr": "Şifremi unuttum",
+    "en": "Forgot password",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nSifreniziTekrarGirin",
+    "tr": "Şifrenizi tekrar girin",
+    "en": "Re-enter your password",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nSifreyiGuncelle",
+    "tr": "Şifreyi güncelle",
+    "en": "Update password",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nSil",
+    "tr": "Sil",
+    "en": "Delete",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nSinirsizKartSaklama",
+    "tr": "Sınırsız kart saklama",
+    "en": "Unlimited card storage",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nSiralama",
+    "tr": "Sıralama",
+    "en": "Sort",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nSirketAdiniGiriniz",
+    "tr": "Şirket adını giriniz",
+    "en": "Enter company name",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nSirketZorunludur",
+    "tr": "Şirket zorunludur",
+    "en": "Company is required",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nSistem",
+    "tr": "Sistem",
+    "en": "System",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nSon30Gun",
+    "tr": "Son 30 gün",
+    "en": "Last 30 days",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nSon7Gun",
+    "tr": "Son 7 gün",
+    "en": "Last 7 days",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nSonEtkilesimler",
+    "tr": "Son etkileşimler",
+    "en": "Recent interactions",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nSonucBulunamadi",
+    "tr": "Sonuç bulunamadı",
+    "en": "No results found",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nSorularinizBizeUlasin",
+    "tr": "Sorularınız için bize ulaşın",
+    "en": "Contact us with your questions",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nSorununuzuVeyaTalebiniziKisacaAciklayin",
+    "tr": "Sorununuzu veya talebinizi kısaca açıklayın…",
+    "en": "Briefly describe your issue or request…",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nSoyad",
+    "tr": "Soyad",
+    "en": "Last name",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nSoyadYalnizcaHarfIcermeliEn",
+    "tr": "Soyad yalnızca harf içermeli (en az 2 karakter)",
+    "en": "Last name must contain only letters (at least 2 characters)",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nSoyadZorunludur",
+    "tr": "Soyad zorunludur",
+    "en": "Last name is required",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nSuOrnekKartlarGoruyorsunuzIlk",
+    "tr": "Şu an örnek kartlar görüyorsunuz. İlk kartınızı eklediğinizde gerçek kotanız burada görünür.",
+    "en": "You are viewing sample cards. Your real quota appears after you add your first card.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nSunucuYanitiOkunamadi",
+    "tr": "Sunucu yanıtı okunamadı.",
+    "en": "Could not read server response.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nSupplyChainLead",
+    "tr": "Supply Chain Lead",
+    "en": "Supply Chain Lead",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nSurum",
+    "tr": "Sürüm",
+    "en": "Version",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nTalebiGonder",
+    "tr": "Talebi gönder",
+    "en": "Submit request",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nTamam",
+    "tr": "Tamam",
+    "en": "OK",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nTarih",
+    "tr": "Tarih",
+    "en": "Date",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nTasarim",
+    "tr": "Tasarım",
+    "en": "Design",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nTelefonNumarasiEnFazla20",
+    "tr": "Telefon numarası en fazla 20 karakter olabilir.",
+    "en": "Phone number can be at most 20 characters.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nTemizle",
+    "tr": "Temizle",
+    "en": "Clear",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nToplantiProjeVeyaHatirlatmaNotu",
+    "tr": "Toplantı, proje veya hatırlatma notu ekleyin",
+    "en": "Add a meeting, project, or reminder note",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nTumTarihler",
+    "tr": "Tüm tarihler",
+    "en": "All dates",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nTumu",
+    "tr": "Tümü",
+    "en": "All",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nUcretsizPlandaTekKartOlusturabilirsiniz",
+    "tr": "Ücretsiz planda tek kart oluşturabilirsiniz. Premium ile daha fazla kart ekleyin.",
+    "en": "On the free plan you can create one card. Add more with Premium.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nUcretsizPlandaYalnizca1Kart",
+    "tr": "Ücretsiz planda yalnızca 1 kart oluşturabilirsiniz. Premium ile daha fazla kart ekleyin.",
+    "en": "On the free plan you can create only 1 card. Add more with Premium.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nUlke",
+    "tr": "Ülke",
+    "en": "Country",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nUlkeAra",
+    "tr": "Ülke ara",
+    "en": "Search country",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nUniversiteVeyaLiseAdi",
+    "tr": "Üniversite veya lise adı",
+    "en": "University or high school name",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nUnvan",
+    "tr": "Ünvan",
+    "en": "Title",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nUxResearcher",
+    "tr": "UX Researcher",
+    "en": "UX Researcher",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nUygula",
+    "tr": "Uygula",
+    "en": "Apply",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nUygulamaSurumu",
+    "tr": "Uygulama sürümü:",
+    "en": "App version:",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nUygulamaTemasiniSecin",
+    "tr": "Uygulama temasını seçin",
+    "en": "Choose app theme",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nWebSitesiHttps",
+    "tr": "Web sitesi (https://...)",
+    "en": "Website (https://...)",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nWebSosyal",
+    "tr": "Web & Sosyal",
+    "en": "Web & Sosyal",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nXTwitter",
+    "tr": "X (Twitter)",
+    "en": "X (Twitter)",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nYaptiginizDegisikliklerKaydedilmediCikmakIstediginize",
+    "tr": "Yaptığınız değişiklikler kaydedilmedi. Çıkmak istediğinize emin misiniz?",
+    "en": "Your changes were not saved. Are you sure you want to leave?",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nYeniEtkinlikGrubu",
+    "tr": "Yeni etkinlik grubu",
+    "en": "New event group",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nYeniKart",
+    "tr": "Yeni kart",
+    "en": "New card",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nYeniKartOlustur",
+    "tr": "Yeni kart oluştur",
+    "en": "Create new card",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nYeniSifre",
+    "tr": "Yeni şifre",
+    "en": "New password",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nYeniSifreTekrar",
+    "tr": "Yeni şifre tekrar",
+    "en": "Confirm new password",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nYenidenCek",
+    "tr": "Yeniden çek",
+    "en": "Retake",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nYukleniyor",
+    "tr": "Yükleniyor…",
+    "en": "Loading…",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nYuz",
+    "tr": "Ön yüz",
+    "en": "Front",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nYuzIletisim",
+    "tr": "Ön yüz — iletişim",
+    "en": "Front — contact",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nYuzdeGoster",
+    "tr": "Ön yüzde göster",
+    "en": "Show on front",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nYuzdeIletisimBilgileriniEnFazla",
+    "tr": "Ön yüzde iletişim bilgilerini (en fazla 3), arka yüzde isteğe bağlı yetenekleri seç.",
+    "en": "Choose up to 3 contact fields on the front and optional skills on the back.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nZ",
+    "tr": "A → Z",
+    "en": "A → Z",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "l10nZ2",
+    "tr": "Z → A",
+    "en": "Z → A",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "myCardsBilgiGirildikceKarttaGorunur",
+    "tr": "Bilgi girildikçe kartta görünür",
+    "en": "Info appears on the card as you enter it",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "myCardsCardenceKartim",
+    "tr": "Cardence kartım",
+    "en": "My Cardence card",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "myCardsIl",
+    "tr": "İl",
+    "en": "Province",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "myCardsIlce",
+    "tr": "İlçe",
+    "en": "District",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "myCardsKart",
+    "tr": "Kart: {name}\n",
+    "en": "Kart: {name}\n",
+    "hasPlaceholders": true
+  },
+  {
+    "key": "myCardsKartId",
+    "tr": "Kart ID: {cardId}\n\n",
+    "en": "Kart ID: {cardId}\n\n",
+    "hasPlaceholders": true
+  },
+  {
+    "key": "myCardsKartIdEkle",
+    "tr": "Kart ID ile ekle",
+    "en": "Add by card ID",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "myCardsKartIdOlusturulamadiLutfenTekrar",
+    "tr": "Kart ID oluşturulamadı. Lütfen tekrar deneyin.",
+    "en": "Could not generate card ID. Please try again.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "myCardsMerhabaCardenceKartimiSeninlePaylasiyorum",
+    "tr": "Merhaba! Cardence kartımı seninle paylaşıyorum.\n\n",
+    "en": "Hello! I'm sharing my Cardence card with you.\n\n",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "myCardsOnizlemeyiGizle",
+    "tr": "Önizlemeyi gizle",
+    "en": "Hide preview",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "myCardsOnizlemeyiGoster",
+    "tr": "Önizlemeyi göster",
+    "en": "Show preview",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "myCardsPaylasincaOlusturulur",
+    "tr": "Paylaşınca oluşturulur",
+    "en": "Created when shared",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "onboardingAlanlarDoldukcaGorunur",
+    "tr": "Alanlar doldukça görünür",
+    "en": "Fields appear as you fill them in",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "onboardingHakkimda",
+    "tr": "Hakkımda",
+    "en": "About me",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "onboardingIsimsizKart",
+    "tr": "İsimsiz kart",
+    "en": "Unnamed card",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "onboardingIslemTamamlanamadiLutfenTekrarDeneyin",
+    "tr": "İşlem tamamlanamadı. Lütfen tekrar deneyin.",
+    "en": "Could not complete the operation. Please try again.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "onboardingKartKaydedilemediLutfenTekrarDeneyin",
+    "tr": "Kart kaydedilemedi. Lütfen tekrar deneyin.",
+    "en": "Could not save card. Please try again.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "onboardingKartimiOlustur",
+    "tr": "Kartımı oluştur",
+    "en": "Create my card",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "onboardingPosta",
+    "tr": "E-posta",
+    "en": "Email",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "onboardingWebSitesi",
+    "tr": "Web sitesi",
+    "en": "Website",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "profile1Kart",
+    "tr": "1 kart",
+    "en": "1 card",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "profileDuzenlemekKartaCiftDokunun",
+    "tr": "Düzenlemek için karta çift dokunun.",
+    "en": "Double-tap a card to edit.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "profileKart",
+    "tr": "{cardCount} kart",
+    "en": "{cardCount} kart",
+    "hasPlaceholders": true
+  },
+  {
+    "key": "profileKartlarinizHenuzKaydedilmedi",
+    "tr": "Kartlarınız henüz kaydedilmedi.",
+    "en": "Your cards have not been saved yet.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "profileKartlarinizToplamKezCuzdanaEklendi",
+    "tr": "Kartlarınız toplam {totalWalletSaveCount} kez cüzdana eklendi.",
+    "en": "Your cards have been added to wallets {totalWalletSaveCount} times in total.",
+    "hasPlaceholders": true
+  },
+  {
+    "key": "profileProfilIstatistikleriAlinamadi",
+    "tr": "Profil istatistikleri alınamadı.",
+    "en": "Could not load profile stats.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "profileProfilestats",
+    "tr": "/ProfileStats",
+    "en": "/ProfileStats",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "profileText",
+    "tr": "{totalWalletSaveCount}",
+    "en": "{totalWalletSaveCount}",
+    "hasPlaceholders": true
+  },
+  {
+    "key": "profileYatayKaydirarakKartlarArasindaGecin",
+    "tr": "Yatay kaydırarak kartlar arasında geçin; düzenlemek için karta çift dokunun.",
+    "en": "Swipe horizontally between cards; double-tap a card to edit.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "savedCards1Grup",
+    "tr": "1 grup",
+    "en": "1 group",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "savedCards1UcretsizDenemeSonrasindaPremium",
+    "tr": "1 ücretsiz deneme · sonrasında Premium gerekir",
+    "en": "1 free trial · Premium required after",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "savedCardsAgu",
+    "tr": "Ağu",
+    "en": "Aug",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "savedCardsAramaAktif",
+    "tr": "Arama aktif",
+    "en": "Search active",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "savedCardsArkaYuzuEkleyinVarsa",
+    "tr": "Arka yüzü ekleyin (varsa)",
+    "en": "Add the back (if any)",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "savedCardsBaglantiAcilamadi",
+    "tr": "Bağlantı açılamadı",
+    "en": "Could not open link",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "savedCardsBosSlot",
+    "tr": "{remaining} boş slot",
+    "en": "{remaining} slots left",
+    "hasPlaceholders": true
+  },
+  {
+    "key": "savedCardsBusinessCardLimitReached",
+    "tr": "BUSINESS_CARD_LIMIT_REACHED",
+    "en": "BUSINESS_CARD_LIMIT_REACHED",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "savedCardsCalistigiSirket",
+    "tr": "Çalıştığı şirket",
+    "en": "Company they work at",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "savedCardsCardNotFound",
+    "tr": "CARD_NOT_FOUND",
+    "en": "CARD_NOT_FOUND",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "savedCardsCardenceAgindakiTumVeriTransferleri",
+    "tr": "Cardence ağındaki tüm veri transferleri uçtan uca şifrelenir ve kimlik doğrulama protokolleri ile korunur.",
+    "en": "All data transfers on the Cardence network are end-to-end encrypted and protected by authentication protocols.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "savedCardsCuzdandanSilindi",
+    "tr": "{displayName} cüzdandan silindi",
+    "en": "{displayName} removed from wallet",
+    "hasPlaceholders": true
+  },
+  {
+    "key": "savedCardsCuzdaninizDoluPaketYukselterekSiniri",
+    "tr": "Cüzdanınız dolu. Paket yükselterek sınırı artırabilirsiniz.",
+    "en": "Your wallet is full. Upgrade your plan to increase the limit.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "savedCardsDeletesavedcardCardid",
+    "tr": "/DeleteSavedCard?cardId={encodeQueryComponentcardId}",
+    "en": "/DeleteSavedCard?cardId={encodeQueryComponentcardId}",
+    "hasPlaceholders": true
+  },
+  {
+    "key": "savedCardsEtkinlik",
+    "tr": "Etkinlik",
+    "en": "Etkinlik",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "savedCardsFiltre",
+    "tr": "Filtre ({activeFilterCount})",
+    "en": "Filtre ({activeFilterCount})",
+    "hasPlaceholders": true
+  },
+  {
+    "key": "savedCardsFiltrele",
+    "tr": "Filtrele",
+    "en": "Filter",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "savedCardsFotografCekilemediKameraIzniniKontrol",
+    "tr": "Fotoğraf çekilemedi. Kamera iznini kontrol edin.",
+    "en": "Could not take photo. Check camera permission.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "savedCardsGrup",
+    "tr": "{groupCount} grup",
+    "en": "{groupCount} groups",
+    "hasPlaceholders": true
+  },
+  {
+    "key": "savedCardsGrupHakkiKaldi",
+    "tr": "{remainingGroups} grup hakkı kaldı",
+    "en": "{remainingGroups} group slots remaining",
+    "hasPlaceholders": true
+  },
+  {
+    "key": "savedCardsGrupLimitineUlasildi",
+    "tr": "Grup limitine ulaşıldı",
+    "en": "Group limit reached",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "savedCardsGrupsuz",
+    "tr": "Grupsuz",
+    "en": "Ungrouped",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "savedCardsGuest",
+    "tr": "{legacyKeySavedCards}_guest",
+    "en": "{legacyKeySavedCards}_guest",
+    "hasPlaceholders": true
+  },
+  {
+    "key": "savedCardsHenuzKartEklenmedi",
+    "tr": "Henüz kart eklenmedi",
+    "en": "No cards added yet",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "savedCardsInvalidCardPayload",
+    "tr": "INVALID_CARD_PAYLOAD",
+    "en": "INVALID_CARD_PAYLOAD",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "savedCardsIstediginizKadarEkleyin",
+    "tr": "İstediğiniz kadar ekleyin",
+    "en": "Add as many as you want",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "savedCardsIstediginizKadarGrupOlusturun",
+    "tr": "İstediğiniz kadar grup oluşturun",
+    "en": "Create as many groups as you want",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "savedCardsKameraIzniKapaliAyarlardanIzin",
+    "tr": "Kamera izni kapalı. Ayarlardan izin verip tekrar deneyin.",
+    "en": "Camera permission is off. Allow it in Settings and try again.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "savedCardsKamerayiKullanarakBilgileriTara",
+    "tr": "Kamerayı kullanarak bilgileri tara",
+    "en": "Scan details using the camera",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "savedCardsKart2",
+    "tr": "{usedCount} kart · {remainingSlotsLabel}",
+    "en": "{usedCount} cards · {remainingSlotsLabel}",
+    "hasPlaceholders": true
+  },
+  {
+    "key": "savedCardsKart3",
+    "tr": "{count} kart",
+    "en": "{count} cards",
+    "hasPlaceholders": true
+  },
+  {
+    "key": "savedCardsKartBulunamadiIdYiKontrol",
+    "tr": "Kart bulunamadı. ID'yi kontrol edin.",
+    "en": "Card not found. Check the ID.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "savedCardsKartCuzdaninizaEklendi",
+    "tr": "Kart cüzdanınıza eklendi",
+    "en": "Card added to your wallet",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "savedCardsKartDahaEkleyebilirsiniz",
+    "tr": "{remaining} kart daha ekleyebilirsiniz.",
+    "en": "You can add {remaining} more cards.",
+    "hasPlaceholders": true
+  },
+  {
+    "key": "savedCardsKartEklenemediLutfenTekrarDeneyin",
+    "tr": "Kart eklenemedi. Lütfen tekrar deneyin.",
+    "en": "Could not add card. Please try again.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "savedCardsKartHakkinizVar",
+    "tr": "{maxCards} kart hakkınız var",
+    "en": "You can save up to {maxCards} cards",
+    "hasPlaceholders": true
+  },
+  {
+    "key": "savedCardsKartKaldi",
+    "tr": "{remaining} kart kaldı",
+    "en": "{remaining} cards remaining",
+    "hasPlaceholders": true
+  },
+  {
+    "key": "savedCardsKartLimitineUlasildi",
+    "tr": "Kart limitine ulaşıldı",
+    "en": "Card limit reached",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "savedCardsKartSilinemedi",
+    "tr": "Kart silinemedi.",
+    "en": "Could not delete card.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "savedCardsKartZatenKayitli",
+    "tr": "Bu kart zaten kayıtlı",
+    "en": "This card is already saved",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "savedCardsKartZatenTumGruplarda",
+    "tr": "Bu kart zaten tüm gruplarda",
+    "en": "This card is already in all groups",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "savedCardsKartiKaydet",
+    "tr": "Kartı kaydet",
+    "en": "Save card",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "savedCardsKartiniCuzdaninizdanSilmekIstediginizeEmin",
+    "tr": "\"{displayName}\" kartını cüzdanınızdan silmek istediğinize emin misiniz?",
+    "en": "Are you sure you want to remove \"{displayName}\" from your wallet?",
+    "hasPlaceholders": true
+  },
+  {
+    "key": "savedCardsKartvizitBilgileriniManuelYazin",
+    "tr": "Kartvizit bilgilerini manuel yazın",
+    "en": "Enter business card details manually",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "savedCardsKartvizitCekmekKameraIzniGerekli",
+    "tr": "Kartvizit çekmek için kamera izni gerekli.",
+    "en": "Camera permission is required to scan a business card.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "savedCardsKaydedildi",
+    "tr": "Kaydedildi: {formatSavedAtms}",
+    "en": "Kaydedildi: {formatSavedAtms}",
+    "hasPlaceholders": true
+  },
+  {
+    "key": "savedCardsKayitliKartlarAlinamadi",
+    "tr": "Kayıtlı kartlar alınamadı.",
+    "en": "Could not load saved cards.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "savedCardsKisininAdiSoyadi",
+    "tr": "Kişinin adı ve soyadı",
+    "en": "Person's full name",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "savedCardsLutfenZorunluAlanlariDoldurun",
+    "tr": "Lütfen zorunlu alanları doldurun.",
+    "en": "Please fill in the required fields.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "savedCardsMetinOkunamadiBilgileriManuelDuzenleyerek",
+    "tr": "Metin okunamadı. Bilgileri manuel düzenleyerek kaydedebilirsiniz.",
+    "en": "Could not read text. You can edit details manually and save.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "savedCardsOpsiyonel",
+    "tr": "OPSİYONEL",
+    "en": "OPTIONAL",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "savedCardsPaketAlSiniriArtir",
+    "tr": "Paket al, sınırı artır",
+    "en": "Buy a plan to increase limit",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "savedCardsPanoyaKopyalandi",
+    "tr": "{label} panoya kopyalandı",
+    "en": "{label} copied to clipboard",
+    "hasPlaceholders": true
+  },
+  {
+    "key": "savedCardsPozisyon",
+    "tr": "Pozisyon",
+    "en": "Position",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "savedCardsPremium",
+    "tr": "Premium",
+    "en": "Premium",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "savedCardsPremiumCuzdanEtkinlestirilemedi",
+    "tr": "Premium cüzdan etkinleştirilemedi.",
+    "en": "Could not activate Premium wallet.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "savedCardsPremiumGerekli",
+    "tr": "Premium gerekli",
+    "en": "Premium required",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "savedCardsPremiumPaketeGec",
+    "tr": "Premium pakete geç",
+    "en": "Upgrade to Premium",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "savedCardsPremiumTumLimitlerKalkti",
+    "tr": "Premium ile tüm limitler kalktı",
+    "en": "All limits removed with Premium",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "savedCardsQrKartIdHizliEkleme",
+    "tr": "QR ve kart ID ile hızlı ekleme",
+    "en": "Quick add via QR and card ID",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "savedCardsSavedcards",
+    "tr": "/SavedCards",
+    "en": "/SavedCards",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "savedCardsSavesavedcard",
+    "tr": "/SaveSavedCard",
+    "en": "/SaveSavedCard",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "savedCardsSinirsiz",
+    "tr": "Sınırsız",
+    "en": "Unlimited",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "savedCardsSinirsizElleFotograflaKartEkleme",
+    "tr": "Sınırsız elle ve fotoğrafla kart ekleme",
+    "en": "Unlimited manual and photo card adding",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "savedCardsSinirsizEtkinlikGrubuOrganizasyonu",
+    "tr": "Sınırsız etkinlik grubu organizasyonu",
+    "en": "Unlimited event group organization",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "savedCardsSinirsizKartEkleyebilirsiniz",
+    "tr": "Sınırsız kart ekleyebilirsiniz.",
+    "en": "You can add unlimited cards.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "savedCardsSinirsizKartKaydi",
+    "tr": "Sınırsız kart kaydı",
+    "en": "Unlimited card storage",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "savedCardsSirket",
+    "tr": "Şirket",
+    "en": "Company",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "savedCardsSkillConstSizedboxHeight24",
+    "tr": ", skill),\n              ),\n            ),\n          ],\n          const SizedBox(height: 24),\n          _DetailSection(\n            title: context.l10n.katldEtkinlikler,\n            child: AnimatedSwitcher(\n              duration: const Duration(milliseconds: 220),\n              switchInCurve: Curves.easeOut,\n              switchOutCurve: Curves.easeIn,\n              child: _loadingGroups\n                  ? const _EventGroupsLoadingSkeleton(\n                      key: ValueKey(",
+    "en": ", skill),\n              ),\n            ),\n          ],\n          const SizedBox(height: 24),\n          _DetailSection(\n            title: context.l10n.katldEtkinlikler,\n            child: AnimatedSwitcher(\n              duration: const Duration(milliseconds: 220),\n              switchInCurve: Curves.easeOut,\n              switchOutCurve: Curves.easeIn,\n              child: _loadingGroups\n                  ? const _EventGroupsLoadingSkeleton(\n                      key: ValueKey(",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "savedCardsSub",
+    "tr": "Şub",
+    "en": "Feb",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "savedCardsText",
+    "tr": "{maxCards}",
+    "en": "{maxCards}",
+    "hasPlaceholders": true
+  },
+  {
+    "key": "savedCardsText2",
+    "tr": "{ornekKartlar} · {remainingSlotsLabel}",
+    "en": "{ornekKartlar} · {remainingSlotsLabel}",
+    "hasPlaceholders": true
+  },
+  {
+    "key": "savedCardsText3",
+    "tr": "{activeFilterCount}",
+    "en": "{activeFilterCount}",
+    "hasPlaceholders": true
+  },
+  {
+    "key": "savedCardsText4",
+    "tr": "{usedCount}",
+    "en": "{usedCount}",
+    "hasPlaceholders": true
+  },
+  {
+    "key": "savedCardsText5",
+    "tr": "{usedCount}/{maxCards}",
+    "en": "{usedCount}/{maxCards}",
+    "hasPlaceholders": true
+  },
+  {
+    "key": "savedCardsText6",
+    "tr": "{usedWallet} / {maxCards}",
+    "en": "{usedWallet} / {maxCards}",
+    "hasPlaceholders": true
+  },
+  {
+    "key": "savedCardsText7",
+    "tr": "{businessCardCount} / {maxBusinessCards}",
+    "en": "{businessCardCount} / {maxBusinessCards}",
+    "hasPlaceholders": true
+  },
+  {
+    "key": "savedCardsText8",
+    "tr": "{businessCardCount} / {maxOwnCards}",
+    "en": "{businessCardCount} / {maxOwnCards}",
+    "hasPlaceholders": true
+  },
+  {
+    "key": "savedCardsText9",
+    "tr": "{eventGroupCount} / {maxEventGroups}",
+    "en": "{eventGroupCount} / {maxEventGroups}",
+    "hasPlaceholders": true
+  },
+  {
+    "key": "savedCardsTumEtkinlikler",
+    "tr": "Tüm etkinlikler",
+    "en": "All events",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "savedCardsUcretsiz",
+    "tr": "Ücretsiz",
+    "en": "Free",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "savedCardsUcretsizHakkinizDolduPremiumGerekli",
+    "tr": "Ücretsiz hakkınız doldu · Premium gerekli",
+    "en": "Free quota used · Premium required",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "savedCardsUcretsizPlandaEnFazlaKart",
+    "tr": "Ücretsiz planda en fazla {maxCards} kart saklayabilirsiniz.",
+    "en": "On the free plan you can save up to {maxCards} cards.",
+    "hasPlaceholders": true
+  },
+  {
+    "key": "savedCardsUcretsizPlandaSinirliDeneme",
+    "tr": "Ücretsiz planda sınırlı deneme",
+    "en": "Limited trial on free plan",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "savedCardsUcretsizPlandakiHaklariniz",
+    "tr": "Ücretsiz plandaki haklarınız",
+    "en": "Your free plan benefits",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "savedCardsUnvanVeyaRol",
+    "tr": "Ünvan veya rol",
+    "en": "Title or role",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "savedCardsUpdatesavedcard",
+    "tr": "/UpdateSavedCard",
+    "en": "/UpdateSavedCard",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "savedCardsUpgradewalletplan",
+    "tr": "/UpgradeWalletPlan",
+    "en": "/UpgradeWalletPlan",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "savedCardsWalletDuplicateCard",
+    "tr": "WALLET_DUPLICATE_CARD",
+    "en": "WALLET_DUPLICATE_CARD",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "savedCardsWalletLimitReached",
+    "tr": "WALLET_LIMIT_REACHED",
+    "en": "WALLET_LIMIT_REACHED",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "savedCardsWalletquota",
+    "tr": "/WalletQuota",
+    "en": "/WalletQuota",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "savedCardsYeniKartOlusturabilirsiniz",
+    "tr": "Yeni kart oluşturabilirsiniz",
+    "en": "You can create a new card",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "savedCardsYuzuCekin",
+    "tr": "Ön yüzü çekin",
+    "en": "Capture the front",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "savedCardsZorunlu",
+    "tr": "ZORUNLU",
+    "en": "ZORUNLU",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "settingsCardenceKullanicisi",
+    "tr": "Cardence kullanıcısı",
+    "en": "Cardence user",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "settingsEnFazla",
+    "tr": "En fazla {maxFrontCardFields}",
+    "en": "Up to {maxFrontCardFields}",
+    "hasPlaceholders": true
+  },
+  {
+    "key": "settingsEnFazla2",
+    "tr": "En fazla {maxBackCardFields}",
+    "en": "Up to {maxBackCardFields}",
+    "hasPlaceholders": true
+  },
+  {
+    "key": "settingsText",
+    "tr": "{cardenceIleDijitalKartvizitlerinizi}",
+    "en": "{cardenceIleDijitalKartvizitlerinizi}",
+    "hasPlaceholders": true
+  },
+  {
+    "key": "settingsText2",
+    "tr": "{uygulamaSrme} {appVersion}",
+    "en": "{uygulamaSrme} {appVersion}",
+    "hasPlaceholders": true
+  },
+  {
+    "key": "settingsV",
+    "tr": "{appName} v{appVersion}",
+    "en": "{appName} v{appVersion}",
+    "hasPlaceholders": true
+  },
+  {
+    "key": "shellKullanici",
+    "tr": "Kullanıcı",
+    "en": "User",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "supportCuzdanAbonelik",
+    "tr": "Cüzdan ve abonelik",
+    "en": "Wallet & subscription",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "supportGecerliPostaEnAz10",
+    "tr": "Geçerli bir e-posta ve en az 10 karakterlik bir mesaj girin.",
+    "en": "Enter a valid email and a message of at least 10 characters.",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "supportGenelSoru",
+    "tr": "Genel soru",
+    "en": "General question",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "supportHataBildirimi",
+    "tr": "Hata bildirimi",
+    "en": "Bug report",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "supportHesapGiris",
+    "tr": "Hesap ve giriş",
+    "en": "Account & sign-in",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "supportOzellikOnerisi",
+    "tr": "Özellik önerisi",
+    "en": "Feature request",
+    "hasPlaceholders": false
+  },
+  {
+    "key": "supportSubmitsupportrequest",
+    "tr": "/SubmitSupportRequest",
+    "en": "/SubmitSupportRequest",
+    "hasPlaceholders": false
+  }
+]

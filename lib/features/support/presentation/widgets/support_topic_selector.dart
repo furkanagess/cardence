@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/l10n/l10n_extensions.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../domain/entities/support_topic.dart';
@@ -22,7 +23,7 @@ class SupportTopicSelector extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Text(
-          'Konu',
+          context.l10n.konu,
           style: textTheme.labelLarge?.copyWith(
             fontWeight: FontWeight.w600,
             color: colorScheme.onSurface,

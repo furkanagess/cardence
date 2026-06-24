@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../../../../core/l10n/l10n_extensions.dart';
+import '../../../../l10n/app_localizations.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/atoms/shimmer.dart';
@@ -54,7 +56,7 @@ class SavedCardsWalletStrip extends StatelessWidget {
                 children: [
                   Expanded(
                     child: Text(
-                      _stripPrimaryLabel(quota, isDemoMode),
+                      _stripPrimaryLabel(context.l10n, quota, isDemoMode),
                       style: textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.w700,
                         letterSpacing: -0.2,
@@ -101,6 +103,7 @@ class SavedCardsWalletStrip extends StatelessWidget {
   }
 
   static String _stripPrimaryLabel(
+    AppLocalizations l10n,
     SavedCardsWalletQuota quota,
     bool isDemoMode,
   ) {
@@ -108,12 +111,12 @@ class SavedCardsWalletStrip extends StatelessWidget {
       return '${quota.maxCards} kart hakkınız var';
     }
     if (quota.isPremium) {
-      return 'Sınırsız kart saklama';
+      return l10n.snrszKartSaklama;
     }
     if (!quota.canAddMore) {
-      return 'Kart kotası doldu';
+      return l10n.kartKotasDoldu;
     }
-    return walletQuotaRemainingLabel(quota);
+    return walletQuotaRemainingLabel(l10n, quota);
   }
 }
 

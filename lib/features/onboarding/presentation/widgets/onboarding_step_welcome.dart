@@ -1,4 +1,5 @@
 import 'dart:math' as math;
+import '../../../../core/l10n/l10n_extensions.dart';
 
 import 'package:flutter/material.dart';
 
@@ -88,7 +89,7 @@ class _OnboardingStepWelcomeState extends State<OnboardingStepWelcome>
                       ),
                       const SizedBox(height: 10),
                       Text(
-                        'Kartınızı oluşturun, paylaşın ve ağınızı genişletin.',
+                        context.l10n.kartnzOluturunPaylanVeAnz,
                         textAlign: TextAlign.center,
                         style: textTheme.bodyMedium?.copyWith(
                           color: colorScheme.onSurfaceVariant,

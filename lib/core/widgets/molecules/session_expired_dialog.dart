@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/l10n/l10n_extensions.dart';
 
 import '../../constants/app_constants.dart';
 import '../../theme/app_colors.dart';
@@ -100,7 +101,7 @@ class SessionExpiredDialog extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Text(
-                  'Oturum sona erdi',
+                  context.l10n.oturumSonaErdi,
                   textAlign: TextAlign.center,
                   style: theme.textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.w700,
@@ -146,7 +147,7 @@ class SessionExpiredDialog extends StatelessWidget {
                         const SizedBox(width: 10),
                         Expanded(
                           child: Text(
-                            'Güvenliğiniz için hesabınıza tekrar giriş yapmanız gerekiyor.',
+                            context.l10n.gvenliinizIinHesabnzaTekrarGiri,
                             style: theme.textTheme.bodySmall?.copyWith(
                               color: colorScheme.onSurfaceVariant,
                               height: 1.4,
@@ -159,7 +160,7 @@ class SessionExpiredDialog extends StatelessWidget {
                 ),
                 const SizedBox(height: 24),
                 CustomButton(
-                  label: 'Giriş yap',
+                  label: context.l10n.giriYap,
                   icon: Icons.login_rounded,
                   onPressed: onLoginPressed,
                   style: FilledButton.styleFrom(

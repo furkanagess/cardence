@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/l10n/l10n_extensions.dart';
 import 'package:flutter/services.dart';
 
 import '../../../../core/widgets/organisms/flippable_person_card.dart';
@@ -371,7 +372,7 @@ class _DragHintChip extends StatelessWidget {
               ),
               const SizedBox(width: 8),
               Text(
-                'Bırakmak için konumu seçin',
+                context.l10n.brakmakIinKonumuSein,
                 style: TextStyle(
                   color: colorScheme.onInverseSurface,
                   fontSize: 13,

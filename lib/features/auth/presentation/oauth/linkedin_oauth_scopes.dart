@@ -1,19 +1,9 @@
-import 'package:linkedin_login/linkedin_login.dart';
-
-class LinkedInOpenIdScope extends Scope {
-  const LinkedInOpenIdScope() : super('openid');
-}
-
-class LinkedInProfileScope extends Scope {
-  const LinkedInProfileScope() : super('profile');
-}
-
-class LinkedInEmailScope extends Scope {
-  const LinkedInEmailScope() : super('email');
-}
-
-const linkedInOpenIdScopes = <Scope>[
-  LinkedInOpenIdScope(),
-  LinkedInProfileScope(),
-  LinkedInEmailScope(),
-];
+/// LinkedIn OAuth scope listesi.
+///
+/// OIDC (`openid profile email`) temel oturum için zorunlu.
+/// `r_profile_basicinfo` ve Plus kapsamları [Verified on LinkedIn] ürünü ile
+/// profil URL, pozisyon, şirket ve okul bilgisini sağlar.
+/// LinkedIn Developer Portal → Products → Verified on LinkedIn ekleyin.
+const linkedInAuthorizationScope =
+    'openid profile email r_profile_basicinfo '
+    'r_most_recent_education r_primary_current_experience';

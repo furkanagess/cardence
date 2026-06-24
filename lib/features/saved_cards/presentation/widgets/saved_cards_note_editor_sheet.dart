@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/l10n/l10n_extensions.dart';
 
 import '../../../../core/widgets/atoms/custom_button.dart';
 
@@ -30,7 +31,7 @@ class SavedCardsNoteEditorSheet {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     Text(
-                      'Kisi notu',
+                      context.l10n.kisiNotu,
                       style: Theme.of(context).textTheme.titleMedium,
                     ),
                     const SizedBox(height: 10),
@@ -41,13 +42,13 @@ class SavedCardsNoteEditorSheet {
                       maxLength: 240,
                       onChanged: (value) =>
                           setModalState(() => draftNote = value),
-                      decoration: const InputDecoration(
-                        hintText: 'Bu kisi hakkinda not yazin',
+                      decoration: InputDecoration(
+                        hintText: context.l10n.buKisiHakkindaNotYazin,
                       ),
                     ),
                     const SizedBox(height: 8),
                     CustomButton(
-                      label: 'Kaydet',
+                      label: context.l10n.kaydet,
                       onPressed: () =>
                           Navigator.of(context).pop(draftNote.trim()),
                       fullWidth: false,

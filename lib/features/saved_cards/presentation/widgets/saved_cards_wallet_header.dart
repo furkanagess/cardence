@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/l10n/l10n_extensions.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/atoms/custom_button.dart';
@@ -78,7 +79,7 @@ class SavedCardsWalletHeader extends StatelessWidget {
               if (isDemoMode) ...[
                 const SizedBox(height: 10),
                 Text(
-                  'Örnek kartlar gösteriliyor. İlk kartınızı eklediğinizde gerçek cüzdanınız başlar.',
+                  context.l10n.rnekKartlarGsteriliyorlkKartnz,
                   style: textTheme.bodySmall?.copyWith(
                     color: colorScheme.onSurfaceVariant,
                     height: 1.35,

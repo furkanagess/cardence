@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+
+import 'l10n/app_localizations.dart';
 
 import 'core/auth/session_expired_handler.dart';
 import 'core/constants/app_constants.dart';
@@ -311,6 +314,13 @@ class _AppState extends State<App> {
       darkTheme: AppTheme.darkTheme,
       themeMode: _themeMode,
       debugShowCheckedModeBanner: false,
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: AppLocalizations.supportedLocales,
       builder: (context, child) {
         return ChuckFabOverlay(
           child: child ?? const SizedBox.shrink(),

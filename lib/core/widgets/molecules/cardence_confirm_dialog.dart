@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/l10n/l10n_extensions.dart';
 
 import '../../theme/app_colors.dart';
 import '../atoms/custom_button.dart';
@@ -27,18 +28,18 @@ class CardenceConfirmDialog extends StatelessWidget {
     required String title,
     required String message,
     required String confirmLabel,
-    String cancelLabel = 'İptal',
+    String? cancelLabel,
     IconData icon = Icons.info_outline_rounded,
     bool confirmIsDestructive = false,
   }) {
     return showDialog<bool>(
       context: context,
       barrierDismissible: true,
-      builder: (context) => CardenceConfirmDialog(
+      builder: (dialogContext) => CardenceConfirmDialog(
         title: title,
         message: message,
         confirmLabel: confirmLabel,
-        cancelLabel: cancelLabel,
+        cancelLabel: cancelLabel ?? context.l10n.iptal,
         icon: icon,
         confirmIsDestructive: confirmIsDestructive,
       ),

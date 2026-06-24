@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/l10n/l10n_extensions.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../domain/entities/event_group.dart';
@@ -67,7 +68,7 @@ class EventGroupInfoBanner extends StatelessWidget {
               if (dateText != null && dateText.isNotEmpty)
                 _InfoRow(
                   icon: Icons.calendar_month_outlined,
-                  label: 'Tarih',
+                  label: context.l10n.tarih,
                   value: dateText,
                   textTheme: textTheme,
                   colorScheme: colorScheme,
@@ -80,7 +81,7 @@ class EventGroupInfoBanner extends StatelessWidget {
               if (location != null && location.isNotEmpty)
                 _InfoRow(
                   icon: Icons.location_on_outlined,
-                  label: 'Konum',
+                  label: context.l10n.konum,
                   value: location,
                   textTheme: textTheme,
                   colorScheme: colorScheme,

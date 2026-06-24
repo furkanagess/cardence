@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/l10n/l10n_extensions.dart';
 import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -121,7 +122,7 @@ class _SavedCardDetailPageState extends State<SavedCardDetailPage> {
         SnackBar(
           content: Text(
             _eventGroups.isEmpty
-                ? 'Henüz etkinlik grubu yok'
+                ? context.l10n.henzEtkinlikGrubuYok
                 : 'Bu kart zaten tüm gruplarda',
           ),
           behavior: SnackBarBehavior.floating,
@@ -174,17 +175,17 @@ class _SavedCardDetailPageState extends State<SavedCardDetailPage> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Kartı sil'),
+        title: Text(context.l10n.kartSil),
         content: Text(
           '"$_displayName" kartını cüzdanınızdan silmek istediğinize emin misiniz?',
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('İptal'),
+            child: Text(context.l10n.iptal),
           ),
           CustomButton(
-            label: 'Sil',
+            label: context.l10n.sil,
             onPressed: () => Navigator.of(context).pop(true),
             fullWidth: false,
             style: FilledButton.styleFrom(
@@ -227,8 +228,8 @@ class _SavedCardDetailPageState extends State<SavedCardDetailPage> {
       if (!mounted) return;
       setState(() => _deleting = false);
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Kart silinemedi. Lütfen tekrar deneyin.'),
+        SnackBar(
+          content: Text(context.l10n.kartSilinemediLtfenTekrarDeneyin),
           behavior: SnackBarBehavior.floating,
         ),
       );
@@ -248,7 +249,7 @@ class _SavedCardDetailPageState extends State<SavedCardDetailPage> {
         child: Material(
           color: Colors.transparent,
           child: CustomButton(
-            label: 'Kartı cüzdandan sil',
+            label: context.l10n.kartCzdandanSil,
             icon: Icons.delete_outline_rounded,
             onPressed: _deleting ? null : _confirmDeleteCard,
             isLoading: _deleting,
@@ -319,8 +320,8 @@ class _SavedCardDetailPageState extends State<SavedCardDetailPage> {
     if (!def.isEditable(_card)) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Bu alan Cardence kartında düzenlenemez'),
+        SnackBar(
+          content: Text(context.l10n.buAlanCardenceKartndaDzenlenemez),
           behavior: SnackBarBehavior.floating,
         ),
       );
@@ -391,7 +392,7 @@ class _SavedCardDetailPageState extends State<SavedCardDetailPage> {
   bool _has(String? value) => value != null && value.trim().isNotEmpty;
 
   String _formatSavedAt(int? ms) {
-    if (ms == null) return 'Bilinmiyor';
+    if (ms == null) return context.l10n.bilinmiyor;
     final dt = DateTime.fromMillisecondsSinceEpoch(ms);
     const months = [
       'Oca',
@@ -411,7 +412,7 @@ class _SavedCardDetailPageState extends State<SavedCardDetailPage> {
   }
 
   String _savedAtDescription(int? ms) {
-    if (ms == null) return 'Kaydedildi: tarih bilinmiyor';
+    if (ms == null) return context.l10n.kaydedildiTarihBilinmiyor;
     return 'Kaydedildi: ${_formatSavedAt(ms)}';
   }
 
@@ -430,7 +431,7 @@ class _SavedCardDetailPageState extends State<SavedCardDetailPage> {
   Future<void> _launchLinkedIn() async {
     final linkedin = _card.linkedin?.trim();
     if (linkedin == null || linkedin.isEmpty) return;
-    await _launchWebsite(linkedin, errorMessage: 'LinkedIn açılamadı');
+    await _launchWebsite(linkedin, errorMessage: context.l10n.linkedinAlamad);
   }
 
   Future<void> _launchEmail() async {
@@ -495,14 +496,14 @@ class _SavedCardDetailPageState extends State<SavedCardDetailPage> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     Text(
-                      'Kişi notu',
+                      context.l10n.kiiNotu,
                       style: Theme.of(context).textTheme.titleLarge?.copyWith(
                             fontWeight: FontWeight.w600,
                           ),
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'Toplantı, proje veya hatırlatma notu ekleyin',
+                      context.l10n.toplantProjeVeyaHatrlatmaNotu,
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                             color: colorScheme.onSurfaceVariant,
                           ),
@@ -516,7 +517,7 @@ class _SavedCardDetailPageState extends State<SavedCardDetailPage> {
                       onChanged: (value) =>
                           setModalState(() => draftNote = value),
                       decoration: InputDecoration(
-                        hintText: 'Notunuzu buraya yazın…',
+                        hintText: context.l10n.notunuzuBurayaYazn,
                         filled: true,
                         fillColor: colorScheme.surfaceContainerHighest
                             .withValues(alpha: 0.5),
@@ -528,7 +529,7 @@ class _SavedCardDetailPageState extends State<SavedCardDetailPage> {
                     ),
                     const SizedBox(height: 12),
                     CustomButton(
-                      label: 'Kaydet',
+                      label: context.l10n.kaydet,
                       onPressed: () =>
                           Navigator.of(context).pop(draftNote.trim()),
                       style: FilledButton.styleFrom(
@@ -554,8 +555,8 @@ class _SavedCardDetailPageState extends State<SavedCardDetailPage> {
     await _persistCard(updated);
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Not kaydedildi'),
+      SnackBar(
+        content: Text(context.l10n.notKaydedildi),
         behavior: SnackBarBehavior.floating,
       ),
     );
@@ -581,7 +582,7 @@ class _SavedCardDetailPageState extends State<SavedCardDetailPage> {
             backgroundColor: _card.previewBackgroundColor,
             frontEntries: const [],
             backEntries: _previewBackEntries,
-            emptyMessage: 'Kart bilgisi yok',
+            emptyMessage: context.l10n.kartBilgisiYok,
             cardId: _card.cardId,
             contactEmail: _card.email,
             contactPhone: _card.phone,
@@ -632,8 +633,8 @@ class _SavedCardDetailPageState extends State<SavedCardDetailPage> {
           ],
           const SizedBox(height: 24),
           _DetailSection(
-            title: 'Bilgiler',
-            actionLabel: _canAddFields ? 'Bilgi ekle' : null,
+            title: context.l10n.bilgiler,
+            actionLabel: _canAddFields ? context.l10n.bilgiEkle : null,
             onAction: _canAddFields ? _openAddFieldFlow : null,
             child: _contactFields.isEmpty
                 ? _EmptyStateCard(
@@ -641,7 +642,7 @@ class _SavedCardDetailPageState extends State<SavedCardDetailPage> {
                     message: _canAddFields
                         ? 'Henüz ek bilgi yok. Bilgi ekle ile adres, etkinlik ve daha fazlasını ekleyin.'
                         : 'Bu kartta ek bilgi yok.',
-                    actionLabel: _canAddFields ? 'Bilgi ekle' : null,
+                    actionLabel: _canAddFields ? context.l10n.bilgiEkle : null,
                     onAction: _canAddFields ? _openAddFieldFlow : null,
                   )
                 : _GroupedInfoCard(
@@ -667,10 +668,10 @@ class _SavedCardDetailPageState extends State<SavedCardDetailPage> {
           if (_skills.isNotEmpty) ...[
             const SizedBox(height: 24),
             _DetailSection(
-              title: 'Yetenekler',
+              title: context.l10n.yetenekler,
               actionLabel: SavedCardFieldCatalog.byKey(SavedCardFieldKey.skills)!
                       .isEditable(_card)
-                  ? 'Düzenle'
+                  ? context.l10n.dzenle
                   : null,
               onAction: SavedCardFieldCatalog.byKey(SavedCardFieldKey.skills)!
                       .isEditable(_card)
@@ -686,7 +687,7 @@ class _SavedCardDetailPageState extends State<SavedCardDetailPage> {
           ],
           const SizedBox(height: 24),
           _DetailSection(
-            title: 'Katıldığı etkinlikler',
+            title: context.l10n.katldEtkinlikler,
             child: AnimatedSwitcher(
               duration: const Duration(milliseconds: 220),
               switchInCurve: Curves.easeOut,
@@ -709,7 +710,7 @@ class _SavedCardDetailPageState extends State<SavedCardDetailPage> {
           ),
           const SizedBox(height: 24),
           _DetailSection(
-            title: 'Notlar',
+            title: context.l10n.notlar,
             child: _NotesContainer(
               note: _card.note,
               onAddOrEdit: _openNoteEditor,
@@ -1010,7 +1011,7 @@ class _ContactFieldRow extends StatelessWidget {
               ),
               if (canEdit)
                 IconButton(
-                  tooltip: 'Düzenle',
+                  tooltip: context.l10n.dzenle,
                   visualDensity: VisualDensity.compact,
                   onPressed: field.onEdit,
                   icon: Icon(
@@ -1021,7 +1022,7 @@ class _ContactFieldRow extends StatelessWidget {
                 ),
               if (canOpen || !canEdit)
                 IconButton(
-                  tooltip: canOpen ? 'Aç' : 'Kopyala',
+                  tooltip: canOpen ? 'Aç' : context.l10n.kopyala,
                   visualDensity: VisualDensity.compact,
                   onPressed: canOpen ? field.onTap : onCopy,
                   icon: Icon(
@@ -1080,7 +1081,7 @@ class _NotesContainer extends StatelessWidget {
                   )
                 : Center(
                     child: CustomButton.tonal(
-                      label: 'Not ekle',
+                      label: context.l10n.notEkle,
                       icon: Icons.add_rounded,
                       onPressed: onAddOrEdit,
                       fullWidth: false,
@@ -1147,7 +1148,7 @@ class _EventGroupsChipRow extends StatelessWidget {
               color: colorScheme.primary,
             ),
             label: Text(
-              'Gruba ekle',
+              context.l10n.grubaEkle,
               style: TextStyle(color: colorScheme.primary),
             ),
             onPressed: onAdd,

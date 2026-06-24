@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/constants/app_constants.dart';
+import '../../../../core/l10n/l10n_extensions.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../../domain/helpers/card_visibility_helper.dart';
 import '../../domain/entities/onboarding_card_draft.dart';
 
-const Map<String, String> _fieldLabels = {
-  'email': 'E-posta',
-  'phone': 'Telefon',
-  'linkedin': 'LinkedIn',
-  'website': 'Web sitesi',
-  'skills': 'Yetenekler',
-};
+Map<String, String> _fieldLabels(AppLocalizations l10n) => {
+      'email': l10n.ePosta,
+      'phone': l10n.telefon,
+      'linkedin': l10n.linkedin,
+      'website': l10n.webSitesi,
+      'skills': l10n.yetenekler,
+    };
 
 bool _hasValue(OnboardingCardDraft draft, String key) {
   final v = switch (key) {
@@ -36,6 +38,8 @@ class OnboardingStepVisibleFields extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final labels = _fieldLabels(l10n);
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final textTheme = theme.textTheme;
@@ -46,7 +50,7 @@ class OnboardingStepVisibleFields extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(
-            'Kartında Görünsün',
+            l10n.kartndaGrnsn,
             style: textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.w600,
               color: colorScheme.onSurface,
@@ -54,14 +58,14 @@ class OnboardingStepVisibleFields extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            'Ön yüzde iletişim bilgilerini (en fazla 3), arka yüzde isteğe bağlı yetenekleri seç.',
+            l10n.nYzdeIletiimBilgileriniEn,
             style: textTheme.bodyMedium?.copyWith(
               color: colorScheme.onSurfaceVariant,
             ),
           ),
           const SizedBox(height: 24),
           Text(
-            'Ön yüz — iletişim',
+            l10n.nYzIletiim,
             style: textTheme.titleSmall?.copyWith(
               fontWeight: FontWeight.w600,
               color: colorScheme.onSurface,
@@ -71,7 +75,7 @@ class OnboardingStepVisibleFields extends StatelessWidget {
           ...OnboardingCardDraft.cardFrontContactFieldKeys
               .where((key) => _hasValue(draft, key))
               .map((key) {
-            final label = _fieldLabels[key] ?? key;
+            final label = labels[key] ?? key;
             final isSelected =
                 draft.resolvedFrontContactFields.contains(key);
             final atLimit = draft.resolvedFrontContactFields.length >=
@@ -118,7 +122,7 @@ class OnboardingStepVisibleFields extends StatelessWidget {
           }),
           const SizedBox(height: 24),
           Text(
-            'Arka yüz',
+            l10n.arkaYz,
             style: textTheme.titleSmall?.copyWith(
               fontWeight: FontWeight.w600,
               color: colorScheme.onSurface,
@@ -126,7 +130,7 @@ class OnboardingStepVisibleFields extends StatelessWidget {
           ),
           const SizedBox(height: 4),
           Text(
-            'Hakkımda her zaman gösterilir.',
+            l10n.hakkmdaHerZamanGsterilir,
             style: textTheme.bodySmall?.copyWith(
               color: colorScheme.onSurfaceVariant,
             ),
@@ -152,7 +156,7 @@ class OnboardingStepVisibleFields extends StatelessWidget {
                   }
                   onChanged(draft.copyWith(backVisibleFields: list));
                 },
-                title: const Text('Yetenekler'),
+                title: Text(l10n.yetenekler),
                 controlAffinity: ListTileControlAffinity.leading,
                 contentPadding:
                     const EdgeInsets.symmetric(horizontal: 12, vertical: 0),

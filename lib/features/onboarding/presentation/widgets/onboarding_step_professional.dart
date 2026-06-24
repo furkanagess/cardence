@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/l10n/l10n_extensions.dart';
 
 import '../../../../core/widgets/atoms/custom_text_field.dart';
 import '../../domain/entities/onboarding_card_draft.dart';
@@ -74,27 +75,27 @@ class _OnboardingStepProfessionalState
   @override
   Widget build(BuildContext context) {
     return OnboardingStepShell(
-      subtitle: 'Kartınızın ön yüzünde görünecek bilgiler',
+      subtitle: context.l10n.kartnznnYzndeGrnecekBilgiler,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const OnboardingFieldLabel(label: 'Şirket', required: true),
+          OnboardingFieldLabel(label: context.l10n.irket, required: true),
           CustomTextField(
             controller: _companyController,
             autofocus: true,
             textCapitalization: TextCapitalization.words,
             textInputAction: TextInputAction.next,
-            hintText: 'Şirket adını giriniz',
+            hintText: context.l10n.irketAdnGiriniz,
             prefixIcon: const Icon(Icons.business_outlined),
             onChanged: (_) => _notifyChanged(),
           ),
           const SizedBox(height: 16),
-          const OnboardingFieldLabel(label: 'Pozisyon', required: true),
+          OnboardingFieldLabel(label: context.l10n.pozisyon, required: true),
           CustomTextField(
             controller: _titleController,
             textCapitalization: TextCapitalization.words,
             textInputAction: TextInputAction.done,
-            hintText: 'Pozisyonunuzu giriniz',
+            hintText: context.l10n.pozisyonunuzuGiriniz,
             prefixIcon: const Icon(Icons.work_outline_rounded),
             onChanged: (_) => _notifyChanged(),
           ),

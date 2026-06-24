@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/l10n/l10n_extensions.dart';
 
 import '../../../../core/media/profile_photo_image_picker.dart';
 import '../../../../core/permissions/media_permission_datasource.dart';
@@ -58,7 +59,7 @@ class _SettingsProfileHeaderState extends State<SettingsProfileHeader> {
           behavior: SnackBarBehavior.floating,
           action: openSettings
               ? SnackBarAction(
-                  label: 'Ayarlar',
+                  label: context.l10n.ayarlar,
                   onPressed: _mediaPermission.openSettings,
                 )
               : null,
@@ -84,8 +85,8 @@ class _SettingsProfileHeaderState extends State<SettingsProfileHeader> {
       ScaffoldMessenger.of(context)
         ..hideCurrentSnackBar()
         ..showSnackBar(
-          const SnackBar(
-            content: Text('Profil fotoğrafı kartlarınıza da uygulandı.'),
+          SnackBar(
+            content: Text(context.l10n.profilFotorafKartlarnzaDaUyguland),
             behavior: SnackBarBehavior.floating,
           ),
         );

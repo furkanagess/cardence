@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/l10n/l10n_extensions.dart';
 
 import '../../../../core/utils/card_id_generator.dart';
 import '../../../../core/widgets/atoms/custom_button.dart';
@@ -144,9 +145,9 @@ class _ProfilePageState extends State<ProfilePage> {
     if (!_canAddBusinessCard) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
           content: Text(
-            'Ücretsiz planda yalnızca 1 kart oluşturabilirsiniz. Premium ile daha fazla kart ekleyin.',
+            context.l10n.cretsizPlandaYalnzca1Kart,
           ),
           behavior: SnackBarBehavior.floating,
         ),
@@ -158,7 +159,7 @@ class _ProfilePageState extends State<ProfilePage> {
     final base = template ?? const OnboardingCardDraft();
     final newCard = base.copyWith(
       cardId: CardIdGenerator.generateBusinessCandidate(),
-      cardName: 'Yeni kart',
+      cardName: context.l10n.yeniKart,
       frontVisibleFields: base.shouldMigrateFrontFields
           ? List<String>.from(OnboardingCardDraft.defaultFrontVisibleFields)
           : List.from(base.frontVisibleFields),
@@ -220,7 +221,7 @@ class _ProfilePageState extends State<ProfilePage> {
           Padding(
             padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
             child: CustomButton(
-              label: 'Yeni kart',
+              label: context.l10n.yeniKart,
               icon: Icons.add_rounded,
               onPressed: _createNewCard,
             ),
@@ -229,7 +230,7 @@ class _ProfilePageState extends State<ProfilePage> {
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
               child: Text(
-                'Ücretsiz planda tek kart oluşturabilirsiniz. Premium ile daha fazla kart ekleyin.',
+                context.l10n.cretsizPlandaTekKartOluturabilirsiniz,
                 style: textTheme.bodySmall?.copyWith(
                   color: colorScheme.onSurfaceVariant,
                   height: 1.35,
@@ -243,7 +244,7 @@ class _ProfilePageState extends State<ProfilePage> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: CustomButton.tonal(
-                label: 'Kart yüzü ve alan düzeni',
+                label: context.l10n.kartYzVeAlanDzeni,
                 icon: Icons.view_carousel_outlined,
                 onPressed: () {
                   Navigator.of(context)
@@ -293,7 +294,7 @@ class _ProfilePageState extends State<ProfilePage> {
             ),
             const SizedBox(height: 16),
             Text(
-              'Henüz kartınız yok',
+              context.l10n.henzKartnzYok,
               style: textTheme.titleSmall?.copyWith(
                 fontWeight: FontWeight.w600,
               ),
@@ -301,7 +302,7 @@ class _ProfilePageState extends State<ProfilePage> {
             ),
             const SizedBox(height: 8),
             Text(
-              'İlk kartınızı oluşturun; iş, etkinlik veya kişisel kullanım için ayrı kartlar ekleyebilirsiniz.',
+              context.l10n.ilkKartnzOluturunIEtkinlik,
               style: textTheme.bodyMedium?.copyWith(
                 color: colorScheme.onSurfaceVariant,
                 height: 1.4,
@@ -356,7 +357,7 @@ class _ProfileCardsCarousel extends StatelessWidget {
                 child: OnboardingCardPreviewFrame(
                   draft: cards.first,
                   onDoubleTap: () => onCardTap(cards.first),
-                  emptyMessage: 'Alanlar doldukça görünür',
+                  emptyMessage: context.l10n.alanlarDoldukaGrnr,
                   normalizeForDisplay: true,
                   showPremiumBadge: showPremiumBadge,
                 ),
@@ -406,7 +407,7 @@ class _ProfileCardsCarousel extends StatelessWidget {
                     key: ValueKey(card.cardId),
                     draft: card,
                     onDoubleTap: () => onCardTap(card),
-                    emptyMessage: 'Alanlar doldukça görünür',
+                    emptyMessage: context.l10n.alanlarDoldukaGrnr,
                     normalizeForDisplay: true,
                     showPremiumBadge: showPremiumBadge,
                   ),

@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 
+import '../../../../l10n/app_localizations.dart';
 import '../../domain/entities/onboarding_card_draft.dart';
 import '../onboarding_validation.dart';
 
@@ -28,13 +29,13 @@ class OnboardingState extends Equatable {
   bool get isFirstPage => currentPageIndex <= 0;
 
   /// İleri / tamamla öncesi geçerli mi; hata mesajı döner.
-  String? validationErrorForStep(int stepIndex) {
+  String? validationErrorForStep(AppLocalizations l10n, int stepIndex) {
     switch (stepIndex) {
       case 0:
-        return OnboardingValidation.validateDisplayName(draft.displayName);
+        return OnboardingValidation.validateDisplayName(l10n, draft.displayName);
       case 1:
-        return OnboardingValidation.validateCompany(draft.company) ??
-            OnboardingValidation.validateTitle(draft.title);
+        return OnboardingValidation.validateCompany(l10n, draft.company) ??
+            OnboardingValidation.validateTitle(l10n, draft.title);
       case 2:
         return null;
       case 3:
@@ -46,16 +47,17 @@ class OnboardingState extends Equatable {
     }
   }
 
-  String? get validationErrorForCurrentStep =>
-      validationErrorForStep(currentPageIndex);
+  String? validationErrorForCurrentStep(AppLocalizations l10n) =>
+      validationErrorForStep(l10n, currentPageIndex);
 
   /// Mevcut adımda Devam / Tamamla aktif mi.
-  bool get canProceedCurrentStep {
-    if (isLastPage) return canFinish;
-    return validationErrorForCurrentStep == null;
+  bool canProceedCurrentStep(AppLocalizations l10n) {
+    if (isLastPage) return canFinish(l10n);
+    return validationErrorForCurrentStep(l10n) == null;
   }
 
-  bool get canFinish => OnboardingValidation.hasRequiredFields(
+  bool canFinish(AppLocalizations l10n) =>
+      OnboardingValidation.fieldsAreValid(
         displayName: draft.displayName,
         company: draft.company,
         title: draft.title,

@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 
+import '../../../../l10n/app_localizations.dart';
 import '../../../onboarding/presentation/onboarding_validation.dart';
 import '../../domain/entities/manual_saved_card_draft.dart';
 
@@ -22,15 +23,15 @@ class AddManualCardState extends Equatable {
   bool get isLastPage => currentPageIndex >= stepCount - 1;
   bool get isFirstPage => currentPageIndex <= 0;
 
-  String? validationErrorForStep(int stepIndex) {
+  String? validationErrorForStep(AppLocalizations l10n, int stepIndex) {
     switch (stepIndex) {
       case 0:
-        return OnboardingValidation.validateDisplayName(draft.displayName);
+        return OnboardingValidation.validateDisplayName(l10n, draft.displayName);
       case 1:
-        return OnboardingValidation.validateCompany(draft.company) ??
-            OnboardingValidation.validateTitle(draft.title);
+        return OnboardingValidation.validateCompany(l10n, draft.company) ??
+            OnboardingValidation.validateTitle(l10n, draft.title);
       case 2:
-        return OnboardingValidation.validateEmail(draft.email);
+        return OnboardingValidation.validateEmail(l10n, draft.email);
       case 3:
         return null;
       default:
@@ -38,15 +39,16 @@ class AddManualCardState extends Equatable {
     }
   }
 
-  String? get validationErrorForCurrentStep =>
-      validationErrorForStep(currentPageIndex);
+  String? validationErrorForCurrentStep(AppLocalizations l10n) =>
+      validationErrorForStep(l10n, currentPageIndex);
 
-  bool get canProceedCurrentStep {
-    if (isLastPage) return canFinish;
-    return validationErrorForCurrentStep == null;
+  bool canProceedCurrentStep(AppLocalizations l10n) {
+    if (isLastPage) return canFinish(l10n);
+    return validationErrorForCurrentStep(l10n) == null;
   }
 
-  bool get canFinish => OnboardingValidation.hasRequiredFields(
+  bool canFinish(AppLocalizations l10n) =>
+      OnboardingValidation.fieldsAreValid(
         displayName: draft.displayName,
         company: draft.company,
         title: draft.title,

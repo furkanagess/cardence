@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/l10n/l10n_extensions.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/atoms/custom_button.dart';
@@ -65,7 +66,7 @@ class WalletQuotaDetailSheet extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Cüzdan kotanız',
+                        context.l10n.czdanKotanz,
                         style: textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.w700,
                           letterSpacing: -0.3,
@@ -94,7 +95,7 @@ class WalletQuotaDetailSheet extends StatelessWidget {
               _HintCard(
                 icon: Icons.lightbulb_outline_rounded,
                 message:
-                    'Şu an örnek kartlar görüyorsunuz. İlk kartınızı eklediğinizde gerçek kotanız burada görünür.',
+                    context.l10n.uAnrnekKartlarGryorsunuz,
                 tone: _HintTone.neutral,
               ),
             ] else if (atLimit) ...[
@@ -102,14 +103,14 @@ class WalletQuotaDetailSheet extends StatelessWidget {
               _HintCard(
                 icon: Icons.info_outline_rounded,
                 message:
-                    'Kayıtlı kart limitiniz doldu. Premium ile sınırsız kart saklayabilir ve manuel / fotoğrafla eklemeye devam edebilirsiniz.',
+                    context.l10n.kaytlKartLimitinizDolduPremium,
                 tone: _HintTone.warning,
               ),
             ],
             if (!quota.isPremium && onUpgradeTap != null) ...[
               const SizedBox(height: 20),
               CustomButton(
-                label: 'Cardence Pro ol',
+                label: context.l10n.cardenceProOl,
                 icon: Icons.workspace_premium_rounded,
                 onPressed: () {
                   Navigator.of(context).pop();
@@ -147,7 +148,7 @@ class _LimitsSection extends StatelessWidget {
     final savedCardsAtLimit = !quota.isPremium && !quota.canAddMore && !isDemoMode;
     final savedCardsNearLimit = !quota.isPremium && quota.isNearLimit && !savedCardsAtLimit;
     final manualLabel = quota.isPremium
-        ? 'Sınırsız'
+        ? context.l10n.snrsz
         : quota.canAddManualSavedCard
             ? '1 deneme'
             : 'Premium gerekli';
@@ -157,13 +158,13 @@ class _LimitsSection extends StatelessWidget {
       children: [
         WalletQuotaLimitRow(
           icon: Icons.credit_card_outlined,
-          title: 'Kayıtlı kartlar',
+          title: context.l10n.kaytlKartlar,
           valueLabel: quota.hasUnlimitedWallet
-              ? 'Sınırsız'
+              ? context.l10n.snrsz
               : '$usedWallet / ${quota.maxCards}',
           subtitle: isDemoMode
               ? 'Henüz kart eklenmedi'
-              : walletQuotaRemainingLabel(quota),
+              : walletQuotaRemainingLabel(context.l10n, quota),
           tone: quota.hasUnlimitedWallet
               ? WalletQuotaLimitTone.success
               : savedCardsAtLimit
@@ -175,7 +176,7 @@ class _LimitsSection extends StatelessWidget {
         const SizedBox(height: 10),
         WalletQuotaLimitRow(
           icon: Icons.badge_outlined,
-          title: 'Kendi kartlarım',
+          title: context.l10n.kendiKartlarm,
           valueLabel: quota.isPremium
               ? '${quota.businessCardCount} / ${quota.maxBusinessCards}'
               : '${quota.businessCardCount} / ${SavedCardsWalletLimits.freeMaxOwnBusinessCards}',
@@ -189,9 +190,9 @@ class _LimitsSection extends StatelessWidget {
         const SizedBox(height: 10),
         WalletQuotaLimitRow(
           icon: Icons.folder_outlined,
-          title: 'Etkinlik grupları',
+          title: context.l10n.etkinlikGruplar,
           valueLabel: quota.hasUnlimitedEventGroups
-              ? 'Sınırsız'
+              ? context.l10n.snrsz
               : '${quota.eventGroupCount} / ${quota.maxEventGroups}',
           subtitle: quota.hasUnlimitedEventGroups
               ? 'İstediğiniz kadar grup oluşturun'
@@ -207,7 +208,7 @@ class _LimitsSection extends StatelessWidget {
         const SizedBox(height: 10),
         WalletQuotaLimitRow(
           icon: Icons.document_scanner_outlined,
-          title: 'Manuel & fotoğraf ekleme',
+          title: context.l10n.manuelFotorafEkleme,
           valueLabel: manualLabel,
           subtitle: quota.isPremium
               ? 'İstediğiniz kadar ekleyin'

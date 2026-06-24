@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/l10n/l10n_extensions.dart';
 
 import '../../../auth/domain/usecases/upload_profile_photo.dart';
 import '../../domain/entities/onboarding_card_draft.dart';
@@ -28,14 +29,14 @@ class OnboardingStepPhoto extends StatelessWidget {
     final displayName = draft.displayName?.trim();
 
     return OnboardingStepShell(
-      subtitle: 'Profil fotoğrafınız kartınızda görünür. İsterseniz atlayabilirsiniz.',
+      subtitle: context.l10n.profilFotorafnzKartnzdaGrnrsterseniz,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Center(
             child: OnboardingPhotoPicker(
               displayName: (displayName == null || displayName.isEmpty)
-                  ? 'Ad Soyad'
+                  ? context.l10n.adSoyad
                   : displayName,
               photoUrl: draft.photoUrl,
               uploadProfilePhoto: uploadProfilePhoto,

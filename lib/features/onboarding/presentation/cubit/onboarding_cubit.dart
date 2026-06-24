@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/network/auth_api_exception.dart';
 import '../../../business_cards/domain/usecases/persist_onboarding_card.dart';
 import '../../domain/entities/onboarding_card_draft.dart';
+import '../onboarding_validation.dart';
 import 'onboarding_state.dart';
 
 class OnboardingCubit extends Cubit<OnboardingState> {
@@ -39,7 +40,12 @@ class OnboardingCubit extends Cubit<OnboardingState> {
 
   /// Taslağı kaydeder, sunucuda kart oluşturur, onboarding'i tamamlar.
   Future<bool> finishOnboarding() async {
-    if (!state.canFinish) return false;
+    if (!OnboardingValidation.fieldsAreValid(
+      displayName: state.draft.displayName,
+      company: state.draft.company,
+      title: state.draft.title,
+      email: state.draft.email,
+    )) return false;
     emit(state.copyWith(isSaving: true, clearError: true));
     try {
       final syncedDraft = await persistOnboardingCard(state.draft);

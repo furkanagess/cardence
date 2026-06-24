@@ -1,4 +1,5 @@
 import 'dart:io';
+import '../../../../core/l10n/l10n_extensions.dart';
 
 import 'package:flutter/material.dart';
 
@@ -228,7 +229,7 @@ class AddCardPhotoCaptureZone extends StatelessWidget {
                                   ),
                                   const SizedBox(width: 6),
                                   Text(
-                                    'Yeniden çek',
+                                    context.l10n.yenidenek,
                                     style: textTheme.labelLarge?.copyWith(
                                       color: colorScheme.surface,
                                       fontWeight: FontWeight.w600,

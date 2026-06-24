@@ -592,11 +592,30 @@ public sealed class AuthService : IAuthService
             card.Title = linkedInProfile.Title.Trim();
         }
 
-        if (!string.IsNullOrWhiteSpace(linkedInProfile.Headline)
-            && string.IsNullOrWhiteSpace(card.About))
+        if (!string.IsNullOrWhiteSpace(linkedInProfile.School)
+            && string.IsNullOrWhiteSpace(card.School))
         {
-            card.About = linkedInProfile.Headline.Trim();
+            card.School = linkedInProfile.School.Trim();
         }
+
+        var about = FirstNonEmpty(linkedInProfile.About, linkedInProfile.Headline);
+        if (!string.IsNullOrWhiteSpace(about) && string.IsNullOrWhiteSpace(card.About))
+        {
+            card.About = about.Trim();
+        }
+    }
+
+    private static string? FirstNonEmpty(params string?[] values)
+    {
+        foreach (var value in values)
+        {
+            if (!string.IsNullOrWhiteSpace(value))
+            {
+                return value.Trim();
+            }
+        }
+
+        return null;
     }
 
     public async Task<AuthServiceResponse<UserProfileEntity>> GetMeAsync(

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/l10n/l10n_extensions.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../settings/presentation/widgets/settings_section_label.dart';
@@ -21,14 +22,14 @@ class ProfileInteractionStats extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const SettingsSectionLabel(label: 'Son etkileşimler'),
+        SettingsSectionLabel(label: context.l10n.sonEtkileimler),
         Row(
           children: [
             Expanded(
               child: _ProfileStatCard(
                 icon: Icons.groups_outlined,
                 value: '$eventGroupCount',
-                label: 'Etkinlik Grubu',
+                label: context.l10n.etkinlikGrubu,
               ),
             ),
             const SizedBox(width: 12),
@@ -36,7 +37,7 @@ class ProfileInteractionStats extends StatelessWidget {
               child: _ProfileStatCard(
                 icon: Icons.bookmark_added_outlined,
                 value: '$totalWalletSaveCount',
-                label: 'Cüzdana Eklendi',
+                label: context.l10n.czdanaEklendi,
               ),
             ),
           ],
@@ -74,7 +75,7 @@ class ProfileInteractionStats extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Kart kayıt sayısı',
+                        context.l10n.kartKaytSays,
                         style: Theme.of(context).textTheme.titleSmall?.copyWith(
                               fontWeight: FontWeight.w700,
                             ),

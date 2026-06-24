@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../l10n/app_localizations.dart';
 import '../../../onboarding/presentation/widgets/onboarding_card_preview_frame.dart';
 import '../../../onboarding/domain/entities/onboarding_card_draft.dart';
 
@@ -7,26 +8,26 @@ import '../../../onboarding/domain/entities/onboarding_card_draft.dart';
 class MyCardPreviewHelpers {
   MyCardPreviewHelpers._();
 
-  static const Map<String, String> fieldLabels = {
-    'displayName': 'Ad Soyad',
-    'email': 'E-posta',
-    'phone': 'Telefon',
-    'company': 'Şirket',
-    'title': 'Ünvan',
-    'website': 'Web sitesi',
-    'linkedin': 'LinkedIn',
-    'skills': 'Yetenekler',
-    'school': 'Okul',
-    'about': 'Hakkımda',
-    'address': 'Adres',
-    'city': 'Şehir',
-    'country': 'Ülke',
-    'department': 'Departman',
-    'attendedEvents': 'Katıldığı etkinlikler',
-    'twitter': 'Twitter / X',
-    'instagram': 'Instagram',
-    'birthday': 'Doğum günü',
-  };
+  static Map<String, String> fieldLabels(AppLocalizations l10n) => {
+        'displayName': l10n.adSoyad,
+        'email': l10n.ePosta,
+        'phone': l10n.telefon,
+        'company': l10n.irket,
+        'title': l10n.nvlan,
+        'website': l10n.webSitesi,
+        'linkedin': l10n.linkedin,
+        'skills': l10n.yetenekler,
+        'school': l10n.okul,
+        'about': l10n.hakkmda,
+        'address': l10n.adres,
+        'city': l10n.ehir,
+        'country': l10n.lke,
+        'department': l10n.departman,
+        'attendedEvents': l10n.katldEtkinlikler,
+        'twitter': 'Twitter / X',
+        'instagram': l10n.instagram,
+        'birthday': l10n.doumGn,
+      };
 
   static Color? parseHexColor(String? hex) {
     if (hex == null || hex.length != 7 || !hex.startsWith('#')) return null;
@@ -35,9 +36,10 @@ class MyCardPreviewHelpers {
 
   static Widget flippableCard({
     required OnboardingCardDraft draft,
+    required AppLocalizations l10n,
     VoidCallback? onTap,
     VoidCallback? onDoubleTap,
-    String emptyMessage = 'Alanlar doldukça görünür',
+    String? emptyMessage,
     Key? key,
   }) {
     return OnboardingCardPreviewFrame(
@@ -45,7 +47,7 @@ class MyCardPreviewHelpers {
       draft: draft,
       onTap: onTap,
       onDoubleTap: onDoubleTap,
-      emptyMessage: emptyMessage,
+      emptyMessage: emptyMessage ?? l10n.alanlarDoldukaGrnr,
       normalizeForDisplay: true,
     );
   }

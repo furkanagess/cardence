@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/l10n/l10n_extensions.dart';
 
 import '../../share/app_share.dart';
 import '../../theme/app_colors.dart';
@@ -53,7 +54,7 @@ class RecommendAppShareTile extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Arkadaşlarına öner',
+                      context.l10n.arkadalarnaner,
                       style: textTheme.titleSmall?.copyWith(
                         fontWeight: FontWeight.w700,
                         color: colorScheme.onSurface,
@@ -61,7 +62,7 @@ class RecommendAppShareTile extends StatelessWidget {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      'Cardence\'i paylaş, birlikte bağlantı kurun',
+                      context.l10n.cardencePaylasBirlikteBaglanti,
                       style: textTheme.bodySmall?.copyWith(
                         color: colorScheme.onSurfaceVariant,
                         height: 1.3,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/l10n/l10n_extensions.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/birthday_format.dart';
@@ -236,7 +237,7 @@ class _CreateEventGroupSheetHeader extends StatelessWidget {
     final colorScheme = theme.colorScheme;
     final isDark = theme.brightness == Brightness.dark;
 
-    final title = step == 0 ? 'Yeni etkinlik grubu' : 'Kartları seç';
+    final title = step == 0 ? context.l10n.yeniEtkinlikGrubu : context.l10n.selectCards;
     final subtitle = step == 0
         ? 'Etkinliğin adını, konumunu ve tarihini girin.'
         : 'İsterseniz kart seçmeden de grubu oluşturabilirsiniz.';
@@ -250,7 +251,7 @@ class _CreateEventGroupSheetHeader extends StatelessWidget {
             children: [
               _StepIndicatorDot(
                 label: '1',
-                title: 'Bilgiler',
+                title: context.l10n.bilgiler,
                 active: step == 0,
                 completed: step > 0,
               ),
@@ -272,7 +273,7 @@ class _CreateEventGroupSheetHeader extends StatelessWidget {
               ),
               _StepIndicatorDot(
                 label: '2',
-                title: 'Kartlar',
+                title: context.l10n.kartlar,
                 active: step == 1,
                 completed: false,
               ),
@@ -419,8 +420,8 @@ class _CreateEventGroupDetailsStep extends StatelessWidget {
                 children: [
                   CustomTextField(
                     controller: nameController,
-                    labelText: 'Etkinlik adı',
-                    hintText: 'Örn. Web Summit 2026',
+                    labelText: context.l10n.etkinlikAd,
+                    hintText: context.l10n.rnWebSummit2026,
                     errorText: nameErrorText,
                     autofocus: true,
                     textInputAction: TextInputAction.next,
@@ -429,15 +430,15 @@ class _CreateEventGroupDetailsStep extends StatelessWidget {
                   const SizedBox(height: 14),
                   CustomTextField(
                     controller: locationController,
-                    labelText: 'Konum',
-                    hintText: 'Örn. İstanbul Kongre Merkezi',
+                    labelText: context.l10n.konum,
+                    hintText: context.l10n.rnstanbulKongreMerkezi,
                     textInputAction: TextInputAction.next,
                   ),
                   const SizedBox(height: 14),
                       BirthdayPickerField(
-                        label: 'Etkinlik tarihi',
+                        label: context.l10n.etkinlikTarihi,
                         value: eventDateValue,
-                        hintText: 'Tarih seçin',
+                        hintText: context.l10n.tarihSein,
                         onChanged: onEventDateChanged,
                       ),
                       const SizedBox(height: 18),
@@ -622,14 +623,14 @@ class _CreateEventGroupSheetFooter extends StatelessWidget {
               if (step == 1) ...[
                 TextButton(
                   onPressed: loadingCards ? null : onBack,
-                  child: const Text('Geri'),
+                  child: Text(context.l10n.geri),
                 ),
                 const SizedBox(width: 8),
               ],
               Expanded(
                 child: step == 0
                     ? CustomButton(
-                        label: 'Devam',
+                        label: context.l10n.devam,
                         onPressed: onContinue,
                       )
                     : CustomButton(

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/l10n/l10n_extensions.dart';
 
 import '../widgets/my_card_preview_helpers.dart';
 import '../../../onboarding/domain/entities/onboarding_card_draft.dart';
@@ -69,7 +70,7 @@ class MyCardsPage extends StatelessWidget {
             ),
             const SizedBox(height: 24),
             Text(
-              'Henüz kartın yok',
+              context.l10n.henzKartnYok,
               style: textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.w600,
                 color: colorScheme.onSurface,
@@ -78,7 +79,7 @@ class MyCardsPage extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              'Onboarding\'de oluşturduğun kart burada listelenecek.',
+              context.l10n.onboardingCardListedHere,
               style: textTheme.bodyMedium?.copyWith(
                 color: colorScheme.onSurfaceVariant,
               ),
@@ -106,7 +107,8 @@ class _MyCardItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return MyCardPreviewHelpers.flippableCard(
       draft: draft,
-      emptyMessage: 'Kart bilgisi yok',
+      l10n: context.l10n,
+      emptyMessage: context.l10n.kartBilgisiYok,
       onDoubleTap: () {
         Navigator.of(context).push(
           MaterialPageRoute<void>(

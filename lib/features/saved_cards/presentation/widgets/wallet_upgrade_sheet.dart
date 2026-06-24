@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/l10n/l10n_extensions.dart';
 
 import '../../../../core/widgets/atoms/custom_button.dart';
 import '../../../subscriptions/domain/usecases/restore_wallet_purchases.dart';
@@ -45,12 +46,12 @@ class WalletUpgradeSheet extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
-              'Premium cüzdan',
+              context.l10n.premiumCzdan,
               style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 8),
             Text(
-              'Daha fazla kişi kartı saklayın ve etkinliklerinizi ölçeklendirin.',
+              context.l10n.dahaFazlaKiiKartSaklayn,
               style: textTheme.bodyMedium?.copyWith(
                 color: colorScheme.onSurfaceVariant,
               ),
@@ -77,7 +78,7 @@ class WalletUpgradeSheet extends StatelessWidget {
             ),
             const SizedBox(height: 24),
             CustomButton(
-              label: 'Premium\'a geç',
+              label: context.l10n.upgradeToPremium,
               onPressed: () {
                 Navigator.of(context).pop(
                   WalletUpgradeSheetResult.purchaseRequested,
@@ -99,17 +100,17 @@ class WalletUpgradeSheet extends StatelessWidget {
                   return;
                 }
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Geri yüklenecek satın alım bulunamadı.'),
+                  SnackBar(
+                    content: Text(context.l10n.geriYklenecekSatnAlmBulunamad),
                     behavior: SnackBarBehavior.floating,
                   ),
                 );
               },
-              child: const Text('Satın alımları geri yükle'),
+              child: Text(context.l10n.satnAlmlarGeriYkle),
             ),
             const SizedBox(height: 4),
             Text(
-              'App Store / Play Store üzerinden güvenli ödeme.',
+              context.l10n.appStorePlayStorezerinden,
               style: textTheme.labelSmall?.copyWith(
                 color: colorScheme.onSurfaceVariant,
               ),

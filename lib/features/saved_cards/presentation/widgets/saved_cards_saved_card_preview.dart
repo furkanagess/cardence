@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/l10n/l10n_extensions.dart';
 
 import '../../../../core/widgets/organisms/flippable_person_card.dart';
 import '../../domain/entities/saved_card.dart';
@@ -42,7 +43,7 @@ class SavedCardsSavedCardPreview extends StatelessWidget {
       backgroundColor: card.previewBackgroundColor,
       frontEntries: const [],
       backEntries: card.backAboutEntries,
-      emptyMessage: 'Kart bilgisi yok',
+      emptyMessage: context.l10n.kartBilgisiYok,
       cardId: card.cardId,
       onDoubleTap: onDoubleTap,
       contactEmail: card.email,

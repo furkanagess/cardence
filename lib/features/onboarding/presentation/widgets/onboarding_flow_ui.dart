@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/l10n/l10n_extensions.dart';
 
 import '../../../../core/widgets/atoms/custom_button.dart';
 
@@ -75,7 +76,7 @@ class OnboardingOptionalBadge extends StatelessWidget {
         borderRadius: BorderRadius.circular(6),
       ),
       child: Text(
-        'Opsiyonel',
+        context.l10n.opsiyonel,
         style: Theme.of(context).textTheme.labelSmall?.copyWith(
               color: colorScheme.onPrimaryContainer,
               fontWeight: FontWeight.w600,

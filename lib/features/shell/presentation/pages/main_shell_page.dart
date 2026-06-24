@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/l10n/l10n_extensions.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/constants/app_constants.dart';
@@ -119,11 +120,11 @@ class _MainShellPageState extends State<MainShellPage> {
   String get _appBarTitle {
     switch (_currentIndex) {
       case 0:
-        return 'Kaydedilen Kartlar';
+        return context.l10n.kaydedilenKartlar;
       case 1:
-        return 'Etkinlik grupları';
+        return context.l10n.etkinlikGruplar;
       case 2:
-        return 'Kartlarım';
+        return context.l10n.kartlarm;
       default:
         return AppConstants.appName;
     }
@@ -138,7 +139,7 @@ class _MainShellPageState extends State<MainShellPage> {
       actions: [
         CardenceAppBar.iconAction(
           icon: Icons.settings_outlined,
-          tooltip: 'Ayarlar',
+          tooltip: context.l10n.ayarlar,
           onPressed: _openingSettings ? null : () => _openSettings(context),
         ),
       ],

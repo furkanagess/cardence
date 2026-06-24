@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/l10n/l10n_extensions.dart';
 import 'package:flip_card/flip_card.dart';
 
 import '../atoms/custom_button.dart';
@@ -173,7 +174,7 @@ class _FlippablePersonCardState extends State<FlippablePersonCard>
     final entries = widget.backEntries;
     if (entries.isEmpty) return false;
     return entries.every(
-      (e) => e.label == 'Hakkımda' || e.label == 'Yetenekler',
+      (e) => e.label == 'Hakkımda' || e.label == context.l10n.yetenekler,
     );
   }
 
@@ -212,7 +213,7 @@ class _FlippablePersonCardState extends State<FlippablePersonCard>
             context,
             Center(
               child: CustomButton.tonal(
-                label: widget.backEmptyActionLabel ?? 'Not ekle',
+                label: widget.backEmptyActionLabel ?? context.l10n.notEkle,
                 icon: Icons.add_rounded,
                 onPressed: widget.onBackEmptyActionTap,
                 fullWidth: false,

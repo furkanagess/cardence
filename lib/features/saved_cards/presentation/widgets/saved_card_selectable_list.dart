@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/l10n/l10n_extensions.dart';
 
 import '../../domain/entities/saved_card.dart';
 import 'saved_card_list_tile.dart';
@@ -29,7 +30,7 @@ class SavedCardSelectableList extends StatelessWidget {
       return Padding(
         padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 20),
         child: Text(
-          'Henüz kaydedilmiş kart yok. Kaydedilen Kartlar sekmesinden QR ile kart ekleyebilirsiniz.',
+          context.l10n.henzKaydedilmiKartYokKaydedilen,
           textAlign: TextAlign.center,
           style: theme.textTheme.bodyMedium?.copyWith(
             color: colorScheme.onSurfaceVariant,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/l10n/l10n_extensions.dart';
 
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -55,10 +56,10 @@ class _SettingsPageState extends State<SettingsPage> {
 
     final confirmed = await CardenceConfirmDialog.show(
       context,
-      title: 'Çıkış yap',
+      title: context.l10n.kYap,
       message:
-          'Oturumunuz kapatılacak ve giriş ekranına yönlendirileceksiniz. Kayıtlı kartlarınız bir sonraki girişinizde yeniden yüklenecektir.',
-      confirmLabel: 'Çıkış yap',
+          context.l10n.oturumunuzKapatlacakVeGiriEkranna,
+      confirmLabel: context.l10n.kYap,
       icon: Icons.logout_rounded,
       confirmIsDestructive: true,
     );
@@ -92,8 +93,8 @@ class _SettingsPageState extends State<SettingsPage> {
     final opened = await widget.requestAppReview();
     if (!mounted || opened) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Mağaza sayfası açılamadı. Lütfen tekrar deneyin.'),
+      SnackBar(
+        content: Text(context.l10n.maazaSayfasAlamadLtfenTekrar),
         behavior: SnackBarBehavior.floating,
       ),
     );
@@ -107,8 +108,8 @@ class _SettingsPageState extends State<SettingsPage> {
     final email = widget.userEmail?.trim();
 
     return CardenceScaffold(
-      appBar: const CardenceAppBar(
-        title: 'Ayarlar',
+      appBar: CardenceAppBar(
+        title: context.l10n.ayarlar,
       ),
       body: ColoredBox(
         color: isDark ? AppColors.backgroundDark : AppColors.backgroundLight,
@@ -132,42 +133,42 @@ class _SettingsPageState extends State<SettingsPage> {
                         onPhotoUpdated: widget.onPhotoUpdated,
                       ),
                       const SizedBox(height: 32),
-                      const SettingsSectionLabel(
-                        label: 'Görünüm',
-                        subtitle: 'Uygulama temasını seçin',
+                      SettingsSectionLabel(
+                        label: context.l10n.grnm,
+                        subtitle: context.l10n.uygulamaTemasnSein,
                       ),
                       SettingsThemeSelector(
                         current: widget.currentTheme,
                         onChanged: widget.onThemeChanged,
                       ),
                       const SizedBox(height: 28),
-                      const SettingsSectionLabel(
-                        label: 'Genel',
-                        subtitle: 'Destek, gizlilik ve uygulama bilgileri',
+                      SettingsSectionLabel(
+                        label: context.l10n.genel,
+                        subtitle: context.l10n.destekGizlilikVeUygulamaBilgileri,
                       ),
                       SettingsMenuGroup(
                         items: [
                           SettingsMenuGroupItem(
                             icon: Icons.star_outline_rounded,
-                            title: 'Bizi değerlendirin',
-                            subtitle: 'App Store veya Play Store\'da puan verin',
+                            title: context.l10n.biziDeerlendirin,
+                            subtitle: context.l10n.rateOnAppStore,
                             iconTint: AppColors.warning,
                             onTap: _rateApp,
                           ),
                           SettingsMenuGroupItem(
                             icon: Icons.help_outline_rounded,
-                            title: 'Destek ve yardım',
-                            subtitle: 'Sorularınız için bize ulaşın',
+                            title: context.l10n.destekVeYardm,
+                            subtitle: context.l10n.sorularnzIinBizeUlan,
                             onTap: widget.onOpenSupport,
                           ),
                           SettingsMenuGroupItem(
                             icon: Icons.shield_outlined,
-                            title: 'Gizlilik politikası',
+                            title: context.l10n.gizlilikPolitikas2,
                             onTap: _openPrivacyPolicy,
                           ),
                           SettingsMenuGroupItem(
                             icon: Icons.info_outline_rounded,
-                            title: 'Hakkında',
+                            title: context.l10n.hakknda,
                             subtitle:
                                 '${AppConstants.appName} v${AppConstants.appVersion}',
                             onTap: _openAbout,
@@ -226,7 +227,7 @@ class _SettingsLogoutBar extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.fromLTRB(20, 14, 20, 16),
           child: CustomButton(
-            label: 'Çıkış yap',
+            label: context.l10n.kYap,
             icon: Icons.logout_rounded,
             isLoading: isLoading,
             enabled: !isLoading,

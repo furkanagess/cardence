@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/l10n/l10n_extensions.dart';
 
 import '../../domain/entities/onboarding_card_draft.dart';
 
@@ -57,7 +58,7 @@ class _OnboardingStepSocialState extends State<OnboardingStepSocial> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(
-            'Web & Sosyal',
+            context.l10n.webSosyal,
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.w600,
                   color: Theme.of(context).colorScheme.onSurface,
@@ -65,7 +66,7 @@ class _OnboardingStepSocialState extends State<OnboardingStepSocial> {
           ),
           const SizedBox(height: 8),
           Text(
-            'İstersen web siteni ve LinkedIn profilini ekle.',
+            context.l10n.istersenWebSiteniVeLinkedin,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
@@ -74,8 +75,8 @@ class _OnboardingStepSocialState extends State<OnboardingStepSocial> {
           TextField(
             keyboardType: TextInputType.url,
             autocorrect: false,
-            decoration: const InputDecoration(
-              hintText: 'Web sitesi (https://...)',
+            decoration: InputDecoration(
+              hintText: context.l10n.webSitesiHttps,
               prefixIcon: Icon(Icons.language),
             ),
             controller: _websiteController,
@@ -87,8 +88,8 @@ class _OnboardingStepSocialState extends State<OnboardingStepSocial> {
           TextField(
             keyboardType: TextInputType.url,
             autocorrect: false,
-            decoration: const InputDecoration(
-              hintText: 'LinkedIn profil linki',
+            decoration: InputDecoration(
+              hintText: context.l10n.linkedinProfilLinki,
               prefixIcon: Icon(Icons.link),
             ),
             controller: _linkedinController,

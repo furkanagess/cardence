@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/l10n/l10n_extensions.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 
 import '../../../../core/utils/card_id_generator.dart';
@@ -138,11 +139,11 @@ class _CardViewPageState extends State<CardViewPage> {
   Future<bool> _confirmDiscardChanges() {
     return CardenceConfirmDialog.show(
       context,
-      title: 'Kaydedilmemiş değişiklikler',
+      title: context.l10n.kaydedilmemiDeiiklikler,
       message:
-          'Yaptığınız değişiklikler kaydedilmedi. Çıkmak istediğinize emin misiniz?',
-      confirmLabel: 'Çık',
-      cancelLabel: 'İptal',
+          context.l10n.yaptnzDeiikliklerKaydedilmedikmakIstediinize,
+      confirmLabel: context.l10n.k,
+      cancelLabel: context.l10n.iptal,
       icon: Icons.warning_amber_rounded,
       confirmIsDestructive: true,
     ).then((value) => value == true);
@@ -212,7 +213,7 @@ class _CardViewPageState extends State<CardViewPage> {
     await showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Özel metin rengi'),
+        title: Text(context.l10n.zelMetinRengi),
         content: SingleChildScrollView(
           child: ColorPicker(
             pickerColor: pickerColor,
@@ -225,10 +226,10 @@ class _CardViewPageState extends State<CardViewPage> {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('İptal'),
+            child: Text(context.l10n.iptal),
           ),
           CustomButton(
-            label: 'Uygula',
+            label: context.l10n.uygula,
             onPressed: () {
               Navigator.of(context).pop();
               final r = (pickerColor.r * 255).round().clamp(0, 255);
@@ -250,7 +251,7 @@ class _CardViewPageState extends State<CardViewPage> {
     final newId = CardIdGenerator.generateBusinessCandidate();
     final copy = current.copyWith(
       cardId: newId,
-      cardName: 'Yeni kart',
+      cardName: context.l10n.yeniKart,
       frontVisibleFields: current.shouldMigrateFrontFields
           ? List<String>.from(OnboardingCardDraft.defaultFrontVisibleFields)
           : List.from(current.frontVisibleFields),
@@ -275,7 +276,7 @@ class _CardViewPageState extends State<CardViewPage> {
     await showDialog<void>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Özel kart rengi'),
+        title: Text(context.l10n.zelKartRengi),
         content: SingleChildScrollView(
           child: ColorPicker(
             pickerColor: pickerColor,
@@ -286,9 +287,9 @@ class _CardViewPageState extends State<CardViewPage> {
           ),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.of(ctx).pop(), child: const Text('İptal')),
+          TextButton(onPressed: () => Navigator.of(ctx).pop(), child: Text(context.l10n.iptal)),
           CustomButton(
-            label: 'Uygula',
+            label: context.l10n.uygula,
             onPressed: () {
               Navigator.of(ctx).pop();
               _setBackgroundColorFromPalette(d, _colorToHex(pickerColor));
@@ -308,14 +309,14 @@ class _CardViewPageState extends State<CardViewPage> {
 
     if (_loading) {
       return CardenceScaffold(
-        appBar: const CardenceAppBar(title: 'Kart Görünümü'),
+        appBar: CardenceAppBar(title: context.l10n.kartGrnm),
         body: const Center(child: CircularProgressIndicator()),
       );
     }
 
     if (_cards.isEmpty) {
       return CardenceScaffold(
-        appBar: const CardenceAppBar(title: 'Kart Görünümü'),
+        appBar: CardenceAppBar(title: context.l10n.kartGrnm),
         body: Center(
           child: Padding(
             padding: const EdgeInsets.all(24),
@@ -325,19 +326,19 @@ class _CardViewPageState extends State<CardViewPage> {
                 Icon(Icons.credit_card_off_rounded, size: 64, color: colorScheme.outline.withValues(alpha: 0.6)),
                 const SizedBox(height: 16),
                 Text(
-                  'Henüz kart yok',
+                  context.l10n.henzKartYok,
                   style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600, color: colorScheme.onSurface),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Profil bilgilerinizi doldurup ilk kartınızı oluşturun veya aşağıdan yeni kart ekleyin.',
+                  context.l10n.profilBilgileriniziDoldurupIlkKartnz,
                   style: textTheme.bodyMedium?.copyWith(color: colorScheme.onSurfaceVariant),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 24),
                 CustomButton(
-                  label: 'Yeni kart oluştur',
+                  label: context.l10n.yeniKartOlutur,
                   icon: Icons.add_rounded,
                   onPressed: _createNewCard,
                   style: FilledButton.styleFrom(
@@ -371,7 +372,7 @@ class _CardViewPageState extends State<CardViewPage> {
         Navigator.of(context).pop();
       },
       child: CardenceScaffold(
-        appBar: const CardenceAppBar(title: 'Kart Görünümü'),
+        appBar: CardenceAppBar(title: context.l10n.kartGrnm),
         body: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -418,14 +419,16 @@ class _CardViewPageState extends State<CardViewPage> {
                                       },
                                       child: MyCardPreviewHelpers.flippableCard(
                                         draft: draft,
-                                        emptyMessage: 'Kart bilgisi yok',
+                                        l10n: context.l10n,
+                                        emptyMessage: context.l10n.kartBilgisiYok,
                                       ),
                                     );
                                   },
                                 )
                               : MyCardPreviewHelpers.flippableCard(
                                   draft: d,
-                                  emptyMessage: 'Kart bilgisi yok',
+                                  l10n: context.l10n,
+                                  emptyMessage: context.l10n.kartBilgisiYok,
                                 ),
                         ),
                       ),
@@ -462,7 +465,7 @@ class _CardViewPageState extends State<CardViewPage> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    'Kart rengi',
+                    context.l10n.kartRengi2,
                     style: textTheme.titleSmall?.copyWith(
                       color: colorScheme.onSurfaceVariant,
                       fontWeight: FontWeight.w600,
@@ -482,7 +485,7 @@ class _CardViewPageState extends State<CardViewPage> {
                   ),
                   const SizedBox(height: 20),
                   Text(
-                    'Metin rengi',
+                    context.l10n.metinRengi2,
                     style: textTheme.titleSmall?.copyWith(
                       color: colorScheme.onSurfaceVariant,
                       fontWeight: FontWeight.w600,
@@ -500,7 +503,7 @@ class _CardViewPageState extends State<CardViewPage> {
                   ),
                   const SizedBox(height: 20),
                   CustomButton(
-                    label: 'Kaydet',
+                    label: context.l10n.kaydet,
                     onPressed: _hasUnsavedChanges && !_saving ? _save : null,
                     isLoading: _saving,
                     style: FilledButton.styleFrom(

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/l10n/l10n_extensions.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/widgets/atoms/cardence_app_bar.dart';
@@ -123,7 +124,7 @@ class _ScanPhysicalCardViewState extends State<_ScanPhysicalCardView>
               behavior: SnackBarBehavior.floating,
               action: openSettings
                   ? SnackBarAction(
-                      label: 'Ayarlar',
+                      label: context.l10n.ayarlar,
                       onPressed: cubit.openCameraSettings,
                     )
                   : null,
@@ -137,7 +138,7 @@ class _ScanPhysicalCardViewState extends State<_ScanPhysicalCardView>
         final isProcessing = state.step == ScanPhysicalCardStep.processing;
 
         return CardenceScaffold(
-          appBar: const CardenceAppBar(title: 'Kartvizit fotoğrafla'),
+          appBar: CardenceAppBar(title: context.l10n.kartvizitFotorafla),
           resizeToAvoidBottomInset: true,
           body: Column(
             children: [
@@ -148,7 +149,7 @@ class _ScanPhysicalCardViewState extends State<_ScanPhysicalCardView>
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       AddCardPhotoCaptureZone(
-                        label: 'Ön yüz',
+                        label: context.l10n.nYz,
                         hint: 'Ön yüzü çekin',
                         required: true,
                         imagePath: state.frontImagePath,
@@ -160,7 +161,7 @@ class _ScanPhysicalCardViewState extends State<_ScanPhysicalCardView>
                       ),
                       const SizedBox(height: 20),
                       AddCardPhotoCaptureZone(
-                        label: 'Arka yüz',
+                        label: context.l10n.arkaYz,
                         hint: 'Arka yüzü ekleyin (varsa)',
                         required: false,
                         imagePath: state.backImagePath,
@@ -175,7 +176,7 @@ class _ScanPhysicalCardViewState extends State<_ScanPhysicalCardView>
                         const Center(child: CircularProgressIndicator()),
                         const SizedBox(height: 12),
                         Text(
-                          'Bilgiler okunuyor…',
+                          context.l10n.bilgilerOkunuyor,
                           textAlign: TextAlign.center,
                           style: textTheme.bodyMedium?.copyWith(
                             color: colorScheme.onSurfaceVariant,
@@ -188,7 +189,7 @@ class _ScanPhysicalCardViewState extends State<_ScanPhysicalCardView>
                 ),
               ),
               AddCardStickyAction(
-                label: 'Bilgileri oku',
+                label: context.l10n.bilgileriOku,
                 icon: Icons.document_scanner_outlined,
                 enabled: state.canReadInfo,
                 isLoading: isProcessing,

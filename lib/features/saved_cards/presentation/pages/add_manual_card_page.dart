@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/l10n/l10n_extensions.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/widgets/atoms/cardence_app_bar.dart';
@@ -66,8 +67,8 @@ class _AddManualCardPageState extends State<AddManualCardPage> {
         Navigator.of(context).pop(result);
       case AddSavedCardDuplicate():
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Bu kart zaten cüzdanınızda.'),
+          SnackBar(
+            content: Text(context.l10n.buKartZatenCzdannzda),
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -137,7 +138,7 @@ class _AddManualCardContent extends StatelessWidget {
             child: CardenceScaffold(
               resizeToAvoidBottomInset: false,
               appBar: CardenceAppBar(
-                title: AddManualCardStepTitles.forIndex(
+                title: AddManualCardStepTitles.forIndex(context.l10n, 
                   flowState.currentPageIndex,
                 ),
                 leading: CardenceAppBar.flowBackButton(
@@ -272,8 +273,6 @@ class _AddManualCardBottomActions extends StatelessWidget {
           a.currentPageIndex != b.currentPageIndex ||
           a.isLastPage != b.isLastPage ||
           a.isSubmitting != b.isSubmitting ||
-          a.canFinish != b.canFinish ||
-          a.canProceedCurrentStep != b.canProceedCurrentStep ||
           a.draft != b.draft,
       builder: (context, state) {
         final isLastPage = state.isLastPage;
@@ -284,15 +283,15 @@ class _AddManualCardBottomActions extends StatelessWidget {
           currentIndex: state.currentPageIndex,
           primaryLabel: primaryLabel,
           isLoading: state.isSubmitting,
-          enabled: state.canProceedCurrentStep,
+          enabled: state.canProceedCurrentStep(context.l10n),
           onStepSelected:
               state.isFirstPage ? null : (index) => onGoToPage(index),
           onPrimaryPressed: () async {
             if (isLastPage) {
-              if (!state.canFinish) {
+              if (!state.canFinish(context.l10n)) {
                 _showValidationSnackBar(
                   context,
-                  'Lütfen zorunlu alanları doldurun.',
+                  context.l10n.ltfenZorunluAlanlarDoldurun,
                 );
                 return;
               }
@@ -300,7 +299,7 @@ class _AddManualCardBottomActions extends StatelessWidget {
               return;
             }
 
-            final error = state.validationErrorForCurrentStep;
+            final error = state.validationErrorForCurrentStep(context.l10n);
             if (error != null) {
               _showValidationSnackBar(context, error);
               return;

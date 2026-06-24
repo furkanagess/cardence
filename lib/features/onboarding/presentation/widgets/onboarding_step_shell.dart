@@ -43,7 +43,7 @@ class OnboardingStepShell extends StatelessWidget {
 
 /// Form alanı etiketi; zorunlu alanlarda yıldız gösterir.
 class OnboardingFieldLabel extends StatelessWidget {
-  const OnboardingFieldLabel({
+  OnboardingFieldLabel({
     super.key,
     required this.label,
     this.required = false,

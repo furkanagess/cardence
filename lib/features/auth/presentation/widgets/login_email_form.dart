@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/l10n/l10n_extensions.dart';
 
 import '../../../../core/validation/app_validators.dart';
 import '../../../../core/widgets/atoms/custom_button.dart';
@@ -97,10 +98,10 @@ class LoginEmailFormState extends State<LoginEmailForm> {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const OnboardingFieldLabel(label: 'E-posta', required: true),
+        OnboardingFieldLabel(label: context.l10n.ePosta, required: true),
         CustomTextField(
           controller: _emailController,
-          hintText: 'ornek@email.com',
+          hintText: context.l10n.ornekEmailCom,
           keyboardType: TextInputType.emailAddress,
           textInputAction: TextInputAction.next,
           autocorrect: false,
@@ -135,14 +136,14 @@ class LoginEmailFormState extends State<LoginEmailForm> {
                 minimumSize: const Size(0, 32),
                 tapTargetSize: MaterialTapTargetSize.shrinkWrap,
               ),
-              child: const Text('Şifremi unuttum'),
+              child: Text(context.l10n.ifremiUnuttum),
             ),
           ),
         ],
         if (widget.showSubmitButton) ...[
           const SizedBox(height: 16),
           CustomButton(
-            label: 'Giriş yap',
+            label: context.l10n.giriYap,
             height: 48,
             isLoading: widget.isLoading,
             onPressed: _submit,

@@ -1,6 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/utils/card_id_generator.dart';
+import '../../../onboarding/presentation/onboarding_validation.dart';
 import '../../data/datasources/physical_card_image_store.dart';
 import '../../domain/entities/add_saved_card_result.dart';
 import '../../domain/entities/manual_saved_card_draft.dart';
@@ -43,7 +44,12 @@ class AddManualCardCubit extends Cubit<AddManualCardState> {
   Future<AddSavedCardResult?> submit() async {
     if (state.isSubmitting) return null;
 
-    if (!state.canFinish) {
+    if (!OnboardingValidation.fieldsAreValid(
+      displayName: state.draft.displayName,
+      company: state.draft.company,
+      title: state.draft.title,
+      email: state.draft.email,
+    )) {
       emit(
         state.copyWith(
           errorMessage: 'Lütfen zorunlu alanları doldurun.',

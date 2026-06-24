@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/l10n/l10n_extensions.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../domain/entities/theme_preference.dart';
@@ -36,7 +37,7 @@ class SettingsThemeSelector extends StatelessWidget {
           children: [
             Expanded(
               child: _ThemeOptionChip(
-                label: 'Açık',
+                label: context.l10n.ak,
                 icon: Icons.wb_sunny_outlined,
                 selected: current == ThemePreference.light,
                 onTap: () => onChanged(ThemePreference.light),
@@ -45,7 +46,7 @@ class SettingsThemeSelector extends StatelessWidget {
             const SizedBox(width: 6),
             Expanded(
               child: _ThemeOptionChip(
-                label: 'Koyu',
+                label: context.l10n.koyu,
                 icon: Icons.dark_mode_outlined,
                 selected: current == ThemePreference.dark,
                 onTap: () => onChanged(ThemePreference.dark),
@@ -54,7 +55,7 @@ class SettingsThemeSelector extends StatelessWidget {
             const SizedBox(width: 6),
             Expanded(
               child: _ThemeOptionChip(
-                label: 'Sistem',
+                label: context.l10n.sistem,
                 icon: Icons.smartphone_outlined,
                 selected: current == ThemePreference.system,
                 onTap: () => onChanged(ThemePreference.system),

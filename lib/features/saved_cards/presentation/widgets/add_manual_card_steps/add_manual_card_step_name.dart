@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../../core/l10n/l10n_extensions.dart';
 
 import '../../../../../core/widgets/atoms/custom_text_field.dart';
 import '../../../../onboarding/presentation/onboarding_name_helper.dart';
@@ -79,17 +80,17 @@ class _AddManualCardStepNameState extends State<AddManualCardStepName> {
   @override
   Widget build(BuildContext context) {
     return OnboardingStepShell(
-      subtitle: 'Kartvizitte görünen adı girin',
+      subtitle: context.l10n.kartvizitteGrnenAdGirin,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const OnboardingFieldLabel(label: 'Ad', required: true),
+          OnboardingFieldLabel(label: 'Ad', required: true),
           CustomTextField(
             controller: _firstNameController,
             autofocus: true,
             textCapitalization: TextCapitalization.words,
             textInputAction: TextInputAction.next,
-            hintText: 'Örn: Mehmet',
+            hintText: context.l10n.rnMehmet,
             prefixIcon: const Icon(Icons.person_outline),
             onChanged: (_) {
               _emitDisplayName();
@@ -97,12 +98,12 @@ class _AddManualCardStepNameState extends State<AddManualCardStepName> {
             },
           ),
           const SizedBox(height: 16),
-          const OnboardingFieldLabel(label: 'Soyad', required: true),
+          OnboardingFieldLabel(label: context.l10n.soyad, required: true),
           CustomTextField(
             controller: _lastNameController,
             textCapitalization: TextCapitalization.words,
             textInputAction: TextInputAction.done,
-            hintText: 'Örn: Yılmaz',
+            hintText: context.l10n.rnYlmaz,
             prefixIcon: const Icon(Icons.person_outline),
             onChanged: (_) {
               _emitDisplayName();

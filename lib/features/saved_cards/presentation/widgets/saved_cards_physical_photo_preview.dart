@@ -1,4 +1,5 @@
 import 'dart:io';
+import '../../../../core/l10n/l10n_extensions.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flip_card/flip_card.dart';
@@ -103,7 +104,7 @@ class _EmptyBackFace extends StatelessWidget {
         ),
         child: Center(
           child: Text(
-            'Arka yüz fotoğrafı yok',
+            context.l10n.arkaYzFotorafYok,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: colorScheme.onSurfaceVariant,
                 ),

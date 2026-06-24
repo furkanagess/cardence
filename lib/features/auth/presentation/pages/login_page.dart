@@ -1,4 +1,6 @@
 import 'dart:math' as math;
+import '../../../../core/l10n/api_error_localizer.dart';
+import '../../../../core/l10n/l10n_extensions.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -130,14 +132,31 @@ class _AuthViewState extends State<_AuthView>
   }
 
   Future<void> _handleLinkedInLogin(BuildContext context) async {
-    final code = await requestLinkedInAuthorizationCode(context);
-    if (!context.mounted || code == null || code.isEmpty) {
-      return;
-    }
+    try {
+      final code = await requestLinkedInAuthorizationCode(context);
+      if (!context.mounted) {
+        return;
+      }
+      if (code == null || code.isEmpty) {
+        return;
+      }
 
-    context.read<LoginBloc>().add(
-          LoginLinkedInSubmitted(authorizationCode: code),
+      context.read<LoginBloc>().add(
+            LoginLinkedInSubmitted(authorizationCode: code),
+          );
+    } catch (_) {
+      if (!context.mounted) {
+        return;
+      }
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(
+          SnackBar(
+            content: Text(context.l10n.linkedinLoginFailed),
+            behavior: SnackBarBehavior.floating,
+          ),
         );
+    }
   }
 
   @override
@@ -156,7 +175,9 @@ class _AuthViewState extends State<_AuthView>
             ..hideCurrentSnackBar()
             ..showSnackBar(
               SnackBar(
-                content: Text(state.errorMessage!),
+                content: Text(
+                  ApiErrorLocalizer.localize(context.l10n, state.errorMessage!),
+                ),
                 behavior: SnackBarBehavior.floating,
               ),
             );
@@ -168,7 +189,7 @@ class _AuthViewState extends State<_AuthView>
             resizeToAvoidBottomInset: state.isRegisterMode,
             appBar: state.isRegisterMode
                 ? CardenceAppBar(
-                    title: 'Kayıt ol',
+                    title: context.l10n.kaytOl,
                     leading: CardenceAppBar.backButton(
                       context: context,
                       onPressed: () =>
@@ -282,7 +303,7 @@ class _RegisterScreenContent extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Profesyonel kimliğinizi yönetmek için yeni bir hesap oluşturun.',
+                    context.l10n.profesyonelKimliiniziYnetmekIinYeni,
                     style: textTheme.bodyMedium?.copyWith(
                       color: colorScheme.onSurfaceVariant,
                     ),
@@ -362,7 +383,7 @@ class _LoginScreenContent extends StatelessWidget {
               ],
               SizedBox(height: keyboardVisible ? 8 : 4),
               Text(
-                'Hesabınıza giriş yapın',
+                context.l10n.hesabnzaGiriYapn,
                 textAlign: TextAlign.center,
                 style: (keyboardVisible
                         ? textTheme.titleSmall
@@ -427,7 +448,7 @@ class _AuthModeLink extends StatelessWidget {
                     : 'Hesabınız yok mu? ',
               ),
               TextSpan(
-                text: isRegister ? 'Giriş yap' : 'Kayıt ol',
+                text: isRegister ? context.l10n.giriYap : context.l10n.signUp,
                 style: TextStyle(
                   color: colorScheme.primary,
                   fontWeight: FontWeight.w700,
@@ -504,7 +525,7 @@ class _LoginFormContentState extends State<_LoginFormContent> {
 
   Widget _buildSubmitButton() {
     return CustomButton(
-      label: 'Giriş yap',
+      label: context.l10n.giriYap,
       height: 48,
       isLoading: state.isLoading,
       onPressed: _submit,

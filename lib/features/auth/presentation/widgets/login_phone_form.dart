@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/l10n/l10n_extensions.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
 
 import '../../../../core/utils/intl_phone_field_helpers.dart';
@@ -70,7 +71,7 @@ class LoginPhoneFormState extends State<LoginPhoneForm> {
     String? passwordError;
 
     if (phone.length < 8) {
-      phoneError = 'Geçerli bir telefon numarası girin.';
+      phoneError = context.l10n.geerliBirTelefonNumarasGirin;
     }
     if (!AppValidators.isValidPassword(password)) {
       passwordError =
@@ -95,12 +96,12 @@ class LoginPhoneFormState extends State<LoginPhoneForm> {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const OnboardingFieldLabel(label: 'Telefon', required: true),
+        OnboardingFieldLabel(label: context.l10n.telefon, required: true),
         IntlPhoneField(
           key: ValueKey(_phoneNumber),
           decoration: CustomTextField.themedDecoration(
             context,
-            hintText: '5XX XXX XX XX',
+            hintText: context.l10n.msg5xxXxxXxXx,
             errorText: _phoneError,
           ),
           initialCountryCode:
@@ -126,7 +127,7 @@ class LoginPhoneFormState extends State<LoginPhoneForm> {
         if (widget.showSubmitButton) ...[
           const SizedBox(height: 16),
           CustomButton(
-            label: 'Giriş yap',
+            label: context.l10n.giriYap,
             height: 48,
             isLoading: widget.isLoading,
             onPressed: _submit,

@@ -10,4 +10,6 @@ public sealed class LinkedInUserInfo
     public string? Headline { get; init; }
     public string? Title { get; init; }
     public string? Company { get; init; }
+    public string? School { get; init; }
+    public string? About { get; init; }
 }

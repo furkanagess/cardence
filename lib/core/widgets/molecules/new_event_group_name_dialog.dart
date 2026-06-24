@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/l10n/l10n_extensions.dart';
 
 import '../atoms/custom_button.dart';
 import '../atoms/custom_text_field.dart';
@@ -73,11 +74,11 @@ class _NewEventGroupNameDialogState extends State<NewEventGroupNameDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('Yeni etkinlik grubu'),
+      title: Text(context.l10n.yeniEtkinlikGrubu),
       content: CustomTextField(
         controller: _controller,
-        labelText: 'Etkinlik adı',
-        hintText: 'Örn. Web Summit 2026',
+        labelText: context.l10n.etkinlikAd,
+        hintText: context.l10n.rnWebSummit2026,
         errorText: _errorText,
         autofocus: true,
         textInputAction: TextInputAction.done,
@@ -86,10 +87,10 @@ class _NewEventGroupNameDialogState extends State<NewEventGroupNameDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('İptal'),
+          child: Text(context.l10n.iptal),
         ),
         CustomButton(
-          label: 'Ekle',
+          label: context.l10n.ekle,
           onPressed: _submit,
           fullWidth: false,
         ),

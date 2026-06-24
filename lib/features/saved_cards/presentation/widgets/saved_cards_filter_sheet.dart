@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/l10n/l10n_extensions.dart';
+import '../../../../l10n/app_localizations.dart';
+
 import '../../../../core/widgets/atoms/custom_button.dart';
 import '../cubit/saved_cards_filter_models.dart';
 
@@ -96,14 +99,14 @@ class SavedCardsFilterSheet extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Filtreler',
+                            context.l10n.filtreler,
                             style: textTheme.titleLarge?.copyWith(
                               fontWeight: FontWeight.w700,
                             ),
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            'Liste ve kart görünümüne birlikte uygulanır.',
+                            context.l10n.listeVeKartGrnmneBirlikte,
                             style: textTheme.bodySmall?.copyWith(
                               color: colorScheme.onSurfaceVariant,
                               height: 1.35,
@@ -113,7 +116,7 @@ class SavedCardsFilterSheet extends StatelessWidget {
                       ),
                     ),
                     IconButton(
-                      tooltip: 'Kapat',
+                      tooltip: context.l10n.kapat,
                       onPressed: () => Navigator.of(context).pop(),
                       icon: Icon(
                         Icons.close_rounded,
@@ -145,6 +148,7 @@ class SavedCardsFilterSheet extends StatelessWidget {
                       if (tempDateFilter != SavedCardsDateFilter.all)
                         _ActiveFilterChip(
                           label: _dateFilterLabel(
+                            context.l10n,
                             tempDateFilter,
                             tempCustomRange,
                           ),
@@ -159,7 +163,7 @@ class SavedCardsFilterSheet extends StatelessWidget {
                 const SizedBox(height: 20),
                 _FilterSection(
                   icon: Icons.event_rounded,
-                  title: 'Etkinlik grubu',
+                  title: context.l10n.etkinlikGrubu2,
                   child: SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
                     child: Row(
@@ -202,13 +206,13 @@ class SavedCardsFilterSheet extends StatelessWidget {
                 const SizedBox(height: 18),
                 _FilterSection(
                   icon: Icons.calendar_month_rounded,
-                  title: 'Eklenme tarihi',
+                  title: context.l10n.eklenmeTarihi,
                   child: Wrap(
                     spacing: 8,
                     runSpacing: 8,
                     children: [
                       _DateFilterChip(
-                        label: 'Tümü',
+                        label: context.l10n.tm,
                         selected: tempDateFilter == SavedCardsDateFilter.all,
                         onTap: () => setModalState(() {
                           tempDateFilter = SavedCardsDateFilter.all;
@@ -216,7 +220,7 @@ class SavedCardsFilterSheet extends StatelessWidget {
                         }),
                       ),
                       _DateFilterChip(
-                        label: 'Son 7 gün',
+                        label: context.l10n.son7Gn,
                         selected: tempDateFilter == SavedCardsDateFilter.last7,
                         onTap: () => setModalState(() {
                           tempDateFilter = SavedCardsDateFilter.last7;
@@ -224,7 +228,7 @@ class SavedCardsFilterSheet extends StatelessWidget {
                         }),
                       ),
                       _DateFilterChip(
-                        label: 'Son 30 gün',
+                        label: context.l10n.son30Gn,
                         selected: tempDateFilter == SavedCardsDateFilter.last30,
                         onTap: () => setModalState(() {
                           tempDateFilter = SavedCardsDateFilter.last30;
@@ -235,7 +239,7 @@ class SavedCardsFilterSheet extends StatelessWidget {
                         label: tempDateFilter == SavedCardsDateFilter.custom &&
                                 tempCustomRange != null
                             ? '${_formatShortDate(tempCustomRange!.start)} – ${_formatShortDate(tempCustomRange!.end)}'
-                            : 'Özel aralık',
+                            : context.l10n.zelAralk,
                         selected: tempDateFilter == SavedCardsDateFilter.custom,
                         icon: Icons.date_range_rounded,
                         onTap: () async {
@@ -258,16 +262,16 @@ class SavedCardsFilterSheet extends StatelessWidget {
                 const SizedBox(height: 18),
                 _FilterSection(
                   icon: Icons.sort_rounded,
-                  title: 'Sıralama',
+                  title: context.l10n.sralama,
                   child: SegmentedButton<SavedCardsNameSort>(
-                    segments: const [
+                    segments: [
                       ButtonSegment(
                         value: SavedCardsNameSort.asc,
-                        label: Text('A → Z'),
+                        label: Text(context.l10n.aZ),
                       ),
                       ButtonSegment(
                         value: SavedCardsNameSort.desc,
-                        label: Text('Z → A'),
+                        label: Text(context.l10n.zA),
                       ),
                     ],
                     selected: {tempSort},
@@ -282,7 +286,7 @@ class SavedCardsFilterSheet extends StatelessWidget {
                   children: [
                     Expanded(
                       child: CustomButton.tonal(
-                        label: 'Sıfırla',
+                        label: context.l10n.sfrla,
                         onPressed: activeCount > 0 ? resetAll : null,
                         style: FilledButton.styleFrom(
                           padding: const EdgeInsets.symmetric(vertical: 14),
@@ -296,7 +300,7 @@ class SavedCardsFilterSheet extends StatelessWidget {
                     Expanded(
                       flex: 2,
                       child: CustomButton(
-                        label: hasChangesFromInitial ? 'Uygula' : 'Kapat',
+                        label: hasChangesFromInitial ? context.l10n.apply : context.l10n.close,
                         onPressed: () {
                           if (!hasChangesFromInitial) {
                             Navigator.of(context).pop();
@@ -323,18 +327,19 @@ class SavedCardsFilterSheet extends StatelessWidget {
   }
 
   static String _dateFilterLabel(
+    AppLocalizations l10n,
     SavedCardsDateFilter filter,
     DateTimeRange? range,
   ) {
     switch (filter) {
       case SavedCardsDateFilter.all:
-        return 'Tüm tarihler';
+        return l10n.tmTarihler;
       case SavedCardsDateFilter.last7:
-        return 'Son 7 gün';
+        return l10n.son7Gn;
       case SavedCardsDateFilter.last30:
-        return 'Son 30 gün';
+        return l10n.son30Gn;
       case SavedCardsDateFilter.custom:
-        if (range == null) return 'Özel aralık';
+        if (range == null) return l10n.zelAralk;
         return '${_formatShortDate(range.start)} – ${_formatShortDate(range.end)}';
     }
   }

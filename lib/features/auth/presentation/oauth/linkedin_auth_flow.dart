@@ -1,3 +1,6 @@
+import 'dart:io' show Platform;
+
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_web_auth_2/flutter_web_auth_2.dart';
@@ -5,12 +8,26 @@ import 'package:uuid/uuid.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 import '../../../../core/config/linkedin_auth_config.dart';
+import '../../../../core/l10n/l10n_extensions.dart';
+import 'linkedin_oauth_scopes.dart';
 
 /// LinkedIn OAuth authorization code.
 ///
-/// Önce sistem tarayıcısı (ASWebAuthenticationSession / Chrome Custom Tab) denenir.
-/// Plugin henüz native build'e dahil değilse WebView yedek akışına düşer.
+/// Mobil: gömülü WebView ile HTTPS callback yakalanır.
 Future<String?> requestLinkedInAuthorizationCode(BuildContext context) async {
+  if (!kIsWeb && (Platform.isIOS || Platform.isAndroid)) {
+    if (!context.mounted) {
+      return null;
+    }
+
+    final webViewCode = await _requestWithEmbeddedWebView(context);
+    if (webViewCode != null && webViewCode.isNotEmpty) {
+      return webViewCode;
+    }
+
+    return null;
+  }
+
   try {
     return await _requestWithSystemBrowser();
   } on MissingPluginException {
@@ -24,7 +41,6 @@ Future<String?> requestLinkedInAuthorizationCode(BuildContext context) async {
 Future<String?> _requestWithSystemBrowser() async {
   final state = const Uuid().v4();
   final redirectUri = LinkedInAuthConfig.redirectUri;
-  final redirect = Uri.parse(redirectUri);
 
   final authorizationUri = Uri.https(
     'www.linkedin.com',
@@ -34,28 +50,17 @@ Future<String?> _requestWithSystemBrowser() async {
       'client_id': LinkedInAuthConfig.clientId,
       'redirect_uri': redirectUri,
       'state': state,
-      'scope': 'openid profile email',
+      'scope': linkedInAuthorizationScope,
       'enable_extended_login': 'true',
     },
   );
 
-  try {
-    final callbackUrl = await FlutterWebAuth2.authenticate(
-      url: authorizationUri.toString(),
-      callbackUrlScheme: redirect.scheme,
-      options: FlutterWebAuth2Options(
-        httpsHost: redirect.host,
-        httpsPath: redirect.path,
-      ),
-    );
+  final callbackUrl = await FlutterWebAuth2.authenticate(
+    url: authorizationUri.toString(),
+    callbackUrlScheme: LinkedInAuthConfig.mobileCallbackScheme,
+  );
 
-    return _parseAuthorizationCode(callbackUrl, expectedState: state);
-  } on PlatformException catch (error) {
-    if (error.code == 'CANCELED') {
-      return null;
-    }
-    rethrow;
-  }
+  return _parseAuthorizationCode(callbackUrl, expectedState: state);
 }
 
 Future<String?> _requestWithEmbeddedWebView(BuildContext context) {
@@ -93,8 +98,6 @@ class _LinkedInAuthCodePage extends StatefulWidget {
 }
 
 class _LinkedInAuthCodePageState extends State<_LinkedInAuthCodePage> {
-  static const _scopes = 'openid profile email';
-
   late final WebViewController _controller;
   late final String _state;
   bool _isHandlingRedirect = false;
@@ -123,7 +126,7 @@ class _LinkedInAuthCodePageState extends State<_LinkedInAuthCodePage> {
         'client_id': LinkedInAuthConfig.clientId,
         'redirect_uri': LinkedInAuthConfig.redirectUri,
         'state': _state,
-        'scope': _scopes,
+        'scope': linkedInAuthorizationScope,
         'enable_extended_login': 'true',
       },
     );
@@ -157,12 +160,19 @@ class _LinkedInAuthCodePageState extends State<_LinkedInAuthCodePage> {
   }
 
   bool _isRedirectCallback(String url) {
-    final target = Uri.parse(LinkedInAuthConfig.redirectUri);
     final current = Uri.tryParse(url);
     if (current == null) {
       return false;
     }
 
+    if (_matchesRedirectUri(current, Uri.parse(LinkedInAuthConfig.redirectUri))) {
+      return true;
+    }
+
+    return _matchesRedirectUri(current, LinkedInAuthConfig.mobileCallbackUri);
+  }
+
+  bool _matchesRedirectUri(Uri current, Uri target) {
     return current.scheme == target.scheme &&
         current.host == target.host &&
         current.path == target.path;
@@ -172,7 +182,7 @@ class _LinkedInAuthCodePageState extends State<_LinkedInAuthCodePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('LinkedIn ile giriş'),
+        title: Text(context.l10n.linkedinIleGiri),
         leading: IconButton(
           icon: const Icon(Icons.close),
           onPressed: () => Navigator.of(context).pop(),

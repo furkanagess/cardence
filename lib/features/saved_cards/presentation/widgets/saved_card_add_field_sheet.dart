@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/l10n/l10n_extensions.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/atoms/custom_button.dart';
@@ -36,14 +37,14 @@ class SavedCardAddFieldSheet {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Text(
-                  'Bilgi ekle',
+                  context.l10n.bilgiEkle,
                   style: textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.w600,
                   ),
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'Karta eklemek istediğiniz alanı seçin',
+                  context.l10n.kartaEklemekIstediinizAlanSein,
                   style: textTheme.bodyMedium?.copyWith(
                     color: colorScheme.onSurfaceVariant,
                   ),
@@ -155,7 +156,7 @@ class SavedCardAddFieldSheet {
                     ),
                     const SizedBox(height: 12),
                     CustomButton(
-                      label: 'Kaydet',
+                      label: context.l10n.kaydet,
                       onPressed: () =>
                           Navigator.of(context).pop(draft.trim()),
                       style: FilledButton.styleFrom(
@@ -172,7 +173,7 @@ class SavedCardAddFieldSheet {
                         style: TextButton.styleFrom(
                           foregroundColor: AppColors.error,
                         ),
-                        child: const Text('Alanı kaldır'),
+                        child: Text(context.l10n.alanKaldr),
                       ),
                     ],
                   ],

@@ -1,4 +1,5 @@
 import 'dart:convert';
+import '../../../../core/l10n/l10n_extensions.dart';
 
 import 'package:cardence/core/theme/app_colors.dart';
 import 'package:flutter/material.dart';
@@ -98,8 +99,8 @@ class _CardDetailPageState extends State<CardDetailPage> {
       });
       widget.onDraftUpdated?.call(synced);
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Kart kaydedildi'),
+        SnackBar(
+          content: Text(context.l10n.kartKaydedildi),
           behavior: SnackBarBehavior.floating,
         ),
       );
@@ -116,8 +117,8 @@ class _CardDetailPageState extends State<CardDetailPage> {
       if (!mounted) return;
       setState(() => _saving = false);
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Kart kaydedilemedi. Lütfen tekrar deneyin.'),
+        SnackBar(
+          content: Text(context.l10n.kartKaydedilemediLtfenTekrarDeneyin),
           behavior: SnackBarBehavior.floating,
         ),
       );
@@ -127,11 +128,11 @@ class _CardDetailPageState extends State<CardDetailPage> {
   Future<bool> _confirmDiscardChanges() {
     return CardenceConfirmDialog.show(
       context,
-      title: 'Kaydedilmemiş değişiklikler',
+      title: context.l10n.kaydedilmemiDeiiklikler,
       message:
-          'Yaptığınız değişiklikler kaydedilmedi. Çıkmak istediğinize emin misiniz?',
-      confirmLabel: 'Çık',
-      cancelLabel: 'İptal',
+          context.l10n.yaptnzDeiikliklerKaydedilmedikmakIstediinize,
+      confirmLabel: context.l10n.k,
+      cancelLabel: context.l10n.iptal,
       icon: Icons.warning_amber_rounded,
       confirmIsDestructive: true,
     ).then((value) => value == true);
@@ -175,7 +176,7 @@ class _CardDetailPageState extends State<CardDetailPage> {
     await showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Özel metin rengi'),
+        title: Text(context.l10n.zelMetinRengi),
         content: SingleChildScrollView(
           child: ColorPicker(
             pickerColor: pickerColor,
@@ -188,10 +189,10 @@ class _CardDetailPageState extends State<CardDetailPage> {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('İptal'),
+            child: Text(context.l10n.iptal),
           ),
           CustomButton(
-            label: 'Uygula',
+            label: context.l10n.uygula,
             onPressed: () {
               Navigator.of(context).pop();
               _setTextColor(_colorToHex(pickerColor));
@@ -246,7 +247,7 @@ class _CardDetailPageState extends State<CardDetailPage> {
     await showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Özel kart rengi'),
+        title: Text(context.l10n.zelKartRengi),
         content: SingleChildScrollView(
           child: ColorPicker(
             pickerColor: pickerColor,
@@ -259,10 +260,10 @@ class _CardDetailPageState extends State<CardDetailPage> {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('İptal'),
+            child: Text(context.l10n.iptal),
           ),
           CustomButton(
-            label: 'Uygula',
+            label: context.l10n.uygula,
             onPressed: () {
               Navigator.of(context).pop();
               _setBackgroundColorFromPalette(_colorToHex(pickerColor));
@@ -284,8 +285,8 @@ class _CardDetailPageState extends State<CardDetailPage> {
     await Clipboard.setData(ClipboardData(text: cardId));
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Kart ID kopyalandı'),
+      SnackBar(
+        content: Text(context.l10n.kartIdKopyaland),
         behavior: SnackBarBehavior.floating,
       ),
     );
@@ -385,7 +386,7 @@ class _CardDetailPageState extends State<CardDetailPage> {
     showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('QR ile paylaş'),
+        title: Text(context.l10n.qrIlePayla),
         content: SizedBox(
           width: 280,
           child: SingleChildScrollView(
@@ -393,7 +394,7 @@ class _CardDetailPageState extends State<CardDetailPage> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  'Diğer kişi bu QR\'ı Cardence ile okutarak kartınızı kaydedebilir.',
+                  context.l10n.scanQrToSaveCard,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
@@ -414,7 +415,7 @@ class _CardDetailPageState extends State<CardDetailPage> {
                 ),
                 const SizedBox(height: 12),
                 SelectableText(
-                  'Kart ID: $cardId',
+                  context.l10n.kartIdCardid,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
@@ -426,7 +427,7 @@ class _CardDetailPageState extends State<CardDetailPage> {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Kapat'),
+            child: Text(context.l10n.kapat),
           ),
         ],
       ),
@@ -449,13 +450,13 @@ class _CardDetailPageState extends State<CardDetailPage> {
         title: _draft.listTitle,
         actions: [
           CardenceAppBar.textAction(
-            label: 'Kaydet',
+            label: context.l10n.kaydet,
             onPressed: _hasUnsavedChanges ? _save : null,
             loading: _saving,
           ),
           CardenceAppBar.iconAction(
             icon: Icons.edit_outlined,
-            tooltip: 'Bilgileri düzenle',
+            tooltip: context.l10n.bilgileriDzenle,
             onPressed: () async {
               final updated =
                   await Navigator.of(context).push<OnboardingCardDraft>(
@@ -488,7 +489,7 @@ class _CardDetailPageState extends State<CardDetailPage> {
         children: [
           CollapsibleCardPreviewPanel(
             draft: _draft,
-            emptyMessage: 'Kart bilgisi yok — düzenle ile ekleyin',
+            emptyMessage: context.l10n.kartBilgisiYokDzenleIle,
           ),
           Expanded(
             child: ListView(
@@ -499,12 +500,12 @@ class _CardDetailPageState extends State<CardDetailPage> {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       _SectionHeader(
-                        title: 'Görünüm',
-                        subtitle: 'Arka plan, metin rengi ve kart stili.',
+                        title: context.l10n.grnm,
+                        subtitle: context.l10n.arkaPlanMetinRengiVe,
                       ),
                       const SizedBox(height: 12),
                       CustomButton(
-                        label: 'Kartı özelleştir',
+                        label: context.l10n.kartzelletir,
                         icon: Icons.palette_outlined,
                         onPressed: _showCustomizeBottomSheet,
                         style: FilledButton.styleFrom(
@@ -524,9 +525,8 @@ class _CardDetailPageState extends State<CardDetailPage> {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       _SectionHeader(
-                        title: 'Kartınızı paylaşın',
-                        subtitle:
-                            'Kart ID\'nizi gönderin; karşı taraf Cardence\'te kartınızı ekleyebilir.',
+                        title: context.l10n.kartnzPaylan,
+                        subtitle: context.l10n.shareCardIdSubtitle,
                       ),
                       const SizedBox(height: 12),
                       _CardIdTile(
@@ -537,7 +537,7 @@ class _CardDetailPageState extends State<CardDetailPage> {
                       ),
                       const SizedBox(height: 12),
                       CustomButton(
-                        label: 'Kartı paylaş',
+                        label: context.l10n.kartPayla,
                         icon: Icons.share_outlined,
                         onPressed: _shareCard,
                         isLoading: _sharing,
@@ -552,7 +552,7 @@ class _CardDetailPageState extends State<CardDetailPage> {
                       ),
                       const SizedBox(height: 8),
                       CustomButton.tonal(
-                        label: 'QR ile paylaş',
+                        label: context.l10n.qrIlePayla,
                         icon: Icons.qr_code_2_rounded,
                         onPressed: _sharing ? null : _showShareQrDialog,
                         enabled: !_sharing,
@@ -795,21 +795,21 @@ class _CustomizeCardSheetContentState
             ),
             const SizedBox(height: 20),
             Text(
-              'Kartı özelleştir',
+              context.l10n.kartzelletir,
               style: textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.w700,
               ),
             ),
             const SizedBox(height: 8),
             Text(
-              'Arka plan ve metin rengi seçimleri anında kaydedilir.',
+              context.l10n.arkaPlanVeMetinRengi,
               style: textTheme.bodyMedium?.copyWith(
                 color: colorScheme.onSurfaceVariant,
               ),
             ),
             const SizedBox(height: 24),
             Text(
-              'Kart rengi',
+              context.l10n.kartRengi2,
               style: textTheme.titleSmall?.copyWith(
                 color: colorScheme.onSurfaceVariant,
                 fontWeight: FontWeight.w600,
@@ -830,7 +830,7 @@ class _CustomizeCardSheetContentState
             ),
             const SizedBox(height: 24),
             Text(
-              'Metin rengi',
+              context.l10n.metinRengi2,
               style: textTheme.titleSmall?.copyWith(
                 color: colorScheme.onSurfaceVariant,
                 fontWeight: FontWeight.w600,
@@ -838,7 +838,7 @@ class _CustomizeCardSheetContentState
             ),
             const SizedBox(height: 4),
             Text(
-              'Otomatik: arka plana göre okunabilir renk.',
+              context.l10n.otomatikArkaPlanaGreOkunabilir,
               style: textTheme.bodySmall?.copyWith(
                 color: colorScheme.onSurfaceVariant,
               ),
@@ -855,7 +855,7 @@ class _CustomizeCardSheetContentState
             ),
             const SizedBox(height: 24),
             CustomButton(
-              label: 'Tamam',
+              label: context.l10n.tamam,
               onPressed: () => Navigator.of(context).pop(),
               style: FilledButton.styleFrom(
                 backgroundColor: AppColors.primary,
@@ -931,7 +931,7 @@ class _CardIdTile extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Kart ID',
+                      context.l10n.kartId2,
                       style: textTheme.labelMedium?.copyWith(
                         color: colorScheme.onSurfaceVariant,
                         fontWeight: FontWeight.w500,
@@ -951,7 +951,7 @@ class _CardIdTile extends StatelessWidget {
                     if (!hasId) ...[
                       const SizedBox(height: 4),
                       Text(
-                        'Kartı paylaş dediğinizde benzersiz bir numara atanır.',
+                        context.l10n.kartPaylaDediinizdeBenzersizBir,
                         style: textTheme.labelSmall?.copyWith(
                           color: colorScheme.onSurfaceVariant,
                         ),
@@ -962,7 +962,7 @@ class _CardIdTile extends StatelessWidget {
               ),
               if (hasId)
                 IconButton(
-                  tooltip: 'Kopyala',
+                  tooltip: context.l10n.kopyala,
                   visualDensity: VisualDensity.compact,
                   onPressed: onCopy,
                   icon: Icon(

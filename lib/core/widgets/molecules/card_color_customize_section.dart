@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/l10n/l10n_extensions.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 
 import '../../theme/app_colors.dart';
@@ -53,7 +54,7 @@ class CardColorCustomizeSection extends StatelessWidget {
     await showDialog<void>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Özel kart rengi'),
+        title: Text(context.l10n.zelKartRengi),
         content: SingleChildScrollView(
           child: ColorPicker(
             pickerColor: pickerColor,
@@ -66,10 +67,10 @@ class CardColorCustomizeSection extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('İptal'),
+            child: Text(context.l10n.iptal),
           ),
           CustomButton(
-            label: 'Uygula',
+            label: context.l10n.uygula,
             onPressed: () {
               final hex = _colorToHex(pickerColor);
               Navigator.of(ctx).pop();
@@ -96,7 +97,7 @@ class CardColorCustomizeSection extends StatelessWidget {
     await showDialog<void>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Özel metin rengi'),
+        title: Text(context.l10n.zelMetinRengi),
         content: SingleChildScrollView(
           child: ColorPicker(
             pickerColor: pickerColor,
@@ -109,10 +110,10 @@ class CardColorCustomizeSection extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('İptal'),
+            child: Text(context.l10n.iptal),
           ),
           CustomButton(
-            label: 'Uygula',
+            label: context.l10n.uygula,
             onPressed: () {
               Navigator.of(ctx).pop();
               onAccentColorChanged(_colorToHex(pickerColor));
@@ -135,7 +136,7 @@ class CardColorCustomizeSection extends StatelessWidget {
         if (showBackgroundSection) ...[
           if (!useAutomaticTextPill)
             Text(
-              'KART RENGİ',
+              context.l10n.kartRengi,
               style: textTheme.labelMedium?.copyWith(
                 color: colorScheme.onSurfaceVariant,
                 fontWeight: FontWeight.w700,
@@ -175,7 +176,7 @@ class CardColorCustomizeSection extends StatelessWidget {
         if (showTextSection) ...[
           if (!useAutomaticTextPill)
             Text(
-              'METİN RENGİ',
+              context.l10n.metinRengi,
               style: textTheme.labelMedium?.copyWith(
                 color: colorScheme.onSurfaceVariant,
                 fontWeight: FontWeight.w700,
@@ -303,7 +304,7 @@ class _TextColorChip extends StatelessWidget {
               ),
             ),
             child: Text(
-              'Otomatik',
+              context.l10n.otomatik,
               style: textTheme.labelLarge?.copyWith(
                 fontWeight: FontWeight.w600,
                 color: selected

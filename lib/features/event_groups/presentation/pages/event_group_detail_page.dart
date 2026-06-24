@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/l10n/l10n_extensions.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/atoms/cardence_app_bar.dart';
@@ -98,8 +99,8 @@ class _EventGroupDetailPageState extends State<EventGroupDetailPage> {
   Future<void> _openAddCardsPicker() async {
     if (_availableToAdd.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Gruba eklenecek kayıtlı kart kalmadı'),
+        SnackBar(
+          content: Text(context.l10n.grubaEklenecekKaytlKartKalmad),
           behavior: SnackBarBehavior.floating,
         ),
       );
@@ -141,7 +142,7 @@ class _EventGroupDetailPageState extends State<EventGroupDetailPage> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Grubu sil'),
+        title: Text(context.l10n.grubuSil),
         content: Text(
           '"${widget.group.name}" etkinlik grubunu silmek istediğinize emin misiniz? '
           'Gruptaki kart bağlantıları kaldırılır.',
@@ -149,10 +150,10 @@ class _EventGroupDetailPageState extends State<EventGroupDetailPage> {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('İptal'),
+            child: Text(context.l10n.iptal),
           ),
           CustomButton(
-            label: 'Sil',
+            label: context.l10n.sil,
             onPressed: () => Navigator.of(context).pop(true),
             fullWidth: false,
             style: FilledButton.styleFrom(
@@ -203,7 +204,7 @@ class _EventGroupDetailPageState extends State<EventGroupDetailPage> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     Text(
-                      'Kişi notu',
+                      context.l10n.kiiNotu,
                       style: Theme.of(context).textTheme.titleMedium,
                     ),
                     const SizedBox(height: 10),
@@ -214,13 +215,13 @@ class _EventGroupDetailPageState extends State<EventGroupDetailPage> {
                       maxLength: 240,
                       onChanged: (value) =>
                           setModalState(() => draftNote = value),
-                      decoration: const InputDecoration(
-                        hintText: 'Bu kişi hakkında not yazın',
+                      decoration: InputDecoration(
+                        hintText: context.l10n.buKiiHakkndaNotYazn,
                       ),
                     ),
                     const SizedBox(height: 8),
                     CustomButton(
-                      label: 'Kaydet',
+                      label: context.l10n.kaydet,
                       onPressed: () =>
                           Navigator.of(context).pop(draftNote.trim()),
                       fullWidth: false,
@@ -266,7 +267,7 @@ class _EventGroupDetailPageState extends State<EventGroupDetailPage> {
         child: Material(
           color: Colors.transparent,
           child: CustomButton(
-            label: 'Bu grubu sil',
+            label: context.l10n.buGrubuSil,
             icon: Icons.delete_outline_rounded,
             onPressed: _confirmDeleteGroup,
             style: FilledButton.styleFrom(
@@ -316,7 +317,7 @@ class _EventGroupDetailPageState extends State<EventGroupDetailPage> {
               ),
               const SizedBox(height: 16),
               Text(
-                'Bu grupta kart yok',
+                context.l10n.buGruptaKartYok,
                 style: textTheme.titleMedium?.copyWith(
                   color: colorScheme.onSurfaceVariant,
                 ),
@@ -324,7 +325,7 @@ class _EventGroupDetailPageState extends State<EventGroupDetailPage> {
               ),
               const SizedBox(height: 8),
               Text(
-                'Kaydedilen kartlarınızdan seçerek bu gruba kart ekleyebilirsiniz.',
+                context.l10n.kaydedilenKartlarnzdanSeerekBuGruba,
                 style: textTheme.bodySmall?.copyWith(
                   color: colorScheme.onSurfaceVariant,
                 ),
@@ -332,7 +333,7 @@ class _EventGroupDetailPageState extends State<EventGroupDetailPage> {
               ),
               const SizedBox(height: 24),
               CustomButton(
-                label: 'Kart ekle',
+                label: context.l10n.kartEkle,
                 icon: Icons.add_rounded,
                 onPressed: _availableToAdd.isEmpty ? null : _openAddCardsPicker,
                 fullWidth: false,
@@ -386,7 +387,7 @@ class _EventGroupDetailPageState extends State<EventGroupDetailPage> {
           if (!_loading && _availableToAdd.isNotEmpty)
             CardenceAppBar.iconAction(
               icon: Icons.person_add_alt_1_rounded,
-              tooltip: 'Kart ekle',
+              tooltip: context.l10n.kartEkle,
               onPressed: _openAddCardsPicker,
             ),
         ],
@@ -445,7 +446,7 @@ class _SavedCardPreviewTile extends StatelessWidget {
         backgroundColor: card.previewBackgroundColor,
         frontEntries: const [],
         backEntries: card.backAboutEntries,
-        emptyMessage: 'Kart bilgisi yok',
+        emptyMessage: context.l10n.kartBilgisiYok,
         cardId: card.cardId,
         onTap: onTap,
         contactEmail: card.email,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../../core/l10n/l10n_extensions.dart';
 
 import '../../../../../core/widgets/molecules/card_color_customize_section.dart';
 import '../../../../onboarding/presentation/widgets/onboarding_card_preview_frame.dart';
@@ -23,7 +24,7 @@ class AddManualCardStepPreview extends StatelessWidget {
     final previewDraft = ManualSavedCardPreviewHelper.toPreviewDraft(draft);
 
     return OnboardingStepShell(
-      subtitle: 'Kartı kaydetmeden önce son kez kontrol edin.',
+      subtitle: context.l10n.kartKaydetmedennceSonKez,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -34,7 +35,7 @@ class AddManualCardStepPreview extends StatelessWidget {
           const SizedBox(height: 8),
           Center(
             child: Text(
-              'Kartı çevirmek için sağ alttaki ikona dokunun',
+              context.l10n.kartevirmekIinSaAlttaki,
               style: textTheme.labelMedium?.copyWith(
                 color: colorScheme.onSurfaceVariant,
               ),

@@ -17,7 +17,9 @@ class AuthApiException implements Exception {
   bool get requiresReLogin =>
       isUnauthorized ||
       message.contains('Oturum süresi doldu') ||
-      message.contains('Oturum bulunamadı');
+      message.contains('Oturum bulunamadı') ||
+      message.contains('Session expired') ||
+      message.contains('Session not found');
 
   @override
   String toString() => message;

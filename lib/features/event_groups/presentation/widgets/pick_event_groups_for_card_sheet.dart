@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/l10n/l10n_extensions.dart';
 
 import '../../../../core/widgets/atoms/custom_button.dart';
 import '../../domain/entities/event_group.dart';
@@ -76,7 +77,7 @@ class _PickEventGroupsForCardSheetState extends State<PickEventGroupsForCardShee
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Etkinlik grubu seç',
+                    context.l10n.etkinlikGrubuSe,
                     style: theme.textTheme.titleLarge?.copyWith(
                       fontWeight: FontWeight.w600,
                     ),
@@ -99,7 +100,7 @@ class _PickEventGroupsForCardSheetState extends State<PickEventGroupsForCardShee
                         vertical: 24,
                       ),
                       child: Text(
-                        'Henüz etkinlik grubu yok. Etkinlik grupları sekmesinden yeni grup oluşturabilirsiniz.',
+                        context.l10n.henzEtkinlikGrubuYokEtkinlik,
                         textAlign: TextAlign.center,
                         style: theme.textTheme.bodyMedium?.copyWith(
                           color: colorScheme.onSurfaceVariant,

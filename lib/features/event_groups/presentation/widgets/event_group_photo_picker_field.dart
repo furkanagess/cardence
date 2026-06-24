@@ -1,4 +1,5 @@
 import 'dart:io';
+import '../../../../core/l10n/l10n_extensions.dart';
 
 import 'package:flutter/material.dart';
 
@@ -45,7 +46,7 @@ class EventGroupPhotoPickerField extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Text(
-          'Etkinlik fotoğrafı',
+          context.l10n.etkinlikFotoraf,
           style: textTheme.labelLarge?.copyWith(
             color: colorScheme.onSurface,
             fontWeight: FontWeight.w600,
@@ -53,7 +54,7 @@ class EventGroupPhotoPickerField extends StatelessWidget {
         ),
         const SizedBox(height: 4),
         Text(
-          'İsteğe bağlı — etkinliği listede görsel olarak ayırt edin.',
+          context.l10n.isteeBalEtkinliiListedeGrsel,
           style: textTheme.bodySmall?.copyWith(
             color: colorScheme.onSurfaceVariant,
             height: 1.35,
@@ -104,7 +105,7 @@ class EventGroupPhotoPickerField extends StatelessWidget {
                   ),
                   if (hasPhoto)
                     IconButton(
-                      tooltip: 'Fotoğrafı kaldır',
+                      tooltip: context.l10n.fotorafKaldr,
                       onPressed: () => onChanged(null),
                       icon: Icon(
                         Icons.close_rounded,

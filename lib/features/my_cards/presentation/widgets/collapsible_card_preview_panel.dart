@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/l10n/l10n_extensions.dart';
 
 import 'my_card_preview_helpers.dart';
 import '../../../onboarding/domain/entities/onboarding_card_draft.dart';
@@ -61,7 +62,7 @@ class _CollapsibleCardPreviewPanelState extends State<CollapsibleCardPreviewPane
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
-                        'Kart önizleme',
+                        context.l10n.kartnizleme,
                         style: textTheme.titleSmall?.copyWith(
                           fontWeight: FontWeight.w600,
                         ),
@@ -91,6 +92,7 @@ class _CollapsibleCardPreviewPanelState extends State<CollapsibleCardPreviewPane
               padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
               child: MyCardPreviewHelpers.flippableCard(
                 draft: widget.draft,
+                l10n: context.l10n,
                 emptyMessage: widget.emptyMessage,
               ),
             ),

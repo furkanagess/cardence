@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/l10n/l10n_extensions.dart';
 import '../../../../core/widgets/organisms/flippable_person_card.dart';
 import '../../domain/entities/onboarding_card_draft.dart';
 import '../../domain/helpers/onboarding_draft_helper.dart';
@@ -47,6 +48,7 @@ class OnboardingCardPreviewFrame extends StatelessWidget {
       child: ConstrainedBox(
         constraints: BoxConstraints(maxWidth: maxWidth),
         child: OnboardingPreviewHelpers.preview(
+          context.l10n,
           _displayDraft(),
           flipOnTouch: flipOnTouch,
           onTap: onTap,

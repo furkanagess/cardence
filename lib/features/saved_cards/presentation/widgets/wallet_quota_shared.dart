@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/l10n/l10n_extensions.dart';
+import '../../../../l10n/app_localizations.dart';
+
 import '../../../../core/theme/app_colors.dart';
 import '../../domain/entities/saved_cards_wallet_quota.dart';
 
@@ -233,9 +236,9 @@ class _ValueBadge extends StatelessWidget {
   }
 }
 
-String walletQuotaRemainingLabel(SavedCardsWalletQuota quota) {
-  if (quota.hasUnlimitedWallet) return 'Sınırsız';
-  if (!quota.canAddMore) return 'Kota doldu';
-  if (quota.remaining == 1) return '1 kart kaldı';
+String walletQuotaRemainingLabel(AppLocalizations l10n, SavedCardsWalletQuota quota) {
+  if (quota.hasUnlimitedWallet) return l10n.snrsz;
+  if (!quota.canAddMore) return l10n.kotaDoldu;
+  if (quota.remaining == 1) return l10n.msg1KartKald;
   return '${quota.remaining} kart kaldı';
 }

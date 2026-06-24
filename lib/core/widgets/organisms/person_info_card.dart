@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/l10n/l10n_extensions.dart';
 
 import '../../utils/card_contact_visibility.dart';
 import '../../utils/contact_launcher.dart';
@@ -7,6 +8,8 @@ import '../atoms/custom_button.dart';
 import '../atoms/premium_owner_badge.dart';
 import '../atoms/profile_avatar.dart';
 import '../molecules/card_back_id_badge.dart';
+
+bool _isNoteLabel(String label) => label == 'Notlar' || label == 'Notes';
 
 /// Kişi / iletişim kartı: tema ile uyumlu, profesyonel ve üç boyutlu görünüm.
 /// [compact] true olduğunda kartvizit oranında sıkı yerleşim kullanılır.
@@ -425,15 +428,17 @@ class PersonInfoCard extends StatelessWidget {
                                   compact: false,
                                   isLastInGroup:
                                       entry.key == visibleEntries.length - 1,
-                                  onEditTap: entry.value.label == 'Notlar'
+                                  onEditTap: _isNoteLabel(entry.value.label) ||
+                                          entry.value.label == context.l10n.notlar
                                       ? onNoteEditTap
                                       : null,
                                   accentColor: accentColor ?? onSurface,
                                   onSurface: onSurface,
                                   onSurfaceVariant: onSurfaceVariant,
                                   surfaceColor: surfaceColor,
-                                  expandVertically: entry.value.label ==
-                                          'Notlar' &&
+                                  expandVertically: (_isNoteLabel(entry.value.label) ||
+                                          entry.value.label ==
+                                              context.l10n.notlar) &&
                                       entry.key == visibleEntries.length - 1,
                                 ),
                               )
@@ -463,7 +468,8 @@ class PersonInfoCard extends StatelessWidget {
                                 compact: false,
                                 isLastInGroup:
                                     entry.key == visibleEntries.length - 1,
-                                onEditTap: entry.value.label == 'Notlar'
+                                onEditTap: _isNoteLabel(entry.value.label) ||
+                                        entry.value.label == context.l10n.notlar
                                     ? onNoteEditTap
                                     : null,
                                 accentColor: accentColor ?? onSurface,
@@ -559,7 +565,8 @@ class _InfoRow extends StatelessWidget {
     final theme = Theme.of(context);
     final textTheme = theme.textTheme;
     final iconColor = accentColor ?? theme.colorScheme.primary;
-    final isNote = label == 'Notlar';
+    final isNote =
+        _isNoteLabel(label) || label == context.l10n.notlar;
 
     final iconBoxSize = compact ? 26.0 : 34.0;
     final iconSize = compact ? 14.0 : 18.0;
@@ -657,7 +664,7 @@ class _InfoRow extends StatelessWidget {
                               minimumSize: const Size(0, 28),
                             ),
                             child: Text(
-                              'Duzenle',
+                              context.l10n.duzenle,
                               style: (compact
                                       ? textTheme.labelSmall
                                       : textTheme.labelMedium)
@@ -854,10 +861,10 @@ class _CompactBusinessCardFace extends StatelessWidget {
     final hasTitle = title != null && title!.trim().isNotEmpty;
     final resolvedJobTitle = jobTitle?.trim().isNotEmpty == true
         ? jobTitle!.trim()
-        : _valueForLabels(['Pozisyon', 'Ünvan']);
+        : _valueForLabels(['Pozisyon', 'Ünvan', 'Title']);
     final company = titleSecondary?.trim().isNotEmpty == true
         ? titleSecondary!.trim()
-        : _valueForLabels(['Şirket']);
+        : _valueForLabels(['Şirket', 'Company']);
     final email = _resolveContact(_email, contactEmail, 'email');
     final phone = _resolveContact(_phone, contactPhone, 'phone');
     final website = _resolveContact(null, contactWebsite, 'website');
@@ -901,9 +908,9 @@ class _CompactBusinessCardFace extends StatelessWidget {
                       linkedin: linkedin,
                     ),
                   ),
-                if (_noteEntry != null && fillHeight) ...[
+                if (_noteEntry(context) != null && fillHeight) ...[
                   const SizedBox(height: 8),
-                  Expanded(child: _buildNote(textTheme)),
+                  Expanded(child: _buildNote(context, textTheme)),
                 ],
               ],
             ),
@@ -989,7 +996,7 @@ class _CompactBusinessCardFace extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Hakkımda',
+          context.l10n.hakkmda,
           style: textTheme.titleSmall?.copyWith(
             fontWeight: FontWeight.w800,
             color: onSurface,
@@ -1013,7 +1020,7 @@ class _CompactBusinessCardFace extends StatelessWidget {
         if (hasSkills) ...[
           const SizedBox(height: 14),
           Text(
-            'Yetenekler',
+            context.l10n.yetenekler,
             style: textTheme.titleSmall?.copyWith(
               fontWeight: FontWeight.w800,
               color: onSurface,
@@ -1039,9 +1046,11 @@ class _CompactBusinessCardFace extends StatelessWidget {
     );
   }
 
-  ({String label, String value})? get _noteEntry {
+  ({String label, String value})? _noteEntry(BuildContext context) {
     for (final entry in entries) {
-      if (entry.label == 'Notlar') return entry;
+      if (_isNoteLabel(entry.label) || entry.label == context.l10n.notlar) {
+        return entry;
+      }
     }
     return null;
   }
@@ -1329,8 +1338,8 @@ class _CompactBusinessCardFace extends StatelessWidget {
     );
   }
 
-  Widget _buildNote(TextTheme textTheme) {
-    final note = _noteEntry!;
+  Widget _buildNote(BuildContext context, TextTheme textTheme) {
+    final note = _noteEntry(context)!;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -1354,7 +1363,7 @@ class _CompactBusinessCardFace extends StatelessWidget {
                   minimumSize: const Size(0, 28),
                 ),
                 child: Text(
-                  'Düzenle',
+                  context.l10n.dzenle,
                   style: textTheme.labelSmall?.copyWith(
                     color: onSurfaceVariant,
                     fontWeight: FontWeight.w600,

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../../../../core/l10n/api_error_localizer.dart';
+import '../../../../core/l10n/l10n_extensions.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/widgets/atoms/cardence_app_bar.dart';
@@ -67,8 +69,8 @@ class _SupportViewState extends State<_SupportView> {
           ScaffoldMessenger.of(context)
             ..hideCurrentSnackBar()
             ..showSnackBar(
-              const SnackBar(
-                content: Text('Destek talebiniz alındı. En kısa sürede dönüş yapacağız.'),
+              SnackBar(
+                content: Text(context.l10n.destekTalebinizAlndEnKsa),
                 behavior: SnackBarBehavior.floating,
               ),
             );
@@ -79,7 +81,9 @@ class _SupportViewState extends State<_SupportView> {
             ..hideCurrentSnackBar()
             ..showSnackBar(
               SnackBar(
-                content: Text(state.errorMessage!),
+                content: Text(
+                  ApiErrorLocalizer.localize(context.l10n, state.errorMessage!),
+                ),
                 behavior: SnackBarBehavior.floating,
               ),
             );
@@ -87,7 +91,7 @@ class _SupportViewState extends State<_SupportView> {
       },
       child: CardenceScaffold(
         resizeToAvoidBottomInset: true,
-        appBar: const CardenceAppBar(title: 'Destek'),
+        appBar: CardenceAppBar(title: context.l10n.destek),
         body: SafeArea(
           child: Padding(
             padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
@@ -106,8 +110,8 @@ class _SupportViewState extends State<_SupportView> {
                           children: [
                             CustomTextField(
                               controller: _emailController,
-                              labelText: 'E-posta',
-                              hintText: 'ornek@mail.com',
+                              labelText: context.l10n.ePosta,
+                              hintText: context.l10n.ornekMailCom,
                               keyboardType: TextInputType.emailAddress,
                               textInputAction: TextInputAction.next,
                               onChanged: cubit.setEmail,
@@ -120,8 +124,8 @@ class _SupportViewState extends State<_SupportView> {
                             const SizedBox(height: 16),
                             CustomTextField(
                               controller: _messageController,
-                              labelText: 'Mesajınız',
-                              hintText: 'Sorununuzu veya talebinizi kısaca açıklayın…',
+                              labelText: context.l10n.mesajnz,
+                              hintText: context.l10n.sorununuzuVeyaTalebiniziKsacaAklayn,
                               minLines: 5,
                               maxLines: 8,
                               maxLength: 2000,
@@ -135,7 +139,7 @@ class _SupportViewState extends State<_SupportView> {
                     ),
                     const SizedBox(height: 12),
                     CustomButton(
-                      label: 'Talebi gönder',
+                      label: context.l10n.talebiGnder,
                       icon: Icons.send_rounded,
                       isLoading: state.isSubmitting,
                       enabled: state.canSubmit,

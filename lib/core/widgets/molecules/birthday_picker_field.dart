@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/l10n/l10n_extensions.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
 import '../../theme/app_colors.dart';
@@ -47,9 +48,9 @@ class _BirthdayPickerFieldState extends State<BirthdayPickerField> {
       initialDate: initial,
       firstDate: DateTime(1900),
       lastDate: now,
-      helpText: 'Doğum günü seçin',
-      cancelText: 'İptal',
-      confirmText: 'Tamam',
+      helpText: context.l10n.doumGnSein,
+      cancelText: context.l10n.iptal,
+      confirmText: context.l10n.tamam,
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
@@ -94,7 +95,7 @@ class _BirthdayPickerFieldState extends State<BirthdayPickerField> {
             ),
             suffixIcon: hasValue
                 ? IconButton(
-                    tooltip: 'Temizle',
+                    tooltip: context.l10n.temizle,
                     onPressed: _clear,
                     icon: Icon(
                       Icons.close,

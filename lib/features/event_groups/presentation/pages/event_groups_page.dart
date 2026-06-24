@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/l10n/l10n_extensions.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/network/auth_api_exception.dart';
 import '../../../saved_cards/presentation/cubit/saved_cards_cubit.dart';
@@ -210,7 +211,7 @@ class _EventGroupsPageState extends State<EventGroupsPage> {
               ),
               const SizedBox(height: 16),
               Text(
-                'Henüz etkinlik grubu yok',
+                context.l10n.henzEtkinlikGrubuYok,
                 style: textTheme.titleMedium?.copyWith(
                   color: colorScheme.onSurfaceVariant,
                 ),
@@ -218,7 +219,7 @@ class _EventGroupsPageState extends State<EventGroupsPage> {
               ),
               const SizedBox(height: 8),
               Text(
-                'Sağ alttaki + ile yeni etkinlik grubu oluşturabilirsiniz.',
+                context.l10n.saAlttakiIleYeniEtkinlik,
                 style: textTheme.bodySmall?.copyWith(
                   color: colorScheme.onSurfaceVariant,
                 ),
@@ -239,7 +240,7 @@ class _EventGroupsPageState extends State<EventGroupsPage> {
         final meta = EventGroupMetaFormatter.summaryFor(group);
         final subtitle = [
           if (meta != null) meta,
-          if (cardCount == 0) 'Bu grupta kart yok' else '$cardCount kayıtlı kart',
+          if (cardCount == 0) context.l10n.noCardsInGroup else '$cardCount kayıtlı kart',
         ].join(' · ');
         return Padding(
           padding: const EdgeInsets.only(bottom: 12),

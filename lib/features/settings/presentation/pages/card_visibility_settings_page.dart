@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/l10n/l10n_extensions.dart';
 
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -183,7 +184,7 @@ class _CardVisibilitySettingsPageState extends State<CardVisibilitySettingsPage>
         child: Material(
           color: Colors.transparent,
           child: CustomButton(
-            label: 'Kaydet',
+            label: context.l10n.kaydet,
             onPressed: _saving ? null : _save,
             isLoading: _saving,
             style: FilledButton.styleFrom(
@@ -208,19 +209,19 @@ class _CardVisibilitySettingsPageState extends State<CardVisibilitySettingsPage>
 
     if (_loading) {
       return CardenceScaffold(
-        appBar: const CardenceAppBar(title: 'Kart görünümü'),
+        appBar: CardenceAppBar(title: context.l10n.kartGrnm2),
         body: const Center(child: CircularProgressIndicator()),
       );
     }
 
     if (_draft == null) {
       return CardenceScaffold(
-        appBar: const CardenceAppBar(title: 'Kart görünümü'),
+        appBar: CardenceAppBar(title: context.l10n.kartGrnm2),
         body: Center(
           child: Padding(
             padding: const EdgeInsets.all(24),
             child: Text(
-              'Henüz kartınız yok. Profilden kart oluşturduktan sonra görünüm ayarlarını yapabilirsiniz.',
+              context.l10n.henzKartnzYokProfildenKart,
               style: textTheme.bodyMedium?.copyWith(
                 color: colorScheme.onSurfaceVariant,
                 height: 1.4,
@@ -240,7 +241,7 @@ class _CardVisibilitySettingsPageState extends State<CardVisibilitySettingsPage>
     final bottomInset = _saveBarInset(context);
 
     return CardenceScaffold(
-      appBar: const CardenceAppBar(title: 'Kart görünümü'),
+      appBar: CardenceAppBar(title: context.l10n.kartGrnm2),
       body: Stack(
         fit: StackFit.expand,
         children: [
@@ -251,7 +252,7 @@ class _CardVisibilitySettingsPageState extends State<CardVisibilitySettingsPage>
               children: [
                 if (_cards.length > 1) ...[
                   Text(
-                    'Kart',
+                    context.l10n.kart,
                     style: textTheme.titleSmall?.copyWith(
                       color: colorScheme.onSurfaceVariant,
                       fontWeight: FontWeight.w600,
@@ -287,12 +288,13 @@ class _CardVisibilitySettingsPageState extends State<CardVisibilitySettingsPage>
                   aspectRatio: FlippablePersonCard.cardAspectRatio,
                   child: MyCardPreviewHelpers.flippableCard(
                     draft: draft,
-                    emptyMessage: 'Önizleme',
+                    l10n: context.l10n,
+                    emptyMessage: context.l10n.nizleme,
                   ),
                 ),
                 const SizedBox(height: 20),
                 CardAppearanceSectionCard(
-                  title: 'Kart rengi',
+                  title: context.l10n.kartRengi2,
                   trailing: Icon(
                     Icons.palette_outlined,
                     size: 20,
@@ -312,7 +314,7 @@ class _CardVisibilitySettingsPageState extends State<CardVisibilitySettingsPage>
                 ),
                 const SizedBox(height: 12),
                 CardAppearanceSectionCard(
-                  title: 'Metin rengi',
+                  title: context.l10n.metinRengi2,
                   child: CardColorCustomizeSection(
                     backgroundColor: draft.backgroundColor,
                     accentColor: draft.accentColor,
@@ -324,7 +326,7 @@ class _CardVisibilitySettingsPageState extends State<CardVisibilitySettingsPage>
                 ),
                 const SizedBox(height: 12),
                 CardAppearanceSectionCard(
-                  title: 'Ön yüzde göster',
+                  title: context.l10n.nYzdeGster,
                   subtitle: 'En fazla ${AppConstants.maxFrontCardFields}',
                   child: Wrap(
                     spacing: 8,
@@ -346,13 +348,13 @@ class _CardVisibilitySettingsPageState extends State<CardVisibilitySettingsPage>
                 ),
                 const SizedBox(height: 12),
                 CardAppearanceSectionCard(
-                  title: 'Arka yüzde göster',
+                  title: context.l10n.arkaYzdeGster,
                   subtitle: 'En fazla ${AppConstants.maxBackCardFields}',
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       Text(
-                        'Hakkımda her zaman gösterilir.',
+                        context.l10n.hakkmdaHerZamanGsterilir,
                         style: textTheme.labelSmall?.copyWith(
                           color: colorScheme.onSurfaceVariant,
                           height: 1.35,

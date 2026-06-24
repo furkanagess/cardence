@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/l10n/l10n_extensions.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
 
 import '../../../../core/utils/intl_phone_field_helpers.dart';
@@ -92,8 +93,8 @@ class _RegisterFormState extends State<RegisterForm> {
     final password = _passwordController.text;
     final phone = _phoneNumber.trim();
 
-    final firstNameError = OnboardingValidation.validateFirstName(firstName);
-    final lastNameError = OnboardingValidation.validateLastName(lastName);
+    final firstNameError = OnboardingValidation.validateFirstName(context.l10n, firstName);
+    final lastNameError = OnboardingValidation.validateLastName(context.l10n, lastName);
     String? emailError;
     String? phoneError;
     String? passwordError;
@@ -138,10 +139,10 @@ class _RegisterFormState extends State<RegisterForm> {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const OnboardingFieldLabel(label: 'Ad', required: true),
+        OnboardingFieldLabel(label: 'Ad', required: true),
         CustomTextField(
           controller: _firstNameController,
-          hintText: 'Örn: Mehmet',
+          hintText: context.l10n.rnMehmet,
           textInputAction: TextInputAction.next,
           textCapitalization: TextCapitalization.words,
           prefixIcon: Icon(
@@ -156,10 +157,10 @@ class _RegisterFormState extends State<RegisterForm> {
           },
         ),
         const SizedBox(height: 12),
-        const OnboardingFieldLabel(label: 'Soyad', required: true),
+        OnboardingFieldLabel(label: context.l10n.soyad, required: true),
         CustomTextField(
           controller: _lastNameController,
-          hintText: 'Örn: Yılmaz',
+          hintText: context.l10n.rnYlmaz,
           textInputAction: TextInputAction.next,
           textCapitalization: TextCapitalization.words,
           prefixIcon: Icon(
@@ -174,10 +175,10 @@ class _RegisterFormState extends State<RegisterForm> {
           },
         ),
         const SizedBox(height: 12),
-        const OnboardingFieldLabel(label: 'E-posta', required: true),
+        OnboardingFieldLabel(label: context.l10n.ePosta, required: true),
         CustomTextField(
           controller: _emailController,
-          hintText: 'ornek@email.com',
+          hintText: context.l10n.ornekEmailCom,
           keyboardType: TextInputType.emailAddress,
           textInputAction: TextInputAction.next,
           autocorrect: false,
@@ -191,12 +192,12 @@ class _RegisterFormState extends State<RegisterForm> {
           },
         ),
         const SizedBox(height: 12),
-        const OnboardingFieldLabel(label: 'Telefon'),
+        OnboardingFieldLabel(label: context.l10n.telefon),
         IntlPhoneField(
           key: ValueKey(_phoneNumber),
           decoration: CustomTextField.themedDecoration(
             context,
-            hintText: '5XX XXX XX XX',
+            hintText: context.l10n.msg5xxXxxXxXx,
             errorText: _phoneError,
             prefixIcon: Icon(
               Icons.phone_outlined,
@@ -207,7 +208,7 @@ class _RegisterFormState extends State<RegisterForm> {
           initialCountryCode:
               IntlPhoneFieldHelpers.countryCodeFromPhone(_phoneNumber),
           initialValue: IntlPhoneFieldHelpers.nationalFromPhone(_phoneNumber),
-          invalidNumberMessage: 'Geçerli bir telefon numarası girin.',
+          invalidNumberMessage: context.l10n.geerliBirTelefonNumarasGirin,
           onChanged: (phone) {
             _phoneNumber = phone.completeNumber;
             if (_phoneError != null) setState(() => _phoneError = null);
@@ -224,7 +225,7 @@ class _RegisterFormState extends State<RegisterForm> {
         ),
         const SizedBox(height: 18),
         CustomButton(
-          label: 'Kayıt ol',
+          label: context.l10n.kaytOl,
           height: 48,
           isLoading: widget.isLoading,
           onPressed: _submit,

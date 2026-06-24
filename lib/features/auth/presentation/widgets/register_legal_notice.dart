@@ -1,4 +1,5 @@
 import 'package:flutter/gestures.dart';
+import '../../../../core/l10n/l10n_extensions.dart';
 import 'package:flutter/material.dart';
 
 import '../pages/privacy_policy_page.dart';
@@ -66,13 +67,13 @@ class _RegisterLegalNoticeState extends State<RegisterLegalNotice> {
         children: [
           const TextSpan(text: 'Kayıt olarak '),
           TextSpan(
-            text: 'Kullanım Koşulları',
+            text: context.l10n.kullanmKoullar,
             style: linkStyle,
             recognizer: _termsRecognizer,
           ),
           const TextSpan(text: ' ve '),
           TextSpan(
-            text: 'Gizlilik Politikası',
+            text: context.l10n.gizlilikPolitikas,
             style: linkStyle,
             recognizer: _privacyRecognizer,
           ),

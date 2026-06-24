@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/l10n/l10n_extensions.dart';
 import 'package:flutter/services.dart';
 
 import '../../../../core/utils/card_id_generator.dart';
@@ -53,7 +54,7 @@ class _AddCardByIdPageState extends State<AddCardByIdPage> {
       case AddSavedCardSuccess():
         Navigator.of(context).pop(result);
       case AddSavedCardDuplicate():
-        _showError('Bu kart zaten cüzdanınızda.');
+        _showError(context.l10n.buKartZatenCzdannzda);
       case AddSavedCardLimitReached():
       case AddSavedCardPremiumRequired():
         Navigator.of(context).pop(result);
@@ -73,9 +74,9 @@ class _AddCardByIdPageState extends State<AddCardByIdPage> {
 
   String? _validateCardId(String? value) {
     final id = value?.trim() ?? '';
-    if (id.isEmpty) return 'Kart ID girin';
+    if (id.isEmpty) return context.l10n.kartIdGirin;
     if (!CardIdGenerator.isValid(id)) {
-      return 'Kart ID tam 6 haneli sayı olmalıdır';
+      return context.l10n.kartIdTam6Haneli;
     }
     return null;
   }
@@ -86,7 +87,7 @@ class _AddCardByIdPageState extends State<AddCardByIdPage> {
     final colorScheme = Theme.of(context).colorScheme;
 
     return CardenceScaffold(
-      appBar: const CardenceAppBar(title: 'Kart ID ile ekle'),
+      appBar: CardenceAppBar(title: context.l10n.kartIdIleEkle),
       resizeToAvoidBottomInset: true,
       body: Column(
         children: [
@@ -113,7 +114,7 @@ class _AddCardByIdPageState extends State<AddCardByIdPage> {
                   ),
                   const SizedBox(height: 20),
                   Text(
-                    'Paylaşılan kart kimliğini girin. Bilgiler sunucudaki güncel kartvizitten alınır.',
+                    context.l10n.paylalanKartKimliiniGirinBilgiler,
                     textAlign: TextAlign.center,
                     style: textTheme.bodyMedium?.copyWith(
                       color: colorScheme.onSurfaceVariant,
@@ -122,7 +123,7 @@ class _AddCardByIdPageState extends State<AddCardByIdPage> {
                   ),
                   const SizedBox(height: 28),
                   Text(
-                    'KART ID',
+                    context.l10n.kartId,
                     style: textTheme.labelMedium?.copyWith(
                       fontWeight: FontWeight.w700,
                       color: colorScheme.onSurfaceVariant,
@@ -155,14 +156,14 @@ class _AddCardByIdPageState extends State<AddCardByIdPage> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'Sadece sayısal karakterler kabul edilir.',
+                    context.l10n.sadeceSaysalKarakterlerKabulEdilir,
                     style: textTheme.bodySmall?.copyWith(
                       color: colorScheme.onSurfaceVariant,
                     ),
                   ),
                   const SizedBox(height: 24),
-                  const AddCardTipCard.security(
-                    title: 'Güvenli Paylaşım',
+                  AddCardTipCard.security(
+                    title: context.l10n.gvenliPaylam,
                     text:
                         'Cardence ağındaki tüm veri transferleri uçtan uca şifrelenir ve kimlik doğrulama protokolleri ile korunur.',
                   ),
@@ -171,7 +172,7 @@ class _AddCardByIdPageState extends State<AddCardByIdPage> {
             ),
           ),
           AddCardStickyAction(
-            label: 'Kartı ekle',
+            label: context.l10n.kartEkle2,
             icon: Icons.add_card_rounded,
             onPressed: _submit,
             isLoading: _submitting,

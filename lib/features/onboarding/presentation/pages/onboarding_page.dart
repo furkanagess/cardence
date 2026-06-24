@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/l10n/l10n_extensions.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/widgets/atoms/cardence_app_bar.dart';
@@ -132,7 +133,7 @@ class _OnboardingContentState extends State<_OnboardingContent> {
             child: CardenceScaffold(
               resizeToAvoidBottomInset: false,
               appBar: CardenceAppBar(
-                title: OnboardingStepTitles.forIndex(flowState.currentPageIndex),
+                title: OnboardingStepTitles.forIndex(context.l10n, flowState.currentPageIndex),
                 leading: flowState.isFirstPage
                     ? null
                     : CardenceAppBar.flowBackButton(
@@ -291,8 +292,6 @@ class _OnboardingBottomActions extends StatelessWidget {
           a.currentPageIndex != b.currentPageIndex ||
           a.isLastPage != b.isLastPage ||
           a.isSaving != b.isSaving ||
-          a.canFinish != b.canFinish ||
-          a.canProceedCurrentStep != b.canProceedCurrentStep ||
           a.draft != b.draft,
       builder: (context, state) {
         final isLastPage = state.isLastPage;
@@ -305,15 +304,15 @@ class _OnboardingBottomActions extends StatelessWidget {
           currentIndex: state.currentPageIndex,
           primaryLabel: primaryLabel,
           isLoading: isSaving,
-          enabled: state.canProceedCurrentStep,
+          enabled: state.canProceedCurrentStep(context.l10n),
           onStepSelected:
               state.isFirstPage ? null : (index) => onGoToPage(index),
           onPrimaryPressed: () async {
             if (isLastPage) {
-              if (!state.canFinish) {
+              if (!state.canFinish(context.l10n)) {
                 _showValidationSnackBar(
                   context,
-                  'Lütfen zorunlu alanları doldurun.',
+                  context.l10n.ltfenZorunluAlanlarDoldurun,
                 );
                 return;
               }
@@ -323,7 +322,7 @@ class _OnboardingBottomActions extends StatelessWidget {
               return;
             }
 
-            final error = state.validationErrorForCurrentStep;
+            final error = state.validationErrorForCurrentStep(context.l10n);
             if (error != null) {
               _showValidationSnackBar(context, error);
               return;

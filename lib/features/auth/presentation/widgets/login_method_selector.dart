@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/l10n/l10n_extensions.dart';
 
 import '../bloc/login_event.dart';
 
@@ -30,7 +31,7 @@ class LoginMethodSelector extends StatelessWidget {
         child: Row(
           children: [
             _Segment(
-              label: 'E-posta',
+              label: context.l10n.ePosta,
               icon: Icons.mail_outline_rounded,
               selected: selected == LoginMethod.email,
               onTap: () => onChanged(LoginMethod.email),
@@ -38,7 +39,7 @@ class LoginMethodSelector extends StatelessWidget {
               colorScheme: colorScheme,
             ),
             _Segment(
-              label: 'Telefon',
+              label: context.l10n.telefon,
               icon: Icons.phone_android_rounded,
               selected: selected == LoginMethod.phone,
               onTap: () => onChanged(LoginMethod.phone),

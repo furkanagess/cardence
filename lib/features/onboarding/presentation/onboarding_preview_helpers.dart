@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/widgets/organisms/flippable_person_card.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../my_cards/presentation/widgets/my_card_preview_helpers.dart';
 import '../domain/entities/onboarding_card_draft.dart';
 import '../domain/helpers/card_visibility_helper.dart';
@@ -11,21 +12,22 @@ class OnboardingPreviewHelpers {
 
   /// Canlı kart önizlemesi; çevrilebilir.
   static Widget preview(
+    AppLocalizations l10n,
     OnboardingCardDraft draft, {
     bool flipOnTouch = false,
     bool showPremiumBadge = false,
     VoidCallback? onTap,
     VoidCallback? onDoubleTap,
-    String emptyMessage = 'Alanlar doldukça görünür',
+    String? emptyMessage,
   }) {
     final name = draft.displayName?.trim();
     return FlippablePersonCard(
-      title: (name == null || name.isEmpty) ? 'Ad Soyad' : name,
+      title: (name == null || name.isEmpty) ? l10n.adSoyad : name,
       titleSecondary: draft.company?.trim(),
       jobTitle: draft.title?.trim(),
       frontEntries: const [],
       backEntries: CardVisibilityHelper.backEntries(draft),
-      emptyMessage: emptyMessage,
+      emptyMessage: emptyMessage ?? l10n.alanlarDoldukaGrnr,
       flipOnTouch: flipOnTouch,
       onTap: onTap,
       onDoubleTap: onDoubleTap,

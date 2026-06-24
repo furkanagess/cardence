@@ -1,6 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/config/linkedin_auth_config.dart';
+import '../../../../core/l10n/app_error_keys.dart';
 import '../../data/datasources/auth_remote_datasource.dart';
 import '../../domain/entities/last_login_credentials.dart';
 import '../../domain/usecases/get_last_login_credentials.dart';
@@ -95,7 +96,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     } catch (_) {
       emit(state.copyWith(
         status: LoginStatus.failure,
-        errorMessage: 'Bağlantı hatası. Lütfen tekrar deneyin.',
+        errorMessage: AppErrorKeys.connectionError,
       ));
     }
   }
@@ -114,7 +115,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     } catch (_) {
       emit(state.copyWith(
         status: LoginStatus.failure,
-        errorMessage: 'Bağlantı hatası. Lütfen tekrar deneyin.',
+        errorMessage: AppErrorKeys.connectionError,
       ));
     }
   }
@@ -136,7 +137,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     } catch (_) {
       emit(state.copyWith(
         status: LoginStatus.failure,
-        errorMessage: 'Bağlantı hatası. Lütfen tekrar deneyin.',
+        errorMessage: AppErrorKeys.connectionError,
       ));
     }
   }
@@ -165,7 +166,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     } catch (_) {
       emit(state.copyWith(
         status: LoginStatus.failure,
-        errorMessage: 'Bağlantı hatası. Lütfen tekrar deneyin.',
+        errorMessage: AppErrorKeys.connectionError,
       ));
     }
   }

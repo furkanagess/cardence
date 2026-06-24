@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/l10n/l10n_extensions.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
 
 import '../../../../core/widgets/atoms/custom_text_field.dart';
@@ -86,18 +87,18 @@ class _OnboardingStepOptionalState extends State<OnboardingStepOptional> {
   @override
   Widget build(BuildContext context) {
     return OnboardingStepShell(
-      subtitle: 'İsterseniz şimdi ekleyin, sonra da düzenleyebilirsiniz',
+      subtitle: context.l10n.istersenizimdiEkleyinSonraDa,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const OnboardingFieldLabel(label: 'Telefon'),
+          OnboardingFieldLabel(label: context.l10n.telefon),
           IntlPhoneField(
             initialCountryCode: _countryCodeFromPhone(widget.draft.phone),
             initialValue: _nationalFromPhone(widget.draft.phone),
             showCountryFlag: true,
             decoration: CustomTextField.themedDecoration(
               context,
-              hintText: '5xx xxx xx xx',
+              hintText: context.l10n.msg5xxXxxXxXx2,
             ),
             onChanged: (phone) => widget.onChanged(
               widget.draft.copyWith(
@@ -106,58 +107,58 @@ class _OnboardingStepOptionalState extends State<OnboardingStepOptional> {
             ),
           ),
           const SizedBox(height: 16),
-          const OnboardingFieldLabel(label: 'Web sitesi'),
+          OnboardingFieldLabel(label: context.l10n.webSitesi),
           CustomTextField(
             controller: _websiteController,
             keyboardType: TextInputType.url,
             autocorrect: false,
-            hintText: 'www.example.com',
+            hintText: context.l10n.wwwExampleCom,
             prefixIcon: const Icon(Icons.language_outlined),
             onChanged: (value) => widget.onChanged(
               widget.draft.copyWith(website: value.isEmpty ? null : value),
             ),
           ),
           const SizedBox(height: 16),
-          const OnboardingFieldLabel(label: 'LinkedIn'),
+          OnboardingFieldLabel(label: context.l10n.linkedin),
           CustomTextField(
             controller: _linkedinController,
             keyboardType: TextInputType.url,
             autocorrect: false,
-            hintText: 'linkedin.com/in/username',
+            hintText: context.l10n.linkedinComInUsername,
             prefixIcon: const Icon(Icons.link_rounded),
             onChanged: (value) => widget.onChanged(
               widget.draft.copyWith(linkedin: value.isEmpty ? null : value),
             ),
           ),
           const SizedBox(height: 16),
-          const OnboardingFieldLabel(label: 'Okul'),
+          OnboardingFieldLabel(label: context.l10n.okul),
           CustomTextField(
             controller: _schoolController,
             textCapitalization: TextCapitalization.words,
-            hintText: 'Üniversite veya lise adı',
+            hintText: context.l10n.niversiteVeyaLiseAd,
             prefixIcon: const Icon(Icons.school_outlined),
             onChanged: (value) => widget.onChanged(
               widget.draft.copyWith(school: value.isEmpty ? null : value),
             ),
           ),
           const SizedBox(height: 16),
-          const OnboardingFieldLabel(label: 'Hakkımda'),
+          OnboardingFieldLabel(label: context.l10n.hakkmda),
           CustomTextField(
             controller: _aboutController,
             minLines: 3,
             maxLines: 5,
             maxLength: 200,
             textCapitalization: TextCapitalization.sentences,
-            hintText: 'Kendinizden kısaca bahsedin...',
+            hintText: context.l10n.kendinizdenKsacaBahsedin,
             onChanged: (value) => widget.onChanged(
               widget.draft.copyWith(about: value.isEmpty ? null : value),
             ),
           ),
           const SizedBox(height: 16),
-          const OnboardingFieldLabel(label: 'Beceriler'),
+          OnboardingFieldLabel(label: context.l10n.beceriler),
           SkillsChipInput(
             label: '',
-            hintText: 'Beceri ekle',
+            hintText: context.l10n.beceriEkle,
             value: widget.draft.skills,
             onChanged: (s) => widget.onChanged(
               widget.draft.copyWith(

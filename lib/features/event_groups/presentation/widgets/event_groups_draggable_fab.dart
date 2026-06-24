@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/l10n/l10n_extensions.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/molecules/draggable_fab.dart';
@@ -30,7 +31,7 @@ class EventGroupsDraggableFab extends StatelessWidget {
           ? FloatingActionButton(
               heroTag: 'event_groups_add_fab',
               onPressed: effectiveOnPressed,
-              tooltip: 'Etkinlik grubu ekle',
+              tooltip: context.l10n.etkinlikGrubuEkle,
               backgroundColor: AppColors.primary,
               foregroundColor: AppColors.textOnPrimary,
               elevation: 4,
@@ -39,7 +40,7 @@ class EventGroupsDraggableFab extends StatelessWidget {
           : FloatingActionButton(
               heroTag: 'event_groups_upgrade_fab',
               onPressed: effectiveOnPressed,
-              tooltip: 'Kapasiteyi artır',
+              tooltip: context.l10n.kapasiteyiArtr,
               backgroundColor: colorScheme.surface,
               foregroundColor: colorScheme.primary,
               elevation: 3,

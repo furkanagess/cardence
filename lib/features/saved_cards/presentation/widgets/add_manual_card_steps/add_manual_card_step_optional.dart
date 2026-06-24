@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../../core/l10n/l10n_extensions.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
 
 import '../../../../../core/widgets/atoms/custom_text_field.dart';
@@ -56,17 +57,17 @@ class _AddManualCardStepOptionalState extends State<AddManualCardStepOptional> {
     final colorScheme = Theme.of(context).colorScheme;
 
     return OnboardingStepShell(
-      subtitle: 'İletişim, profil ve kişisel not bilgilerini ekleyin',
+      subtitle: context.l10n.iletiimProfilVeKiiselNot,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const OnboardingFieldLabel(label: 'E-posta', required: true),
+          OnboardingFieldLabel(label: context.l10n.ePosta, required: true),
           CustomTextField(
             controller: _emailController,
             keyboardType: TextInputType.emailAddress,
             autocorrect: false,
             textInputAction: TextInputAction.next,
-            hintText: 'isim@sirket.com',
+            hintText: context.l10n.isimSirketCom,
             prefixIcon: Icon(
               Icons.mail_outline_rounded,
               color: colorScheme.onSurfaceVariant,
@@ -78,7 +79,7 @@ class _AddManualCardStepOptionalState extends State<AddManualCardStepOptional> {
             ),
           ),
           const SizedBox(height: 16),
-          const OnboardingFieldLabel(label: 'Telefon'),
+          OnboardingFieldLabel(label: context.l10n.telefon),
           IntlPhoneField(
             initialCountryCode:
                 ManualCardPhoneHelper.countryCodeFromPhone(widget.draft.phone),
@@ -87,7 +88,7 @@ class _AddManualCardStepOptionalState extends State<AddManualCardStepOptional> {
             showCountryFlag: true,
             decoration: CustomTextField.themedDecoration(
               context,
-              hintText: '5xx xxx xx xx',
+              hintText: context.l10n.msg5xxXxxXxXx2,
             ),
             onChanged: (phone) => widget.onChanged(
               widget.draft.copyWith(
@@ -96,12 +97,12 @@ class _AddManualCardStepOptionalState extends State<AddManualCardStepOptional> {
             ),
           ),
           const SizedBox(height: 16),
-          const OnboardingFieldLabel(label: 'Web sitesi'),
+          OnboardingFieldLabel(label: context.l10n.webSitesi),
           CustomTextField(
             controller: _websiteController,
             keyboardType: TextInputType.url,
             autocorrect: false,
-            hintText: 'www.sirket.com',
+            hintText: context.l10n.wwwSirketCom,
             prefixIcon: Icon(
               Icons.language_outlined,
               color: colorScheme.onSurfaceVariant,
@@ -113,12 +114,12 @@ class _AddManualCardStepOptionalState extends State<AddManualCardStepOptional> {
             ),
           ),
           const SizedBox(height: 16),
-          const OnboardingFieldLabel(label: 'LinkedIn'),
+          OnboardingFieldLabel(label: context.l10n.linkedin),
           CustomTextField(
             controller: _linkedinController,
             keyboardType: TextInputType.url,
             autocorrect: false,
-            hintText: 'linkedin.com/in/kullanici',
+            hintText: context.l10n.linkedinComInKullanici,
             prefixIcon: Icon(
               Icons.link_rounded,
               color: colorScheme.onSurfaceVariant,
@@ -130,14 +131,14 @@ class _AddManualCardStepOptionalState extends State<AddManualCardStepOptional> {
             ),
           ),
           const SizedBox(height: 16),
-          const OnboardingFieldLabel(label: 'Hakkımda'),
+          OnboardingFieldLabel(label: context.l10n.hakkmda),
           CustomTextField(
             controller: _aboutController,
             minLines: 3,
             maxLines: 5,
             maxLength: 200,
             textCapitalization: TextCapitalization.sentences,
-            hintText: 'Kart sahibi hakkında kısa bilgi...',
+            hintText: context.l10n.kartSahibiHakkndaKsaBilgi,
             onChanged: (value) => widget.onChanged(
               widget.draft.copyWith(
                 about: value.trim().isEmpty ? null : value.trim(),
@@ -145,10 +146,10 @@ class _AddManualCardStepOptionalState extends State<AddManualCardStepOptional> {
             ),
           ),
           const SizedBox(height: 16),
-          const OnboardingFieldLabel(label: 'Beceriler'),
+          OnboardingFieldLabel(label: context.l10n.beceriler),
           SkillsChipInput(
             label: '',
-            hintText: 'Beceri ekle',
+            hintText: context.l10n.beceriEkle,
             value: widget.draft.skills,
             onChanged: (skills) => widget.onChanged(
               widget.draft.copyWith(
@@ -157,13 +158,13 @@ class _AddManualCardStepOptionalState extends State<AddManualCardStepOptional> {
             ),
           ),
           const SizedBox(height: 16),
-          const OnboardingFieldLabel(label: 'Not'),
+          OnboardingFieldLabel(label: context.l10n.not),
           CustomTextField(
             controller: _noteController,
             minLines: 3,
             maxLines: 5,
             textCapitalization: TextCapitalization.sentences,
-            hintText: 'Bu kişi hakkında eklemek istediğiniz notlar...',
+            hintText: context.l10n.buKiiHakkndaEklemekIstediiniz,
             onChanged: (value) => widget.onChanged(
               widget.draft.copyWith(
                 note: value.trim().isEmpty ? null : value.trim(),

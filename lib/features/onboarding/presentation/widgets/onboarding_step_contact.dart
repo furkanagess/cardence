@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/l10n/l10n_extensions.dart';
 
 import '../../../../core/widgets/atoms/custom_text_field.dart';
 import '../../domain/entities/onboarding_card_draft.dart';
@@ -66,18 +67,18 @@ class _OnboardingStepContactState extends State<OnboardingStepContact> {
           ),
         ),
         OnboardingStepShell(
-          subtitle: 'İletişim için e-posta adresiniz',
+          subtitle: context.l10n.iletiimIinEPostaAdresiniz,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const OnboardingFieldLabel(label: 'E-posta', required: true),
+              OnboardingFieldLabel(label: context.l10n.ePosta, required: true),
               CustomTextField(
                 controller: _emailController,
                 autofocus: true,
                 keyboardType: TextInputType.emailAddress,
                 autocorrect: false,
                 textInputAction: TextInputAction.done,
-                hintText: 'E-posta',
+                hintText: context.l10n.ePosta,
                 prefixIcon: const Icon(Icons.alternate_email_rounded),
                 onChanged: (value) => widget.onChanged(
                   widget.draft.copyWith(
@@ -87,7 +88,7 @@ class _OnboardingStepContactState extends State<OnboardingStepContact> {
               ),
               const SizedBox(height: 8),
               Text(
-                'İş ortaklıkları ve güvenlik bildirimleri için gereklidir.',
+                context.l10n.iOrtaklklarVeGvenlikBildirimleri,
                 style: textTheme.labelSmall?.copyWith(
                   color: colorScheme.onSurfaceVariant,
                 ),

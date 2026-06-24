@@ -1,4 +1,5 @@
 import '../domain/entities/saved_cards_wallet_quota.dart';
+import '../../../l10n/app_localizations.dart';
 
 /// [MainShellPage] AppBar ve [SavedCardsPage] gövdesi arasında paylaşılan UI durumu.
 class SavedCardsChromeState {
@@ -22,13 +23,13 @@ class SavedCardsChromeState {
   final int activeFilterCount;
   final bool canAddMore;
 
-  String get subtitle {
-    if (quota == null) return 'Yükleniyor…';
+  String subtitle(AppLocalizations l10n) {
+    if (quota == null) return l10n.ykleniyor;
     if (isDemoMode) {
-      return 'Örnek kartlar · ${quota!.remainingSlotsLabel}';
+      return '${l10n.ornekKartlar} · ${quota!.remainingSlotsLabel}';
     }
     if (hasActiveFilters) {
-      return '$displayCount / $totalCount kart gösteriliyor';
+      return l10n.cardsShowing(displayCount, totalCount);
     }
     return '${quota!.usedCount} kart · ${quota!.remainingSlotsLabel}';
   }

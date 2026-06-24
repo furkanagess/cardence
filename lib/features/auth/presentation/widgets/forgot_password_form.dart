@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/l10n/l10n_extensions.dart';
 
 import '../../../../core/validation/app_validators.dart';
 import '../../../../core/widgets/atoms/custom_button.dart';
@@ -117,7 +118,7 @@ class _ForgotPasswordFormState extends State<ForgotPasswordForm> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(
-            'Kod gönderildi',
+            context.l10n.kodGnderildi,
             style: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
           ),
           const SizedBox(height: 4),
@@ -128,10 +129,10 @@ class _ForgotPasswordFormState extends State<ForgotPasswordForm> {
             ),
           ),
           const SizedBox(height: 12),
-          const OnboardingFieldLabel(label: 'Doğrulama kodu', required: true),
+          OnboardingFieldLabel(label: context.l10n.dorulamaKodu, required: true),
           CustomTextField(
             controller: _otpController,
-            hintText: '6 haneli kod',
+            hintText: context.l10n.msg6HaneliKod,
             keyboardType: TextInputType.number,
             maxLength: 6,
             errorText: _otpError,
@@ -142,7 +143,7 @@ class _ForgotPasswordFormState extends State<ForgotPasswordForm> {
           const SizedBox(height: 8),
           AuthPasswordField(
             controller: _passwordController,
-            label: 'Yeni şifre',
+            label: context.l10n.yeniifre,
             errorText: _passwordError,
             textInputAction: TextInputAction.next,
             onChanged: (_) {
@@ -152,8 +153,8 @@ class _ForgotPasswordFormState extends State<ForgotPasswordForm> {
           const SizedBox(height: 8),
           AuthPasswordField(
             controller: _confirmController,
-            label: 'Yeni şifre tekrar',
-            hintText: 'Şifrenizi tekrar girin',
+            label: context.l10n.yeniifreTekrar,
+            hintText: context.l10n.ifreniziTekrarGirin,
             errorText: _confirmError,
             textInputAction: TextInputAction.done,
             onSubmitted: (_) => _resetPassword(),
@@ -163,14 +164,14 @@ class _ForgotPasswordFormState extends State<ForgotPasswordForm> {
           ),
           const SizedBox(height: 14),
           CustomButton(
-            label: 'Şifreyi güncelle',
+            label: context.l10n.ifreyiGncelle,
             height: 48,
             isLoading: widget.isLoading,
             onPressed: _resetPassword,
           ),
           const SizedBox(height: 8),
           CustomButton.tonal(
-            label: 'Geri',
+            label: context.l10n.geri,
             height: 40,
             enabled: !widget.isLoading,
             onPressed: widget.onBack,
@@ -183,10 +184,10 @@ class _ForgotPasswordFormState extends State<ForgotPasswordForm> {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const OnboardingFieldLabel(label: 'E-posta', required: true),
+        OnboardingFieldLabel(label: context.l10n.ePosta, required: true),
         CustomTextField(
           controller: _emailController,
-          hintText: 'ornek@email.com',
+          hintText: context.l10n.ornekEmailCom,
           keyboardType: TextInputType.emailAddress,
           autocorrect: false,
           prefixIcon: Icon(
@@ -201,7 +202,7 @@ class _ForgotPasswordFormState extends State<ForgotPasswordForm> {
         ),
         const SizedBox(height: 12),
         Text(
-          'Kayıtlı e-posta adresinize sıfırlama kodu gönderilir.',
+          context.l10n.kaytlEPostaAdresinizeSfrlama,
           style: textTheme.bodySmall?.copyWith(
             color: colorScheme.onSurfaceVariant,
             height: 1.4,
@@ -209,7 +210,7 @@ class _ForgotPasswordFormState extends State<ForgotPasswordForm> {
         ),
         const SizedBox(height: 14),
         CustomButton(
-          label: 'Kod gönder',
+          label: context.l10n.kodGnder,
           height: 48,
           isLoading: widget.isLoading,
           onPressed: _requestOtp,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/l10n/l10n_extensions.dart';
 
 import '../../../../core/media/profile_photo_image_picker.dart';
 import '../../../../core/permissions/media_permission_datasource.dart';
@@ -56,7 +57,7 @@ class _OnboardingPhotoPickerState extends State<OnboardingPhotoPicker> {
           behavior: SnackBarBehavior.floating,
           action: openSettings
               ? SnackBarAction(
-                  label: 'Ayarlar',
+                  label: context.l10n.ayarlar,
                   onPressed: _mediaPermission.openSettings,
                 )
               : null,
@@ -120,7 +121,7 @@ class _OnboardingPhotoPickerState extends State<OnboardingPhotoPicker> {
         ),
         const SizedBox(height: 8),
         Text(
-          'Profil fotoğrafı (isteğe bağlı)',
+          context.l10n.profilFotorafIsteeBal,
           style: textTheme.labelMedium?.copyWith(
             color: colorScheme.onSurfaceVariant,
             fontWeight: FontWeight.w500,
@@ -128,7 +129,7 @@ class _OnboardingPhotoPickerState extends State<OnboardingPhotoPicker> {
         ),
         const SizedBox(height: 2),
         Text(
-          'Kamera veya galeriden ekleyin',
+          context.l10n.kameraVeyaGaleridenEkleyin,
           style: textTheme.labelSmall?.copyWith(
             color: AppColors.primary,
             fontWeight: FontWeight.w600,

@@ -22,6 +22,11 @@
 		<string>????</string>
 		<key>CFBundleVersion</key>
 		<string>5</string>
+		<key>CFBundleLocalizations</key>
+		<array>
+			<string>tr</string>
+			<string>en</string>
+		</array>
 		<key>LSRequiresIPhoneOS</key>
 		<true/>
 		<key>UILaunchStoryboardName</key>
@@ -58,5 +63,18 @@
 		</dict>
 		<key>GADApplicationIdentifier</key>
 		<string>ca-app-pub-3499593115543692~2845897015</string>
+		<key>CFBundleURLTypes</key>
+		<array>
+			<dict>
+				<key>CFBundleTypeRole</key>
+				<string>Editor</string>
+				<key>CFBundleURLName</key>
+				<string>com.furkanages.cardenceapp</string>
+				<key>CFBundleURLSchemes</key>
+				<array>
+					<string>com.furkanages.cardenceapp</string>
+				</array>
+			</dict>
+		</array>
 	</dict>
 </plist>

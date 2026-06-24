@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/l10n/l10n_extensions.dart';
 
 import '../../../../core/widgets/atoms/custom_button.dart';
 import '../../../saved_cards/domain/entities/saved_card.dart';
@@ -91,7 +92,7 @@ class _PickSavedCardsForGroupSheetState
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Kaydedilen kartlardan seç',
+                    context.l10n.kaydedilenKartlardanSe,
                     style: theme.textTheme.titleLarge?.copyWith(
                       fontWeight: FontWeight.w600,
                     ),
