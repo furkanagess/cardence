@@ -28,7 +28,7 @@ public sealed class LinkedInAuthService : ILinkedInAuthService
         _logger = logger;
     }
 
-    public async Task<LinkedInUserInfo?> ExchangeAuthorizationCodeAsync(
+    public async Task<LinkedInExchangeResult> ExchangeAuthorizationCodeAsync(
         string authorizationCode,
         string redirectUri,
         CancellationToken cancellationToken = default)
@@ -37,7 +37,8 @@ public sealed class LinkedInAuthService : ILinkedInAuthService
             || string.IsNullOrWhiteSpace(_options.ClientSecret))
         {
             _logger.LogWarning("LinkedIn OAuth is not configured (missing client id or secret).");
-            return null;
+            return LinkedInExchangeResult.Failed(
+                "LinkedIn girişi sunucuda yapılandırılmamış. Client Secret kontrol edin.");
         }
 
         var tokenPayload = new Dictionary<string, string>
@@ -62,7 +63,8 @@ public sealed class LinkedInAuthService : ILinkedInAuthService
                 "LinkedIn token exchange failed with status {StatusCode}: {Body}",
                 tokenResponse.StatusCode,
                 errorBody);
-            return null;
+            return LinkedInExchangeResult.Failed(
+                MapLinkedInTokenError(errorBody));
         }
 
         var tokenJson = await tokenResponse.Content.ReadAsStringAsync(cancellationToken);
@@ -71,7 +73,7 @@ public sealed class LinkedInAuthService : ILinkedInAuthService
         if (string.IsNullOrWhiteSpace(tokenBody?.AccessToken))
         {
             _logger.LogWarning("LinkedIn token exchange returned an empty access token.");
-            return null;
+            return LinkedInExchangeResult.Failed("LinkedIn oturumu doğrulanamadı.");
         }
 
         using var userInfoRequest = new HttpRequestMessage(HttpMethod.Get, UserInfoEndpoint);
@@ -86,7 +88,8 @@ public sealed class LinkedInAuthService : ILinkedInAuthService
                 "LinkedIn userinfo request failed with status {StatusCode}: {Body}",
                 userInfoResponse.StatusCode,
                 errorBody);
-            return null;
+            return LinkedInExchangeResult.Failed(
+                "LinkedIn profil bilgileri alınamadı. OpenID Connect ürününün etkin olduğundan emin olun.");
         }
 
         var userInfoJson = await userInfoResponse.Content.ReadAsStringAsync(cancellationToken);
@@ -95,48 +98,171 @@ public sealed class LinkedInAuthService : ILinkedInAuthService
         if (profile is null || string.IsNullOrWhiteSpace(profile.Sub))
         {
             _logger.LogWarning("LinkedIn userinfo response did not include a subject id.");
-            return null;
+            return LinkedInExchangeResult.Failed("LinkedIn profil kimliği alınamadı.");
         }
 
-        var profileUrl = await TryFetchProfileUrlAsync(tokenBody.AccessToken, cancellationToken);
+        var meProfile = await TryFetchMeProfileAsync(tokenBody.AccessToken, cancellationToken);
 
-        return new LinkedInUserInfo
+        return LinkedInExchangeResult.Succeeded(new LinkedInUserInfo
         {
             Sub = profile.Sub.Trim(),
             Email = NormalizeEmail(profile.Email),
             DisplayName = ResolveDisplayName(profile),
-            PictureUrl = string.IsNullOrWhiteSpace(profile.Picture) ? null : profile.Picture.Trim(),
-            ProfileUrl = profileUrl,
-        };
+            PictureUrl = string.IsNullOrWhiteSpace(profile.Picture)
+                ? meProfile.PictureUrl
+                : profile.Picture.Trim(),
+            ProfileUrl = meProfile.ProfileUrl,
+            Headline = meProfile.Headline,
+            Title = meProfile.Title,
+            Company = meProfile.Company,
+        });
     }
 
-    private async Task<string?> TryFetchProfileUrlAsync(
+    private static string MapLinkedInTokenError(string errorBody)
+    {
+        if (string.IsNullOrWhiteSpace(errorBody))
+        {
+            return "LinkedIn oturumu doğrulanamadı.";
+        }
+
+        try
+        {
+            using var document = JsonDocument.Parse(errorBody);
+            var root = document.RootElement;
+            var description = root.TryGetProperty("error_description", out var descriptionElement)
+                ? descriptionElement.GetString()
+                : null;
+
+            if (!string.IsNullOrWhiteSpace(description))
+            {
+                var normalized = description.ToLowerInvariant();
+                if (normalized.Contains("authorization code not found", StringComparison.Ordinal)
+                    || normalized.Contains("authorization code expired", StringComparison.Ordinal)
+                    || normalized.Contains("code verifier", StringComparison.Ordinal))
+                {
+                    return "LinkedIn oturumu süresi doldu veya geçersiz. Lütfen tekrar deneyin.";
+                }
+
+                if (normalized.Contains("redirect", StringComparison.Ordinal))
+                {
+                    return "LinkedIn yönlendirme adresi uyuşmuyor. Developer Portal ayarlarını kontrol edin.";
+                }
+
+                if (normalized.Contains("invalid client", StringComparison.Ordinal)
+                    || normalized.Contains("client authentication", StringComparison.Ordinal))
+                {
+                    return "LinkedIn uygulama kimlik bilgileri geçersiz. Client Secret kontrol edin.";
+                }
+            }
+        }
+        catch (JsonException)
+        {
+            // Fall through to generic message.
+        }
+
+        return "LinkedIn oturumu doğrulanamadı.";
+    }
+
+    private async Task<LinkedInMeProfile> TryFetchMeProfileAsync(
         string accessToken,
         CancellationToken cancellationToken)
     {
         using var request = new HttpRequestMessage(
             HttpMethod.Get,
-            "https://api.linkedin.com/v2/me?projection=(vanityName)");
+            "https://api.linkedin.com/v2/me?projection=(vanityName,localizedHeadline)");
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
         request.Headers.Add("X-Restli-Protocol-Version", "2.0.0");
 
         using var response = await _httpClient.SendAsync(request, cancellationToken);
         if (!response.IsSuccessStatusCode)
         {
-            return null;
+            return LinkedInMeProfile.Empty;
         }
 
         var json = await response.Content.ReadAsStringAsync(cancellationToken);
         using var document = JsonDocument.Parse(json);
-        if (!document.RootElement.TryGetProperty("vanityName", out var vanityElement))
+        var root = document.RootElement;
+
+        string? profileUrl = null;
+        if (root.TryGetProperty("vanityName", out var vanityElement))
+        {
+            var vanityName = vanityElement.GetString()?.Trim();
+            if (!string.IsNullOrWhiteSpace(vanityName))
+            {
+                profileUrl = $"https://www.linkedin.com/in/{vanityName}";
+            }
+        }
+
+        var headline = ReadLocalizedHeadline(root);
+        var (title, company) = ParseHeadline(headline);
+
+        return new LinkedInMeProfile(profileUrl, headline, title, company, null);
+    }
+
+    private static string? ReadLocalizedHeadline(JsonElement root)
+    {
+        if (!root.TryGetProperty("localizedHeadline", out var headlineElement))
         {
             return null;
         }
 
-        var vanityName = vanityElement.GetString()?.Trim();
-        return string.IsNullOrWhiteSpace(vanityName)
-            ? null
-            : $"https://www.linkedin.com/in/{vanityName}";
+        if (headlineElement.ValueKind == JsonValueKind.String)
+        {
+            return headlineElement.GetString()?.Trim();
+        }
+
+        if (!headlineElement.TryGetProperty("localized", out var localized))
+        {
+            return null;
+        }
+
+        if (localized.TryGetProperty("en_US", out var english))
+        {
+            return english.GetString()?.Trim();
+        }
+
+        foreach (var property in localized.EnumerateObject())
+        {
+            var value = property.Value.GetString()?.Trim();
+            if (!string.IsNullOrWhiteSpace(value))
+            {
+                return value;
+            }
+        }
+
+        return null;
+    }
+
+    private static (string? Title, string? Company) ParseHeadline(string? headline)
+    {
+        if (string.IsNullOrWhiteSpace(headline))
+        {
+            return (null, null);
+        }
+
+        var text = headline.Trim();
+        const string separator = " at ";
+        var index = text.LastIndexOf(separator, StringComparison.OrdinalIgnoreCase);
+        if (index <= 0 || index + separator.Length >= text.Length)
+        {
+            return (text, null);
+        }
+
+        var title = text[..index].Trim();
+        var company = text[(index + separator.Length)..].Trim();
+        return (
+            string.IsNullOrWhiteSpace(title) ? null : title,
+            string.IsNullOrWhiteSpace(company) ? null : company);
+    }
+
+    private sealed record LinkedInMeProfile(
+        string? ProfileUrl,
+        string? Headline,
+        string? Title,
+        string? Company,
+        string? PictureUrl)
+    {
+        public static LinkedInMeProfile Empty { get; } = new(null, null, null, null, null);
     }
 
     private static string? NormalizeEmail(string? email)

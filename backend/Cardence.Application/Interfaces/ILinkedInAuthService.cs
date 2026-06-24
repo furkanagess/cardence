@@ -4,7 +4,7 @@ namespace Cardence.Application.Interfaces;
 
 public interface ILinkedInAuthService
 {
-    Task<LinkedInUserInfo?> ExchangeAuthorizationCodeAsync(
+    Task<LinkedInExchangeResult> ExchangeAuthorizationCodeAsync(
         string authorizationCode,
         string redirectUri,
         CancellationToken cancellationToken = default);

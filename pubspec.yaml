@@ -83,6 +83,7 @@ dependencies:
       ref: master
   intl: ^0.20.2
   in_app_review: ^2.0.12
+  flutter_web_auth_2: ^5.0.3
 
 dev_dependencies:
   flutter_test:

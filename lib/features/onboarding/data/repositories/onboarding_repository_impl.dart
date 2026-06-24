@@ -1,5 +1,6 @@
 import '../../../business_cards/domain/entities/business_card.dart';
 import '../../domain/entities/onboarding_card_draft.dart';
+import '../../domain/onboarding_draft_seeder.dart';
 import '../../domain/repositories/onboarding_repository.dart';
 import '../datasources/onboarding_local_datasource.dart';
 import '../mappers/business_card_to_draft_mapper.dart';
@@ -32,13 +33,21 @@ class OnboardingRepositoryImpl implements OnboardingRepository {
   @override
   Future<OnboardingCardDraft?> getDraftCard() async {
     final model = await _localDataSource.getDraftCard();
-    return model?.toEntity().withStandardFrontFields();
+    final entity = model?.toEntity();
+    if (entity == null) return null;
+    return OnboardingDraftSeeder.enrichLinkedInCard(
+      entity.withStandardFrontFields(),
+    );
   }
 
   @override
   Future<List<OnboardingCardDraft>> getDraftCards() async {
     final models = await _localDataSource.getDraftCards();
-    return models.map((m) => m.toEntity().withStandardFrontFields()).toList();
+    return models
+        .map((m) => OnboardingDraftSeeder.enrichLinkedInCard(
+              m.toEntity().withStandardFrontFields(),
+            ))
+        .toList();
   }
 
   @override
@@ -46,6 +55,7 @@ class OnboardingRepositoryImpl implements OnboardingRepository {
     if (cards.isEmpty) return;
     final drafts = cards
         .map(BusinessCardToDraftMapper.fromBusinessCard)
+        .map(OnboardingDraftSeeder.enrichLinkedInCard)
         .map(OnboardingCardDraftModel.fromEntity)
         .toList(growable: false);
     await _localDataSource.replaceAllDraftCards(drafts);

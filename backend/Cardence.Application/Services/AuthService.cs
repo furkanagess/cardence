@@ -422,18 +422,20 @@ public sealed class AuthService : IAuthService
                 "Geçersiz yönlendirme adresi.");
         }
 
-        var linkedInProfile = await _linkedInAuthService.ExchangeAuthorizationCodeAsync(
+        var linkedInResult = await _linkedInAuthService.ExchangeAuthorizationCodeAsync(
             request.AuthorizationCode.Trim(),
             redirectUri,
             cancellationToken);
 
-        if (linkedInProfile is null)
+        if (!linkedInResult.IsSuccess || linkedInResult.Profile is null)
         {
             return FailSession(
                 AuthErrorCodes.InvalidOAuthToken,
                 "InvalidOAuthToken",
-                "LinkedIn oturumu doğrulanamadı.");
+                linkedInResult.ErrorMessage ?? "LinkedIn oturumu doğrulanamadı.");
         }
+
+        var linkedInProfile = linkedInResult.Profile;
 
         var existingProvider = await _userAuthProviderRepository.GetByProviderAsync(
             AuthProviderIds.LinkedIn,
@@ -526,58 +528,75 @@ public sealed class AuthService : IAuthService
                 Id = Guid.NewGuid(),
                 UserId = user.Id,
                 CardId = cardId,
-                DisplayName = linkedInProfile.DisplayName ?? user.DisplayName,
-                Email = linkedInProfile.Email ?? user.Email,
-                PhotoUrl = linkedInProfile.PictureUrl ?? user.PhotoUrl,
-                Linkedin = linkedInProfile.ProfileUrl,
                 BackgroundColor = "#1B365D",
                 AccentColor = "#FFFFFF",
                 CreatedAt = now,
                 UpdatedAt = now,
             };
+            ApplyLinkedInCardFields(card, linkedInProfile, user);
 
             await _businessCardRepository.AddAsync(card, cancellationToken);
             return;
         }
 
         var primaryCard = cards.OrderBy(card => card.CreatedAt).First();
-        var updated = false;
-
-        if (string.IsNullOrWhiteSpace(primaryCard.DisplayName)
-            && !string.IsNullOrWhiteSpace(linkedInProfile.DisplayName))
-        {
-            primaryCard.DisplayName = linkedInProfile.DisplayName.Trim();
-            updated = true;
-        }
-
-        if (string.IsNullOrWhiteSpace(primaryCard.Email)
-            && !string.IsNullOrWhiteSpace(linkedInProfile.Email))
-        {
-            primaryCard.Email = linkedInProfile.Email;
-            updated = true;
-        }
-
-        if (string.IsNullOrWhiteSpace(primaryCard.PhotoUrl)
-            && !string.IsNullOrWhiteSpace(linkedInProfile.PictureUrl))
-        {
-            primaryCard.PhotoUrl = linkedInProfile.PictureUrl.Trim();
-            updated = true;
-        }
-
-        if (string.IsNullOrWhiteSpace(primaryCard.Linkedin)
-            && !string.IsNullOrWhiteSpace(linkedInProfile.ProfileUrl))
-        {
-            primaryCard.Linkedin = linkedInProfile.ProfileUrl.Trim();
-            updated = true;
-        }
-
-        if (!updated)
-        {
-            return;
-        }
-
+        ApplyLinkedInCardFields(primaryCard, linkedInProfile, user);
         primaryCard.UpdatedAt = DateTime.UtcNow;
         await _businessCardRepository.UpdateAsync(primaryCard, cancellationToken);
+    }
+
+    private static void ApplyLinkedInCardFields(
+        Card card,
+        LinkedInUserInfo linkedInProfile,
+        User user)
+    {
+        if (!string.IsNullOrWhiteSpace(linkedInProfile.DisplayName))
+        {
+            card.DisplayName = linkedInProfile.DisplayName.Trim();
+        }
+        else if (string.IsNullOrWhiteSpace(card.DisplayName))
+        {
+            card.DisplayName = user.DisplayName;
+        }
+
+        if (!string.IsNullOrWhiteSpace(linkedInProfile.Email))
+        {
+            card.Email = linkedInProfile.Email;
+        }
+        else if (string.IsNullOrWhiteSpace(card.Email))
+        {
+            card.Email = user.Email;
+        }
+
+        if (!string.IsNullOrWhiteSpace(linkedInProfile.PictureUrl))
+        {
+            card.PhotoUrl = linkedInProfile.PictureUrl.Trim();
+        }
+        else if (string.IsNullOrWhiteSpace(card.PhotoUrl))
+        {
+            card.PhotoUrl = user.PhotoUrl;
+        }
+
+        if (!string.IsNullOrWhiteSpace(linkedInProfile.ProfileUrl))
+        {
+            card.Linkedin = linkedInProfile.ProfileUrl.Trim();
+        }
+
+        if (!string.IsNullOrWhiteSpace(linkedInProfile.Company))
+        {
+            card.Company = linkedInProfile.Company.Trim();
+        }
+
+        if (!string.IsNullOrWhiteSpace(linkedInProfile.Title))
+        {
+            card.Title = linkedInProfile.Title.Trim();
+        }
+
+        if (!string.IsNullOrWhiteSpace(linkedInProfile.Headline)
+            && string.IsNullOrWhiteSpace(card.About))
+        {
+            card.About = linkedInProfile.Headline.Trim();
+        }
     }
 
     public async Task<AuthServiceResponse<UserProfileEntity>> GetMeAsync(

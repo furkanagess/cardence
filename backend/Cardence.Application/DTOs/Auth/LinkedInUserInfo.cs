@@ -7,4 +7,7 @@ public sealed class LinkedInUserInfo
     public string? DisplayName { get; init; }
     public string? PictureUrl { get; init; }
     public string? ProfileUrl { get; init; }
+    public string? Headline { get; init; }
+    public string? Title { get; init; }
+    public string? Company { get; init; }
 }
