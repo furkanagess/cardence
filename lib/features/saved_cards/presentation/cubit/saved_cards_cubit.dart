@@ -4,6 +4,7 @@ import '../../../../core/network/auth_api_exception.dart';
 import '../../../event_groups/domain/usecases/get_event_groups.dart';
 import '../../domain/entities/add_saved_card_result.dart';
 import '../../domain/entities/saved_card.dart';
+import '../../domain/entities/saved_cards_wallet_quota.dart';
 import '../../domain/usecases/get_saved_cards.dart';
 import '../../domain/usecases/get_saved_cards_wallet_quota.dart';
 import '../../domain/usecases/save_saved_card.dart';
@@ -68,20 +69,55 @@ class SavedCardsCubit extends Cubit<SavedCardsState> {
     try {
       await _loadQuota();
     } on AuthApiException {
-      // Kota alınamazsa mevcut kota değeri korunur.
-    } catch (_) {}
+      if (isClosed) return;
+      emit(
+        state.copyWith(
+          quota: _fallbackQuota(),
+          isLoadingQuota: false,
+        ),
+      );
+    } catch (_) {
+      if (isClosed) return;
+      emit(
+        state.copyWith(
+          quota: _fallbackQuota(),
+          isLoadingQuota: false,
+        ),
+      );
+    }
+  }
+
+  SavedCardsWalletQuota _fallbackQuota() {
+    return SavedCardsWalletQuota.freeDefault(
+      usedCount: state.cards.length,
+      eventGroupCount: state.eventGroups.length,
+    );
+  }
+
+  void _syncDefaultQuotaCounts() {
+    if (!state.isLoadingQuota) return;
+    emit(
+      state.copyWith(
+        quota: state.quota.withCounts(
+          usedCount: state.cards.length,
+          eventGroupCount: state.eventGroups.length,
+        ),
+      ),
+    );
   }
 
   Future<void> _loadQuota() async {
+    emit(state.copyWith(isLoadingQuota: true));
     final quota = await _getSavedCardsWalletQuota();
     if (isClosed) return;
-    emit(state.copyWith(quota: quota));
+    emit(state.copyWith(quota: quota, isLoadingQuota: false));
   }
 
   Future<void> _loadEventGroups() async {
     final groups = await _getEventGroups();
     if (isClosed) return;
     emit(state.copyWith(eventGroups: groups));
+    _syncDefaultQuotaCounts();
   }
 
   Future<void> _loadCards() async {
@@ -93,6 +129,7 @@ class SavedCardsCubit extends Cubit<SavedCardsState> {
         isLoadingCards: false,
       ),
     );
+    _syncDefaultQuotaCounts();
   }
 
   void clearEffect() {
@@ -164,10 +201,15 @@ class SavedCardsCubit extends Cubit<SavedCardsState> {
   }
 
   Future<void> handleAddCardTap() async {
-    final quota = state.quota ?? await _getSavedCardsWalletQuota();
+    final quota = state.isLoadingQuota
+        ? await _getSavedCardsWalletQuota()
+        : state.quota;
     if (isClosed) return;
-    if (quota != state.quota) {
-      emit(state.copyWith(quota: quota));
+    emit(state.copyWith(quota: quota, isLoadingQuota: false));
+
+    if (!quota.canAddMore) {
+      emit(state.copyWith(effectType: SavedCardsEffectType.openUpgradeSheet));
+      return;
     }
 
     emit(state.copyWith(effectType: SavedCardsEffectType.openAddCard));

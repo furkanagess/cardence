@@ -6,7 +6,14 @@ import '../pages/privacy_policy_page.dart';
 import '../pages/terms_of_use_page.dart';
 
 class RegisterLegalNotice extends StatefulWidget {
-  const RegisterLegalNotice({super.key});
+  const RegisterLegalNotice({
+    super.key,
+    required this.value,
+    required this.onChanged,
+  });
+
+  final bool value;
+  final ValueChanged<bool> onChanged;
 
   @override
   State<RegisterLegalNotice> createState() => _RegisterLegalNoticeState();
@@ -55,32 +62,49 @@ class _RegisterLegalNoticeState extends State<RegisterLegalNotice> {
     final baseStyle = textTheme.labelSmall?.copyWith(
       color: colorScheme.onSurfaceVariant,
       fontWeight: FontWeight.w500,
+      height: 1.35,
     );
     final linkStyle = baseStyle?.copyWith(
       color: colorScheme.primary,
       fontWeight: FontWeight.w700,
     );
 
-    return Text.rich(
-      TextSpan(
-        style: baseStyle,
-        children: [
-          const TextSpan(text: 'Kayıt olarak '),
-          TextSpan(
-            text: context.l10n.kullanmKoullar,
-            style: linkStyle,
-            recognizer: _termsRecognizer,
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(top: 2),
+          child: Checkbox(
+            value: widget.value,
+            onChanged: (checked) => widget.onChanged(checked ?? false),
+            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            visualDensity: VisualDensity.compact,
           ),
-          const TextSpan(text: ' ve '),
-          TextSpan(
-            text: context.l10n.gizlilikPolitikas,
-            style: linkStyle,
-            recognizer: _privacyRecognizer,
+        ),
+        const SizedBox(width: 4),
+        Expanded(
+          child: Text.rich(
+            TextSpan(
+              style: baseStyle,
+              children: [
+                const TextSpan(text: 'Kayıt olarak '),
+                TextSpan(
+                  text: context.l10n.kullanmKoullar,
+                  style: linkStyle,
+                  recognizer: _termsRecognizer,
+                ),
+                const TextSpan(text: ' ve '),
+                TextSpan(
+                  text: context.l10n.gizlilikPolitikas,
+                  style: linkStyle,
+                  recognizer: _privacyRecognizer,
+                ),
+                const TextSpan(text: '\'nı kabul etmiş sayılırsınız.'),
+              ],
+            ),
           ),
-          const TextSpan(text: '\'nı kabul etmiş sayılırsınız.'),
-        ],
-      ),
-      textAlign: TextAlign.center,
+        ),
+      ],
     );
   }
 }

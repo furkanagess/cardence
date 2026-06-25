@@ -8,7 +8,8 @@ import '../../../my_cards/presentation/pages/my_card_edit_page.dart';
 import '../../../settings/presentation/pages/card_visibility_settings_page.dart';
 import '../../../network_graph/domain/usecases/get_network_graph.dart';
 import '../../../network_graph/domain/usecases/get_network_graph_path.dart';
-import '../../../network_graph/presentation/pages/network_graph_page.dart';
+import '../../../network_graph/presentation/helpers/network_graph_launcher.dart';
+import '../../../event_groups/domain/usecases/get_event_groups.dart';
 import '../../../onboarding/domain/entities/onboarding_card_draft.dart';
 import '../../../onboarding/domain/usecases/get_onboarding_draft_cards.dart';
 import '../../../onboarding/presentation/widgets/onboarding_card_preview_frame.dart';
@@ -35,6 +36,7 @@ class ProfilePage extends StatefulWidget {
     required this.getProfileStats,
     required this.getNetworkGraph,
     required this.getNetworkGraphPath,
+    required this.getEventGroups,
     this.onDraftUpdated,
   });
 
@@ -44,6 +46,7 @@ class ProfilePage extends StatefulWidget {
   final GetProfileStats getProfileStats;
   final GetNetworkGraph getNetworkGraph;
   final GetNetworkGraphPath getNetworkGraphPath;
+  final GetEventGroups getEventGroups;
   final ValueChanged<OnboardingCardDraft>? onDraftUpdated;
 
   @override
@@ -182,38 +185,16 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   Future<void> _openNetworkGraph() async {
-    final planCubit = context.read<PlanCubit>();
-    if (planCubit.state.entitlements == null) {
-      await planCubit.refresh();
-    }
-    if (!mounted) return;
-
-    final isPremium = planCubit.state.entitlements?.features.networkGraph ??
-        planCubit.state.entitlements?.isPremiumOrHigher ??
-        false;
-    if (!isPremium) {
-      await WalletPaywallFlow.show(
-        context,
-        cubit: context.read<SavedCardsCubit>(),
-      );
-      if (!mounted) return;
-      await planCubit.refresh();
-      if (!mounted) return;
-      if (planCubit.state.entitlements?.features.networkGraph != true) {
-        return;
-      }
-    }
-
-    final centerCardId =
-        _cards.isEmpty ? null : _cards[_selectedIndex].cardId?.trim();
-    await Navigator.of(context).push(
-      MaterialPageRoute<void>(
-        builder: (context) => NetworkGraphPage(
-          getNetworkGraph: widget.getNetworkGraph,
-          getNetworkGraphPath: widget.getNetworkGraphPath,
-          centerCardId: centerCardId?.isEmpty == true ? null : centerCardId,
-        ),
-      ),
+    await NetworkGraphLauncher.open(
+      context,
+      getNetworkGraph: widget.getNetworkGraph,
+      getNetworkGraphPath: widget.getNetworkGraphPath,
+      getEventGroups: widget.getEventGroups,
+      centerCardId: _cards.isEmpty
+          ? null
+          : _cards[_selectedIndex].cardId?.trim().isEmpty == true
+              ? null
+              : _cards[_selectedIndex].cardId?.trim(),
     );
   }
 
@@ -241,8 +222,8 @@ class _ProfilePageState extends State<ProfilePage> {
             padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
             child: Text(
               _cards.length > 1
-                  ? 'Yatay kaydırarak kartlar arasında geçin; düzenlemek için karta çift dokunun.'
-                  : 'Düzenlemek için karta çift dokunun.',
+                  ? 'Yatay kaydırarak kartlar arasında geçin; düzenlemek için karta dokunun.'
+                  : 'Düzenlemek için karta dokunun.',
               style: textTheme.bodyMedium?.copyWith(
                 color: colorScheme.onSurfaceVariant,
                 height: 1.4,
@@ -412,7 +393,8 @@ class _ProfileCardsCarousel extends StatelessWidget {
                 ),
                 child: OnboardingCardPreviewFrame(
                   draft: cards.first,
-                  onDoubleTap: () => onCardTap(cards.first),
+                  onTap: () => onCardTap(cards.first),
+                  contactFieldsTappable: false,
                   emptyMessage: context.l10n.alanlarDoldukaGrnr,
                   normalizeForDisplay: true,
                   showPremiumBadge: showPremiumBadge,
@@ -462,7 +444,8 @@ class _ProfileCardsCarousel extends StatelessWidget {
                   child: OnboardingCardPreviewFrame(
                     key: ValueKey(card.cardId),
                     draft: card,
-                    onDoubleTap: () => onCardTap(card),
+                    onTap: () => onCardTap(card),
+                    contactFieldsTappable: false,
                     emptyMessage: context.l10n.alanlarDoldukaGrnr,
                     normalizeForDisplay: true,
                     showPremiumBadge: showPremiumBadge,

@@ -208,7 +208,7 @@ class _SavedCardsPageState extends State<SavedCardsPage>
         const topPadding = 4.0;
         const contentBottomInset = 128.0;
         final quota = state.quota;
-        final canAddMore = quota?.canAddMore ?? true;
+        final canAddMore = quota.canAddMore;
         _syncStackFocus(displayCards.length, topPadding: topPadding);
 
         if (_showFlippableView &&
@@ -229,12 +229,10 @@ class _SavedCardsPageState extends State<SavedCardsPage>
                 children: [
                   SafeArea(
                     bottom: false,
-                    child: quota != null
-                        ? SavedCardsWalletStrip(
+                    child: SavedCardsWalletStrip(
                             quota: quota,
                             onUpgradeTap: cubit.requestUpgradeSheet,
-                          )
-                        : const SavedCardsWalletStripShimmer(),
+                          ),
                   ),
                   SavedCardsScreenToolbar(
                     showFlippableView: _showFlippableView,

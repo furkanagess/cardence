@@ -35,7 +35,7 @@ public sealed class PlanPolicyService : IPlanPolicyService
                 AdvancedDesigns = premium,
                 ProfileStats = premium,
                 CsvExport = premium,
-                NetworkGraph = premium,
+                NetworkGraph = true,
                 WalletPass = premium,
                 CrmIntegration = business,
             },

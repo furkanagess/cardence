@@ -1,4 +1,3 @@
-using Cardence.Application.Common;
 using Cardence.Application.DTOs.NetworkGraph;
 using Cardence.Application.Interfaces;
 using Cardence.Domain.Entities;
@@ -12,7 +11,6 @@ public sealed class NetworkGraphService : INetworkGraphService
     private const int AbsoluteMaxNodes = 500;
 
     private readonly ICurrentUserService _currentUser;
-    private readonly IPlanPolicyService _planPolicyService;
     private readonly IBusinessCardRepository _businessCardRepository;
     private readonly ISavedCardRepository _savedCardRepository;
     private readonly IEventGroupRepository _eventGroupRepository;
@@ -20,14 +18,12 @@ public sealed class NetworkGraphService : INetworkGraphService
 
     public NetworkGraphService(
         ICurrentUserService currentUser,
-        IPlanPolicyService planPolicyService,
         IBusinessCardRepository businessCardRepository,
         ISavedCardRepository savedCardRepository,
         IEventGroupRepository eventGroupRepository,
         ICardInteractionRepository cardInteractionRepository)
     {
         _currentUser = currentUser;
-        _planPolicyService = planPolicyService;
         _businessCardRepository = businessCardRepository;
         _savedCardRepository = savedCardRepository;
         _eventGroupRepository = eventGroupRepository;
@@ -38,8 +34,6 @@ public sealed class NetworkGraphService : INetworkGraphService
         NetworkGraphQuery query,
         CancellationToken cancellationToken = default)
     {
-        await EnsureNetworkGraphIncludedAsync(cancellationToken);
-
         return query.Scope switch
         {
             GraphScope.Event => await BuildEventGraphAsync(query, cancellationToken),
@@ -179,17 +173,6 @@ public sealed class NetworkGraphService : INetworkGraphService
             "event",
             query.MaxNodes,
             query.CenterCardId);
-    }
-
-    private async Task EnsureNetworkGraphIncludedAsync(CancellationToken cancellationToken)
-    {
-        var entitlements = await _planPolicyService.GetEntitlementsAsync(cancellationToken);
-        if (!entitlements.Features.NetworkGraph)
-        {
-            throw new ForbiddenException(
-                "Network graph requires a Premium or higher plan.",
-                ErrorCodes.FeatureNotIncluded);
-        }
     }
 
     private static void AddBusinessCardNode(GraphAccumulator graph, Card card, bool isOwnCard)

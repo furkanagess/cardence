@@ -14,6 +14,10 @@ class WalletQuotaModel {
     required this.eventGroupCount,
     required this.maxEventGroups,
     required this.canAddEventGroup,
+    this.canAddMore,
+    this.remaining,
+    this.isNearLimit,
+    this.usageFraction,
   });
 
   final String tier;
@@ -26,6 +30,10 @@ class WalletQuotaModel {
   final int eventGroupCount;
   final int maxEventGroups;
   final bool canAddEventGroup;
+  final bool? canAddMore;
+  final int? remaining;
+  final bool? isNearLimit;
+  final double? usageFraction;
 
   factory WalletQuotaModel.fromJson(Map<String, dynamic> json) {
     return WalletQuotaModel(
@@ -57,7 +65,30 @@ class WalletQuotaModel {
         json['canAddEventGroup'] ?? json['CanAddEventGroup'],
         fallback: true,
       ),
+      canAddMore: _readNullableBool(json['canAddMore'] ?? json['CanAddMore']),
+      remaining: _readNullableInt(json['remaining'] ?? json['Remaining']),
+      isNearLimit: _readNullableBool(json['isNearLimit'] ?? json['IsNearLimit']),
+      usageFraction: _readNullableDouble(
+        json['usageFraction'] ?? json['UsageFraction'],
+      ),
     );
+  }
+
+  static bool? _readNullableBool(dynamic value) {
+    if (value == null) return null;
+    return _readBool(value);
+  }
+
+  static int? _readNullableInt(dynamic value) {
+    if (value == null) return null;
+    return _readInt(value);
+  }
+
+  static double? _readNullableDouble(dynamic value) {
+    if (value is double) return value;
+    if (value is num) return value.toDouble();
+    if (value is String) return double.tryParse(value);
+    return null;
   }
 
   static int _readInt(dynamic value, {int fallback = 0}) {
@@ -80,18 +111,23 @@ class WalletQuotaModel {
 
   SavedCardsWalletQuota toEntity() {
     final normalizedTier = tier.trim().toLowerCase();
-    final isPremium = normalizedTier == WalletPlanTier.premium.name;
+    final isPremium = normalizedTier == WalletPlanTier.premium.name ||
+        normalizedTier == 'business' ||
+        normalizedTier == 'enterprise';
+    final resolvedMaxCards = isPremium
+        ? maxCards
+        : SavedCardsWalletLimits.effectiveFreeMaxCards(maxCards);
     return SavedCardsWalletQuota(
       tier: isPremium ? WalletPlanTier.premium : WalletPlanTier.free,
       usedCount: usedCount,
-      maxCards: maxCards,
+      maxCards: resolvedMaxCards,
       businessCardCount: businessCardCount,
       maxBusinessCards: maxBusinessCards,
       canAddBusinessCard: canAddBusinessCard,
-      canAddManualSavedCard: true,
+      canAddManualSavedCard: canAddManualSavedCard,
       eventGroupCount: eventGroupCount,
       maxEventGroups: maxEventGroups,
-      canAddEventGroup: canAddEventGroup || isPremium,
+      canAddEventGroup: canAddEventGroup,
     );
   }
 }

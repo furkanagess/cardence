@@ -39,9 +39,10 @@ public sealed class PlanPolicyServiceTests
         result.Features.AdsDisabled.Should().BeFalse();
         result.Features.AdvancedDesigns.Should().BeFalse();
         result.Features.CsvExport.Should().BeFalse();
+        result.Features.NetworkGraph.Should().BeTrue();
         result.Features.CrmIntegration.Should().BeFalse();
         result.Limits.MaxBusinessCards.Should().Be(WalletConstants.FreeMaxBusinessCards);
-        result.Limits.MaxSavedCards.Should().BeNull();
+        result.Limits.MaxSavedCards.Should().Be(WalletConstants.FreeMaxCards);
         result.Limits.MaxEventGroups.Should().Be(WalletConstants.FreeMaxEventGroups);
         result.Limits.MaxTeamSeats.Should().Be(1);
     }

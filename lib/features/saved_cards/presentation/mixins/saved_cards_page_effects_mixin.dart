@@ -107,7 +107,6 @@ mixin SavedCardsPageEffectsMixin<T extends StatefulWidget> on State<T> {
   }) async {
     final cubit = context.read<SavedCardsCubit>();
     final quota = cubit.state.quota;
-    if (quota == null) return;
 
     final method = await AddSavedCardSheet.show(
       context,

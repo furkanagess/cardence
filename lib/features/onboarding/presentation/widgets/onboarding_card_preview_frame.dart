@@ -18,6 +18,7 @@ class OnboardingCardPreviewFrame extends StatelessWidget {
     this.maxWidth = 420,
     this.normalizeForDisplay = false,
     this.showPremiumBadge = false,
+    this.contactFieldsTappable = true,
   });
 
   final OnboardingCardDraft draft;
@@ -32,6 +33,9 @@ class OnboardingCardPreviewFrame extends StatelessWidget {
 
   /// Premium kullanıcının kendi kartında yıldız rozeti.
   final bool showPremiumBadge;
+
+  /// false: ön yüzdeki e-posta/telefon vb. iletişim alanları tıklanamaz.
+  final bool contactFieldsTappable;
 
   static double heightForWidth(double width) {
     return width / FlippablePersonCard.cardAspectRatio;
@@ -55,6 +59,7 @@ class OnboardingCardPreviewFrame extends StatelessWidget {
           onDoubleTap: onDoubleTap,
           emptyMessage: emptyMessage,
           showPremiumBadge: showPremiumBadge,
+          contactFieldsTappable: contactFieldsTappable,
         ),
       ),
     );

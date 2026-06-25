@@ -16,6 +16,40 @@ class SavedCardsWalletQuota {
     this.canAddEventGroup = true,
   });
 
+  /// Servis yanıtı gelene kadar ücretsiz plan varsayılanı (15 kart).
+  factory SavedCardsWalletQuota.freeDefault({
+    int usedCount = 0,
+    int eventGroupCount = 0,
+    int businessCardCount = 0,
+  }) {
+    return SavedCardsWalletQuota(
+      tier: WalletPlanTier.free,
+      usedCount: usedCount,
+      maxCards: SavedCardsWalletLimits.freeMaxCards,
+      businessCardCount: businessCardCount,
+      eventGroupCount: eventGroupCount,
+    );
+  }
+
+  SavedCardsWalletQuota withCounts({
+    int? usedCount,
+    int? eventGroupCount,
+    int? businessCardCount,
+  }) {
+    return SavedCardsWalletQuota(
+      tier: tier,
+      usedCount: usedCount ?? this.usedCount,
+      maxCards: maxCards,
+      businessCardCount: businessCardCount ?? this.businessCardCount,
+      maxBusinessCards: maxBusinessCards,
+      canAddBusinessCard: canAddBusinessCard,
+      canAddManualSavedCard: canAddManualSavedCard,
+      eventGroupCount: eventGroupCount ?? this.eventGroupCount,
+      maxEventGroups: maxEventGroups,
+      canAddEventGroup: canAddEventGroup,
+    );
+  }
+
   final WalletPlanTier tier;
   final int usedCount;
   final int maxCards;
@@ -27,14 +61,13 @@ class SavedCardsWalletQuota {
   final int maxEventGroups;
   final bool canAddEventGroup;
 
-  bool get hasUnlimitedWallet => true;
-
-  bool get hasUnlimitedEventGroups => isPremium;
+  bool get hasUnlimitedWallet => isPremium;
 
   int get remaining =>
       hasUnlimitedWallet ? 0 : (maxCards - usedCount).clamp(0, maxCards);
 
-  bool get canAddMore => true;
+  bool get canAddMore =>
+      hasUnlimitedWallet || (maxCards > 0 && usedCount < maxCards);
 
   bool get isNearLimit {
     if (hasUnlimitedWallet || maxCards <= 0) return false;
@@ -46,6 +79,8 @@ class SavedCardsWalletQuota {
       : (usedCount / maxCards).clamp(0.0, 1.0);
 
   bool get isPremium => tier == WalletPlanTier.premium;
+
+  bool get hasUnlimitedEventGroups => isPremium;
 
   String get walletCapacityLabel =>
       hasUnlimitedWallet ? 'Sınırsız' : '$maxCards';

@@ -8,6 +8,8 @@ import '../../../saved_cards/presentation/cubit/saved_cards_cubit.dart';
 import '../../../saved_cards/presentation/cubit/saved_cards_state.dart';
 import '../../../saved_cards/presentation/wallet_paywall_flow.dart';
 import '../../../subscriptions/domain/usecases/restore_wallet_purchases.dart';
+import '../../../network_graph/domain/usecases/get_network_graph.dart';
+import '../../../network_graph/domain/usecases/get_network_graph_path.dart';
 import '../../domain/entities/event_group.dart';
 import '../helpers/event_group_meta_formatter.dart';
 import '../widgets/create_event_group_sheet.dart';
@@ -37,6 +39,8 @@ class EventGroupsPage extends StatefulWidget {
     required this.saveSavedCard,
     required this.deleteSavedCard,
     required this.restoreWalletPurchases,
+    required this.getNetworkGraph,
+    required this.getNetworkGraphPath,
   });
 
   final GetEventGroups getEventGroups;
@@ -47,6 +51,8 @@ class EventGroupsPage extends StatefulWidget {
   final SaveSavedCard saveSavedCard;
   final DeleteSavedCard deleteSavedCard;
   final RestoreWalletPurchases restoreWalletPurchases;
+  final GetNetworkGraph getNetworkGraph;
+  final GetNetworkGraphPath getNetworkGraphPath;
 
   @override
   State<EventGroupsPage> createState() => _EventGroupsPageState();
@@ -95,7 +101,7 @@ class _EventGroupsPageState extends State<EventGroupsPage> {
       final planCubit = context.read<PlanCubit>();
       final planAllowsGroup = _canAddGroupFromPlan(planCubit.state);
       final quota = savedCardsCubit.state.quota;
-      if (!planAllowsGroup || (quota != null && !quota.canAddEventGroup)) {
+      if (!planAllowsGroup || !quota.canAddEventGroup) {
         await WalletPaywallFlow.show(
           context,
           cubit: savedCardsCubit,
@@ -185,7 +191,7 @@ class _EventGroupsPageState extends State<EventGroupsPage> {
           builder: (context, savedState) {
             final savedCards = savedState.cards;
             final canAddGroup = _canAddGroupFromPlan(planState) &&
-                (savedState.quota?.canAddEventGroup ?? true);
+                savedState.quota.canAddEventGroup;
 
             return Stack(
               children: [
@@ -333,6 +339,8 @@ class _EventGroupsPageState extends State<EventGroupsPage> {
               getSavedCards: widget.getSavedCards,
               saveSavedCard: widget.saveSavedCard,
               deleteSavedCard: widget.deleteSavedCard,
+              getNetworkGraph: widget.getNetworkGraph,
+              getNetworkGraphPath: widget.getNetworkGraphPath,
             ),
           ),
         )

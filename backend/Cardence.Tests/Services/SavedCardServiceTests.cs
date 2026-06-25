@@ -56,6 +56,10 @@ public sealed class SavedCardServiceTests
         var quota = await _service.GetWalletQuotaAsync();
 
         quota.Tier.Should().Be(WalletConstants.FreeTier);
+        quota.UsedCount.Should().Be(3);
+        quota.MaxCards.Should().Be(WalletConstants.FreeMaxCards);
+        quota.CanAddMore.Should().BeTrue();
+        quota.Remaining.Should().Be(12);
         quota.BusinessCardCount.Should().Be(1);
         quota.MaxBusinessCards.Should().Be(WalletConstants.FreeMaxBusinessCards);
         quota.CanAddBusinessCard.Should().BeTrue();
@@ -82,6 +86,8 @@ public sealed class SavedCardServiceTests
         var quota = await _service.GetWalletQuotaAsync();
 
         quota.Tier.Should().Be(WalletConstants.PremiumTier);
+        quota.MaxCards.Should().Be(WalletConstants.PremiumMaxCards);
+        quota.CanAddMore.Should().BeTrue();
         quota.MaxBusinessCards.Should().Be(WalletConstants.PremiumMaxBusinessCards);
         quota.CanAddBusinessCard.Should().BeTrue();
         quota.MaxEventGroups.Should().Be(0);

@@ -14,9 +14,10 @@ public static class WalletConstants
     public const int PremiumMaxCards = 0;
 
     /// <summary>
-    /// Tüm kullanıcılar için sınırsız cüzdan kaydı.
+    /// Premium ve üzeri planlarda cüzdan kayıtları sınırsızdır.
     /// </summary>
-    public static bool HasUnlimitedWalletCards(string tier) => true;
+    public static bool HasUnlimitedWalletCards(string tier) =>
+        IsPremiumOrHigher(tier);
 
     public const int FreeMaxBusinessCards = 2;
     public const int PremiumMaxBusinessCards = 50;

@@ -13,6 +13,10 @@ import '../../../saved_cards/domain/usecases/delete_saved_card.dart';
 import '../../../saved_cards/domain/usecases/get_saved_cards.dart';
 import '../../../saved_cards/domain/usecases/save_saved_card.dart';
 import '../../../saved_cards/presentation/pages/saved_card_detail_page.dart';
+import '../../../network_graph/domain/entities/graph_scope.dart';
+import '../../../network_graph/domain/usecases/get_network_graph.dart';
+import '../../../network_graph/domain/usecases/get_network_graph_path.dart';
+import '../../../network_graph/presentation/helpers/network_graph_launcher.dart';
 import '../../domain/entities/event_group.dart';
 import '../../domain/usecases/get_event_groups.dart';
 import '../../domain/usecases/delete_event_group.dart';
@@ -31,6 +35,8 @@ class EventGroupDetailPage extends StatefulWidget {
     required this.getSavedCards,
     required this.saveSavedCard,
     required this.deleteSavedCard,
+    this.getNetworkGraph,
+    this.getNetworkGraphPath,
   });
 
   final EventGroup group;
@@ -40,6 +46,8 @@ class EventGroupDetailPage extends StatefulWidget {
   final GetSavedCards getSavedCards;
   final SaveSavedCard saveSavedCard;
   final DeleteSavedCard deleteSavedCard;
+  final GetNetworkGraph? getNetworkGraph;
+  final GetNetworkGraphPath? getNetworkGraphPath;
 
   @override
   State<EventGroupDetailPage> createState() => _EventGroupDetailPageState();
@@ -132,6 +140,22 @@ class _EventGroupDetailPageState extends State<EventGroupDetailPage> {
         content: Text('$addedCount kart gruba eklendi'),
         behavior: SnackBarBehavior.floating,
       ),
+    );
+  }
+
+  Future<void> _openNetworkGraph() async {
+    final getNetworkGraph = widget.getNetworkGraph;
+    final getNetworkGraphPath = widget.getNetworkGraphPath;
+    if (getNetworkGraph == null || getNetworkGraphPath == null) return;
+
+    await NetworkGraphLauncher.open(
+      context,
+      getNetworkGraph: getNetworkGraph,
+      getNetworkGraphPath: getNetworkGraphPath,
+      getEventGroups: widget.getEventGroups,
+      initialScope: GraphScope.event,
+      eventGroupId: widget.group.id,
+      eventGroupName: widget.group.name,
     );
   }
 
@@ -381,6 +405,13 @@ class _EventGroupDetailPageState extends State<EventGroupDetailPage> {
       appBar: CardenceAppBar(
         title: widget.group.name,
         actions: [
+          if (widget.getNetworkGraph != null &&
+              widget.getNetworkGraphPath != null)
+            CardenceAppBar.iconAction(
+              icon: Icons.hub_outlined,
+              tooltip: 'Etkinlik ağını görüntüle',
+              onPressed: _openNetworkGraph,
+            ),
           if (!_loading && _availableToAdd.isNotEmpty)
             CardenceAppBar.iconAction(
               icon: Icons.person_add_alt_1_rounded,

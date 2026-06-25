@@ -6,6 +6,9 @@ class PlanLimits {
     this.maxTeamSeats = 1,
   });
 
+  /// Ücretsiz planda kayıtlı kart üst sınırı.
+  static const int defaultFreeSavedCardsLimit = 15;
+
   final int? maxBusinessCards;
   final int? maxSavedCards;
   final int? maxEventGroups;

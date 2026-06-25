@@ -4,6 +4,8 @@ import '../../../event_groups/domain/entities/event_group.dart';
 import '../../domain/entities/add_saved_card_result.dart';
 import '../../domain/entities/saved_card.dart';
 import '../../domain/entities/saved_cards_wallet_quota.dart';
+import '../../domain/entities/wallet_plan_tier.dart';
+import '../../domain/saved_cards_wallet_limits.dart';
 import 'saved_cards_filter_models.dart';
 
 enum SavedCardsEffectType {
@@ -15,10 +17,17 @@ enum SavedCardsEffectType {
 }
 
 class SavedCardsState extends Equatable {
+  static const SavedCardsWalletQuota _initialQuota = SavedCardsWalletQuota(
+    tier: WalletPlanTier.free,
+    usedCount: 0,
+    maxCards: SavedCardsWalletLimits.freeMaxCards,
+  );
+
   const SavedCardsState({
     this.cards = const [],
     this.eventGroups = const [],
-    this.quota,
+    this.quota = _initialQuota,
+    this.isLoadingQuota = true,
     this.isLoadingCards = true,
     this.filter = const SavedCardsFilterSelection(
       eventFilter: SavedCardsFilterSelection.allEventsValue,
@@ -33,7 +42,8 @@ class SavedCardsState extends Equatable {
 
   final List<SavedCard> cards;
   final List<EventGroup> eventGroups;
-  final SavedCardsWalletQuota? quota;
+  final SavedCardsWalletQuota quota;
+  final bool isLoadingQuota;
   final bool isLoadingCards;
   final SavedCardsFilterSelection filter;
   final String searchQuery;
@@ -49,6 +59,7 @@ class SavedCardsState extends Equatable {
     List<SavedCard>? cards,
     List<EventGroup>? eventGroups,
     SavedCardsWalletQuota? quota,
+    bool? isLoadingQuota,
     bool? isLoadingCards,
     SavedCardsFilterSelection? filter,
     String? searchQuery,
@@ -62,6 +73,7 @@ class SavedCardsState extends Equatable {
       cards: cards ?? this.cards,
       eventGroups: eventGroups ?? this.eventGroups,
       quota: quota ?? this.quota,
+      isLoadingQuota: isLoadingQuota ?? this.isLoadingQuota,
       isLoadingCards: isLoadingCards ?? this.isLoadingCards,
       filter: filter ?? this.filter,
       searchQuery: searchQuery ?? this.searchQuery,
@@ -80,6 +92,7 @@ class SavedCardsState extends Equatable {
         cards,
         eventGroups,
         quota,
+        isLoadingQuota,
         isLoadingCards,
         filter,
         searchQuery,

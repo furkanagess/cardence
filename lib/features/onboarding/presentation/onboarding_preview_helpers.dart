@@ -19,6 +19,7 @@ class OnboardingPreviewHelpers {
     VoidCallback? onTap,
     VoidCallback? onDoubleTap,
     String? emptyMessage,
+    bool contactFieldsTappable = true,
   }) {
     final name = draft.displayName?.trim();
     return FlippablePersonCard(
@@ -42,6 +43,7 @@ class OnboardingPreviewHelpers {
       contactWebsite: draft.website,
       contactLinkedin: draft.linkedin,
       visibleContactFields: CardVisibilityHelper.visibleFrontContactKeys(draft),
+      contactFieldsTappable: contactFieldsTappable,
     );
   }
 }

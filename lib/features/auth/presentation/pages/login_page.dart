@@ -27,7 +27,6 @@ import '../widgets/login_phone_form.dart';
 import '../oauth/linkedin_auth_flow.dart';
 import '../widgets/login_social_section.dart';
 import '../widgets/register_form.dart';
-import '../widgets/register_legal_notice.dart';
 import 'forgot_password_page.dart';
 
 class LoginPage extends StatelessWidget {
@@ -315,12 +314,6 @@ class _RegisterScreenContent extends StatelessWidget {
             ),
           ),
         ),
-        if (!keyboardVisible) ...[
-          const Padding(
-            padding: EdgeInsets.only(top: 6),
-            child: RegisterLegalNotice(),
-          ),
-        ],
       ],
     );
   }

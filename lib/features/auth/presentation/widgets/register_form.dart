@@ -10,6 +10,7 @@ import '../../../onboarding/presentation/onboarding_name_helper.dart';
 import '../../../onboarding/presentation/onboarding_validation.dart';
 import '../../../onboarding/presentation/widgets/onboarding_step_shell.dart';
 import 'auth_password_field.dart';
+import 'register_legal_notice.dart';
 
 class RegisterForm extends StatefulWidget {
   const RegisterForm({
@@ -45,6 +46,7 @@ class _RegisterFormState extends State<RegisterForm> {
   String? _emailError;
   String? _phoneError;
   String? _passwordError;
+  bool _termsAccepted = false;
 
   @override
   void initState() {
@@ -86,6 +88,8 @@ class _RegisterFormState extends State<RegisterForm> {
   }
 
   void _submit() {
+    if (!_termsAccepted) return;
+
     final firstName = _firstNameController.text.trim();
     final lastName = _lastNameController.text.trim();
     final displayName = OnboardingNameHelper.combine(firstName, lastName);
@@ -223,12 +227,17 @@ class _RegisterFormState extends State<RegisterForm> {
             if (_passwordError != null) setState(() => _passwordError = null);
           },
         ),
-        const SizedBox(height: 18),
+        const SizedBox(height: 14),
+        RegisterLegalNotice(
+          value: _termsAccepted,
+          onChanged: (accepted) => setState(() => _termsAccepted = accepted),
+        ),
+        const SizedBox(height: 14),
         CustomButton(
           label: context.l10n.kaytOl,
           height: 48,
           isLoading: widget.isLoading,
-          onPressed: _submit,
+          onPressed: _termsAccepted ? _submit : null,
         ),
       ],
     );

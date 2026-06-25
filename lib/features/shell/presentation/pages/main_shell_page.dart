@@ -213,6 +213,8 @@ class _MainShellPageState extends State<MainShellPage> {
                 saveSavedCard: widget.saveSavedCard,
                 deleteSavedCard: widget.deleteSavedCard,
                 restoreWalletPurchases: widget.restoreWalletPurchases,
+                getNetworkGraph: widget.getNetworkGraph,
+                getNetworkGraphPath: widget.getNetworkGraphPath,
               ),
               ProfilePage(
                 draft: _myCardDraft,
@@ -221,6 +223,7 @@ class _MainShellPageState extends State<MainShellPage> {
                 getProfileStats: widget.getProfileStats,
                 getNetworkGraph: widget.getNetworkGraph,
                 getNetworkGraphPath: widget.getNetworkGraphPath,
+                getEventGroups: widget.getEventGroups,
                 onDraftUpdated: (updated) =>
                     setState(() => _myCardDraft = updated),
               ),
@@ -524,7 +527,7 @@ class _PostOnboardingPaywallGateState
     _handled = true;
 
     final cubit = context.read<SavedCardsCubit>();
-    if (cubit.state.quota?.isPremium == true) return;
+    if (cubit.state.quota.isPremium) return;
 
     try {
       await WalletPaywallFlow.show(context, cubit: cubit);

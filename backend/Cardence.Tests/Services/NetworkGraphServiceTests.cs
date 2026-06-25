@@ -1,10 +1,8 @@
 using Cardence.Application.DTOs.NetworkGraph;
-using Cardence.Application.DTOs.Plans;
 using Cardence.Application.Interfaces;
 using Cardence.Application.Services;
 using Cardence.Domain.Constants;
 using Cardence.Domain.Entities;
-using Cardence.Domain.Exceptions;
 using Cardence.Domain.Graph;
 using FluentAssertions;
 using NSubstitute;
@@ -15,7 +13,6 @@ namespace Cardence.Tests.Services;
 public sealed class NetworkGraphServiceTests
 {
     private readonly ICurrentUserService _currentUser = Substitute.For<ICurrentUserService>();
-    private readonly IPlanPolicyService _planPolicyService = Substitute.For<IPlanPolicyService>();
     private readonly IBusinessCardRepository _businessCardRepository =
         Substitute.For<IBusinessCardRepository>();
     private readonly ISavedCardRepository _savedCardRepository =
@@ -32,23 +29,10 @@ public sealed class NetworkGraphServiceTests
         _currentUser.GetRequiredUserId().Returns(_userId);
         _service = new NetworkGraphService(
             _currentUser,
-            _planPolicyService,
             _businessCardRepository,
             _savedCardRepository,
             _eventGroupRepository,
             _cardInteractionRepository);
-    }
-
-    [Fact]
-    public async Task GetGraphAsync_ThrowsForbidden_WhenNetworkGraphNotIncluded()
-    {
-        _planPolicyService.GetEntitlementsAsync(Arg.Any<CancellationToken>())
-            .Returns(Entitlements(networkGraph: false));
-
-        var act = () => _service.GetGraphAsync(new NetworkGraphQuery());
-
-        var exception = await act.Should().ThrowAsync<ForbiddenException>();
-        exception.Which.Code.Should().Be("FEATURE_NOT_INCLUDED");
     }
 
     [Fact]
@@ -66,8 +50,6 @@ public sealed class NetworkGraphServiceTests
         };
         savedCard.LinkedEventGroupIds = [eventGroup.Id.ToString()];
 
-        _planPolicyService.GetEntitlementsAsync(Arg.Any<CancellationToken>())
-            .Returns(Entitlements(networkGraph: true));
         _businessCardRepository.GetByUserIdAsync(_userId, Arg.Any<CancellationToken>())
             .Returns([ownCard]);
         _savedCardRepository.GetByUserIdAsync(_userId, Arg.Any<CancellationToken>())
@@ -111,8 +93,6 @@ public sealed class NetworkGraphServiceTests
         var ownCard = OwnCard("111111", "Acme");
         var savedCard = SavedCard("222222", "Acme");
 
-        _planPolicyService.GetEntitlementsAsync(Arg.Any<CancellationToken>())
-            .Returns(Entitlements(networkGraph: true));
         _businessCardRepository.GetByUserIdAsync(_userId, Arg.Any<CancellationToken>())
             .Returns([ownCard]);
         _savedCardRepository.GetByUserIdAsync(_userId, Arg.Any<CancellationToken>())
@@ -150,8 +130,6 @@ public sealed class NetworkGraphServiceTests
         var first = SavedCard("333333", "Acme");
         var second = SavedCard("444444", "Acme");
 
-        _planPolicyService.GetEntitlementsAsync(Arg.Any<CancellationToken>())
-            .Returns(Entitlements(networkGraph: true));
         _eventGroupRepository.GetByUserAndIdAsync(
                 _userId,
                 eventGroup.Id,
@@ -175,17 +153,6 @@ public sealed class NetworkGraphServiceTests
         graph.Edges.Count(edge => edge.Type == "met_at_event").Should().Be(2);
         graph.Edges.Should().Contain(edge => edge.Type == "same_company");
     }
-
-    private static PlanEntitlementsDto Entitlements(bool networkGraph) =>
-        new()
-        {
-            Tier = networkGraph ? WalletConstants.PremiumTier : WalletConstants.FreeTier,
-            Features = new PlanFeaturesDto
-            {
-                NetworkGraph = networkGraph,
-            },
-            Limits = new PlanLimitsDto(),
-        };
 
     private Card OwnCard(string cardId, string company) =>
         new()

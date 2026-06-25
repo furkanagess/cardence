@@ -30,10 +30,11 @@ class PlanEntitlementsModel {
   }
 
   PlanEntitlements toEntity() {
+    final resolvedTier = PlanTier.fromName(tier);
     return PlanEntitlements(
-      tier: PlanTier.fromName(tier),
+      tier: resolvedTier,
       features: features.toEntity(),
-      limits: limits.toEntity(),
+      limits: limits.toEntity(resolvedTier),
     );
   }
 }
@@ -112,10 +113,13 @@ class PlanLimitsModel {
     );
   }
 
-  PlanLimits toEntity() {
+  PlanLimits toEntity(PlanTier tier) {
+    final isFree = tier == PlanTier.free;
     return PlanLimits(
       maxBusinessCards: maxBusinessCards,
-      maxSavedCards: maxSavedCards,
+      maxSavedCards: isFree
+          ? (maxSavedCards ?? PlanLimits.defaultFreeSavedCardsLimit)
+          : maxSavedCards,
       maxEventGroups: maxEventGroups,
       maxTeamSeats: maxTeamSeats,
     );
