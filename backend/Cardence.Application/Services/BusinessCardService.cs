@@ -223,7 +223,5 @@ public sealed class BusinessCardService : IBusinessCardService
     }
 
     private static int GetMaxBusinessCards(string tier) =>
-        string.Equals(tier, WalletConstants.PremiumTier, StringComparison.OrdinalIgnoreCase)
-            ? WalletConstants.PremiumMaxBusinessCards
-            : WalletConstants.FreeMaxBusinessCards;
+        WalletConstants.PremiumMaxBusinessCards;
 }

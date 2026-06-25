@@ -17,7 +17,6 @@ enum SavedCardsEffectType {
 class SavedCardsState extends Equatable {
   const SavedCardsState({
     this.cards = const [],
-    this.dummyCardsOrder = const [],
     this.eventGroups = const [],
     this.quota,
     this.isLoadingCards = true,
@@ -27,22 +26,17 @@ class SavedCardsState extends Equatable {
       nameSort: SavedCardsNameSort.asc,
     ),
     this.searchQuery = '',
-    this.draggingCardIndex,
-    this.hoverTargetIndex,
     this.effectType = SavedCardsEffectType.none,
     this.snackbarMessage,
     this.lastAddCardResult,
   });
 
   final List<SavedCard> cards;
-  final List<SavedCard> dummyCardsOrder;
   final List<EventGroup> eventGroups;
   final SavedCardsWalletQuota? quota;
   final bool isLoadingCards;
   final SavedCardsFilterSelection filter;
   final String searchQuery;
-  final int? draggingCardIndex;
-  final int? hoverTargetIndex;
   final SavedCardsEffectType effectType;
   final String? snackbarMessage;
   final AddSavedCardResult? lastAddCardResult;
@@ -53,16 +47,11 @@ class SavedCardsState extends Equatable {
 
   SavedCardsState copyWith({
     List<SavedCard>? cards,
-    List<SavedCard>? dummyCardsOrder,
     List<EventGroup>? eventGroups,
     SavedCardsWalletQuota? quota,
     bool? isLoadingCards,
     SavedCardsFilterSelection? filter,
     String? searchQuery,
-    int? draggingCardIndex,
-    int? hoverTargetIndex,
-    bool clearDraggingCardIndex = false,
-    bool clearHoverTargetIndex = false,
     SavedCardsEffectType? effectType,
     String? snackbarMessage,
     AddSavedCardResult? lastAddCardResult,
@@ -71,18 +60,11 @@ class SavedCardsState extends Equatable {
   }) {
     return SavedCardsState(
       cards: cards ?? this.cards,
-      dummyCardsOrder: dummyCardsOrder ?? this.dummyCardsOrder,
       eventGroups: eventGroups ?? this.eventGroups,
       quota: quota ?? this.quota,
       isLoadingCards: isLoadingCards ?? this.isLoadingCards,
       filter: filter ?? this.filter,
       searchQuery: searchQuery ?? this.searchQuery,
-      draggingCardIndex: clearDraggingCardIndex
-          ? null
-          : (draggingCardIndex ?? this.draggingCardIndex),
-      hoverTargetIndex: clearHoverTargetIndex
-          ? null
-          : (hoverTargetIndex ?? this.hoverTargetIndex),
       effectType: clearEffect
           ? SavedCardsEffectType.none
           : (effectType ?? this.effectType),
@@ -96,14 +78,11 @@ class SavedCardsState extends Equatable {
   @override
   List<Object?> get props => [
         cards,
-        dummyCardsOrder,
         eventGroups,
         quota,
         isLoadingCards,
         filter,
         searchQuery,
-        draggingCardIndex,
-        hoverTargetIndex,
         effectType,
         snackbarMessage,
         lastAddCardResult,

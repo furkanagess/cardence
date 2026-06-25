@@ -13,13 +13,11 @@ class SavedCardsWalletStrip extends StatelessWidget {
   const SavedCardsWalletStrip({
     super.key,
     required this.quota,
-    required this.isDemoMode,
     this.inAppBar = false,
     this.onUpgradeTap,
   });
 
   final SavedCardsWalletQuota quota;
-  final bool isDemoMode;
   final bool inAppBar;
   final VoidCallback? onUpgradeTap;
 
@@ -38,7 +36,6 @@ class SavedCardsWalletStrip extends StatelessWidget {
         onTap: () => WalletQuotaDetailSheet.show(
           context,
           quota: quota,
-          isDemoMode: isDemoMode,
           onUpgradeTap: onUpgradeTap,
         ),
         borderRadius: BorderRadius.circular(16),
@@ -56,7 +53,7 @@ class SavedCardsWalletStrip extends StatelessWidget {
                 children: [
                   Expanded(
                     child: Text(
-                      _stripPrimaryLabel(context.l10n, quota, isDemoMode),
+                      _stripPrimaryLabel(context.l10n, quota),
                       style: textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.w700,
                         letterSpacing: -0.2,
@@ -68,7 +65,7 @@ class SavedCardsWalletStrip extends StatelessWidget {
                       ),
                     ),
                   ),
-                  if (!quota.hasUnlimitedWallet && !isDemoMode)
+                  if (!quota.hasUnlimitedWallet)
                     Text(
                       '${quota.usedCount}/${quota.maxCards}',
                       style: textTheme.labelLarge?.copyWith(
@@ -105,11 +102,7 @@ class SavedCardsWalletStrip extends StatelessWidget {
   static String _stripPrimaryLabel(
     AppLocalizations l10n,
     SavedCardsWalletQuota quota,
-    bool isDemoMode,
   ) {
-    if (isDemoMode) {
-      return '${quota.maxCards} kart hakkınız var';
-    }
     if (quota.isPremium) {
       return l10n.snrszKartSaklama;
     }

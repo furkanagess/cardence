@@ -88,8 +88,7 @@ class WalletQuotaModel {
       businessCardCount: businessCardCount,
       maxBusinessCards: maxBusinessCards,
       canAddBusinessCard: canAddBusinessCard,
-      canAddManualSavedCard: canAddManualSavedCard ||
-          isPremium,
+      canAddManualSavedCard: true,
       eventGroupCount: eventGroupCount,
       maxEventGroups: maxEventGroups,
       canAddEventGroup: canAddEventGroup || isPremium,

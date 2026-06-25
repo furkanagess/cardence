@@ -13,7 +13,6 @@ import '../../../saved_cards/domain/usecases/delete_saved_card.dart';
 import '../../../saved_cards/domain/usecases/get_saved_cards.dart';
 import '../../../saved_cards/domain/usecases/save_saved_card.dart';
 import '../../../saved_cards/presentation/pages/saved_card_detail_page.dart';
-import '../../../saved_cards/presentation/saved_cards_catalog.dart';
 import '../../domain/entities/event_group.dart';
 import '../../domain/usecases/get_event_groups.dart';
 import '../../domain/usecases/delete_event_group.dart';
@@ -61,7 +60,7 @@ class _EventGroupDetailPageState extends State<EventGroupDetailPage> {
     setState(() => _loading = true);
     final cards = await widget.getSavedCards();
     if (!mounted) return;
-    final allCards = SavedCardsCatalog.displayCards(cards);
+    final allCards = cards;
     setState(() {
       _linkedCards = allCards
           .where((c) => c.linkedEventGroupIds.contains(widget.group.id))
@@ -116,9 +115,7 @@ class _EventGroupDetailPageState extends State<EventGroupDetailPage> {
     );
     if (!mounted || selectedIds == null || selectedIds.isEmpty) return;
 
-    final allCards = SavedCardsCatalog.displayCards(
-      await widget.getSavedCards(),
-    );
+    final allCards = await widget.getSavedCards();
     await widget.linkSavedCardsToEventGroup(
       groupId: widget.group.id,
       allCards: allCards,

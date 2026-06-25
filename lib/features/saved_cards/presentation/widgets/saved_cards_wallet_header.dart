@@ -11,12 +11,10 @@ class SavedCardsWalletHeader extends StatelessWidget {
   const SavedCardsWalletHeader({
     super.key,
     required this.quota,
-    required this.isDemoMode,
     required this.onUpgradeTap,
   });
 
   final SavedCardsWalletQuota quota;
-  final bool isDemoMode;
   final VoidCallback? onUpgradeTap;
 
   @override
@@ -76,16 +74,7 @@ class SavedCardsWalletHeader extends StatelessWidget {
                   color: progressColor,
                 ),
               ),
-              if (isDemoMode) ...[
-                const SizedBox(height: 10),
-                Text(
-                  context.l10n.rnekKartlarGsteriliyorlkKartnz,
-                  style: textTheme.bodySmall?.copyWith(
-                    color: colorScheme.onSurfaceVariant,
-                    height: 1.35,
-                  ),
-                ),
-              ] else if (atLimit && !quota.isPremium) ...[
+              if (atLimit && !quota.isPremium) ...[
                 const SizedBox(height: 10),
                 Text(
                   'Ücretsiz planda en fazla ${SavedCardsWalletLimits.freeMaxCards} kart saklayabilirsiniz.',

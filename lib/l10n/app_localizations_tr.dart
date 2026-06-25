@@ -229,6 +229,9 @@ class AppLocalizationsTr extends AppLocalizations {
   String get devam => 'Devam';
 
   @override
+  String get dil => 'Dil';
+
+  @override
   String get devopsEngineer => 'DevOps Engineer';
 
   @override
@@ -468,6 +471,9 @@ class AppLocalizationsTr extends AppLocalizations {
   @override
   String get iOrtaklklarVeGvenlikBildirimleri =>
       'İş ortaklıkları ve güvenlik bildirimleri için gereklidir.';
+
+  @override
+  String get ingilizce => 'İngilizce';
 
   @override
   String get ifremiUnuttum => 'Şifremi unuttum';
@@ -1236,6 +1242,9 @@ class AppLocalizationsTr extends AppLocalizations {
   String get tarihSein => 'Tarih seçin';
 
   @override
+  String get turkce => 'Türkçe';
+
+  @override
   String get tasarm => 'Tasarım';
 
   @override
@@ -1274,6 +1283,9 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get uygula => 'Uygula';
+
+  @override
+  String get uygulamaDiliniSein => 'Uygulama dilini seçin';
 
   @override
   String get uygulamaTemasnSein => 'Uygulama temasını seçin';

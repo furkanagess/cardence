@@ -229,6 +229,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get devam => 'Continue';
 
   @override
+  String get dil => 'Language';
+
+  @override
   String get devopsEngineer => 'DevOps Engineer';
 
   @override
@@ -468,6 +471,9 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get iOrtaklklarVeGvenlikBildirimleri =>
       'İş ortaklıkları ve güvenlik bildirimleri için gereklidir.';
+
+  @override
+  String get ingilizce => 'English';
 
   @override
   String get ifremiUnuttum => 'Passwordmi unuttum';
@@ -1236,6 +1242,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get tarihSein => 'Tarih select';
 
   @override
+  String get turkce => 'Turkish';
+
+  @override
   String get tasarm => 'Tasarım';
 
   @override
@@ -1274,6 +1283,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get uygula => 'Uygula';
+
+  @override
+  String get uygulamaDiliniSein => 'Choose app language';
 
   @override
   String get uygulamaTemasnSein => 'Choose app theme';

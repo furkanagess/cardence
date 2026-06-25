@@ -9,7 +9,6 @@ import '../../../../core/widgets/molecules/birthday_picker_field.dart';
 import '../../../../core/widgets/molecules/new_event_group_name_dialog.dart';
 import '../../../saved_cards/domain/entities/saved_card.dart';
 import '../../../saved_cards/domain/usecases/get_saved_cards.dart';
-import '../../../saved_cards/presentation/saved_cards_catalog.dart';
 import '../../../saved_cards/presentation/widgets/saved_card_selectable_list.dart';
 import 'event_group_cover_thumbnail.dart';
 import 'event_group_photo_picker_field.dart';
@@ -133,7 +132,7 @@ class _CreateEventGroupSheetState extends State<CreateEventGroupSheet> {
     final persisted = await widget.getSavedCards();
     if (!mounted) return;
     setState(() {
-      _pickableCards = SavedCardsCatalog.displayCards(persisted);
+      _pickableCards = persisted;
       _loadingCards = false;
     });
   }

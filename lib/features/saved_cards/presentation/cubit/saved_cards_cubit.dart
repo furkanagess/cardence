@@ -8,7 +8,6 @@ import '../../domain/usecases/get_saved_cards.dart';
 import '../../domain/usecases/get_saved_cards_wallet_quota.dart';
 import '../../domain/usecases/save_saved_card.dart';
 import '../../domain/usecases/upgrade_wallet_plan.dart';
-import '../saved_cards_catalog.dart';
 import 'saved_cards_filter_models.dart';
 import 'saved_cards_list_logic.dart';
 import 'saved_cards_state.dart';
@@ -33,10 +32,7 @@ class SavedCardsCubit extends Cubit<SavedCardsState> {
   final GetSavedCardsWalletQuota _getSavedCardsWalletQuota;
   final UpgradeWalletPlan _upgradeWalletPlan;
 
-  List<SavedCard> get sourceCards {
-    final useDummyCards = SavedCardsCatalog.isUsingDemoCards(state.cards);
-    return useDummyCards ? state.dummyCardsOrder : state.cards;
-  }
+  List<SavedCard> get sourceCards => state.cards;
 
   Future<void> load() => refreshAll();
 
@@ -51,15 +47,9 @@ class SavedCardsCubit extends Cubit<SavedCardsState> {
   Future<void> _loadCardsSafely() async {
     try {
       await _loadCards();
-    } on AuthApiException catch (error) {
+    } on AuthApiException {
       if (isClosed) return;
-      emit(
-        state.copyWith(
-          isLoadingCards: false,
-          effectType: SavedCardsEffectType.showSnackbar,
-          snackbarMessage: error.message,
-        ),
-      );
+      emit(state.copyWith(isLoadingCards: false));
     } catch (_) {
       if (isClosed) return;
       emit(state.copyWith(isLoadingCards: false));
@@ -101,9 +91,6 @@ class SavedCardsCubit extends Cubit<SavedCardsState> {
       state.copyWith(
         cards: list,
         isLoadingCards: false,
-        dummyCardsOrder: SavedCardsCatalog.isUsingDemoCards(list)
-            ? SavedCardsCatalog.demoDisplayList(list)
-            : state.dummyCardsOrder,
       ),
     );
   }
@@ -117,8 +104,6 @@ class SavedCardsCubit extends Cubit<SavedCardsState> {
     emit(
       state.copyWith(
         effectType: SavedCardsEffectType.openFilters,
-        clearDraggingCardIndex: true,
-        clearHoverTargetIndex: true,
       ),
     );
   }
@@ -132,45 +117,21 @@ class SavedCardsCubit extends Cubit<SavedCardsState> {
   }
 
   void applyFilter(SavedCardsFilterSelection selection) {
-    emit(
-      state.copyWith(
-        filter: selection,
-        clearDraggingCardIndex: true,
-        clearHoverTargetIndex: true,
-      ),
-    );
+    emit(state.copyWith(filter: selection));
   }
 
   void clearFilters() {
-    emit(
-      state.copyWith(
-        filter: state.filter.cleared(),
-        clearDraggingCardIndex: true,
-        clearHoverTargetIndex: true,
-      ),
-    );
+    emit(state.copyWith(filter: state.filter.cleared()));
   }
 
   void setSearchQuery(String query) {
     if (state.searchQuery == query) return;
-    emit(
-      state.copyWith(
-        searchQuery: query,
-        clearDraggingCardIndex: true,
-        clearHoverTargetIndex: true,
-      ),
-    );
+    emit(state.copyWith(searchQuery: query));
   }
 
   void clearSearch() {
     if (!state.hasActiveSearch) return;
-    emit(
-      state.copyWith(
-        searchQuery: '',
-        clearDraggingCardIndex: true,
-        clearHoverTargetIndex: true,
-      ),
-    );
+    emit(state.copyWith(searchQuery: ''));
   }
 
   List<({String value, String label})> eventFilterOptionsForSource(
@@ -190,68 +151,7 @@ class SavedCardsCubit extends Cubit<SavedCardsState> {
     );
   }
 
-  void startDrag(int index) {
-    emit(
-      state.copyWith(
-        draggingCardIndex: index,
-        clearHoverTargetIndex: true,
-      ),
-    );
-  }
-
-  void setHoverTarget(int? index) {
-    if (state.hoverTargetIndex == index) return;
-    emit(state.copyWith(hoverTargetIndex: index));
-  }
-
-  void endDrag() {
-    emit(
-      state.copyWith(
-        clearDraggingCardIndex: true,
-        clearHoverTargetIndex: true,
-      ),
-    );
-  }
-
-  void reorderCards({
-    required int fromIndex,
-    required int toIndex,
-    required bool useDummyCards,
-    required List<SavedCard> displayCards,
-  }) {
-    if (fromIndex == toIndex) {
-      endDrag();
-      return;
-    }
-
-    final targetList = useDummyCards ? state.dummyCardsOrder : state.cards;
-    final reordered = SavedCardsListLogic.reorderCards(
-      targetList: targetList,
-      displayCards: displayCards,
-      fromIndex: fromIndex,
-      toIndex: toIndex,
-      filtersActive: state.hasActiveFilters,
-    );
-
-    emit(
-      state.copyWith(
-        cards: useDummyCards ? state.cards : reordered,
-        dummyCardsOrder: useDummyCards ? reordered : state.dummyCardsOrder,
-        clearDraggingCardIndex: true,
-        clearHoverTargetIndex: true,
-      ),
-    );
-  }
-
   Future<void> persistCardUpdate(SavedCard updated) async {
-    if (SavedCardsCatalog.isUsingDemoCards(state.cards)) {
-      final nextDummy = state.dummyCardsOrder
-          .map((c) => c.cardId == updated.cardId ? updated : c)
-          .toList();
-      emit(state.copyWith(dummyCardsOrder: nextDummy));
-      if (state.cards.isEmpty) return;
-    }
-
     await _saveSavedCard(updated);
     if (isClosed) return;
     emit(
@@ -268,11 +168,6 @@ class SavedCardsCubit extends Cubit<SavedCardsState> {
     if (isClosed) return;
     if (quota != state.quota) {
       emit(state.copyWith(quota: quota));
-    }
-
-    if (!quota.canAddMore) {
-      emit(state.copyWith(effectType: SavedCardsEffectType.openUpgradeSheet));
-      return;
     }
 
     emit(state.copyWith(effectType: SavedCardsEffectType.openAddCard));

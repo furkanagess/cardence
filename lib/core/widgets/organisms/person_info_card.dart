@@ -41,6 +41,7 @@ class PersonInfoCard extends StatelessWidget {
     this.contactLinkedin,
     this.visibleContactFields = const [],
     this.jobTitle,
+    this.contactFieldsTappable = true,
   });
 
   /// Kompakt kartvizit yüzü köşe yarıçapı (flip önizleme vb.).
@@ -106,6 +107,9 @@ class PersonInfoCard extends StatelessWidget {
 
   /// Ünvan; entries'den bağımsız yapısal alan.
   final String? jobTitle;
+
+  /// false: e-posta, telefon ve link satırları tıklanamaz.
+  final bool contactFieldsTappable;
 
   /// Arka plan rengine göre okunabilir metin rengi (koyu arka plan → açık metin).
   static Color _onSurfaceForBackground(Color bg) {
@@ -237,6 +241,7 @@ class PersonInfoCard extends StatelessWidget {
         contactLinkedin: contactLinkedin,
         visibleContactFields: visibleContactFields,
         jobTitle: jobTitle,
+        contactFieldsTappable: contactFieldsTappable,
         accentColor: accentColor,
         backgroundColor: surfaceColor,
         photoUrl: photoUrl,
@@ -758,6 +763,7 @@ class _CompactBusinessCardFace extends StatelessWidget {
     this.contactLinkedin,
     this.visibleContactFields = const [],
     this.jobTitle,
+    this.contactFieldsTappable = true,
   });
 
   static double get _radius => PersonInfoCard.compactCardRadius;
@@ -783,6 +789,7 @@ class _CompactBusinessCardFace extends StatelessWidget {
   final String? contactLinkedin;
   final List<String> visibleContactFields;
   final String? jobTitle;
+  final bool contactFieldsTappable;
   final Color? accentColor;
   final Color backgroundColor;
   final String? photoUrl;
@@ -1220,7 +1227,9 @@ class _CompactBusinessCardFace extends StatelessWidget {
               textTheme,
               icon: Icons.mail_outline_rounded,
               value: value,
-              onTap: () => ContactLauncher.launchEmail(context, value),
+              onTap: contactFieldsTappable
+                  ? () => ContactLauncher.launchEmail(context, value)
+                  : null,
             ),
           );
         case 'phone':
@@ -1231,7 +1240,9 @@ class _CompactBusinessCardFace extends StatelessWidget {
               textTheme,
               icon: Icons.phone_outlined,
               value: value,
-              onTap: () => ContactLauncher.launchPhone(context, value),
+              onTap: contactFieldsTappable
+                  ? () => ContactLauncher.launchPhone(context, value)
+                  : null,
             ),
           );
         case 'linkedin':
@@ -1242,7 +1253,9 @@ class _CompactBusinessCardFace extends StatelessWidget {
               textTheme,
               icon: Icons.link_rounded,
               value: value,
-              onTap: () => ContactLauncher.launchWebUrl(context, value),
+              onTap: contactFieldsTappable
+                  ? () => ContactLauncher.launchWebUrl(context, value)
+                  : null,
             ),
           );
         case 'website':
@@ -1253,7 +1266,9 @@ class _CompactBusinessCardFace extends StatelessWidget {
               textTheme,
               icon: Icons.language_rounded,
               value: value,
-              onTap: () => ContactLauncher.launchWebUrl(context, value),
+              onTap: contactFieldsTappable
+                  ? () => ContactLauncher.launchWebUrl(context, value)
+                  : null,
             ),
           );
       }

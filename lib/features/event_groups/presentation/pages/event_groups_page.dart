@@ -4,7 +4,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/network/auth_api_exception.dart';
 import '../../../saved_cards/presentation/cubit/saved_cards_cubit.dart';
 import '../../../saved_cards/presentation/cubit/saved_cards_state.dart';
-import '../../../saved_cards/presentation/saved_cards_catalog.dart';
 import '../../../saved_cards/presentation/wallet_paywall_flow.dart';
 import '../../../subscriptions/domain/usecases/restore_wallet_purchases.dart';
 import '../../domain/entities/event_group.dart';
@@ -131,9 +130,7 @@ class _EventGroupsPageState extends State<EventGroupsPage> {
       }
 
       if (result.selectedCardIds.isNotEmpty) {
-        final allCards = SavedCardsCatalog.displayCards(
-          savedCardsCubit.state.cards,
-        );
+        final allCards = savedCardsCubit.state.cards;
         await widget.linkSavedCardsToEventGroup(
           groupId: newGroup.id,
           allCards: allCards,
@@ -168,7 +165,7 @@ class _EventGroupsPageState extends State<EventGroupsPage> {
   Widget build(BuildContext context) {
     return BlocBuilder<SavedCardsCubit, SavedCardsState>(
       builder: (context, savedState) {
-        final savedCards = SavedCardsCatalog.displayCards(savedState.cards);
+        final savedCards = savedState.cards;
         final canAddGroup = savedState.quota?.canAddEventGroup ?? true;
 
         return Stack(

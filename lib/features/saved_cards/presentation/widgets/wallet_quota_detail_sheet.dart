@@ -11,18 +11,15 @@ class WalletQuotaDetailSheet extends StatelessWidget {
   const WalletQuotaDetailSheet({
     super.key,
     required this.quota,
-    required this.isDemoMode,
     this.onUpgradeTap,
   });
 
   final SavedCardsWalletQuota quota;
-  final bool isDemoMode;
   final VoidCallback? onUpgradeTap;
 
   static Future<void> show(
     BuildContext context, {
     required SavedCardsWalletQuota quota,
-    required bool isDemoMode,
     VoidCallback? onUpgradeTap,
   }) {
     return showModalBottomSheet<void>(
@@ -35,7 +32,6 @@ class WalletQuotaDetailSheet extends StatelessWidget {
       ),
       builder: (context) => WalletQuotaDetailSheet(
         quota: quota,
-        isDemoMode: isDemoMode,
         onUpgradeTap: onUpgradeTap,
       ),
     );
@@ -89,16 +85,8 @@ class WalletQuotaDetailSheet extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 20),
-            _LimitsSection(quota: quota, isDemoMode: isDemoMode),
-            if (isDemoMode) ...[
-              const SizedBox(height: 12),
-              _HintCard(
-                icon: Icons.lightbulb_outline_rounded,
-                message:
-                    context.l10n.uAnrnekKartlarGryorsunuz,
-                tone: _HintTone.neutral,
-              ),
-            ] else if (atLimit) ...[
+            _LimitsSection(quota: quota),
+            if (atLimit) ...[
               const SizedBox(height: 12),
               _HintCard(
                 icon: Icons.info_outline_rounded,
@@ -136,16 +124,14 @@ class WalletQuotaDetailSheet extends StatelessWidget {
 class _LimitsSection extends StatelessWidget {
   const _LimitsSection({
     required this.quota,
-    required this.isDemoMode,
   });
 
   final SavedCardsWalletQuota quota;
-  final bool isDemoMode;
 
   @override
   Widget build(BuildContext context) {
-    final usedWallet = isDemoMode ? 0 : quota.usedCount;
-    final savedCardsAtLimit = !quota.isPremium && !quota.canAddMore && !isDemoMode;
+    final usedWallet = quota.usedCount;
+    final savedCardsAtLimit = !quota.isPremium && !quota.canAddMore;
     final savedCardsNearLimit = !quota.isPremium && quota.isNearLimit && !savedCardsAtLimit;
     final manualLabel = quota.isPremium
         ? context.l10n.snrsz
@@ -162,9 +148,7 @@ class _LimitsSection extends StatelessWidget {
           valueLabel: quota.hasUnlimitedWallet
               ? context.l10n.snrsz
               : '$usedWallet / ${quota.maxCards}',
-          subtitle: isDemoMode
-              ? 'Henüz kart eklenmedi'
-              : walletQuotaRemainingLabel(context.l10n, quota),
+          subtitle: walletQuotaRemainingLabel(context.l10n, quota),
           tone: quota.hasUnlimitedWallet
               ? WalletQuotaLimitTone.success
               : savedCardsAtLimit
@@ -224,7 +208,7 @@ class _LimitsSection extends StatelessWidget {
   }
 }
 
-enum _HintTone { neutral, warning }
+enum _HintTone { warning }
 
 class _HintCard extends StatelessWidget {
   const _HintCard({

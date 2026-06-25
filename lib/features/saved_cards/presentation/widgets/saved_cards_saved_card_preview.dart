@@ -10,13 +10,13 @@ class SavedCardsSavedCardPreview extends StatelessWidget {
   const SavedCardsSavedCardPreview({
     super.key,
     required this.card,
-    this.onDoubleTap,
+    this.onTap,
     this.heroTag,
     this.wrapHero = false,
   });
 
   final SavedCard card;
-  final VoidCallback? onDoubleTap;
+  final VoidCallback? onTap;
   final String? heroTag;
   final bool wrapHero;
 
@@ -45,7 +45,8 @@ class SavedCardsSavedCardPreview extends StatelessWidget {
       backEntries: card.backAboutEntries,
       emptyMessage: context.l10n.kartBilgisiYok,
       cardId: card.cardId,
-      onDoubleTap: onDoubleTap,
+      onTap: onTap,
+      contactFieldsTappable: false,
       contactEmail: card.email,
       contactPhone: card.phone,
       contactWebsite: card.website,

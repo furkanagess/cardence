@@ -9,9 +9,11 @@ import '../../../../core/widgets/molecules/cardence_confirm_dialog.dart';
 import '../../../../core/widgets/organisms/cardence_scaffold.dart';
 import '../../../auth/domain/usecases/upload_profile_photo.dart';
 import '../../../auth/presentation/pages/privacy_policy_page.dart';
+import '../../domain/entities/locale_preference.dart';
 import '../../domain/entities/theme_preference.dart';
 import '../../domain/usecases/request_app_review.dart';
 import '../pages/settings_about_page.dart';
+import '../widgets/settings_locale_selector.dart';
 import '../widgets/settings_menu_group.dart';
 import '../widgets/settings_profile_header.dart';
 import '../widgets/settings_section_label.dart';
@@ -23,6 +25,8 @@ class SettingsPage extends StatefulWidget {
     super.key,
     required this.currentTheme,
     required this.onThemeChanged,
+    required this.currentLocale,
+    required this.onLocaleChanged,
     required this.onLogout,
     required this.onOpenSupport,
     required this.requestAppReview,
@@ -35,6 +39,8 @@ class SettingsPage extends StatefulWidget {
 
   final ThemePreference currentTheme;
   final ValueChanged<ThemePreference> onThemeChanged;
+  final LocalePreference currentLocale;
+  final ValueChanged<LocalePreference> onLocaleChanged;
   final Future<void> Function() onLogout;
   final VoidCallback onOpenSupport;
   final RequestAppReview requestAppReview;
@@ -140,6 +146,15 @@ class _SettingsPageState extends State<SettingsPage> {
                       SettingsThemeSelector(
                         current: widget.currentTheme,
                         onChanged: widget.onThemeChanged,
+                      ),
+                      const SizedBox(height: 28),
+                      SettingsSectionLabel(
+                        label: context.l10n.dil,
+                        subtitle: context.l10n.uygulamaDiliniSein,
+                      ),
+                      SettingsLocaleSelector(
+                        current: widget.currentLocale,
+                        onChanged: widget.onLocaleChanged,
                       ),
                       const SizedBox(height: 28),
                       SettingsSectionLabel(

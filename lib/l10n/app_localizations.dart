@@ -506,6 +506,12 @@ abstract class AppLocalizations {
   /// **'Devam'**
   String get devam;
 
+  /// No description provided for @dil.
+  ///
+  /// In tr, this message translates to:
+  /// **'Dil'**
+  String get dil;
+
   /// No description provided for @devopsEngineer.
   ///
   /// In tr, this message translates to:
@@ -967,6 +973,12 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'İş ortaklıkları ve güvenlik bildirimleri için gereklidir.'**
   String get iOrtaklklarVeGvenlikBildirimleri;
+
+  /// No description provided for @ingilizce.
+  ///
+  /// In tr, this message translates to:
+  /// **'İngilizce'**
+  String get ingilizce;
 
   /// No description provided for @ifremiUnuttum.
   ///
@@ -2408,6 +2420,12 @@ abstract class AppLocalizations {
   /// **'Tarih seçin'**
   String get tarihSein;
 
+  /// No description provided for @turkce.
+  ///
+  /// In tr, this message translates to:
+  /// **'Türkçe'**
+  String get turkce;
+
   /// No description provided for @tasarm.
   ///
   /// In tr, this message translates to:
@@ -2479,6 +2497,12 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Uygula'**
   String get uygula;
+
+  /// No description provided for @uygulamaDiliniSein.
+  ///
+  /// In tr, this message translates to:
+  /// **'Uygulama dilini seçin'**
+  String get uygulamaDiliniSein;
 
   /// No description provided for @uygulamaTemasnSein.
   ///

@@ -11,11 +11,18 @@ public static class WalletConstants
     /// </summary>
     public const int PremiumMaxCards = 0;
 
-    public static bool HasUnlimitedWalletCards(string tier) =>
-        string.Equals(tier, PremiumTier, StringComparison.OrdinalIgnoreCase);
-    public const int FreeMaxBusinessCards = 1;
+    /// <summary>
+    /// Tüm kullanıcılar için sınırsız cüzdan kaydı.
+    /// </summary>
+    public static bool HasUnlimitedWalletCards(string tier) => true;
+
+    public const int FreeMaxBusinessCards = PremiumMaxBusinessCards;
     public const int PremiumMaxBusinessCards = 50;
-    public const int FreeMaxManualSavedCards = 1;
+
+    /// <summary>
+    /// Manuel / fotoğrafla cüzdan kartı ekleme tüm kullanıcılara açık.
+    /// </summary>
+    public const int FreeMaxManualSavedCards = int.MaxValue;
     public const int FreeMaxEventGroups = 2;
 
     public static bool HasUnlimitedEventGroups(string tier) =>

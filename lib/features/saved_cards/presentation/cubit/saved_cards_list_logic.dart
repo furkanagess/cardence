@@ -2,7 +2,7 @@ import '../../../event_groups/domain/entities/event_group.dart';
 import '../../domain/entities/saved_card.dart';
 import 'saved_cards_filter_models.dart';
 
-/// Kayıtlı kart listesi filtre, sıralama ve sürükle-bırak yardımcıları.
+/// Kayıtlı kart listesi filtre ve sıralama yardımcıları.
 class SavedCardsListLogic {
   SavedCardsListLogic._();
 
@@ -126,52 +126,5 @@ class SavedCardsListLogic {
       }
     }
     return options;
-  }
-
-  static List<SavedCard> reorderCards({
-    required List<SavedCard> targetList,
-    required List<SavedCard> displayCards,
-    required int fromIndex,
-    required int toIndex,
-    required bool filtersActive,
-  }) {
-    if (fromIndex == toIndex) return List<SavedCard>.from(targetList);
-
-    final next = List<SavedCard>.from(targetList);
-    if (!filtersActive) {
-      final moved = next.removeAt(fromIndex);
-      next.insert(toIndex, moved);
-      return next;
-    }
-
-    final movedCard = displayCards[fromIndex];
-    final targetCard = displayCards[toIndex];
-    final fromRawIndex = next.indexWhere((e) => e.cardId == movedCard.cardId);
-    final toRawIndex = next.indexWhere((e) => e.cardId == targetCard.cardId);
-    if (fromRawIndex != -1 && toRawIndex != -1) {
-      final moved = next.removeAt(fromRawIndex);
-      next.insert(toRawIndex, moved);
-    }
-    return next;
-  }
-
-  static int visualSlotFor({
-    required int index,
-    required int? draggingIndex,
-    required int? hoverTargetIndex,
-  }) {
-    final from = draggingIndex;
-    if (from == null) return index;
-
-    final to = hoverTargetIndex ?? from;
-    if (index == from) return from;
-
-    var slot = index;
-    if (from < to) {
-      if (index > from && index <= to) slot = index - 1;
-    } else if (from > to) {
-      if (index >= to && index < from) slot = index + 1;
-    }
-    return slot;
   }
 }

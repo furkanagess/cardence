@@ -45,9 +45,13 @@ import 'features/saved_cards/domain/usecases/upgrade_wallet_plan.dart';
 import 'features/subscriptions/domain/usecases/identify_subscription_user.dart';
 import 'features/subscriptions/domain/usecases/restore_wallet_purchases.dart';
 import 'features/ads/domain/usecases/show_post_add_card_monetization.dart';
+import 'core/l10n/locale_preference_material.dart';
+import 'features/settings/domain/entities/locale_preference.dart';
 import 'features/settings/domain/entities/theme_preference.dart';
+import 'features/settings/domain/usecases/get_locale_preference.dart';
 import 'features/settings/domain/usecases/get_theme_preference.dart';
 import 'features/settings/domain/usecases/request_app_review.dart';
+import 'features/settings/domain/usecases/set_locale_preference.dart';
 import 'features/settings/domain/usecases/set_theme_preference.dart';
 import 'features/profile/domain/usecases/get_profile_stats.dart';
 import 'features/support/domain/usecases/submit_support_request.dart';
@@ -84,6 +88,9 @@ class App extends StatefulWidget {
     required this.getThemePreference,
     required this.setThemePreference,
     required this.initialThemePreference,
+    required this.getLocalePreference,
+    required this.setLocalePreference,
+    required this.initialLocalePreference,
     required this.submitSupportRequest,
     required this.requestAppReview,
     required this.getEventGroups,
@@ -127,6 +134,9 @@ class App extends StatefulWidget {
   final GetThemePreference getThemePreference;
   final SetThemePreference setThemePreference;
   final ThemePreference initialThemePreference;
+  final GetLocalePreference getLocalePreference;
+  final SetLocalePreference setLocalePreference;
+  final LocalePreference initialLocalePreference;
   final SubmitSupportRequest submitSupportRequest;
   final RequestAppReview requestAppReview;
   final GetEventGroups getEventGroups;
@@ -151,18 +161,21 @@ class App extends StatefulWidget {
 class _AppState extends State<App> {
   _AppDestination _destination = _AppDestination.loading;
   late ThemePreference _themePreference;
+  late LocalePreference _localePreference;
   bool _showPostOnboardingPaywall = false;
 
   @override
   void initState() {
     super.initState();
     _themePreference = widget.initialThemePreference;
+    _localePreference = widget.initialLocalePreference;
     SessionExpiredHandler.instance.configure(
       navigatorKey: widget.rootNavigatorKey,
       onForceLogout: _onLogout,
     );
     _bootstrap();
     _loadTheme();
+    _loadLocale();
   }
 
   Future<void> _bootstrap() async {
@@ -209,6 +222,12 @@ class _AppState extends State<App> {
     setState(() => _themePreference = pref);
   }
 
+  Future<void> _loadLocale() async {
+    final pref = await widget.getLocalePreference();
+    if (!mounted) return;
+    setState(() => _localePreference = pref);
+  }
+
   void _onLoginSuccess() {
     _identifySubscriptionUser();
     _resolvePostLoginDestination();
@@ -238,6 +257,12 @@ class _AppState extends State<App> {
     await widget.setThemePreference(preference);
     if (!mounted) return;
     setState(() => _themePreference = preference);
+  }
+
+  void _onLocaleChanged(LocalePreference preference) async {
+    await widget.setLocalePreference(preference);
+    if (!mounted) return;
+    setState(() => _localePreference = preference);
   }
 
   ThemeMode get _themeMode {
@@ -295,6 +320,8 @@ class _AppState extends State<App> {
           getCurrentUser: widget.getCurrentUser,
           themePreference: _themePreference,
           onThemeChanged: _onThemeChanged,
+          localePreference: _localePreference,
+          onLocaleChanged: _onLocaleChanged,
           onLogout: _onLogout,
           uploadProfilePhoto: widget.uploadProfilePhoto,
           submitSupportRequest: widget.submitSupportRequest,
@@ -321,6 +348,7 @@ class _AppState extends State<App> {
         GlobalCupertinoLocalizations.delegate,
       ],
       supportedLocales: AppLocalizations.supportedLocales,
+      locale: materialLocaleFor(_localePreference),
       builder: (context, child) {
         return ChuckFabOverlay(
           child: child ?? const SizedBox.shrink(),

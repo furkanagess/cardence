@@ -114,10 +114,7 @@ public sealed class SavedCardService : ISavedCardService
             userId,
             cancellationToken);
         var isPremium = IsPremiumTier(entitlement.Tier);
-        var canAddManualSavedCard = await CanAddManualSavedCardAsync(
-            userId,
-            entitlement.Tier,
-            cancellationToken);
+        var canAddManualSavedCard = true;
         var eventGroupCount = await _eventGroupRepository.CountByUserIdAsync(
             userId,
             cancellationToken);
@@ -197,15 +194,7 @@ public sealed class SavedCardService : ISavedCardService
                 ErrorCodes.WalletDuplicateCard);
         }
 
-        var entitlement = await _walletRepository.GetOrCreateAsync(userId, cancellationToken);
         var usedCount = await _savedCardRepository.CountByUserIdAsync(userId, cancellationToken);
-        if (!WalletConstants.HasUnlimitedWalletCards(entitlement.Tier) &&
-            usedCount >= entitlement.MaxCards)
-        {
-            throw new ForbiddenException(
-                "Wallet card limit reached.",
-                ErrorCodes.WalletLimitReached);
-        }
 
         var creationMethod = CardCreationMethods.NormalizeWallet(
             request.CreationMethod,
@@ -213,14 +202,6 @@ public sealed class SavedCardService : ISavedCardService
             cardId,
             fromQrPayload: false);
         var isManual = CardCreationMethods.IsManualEntry(creationMethod);
-
-        if (isManual &&
-            !await CanAddManualSavedCardAsync(userId, entitlement.Tier, cancellationToken))
-        {
-            throw new ForbiddenException(
-                "Manual wallet entries require a premium plan after the free trial.",
-                ErrorCodes.PremiumRequired);
-        }
 
         if (isManual && !CardIdGenerator.IsManualWalletId(cardId))
         {
@@ -410,26 +391,8 @@ public sealed class SavedCardService : ISavedCardService
     private static bool IsPremiumTier(string tier) =>
         string.Equals(tier, WalletConstants.PremiumTier, StringComparison.OrdinalIgnoreCase);
 
-    private async Task<bool> CanAddManualSavedCardAsync(
-        Guid userId,
-        string tier,
-        CancellationToken cancellationToken)
-    {
-        if (IsPremiumTier(tier))
-        {
-            return true;
-        }
-
-        var manualCount = await _savedCardRepository.CountManualByUserIdAsync(
-            userId,
-            cancellationToken);
-        return manualCount < WalletConstants.FreeMaxManualSavedCards;
-    }
-
     private static int GetMaxBusinessCards(string tier) =>
-        IsPremiumTier(tier)
-            ? WalletConstants.PremiumMaxBusinessCards
-            : WalletConstants.FreeMaxBusinessCards;
+        WalletConstants.PremiumMaxBusinessCards;
 
     private static void ValidateCardId(string? cardId)
     {

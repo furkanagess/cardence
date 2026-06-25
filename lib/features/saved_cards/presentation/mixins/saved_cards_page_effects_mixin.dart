@@ -176,8 +176,6 @@ mixin SavedCardsPageEffectsMixin<T extends StatefulWidget> on State<T> {
     required DeleteSavedCard deleteSavedCard,
   }) async {
     final cubit = context.read<SavedCardsCubit>();
-    if (cubit.state.draggingCardIndex != null) return;
-
     await Navigator.of(context).push<void>(
       MaterialPageRoute<void>(
         builder: (context) => SavedCardDetailPage(

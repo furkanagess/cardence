@@ -10,7 +10,7 @@ class SavedCardsWalletQuota {
     this.businessCardCount = 0,
     this.maxBusinessCards = SavedCardsWalletLimits.freeMaxOwnBusinessCards,
     this.canAddBusinessCard = true,
-    this.canAddManualSavedCard = false,
+    this.canAddManualSavedCard = true,
     this.eventGroupCount = 0,
     this.maxEventGroups = SavedCardsWalletLimits.freeMaxEventGroups,
     this.canAddEventGroup = true,
@@ -27,14 +27,14 @@ class SavedCardsWalletQuota {
   final int maxEventGroups;
   final bool canAddEventGroup;
 
-  bool get hasUnlimitedWallet => isPremium;
+  bool get hasUnlimitedWallet => true;
 
   bool get hasUnlimitedEventGroups => isPremium;
 
   int get remaining =>
       hasUnlimitedWallet ? 0 : (maxCards - usedCount).clamp(0, maxCards);
 
-  bool get canAddMore => hasUnlimitedWallet || usedCount < maxCards;
+  bool get canAddMore => true;
 
   bool get isNearLimit {
     if (hasUnlimitedWallet || maxCards <= 0) return false;
@@ -53,21 +53,9 @@ class SavedCardsWalletQuota {
   String get remainingSlotsLabel =>
       hasUnlimitedWallet ? 'Sınırsız' : '$remaining boş slot';
 
-  String get manualEntryMethodSubtitle {
-    if (isPremium) return 'Kartvizit bilgilerini manuel yazın';
-    if (canAddManualSavedCard) {
-      return '1 ücretsiz deneme · sonrasında Premium gerekir';
-    }
-    return 'Ücretsiz hakkınız doldu · Premium gerekli';
-  }
+  String get manualEntryMethodSubtitle => 'Kartvizit bilgilerini manuel yazın';
 
-  String get photoScanMethodSubtitle {
-    if (isPremium) return 'Kamerayı kullanarak bilgileri tara';
-    if (canAddManualSavedCard) {
-      return '1 ücretsiz deneme · sonrasında Premium gerekir';
-    }
-    return 'Ücretsiz hakkınız doldu · Premium gerekli';
-  }
+  String get photoScanMethodSubtitle => 'Kamerayı kullanarak bilgileri tara';
 
   @override
   bool operator ==(Object other) {

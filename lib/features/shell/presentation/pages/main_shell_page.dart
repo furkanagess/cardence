@@ -30,6 +30,7 @@ import '../../../saved_cards/presentation/pages/saved_cards_page.dart';
 import '../../../saved_cards/presentation/wallet_paywall_flow.dart';
 import '../../../auth/domain/usecases/get_current_user.dart';
 import '../../../auth/domain/usecases/upload_profile_photo.dart';
+import '../../../settings/domain/entities/locale_preference.dart';
 import '../../../settings/domain/entities/theme_preference.dart';
 import '../../../settings/presentation/pages/settings_page.dart';
 import '../../../settings/domain/usecases/request_app_review.dart';
@@ -60,6 +61,8 @@ class MainShellPage extends StatefulWidget {
     required this.showPostAddCardMonetization,
     required this.themePreference,
     required this.onThemeChanged,
+    required this.localePreference,
+    required this.onLocaleChanged,
     required this.onLogout,
     required this.uploadProfilePhoto,
     required this.submitSupportRequest,
@@ -87,6 +90,8 @@ class MainShellPage extends StatefulWidget {
   final ShowPostAddCardMonetization showPostAddCardMonetization;
   final ThemePreference themePreference;
   final ValueChanged<ThemePreference> onThemeChanged;
+  final LocalePreference localePreference;
+  final ValueChanged<LocalePreference> onLocaleChanged;
   final Future<void> Function() onLogout;
   final UploadProfilePhoto uploadProfilePhoto;
   final SubmitSupportRequest submitSupportRequest;
@@ -100,7 +105,6 @@ class MainShellPage extends StatefulWidget {
 class _MainShellPageState extends State<MainShellPage> {
   int _currentIndex = 0;
   OnboardingCardDraft? _myCardDraft;
-  bool _savedCardsPreferListView = true;
   int _savedCardsFilterTrigger = 0;
   int _savedCardsAddCardTrigger = 0;
   bool _openingSettings = false;
@@ -174,9 +178,6 @@ class _MainShellPageState extends State<MainShellPage> {
               upgradeWalletPlan: widget.upgradeWalletPlan,
               restoreWalletPurchases: widget.restoreWalletPurchases,
               showPostAddCardMonetization: widget.showPostAddCardMonetization,
-              showFlippableView: !_savedCardsPreferListView,
-              onViewModeChanged: (flippable) =>
-                  setState(() => _savedCardsPreferListView = !flippable),
               filterTrigger: _savedCardsFilterTrigger,
               addCardTrigger: _savedCardsAddCardTrigger,
             ),
@@ -209,12 +210,7 @@ class _MainShellPageState extends State<MainShellPage> {
             child: _LiquidGlassBottomNavBar(
               currentIndex: _currentIndex,
               itemCount: 3,
-              onTap: (index) => setState(() {
-                _currentIndex = index;
-                if (index == 0) {
-                  _savedCardsPreferListView = true;
-                }
-              }),
+              onTap: (index) => setState(() => _currentIndex = index),
             ),
           ),
         ),
@@ -245,6 +241,8 @@ class _MainShellPageState extends State<MainShellPage> {
           builder: (context) => SettingsPage(
             currentTheme: widget.themePreference,
             onThemeChanged: widget.onThemeChanged,
+            currentLocale: widget.localePreference,
+            onLocaleChanged: widget.onLocaleChanged,
             onLogout: widget.onLogout,
             userDisplayName: displayName,
             userEmail: user.email ?? draft?.email,

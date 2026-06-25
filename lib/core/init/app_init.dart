@@ -66,11 +66,16 @@ import '../../features/ads/data/datasources/post_add_card_ad_counter_local_datas
 import '../../features/ads/domain/usecases/initialize_mobile_ads.dart';
 import '../../features/ads/domain/usecases/show_post_add_card_monetization.dart';
 import '../../features/settings/data/repositories/app_review_repository_impl.dart';
+import '../../features/settings/data/datasources/locale_local_datasource.dart';
 import '../../features/settings/data/datasources/theme_local_datasource.dart';
+import '../../features/settings/data/repositories/locale_repository_impl.dart';
 import '../../features/settings/data/repositories/theme_repository_impl.dart';
+import '../../features/settings/domain/entities/locale_preference.dart';
 import '../../features/settings/domain/entities/theme_preference.dart';
+import '../../features/settings/domain/usecases/get_locale_preference.dart';
 import '../../features/settings/domain/usecases/get_theme_preference.dart';
 import '../../features/settings/domain/usecases/request_app_review.dart';
+import '../../features/settings/domain/usecases/set_locale_preference.dart';
 import '../../features/settings/domain/usecases/set_theme_preference.dart';
 import '../../features/support/data/datasources/support_remote_datasource.dart';
 import '../../features/support/data/repositories/support_repository_impl.dart';
@@ -166,6 +171,8 @@ class AppInit {
     );
     final theme = _initTheme(prefs);
     final initialThemePreference = await theme.getThemePreference();
+    final locale = _initLocale(prefs);
+    final initialLocalePreference = await locale.getLocalePreference();
     final appReview = _initAppReview();
     final support = _initSupport(authTokenProvider);
     final profile = _initProfile(authTokenProvider);
@@ -214,6 +221,9 @@ class AppInit {
       getThemePreference: theme.getThemePreference,
       setThemePreference: theme.setThemePreference,
       initialThemePreference: initialThemePreference,
+      getLocalePreference: locale.getLocalePreference,
+      setLocalePreference: locale.setLocalePreference,
+      initialLocalePreference: initialLocalePreference,
       submitSupportRequest: support.submitSupportRequest,
       requestAppReview: appReview.requestAppReview,
       getEventGroups: eventGroups.getEventGroups,
@@ -385,6 +395,18 @@ class AppInit {
   }
 
   static ({
+    GetLocalePreference getLocalePreference,
+    SetLocalePreference setLocalePreference,
+  }) _initLocale(SharedPreferences prefs) {
+    final local = LocaleLocalDataSourceImpl(prefs);
+    final repo = LocaleRepositoryImpl(local);
+    return (
+      getLocalePreference: GetLocalePreference(repo),
+      setLocalePreference: SetLocalePreference(repo),
+    );
+  }
+
+  static ({
     GetThemePreference getThemePreference,
     SetThemePreference setThemePreference,
   }) _initTheme(SharedPreferences prefs) {
@@ -454,6 +476,9 @@ class AppInitResult {
     required this.getThemePreference,
     required this.setThemePreference,
     required this.initialThemePreference,
+    required this.getLocalePreference,
+    required this.setLocalePreference,
+    required this.initialLocalePreference,
     required this.submitSupportRequest,
     required this.requestAppReview,
     required this.getEventGroups,
@@ -497,6 +522,9 @@ class AppInitResult {
   final GetThemePreference getThemePreference;
   final SetThemePreference setThemePreference;
   final ThemePreference initialThemePreference;
+  final GetLocalePreference getLocalePreference;
+  final SetLocalePreference setLocalePreference;
+  final LocalePreference initialLocalePreference;
   final SubmitSupportRequest submitSupportRequest;
   final RequestAppReview requestAppReview;
   final GetEventGroups getEventGroups;

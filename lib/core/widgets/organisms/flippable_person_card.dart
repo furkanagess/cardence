@@ -34,6 +34,7 @@ class FlippablePersonCard extends StatefulWidget {
     this.contactLinkedin,
     this.visibleContactFields = const [],
     this.jobTitle,
+    this.contactFieldsTappable = true,
   });
 
   final String? title;
@@ -76,6 +77,7 @@ class FlippablePersonCard extends StatefulWidget {
   final String? contactLinkedin;
   final List<String> visibleContactFields;
   final String? jobTitle;
+  final bool contactFieldsTappable;
 
   /// Kartvizit oranı: genişlik / yükseklik (ISO 7810 ID-1 ~ 85.6×53.98 mm).
   static const double cardAspectRatio = 1.586;
@@ -200,6 +202,7 @@ class _FlippablePersonCardState extends State<FlippablePersonCard>
       contactLinkedin: widget.contactLinkedin,
       visibleContactFields: widget.visibleContactFields,
       jobTitle: widget.jobTitle,
+      contactFieldsTappable: widget.contactFieldsTappable,
     );
   }
 

@@ -3,182 +3,128 @@ import 'package:flutter/services.dart';
 
 import '../../../../core/theme/app_colors.dart';
 
-/// Sol kenarda dikey sürüklenebilir ok; [slotCenterYs] ile hizalanan kartı seçer.
-class SavedCardsFocusArrowTrack extends StatefulWidget {
+/// Ekranın sol ortasında sabit: yukarı ok · konum · aşağı ok (ayrı konteynerler).
+class SavedCardsFocusArrowTrack extends StatelessWidget {
   const SavedCardsFocusArrowTrack({
     super.key,
-    required this.trackHeight,
-    required this.slotCenterYs,
     required this.focusedIndex,
+    required this.cardCount,
     required this.onFocusedIndexChanged,
   });
 
-  final double trackHeight;
-  final List<double> slotCenterYs;
   final int focusedIndex;
+  final int cardCount;
   final ValueChanged<int> onFocusedIndexChanged;
 
-  static const double width = 44;
+  static const double width = 40;
 
-  @override
-  State<SavedCardsFocusArrowTrack> createState() =>
-      _SavedCardsFocusArrowTrackState();
-}
+  bool get _canGoUp => focusedIndex > 0;
+  bool get _canGoDown => cardCount > 0 && focusedIndex < cardCount - 1;
 
-class _SavedCardsFocusArrowTrackState extends State<SavedCardsFocusArrowTrack> {
-  double? _dragCenterY;
-  int? _lastHapticIndex;
-
-  @override
-  void didUpdateWidget(covariant SavedCardsFocusArrowTrack oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (_dragCenterY != null &&
-        widget.focusedIndex >= 0 &&
-        widget.focusedIndex < widget.slotCenterYs.length) {
-      _dragCenterY = widget.slotCenterYs[widget.focusedIndex];
-    }
+  void _goUp() {
+    if (!_canGoUp) return;
+    HapticFeedback.selectionClick();
+    onFocusedIndexChanged(focusedIndex - 1);
   }
 
-  double get _arrowCenterY {
-    if (_dragCenterY != null) return _dragCenterY!;
-    if (widget.slotCenterYs.isEmpty) return widget.trackHeight / 2;
-    final index = widget.focusedIndex.clamp(0, widget.slotCenterYs.length - 1);
-    return widget.slotCenterYs[index];
-  }
-
-  int _nearestIndex(double localY) {
-    if (widget.slotCenterYs.isEmpty) return 0;
-    if (widget.slotCenterYs.length == 1) return 0;
-
-    var nearest = 0;
-    var minDistance = double.infinity;
-    for (var i = 0; i < widget.slotCenterYs.length; i++) {
-      final distance = (localY - widget.slotCenterYs[i]).abs();
-      if (distance < minDistance) {
-        minDistance = distance;
-        nearest = i;
-      }
-    }
-    return nearest;
-  }
-
-  void _emitFocus(int index) {
-    if (index == widget.focusedIndex) return;
-    if (_lastHapticIndex != index) {
-      _lastHapticIndex = index;
-      HapticFeedback.selectionClick();
-    }
-    widget.onFocusedIndexChanged(index);
-  }
-
-  void _handleDragUpdate(DragUpdateDetails details) {
-    final localY = details.localPosition.dy.clamp(0.0, widget.trackHeight);
-    final index = _nearestIndex(localY);
-    setState(() => _dragCenterY = localY);
-    _emitFocus(index);
-  }
-
-  void _handleDragEnd() {
-    final index = widget.focusedIndex.clamp(0, widget.slotCenterYs.length - 1);
-    setState(() {
-      _dragCenterY = widget.slotCenterYs.isEmpty
-          ? null
-          : widget.slotCenterYs[index];
-    });
-    Future<void>.delayed(const Duration(milliseconds: 220), () {
-      if (!mounted) return;
-      setState(() => _dragCenterY = null);
-    });
+  void _goDown() {
+    if (!_canGoDown) return;
+    HapticFeedback.selectionClick();
+    onFocusedIndexChanged(focusedIndex + 1);
   }
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final trackColor =
-        isDark ? AppColors.outlineDark : AppColors.outlineVariant;
-    final activeColor =
-        isDark ? AppColors.primaryDarkTheme : AppColors.primary;
-    final inactiveDotColor =
-        isDark ? AppColors.textSecondaryDark : AppColors.textDisabled;
+    if (cardCount <= 1) {
+      return const SizedBox.shrink();
+    }
 
-    return SizedBox(
-      width: SavedCardsFocusArrowTrack.width,
-      height: widget.trackHeight,
-      child: Stack(
-        clipBehavior: Clip.none,
-        children: [
-          Positioned(
-            left: SavedCardsFocusArrowTrack.width / 2 - 0.5,
-            top: 12,
-            bottom: 12,
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                color: trackColor.withValues(alpha: 0.65),
-                borderRadius: BorderRadius.circular(1),
-              ),
-              child: const SizedBox(width: 1),
-            ),
-          ),
-          for (var i = 0; i < widget.slotCenterYs.length; i++)
-            Positioned(
-              left: SavedCardsFocusArrowTrack.width / 2 - 3,
-              top: widget.slotCenterYs[i] - 3,
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 180),
-                curve: Curves.easeOutCubic,
-                width: i == widget.focusedIndex ? 8 : 6,
-                height: i == widget.focusedIndex ? 8 : 6,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: i == widget.focusedIndex ? activeColor : inactiveDotColor,
-                  boxShadow: i == widget.focusedIndex
-                      ? [
-                          BoxShadow(
-                            color: activeColor.withValues(alpha: 0.35),
-                            blurRadius: 6,
-                          ),
-                        ]
-                      : null,
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final iconColor =
+        isDark ? AppColors.textSecondaryDark : AppColors.textSecondary;
+    final disabledColor =
+        isDark ? AppColors.outlineDark : AppColors.outlineVariant;
+    final labelColor =
+        isDark ? AppColors.textSecondaryDark : AppColors.textDisabled;
+    final containerColor = isDark
+        ? AppColors.surfaceDark.withValues(alpha: 0.55)
+        : AppColors.surfaceLight.withValues(alpha: 0.72);
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        _ArrowChip(
+          icon: Icons.keyboard_arrow_up_rounded,
+          enabled: _canGoUp,
+          iconColor: iconColor,
+          disabledColor: disabledColor,
+          containerColor: containerColor,
+          onPressed: _goUp,
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 6),
+          child: Text(
+            '${focusedIndex + 1}/$cardCount',
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  color: labelColor,
+                  fontWeight: FontWeight.w500,
+                  fontSize: 11,
                 ),
-              ),
-            ),
-          AnimatedPositioned(
-            duration: _dragCenterY == null
-                ? const Duration(milliseconds: 260)
-                : Duration.zero,
-            curve: Curves.easeOutCubic,
-            top: _arrowCenterY - 18,
-            left: 0,
-            child: GestureDetector(
-              behavior: HitTestBehavior.translucent,
-              onVerticalDragUpdate: _handleDragUpdate,
-              onVerticalDragEnd: (_) => _handleDragEnd(),
-              onVerticalDragCancel: _handleDragEnd,
-              child: SizedBox(
-                width: SavedCardsFocusArrowTrack.width,
-                height: 36,
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    color: activeColor,
-                    borderRadius: BorderRadius.circular(10),
-                    boxShadow: [
-                      BoxShadow(
-                        color: activeColor.withValues(alpha: 0.28),
-                        blurRadius: 10,
-                        offset: const Offset(0, 3),
-                      ),
-                    ],
-                  ),
-                  child: Icon(
-                    Icons.arrow_forward_ios_rounded,
-                    size: 14,
-                    color: AppColors.textOnPrimary,
-                  ),
-                ),
-              ),
-            ),
           ),
-        ],
+        ),
+        _ArrowChip(
+          icon: Icons.keyboard_arrow_down_rounded,
+          enabled: _canGoDown,
+          iconColor: iconColor,
+          disabledColor: disabledColor,
+          containerColor: containerColor,
+          onPressed: _goDown,
+        ),
+      ],
+    );
+  }
+}
+
+class _ArrowChip extends StatelessWidget {
+  const _ArrowChip({
+    required this.icon,
+    required this.enabled,
+    required this.iconColor,
+    required this.disabledColor,
+    required this.containerColor,
+    required this.onPressed,
+  });
+
+  final IconData icon;
+  final bool enabled;
+  final Color iconColor;
+  final Color disabledColor;
+  final Color containerColor;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: containerColor,
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10),
+        side: BorderSide(
+          color: (enabled ? iconColor : disabledColor).withValues(alpha: 0.18),
+        ),
+      ),
+      child: InkWell(
+        onTap: enabled ? onPressed : null,
+        borderRadius: BorderRadius.circular(10),
+        child: SizedBox(
+          width: SavedCardsFocusArrowTrack.width,
+          height: 34,
+          child: Icon(
+            icon,
+            size: 22,
+            color: enabled ? iconColor : disabledColor,
+          ),
+        ),
       ),
     );
   }
