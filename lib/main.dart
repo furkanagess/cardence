@@ -59,9 +59,13 @@ void main() async {
     getSavedCardsWalletQuota: result.getSavedCardsWalletQuota,
     addSavedCard: result.addSavedCard,
     deleteSavedCard: result.deleteSavedCard,
+    trackSavedCardContactClick: result.trackSavedCardContactClick,
     upgradeWalletPlan: result.upgradeWalletPlan,
     restoreWalletPurchases: result.restoreWalletPurchases,
     getProfileStats: result.getProfileStats,
+    getPlanEntitlements: result.getPlanEntitlements,
+    getNetworkGraph: result.getNetworkGraph,
+    getNetworkGraphPath: result.getNetworkGraphPath,
     showPostAddCardMonetization: result.showPostAddCardMonetization,
   ));
 }

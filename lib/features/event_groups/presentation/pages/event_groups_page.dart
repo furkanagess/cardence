@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import '../../../../core/l10n/l10n_extensions.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/network/auth_api_exception.dart';
+import '../../../plans/presentation/cubit/plan_cubit.dart';
+import '../../../plans/presentation/cubit/plan_state.dart';
 import '../../../saved_cards/presentation/cubit/saved_cards_cubit.dart';
 import '../../../saved_cards/presentation/cubit/saved_cards_state.dart';
 import '../../../saved_cards/presentation/wallet_paywall_flow.dart';
@@ -79,18 +81,28 @@ class _EventGroupsPageState extends State<EventGroupsPage> {
         .length;
   }
 
+  bool _canAddGroupFromPlan(PlanState planState) {
+    final maxEventGroups = planState.entitlements?.limits.maxEventGroups;
+    return maxEventGroups == null || _groups.length < maxEventGroups;
+  }
+
   Future<void> _createNewEventGroup() async {
     if (_creatingGroup) return;
     setState(() => _creatingGroup = true);
 
     try {
       final savedCardsCubit = context.read<SavedCardsCubit>();
+      final planCubit = context.read<PlanCubit>();
+      final planAllowsGroup = _canAddGroupFromPlan(planCubit.state);
       final quota = savedCardsCubit.state.quota;
-      if (quota != null && !quota.canAddEventGroup) {
+      if (!planAllowsGroup || (quota != null && !quota.canAddEventGroup)) {
         await WalletPaywallFlow.show(
           context,
           cubit: savedCardsCubit,
         );
+        if (mounted) {
+          await planCubit.refresh();
+        }
         return;
       }
 
@@ -113,11 +125,15 @@ class _EventGroupsPageState extends State<EventGroupsPage> {
         );
       } on AuthApiException catch (e) {
         if (!mounted) return;
-        if (e.errorCode == 'PREMIUM_REQUIRED') {
+        if (e.errorCode == 'PREMIUM_REQUIRED' ||
+            e.errorCode == 'PLAN_LIMIT_REACHED') {
           await WalletPaywallFlow.show(
             context,
             cubit: savedCardsCubit,
           );
+          if (mounted) {
+            await context.read<PlanCubit>().refresh();
+          }
           return;
         }
         ScaffoldMessenger.of(context).showSnackBar(
@@ -163,23 +179,28 @@ class _EventGroupsPageState extends State<EventGroupsPage> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<SavedCardsCubit, SavedCardsState>(
-      builder: (context, savedState) {
-        final savedCards = savedState.cards;
-        final canAddGroup = savedState.quota?.canAddEventGroup ?? true;
+    return BlocBuilder<PlanCubit, PlanState>(
+      builder: (context, planState) {
+        return BlocBuilder<SavedCardsCubit, SavedCardsState>(
+          builder: (context, savedState) {
+            final savedCards = savedState.cards;
+            final canAddGroup = _canAddGroupFromPlan(planState) &&
+                (savedState.quota?.canAddEventGroup ?? true);
 
-        return Stack(
-          children: [
-            Positioned.fill(
-              child: _buildContent(context, savedCards),
-            ),
-            Positioned.fill(
-              child: EventGroupsDraggableFab(
-                canAddGroup: canAddGroup,
-                onPressed: _createNewEventGroup,
-              ),
-            ),
-          ],
+            return Stack(
+              children: [
+                Positioned.fill(
+                  child: _buildContent(context, savedCards),
+                ),
+                Positioned.fill(
+                  child: EventGroupsDraggableFab(
+                    canAddGroup: canAddGroup,
+                    onPressed: _createNewEventGroup,
+                  ),
+                ),
+              ],
+            );
+          },
         );
       },
     );
@@ -237,7 +258,10 @@ class _EventGroupsPageState extends State<EventGroupsPage> {
         final meta = EventGroupMetaFormatter.summaryFor(group);
         final subtitle = [
           if (meta != null) meta,
-          if (cardCount == 0) context.l10n.noCardsInGroup else '$cardCount kayıtlı kart',
+          if (cardCount == 0)
+            context.l10n.noCardsInGroup
+          else
+            '$cardCount kayıtlı kart',
         ].join(' · ');
         return Padding(
           padding: const EdgeInsets.only(bottom: 12),

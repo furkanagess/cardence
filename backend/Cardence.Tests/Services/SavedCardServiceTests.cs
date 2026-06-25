@@ -1,0 +1,110 @@
+using Cardence.Application.Interfaces;
+using Cardence.Application.Services;
+using Cardence.Domain.Constants;
+using Cardence.Domain.Entities;
+using FluentAssertions;
+using NSubstitute;
+using Xunit;
+
+namespace Cardence.Tests.Services;
+
+public sealed class SavedCardServiceTests
+{
+    private readonly ISavedCardRepository _savedCardRepository =
+        Substitute.For<ISavedCardRepository>();
+    private readonly IBusinessCardRepository _businessCardRepository =
+        Substitute.For<IBusinessCardRepository>();
+    private readonly IWalletEntitlementRepository _walletRepository =
+        Substitute.For<IWalletEntitlementRepository>();
+    private readonly IEventGroupRepository _eventGroupRepository =
+        Substitute.For<IEventGroupRepository>();
+    private readonly ICardInteractionRepository _cardInteractionRepository =
+        Substitute.For<ICardInteractionRepository>();
+    private readonly ICurrentUserService _currentUser = Substitute.For<ICurrentUserService>();
+    private readonly SavedCardService _service;
+    private readonly Guid _userId = Guid.NewGuid();
+
+    public SavedCardServiceTests()
+    {
+        _currentUser.GetRequiredUserId().Returns(_userId);
+        _savedCardRepository.CountByUserIdAsync(_userId, Arg.Any<CancellationToken>())
+            .Returns(3);
+        _businessCardRepository.CountByUserIdAsync(_userId, Arg.Any<CancellationToken>())
+            .Returns(1);
+        _eventGroupRepository.CountByUserIdAsync(_userId, Arg.Any<CancellationToken>())
+            .Returns(1);
+        _service = new SavedCardService(
+            _savedCardRepository,
+            _businessCardRepository,
+            _walletRepository,
+            _eventGroupRepository,
+            _cardInteractionRepository,
+            _currentUser);
+    }
+
+    [Fact]
+    public async Task GetWalletQuotaAsync_ReturnsFreePlanBusinessCardLimit()
+    {
+        _walletRepository.GetOrCreateAsync(_userId, Arg.Any<CancellationToken>())
+            .Returns(new WalletEntitlement
+            {
+                UserId = _userId,
+                Tier = WalletConstants.FreeTier,
+                MaxCards = WalletConstants.FreeMaxCards,
+            });
+
+        var quota = await _service.GetWalletQuotaAsync();
+
+        quota.Tier.Should().Be(WalletConstants.FreeTier);
+        quota.BusinessCardCount.Should().Be(1);
+        quota.MaxBusinessCards.Should().Be(WalletConstants.FreeMaxBusinessCards);
+        quota.CanAddBusinessCard.Should().BeTrue();
+        quota.EventGroupCount.Should().Be(1);
+        quota.MaxEventGroups.Should().Be(WalletConstants.FreeMaxEventGroups);
+        quota.CanAddEventGroup.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task GetWalletQuotaAsync_ReturnsPremiumUnlimitedEventGroups()
+    {
+        _walletRepository.GetOrCreateAsync(_userId, Arg.Any<CancellationToken>())
+            .Returns(new WalletEntitlement
+            {
+                UserId = _userId,
+                Tier = WalletConstants.PremiumTier,
+                MaxCards = WalletConstants.PremiumMaxCards,
+            });
+        _businessCardRepository.CountByUserIdAsync(_userId, Arg.Any<CancellationToken>())
+            .Returns(WalletConstants.FreeMaxBusinessCards);
+        _eventGroupRepository.CountByUserIdAsync(_userId, Arg.Any<CancellationToken>())
+            .Returns(WalletConstants.FreeMaxEventGroups);
+
+        var quota = await _service.GetWalletQuotaAsync();
+
+        quota.Tier.Should().Be(WalletConstants.PremiumTier);
+        quota.MaxBusinessCards.Should().Be(WalletConstants.PremiumMaxBusinessCards);
+        quota.CanAddBusinessCard.Should().BeTrue();
+        quota.MaxEventGroups.Should().Be(0);
+        quota.CanAddEventGroup.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task UpgradeWalletPlanAsync_DoesNotGrantPremiumDirectly()
+    {
+        _walletRepository.GetOrCreateAsync(_userId, Arg.Any<CancellationToken>())
+            .Returns(new WalletEntitlement
+            {
+                UserId = _userId,
+                Tier = WalletConstants.FreeTier,
+                MaxCards = WalletConstants.FreeMaxCards,
+            });
+
+        var quota = await _service.UpgradeWalletPlanAsync();
+
+        quota.Tier.Should().Be(WalletConstants.FreeTier);
+        await _walletRepository.DidNotReceiveWithAnyArgs()
+            .UpgradeToPremiumAsync(default, default);
+        await _walletRepository.DidNotReceiveWithAnyArgs()
+            .SetTierAsync(default, default!, default, default);
+    }
+}

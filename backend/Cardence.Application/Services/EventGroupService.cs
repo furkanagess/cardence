@@ -276,7 +276,7 @@ public sealed class EventGroupService : IEventGroupService
         {
             throw new ForbiddenException(
                 "Event group limit reached.",
-                ErrorCodes.PremiumRequired);
+                ErrorCodes.PlanLimitReached);
         }
     }
 

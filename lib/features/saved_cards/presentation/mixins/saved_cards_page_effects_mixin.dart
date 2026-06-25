@@ -18,6 +18,7 @@ import '../../domain/usecases/add_saved_card.dart';
 import '../../domain/usecases/delete_saved_card.dart';
 import '../../domain/usecases/get_saved_cards.dart';
 import '../../domain/usecases/save_saved_card.dart';
+import '../../domain/usecases/track_saved_card_contact_click.dart';
 import '../../domain/usecases/upgrade_wallet_plan.dart';
 import '../../../ads/domain/usecases/show_post_add_card_monetization.dart';
 import '../../../subscriptions/domain/usecases/restore_wallet_purchases.dart';
@@ -174,6 +175,7 @@ mixin SavedCardsPageEffectsMixin<T extends StatefulWidget> on State<T> {
     required LinkSavedCardsToEventGroup linkSavedCardsToEventGroup,
     required SaveSavedCard saveSavedCard,
     required DeleteSavedCard deleteSavedCard,
+    required TrackSavedCardContactClick trackSavedCardContactClick,
   }) async {
     final cubit = context.read<SavedCardsCubit>();
     await Navigator.of(context).push<void>(
@@ -187,6 +189,7 @@ mixin SavedCardsPageEffectsMixin<T extends StatefulWidget> on State<T> {
           linkSavedCardsToEventGroup: linkSavedCardsToEventGroup,
           saveSavedCard: saveSavedCard,
           deleteSavedCard: deleteSavedCard,
+          trackSavedCardContactClick: trackSavedCardContactClick,
           onSave: cubit.persistCardUpdate,
         ),
       ),

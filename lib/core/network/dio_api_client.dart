@@ -27,11 +27,13 @@ class DioApiClient {
     String? accessToken,
     required String fallbackError,
     bool requireData = true,
+    Map<String, dynamic>? queryParameters,
   }) {
     return _withAuthRetry(
       (token) async {
         final response = await _dio.get<dynamic>(
           _url(path),
+          queryParameters: queryParameters,
           options: _options(accessToken: token),
         );
         return ApiResponseParser.parseEnvelope(

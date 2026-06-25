@@ -16,6 +16,7 @@ public sealed class BusinessCardService : IBusinessCardService
     private readonly IUserRepository _userRepository;
     private readonly IEventGroupRepository _eventGroupRepository;
     private readonly IWalletEntitlementRepository _walletRepository;
+    private readonly ICardInteractionRepository _cardInteractionRepository;
     private readonly ICurrentUserService _currentUser;
     private readonly IValidator<BusinessCardDto> _validator;
 
@@ -24,6 +25,7 @@ public sealed class BusinessCardService : IBusinessCardService
         IUserRepository userRepository,
         IEventGroupRepository eventGroupRepository,
         IWalletEntitlementRepository walletRepository,
+        ICardInteractionRepository cardInteractionRepository,
         ICurrentUserService currentUser,
         IValidator<BusinessCardDto> validator)
     {
@@ -31,6 +33,7 @@ public sealed class BusinessCardService : IBusinessCardService
         _userRepository = userRepository;
         _eventGroupRepository = eventGroupRepository;
         _walletRepository = walletRepository;
+        _cardInteractionRepository = cardInteractionRepository;
         _currentUser = currentUser;
         _validator = validator;
     }
@@ -165,7 +168,28 @@ public sealed class BusinessCardService : IBusinessCardService
         var card = await _repository.GetByCardIdAsync(cardId, cancellationToken)
             ?? throw new NotFoundException("BusinessCard", cardId);
 
+        await LogPublicInteractionAsync(
+            card,
+            CardInteractionTypes.CardViewed,
+            "public",
+            cancellationToken);
+
         return BusinessCardMapper.ToSharePayload(card);
+    }
+
+    public async Task RecordPublicContactClickAsync(
+        string cardId,
+        string contactType,
+        CancellationToken cancellationToken = default)
+    {
+        var card = await _repository.GetByCardIdAsync(cardId, cancellationToken)
+            ?? throw new NotFoundException("BusinessCard", cardId);
+
+        await LogPublicInteractionAsync(
+            card,
+            CardInteractionTypes.ContactClicked,
+            NormalizeContactType(contactType),
+            cancellationToken);
     }
 
     public async Task<bool> PublicCardExistsAsync(string cardId, CancellationToken cancellationToken = default)
@@ -214,14 +238,47 @@ public sealed class BusinessCardService : IBusinessCardService
         var businessCardCount = await _repository.CountByUserIdAsync(userId, cancellationToken);
         var maxBusinessCards = GetMaxBusinessCards(entitlement.Tier);
 
-        if (businessCardCount >= maxBusinessCards)
+        if (maxBusinessCards.HasValue && businessCardCount >= maxBusinessCards.Value)
         {
             throw new ForbiddenException(
                 "Business card limit reached.",
-                ErrorCodes.BusinessCardLimitReached);
+                ErrorCodes.PlanLimitReached);
         }
     }
 
-    private static int GetMaxBusinessCards(string tier) =>
-        WalletConstants.PremiumMaxBusinessCards;
+    private static int? GetMaxBusinessCards(string tier) =>
+        WalletConstants.GetMaxBusinessCards(tier);
+
+    private async Task LogPublicInteractionAsync(
+        Card card,
+        string eventType,
+        string source,
+        CancellationToken cancellationToken)
+    {
+        await _cardInteractionRepository.AddAsync(
+            new CardInteraction
+            {
+                Id = Guid.NewGuid(),
+                ActorUserId = null,
+                TargetCardEntityId = card.Id,
+                TargetCardPublicId = card.CardId,
+                EventType = eventType,
+                Source = source,
+                OccurredAt = DateTime.UtcNow,
+            },
+            cancellationToken);
+    }
+
+    private static string NormalizeContactType(string? contactType)
+    {
+        var normalized = contactType?.Trim().ToLowerInvariant();
+        return normalized switch
+        {
+            "email" => "email",
+            "phone" => "phone",
+            "linkedin" => "linkedin",
+            "website" => "website",
+            _ => "unknown",
+        };
+    }
 }

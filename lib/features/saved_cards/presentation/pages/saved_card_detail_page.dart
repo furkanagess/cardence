@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import '../../../../core/l10n/l10n_extensions.dart';
 import 'package:flutter/services.dart';
@@ -22,6 +24,7 @@ import '../../domain/entities/saved_card.dart';
 import '../../domain/usecases/delete_saved_card.dart';
 import '../../domain/usecases/get_saved_cards.dart';
 import '../../domain/usecases/save_saved_card.dart';
+import '../../domain/usecases/track_saved_card_contact_click.dart';
 import '../../domain/helpers/saved_card_field_catalog.dart';
 import '../../domain/extensions/saved_card_preview_colors.dart';
 import '../../domain/extensions/saved_card_preview_entries.dart';
@@ -39,6 +42,7 @@ class SavedCardDetailPage extends StatefulWidget {
     this.linkSavedCardsToEventGroup,
     this.saveSavedCard,
     this.deleteSavedCard,
+    this.trackSavedCardContactClick,
     this.heroTag,
   });
 
@@ -50,6 +54,7 @@ class SavedCardDetailPage extends StatefulWidget {
   final LinkSavedCardsToEventGroup? linkSavedCardsToEventGroup;
   final SaveSavedCard? saveSavedCard;
   final DeleteSavedCard? deleteSavedCard;
+  final TrackSavedCardContactClick? trackSavedCardContactClick;
   final String? heroTag;
 
   @override
@@ -99,8 +104,7 @@ class _SavedCardDetailPageState extends State<SavedCardDetailPage> {
 
   bool get _isDemoCard => _card.cardId.startsWith('dummy-');
 
-  bool get _canDeleteCard =>
-      widget.deleteSavedCard != null && !_isDemoCard;
+  bool get _canDeleteCard => widget.deleteSavedCard != null && !_isDemoCard;
 
   double _deleteBarInset(BuildContext context) {
     if (!_canDeleteCard) return 0;
@@ -296,8 +300,7 @@ class _SavedCardDetailPageState extends State<SavedCardDetailPage> {
   }
 
   bool get _canAddFields =>
-      !_isDemoCard &&
-      SavedCardFieldCatalog.addableFields(_card).isNotEmpty;
+      !_isDemoCard && SavedCardFieldCatalog.addableFields(_card).isNotEmpty;
 
   List<SavedCardFieldDefinition> get _infoFields {
     return SavedCardFieldCatalog.filledFields(_card)
@@ -353,7 +356,7 @@ class _SavedCardDetailPageState extends State<SavedCardDetailPage> {
 
     if (def.isLink) {
       trailing = _ContactTrailingAction.openLink;
-      onTap = () => _launchWebsite(value);
+      onTap = () => _launchWebsite(value, contactType: _contactTypeFor(def));
     } else if (def.key == SavedCardFieldKey.email) {
       onTap = _launchEmail;
     } else if (def.key == SavedCardFieldKey.phone) {
@@ -374,8 +377,7 @@ class _SavedCardDetailPageState extends State<SavedCardDetailPage> {
     return _infoFields.map(_contactDataFor).toList();
   }
 
-  List<String> get _skills =>
-      SkillsFormat.parse(_card.skills);
+  List<String> get _skills => SkillsFormat.parse(_card.skills);
 
   List<String> get _visibleContactFields {
     final keys = <String>[];
@@ -431,25 +433,33 @@ class _SavedCardDetailPageState extends State<SavedCardDetailPage> {
   Future<void> _launchLinkedIn() async {
     final linkedin = _card.linkedin?.trim();
     if (linkedin == null || linkedin.isEmpty) return;
-    await _launchWebsite(linkedin, errorMessage: context.l10n.linkedinAlamad);
+    await _launchWebsite(
+      linkedin,
+      contactType: 'linkedin',
+      errorMessage: context.l10n.linkedinAlamad,
+    );
   }
 
   Future<void> _launchEmail() async {
     final email = _card.email?.trim();
     if (email == null || email.isEmpty) return;
+    unawaited(_trackContactClick('email'));
     await ContactLauncher.launchEmail(context, email);
   }
 
   Future<void> _launchPhone() async {
     final phone = _card.phone?.trim();
     if (phone == null || phone.isEmpty) return;
+    unawaited(_trackContactClick('phone'));
     await ContactLauncher.launchPhone(context, phone);
   }
 
   Future<void> _launchWebsite(
     String url, {
+    String contactType = 'website',
     String errorMessage = 'Bağlantı açılamadı',
   }) async {
+    unawaited(_trackContactClick(contactType));
     var normalized = url.trim();
     if (!normalized.startsWith('http://') &&
         !normalized.startsWith('https://')) {
@@ -467,6 +477,25 @@ class _SavedCardDetailPageState extends State<SavedCardDetailPage> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(message), behavior: SnackBarBehavior.floating),
     );
+  }
+
+  String _contactTypeFor(SavedCardFieldDefinition def) {
+    return switch (def.key) {
+      SavedCardFieldKey.linkedin => 'linkedin',
+      SavedCardFieldKey.website => 'website',
+      _ => 'website',
+    };
+  }
+
+  Future<void> _trackContactClick(String contactType) async {
+    final tracker = widget.trackSavedCardContactClick;
+    if (tracker == null) return;
+
+    try {
+      await tracker(cardId: _card.cardId, contactType: contactType);
+    } catch (_) {
+      // Telemetry should never block the user's contact action.
+    }
   }
 
   Future<void> _openNoteEditor() async {
@@ -574,22 +603,22 @@ class _SavedCardDetailPageState extends State<SavedCardDetailPage> {
     final companyName = _card.company?.trim();
 
     final cardPreview = FlippablePersonCard(
-            title: _displayName,
-            titleSecondary: companyName,
-            jobTitle: _card.title?.trim(),
-            photoUrl: _card.photoUrl,
-            accentColor: _card.previewAccentColor,
-            backgroundColor: _card.previewBackgroundColor,
-            frontEntries: const [],
-            backEntries: _previewBackEntries,
-            emptyMessage: context.l10n.kartBilgisiYok,
-            cardId: _card.cardId,
-            contactEmail: _card.email,
-            contactPhone: _card.phone,
-            contactWebsite: _card.website,
-            contactLinkedin: _card.linkedin,
-            visibleContactFields: _visibleContactFields,
-          );
+      title: _displayName,
+      titleSecondary: companyName,
+      jobTitle: _card.title?.trim(),
+      photoUrl: _card.photoUrl,
+      accentColor: _card.previewAccentColor,
+      backgroundColor: _card.previewBackgroundColor,
+      frontEntries: const [],
+      backEntries: _previewBackEntries,
+      emptyMessage: context.l10n.kartBilgisiYok,
+      cardId: _card.cardId,
+      contactEmail: _card.email,
+      contactPhone: _card.phone,
+      contactWebsite: _card.website,
+      contactLinkedin: _card.linkedin,
+      visibleContactFields: _visibleContactFields,
+    );
 
     final preview = Center(
       child: ConstrainedBox(
@@ -608,126 +637,130 @@ class _SavedCardDetailPageState extends State<SavedCardDetailPage> {
         fit: StackFit.expand,
         children: [
           ListView(
-        padding: EdgeInsets.fromLTRB(20, 12, 20, 32 + bottomInset),
-        children: [
-          if (widget.heroTag != null)
-            Hero(
-              tag: widget.heroTag!,
-              child: Material(
-                color: Colors.transparent,
-                child: preview,
-              ),
-            )
-          else
-            preview,
-          if (showQuickActions) ...[
-            const SizedBox(height: 20),
-            _CircularQuickActionsRow(
-              hasLinkedIn: hasLinkedIn,
-              hasEmail: hasEmail,
-              hasPhone: hasPhone,
-              onLinkedIn: _launchLinkedIn,
-              onEmail: _launchEmail,
-              onPhone: _launchPhone,
-            ),
-          ],
-          const SizedBox(height: 24),
-          _DetailSection(
-            title: context.l10n.bilgiler,
-            actionLabel: _canAddFields ? context.l10n.bilgiEkle : null,
-            onAction: _canAddFields ? _openAddFieldFlow : null,
-            child: _contactFields.isEmpty
-                ? _EmptyStateCard(
-                    icon: Icons.contact_page_outlined,
-                    message: _canAddFields
-                        ? 'Henüz ek bilgi yok. Bilgi ekle ile adres, etkinlik ve daha fazlasını ekleyin.'
-                        : 'Bu kartta ek bilgi yok.',
-                    actionLabel: _canAddFields ? context.l10n.bilgiEkle : null,
-                    onAction: _canAddFields ? _openAddFieldFlow : null,
-                  )
-                : _GroupedInfoCard(
-                    children: [
-                      for (var i = 0; i < _contactFields.length; i++) ...[
-                        if (i > 0)
-                          Divider(
-                            height: 1,
-                            color: colorScheme.outlineVariant
-                                .withValues(alpha: 0.5),
-                          ),
-                        _ContactFieldRow(
-                          field: _contactFields[i],
-                          onCopy: () => _copyToClipboard(
-                            _contactFields[i].label,
-                            _contactFields[i].value,
-                          ),
-                        ),
-                      ],
-                    ],
+            padding: EdgeInsets.fromLTRB(20, 12, 20, 32 + bottomInset),
+            children: [
+              if (widget.heroTag != null)
+                Hero(
+                  tag: widget.heroTag!,
+                  child: Material(
+                    color: Colors.transparent,
+                    child: preview,
                   ),
-          ),
-          if (_skills.isNotEmpty) ...[
-            const SizedBox(height: 24),
-            _DetailSection(
-              title: context.l10n.yetenekler,
-              actionLabel: SavedCardFieldCatalog.byKey(SavedCardFieldKey.skills)!
-                      .isEditable(_card)
-                  ? context.l10n.dzenle
-                  : null,
-              onAction: SavedCardFieldCatalog.byKey(SavedCardFieldKey.skills)!
-                      .isEditable(_card)
-                  ? () => _openEditField(
-                        SavedCardFieldCatalog.byKey(SavedCardFieldKey.skills)!,
+                )
+              else
+                preview,
+              if (showQuickActions) ...[
+                const SizedBox(height: 20),
+                _CircularQuickActionsRow(
+                  hasLinkedIn: hasLinkedIn,
+                  hasEmail: hasEmail,
+                  hasPhone: hasPhone,
+                  onLinkedIn: _launchLinkedIn,
+                  onEmail: _launchEmail,
+                  onPhone: _launchPhone,
+                ),
+              ],
+              const SizedBox(height: 24),
+              _DetailSection(
+                title: context.l10n.bilgiler,
+                actionLabel: _canAddFields ? context.l10n.bilgiEkle : null,
+                onAction: _canAddFields ? _openAddFieldFlow : null,
+                child: _contactFields.isEmpty
+                    ? _EmptyStateCard(
+                        icon: Icons.contact_page_outlined,
+                        message: _canAddFields
+                            ? 'Henüz ek bilgi yok. Bilgi ekle ile adres, etkinlik ve daha fazlasını ekleyin.'
+                            : 'Bu kartta ek bilgi yok.',
+                        actionLabel:
+                            _canAddFields ? context.l10n.bilgiEkle : null,
+                        onAction: _canAddFields ? _openAddFieldFlow : null,
                       )
-                  : null,
-              child: SkillsChipDisplay(
-                skills: _skills,
-                onSkillTap: (skill) => _copyToClipboard('Yetenek', skill),
-              ),
-            ),
-          ],
-          const SizedBox(height: 24),
-          _DetailSection(
-            title: context.l10n.katldEtkinlikler,
-            child: AnimatedSwitcher(
-              duration: const Duration(milliseconds: 220),
-              switchInCurve: Curves.easeOut,
-              switchOutCurve: Curves.easeIn,
-              child: _loadingGroups
-                  ? const _EventGroupsLoadingSkeleton(
-                      key: ValueKey('event_groups_loading'),
-                    )
-                  : _EventGroupsChipRow(
-                      key: ValueKey(
-                        'event_groups_chips_${_linkedGroups.length}',
+                    : _GroupedInfoCard(
+                        children: [
+                          for (var i = 0; i < _contactFields.length; i++) ...[
+                            if (i > 0)
+                              Divider(
+                                height: 1,
+                                color: colorScheme.outlineVariant
+                                    .withValues(alpha: 0.5),
+                              ),
+                            _ContactFieldRow(
+                              field: _contactFields[i],
+                              onCopy: () => _copyToClipboard(
+                                _contactFields[i].label,
+                                _contactFields[i].value,
+                              ),
+                            ),
+                          ],
+                        ],
                       ),
-                      groups: _linkedGroups,
-                      canOpenDetail: _canOpenGroupDetail,
-                      canAddMore: _canAddToMoreGroups || !_hasLinkedGroups,
-                      onGroupTap: _openEventGroupDetail,
-                      onAdd: _openAddToEventGroupsSheet,
-                    ),
-            ),
-          ),
-          const SizedBox(height: 24),
-          _DetailSection(
-            title: context.l10n.notlar,
-            child: _NotesContainer(
-              note: _card.note,
-              onAddOrEdit: _openNoteEditor,
-            ),
-          ),
-          const SizedBox(height: 12),
-          Center(
-            child: Text(
-              _savedAtDescription(_card.savedAt),
-              textAlign: TextAlign.center,
-              style: textTheme.labelSmall?.copyWith(
-                color: colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
               ),
-            ),
+              if (_skills.isNotEmpty) ...[
+                const SizedBox(height: 24),
+                _DetailSection(
+                  title: context.l10n.yetenekler,
+                  actionLabel:
+                      SavedCardFieldCatalog.byKey(SavedCardFieldKey.skills)!
+                              .isEditable(_card)
+                          ? context.l10n.dzenle
+                          : null,
+                  onAction:
+                      SavedCardFieldCatalog.byKey(SavedCardFieldKey.skills)!
+                              .isEditable(_card)
+                          ? () => _openEditField(
+                                SavedCardFieldCatalog.byKey(
+                                    SavedCardFieldKey.skills)!,
+                              )
+                          : null,
+                  child: SkillsChipDisplay(
+                    skills: _skills,
+                    onSkillTap: (skill) => _copyToClipboard('Yetenek', skill),
+                  ),
+                ),
+              ],
+              const SizedBox(height: 24),
+              _DetailSection(
+                title: context.l10n.katldEtkinlikler,
+                child: AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 220),
+                  switchInCurve: Curves.easeOut,
+                  switchOutCurve: Curves.easeIn,
+                  child: _loadingGroups
+                      ? const _EventGroupsLoadingSkeleton(
+                          key: ValueKey('event_groups_loading'),
+                        )
+                      : _EventGroupsChipRow(
+                          key: ValueKey(
+                            'event_groups_chips_${_linkedGroups.length}',
+                          ),
+                          groups: _linkedGroups,
+                          canOpenDetail: _canOpenGroupDetail,
+                          canAddMore: _canAddToMoreGroups || !_hasLinkedGroups,
+                          onGroupTap: _openEventGroupDetail,
+                          onAdd: _openAddToEventGroupsSheet,
+                        ),
+                ),
+              ),
+              const SizedBox(height: 24),
+              _DetailSection(
+                title: context.l10n.notlar,
+                child: _NotesContainer(
+                  note: _card.note,
+                  onAddOrEdit: _openNoteEditor,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Center(
+                child: Text(
+                  _savedAtDescription(_card.savedAt),
+                  textAlign: TextAlign.center,
+                  style: textTheme.labelSmall?.copyWith(
+                    color: colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
+                  ),
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
           if (_canDeleteCard)
             Positioned(
               left: 0,
@@ -1152,7 +1185,8 @@ class _EventGroupsChipRow extends StatelessWidget {
               style: TextStyle(color: colorScheme.primary),
             ),
             onPressed: onAdd,
-            backgroundColor: colorScheme.primaryContainer.withValues(alpha: 0.35),
+            backgroundColor:
+                colorScheme.primaryContainer.withValues(alpha: 0.35),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(20),
               side: BorderSide(

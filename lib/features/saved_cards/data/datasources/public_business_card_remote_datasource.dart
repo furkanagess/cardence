@@ -5,6 +5,11 @@ import '../../domain/entities/card_share_payload.dart';
 
 abstract class PublicBusinessCardRemoteDataSource {
   Future<CardSharePayload?> fetchSharePayload(String cardId);
+
+  Future<void> trackContactClick({
+    required String cardId,
+    required String contactType,
+  });
 }
 
 class PublicBusinessCardRemoteDataSourceImpl
@@ -29,6 +34,31 @@ class PublicBusinessCardRemoteDataSourceImpl
       return CardSharePayload.fromJson(data);
     } on AuthApiException catch (e) {
       if (e.statusCode == 404) return null;
+      rethrow;
+    }
+  }
+
+  @override
+  Future<void> trackContactClick({
+    required String cardId,
+    required String contactType,
+  }) async {
+    final id = cardId.trim();
+    final type = contactType.trim();
+    if (id.isEmpty || type.isEmpty) return;
+
+    try {
+      await _client.post(
+        '/PublicBusinessCardContactClick',
+        queryParameters: {
+          'cardId': id,
+          'contactType': type,
+        },
+        fallbackError: 'Etkileşim kaydedilemedi.',
+        requireData: false,
+      );
+    } on AuthApiException catch (e) {
+      if (e.statusCode == 404) return;
       rethrow;
     }
   }

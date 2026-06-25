@@ -15,11 +15,16 @@ import '../../../saved_cards/domain/usecases/get_saved_cards.dart';
 import '../../../saved_cards/domain/usecases/get_saved_cards_wallet_quota.dart';
 import '../../../saved_cards/domain/usecases/link_saved_cards_to_event_group.dart';
 import '../../../saved_cards/domain/usecases/save_saved_card.dart';
+import '../../../saved_cards/domain/usecases/track_saved_card_contact_click.dart';
 import '../../../saved_cards/domain/usecases/upgrade_wallet_plan.dart';
 import '../../../subscriptions/domain/usecases/restore_wallet_purchases.dart';
 import '../../../ads/domain/usecases/show_post_add_card_monetization.dart';
 import '../../../event_groups/presentation/pages/event_groups_page.dart';
 import '../../../onboarding/domain/entities/onboarding_card_draft.dart';
+import '../../../network_graph/domain/usecases/get_network_graph.dart';
+import '../../../network_graph/domain/usecases/get_network_graph_path.dart';
+import '../../../plans/domain/usecases/get_plan_entitlements.dart';
+import '../../../plans/presentation/cubit/plan_cubit.dart';
 import '../../../profile/domain/usecases/get_profile_stats.dart';
 import '../../../profile/presentation/pages/profile_page.dart';
 import '../../../onboarding/domain/usecases/get_onboarding_draft_card.dart';
@@ -55,9 +60,13 @@ class MainShellPage extends StatefulWidget {
     required this.getSavedCardsWalletQuota,
     required this.addSavedCard,
     required this.deleteSavedCard,
+    required this.trackSavedCardContactClick,
     required this.upgradeWalletPlan,
     required this.restoreWalletPurchases,
     required this.getCurrentUser,
+    required this.getPlanEntitlements,
+    required this.getNetworkGraph,
+    required this.getNetworkGraphPath,
     required this.showPostAddCardMonetization,
     required this.themePreference,
     required this.onThemeChanged,
@@ -84,9 +93,13 @@ class MainShellPage extends StatefulWidget {
   final GetSavedCardsWalletQuota getSavedCardsWalletQuota;
   final AddSavedCard addSavedCard;
   final DeleteSavedCard deleteSavedCard;
+  final TrackSavedCardContactClick trackSavedCardContactClick;
   final UpgradeWalletPlan upgradeWalletPlan;
   final RestoreWalletPurchases restoreWalletPurchases;
   final GetCurrentUser getCurrentUser;
+  final GetPlanEntitlements getPlanEntitlements;
+  final GetNetworkGraph getNetworkGraph;
+  final GetNetworkGraphPath getNetworkGraphPath;
   final ShowPostAddCardMonetization showPostAddCardMonetization;
   final ThemePreference themePreference;
   final ValueChanged<ThemePreference> onThemeChanged;
@@ -105,8 +118,8 @@ class MainShellPage extends StatefulWidget {
 class _MainShellPageState extends State<MainShellPage> {
   int _currentIndex = 0;
   OnboardingCardDraft? _myCardDraft;
-  int _savedCardsFilterTrigger = 0;
-  int _savedCardsAddCardTrigger = 0;
+  final int _savedCardsFilterTrigger = 0;
+  final int _savedCardsAddCardTrigger = 0;
   bool _openingSettings = false;
 
   @override
@@ -152,70 +165,81 @@ class _MainShellPageState extends State<MainShellPage> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => SavedCardsCubit(
-        getSavedCards: widget.getSavedCards,
-        saveSavedCard: widget.saveSavedCard,
-        getEventGroups: widget.getEventGroups,
-        getSavedCardsWalletQuota: widget.getSavedCardsWalletQuota,
-        upgradeWalletPlan: widget.upgradeWalletPlan,
-      )..load(),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(
+          create: (_) => SavedCardsCubit(
+            getSavedCards: widget.getSavedCards,
+            saveSavedCard: widget.saveSavedCard,
+            getEventGroups: widget.getEventGroups,
+            getSavedCardsWalletQuota: widget.getSavedCardsWalletQuota,
+            upgradeWalletPlan: widget.upgradeWalletPlan,
+          )..load(),
+        ),
+        BlocProvider(
+          create: (_) => PlanCubit(
+            getPlanEntitlements: widget.getPlanEntitlements,
+          )..load(),
+        ),
+      ],
       child: _PostOnboardingPaywallGate(
         enabled: widget.showPostOnboardingPaywall,
         child: CardenceScaffold(
-        appBar: _buildAppBar(context),
-        body: IndexedStack(
-          index: _currentIndex,
-          children: [
-            SavedCardsPage(
-              getEventGroups: widget.getEventGroups,
-              getSavedCards: widget.getSavedCards,
-              deleteEventGroup: widget.deleteEventGroup,
-              linkSavedCardsToEventGroup: widget.linkSavedCardsToEventGroup,
-              saveSavedCard: widget.saveSavedCard,
-              deleteSavedCard: widget.deleteSavedCard,
-              addSavedCard: widget.addSavedCard,
-              upgradeWalletPlan: widget.upgradeWalletPlan,
-              restoreWalletPurchases: widget.restoreWalletPurchases,
-              showPostAddCardMonetization: widget.showPostAddCardMonetization,
-              filterTrigger: _savedCardsFilterTrigger,
-              addCardTrigger: _savedCardsAddCardTrigger,
-            ),
-            EventGroupsPage(
-              getEventGroups: widget.getEventGroups,
-              createEventGroup: widget.createEventGroup,
-              deleteEventGroup: widget.deleteEventGroup,
-              linkSavedCardsToEventGroup: widget.linkSavedCardsToEventGroup,
-              getSavedCards: widget.getSavedCards,
-              saveSavedCard: widget.saveSavedCard,
-              deleteSavedCard: widget.deleteSavedCard,
-              restoreWalletPurchases: widget.restoreWalletPurchases,
-            ),
-            ProfilePage(
-              draft: _myCardDraft,
-              getOnboardingDraftCards: widget.getOnboardingDraftCards,
-              persistOnboardingCard: widget.persistOnboardingCard,
-              getProfileStats: widget.getProfileStats,
-              getSavedCardsWalletQuota: widget.getSavedCardsWalletQuota,
-              onDraftUpdated: (updated) =>
-                  setState(() => _myCardDraft = updated),
-            ),
-          ],
-        ),
-        extendBody: true,
-        bottomNavigationBar: SafeArea(
-          top: false,
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(24, 0, 24, 16),
-            child: _LiquidGlassBottomNavBar(
-              currentIndex: _currentIndex,
-              itemCount: 3,
-              onTap: (index) => setState(() => _currentIndex = index),
+          appBar: _buildAppBar(context),
+          body: IndexedStack(
+            index: _currentIndex,
+            children: [
+              SavedCardsPage(
+                getEventGroups: widget.getEventGroups,
+                getSavedCards: widget.getSavedCards,
+                deleteEventGroup: widget.deleteEventGroup,
+                linkSavedCardsToEventGroup: widget.linkSavedCardsToEventGroup,
+                saveSavedCard: widget.saveSavedCard,
+                deleteSavedCard: widget.deleteSavedCard,
+                addSavedCard: widget.addSavedCard,
+                upgradeWalletPlan: widget.upgradeWalletPlan,
+                trackSavedCardContactClick: widget.trackSavedCardContactClick,
+                restoreWalletPurchases: widget.restoreWalletPurchases,
+                showPostAddCardMonetization: widget.showPostAddCardMonetization,
+                filterTrigger: _savedCardsFilterTrigger,
+                addCardTrigger: _savedCardsAddCardTrigger,
+              ),
+              EventGroupsPage(
+                getEventGroups: widget.getEventGroups,
+                createEventGroup: widget.createEventGroup,
+                deleteEventGroup: widget.deleteEventGroup,
+                linkSavedCardsToEventGroup: widget.linkSavedCardsToEventGroup,
+                getSavedCards: widget.getSavedCards,
+                saveSavedCard: widget.saveSavedCard,
+                deleteSavedCard: widget.deleteSavedCard,
+                restoreWalletPurchases: widget.restoreWalletPurchases,
+              ),
+              ProfilePage(
+                draft: _myCardDraft,
+                getOnboardingDraftCards: widget.getOnboardingDraftCards,
+                persistOnboardingCard: widget.persistOnboardingCard,
+                getProfileStats: widget.getProfileStats,
+                getNetworkGraph: widget.getNetworkGraph,
+                getNetworkGraphPath: widget.getNetworkGraphPath,
+                onDraftUpdated: (updated) =>
+                    setState(() => _myCardDraft = updated),
+              ),
+            ],
+          ),
+          extendBody: true,
+          bottomNavigationBar: SafeArea(
+            top: false,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(24, 0, 24, 16),
+              child: _LiquidGlassBottomNavBar(
+                currentIndex: _currentIndex,
+                itemCount: 3,
+                onTap: (index) => setState(() => _currentIndex = index),
+              ),
             ),
           ),
         ),
       ),
-    ),
     );
   }
 
@@ -483,7 +507,8 @@ class _PostOnboardingPaywallGate extends StatefulWidget {
       _PostOnboardingPaywallGateState();
 }
 
-class _PostOnboardingPaywallGateState extends State<_PostOnboardingPaywallGate> {
+class _PostOnboardingPaywallGateState
+    extends State<_PostOnboardingPaywallGate> {
   bool _handled = false;
 
   @override

@@ -10,6 +10,7 @@ import '../../domain/usecases/add_saved_card.dart';
 import '../../domain/usecases/delete_saved_card.dart';
 import '../../domain/usecases/get_saved_cards.dart';
 import '../../domain/usecases/save_saved_card.dart';
+import '../../domain/usecases/track_saved_card_contact_click.dart';
 import '../../domain/usecases/upgrade_wallet_plan.dart';
 import '../../../subscriptions/domain/usecases/restore_wallet_purchases.dart';
 import '../../../ads/domain/usecases/show_post_add_card_monetization.dart';
@@ -41,6 +42,7 @@ class SavedCardsPage extends StatefulWidget {
     required this.linkSavedCardsToEventGroup,
     required this.saveSavedCard,
     required this.deleteSavedCard,
+    required this.trackSavedCardContactClick,
   });
 
   final int filterTrigger;
@@ -55,6 +57,7 @@ class SavedCardsPage extends StatefulWidget {
   final LinkSavedCardsToEventGroup linkSavedCardsToEventGroup;
   final SaveSavedCard saveSavedCard;
   final DeleteSavedCard deleteSavedCard;
+  final TrackSavedCardContactClick trackSavedCardContactClick;
 
   @override
   State<SavedCardsPage> createState() => _SavedCardsPageState();
@@ -291,16 +294,16 @@ class _SavedCardsPageState extends State<SavedCardsPage>
                                             heroTag: heroTag,
                                             getEventGroups:
                                                 widget.getEventGroups,
-                                            getSavedCards:
-                                                widget.getSavedCards,
+                                            getSavedCards: widget.getSavedCards,
                                             deleteEventGroup:
                                                 widget.deleteEventGroup,
                                             linkSavedCardsToEventGroup: widget
                                                 .linkSavedCardsToEventGroup,
-                                            saveSavedCard:
-                                                widget.saveSavedCard,
+                                            saveSavedCard: widget.saveSavedCard,
                                             deleteSavedCard:
                                                 widget.deleteSavedCard,
+                                            trackSavedCardContactClick: widget
+                                                .trackSavedCardContactClick,
                                           ),
                                         ),
                                       ),
@@ -336,6 +339,8 @@ class _SavedCardsPageState extends State<SavedCardsPage>
                                           widget.linkSavedCardsToEventGroup,
                                       saveSavedCard: widget.saveSavedCard,
                                       deleteSavedCard: widget.deleteSavedCard,
+                                      trackSavedCardContactClick:
+                                          widget.trackSavedCardContactClick,
                                     ),
                                     horizontalPadding: horizontalPadding,
                                     topPadding: topPadding,

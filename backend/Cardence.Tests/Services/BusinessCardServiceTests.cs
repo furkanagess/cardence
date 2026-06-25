@@ -19,6 +19,8 @@ public sealed class BusinessCardServiceTests
         Substitute.For<IEventGroupRepository>();
     private readonly IWalletEntitlementRepository _walletRepository =
         Substitute.For<IWalletEntitlementRepository>();
+    private readonly ICardInteractionRepository _cardInteractionRepository =
+        Substitute.For<ICardInteractionRepository>();
     private readonly ICurrentUserService _currentUser = Substitute.For<ICurrentUserService>();
     private readonly BusinessCardService _service;
     private readonly Guid _userId = Guid.NewGuid();
@@ -39,6 +41,7 @@ public sealed class BusinessCardServiceTests
             _userRepository,
             _eventGroupRepository,
             _walletRepository,
+            _cardInteractionRepository,
             _currentUser,
             new BusinessCardDtoValidator());
     }
@@ -80,7 +83,30 @@ public sealed class BusinessCardServiceTests
 
         var act = () => _service.CreateAsync(ValidCardRequest());
 
-        await act.Should().ThrowAsync<ForbiddenException>();
+        var exception = await act.Should().ThrowAsync<ForbiddenException>();
+        exception.Which.Code.Should().Be("PLAN_LIMIT_REACHED");
+    }
+
+    [Fact]
+    public async Task CreateAsync_AllowsPremiumUser_WhenFreeBusinessCardLimitReached()
+    {
+        _walletRepository.GetOrCreateAsync(_userId, Arg.Any<CancellationToken>())
+            .Returns(new WalletEntitlement
+            {
+                UserId = _userId,
+                Tier = WalletConstants.PremiumTier,
+                MaxCards = WalletConstants.PremiumMaxCards,
+            });
+        _repository.CountByUserIdAsync(_userId, Arg.Any<CancellationToken>())
+            .Returns(WalletConstants.FreeMaxBusinessCards);
+        _repository.CardIdExistsAsync(Arg.Any<string>(), null, Arg.Any<CancellationToken>())
+            .Returns(false);
+
+        await _service.CreateAsync(ValidCardRequest());
+
+        await _repository.Received(1).AddAsync(
+            Arg.Is<Card>(card => card.UserId == _userId),
+            Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -129,6 +155,39 @@ public sealed class BusinessCardServiceTests
         payload.Should().ContainKey("n");
         payload.Should().ContainKey("e");
         payload.Should().NotContainKey("p");
+        await _cardInteractionRepository.Received(1).AddAsync(
+            Arg.Is<CardInteraction>(interaction =>
+                interaction.TargetCardPublicId == cardId &&
+                interaction.EventType == CardInteractionTypes.CardViewed &&
+                interaction.Source == "public"),
+            Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task RecordPublicContactClickAsync_WritesContactInteraction()
+    {
+        var cardId = "482917";
+        var card = new Card
+        {
+            Id = Guid.NewGuid(),
+            UserId = _userId,
+            CardId = cardId,
+            DisplayName = "Furkan Çağlar",
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow,
+        };
+        _repository.GetByCardIdAsync(cardId, Arg.Any<CancellationToken>())
+            .Returns(card);
+
+        await _service.RecordPublicContactClickAsync(cardId, "linkedin");
+
+        await _cardInteractionRepository.Received(1).AddAsync(
+            Arg.Is<CardInteraction>(interaction =>
+                interaction.TargetCardEntityId == card.Id &&
+                interaction.TargetCardPublicId == cardId &&
+                interaction.EventType == CardInteractionTypes.ContactClicked &&
+                interaction.Source == "linkedin"),
+            Arg.Any<CancellationToken>());
     }
 
     private static BusinessCardDto ValidCardRequest(

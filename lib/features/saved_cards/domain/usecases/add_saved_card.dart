@@ -33,12 +33,15 @@ class AddSavedCard {
       if (e.statusCode == 409 || e.errorCode == 'WALLET_DUPLICATE_CARD') {
         return const AddSavedCardDuplicate();
       }
-      if (e.statusCode == 403 || e.errorCode == 'WALLET_LIMIT_REACHED') {
+      if (e.statusCode == 403 ||
+          e.errorCode == 'WALLET_LIMIT_REACHED' ||
+          e.errorCode == 'PLAN_LIMIT_REACHED') {
         final quota = await _cardRepository.getWalletQuota();
         return AddSavedCardLimitReached(quota);
       }
       if (e.statusCode == 403 &&
           (e.errorCode == 'PREMIUM_REQUIRED' ||
+              e.errorCode == 'SUBSCRIPTION_REQUIRED' ||
               e.errorCode == 'BUSINESS_CARD_LIMIT_REACHED')) {
         final quota = await _cardRepository.getWalletQuota();
         return AddSavedCardPremiumRequired(quota);

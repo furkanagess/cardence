@@ -209,6 +209,61 @@ namespace Cardence.Infrastructure.Migrations
                     b.ToTable("cards", (string)null);
                 });
 
+            modelBuilder.Entity("Cardence.Domain.Entities.CardInteraction", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("ActorUserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("actor_user_id");
+
+                    b.Property<string>("EventType")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)")
+                        .HasColumnName("event_type");
+
+                    b.Property<DateTime>("OccurredAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("occurred_at");
+
+                    b.Property<Guid?>("OrganizationEventId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("organization_event_id");
+
+                    b.Property<string>("Source")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)")
+                        .HasColumnName("source");
+
+                    b.Property<Guid>("TargetCardEntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("target_card_entity_id");
+
+                    b.Property<string>("TargetCardPublicId")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("target_card_public_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ActorUserId");
+
+                    b.HasIndex("OccurredAt");
+
+                    b.HasIndex("TargetCardEntityId");
+
+                    b.HasIndex("TargetCardPublicId");
+
+                    b.HasIndex("TargetCardPublicId", "EventType");
+
+                    b.ToTable("card_interactions", (string)null);
+                });
+
             modelBuilder.Entity("Cardence.Domain.Entities.EventGroup", b =>
                 {
                     b.Property<Guid>("Id")
@@ -474,6 +529,53 @@ namespace Cardence.Infrastructure.Migrations
                     b.ToTable("support_requests", (string)null);
                 });
 
+            modelBuilder.Entity("Cardence.Domain.Entities.SubscriptionEvent", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("EventType")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("character varying(80)")
+                        .HasColumnName("event_type");
+
+                    b.Property<string>("PayloadJson")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("payload_json");
+
+                    b.Property<DateTime>("ProcessedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("processed_at");
+
+                    b.Property<string>("Provider")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)")
+                        .HasColumnName("provider");
+
+                    b.Property<string>("ProviderEventId")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("provider_event_id");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("Provider", "ProviderEventId")
+                        .IsUnique();
+
+                    b.ToTable("subscription_events", (string)null);
+                });
+
             modelBuilder.Entity("Cardence.Domain.Entities.User", b =>
                 {
                     b.Property<Guid>("Id")
@@ -601,6 +703,24 @@ namespace Cardence.Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("Cardence.Domain.Entities.CardInteraction", b =>
+                {
+                    b.HasOne("Cardence.Domain.Entities.User", "ActorUser")
+                        .WithMany()
+                        .HasForeignKey("ActorUserId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("Cardence.Domain.Entities.Card", "TargetCard")
+                        .WithMany()
+                        .HasForeignKey("TargetCardEntityId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ActorUser");
+
+                    b.Navigation("TargetCard");
+                });
+
             modelBuilder.Entity("Cardence.Domain.Entities.EventGroup", b =>
                 {
                     b.HasOne("Cardence.Domain.Entities.User", "User")
@@ -643,6 +763,17 @@ namespace Cardence.Infrastructure.Migrations
                 });
 
             modelBuilder.Entity("Cardence.Domain.Entities.SupportRequest", b =>
+                {
+                    b.HasOne("Cardence.Domain.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Cardence.Domain.Entities.SubscriptionEvent", b =>
                 {
                     b.HasOne("Cardence.Domain.Entities.User", "User")
                         .WithMany()

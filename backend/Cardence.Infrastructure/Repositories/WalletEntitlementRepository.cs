@@ -44,9 +44,22 @@ public sealed class WalletEntitlementRepository : IWalletEntitlementRepository
         Guid userId,
         CancellationToken cancellationToken = default)
     {
+        return await SetTierAsync(
+            userId,
+            WalletConstants.PremiumTier,
+            WalletConstants.PremiumMaxCards,
+            cancellationToken);
+    }
+
+    public async Task<WalletEntitlement> SetTierAsync(
+        Guid userId,
+        string tier,
+        int maxCards,
+        CancellationToken cancellationToken = default)
+    {
         var entitlement = await GetOrCreateAsync(userId, cancellationToken);
-        entitlement.Tier = WalletConstants.PremiumTier;
-        entitlement.MaxCards = WalletConstants.PremiumMaxCards;
+        entitlement.Tier = WalletConstants.NormalizeTier(tier);
+        entitlement.MaxCards = maxCards;
         entitlement.UpdatedAt = DateTime.UtcNow;
         await _dbContext.SaveChangesAsync(cancellationToken);
         return entitlement;

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/l10n/l10n_extensions.dart';
 
 import '../../../../core/widgets/atoms/custom_button.dart';
+import '../../../plans/presentation/cubit/plan_cubit.dart';
 import '../../../subscriptions/domain/usecases/restore_wallet_purchases.dart';
 
 enum WalletUpgradeSheetResult {
@@ -47,7 +49,8 @@ class WalletUpgradeSheet extends StatelessWidget {
           children: [
             Text(
               context.l10n.premiumCzdan,
-              style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600),
+              style:
+                  textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 8),
             Text(
@@ -96,6 +99,8 @@ class WalletUpgradeSheet extends StatelessWidget {
                 final restored = await restoreWalletPurchases();
                 if (!context.mounted) return;
                 if (restored) {
+                  await _refreshPlanIfAvailable(context);
+                  if (!context.mounted) return;
                   Navigator.of(context).pop(WalletUpgradeSheetResult.restored);
                   return;
                 }
@@ -120,6 +125,14 @@ class WalletUpgradeSheet extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Future<void> _refreshPlanIfAvailable(BuildContext context) async {
+    try {
+      await context.read<PlanCubit>().refresh();
+    } catch (_) {
+      // This sheet can be shown from legacy contexts without a PlanCubit.
+    }
   }
 }
 

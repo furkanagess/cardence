@@ -1,17 +1,22 @@
 import 'package:flutter/material.dart';
 import '../../../../core/l10n/l10n_extensions.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/utils/card_id_generator.dart';
 import '../../../../core/widgets/atoms/custom_button.dart';
 import '../../../my_cards/presentation/pages/my_card_edit_page.dart';
 import '../../../settings/presentation/pages/card_visibility_settings_page.dart';
+import '../../../network_graph/domain/usecases/get_network_graph.dart';
+import '../../../network_graph/domain/usecases/get_network_graph_path.dart';
+import '../../../network_graph/presentation/pages/network_graph_page.dart';
 import '../../../onboarding/domain/entities/onboarding_card_draft.dart';
 import '../../../onboarding/domain/usecases/get_onboarding_draft_cards.dart';
 import '../../../onboarding/presentation/widgets/onboarding_card_preview_frame.dart';
 import '../../../business_cards/domain/usecases/persist_onboarding_card.dart';
 import '../../domain/entities/profile_stats.dart';
-import '../../../saved_cards/domain/entities/saved_cards_wallet_quota.dart';
-import '../../../saved_cards/domain/usecases/get_saved_cards_wallet_quota.dart';
+import '../../../plans/presentation/cubit/plan_cubit.dart';
+import '../../../saved_cards/presentation/cubit/saved_cards_cubit.dart';
+import '../../../saved_cards/presentation/wallet_paywall_flow.dart';
 import '../../domain/usecases/get_profile_stats.dart';
 import '../widgets/profile_interaction_stats.dart';
 import '../widgets/profile_loading_shimmer.dart';
@@ -28,7 +33,8 @@ class ProfilePage extends StatefulWidget {
     required this.getOnboardingDraftCards,
     required this.persistOnboardingCard,
     required this.getProfileStats,
-    required this.getSavedCardsWalletQuota,
+    required this.getNetworkGraph,
+    required this.getNetworkGraphPath,
     this.onDraftUpdated,
   });
 
@@ -36,7 +42,8 @@ class ProfilePage extends StatefulWidget {
   final GetOnboardingDraftCards getOnboardingDraftCards;
   final PersistOnboardingCard persistOnboardingCard;
   final GetProfileStats getProfileStats;
-  final GetSavedCardsWalletQuota getSavedCardsWalletQuota;
+  final GetNetworkGraph getNetworkGraph;
+  final GetNetworkGraphPath getNetworkGraphPath;
   final ValueChanged<OnboardingCardDraft>? onDraftUpdated;
 
   @override
@@ -69,20 +76,25 @@ class _ProfilePageState extends State<ProfilePage> {
   Future<void> _loadPageData() async {
     setState(() => _loading = true);
     try {
+      final planCubit = context.read<PlanCubit>();
       final results = await Future.wait([
         widget.getOnboardingDraftCards(),
         widget.getProfileStats(),
-        widget.getSavedCardsWalletQuota(),
       ]);
+      if (planCubit.state.entitlements == null) {
+        await planCubit.refresh();
+      }
       if (!mounted) return;
       final list = results[0] as List<OnboardingCardDraft>;
       final stats = results[1] as ProfileStats;
-      final quota = results[2] as SavedCardsWalletQuota;
+      final plan = planCubit.state.entitlements;
+      final maxBusinessCards = plan?.limits.maxBusinessCards;
       setState(() {
         _cards = list;
         _stats = stats;
-        _canAddBusinessCard = quota.canAddBusinessCard;
-        _isPremium = quota.isPremium;
+        _canAddBusinessCard =
+            maxBusinessCards == null || list.length < maxBusinessCards;
+        _isPremium = plan?.isPremiumOrHigher ?? false;
         if (_selectedIndex >= list.length) {
           _selectedIndex = list.isEmpty ? 0 : list.length - 1;
         }
@@ -144,14 +156,13 @@ class _ProfilePageState extends State<ProfilePage> {
   Future<void> _createNewCard() async {
     if (!_canAddBusinessCard) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            context.l10n.cretsizPlandaYalnzca1Kart,
-          ),
-          behavior: SnackBarBehavior.floating,
-        ),
+      await WalletPaywallFlow.show(
+        context,
+        cubit: context.read<SavedCardsCubit>(),
       );
+      if (!mounted) return;
+      await context.read<PlanCubit>().refresh();
+      await _loadPageData();
       return;
     }
 
@@ -168,6 +179,42 @@ class _ProfilePageState extends State<ProfilePage> {
           : List.from(base.backVisibleFields),
     );
     await _openCardEditor(newCard, isNew: true);
+  }
+
+  Future<void> _openNetworkGraph() async {
+    final planCubit = context.read<PlanCubit>();
+    if (planCubit.state.entitlements == null) {
+      await planCubit.refresh();
+    }
+    if (!mounted) return;
+
+    final isPremium = planCubit.state.entitlements?.features.networkGraph ??
+        planCubit.state.entitlements?.isPremiumOrHigher ??
+        false;
+    if (!isPremium) {
+      await WalletPaywallFlow.show(
+        context,
+        cubit: context.read<SavedCardsCubit>(),
+      );
+      if (!mounted) return;
+      await planCubit.refresh();
+      if (!mounted) return;
+      if (planCubit.state.entitlements?.features.networkGraph != true) {
+        return;
+      }
+    }
+
+    final centerCardId =
+        _cards.isEmpty ? null : _cards[_selectedIndex].cardId?.trim();
+    await Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (context) => NetworkGraphPage(
+          getNetworkGraph: widget.getNetworkGraph,
+          getNetworkGraphPath: widget.getNetworkGraphPath,
+          centerCardId: centerCardId?.isEmpty == true ? null : centerCardId,
+        ),
+      ),
+    );
   }
 
   @override
@@ -230,7 +277,7 @@ class _ProfilePageState extends State<ProfilePage> {
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
               child: Text(
-                context.l10n.cretsizPlandaTekKartOluturabilirsiniz,
+                'Kart limitine ulaştınız. Yeni kart oluşturmak için Premium\'a geçebilirsiniz.',
                 style: textTheme.bodySmall?.copyWith(
                   color: colorScheme.onSurfaceVariant,
                   height: 1.35,
@@ -260,6 +307,15 @@ class _ProfilePageState extends State<ProfilePage> {
                       )
                       .then((_) => _loadPageData());
                 },
+              ),
+            ),
+            const SizedBox(height: 12),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: CustomButton.tonal(
+                label: 'Ağ grafiğini görüntüle',
+                icon: Icons.hub_outlined,
+                onPressed: _openNetworkGraph,
               ),
             ),
           ],

@@ -46,6 +46,13 @@ import '../../features/onboarding/domain/usecases/get_onboarding_draft_card.dart
 import '../../features/onboarding/domain/usecases/get_onboarding_draft_cards.dart';
 import '../../features/onboarding/domain/usecases/resolve_onboarding_initial_draft.dart';
 import '../../features/onboarding/domain/usecases/save_onboarding_draft_card.dart';
+import '../../features/plans/data/datasources/plan_remote_datasource.dart';
+import '../../features/plans/data/repositories/plan_repository_impl.dart';
+import '../../features/plans/domain/usecases/get_plan_entitlements.dart';
+import '../../features/network_graph/data/datasources/network_graph_remote_datasource.dart';
+import '../../features/network_graph/data/repositories/network_graph_repository_impl.dart';
+import '../../features/network_graph/domain/usecases/get_network_graph.dart';
+import '../../features/network_graph/domain/usecases/get_network_graph_path.dart';
 import '../../features/saved_cards/data/datasources/saved_card_local_datasource.dart';
 import '../../features/saved_cards/data/datasources/saved_card_remote_datasource.dart';
 import '../../features/saved_cards/data/repositories/saved_card_repository_impl.dart';
@@ -55,6 +62,7 @@ import '../../features/saved_cards/domain/usecases/delete_saved_card.dart';
 import '../../features/saved_cards/domain/usecases/get_saved_cards.dart';
 import '../../features/saved_cards/domain/usecases/get_saved_cards_wallet_quota.dart';
 import '../../features/saved_cards/domain/usecases/save_saved_card.dart';
+import '../../features/saved_cards/domain/usecases/track_saved_card_contact_click.dart';
 import '../../features/saved_cards/domain/usecases/upgrade_wallet_plan.dart';
 import '../../features/subscriptions/data/repositories/subscription_repository_impl.dart';
 import '../../features/subscriptions/domain/usecases/configure_subscriptions.dart';
@@ -176,6 +184,8 @@ class AppInit {
     final appReview = _initAppReview();
     final support = _initSupport(authTokenProvider);
     final profile = _initProfile(authTokenProvider);
+    final plans = _initPlans(authTokenProvider);
+    final networkGraph = _initNetworkGraph(authTokenProvider);
 
     final eventGroups = _initEventGroups(
       local: eventGroupLocal,
@@ -184,10 +194,11 @@ class AppInit {
     final savedCards = _initSavedCards(
       savedCardRepo: savedCardRepo,
       subscriptionRepo: subscriptionRepo,
+      getPlanEntitlements: plans.getPlanEntitlements,
     );
     final restoreWalletPurchases = RestoreWalletPurchases(
       subscriptionRepo,
-      savedCardRepo,
+      plans.getPlanEntitlements,
     );
 
     final session = await authLocal.getSession();
@@ -235,11 +246,39 @@ class AppInit {
       getSavedCardsWalletQuota: savedCards.getSavedCardsWalletQuota,
       addSavedCard: savedCards.addSavedCard,
       deleteSavedCard: savedCards.deleteSavedCard,
+      trackSavedCardContactClick: savedCards.trackSavedCardContactClick,
       upgradeWalletPlan: savedCards.upgradeWalletPlan,
       restoreWalletPurchases: restoreWalletPurchases,
       linkSavedCardsToEventGroup: savedCards.linkSavedCardsToEventGroup,
       getProfileStats: profile.getProfileStats,
+      getPlanEntitlements: plans.getPlanEntitlements,
+      getNetworkGraph: networkGraph.getNetworkGraph,
+      getNetworkGraphPath: networkGraph.getNetworkGraphPath,
       showPostAddCardMonetization: showPostAddCardMonetization,
+    );
+  }
+
+  static ({
+    GetPlanEntitlements getPlanEntitlements,
+  }) _initPlans(AuthTokenProvider authTokens) {
+    final repo = PlanRepositoryImpl(
+      remote: PlanRemoteDataSourceImpl(),
+      authTokens: authTokens,
+    );
+    return (getPlanEntitlements: GetPlanEntitlements(repo));
+  }
+
+  static ({
+    GetNetworkGraph getNetworkGraph,
+    GetNetworkGraphPath getNetworkGraphPath,
+  }) _initNetworkGraph(AuthTokenProvider authTokens) {
+    final repo = NetworkGraphRepositoryImpl(
+      remote: NetworkGraphRemoteDataSourceImpl(),
+      authTokens: authTokens,
+    );
+    return (
+      getNetworkGraph: GetNetworkGraph(repo),
+      getNetworkGraphPath: GetNetworkGraphPath(repo),
     );
   }
 
@@ -249,11 +288,13 @@ class AppInit {
     GetSavedCardsWalletQuota getSavedCardsWalletQuota,
     AddSavedCard addSavedCard,
     DeleteSavedCard deleteSavedCard,
+    TrackSavedCardContactClick trackSavedCardContactClick,
     UpgradeWalletPlan upgradeWalletPlan,
     LinkSavedCardsToEventGroup linkSavedCardsToEventGroup,
   }) _initSavedCards({
     required SavedCardRepositoryImpl savedCardRepo,
     required SubscriptionRepositoryImpl subscriptionRepo,
+    required GetPlanEntitlements getPlanEntitlements,
   }) {
     final getQuota = GetSavedCardsWalletQuota(savedCardRepo);
     final saveSavedCard = SaveSavedCard(savedCardRepo);
@@ -263,7 +304,11 @@ class AppInit {
       getSavedCardsWalletQuota: getQuota,
       addSavedCard: AddSavedCard(savedCardRepo),
       deleteSavedCard: DeleteSavedCard(savedCardRepo),
-      upgradeWalletPlan: UpgradeWalletPlan(subscriptionRepo, savedCardRepo),
+      trackSavedCardContactClick: TrackSavedCardContactClick(savedCardRepo),
+      upgradeWalletPlan: UpgradeWalletPlan(
+        subscriptionRepo,
+        getPlanEntitlements,
+      ),
       linkSavedCardsToEventGroup: LinkSavedCardsToEventGroup(saveSavedCard),
     );
   }
@@ -430,9 +475,7 @@ class AppInit {
       remote: SupportRemoteDataSourceImpl(),
       authTokens: authTokens,
     );
-    return (
-      submitSupportRequest: SubmitSupportRequest(repo),
-    );
+    return (submitSupportRequest: SubmitSupportRequest(repo),);
   }
 
   static ({GetProfileStats getProfileStats}) _initProfile(
@@ -442,9 +485,7 @@ class AppInit {
       remote: ProfileRemoteDataSourceImpl(),
       authTokens: authTokens,
     );
-    return (
-      getProfileStats: GetProfileStats(repo),
-    );
+    return (getProfileStats: GetProfileStats(repo),);
   }
 }
 
@@ -490,10 +531,14 @@ class AppInitResult {
     required this.getSavedCardsWalletQuota,
     required this.addSavedCard,
     required this.deleteSavedCard,
+    required this.trackSavedCardContactClick,
     required this.upgradeWalletPlan,
     required this.restoreWalletPurchases,
     required this.linkSavedCardsToEventGroup,
     required this.getProfileStats,
+    required this.getPlanEntitlements,
+    required this.getNetworkGraph,
+    required this.getNetworkGraphPath,
     required this.showPostAddCardMonetization,
   });
 
@@ -536,9 +581,13 @@ class AppInitResult {
   final GetSavedCardsWalletQuota getSavedCardsWalletQuota;
   final AddSavedCard addSavedCard;
   final DeleteSavedCard deleteSavedCard;
+  final TrackSavedCardContactClick trackSavedCardContactClick;
   final UpgradeWalletPlan upgradeWalletPlan;
   final RestoreWalletPurchases restoreWalletPurchases;
   final LinkSavedCardsToEventGroup linkSavedCardsToEventGroup;
   final GetProfileStats getProfileStats;
+  final GetPlanEntitlements getPlanEntitlements;
+  final GetNetworkGraph getNetworkGraph;
+  final GetNetworkGraphPath getNetworkGraphPath;
   final ShowPostAddCardMonetization showPostAddCardMonetization;
 }

@@ -17,6 +17,7 @@ public sealed class SavedCardService : ISavedCardService
     private readonly IBusinessCardRepository _businessCardRepository;
     private readonly IWalletEntitlementRepository _walletRepository;
     private readonly IEventGroupRepository _eventGroupRepository;
+    private readonly ICardInteractionRepository _cardInteractionRepository;
     private readonly ICurrentUserService _currentUser;
 
     public SavedCardService(
@@ -24,12 +25,14 @@ public sealed class SavedCardService : ISavedCardService
         IBusinessCardRepository businessCardRepository,
         IWalletEntitlementRepository walletRepository,
         IEventGroupRepository eventGroupRepository,
+        ICardInteractionRepository cardInteractionRepository,
         ICurrentUserService currentUser)
     {
         _savedCardRepository = savedCardRepository;
         _businessCardRepository = businessCardRepository;
         _walletRepository = walletRepository;
         _eventGroupRepository = eventGroupRepository;
+        _cardInteractionRepository = cardInteractionRepository;
         _currentUser = currentUser;
     }
 
@@ -113,7 +116,6 @@ public sealed class SavedCardService : ISavedCardService
         var businessCardCount = await _businessCardRepository.CountByUserIdAsync(
             userId,
             cancellationToken);
-        var isPremium = IsPremiumTier(entitlement.Tier);
         var canAddManualSavedCard = true;
         var eventGroupCount = await _eventGroupRepository.CountByUserIdAsync(
             userId,
@@ -123,7 +125,11 @@ public sealed class SavedCardService : ISavedCardService
         var maxCards = unlimitedWallet
             ? WalletConstants.PremiumMaxCards
             : entitlement.MaxCards;
-        var maxBusinessCards = GetMaxBusinessCards(entitlement.Tier);
+        var maxBusinessCards = WalletConstants.GetMaxBusinessCards(entitlement.Tier);
+        var displayedMaxBusinessCards =
+            maxBusinessCards ?? WalletConstants.PremiumMaxBusinessCards;
+        var canAddBusinessCard = maxBusinessCards is null ||
+            businessCardCount < displayedMaxBusinessCards;
         var remaining = unlimitedWallet
             ? 0
             : Math.Max(0, entitlement.MaxCards - usedCount);
@@ -143,8 +149,8 @@ public sealed class SavedCardService : ISavedCardService
                 usedCount >= (int)Math.Ceiling(entitlement.MaxCards * 0.85),
             UsageFraction = usageFraction,
             BusinessCardCount = businessCardCount,
-            MaxBusinessCards = maxBusinessCards,
-            CanAddBusinessCard = businessCardCount < maxBusinessCards,
+            MaxBusinessCards = displayedMaxBusinessCards,
+            CanAddBusinessCard = canAddBusinessCard,
             CanAddManualSavedCard = canAddManualSavedCard,
             EventGroupCount = eventGroupCount,
             MaxEventGroups = unlimitedEventGroups
@@ -158,19 +164,8 @@ public sealed class SavedCardService : ISavedCardService
     public async Task<WalletQuotaDto> UpgradeWalletPlanAsync(
         CancellationToken cancellationToken = default)
     {
-        var userId = _currentUser.GetRequiredUserId();
-        await _walletRepository.UpgradeToPremiumAsync(userId, cancellationToken);
-        await _businessCardRepository.SetOwnerPremiumByUserIdAsync(
-            userId,
-            isOwnerPremium: true,
-            cancellationToken);
-        var cardIds = await _businessCardRepository.GetCardIdsByUserIdAsync(
-            userId,
-            cancellationToken);
-        await _savedCardRepository.SetOwnerPremiumByCardIdsAsync(
-            cardIds,
-            isOwnerPremium: true,
-            cancellationToken);
+        // Premium grants are authoritative via RevenueCatWebhook.
+        // Keep this endpoint as a backward-compatible quota refresh for older clients.
         return await GetWalletQuotaAsync(cancellationToken);
     }
 
@@ -276,6 +271,12 @@ public sealed class SavedCardService : ISavedCardService
             await _businessCardRepository.IncrementSaveCountAsync(
                 ownCard.Id,
                 cancellationToken);
+            await LogCardSavedInteractionAsync(
+                userId,
+                ownCard,
+                creationMethod,
+                now,
+                cancellationToken);
         }
         await _eventGroupRepository.SyncWalletCardLinksAsync(
             userId,
@@ -285,6 +286,43 @@ public sealed class SavedCardService : ISavedCardService
         entity.LinkedEventGroupIds = request.LinkedEventGroupIds.ToList();
 
         return SavedCardMapper.ToDto(entity);
+    }
+
+    private async Task LogCardSavedInteractionAsync(
+        Guid userId,
+        Card targetCard,
+        string creationMethod,
+        DateTime occurredAt,
+        CancellationToken cancellationToken)
+    {
+        if (creationMethod == CardCreationMethods.QrScan)
+        {
+            await _cardInteractionRepository.AddAsync(
+                new CardInteraction
+                {
+                    Id = Guid.NewGuid(),
+                    ActorUserId = userId,
+                    TargetCardEntityId = targetCard.Id,
+                    TargetCardPublicId = targetCard.CardId,
+                    EventType = CardInteractionTypes.QrScanned,
+                    Source = creationMethod,
+                    OccurredAt = occurredAt,
+                },
+                cancellationToken);
+        }
+
+        await _cardInteractionRepository.AddAsync(
+            new CardInteraction
+            {
+                Id = Guid.NewGuid(),
+                ActorUserId = userId,
+                TargetCardEntityId = targetCard.Id,
+                TargetCardPublicId = targetCard.CardId,
+                EventType = CardInteractionTypes.CardSaved,
+                Source = creationMethod,
+                OccurredAt = occurredAt,
+            },
+            cancellationToken);
     }
 
     private static bool IsStubRequest(SavedCardDto request)
@@ -387,12 +425,6 @@ public sealed class SavedCardService : ISavedCardService
         value = text;
         return true;
     }
-
-    private static bool IsPremiumTier(string tier) =>
-        string.Equals(tier, WalletConstants.PremiumTier, StringComparison.OrdinalIgnoreCase);
-
-    private static int GetMaxBusinessCards(string tier) =>
-        WalletConstants.PremiumMaxBusinessCards;
 
     private static void ValidateCardId(string? cardId)
     {

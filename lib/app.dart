@@ -35,12 +35,16 @@ import 'features/business_cards/domain/usecases/persist_onboarding_card.dart';
 import 'features/business_cards/domain/usecases/save_business_card.dart';
 import 'features/onboarding/domain/usecases/sync_onboarding_from_server.dart';
 import 'features/onboarding/presentation/pages/onboarding_page.dart';
+import 'features/network_graph/domain/usecases/get_network_graph.dart';
+import 'features/network_graph/domain/usecases/get_network_graph_path.dart';
+import 'features/plans/domain/usecases/get_plan_entitlements.dart';
 import 'features/saved_cards/domain/usecases/add_saved_card.dart';
 import 'features/saved_cards/domain/usecases/delete_saved_card.dart';
 import 'features/saved_cards/domain/usecases/get_saved_cards.dart';
 import 'features/saved_cards/domain/usecases/get_saved_cards_wallet_quota.dart';
 import 'features/saved_cards/domain/usecases/link_saved_cards_to_event_group.dart';
 import 'features/saved_cards/domain/usecases/save_saved_card.dart';
+import 'features/saved_cards/domain/usecases/track_saved_card_contact_click.dart';
 import 'features/saved_cards/domain/usecases/upgrade_wallet_plan.dart';
 import 'features/subscriptions/domain/usecases/identify_subscription_user.dart';
 import 'features/subscriptions/domain/usecases/restore_wallet_purchases.dart';
@@ -103,9 +107,13 @@ class App extends StatefulWidget {
     required this.getSavedCardsWalletQuota,
     required this.addSavedCard,
     required this.deleteSavedCard,
+    required this.trackSavedCardContactClick,
     required this.upgradeWalletPlan,
     required this.restoreWalletPurchases,
     required this.getProfileStats,
+    required this.getPlanEntitlements,
+    required this.getNetworkGraph,
+    required this.getNetworkGraphPath,
     required this.showPostAddCardMonetization,
   });
 
@@ -149,9 +157,13 @@ class App extends StatefulWidget {
   final GetSavedCardsWalletQuota getSavedCardsWalletQuota;
   final AddSavedCard addSavedCard;
   final DeleteSavedCard deleteSavedCard;
+  final TrackSavedCardContactClick trackSavedCardContactClick;
   final UpgradeWalletPlan upgradeWalletPlan;
   final RestoreWalletPurchases restoreWalletPurchases;
   final GetProfileStats getProfileStats;
+  final GetPlanEntitlements getPlanEntitlements;
+  final GetNetworkGraph getNetworkGraph;
+  final GetNetworkGraphPath getNetworkGraphPath;
   final ShowPostAddCardMonetization showPostAddCardMonetization;
 
   @override
@@ -315,9 +327,13 @@ class _AppState extends State<App> {
           getSavedCardsWalletQuota: widget.getSavedCardsWalletQuota,
           addSavedCard: widget.addSavedCard,
           deleteSavedCard: widget.deleteSavedCard,
+          trackSavedCardContactClick: widget.trackSavedCardContactClick,
           upgradeWalletPlan: widget.upgradeWalletPlan,
           restoreWalletPurchases: widget.restoreWalletPurchases,
           getCurrentUser: widget.getCurrentUser,
+          getPlanEntitlements: widget.getPlanEntitlements,
+          getNetworkGraph: widget.getNetworkGraph,
+          getNetworkGraphPath: widget.getNetworkGraphPath,
           themePreference: _themePreference,
           onThemeChanged: _onThemeChanged,
           localePreference: _localePreference,

@@ -11,4 +11,10 @@ public interface IWalletEntitlementRepository
     Task<WalletEntitlement> UpgradeToPremiumAsync(
         Guid userId,
         CancellationToken cancellationToken = default);
+
+    Task<WalletEntitlement> SetTierAsync(
+        Guid userId,
+        string tier,
+        int maxCards,
+        CancellationToken cancellationToken = default);
 }

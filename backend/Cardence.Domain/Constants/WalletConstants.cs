@@ -5,6 +5,8 @@ public static class WalletConstants
     public const string FreeTier = "free";
     public const int FreeMaxCards = 15;
     public const string PremiumTier = "premium";
+    public const string BusinessTier = "business";
+    public const string EnterpriseTier = "enterprise";
 
     /// <summary>
     /// Premium cüzdan kayıtları sınırsızdır; veritabanında 0 olarak saklanır.
@@ -16,7 +18,7 @@ public static class WalletConstants
     /// </summary>
     public static bool HasUnlimitedWalletCards(string tier) => true;
 
-    public const int FreeMaxBusinessCards = PremiumMaxBusinessCards;
+    public const int FreeMaxBusinessCards = 2;
     public const int PremiumMaxBusinessCards = 50;
 
     /// <summary>
@@ -25,8 +27,43 @@ public static class WalletConstants
     public const int FreeMaxManualSavedCards = int.MaxValue;
     public const int FreeMaxEventGroups = 2;
 
+    public static string NormalizeTier(string? tier)
+    {
+        var normalized = tier?.Trim().ToLowerInvariant();
+        return normalized switch
+        {
+            PremiumTier => PremiumTier,
+            BusinessTier => BusinessTier,
+            EnterpriseTier => EnterpriseTier,
+            _ => FreeTier,
+        };
+    }
+
+    public static bool IsPremiumOrHigher(string tier)
+    {
+        var normalized = NormalizeTier(tier);
+        return normalized is PremiumTier or BusinessTier or EnterpriseTier;
+    }
+
+    public static bool IsBusinessOrHigher(string tier)
+    {
+        var normalized = NormalizeTier(tier);
+        return normalized is BusinessTier or EnterpriseTier;
+    }
+
+    public static int? GetMaxBusinessCards(string tier)
+    {
+        var normalized = NormalizeTier(tier);
+        return normalized switch
+        {
+            PremiumTier => PremiumMaxBusinessCards,
+            BusinessTier or EnterpriseTier => null,
+            _ => FreeMaxBusinessCards,
+        };
+    }
+
     public static bool HasUnlimitedEventGroups(string tier) =>
-        string.Equals(tier, PremiumTier, StringComparison.OrdinalIgnoreCase);
+        IsPremiumOrHigher(tier);
 
     /// <summary>
     /// Cardence iş kartları 000000–899999 aralığını kullanır.

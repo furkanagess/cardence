@@ -19,6 +19,8 @@ public sealed class CardenceDbContext : DbContext
     public DbSet<SupportRequest> SupportRequests => Set<SupportRequest>();
     public DbSet<EventGroup> EventGroups => Set<EventGroup>();
     public DbSet<SavedCardEventGroup> SavedCardEventGroups => Set<SavedCardEventGroup>();
+    public DbSet<SubscriptionEvent> SubscriptionEvents => Set<SubscriptionEvent>();
+    public DbSet<CardInteraction> CardInteractions => Set<CardInteraction>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

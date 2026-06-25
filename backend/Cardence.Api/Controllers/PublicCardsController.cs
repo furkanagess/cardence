@@ -27,6 +27,21 @@ public sealed class PublicCardsController : ControllerBase
         return Ok(ApiResponse<IReadOnlyDictionary<string, object?>>.Ok(payload, HttpContext.TraceIdentifier));
     }
 
+    [HttpPost("PublicBusinessCardContactClick")]
+    [ProducesResponseType(typeof(ApiResponse<object?>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse<object?>), StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<ApiResponse<object?>>> TrackPublicBusinessCardContactClick(
+        [FromQuery] string cardId,
+        [FromQuery] string contactType,
+        CancellationToken cancellationToken)
+    {
+        await _businessCardService.RecordPublicContactClickAsync(
+            cardId,
+            contactType,
+            cancellationToken);
+        return Ok(ApiResponse<object?>.Ok(null, HttpContext.TraceIdentifier));
+    }
+
     [HttpHead("PublicBusinessCard")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]

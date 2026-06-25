@@ -23,6 +23,7 @@ public static class DependencyInjection
         services.Configure<ApiOptions>(configuration.GetSection(ApiOptions.SectionName));
         services.Configure<MonitoringOptions>(configuration.GetSection(MonitoringOptions.SectionName));
         services.Configure<LinkedInAuthOptions>(configuration.GetSection(LinkedInAuthOptions.SectionName));
+        services.Configure<RevenueCatOptions>(configuration.GetSection(RevenueCatOptions.SectionName));
 
         services.AddHttpClient<ILinkedInAuthService, LinkedInAuthService>();
 
@@ -62,6 +63,8 @@ public static class DependencyInjection
         services.AddScoped<IUserAuthProviderRepository, UserAuthProviderRepository>();
         services.AddScoped<ISupportRequestRepository, SupportRequestRepository>();
         services.AddScoped<IEventGroupRepository, EventGroupRepository>();
+        services.AddScoped<ISubscriptionEventRepository, SubscriptionEventRepository>();
+        services.AddScoped<ICardInteractionRepository, CardInteractionRepository>();
         services.AddScoped<IHealthStatusReader, HealthStatusReader>();
         services.AddScoped<IProfilePhotoStorage, LocalProfilePhotoStorage>();
         services.AddScoped<IEventGroupPhotoStorage, LocalEventGroupPhotoStorage>();

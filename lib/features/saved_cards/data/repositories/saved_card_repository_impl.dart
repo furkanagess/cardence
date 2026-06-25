@@ -75,7 +75,8 @@ class SavedCardRepositoryImpl implements SavedCardRepository {
           for (final card in localCards) card.cardId: card,
         };
         final mergedCards = remoteCards
-            .map((remote) => _mergeLocalFields(remote, localById[remote.cardId]))
+            .map(
+                (remote) => _mergeLocalFields(remote, localById[remote.cardId]))
             .toList();
         await _cacheCards(mergedCards);
         return mergedCards.map((model) => model.toEntity()).toList();
@@ -97,6 +98,17 @@ class SavedCardRepositoryImpl implements SavedCardRepository {
   }
 
   @override
+  Future<void> trackPublicContactClick({
+    required String cardId,
+    required String contactType,
+  }) {
+    return _publicCardRemote.trackContactClick(
+      cardId: cardId,
+      contactType: contactType,
+    );
+  }
+
+  @override
   Future<SavedCard> addCard(SavedCard card) async {
     final token = await _requireAccessToken();
     final saved = await _remote.saveSavedCard(
@@ -104,12 +116,13 @@ class SavedCardRepositoryImpl implements SavedCardRepository {
       accessToken: token,
     );
     final merged = saved.toEntity().copyWith(
-      origin: card.origin,
-      creationMethod: card.creationMethod ?? saved.toEntity().creationMethod,
-      frontImagePath: card.frontImagePath,
-      backImagePath: card.backImagePath,
-      note: card.note,
-    );
+          origin: card.origin,
+          creationMethod:
+              card.creationMethod ?? saved.toEntity().creationMethod,
+          frontImagePath: card.frontImagePath,
+          backImagePath: card.backImagePath,
+          note: card.note,
+        );
     await _local.saveCard(SavedCardModel.fromEntity(merged));
     return merged;
   }
@@ -122,11 +135,11 @@ class SavedCardRepositoryImpl implements SavedCardRepository {
       accessToken: token,
     );
     final merged = updated.toEntity().copyWith(
-      origin: card.origin,
-      frontImagePath: card.frontImagePath,
-      backImagePath: card.backImagePath,
-      note: updated.note ?? card.note,
-    );
+          origin: card.origin,
+          frontImagePath: card.frontImagePath,
+          backImagePath: card.backImagePath,
+          note: updated.note ?? card.note,
+        );
     await _local.saveCard(SavedCardModel.fromEntity(merged));
   }
 

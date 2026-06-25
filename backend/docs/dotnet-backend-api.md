@@ -292,8 +292,8 @@ Hata durumunda:
   "success": false,
   "data": null,
   "error": {
-    "code": "WALLET_LIMIT_REACHED",
-    "message": "Kayıtlı kart limitine ulaştınız.",
+    "code": "PLAN_LIMIT_REACHED",
+    "message": "Plan limitine ulaştınız.",
     "details": {
       "tier": "free",
       "usedCount": 15,
@@ -451,10 +451,11 @@ Flutter: `OnboardingRepository`, `SaveOnboardingDraftCard`, `GetOnboardingDraftC
 
 Kimlik doğrulama gerektirmez; yalnızca paylaşıma açık alanlar döner.
 
-| Method | Endpoint                           | Açıklama                 | Auth  |
-| ------ | ---------------------------------- | ------------------------ | ----- |
-| `GET`  | `/PublicBusinessCardShare?cardId=` | `CardSharePayload` döner | Hayır |
-| `HEAD` | `/PublicBusinessCard?cardId=`      | Kart var mı (204/404)    | Hayır |
+| Method | Endpoint                                           | Açıklama                            | Auth  |
+| ------ | -------------------------------------------------- | ----------------------------------- | ----- |
+| `GET`  | `/PublicBusinessCardShare?cardId=`                 | `CardSharePayload` döner            | Hayır |
+| `POST` | `/PublicBusinessCardContactClick?cardId=&contactType=` | `contact_clicked` interaction yazar | Hayır |
+| `HEAD` | `/PublicBusinessCard?cardId=`                      | Kart var mı (204/404)               | Hayır |
 
 **GET response — CardSharePayload (kısa anahtarlar):**
 
@@ -476,6 +477,11 @@ Kimlik doğrulama gerektirmez; yalnızca paylaşıma açık alanlar döner.
 
 Boş alanlar JSON'dan **çıkarılır** (QR boyutu optimizasyonu).
 
+Telemetry:
+
+- `GET /PublicBusinessCardShare` başarılı olduğunda `card_interactions.event_type = card_viewed`
+- `POST /PublicBusinessCardContactClick` başarılı olduğunda `event_type = contact_clicked`, `source = email|phone|linkedin|website`
+
 ---
 
 ### 6.4 Wallet (Swagger tag)
@@ -489,6 +495,7 @@ Flutter: `SavedCardRepository`, `AddSavedCard`, `GetSavedCards`, `GetSavedCardsW
 | `PUT`    | `/UpdateSavedCard`         | `SaveSavedCard` (not/grup güncelle; `cardId` body'de) | Evet |
 | `DELETE` | `/DeleteSavedCard?cardId=` | _(henüz Flutter'da yok)_                              | Evet |
 | `GET`    | `/WalletQuota`             | `GetSavedCardsWalletQuota`                            | Evet |
+| `GET`    | `/PlanEntitlements`        | `GetPlanEntitlements`                                 | Evet |
 
 **POST `/SaveSavedCard` — üç giriş modu:**
 
@@ -530,7 +537,7 @@ Backend public card'dan profil alanlarını hydrate edebilir.
 | ---------------- | ----------------- | ----------------------- |
 | Başarılı         | `201 Created`     | —                       |
 | Duplicate        | `409 Conflict`    | `WALLET_DUPLICATE_CARD` |
-| Limit aşıldı     | `403 Forbidden`   | `WALLET_LIMIT_REACHED`  |
+| Limit aşıldı     | `403 Forbidden`   | `PLAN_LIMIT_REACHED`    |
 | Geçersiz payload | `400 Bad Request` | `INVALID_CARD_PAYLOAD`  |
 
 **GET `/WalletQuota` response:**
@@ -547,9 +554,99 @@ Backend public card'dan profil alanlarını hydrate edebilir.
 }
 ```
 
+**GET `/PlanEntitlements` response:**
+
+```json
+{
+  "tier": "free",
+  "features": {
+    "adsDisabled": false,
+    "advancedDesigns": false,
+    "profileStats": false,
+    "csvExport": false,
+    "networkGraph": false,
+    "walletPass": false,
+    "crmIntegration": false
+  },
+  "limits": {
+    "maxBusinessCards": 2,
+    "maxSavedCards": null,
+    "maxEventGroups": 2,
+    "maxTeamSeats": 1
+  }
+}
+```
+
 ---
 
-### 6.5 EventGroups (Swagger tag)
+### 6.5 Network Graph (Swagger tag)
+
+Flutter: `NetworkGraphRepository`, `GetNetworkGraph`, `GetNetworkGraphPath`, `NetworkGraphCubit`
+
+| Method | Endpoint            | Açıklama                                      | Auth |
+| ------ | ------------------- | --------------------------------------------- | ---- |
+| `GET`  | `/NetworkGraph`     | Personal/event/organization graph node-edge   | Evet |
+| `GET`  | `/NetworkGraphPath` | İki kart arasındaki BFS shortest path sonucu  | Evet |
+
+**Yetki:** `PlanEntitlements.features.networkGraph == true`; Free kullanıcı `403 FEATURE_NOT_INCLUDED` alır.
+
+**GET `/NetworkGraph` query:**
+
+| Parametre | Açıklama |
+| --- | --- |
+| `scope` | `personal`, `event`, `organization` (`personal` varsayılan) |
+| `eventGroupId` | `scope=event` için EventGroup id |
+| `organizationId` | İleri faz organization graph |
+| `organizationEventId` | İleri faz organization event filtresi |
+| `centerCardId` | Merkez/vurgulu kart id |
+| `maxDepth` | Graph traversal derinlik limiti |
+| `maxNodes` | Dönen node limiti |
+
+**Response shape:**
+
+```json
+{
+  "scope": "personal",
+  "nodes": [
+    {
+      "id": "card:123456",
+      "type": "card",
+      "label": "Ayşe Yılmaz",
+      "subtitle": "Acme · Product Manager",
+      "cardId": "123456",
+      "degree": 4,
+      "isCenter": false,
+      "isOwnCard": false
+    }
+  ],
+  "edges": [
+    {
+      "id": "edge:saved:user:...:card:123456",
+      "source": "user:...",
+      "target": "card:123456",
+      "type": "saved",
+      "weight": 1
+    }
+  ],
+  "metrics": {
+    "nodeCount": 12,
+    "edgeCount": 18,
+    "centerCardId": "123456"
+  }
+}
+```
+
+**GET `/NetworkGraphPath` query:**
+
+| Parametre | Açıklama |
+| --- | --- |
+| `fromCardId` | Başlangıç kart id |
+| `toCardId` | Hedef kart id |
+| `scope` | `personal` varsayılan |
+
+---
+
+### 6.6 EventGroups (Swagger tag)
 
 Flutter: `EventGroupRepository`, `GetEventGroups`, `SaveEventGroups`
 
@@ -586,27 +683,35 @@ Flutter: `EventGroupRepository`, `GetEventGroups`, `SaveEventGroups`
 
 ---
 
-### 6.6 Subscriptions (Swagger tag)
+### 6.7 Subscriptions (Swagger tag)
 
-Flutter: `WalletEntitlementRepository`, `UpgradeWalletPlan`
+Flutter: `GetPlanEntitlements`, RevenueCat purchase/restore, backend webhook sync
 
-| Method | Endpoint             | Açıklama                         | Auth           |
-| ------ | -------------------- | -------------------------------- | -------------- |
-| `GET`  | `/WalletEntitlement` | Mevcut plan                      | Evet           |
-| `POST` | `/UpgradeWalletPlan` | Premium'a yükselt (ödeme başlat) | Evet           |
-| `POST` | `/AppStoreWebhook`   | App Store Server Notification    | Webhook secret |
-| `POST` | `/PlayStoreWebhook`  | Google Play RTDN                 | Webhook secret |
+| Method | Endpoint              | Açıklama                                | Auth           |
+| ------ | --------------------- | --------------------------------------- | -------------- |
+| `GET`  | `/WalletEntitlement`  | Mevcut plan                             | Evet           |
+| `POST` | `/UpgradeWalletPlan`  | Legacy kota refresh; Premium grant etmez | Evet           |
+| `POST` | `/RevenueCatWebhook`  | RevenueCat entitlement event senkronu   | Webhook secret |
+
+**POST `/RevenueCatWebhook` auth:**
+
+RevenueCat webhook isteği aşağıdaki header'lardan biriyle `RevenueCat:WebhookAuthorizationToken` değerini göndermelidir:
+
+- `Authorization: Bearer {token}`
+- `X-RevenueCat-Auth: {token}`
+
+Endpoint idempotency için `event.id` değerini `subscription_events.provider_event_id` alanında saklar.
 
 **Plan limitleri:**
 
-| Tier      | `maxCards` |
-| --------- | ---------- |
-| `free`    | 15         |
-| `premium` | 200        |
+| Tier      | `maxSavedCards` | `maxBusinessCards` | `maxEventGroups` |
+| --------- | --------------- | ------------------ | ---------------- |
+| `free`    | `null`          | 2                  | 2                |
+| `premium` | `null`          | 50                 | `null`           |
 
 ---
 
-### 6.7 Onboarding (Swagger tag)
+### 6.8 Onboarding (Swagger tag)
 
 | Method | Endpoint              | Açıklama                     | Auth |
 | ------ | --------------------- | ---------------------------- | ---- |
@@ -785,7 +890,9 @@ Backend **FluentValidation** ile Flutter `AppValidators` ve `OnboardingValidatio
 | 400  | `VALIDATION_ERROR`           | FluentValidation hatası           |
 | 400  | `INVALID_CARD_PAYLOAD`       | Geçersiz kart ID veya payload     |
 | 401  | `UNAUTHORIZED`               | Token eksik/geçersiz              |
-| 403  | `WALLET_LIMIT_REACHED`       | Cüzdan kotası doldu               |
+| 403  | `PLAN_LIMIT_REACHED`         | Kart/event/seat plan limiti doldu |
+| 403  | `FEATURE_NOT_INCLUDED`       | Özellik mevcut planda yok         |
+| 403  | `SUBSCRIPTION_REQUIRED`      | Premium/Business abonelik gerekir |
 | 403  | `FORBIDDEN`                  | Kaynağa erişim yok                |
 | 404  | `CARD_NOT_FOUND`             | BusinessCard veya public card yok |
 | 404  | `EVENT_GROUP_NOT_FOUND`      | Grup bulunamadı                   |
@@ -967,7 +1074,7 @@ lib/core/network/
 
 - [ ] App Store / Play Store webhook
 - [ ] Premium tier (`maxCards: 200`)
-- [ ] `UpgradeWalletPlan` gerçek ödeme entegrasyonu
+- [x] Premium grant RevenueCat webhook ile server-side doğrulanır
 
 ### Faz 5 — Gelişmiş
 
