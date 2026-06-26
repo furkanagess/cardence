@@ -57,4 +57,19 @@ class AppColors {
 
   // --- Marka (sosyal giriş) ---
   static const Color linkedInBrand = Color(0xFF0A66C2);
+
+  // --- Network graph kenar (edge) renkleri ---
+  static const Color graphEdgeOwns = Color(0xFF1B365D); // primary - sahiplik
+  static const Color graphEdgeSaved = Color(0xFF2E7D9A); // teal - senin kaydettiğin
+  static const Color graphEdgeSavedBy = Color(0xFF1F6B4F); // yeşil - seni kaydeden
+  static const Color graphEdgeEvent = Color(0xFF7A5AF8); // mor - etkinlik
+  static const Color graphEdgeCompany = Color(0xFF8A93A6); // gri - şirket
+  static const Color graphEdgeNeutral = Color(0xFFB8C0CC); // nötr varsayılan
+
+  // --- Network graph düğüm (node) accent renkleri ---
+  static const Color graphCompanyNodeLight = Color(0xFFE8EDF4);
+  static const Color graphCompanyNodeDark = Color(0xFF2A3340);
+  static const Color graphEventNodeLight = Color(0xFFEAE4FD);
+  static const Color graphEventNodeDark = Color(0xFF2E2747);
+  static const Color graphEventAccent = Color(0xFF7A5AF8);
 }

@@ -84,7 +84,9 @@ class _PickEventGroupsForCardSheetState extends State<PickEventGroupsForCardShee
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    '${widget.cardTitle} kartının eklenebileceği grupları işaretleyin.',
+                    context.l10n.pickEventGroupsForCardSubtitle(
+                      widget.cardTitle,
+                    ),
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: colorScheme.onSurfaceVariant,
                     ),
@@ -134,8 +136,8 @@ class _PickEventGroupsForCardSheetState extends State<PickEventGroupsForCardShee
               padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
               child: CustomButton(
                 label: _selectedIds.isEmpty
-                    ? 'Gruplara ekle'
-                    : '${_selectedIds.length} gruba ekle',
+                    ? context.l10n.addToGroups
+                    : context.l10n.addToGroupsCount(_selectedIds.length),
                 onPressed: widget.groups.isEmpty || _selectedIds.isEmpty
                     ? null
                     : () => Navigator.of(context).pop(_selectedIds),

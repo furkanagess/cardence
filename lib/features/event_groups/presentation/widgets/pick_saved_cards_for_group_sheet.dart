@@ -99,7 +99,9 @@ class _PickSavedCardsForGroupSheetState
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    '${widget.eventGroupName} grubuna eklenecek kayıtlı kartları seçin.',
+                    context.l10n.pickSavedCardsForGroupSubtitle(
+                      widget.eventGroupName,
+                    ),
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: colorScheme.onSurfaceVariant,
                     ),
@@ -118,8 +120,8 @@ class _PickSavedCardsForGroupSheetState
               padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
               child: CustomButton(
                 label: _selectedIds.isEmpty
-                    ? 'Kartları gruba ekle'
-                    : '${_selectedIds.length} kartı gruba ekle',
+                    ? context.l10n.addCardsToGroup
+                    : context.l10n.addCardsToGroupCount(_selectedIds.length),
                 onPressed: widget.cards.isEmpty || _selectedIds.isEmpty
                     ? null
                     : () => Navigator.of(context).pop(_selectedIds),

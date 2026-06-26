@@ -29,7 +29,7 @@
   "beceriEkle": "Beceri ekle",
   "beceriler": "Beceriler",
   "bilgiEkle": "Bilgi ekle",
-  "bilgiGirildikeKarttaGrnr": "Bilgi girildikçe cardta görünür",
+  "bilgiGirildikeKarttaGrnr": "Details appear on the card as you fill them in",
   "bilgiler": "Bilgiler",
   "bilgilerOkunuyor": "Bilgiler okunuyor…",
   "bilgileriDzenle": "Bilgileri düzenle",
@@ -181,7 +181,7 @@
   "kartBilgileri": "Card bilgileri",
   "kartBilgisiAlnamad": "Card bilgisi alınamadı.",
   "kartBilgisiYok": "Card bilgisi yok",
-  "kartBilgisiYokDzenleIle": "Card bilgisi yok — düzenle ile ekleyin",
+  "kartBilgisiYokDzenleIle": "No card info yet — add via Edit",
   "kartBulunamad": "Card not found.",
   "kartCzdanaEklenemedi": "Card walleta eklenemedi.",
   "kartCzdandanSil": "Cardı walletdan sil",
@@ -200,7 +200,7 @@
   "kartIdIleEkle": "Card ID ile ekle",
   "kartIdKopyaland": "Card ID kopyalandı",
   "kartIdKopyalandId": "Card ID kopyalandı: $id",
-  "kartIdOluturulamadLtfenTekrar": "Card ID oluşturulamadı. Please tekrar try.",
+  "kartIdOluturulamadLtfenTekrar": "Could not create Card ID. Please try again.",
   "kartIdTam6Haneli": "Card ID tam 6 haneli sayı olmalıdır",
   "kartKaydedildi": "Card kaydedildi",
   "kartKaydedilemedi": "Card could not be saved.",
@@ -211,7 +211,7 @@
   "kartKimliiOluturulamadLtfenTekrar": "Card kimliği oluşturulamadı. Please tekrar try.",
   "kartKotasDoldu": "Card kotası doldu",
   "kartPayla": "Cardı paylaş",
-  "kartPaylaDediinizdeBenzersizBir": "Cardı paylaş dediğinizde benzersiz bir numara atanır.",
+  "kartPaylaDediinizdeBenzersizBir": "A unique number is assigned when you share the card.",
   "kartRengi": "KART RENGİ",
   "kartRengi2": "Card rengi",
   "kartRenkleri": "Card renkleri",
@@ -549,5 +549,130 @@
   "termsSection6Title": "6. Limitation of liability",
   "termsSection6Body": "The service is provided \"as is\". We exercise reasonable care but do not guarantee uninterrupted or error-free operation. To the extent permitted by law we are not liable for indirect damages.",
   "termsSection7Title": "7. Contact",
-  "termsSection7Body": "For questions about these terms, contact us through the in-app Support section."
+  "termsSection7Body": "For questions about these terms, contact us through the in-app Support section.",
+  "hidePreview": "Hide preview",
+  "showPreview": "Show preview",
+  "createdOnShare": "Created when you share",
+  "shareCardSubject": "My Cardence card",
+  "shareCardMessage": "Hi! I'm sharing my Cardence card with you.\n\nCard: {name}\nCard ID: {cardId}\n\nIn Cardence, open Saved Cards and use \"Add with Card ID\" to save my card.",
+  "@shareCardMessage": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "cardId": {
+        "type": "String"
+      }
+    }
+  },
+  "provinceLabel": "Province",
+  "districtLabel": "District",
+  "twitterX": "Twitter / X",
+  "walletUnlimitedCardsCanAdd": "You can add unlimited cards.",
+  "walletRemainingCardsCanAdd": "You can add {count} more cards.",
+  "@walletRemainingCardsCanAdd": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "walletFullUpgradeLimit": "Your wallet is full. Upgrade your plan to increase the limit.",
+  "premiumBenefitUnlimitedSavedCards": "Unlimited saved cards",
+  "premiumBenefitUnlimitedEventGroups": "Unlimited event group organization",
+  "premiumBenefitUnlimitedManualPhoto": "Unlimited manual and photo card entry",
+  "premiumBenefitQrAndCardId": "Fast add via QR and Card ID",
+  "quotaPremiumAllLimitsRemoved": "All limits removed with Premium",
+  "quotaFreePlanRights": "Your free plan entitlements",
+  "oneTrial": "1 trial",
+  "premiumRequired": "Premium required",
+  "canCreateNewCard": "You can create a new card",
+  "cardLimitReached": "Card limit reached",
+  "createUnlimitedGroups": "Create as many groups as you want",
+  "eventGroupsRemaining": "{count} group slots left",
+  "@eventGroupsRemaining": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "groupLimitReached": "Group limit reached",
+  "addUnlimitedManualPhoto": "Add as many as you want",
+  "limitedTrialOnFreePlan": "Limited trial on the free plan",
+  "eventFilterFallback": "Event",
+  "eventGroupNameRequired": "Event name cannot be empty",
+  "eventGroupNameDuplicate": "An event group with this name already exists",
+  "eventGroupDetailsStepSubtitle": "Enter the event name, location, and date.",
+  "eventGroupCardsStepSubtitle": "You can create the group without selecting cards.",
+  "noCardsSelectedYet": "No cards selected yet",
+  "cardsSelectedCount": "{count} cards selected",
+  "@cardsSelectedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "createGroup": "Create group",
+  "createGroupWithCards": "Create with {count} cards",
+  "@createGroupWithCards": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "pickSavedCardsForGroupSubtitle": "Select saved cards to add to the {groupName} group.",
+  "@pickSavedCardsForGroupSubtitle": {
+    "placeholders": {
+      "groupName": {
+        "type": "String"
+      }
+    }
+  },
+  "addCardsToGroup": "Add cards to group",
+  "addCardsToGroupCount": "Add {count} cards to group",
+  "@addCardsToGroupCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "pickEventGroupsForCardSubtitle": "Select groups where the {cardTitle} card can be added.",
+  "@pickEventGroupsForCardSubtitle": {
+    "placeholders": {
+      "cardTitle": {
+        "type": "String"
+      }
+    }
+  },
+  "addToGroups": "Add to groups",
+  "addToGroupsCount": "Add to {count} groups",
+  "@addToGroupsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "savedCardFieldHintDisplayName": "Person's full name",
+  "savedCardFieldHintEmail": "name@company.com",
+  "savedCardFieldHintPhone": "+1 555 000 0000",
+  "savedCardFieldHintCompany": "Company they work at",
+  "savedCardFieldHintTitle": "Job title or role",
+  "savedCardFieldHintWebsite": "https://...",
+  "savedCardFieldHintLinkedin": "LinkedIn profile URL",
+  "savedCardFieldHintAddress": "Street address",
+  "savedCardFieldHintCity": "City",
+  "savedCardFieldHintCountry": "Country",
+  "savedCardFieldHintDepartment": "Sales, R&D, etc.",
+  "savedCardFieldHintSchool": "School or university",
+  "savedCardFieldHintAbout": "Short bio",
+  "savedCardFieldHintSkills": "Separate with commas",
+  "savedCardFieldHintAttendedEvents": "Web Summit 2025, SaaStr Annual…",
+  "savedCardFieldHintTwitter": "@username or profile URL",
+  "savedCardFieldHintInstagram": "@username or profile URL",
+  "savedCardFieldHintBirthday": "March 15 or 03/15/1990"
 }

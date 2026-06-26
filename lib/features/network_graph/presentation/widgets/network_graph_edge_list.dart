@@ -104,7 +104,8 @@ class NetworkGraphEdgeIcon {
   static IconData iconFor(GraphEdgeType type) {
     return switch (type) {
       GraphEdgeType.owns => Icons.account_circle_outlined,
-      GraphEdgeType.saved => Icons.bookmark_border_rounded,
+      GraphEdgeType.saved => Icons.bookmark_added_outlined,
+      GraphEdgeType.savedBy => Icons.favorite_border_rounded,
       GraphEdgeType.scanned => Icons.qr_code_scanner_rounded,
       GraphEdgeType.viewed => Icons.visibility_outlined,
       GraphEdgeType.contactClicked => Icons.touch_app_outlined,
@@ -124,7 +125,8 @@ class NetworkGraphEdgeLabel {
   static String labelFor(GraphEdgeType type) {
     return switch (type) {
       GraphEdgeType.owns => 'Kart sahibi',
-      GraphEdgeType.saved => 'Cüzdana kaydedildi',
+      GraphEdgeType.saved => 'Senin kaydettiğin',
+      GraphEdgeType.savedBy => 'Seni kaydeden',
       GraphEdgeType.scanned => 'QR tarandı',
       GraphEdgeType.viewed => 'Görüntülendi',
       GraphEdgeType.contactClicked => 'İletişim tıklandı',

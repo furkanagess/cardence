@@ -292,14 +292,9 @@ class _CardDetailPageState extends State<CardDetailPage> {
     );
   }
 
-  String _shareMessage(String cardId) {
+  String _shareMessage(BuildContext context, String cardId) {
     final name = _draft.listTitle;
-    return 'Merhaba! Cardence kartımı seninle paylaşıyorum.\n\n'
-        'Kart: $name\n'
-        'Kart ID: $cardId\n\n'
-        'Cardence uygulamasında Kayıtlı Kartlar bölümünden '
-        '"Kart ID ile ekle" seçeneğine bu numarayı yazarak '
-        'kartımı kaydedebilirsin.';
+    return context.l10n.shareCardMessage(name, cardId);
   }
 
   Future<OnboardingCardDraft> _ensureShareableDraft() async {
@@ -328,9 +323,12 @@ class _CardDetailPageState extends State<CardDetailPage> {
       final synced = await _ensureShareableDraft();
       final cardId = synced.cardId?.trim();
       if (!mounted || cardId == null || !CardIdGenerator.isValid(cardId)) {
-        throw AuthApiException('Kart ID oluşturulamadı. Lütfen tekrar deneyin.');
+        throw AuthApiException(context.l10n.kartIdOluturulamadLtfenTekrar);
       }
-      await Share.share(_shareMessage(cardId), subject: 'Cardence kartım');
+      await Share.share(
+        _shareMessage(context, cardId),
+        subject: context.l10n.shareCardSubject,
+      );
     } on AuthApiException catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -352,7 +350,7 @@ class _CardDetailPageState extends State<CardDetailPage> {
       final synced = await _ensureShareableDraft();
       cardId = synced.cardId?.trim() ?? '';
       if (!CardIdGenerator.isValid(cardId)) {
-        throw AuthApiException('Kart ID oluşturulamadı. Lütfen tekrar deneyin.');
+        throw AuthApiException(context.l10n.kartIdOluturulamadLtfenTekrar);
       }
     } on AuthApiException catch (e) {
       if (!mounted) return;
@@ -939,7 +937,7 @@ class _CardIdTile extends StatelessWidget {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      hasId ? cardId! : 'Paylaşınca oluşturulur',
+                      hasId ? cardId! : context.l10n.createdOnShare,
                       style: textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.w700,
                         letterSpacing: hasId ? 2 : 0,

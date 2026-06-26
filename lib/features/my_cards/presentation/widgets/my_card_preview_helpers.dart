@@ -24,7 +24,7 @@ class MyCardPreviewHelpers {
         'country': l10n.lke,
         'department': l10n.departman,
         'attendedEvents': l10n.katldEtkinlikler,
-        'twitter': 'Twitter / X',
+        'twitter': l10n.twitterX,
         'instagram': l10n.instagram,
         'birthday': l10n.doumGn,
       };

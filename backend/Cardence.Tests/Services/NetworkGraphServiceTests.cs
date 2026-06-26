@@ -36,7 +36,7 @@ public sealed class NetworkGraphServiceTests
     }
 
     [Fact]
-    public async Task GetGraphAsync_BuildsPersonalGraph_FromCardsEventsAndInteractions()
+    public async Task GetGraphAsync_BuildsPersonalGraph_WithSavedAndReverseSaverNodes()
     {
         var ownCard = OwnCard("111111", "Acme");
         var savedCard = SavedCard("222222", "Acme");
@@ -50,6 +50,20 @@ public sealed class NetworkGraphServiceTests
         };
         savedCard.LinkedEventGroupIds = [eventGroup.Id.ToString()];
 
+        var saverUserId = Guid.NewGuid();
+        var saverCard = new Card
+        {
+            Id = Guid.NewGuid(),
+            UserId = saverUserId,
+            CardId = "999999",
+            DisplayName = "Saver 999999",
+            Company = "Globex",
+            Title = "Recruiter",
+            PhotoUrl = "https://cdn.example/avatar.png",
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow,
+        };
+
         _businessCardRepository.GetByUserIdAsync(_userId, Arg.Any<CancellationToken>())
             .Returns([ownCard]);
         _savedCardRepository.GetByUserIdAsync(_userId, Arg.Any<CancellationToken>())
@@ -60,9 +74,12 @@ public sealed class NetworkGraphServiceTests
                 Arg.Is<IReadOnlyCollection<Guid>>(ids => ids.Contains(ownCard.Id)),
                 Arg.Any<CancellationToken>())
             .Returns([
-                Interaction(ownCard, CardInteractionTypes.CardViewed),
-                Interaction(ownCard, CardInteractionTypes.CardViewed),
+                CardSavedInteraction(ownCard, saverUserId),
             ]);
+        _businessCardRepository.GetByUserIdsAsync(
+                Arg.Is<IReadOnlyCollection<Guid>>(ids => ids.Contains(saverUserId)),
+                Arg.Any<CancellationToken>())
+            .Returns([saverCard]);
 
         var graph = await _service.GetGraphAsync(
             new NetworkGraphQuery
@@ -76,13 +93,16 @@ public sealed class NetworkGraphServiceTests
             node.IsOwnCard &&
             node.IsCenter);
         graph.Nodes.Should().Contain(node => node.Id == GraphNodeIds.Card("222222"));
+        graph.Nodes.Should().Contain(node =>
+            node.Id == GraphNodeIds.Card("999999") &&
+            node.PhotoUrl == "https://cdn.example/avatar.png");
         graph.Nodes.Should().Contain(node => node.Id == GraphNodeIds.Company("Acme"));
         graph.Nodes.Should().Contain(node => node.Id == GraphNodeIds.Event(eventGroup.Id));
         graph.Edges.Should().Contain(edge => edge.Type == "owns");
         graph.Edges.Should().Contain(edge => edge.Type == "saved");
+        graph.Edges.Should().Contain(edge => edge.Type == "saved_by");
         graph.Edges.Should().Contain(edge => edge.Type == "works_at");
         graph.Edges.Should().Contain(edge => edge.Type == "met_at_event");
-        graph.Edges.Should().Contain(edge => edge.Type == CardInteractionTypes.CardViewed && edge.Weight == 2);
         graph.Metrics.NodeCount.Should().Be(graph.Nodes.Count);
         graph.Metrics.EdgeCount.Should().Be(graph.Edges.Count);
     }
@@ -180,14 +200,14 @@ public sealed class NetworkGraphServiceTests
             UpdatedAt = DateTime.UtcNow,
         };
 
-    private static CardInteraction Interaction(Card targetCard, string eventType) =>
+    private static CardInteraction CardSavedInteraction(Card targetCard, Guid actorUserId) =>
         new()
         {
             Id = Guid.NewGuid(),
-            ActorUserId = null,
+            ActorUserId = actorUserId,
             TargetCardEntityId = targetCard.Id,
             TargetCardPublicId = targetCard.CardId,
-            EventType = eventType,
+            EventType = CardInteractionTypes.CardSaved,
             Source = "public",
             OccurredAt = DateTime.UtcNow,
         };

@@ -8,6 +8,7 @@ class GraphNode {
     this.subtitle,
     this.cardId,
     this.company,
+    this.photoUrl,
     this.degree = 0,
     this.isCenter = false,
     this.isOwnCard = false,
@@ -19,6 +20,7 @@ class GraphNode {
   final String? subtitle;
   final String? cardId;
   final String? company;
+  final String? photoUrl;
   final int degree;
   final bool isCenter;
   final bool isOwnCard;

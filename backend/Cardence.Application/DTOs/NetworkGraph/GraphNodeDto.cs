@@ -8,6 +8,7 @@ public sealed class GraphNodeDto
     public string? Subtitle { get; init; }
     public string? CardId { get; init; }
     public string? Company { get; init; }
+    public string? PhotoUrl { get; init; }
     public int Degree { get; init; }
     public bool IsCenter { get; init; }
     public bool IsOwnCard { get; init; }

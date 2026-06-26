@@ -14,6 +14,7 @@ class GraphNodeModel {
     this.subtitle,
     this.cardId,
     this.company,
+    this.photoUrl,
     this.degree = 0,
     this.isCenter = false,
     this.isOwnCard = false,
@@ -27,6 +28,7 @@ class GraphNodeModel {
       subtitle: (json['subtitle'] ?? json['Subtitle'])?.toString(),
       cardId: (json['cardId'] ?? json['CardId'])?.toString(),
       company: (json['company'] ?? json['Company'])?.toString(),
+      photoUrl: (json['photoUrl'] ?? json['PhotoUrl'])?.toString(),
       degree: (json['degree'] ?? json['Degree'] ?? 0) as int,
       isCenter: (json['isCenter'] ?? json['IsCenter'] ?? false) as bool,
       isOwnCard: (json['isOwnCard'] ?? json['IsOwnCard'] ?? false) as bool,
@@ -39,6 +41,7 @@ class GraphNodeModel {
   final String? subtitle;
   final String? cardId;
   final String? company;
+  final String? photoUrl;
   final int degree;
   final bool isCenter;
   final bool isOwnCard;
@@ -51,6 +54,7 @@ class GraphNodeModel {
       subtitle: subtitle,
       cardId: cardId,
       company: company,
+      photoUrl: photoUrl,
       degree: degree,
       isCenter: isCenter,
       isOwnCard: isOwnCard,

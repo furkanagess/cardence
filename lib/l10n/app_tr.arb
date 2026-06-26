@@ -549,5 +549,130 @@
   "termsSection6Title": "6. Sorumluluk sınırı",
   "termsSection6Body": "Hizmet \"olduğu gibi\" sunulur. Makul özeni gösteririz; ancak kesintisiz veya hatasız çalışma garantisi verilmez. Yasal olarak izin verilen ölçüde dolaylı zararlardan sorumlu tutulamayız.",
   "termsSection7Title": "7. İletişim",
-  "termsSection7Body": "Kullanım koşulları hakkında sorularınız için uygulama içindeki Destek bölümünden bize ulaşabilirsiniz."
+  "termsSection7Body": "Kullanım koşulları hakkında sorularınız için uygulama içindeki Destek bölümünden bize ulaşabilirsiniz.",
+  "hidePreview": "Önizlemeyi gizle",
+  "showPreview": "Önizlemeyi göster",
+  "createdOnShare": "Paylaşınca oluşturulur",
+  "shareCardSubject": "Cardence kartım",
+  "shareCardMessage": "Merhaba! Cardence kartımı seninle paylaşıyorum.\n\nKart: {name}\nKart ID: {cardId}\n\nCardence uygulamasında Kayıtlı Kartlar bölümünden \"Kart ID ile ekle\" seçeneğine bu numarayı yazarak kartımı kaydedebilirsin.",
+  "@shareCardMessage": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "cardId": {
+        "type": "String"
+      }
+    }
+  },
+  "provinceLabel": "İl",
+  "districtLabel": "İlçe",
+  "twitterX": "Twitter / X",
+  "walletUnlimitedCardsCanAdd": "Sınırsız kart ekleyebilirsiniz.",
+  "walletRemainingCardsCanAdd": "{count} kart daha ekleyebilirsiniz.",
+  "@walletRemainingCardsCanAdd": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "walletFullUpgradeLimit": "Cüzdanınız dolu. Paket yükselterek sınırı artırabilirsiniz.",
+  "premiumBenefitUnlimitedSavedCards": "Sınırsız kart kaydı",
+  "premiumBenefitUnlimitedEventGroups": "Sınırsız etkinlik grubu organizasyonu",
+  "premiumBenefitUnlimitedManualPhoto": "Sınırsız elle ve fotoğrafla kart ekleme",
+  "premiumBenefitQrAndCardId": "QR ve kart ID ile hızlı ekleme",
+  "quotaPremiumAllLimitsRemoved": "Premium ile tüm limitler kalktı",
+  "quotaFreePlanRights": "Ücretsiz plandaki haklarınız",
+  "oneTrial": "1 deneme",
+  "premiumRequired": "Premium gerekli",
+  "canCreateNewCard": "Yeni kart oluşturabilirsiniz",
+  "cardLimitReached": "Kart limitine ulaşıldı",
+  "createUnlimitedGroups": "İstediğiniz kadar grup oluşturun",
+  "eventGroupsRemaining": "{count} grup hakkı kaldı",
+  "@eventGroupsRemaining": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "groupLimitReached": "Grup limitine ulaşıldı",
+  "addUnlimitedManualPhoto": "İstediğiniz kadar ekleyin",
+  "limitedTrialOnFreePlan": "Ücretsiz planda sınırlı deneme",
+  "eventFilterFallback": "Etkinlik",
+  "eventGroupNameRequired": "Etkinlik adı boş olamaz",
+  "eventGroupNameDuplicate": "Bu isimde bir etkinlik grubu zaten var",
+  "eventGroupDetailsStepSubtitle": "Etkinliğin adını, konumunu ve tarihini girin.",
+  "eventGroupCardsStepSubtitle": "İsterseniz kart seçmeden de grubu oluşturabilirsiniz.",
+  "noCardsSelectedYet": "Henüz kart seçilmedi",
+  "cardsSelectedCount": "{count} kart seçildi",
+  "@cardsSelectedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "createGroup": "Grubu oluştur",
+  "createGroupWithCards": "{count} kartla oluştur",
+  "@createGroupWithCards": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "pickSavedCardsForGroupSubtitle": "{groupName} grubuna eklenecek kayıtlı kartları seçin.",
+  "@pickSavedCardsForGroupSubtitle": {
+    "placeholders": {
+      "groupName": {
+        "type": "String"
+      }
+    }
+  },
+  "addCardsToGroup": "Kartları gruba ekle",
+  "addCardsToGroupCount": "{count} kartı gruba ekle",
+  "@addCardsToGroupCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "pickEventGroupsForCardSubtitle": "{cardTitle} kartının eklenebileceği grupları işaretleyin.",
+  "@pickEventGroupsForCardSubtitle": {
+    "placeholders": {
+      "cardTitle": {
+        "type": "String"
+      }
+    }
+  },
+  "addToGroups": "Gruplara ekle",
+  "addToGroupsCount": "{count} gruba ekle",
+  "@addToGroupsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "savedCardFieldHintDisplayName": "Kişinin adı ve soyadı",
+  "savedCardFieldHintEmail": "ornek@firma.com",
+  "savedCardFieldHintPhone": "+90 5XX XXX XX XX",
+  "savedCardFieldHintCompany": "Çalıştığı şirket",
+  "savedCardFieldHintTitle": "Ünvan veya rol",
+  "savedCardFieldHintWebsite": "https://...",
+  "savedCardFieldHintLinkedin": "LinkedIn profil URL",
+  "savedCardFieldHintAddress": "Açık adres",
+  "savedCardFieldHintCity": "İstanbul",
+  "savedCardFieldHintCountry": "Türkiye",
+  "savedCardFieldHintDepartment": "Satış, AR-GE vb.",
+  "savedCardFieldHintSchool": "Mezun olunan okul",
+  "savedCardFieldHintAbout": "Kısa tanıtım",
+  "savedCardFieldHintSkills": "Virgülle ayırın",
+  "savedCardFieldHintAttendedEvents": "Web Summit 2025, SaaStr Annual…",
+  "savedCardFieldHintTwitter": "@kullanici veya profil URL",
+  "savedCardFieldHintInstagram": "@kullanici veya profil URL",
+  "savedCardFieldHintBirthday": "15 Mart veya 15.03.1990"
 }

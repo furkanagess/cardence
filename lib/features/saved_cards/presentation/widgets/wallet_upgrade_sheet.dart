@@ -62,22 +62,22 @@ class WalletUpgradeSheet extends StatelessWidget {
             const SizedBox(height: 20),
             _BenefitRow(
               icon: Icons.credit_card_rounded,
-              text: 'Sınırsız kart kaydı',
+              text: context.l10n.premiumBenefitUnlimitedSavedCards,
             ),
             const SizedBox(height: 10),
             _BenefitRow(
               icon: Icons.event_rounded,
-              text: 'Sınırsız etkinlik grubu organizasyonu',
+              text: context.l10n.premiumBenefitUnlimitedEventGroups,
             ),
             const SizedBox(height: 10),
             _BenefitRow(
               icon: Icons.edit_note_rounded,
-              text: 'Sınırsız elle ve fotoğrafla kart ekleme',
+              text: context.l10n.premiumBenefitUnlimitedManualPhoto,
             ),
             const SizedBox(height: 10),
             _BenefitRow(
               icon: Icons.qr_code_scanner_rounded,
-              text: 'QR ve kart ID ile hızlı ekleme',
+              text: context.l10n.premiumBenefitQrAndCardId,
             ),
             const SizedBox(height: 24),
             CustomButton(

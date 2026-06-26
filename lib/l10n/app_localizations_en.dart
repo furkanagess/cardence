@@ -102,7 +102,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get bilgiEkle => 'Bilgi ekle';
 
   @override
-  String get bilgiGirildikeKarttaGrnr => 'Bilgi girildikçe cardta görünür';
+  String get bilgiGirildikeKarttaGrnr =>
+      'Details appear on the card as you fill them in';
 
   @override
   String get bilgiler => 'Bilgiler';
@@ -585,8 +586,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get kartBilgisiYok => 'Card bilgisi yok';
 
   @override
-  String get kartBilgisiYokDzenleIle =>
-      'Card bilgisi yok — düzenle ile ekleyin';
+  String get kartBilgisiYokDzenleIle => 'No card info yet — add via Edit';
 
   @override
   String get kartBulunamad => 'Card not found.';
@@ -644,7 +644,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get kartIdOluturulamadLtfenTekrar =>
-      'Card ID oluşturulamadı. Please tekrar try.';
+      'Could not create Card ID. Please try again.';
 
   @override
   String get kartIdTam6Haneli => 'Card ID tam 6 haneli sayı olmalıdır';
@@ -681,7 +681,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get kartPaylaDediinizdeBenzersizBir =>
-      'Cardı paylaş dediğinizde benzersiz bir numara atanır.';
+      'A unique number is assigned when you share the card.';
 
   @override
   String get kartRengi => 'KART RENGİ';
@@ -1644,4 +1644,206 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get termsSection7Body =>
       'For questions about these terms, contact us through the in-app Support section.';
+
+  @override
+  String get hidePreview => 'Hide preview';
+
+  @override
+  String get showPreview => 'Show preview';
+
+  @override
+  String get createdOnShare => 'Created when you share';
+
+  @override
+  String get shareCardSubject => 'My Cardence card';
+
+  @override
+  String shareCardMessage(String name, String cardId) {
+    return 'Hi! I\'m sharing my Cardence card with you.\n\nCard: $name\nCard ID: $cardId\n\nIn Cardence, open Saved Cards and use \"Add with Card ID\" to save my card.';
+  }
+
+  @override
+  String get provinceLabel => 'Province';
+
+  @override
+  String get districtLabel => 'District';
+
+  @override
+  String get twitterX => 'Twitter / X';
+
+  @override
+  String get walletUnlimitedCardsCanAdd => 'You can add unlimited cards.';
+
+  @override
+  String walletRemainingCardsCanAdd(int count) {
+    return 'You can add $count more cards.';
+  }
+
+  @override
+  String get walletFullUpgradeLimit =>
+      'Your wallet is full. Upgrade your plan to increase the limit.';
+
+  @override
+  String get premiumBenefitUnlimitedSavedCards => 'Unlimited saved cards';
+
+  @override
+  String get premiumBenefitUnlimitedEventGroups =>
+      'Unlimited event group organization';
+
+  @override
+  String get premiumBenefitUnlimitedManualPhoto =>
+      'Unlimited manual and photo card entry';
+
+  @override
+  String get premiumBenefitQrAndCardId => 'Fast add via QR and Card ID';
+
+  @override
+  String get quotaPremiumAllLimitsRemoved => 'All limits removed with Premium';
+
+  @override
+  String get quotaFreePlanRights => 'Your free plan entitlements';
+
+  @override
+  String get oneTrial => '1 trial';
+
+  @override
+  String get premiumRequired => 'Premium required';
+
+  @override
+  String get canCreateNewCard => 'You can create a new card';
+
+  @override
+  String get cardLimitReached => 'Card limit reached';
+
+  @override
+  String get createUnlimitedGroups => 'Create as many groups as you want';
+
+  @override
+  String eventGroupsRemaining(int count) {
+    return '$count group slots left';
+  }
+
+  @override
+  String get groupLimitReached => 'Group limit reached';
+
+  @override
+  String get addUnlimitedManualPhoto => 'Add as many as you want';
+
+  @override
+  String get limitedTrialOnFreePlan => 'Limited trial on the free plan';
+
+  @override
+  String get eventFilterFallback => 'Event';
+
+  @override
+  String get eventGroupNameRequired => 'Event name cannot be empty';
+
+  @override
+  String get eventGroupNameDuplicate =>
+      'An event group with this name already exists';
+
+  @override
+  String get eventGroupDetailsStepSubtitle =>
+      'Enter the event name, location, and date.';
+
+  @override
+  String get eventGroupCardsStepSubtitle =>
+      'You can create the group without selecting cards.';
+
+  @override
+  String get noCardsSelectedYet => 'No cards selected yet';
+
+  @override
+  String cardsSelectedCount(int count) {
+    return '$count cards selected';
+  }
+
+  @override
+  String get createGroup => 'Create group';
+
+  @override
+  String createGroupWithCards(int count) {
+    return 'Create with $count cards';
+  }
+
+  @override
+  String pickSavedCardsForGroupSubtitle(String groupName) {
+    return 'Select saved cards to add to the $groupName group.';
+  }
+
+  @override
+  String get addCardsToGroup => 'Add cards to group';
+
+  @override
+  String addCardsToGroupCount(int count) {
+    return 'Add $count cards to group';
+  }
+
+  @override
+  String pickEventGroupsForCardSubtitle(String cardTitle) {
+    return 'Select groups where the $cardTitle card can be added.';
+  }
+
+  @override
+  String get addToGroups => 'Add to groups';
+
+  @override
+  String addToGroupsCount(int count) {
+    return 'Add to $count groups';
+  }
+
+  @override
+  String get savedCardFieldHintDisplayName => 'Person\'s full name';
+
+  @override
+  String get savedCardFieldHintEmail => 'name@company.com';
+
+  @override
+  String get savedCardFieldHintPhone => '+1 555 000 0000';
+
+  @override
+  String get savedCardFieldHintCompany => 'Company they work at';
+
+  @override
+  String get savedCardFieldHintTitle => 'Job title or role';
+
+  @override
+  String get savedCardFieldHintWebsite => 'https://...';
+
+  @override
+  String get savedCardFieldHintLinkedin => 'LinkedIn profile URL';
+
+  @override
+  String get savedCardFieldHintAddress => 'Street address';
+
+  @override
+  String get savedCardFieldHintCity => 'City';
+
+  @override
+  String get savedCardFieldHintCountry => 'Country';
+
+  @override
+  String get savedCardFieldHintDepartment => 'Sales, R&D, etc.';
+
+  @override
+  String get savedCardFieldHintSchool => 'School or university';
+
+  @override
+  String get savedCardFieldHintAbout => 'Short bio';
+
+  @override
+  String get savedCardFieldHintSkills => 'Separate with commas';
+
+  @override
+  String get savedCardFieldHintAttendedEvents =>
+      'Web Summit 2025, SaaStr Annual…';
+
+  @override
+  String get savedCardFieldHintTwitter => '@username or profile URL';
+
+  @override
+  String get savedCardFieldHintInstagram => '@username or profile URL';
+
+  @override
+  String get savedCardFieldHintBirthday => 'March 15 or 03/15/1990';
 }

@@ -5,6 +5,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/atoms/custom_button.dart';
 import '../../domain/entities/saved_card.dart';
 import '../../domain/helpers/saved_card_field_catalog.dart';
+import '../helpers/saved_card_field_l10n.dart';
 
 /// Kayıtlı kart detayında alan seçme ve düzenleme bottom sheet'i.
 class SavedCardAddFieldSheet {
@@ -63,13 +64,13 @@ class SavedCardAddFieldSheet {
                           color: colorScheme.primary,
                         ),
                         title: Text(
-                          def.label,
+                          SavedCardFieldL10n.label(context.l10n, def.key),
                           style: textTheme.titleSmall?.copyWith(
                             fontWeight: FontWeight.w600,
                           ),
                         ),
                         subtitle: Text(
-                          def.hint,
+                          SavedCardFieldL10n.hint(context.l10n, def.key),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -129,7 +130,7 @@ class SavedCardAddFieldSheet {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     Text(
-                      definition.label,
+                      SavedCardFieldL10n.label(context.l10n, definition.key),
                       style: textTheme.titleLarge?.copyWith(
                         fontWeight: FontWeight.w600,
                       ),
@@ -144,7 +145,10 @@ class SavedCardAddFieldSheet {
                       onChanged: (value) =>
                           setModalState(() => draft = value),
                       decoration: InputDecoration(
-                        hintText: definition.hint,
+                        hintText: SavedCardFieldL10n.hint(
+                          context.l10n,
+                          definition.key,
+                        ),
                         filled: true,
                         fillColor: colorScheme.surfaceContainerHighest
                             .withValues(alpha: 0.5),

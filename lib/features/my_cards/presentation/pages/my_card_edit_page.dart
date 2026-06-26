@@ -516,8 +516,8 @@ class _MyCardEditPageState extends State<MyCardEditPage> {
                       ),
                       CountryCityPickerField(
                         countryLabel: (_labels(context))['country']!,
-                        stateLabel: 'İl',
-                        districtLabel: 'İlçe',
+                        stateLabel: context.l10n.provinceLabel,
+                        districtLabel: context.l10n.districtLabel,
                         country: _countryValue,
                         city: _cityValue,
                         onCountryChanged: (value) =>

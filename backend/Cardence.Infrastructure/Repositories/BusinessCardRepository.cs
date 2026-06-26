@@ -25,6 +25,24 @@ public sealed class BusinessCardRepository : IBusinessCardRepository
             .ToListAsync(cancellationToken);
     }
 
+    public async Task<IReadOnlyList<Card>> GetByUserIdsAsync(
+        IReadOnlyCollection<Guid> userIds,
+        CancellationToken cancellationToken = default)
+    {
+        if (userIds.Count == 0)
+        {
+            return [];
+        }
+
+        var distinctIds = userIds.Distinct().ToList();
+        return await _dbContext.Cards
+            .AsNoTracking()
+            .Where(card => distinctIds.Contains(card.UserId))
+            .OrderByDescending(card => card.SaveCount)
+            .ThenByDescending(card => card.UpdatedAt)
+            .ToListAsync(cancellationToken);
+    }
+
     public async Task<Card?> GetByUserAndCardIdAsync(
         Guid userId,
         string cardId,

@@ -10,12 +10,12 @@ class CollapsibleCardPreviewPanel extends StatefulWidget {
     super.key,
     required this.draft,
     this.initiallyExpanded = false,
-    this.emptyMessage = 'Bilgi girildikçe kartta görünür',
+    this.emptyMessage,
   });
 
   final OnboardingCardDraft draft;
   final bool initiallyExpanded;
-  final String emptyMessage;
+  final String? emptyMessage;
 
   @override
   State<CollapsibleCardPreviewPanel> createState() =>
@@ -47,7 +47,9 @@ class _CollapsibleCardPreviewPanelState extends State<CollapsibleCardPreviewPane
         children: [
           Semantics(
             button: true,
-            label: _expanded ? 'Önizlemeyi gizle' : 'Önizlemeyi göster',
+            label: _expanded
+                ? context.l10n.hidePreview
+                : context.l10n.showPreview,
             child: InkWell(
               onTap: _toggle,
               child: Padding(
@@ -93,7 +95,8 @@ class _CollapsibleCardPreviewPanelState extends State<CollapsibleCardPreviewPane
               child: MyCardPreviewHelpers.flippableCard(
                 draft: widget.draft,
                 l10n: context.l10n,
-                emptyMessage: widget.emptyMessage,
+                emptyMessage:
+                    widget.emptyMessage ?? context.l10n.bilgiGirildikeKarttaGrnr,
               ),
             ),
           ),

@@ -141,7 +141,7 @@ class SavedCardsFilterSheet extends StatelessWidget {
                                   .where((o) => o.value == tempEvent)
                                   .map((o) => o.label)
                                   .firstOrNull ??
-                              'Etkinlik',
+                              context.l10n.eventFilterFallback,
                           onRemove: () =>
                               setModalState(() => tempEvent = allEventsValue),
                         ),

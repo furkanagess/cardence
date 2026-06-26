@@ -71,8 +71,8 @@ class WalletQuotaDetailSheet extends StatelessWidget {
                       const SizedBox(height: 4),
                       Text(
                         quota.isPremium
-                            ? 'Premium ile tüm limitler kalktı'
-                            : 'Ücretsiz plandaki haklarınız',
+                            ? context.l10n.quotaPremiumAllLimitsRemoved
+                            : context.l10n.quotaFreePlanRights,
                         style: textTheme.bodyMedium?.copyWith(
                           color: colorScheme.onSurfaceVariant,
                           height: 1.35,
@@ -136,8 +136,8 @@ class _LimitsSection extends StatelessWidget {
     final manualLabel = quota.isPremium
         ? context.l10n.snrsz
         : quota.canAddManualSavedCard
-            ? '1 deneme'
-            : 'Premium gerekli';
+            ? context.l10n.oneTrial
+            : context.l10n.premiumRequired;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -165,8 +165,8 @@ class _LimitsSection extends StatelessWidget {
               ? '${quota.businessCardCount} / ${quota.maxBusinessCards}'
               : '${quota.businessCardCount} / ${SavedCardsWalletLimits.freeMaxOwnBusinessCards}',
           subtitle: quota.canAddBusinessCard
-              ? 'Yeni kart oluşturabilirsiniz'
-              : 'Kart limitine ulaşıldı',
+              ? context.l10n.canCreateNewCard
+              : context.l10n.cardLimitReached,
           tone: quota.canAddBusinessCard
               ? WalletQuotaLimitTone.neutral
               : WalletQuotaLimitTone.error,
@@ -179,10 +179,12 @@ class _LimitsSection extends StatelessWidget {
               ? context.l10n.snrsz
               : '${quota.eventGroupCount} / ${quota.maxEventGroups}',
           subtitle: quota.hasUnlimitedEventGroups
-              ? 'İstediğiniz kadar grup oluşturun'
+              ? context.l10n.createUnlimitedGroups
               : quota.canAddEventGroup
-                  ? '${quota.maxEventGroups - quota.eventGroupCount} grup hakkı kaldı'
-                  : 'Grup limitine ulaşıldı',
+                  ? context.l10n.eventGroupsRemaining(
+                      quota.maxEventGroups - quota.eventGroupCount,
+                    )
+                  : context.l10n.groupLimitReached,
           tone: quota.hasUnlimitedEventGroups
               ? WalletQuotaLimitTone.success
               : quota.canAddEventGroup
@@ -195,8 +197,8 @@ class _LimitsSection extends StatelessWidget {
           title: context.l10n.manuelFotorafEkleme,
           valueLabel: manualLabel,
           subtitle: quota.isPremium
-              ? 'İstediğiniz kadar ekleyin'
-              : 'Ücretsiz planda sınırlı deneme',
+              ? context.l10n.addUnlimitedManualPhoto
+              : context.l10n.limitedTrialOnFreePlan,
           tone: quota.isPremium
               ? WalletQuotaLimitTone.success
               : quota.canAddManualSavedCard

@@ -39,7 +39,7 @@ class SettingsLocaleSelector extends StatelessWidget {
             Expanded(
               child: _LocaleOptionChip(
                 label: context.l10n.turkce,
-                icon: Icons.translate_rounded,
+                flag: '🇹🇷',
                 selected: current == LocalePreference.turkish,
                 onTap: () => onChanged(LocalePreference.turkish),
               ),
@@ -48,7 +48,7 @@ class SettingsLocaleSelector extends StatelessWidget {
             Expanded(
               child: _LocaleOptionChip(
                 label: context.l10n.ingilizce,
-                icon: Icons.language_rounded,
+                flag: '🇬🇧',
                 selected: current == LocalePreference.english,
                 onTap: () => onChanged(LocalePreference.english),
               ),
@@ -72,13 +72,15 @@ class SettingsLocaleSelector extends StatelessWidget {
 class _LocaleOptionChip extends StatelessWidget {
   const _LocaleOptionChip({
     required this.label,
-    required this.icon,
     required this.selected,
     required this.onTap,
-  });
+    this.flag,
+    this.icon,
+  }) : assert(flag != null || icon != null, 'flag veya icon verilmeli');
 
   final String label;
-  final IconData icon;
+  final String? flag;
+  final IconData? icon;
   final bool selected;
   final VoidCallback onTap;
 
@@ -93,6 +95,7 @@ class _LocaleOptionChip extends StatelessWidget {
         : AppColors.primaryContainer.withValues(alpha: 0.75);
     final selectedForeground =
         isDark ? AppColors.primaryDarkTheme : AppColors.primary;
+    final unselectedForeground = colorScheme.onSurfaceVariant;
 
     return Material(
       color: Colors.transparent,
@@ -110,12 +113,12 @@ class _LocaleOptionChip extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(
-                icon,
-                size: 22,
-                color: selected
-                    ? selectedForeground
-                    : colorScheme.onSurfaceVariant,
+              _LocaleOptionGlyph(
+                flag: flag,
+                icon: icon,
+                selected: selected,
+                selectedForeground: selectedForeground,
+                unselectedForeground: unselectedForeground,
               ),
               const SizedBox(height: 8),
               Text(
@@ -134,6 +137,48 @@ class _LocaleOptionChip extends StatelessWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _LocaleOptionGlyph extends StatelessWidget {
+  const _LocaleOptionGlyph({
+    required this.selected,
+    required this.selectedForeground,
+    required this.unselectedForeground,
+    this.flag,
+    this.icon,
+  });
+
+  final String? flag;
+  final IconData? icon;
+  final bool selected;
+  final Color selectedForeground;
+  final Color unselectedForeground;
+
+  @override
+  Widget build(BuildContext context) {
+    if (flag != null) {
+      return SizedBox(
+        width: 30,
+        height: 30,
+        child: Center(
+          child: Text(
+            flag!,
+            style: const TextStyle(fontSize: 22, height: 1),
+          ),
+        ),
+      );
+    }
+
+    return SizedBox(
+      width: 30,
+      height: 30,
+      child: Icon(
+        icon,
+        size: 22,
+        color: selected ? selectedForeground : unselectedForeground,
       ),
     );
   }

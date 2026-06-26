@@ -7,6 +7,7 @@ public enum GraphEdgeType
 {
     Owns,
     Saved,
+    SavedBy,
     Scanned,
     Viewed,
     ContactClicked,

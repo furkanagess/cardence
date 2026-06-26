@@ -1,5 +1,6 @@
 using Cardence.Application.DTOs.NetworkGraph;
 using Cardence.Application.Interfaces;
+using Cardence.Domain.Constants;
 using Cardence.Domain.Entities;
 using Cardence.Domain.Exceptions;
 using Cardence.Domain.Graph;
@@ -109,6 +110,7 @@ public sealed class NetworkGraphService : INetworkGraphService
             AddCompanyLink(graph, GraphNodeIds.Card(card.CardId), card.Company);
         }
 
+        // Kullanıcının kaydettiği kişiler (giden bağlantılar).
         foreach (var card in savedCards)
         {
             AddSavedCardNode(graph, card);
@@ -117,12 +119,66 @@ public sealed class NetworkGraphService : INetworkGraphService
         }
 
         AddEventLinks(graph, savedCards, eventGroups);
-        AddInteractionLinks(graph, interactions, userNodeId);
+        await AddReverseSaverLinksAsync(graph, interactions, userId, cancellationToken);
 
         return graph.ToDto(
             "personal",
             query.MaxNodes,
             query.CenterCardId);
+    }
+
+    /// <summary>
+    /// Kullanıcının kartlarını kaydeden kişileri (gelen bağlantılar) gerçek
+    /// kart düğümleri olarak ekler.
+    /// </summary>
+    private async Task AddReverseSaverLinksAsync(
+        GraphAccumulator graph,
+        IReadOnlyList<CardInteraction> interactions,
+        Guid currentUserId,
+        CancellationToken cancellationToken)
+    {
+        var savedInteractions = interactions
+            .Where(interaction =>
+                interaction.EventType == CardInteractionTypes.CardSaved &&
+                interaction.ActorUserId.HasValue &&
+                interaction.ActorUserId.Value != currentUserId)
+            .ToList();
+
+        if (savedInteractions.Count == 0)
+        {
+            return;
+        }
+
+        var actorUserIds = savedInteractions
+            .Select(interaction => interaction.ActorUserId!.Value)
+            .Distinct()
+            .ToList();
+
+        var actorCards = await _businessCardRepository.GetByUserIdsAsync(
+            actorUserIds,
+            cancellationToken);
+
+        // Her kaydeden için temsilci kart (en çok kaydedilen / en güncel).
+        var representativeByUser = actorCards
+            .GroupBy(card => card.UserId)
+            .ToDictionary(group => group.Key, group => group.First());
+
+        foreach (var interaction in savedInteractions)
+        {
+            if (!representativeByUser.TryGetValue(interaction.ActorUserId!.Value, out var saverCard))
+            {
+                continue;
+            }
+
+            AddBusinessCardNode(graph, saverCard, isOwnCard: false);
+            AddCompanyLink(graph, GraphNodeIds.Card(saverCard.CardId), saverCard.Company);
+            graph.AddEdge(
+                GraphNodeIds.Card(saverCard.CardId),
+                GraphNodeIds.Card(interaction.TargetCardPublicId),
+                "saved_by",
+                GraphEdgeType.SavedBy,
+                occurredAt: interaction.OccurredAt);
+        }
     }
 
     private async Task<NetworkGraphDto> BuildEventGraphAsync(
@@ -186,6 +242,7 @@ public sealed class NetworkGraphService : INetworkGraphService
             subtitle,
             card.CardId,
             card.Company,
+            photoUrl: card.PhotoUrl,
             isOwnCard: isOwnCard);
     }
 
@@ -199,7 +256,8 @@ public sealed class NetworkGraphService : INetworkGraphService
             label,
             subtitle,
             card.CardId,
-            card.Company);
+            card.Company,
+            photoUrl: card.PhotoUrl);
     }
 
     private static void AddCompanyLink(GraphAccumulator graph, string cardNodeId, string? company)
@@ -246,28 +304,6 @@ public sealed class NetworkGraphService : INetworkGraphService
         }
     }
 
-    private static void AddInteractionLinks(
-        GraphAccumulator graph,
-        IReadOnlyList<CardInteraction> interactions,
-        string fallbackUserNodeId)
-    {
-        foreach (var interaction in interactions)
-        {
-            var sourceNodeId = interaction.ActorUserId.HasValue
-                ? GraphNodeIds.User(interaction.ActorUserId.Value)
-                : fallbackUserNodeId;
-
-            graph.AddNode(sourceNodeId, "user", interaction.ActorUserId.HasValue ? "Cardence user" : "Anonymous");
-            graph.AddEdge(
-                sourceNodeId,
-                GraphNodeIds.Card(interaction.TargetCardPublicId),
-                interaction.EventType,
-                MapInteractionEdgeType(interaction.EventType),
-                occurredAt: interaction.OccurredAt,
-                organizationEventId: interaction.OrganizationEventId);
-        }
-    }
-
     private static void AddSameCompanyLinks(GraphAccumulator graph, IReadOnlyList<SavedCard> cards)
     {
         foreach (var group in cards
@@ -286,15 +322,6 @@ public sealed class NetworkGraphService : INetworkGraphService
             }
         }
     }
-
-    private static GraphEdgeType MapInteractionEdgeType(string eventType) =>
-        eventType switch
-        {
-            "qr_scanned" => GraphEdgeType.Scanned,
-            "card_viewed" => GraphEdgeType.Viewed,
-            "contact_clicked" => GraphEdgeType.ContactClicked,
-            _ => GraphEdgeType.Saved,
-        };
 
     private static NetworkGraphDto EmptyGraph(GraphScope scope, string? centerCardId) =>
         new()
@@ -441,14 +468,18 @@ public sealed class NetworkGraphService : INetworkGraphService
             string? subtitle = null,
             string? cardId = null,
             string? company = null,
+            string? photoUrl = null,
             bool isCenter = false,
             bool isOwnCard = false)
         {
             if (_nodes.TryGetValue(id, out var existing))
             {
-                existing.Degree = existing.Degree;
                 existing.IsCenter = existing.IsCenter || isCenter || IsCenterCard(cardId);
                 existing.IsOwnCard = existing.IsOwnCard || isOwnCard;
+                if (string.IsNullOrWhiteSpace(existing.PhotoUrl) && !string.IsNullOrWhiteSpace(photoUrl))
+                {
+                    existing.PhotoUrl = photoUrl;
+                }
                 return;
             }
 
@@ -460,6 +491,7 @@ public sealed class NetworkGraphService : INetworkGraphService
                 Subtitle = subtitle,
                 CardId = cardId,
                 Company = company,
+                PhotoUrl = photoUrl,
                 IsCenter = isCenter || IsCenterCard(cardId),
                 IsOwnCard = isOwnCard,
             };
@@ -567,6 +599,7 @@ public sealed class NetworkGraphService : INetworkGraphService
         public string? Subtitle { get; init; }
         public string? CardId { get; init; }
         public string? Company { get; init; }
+        public string? PhotoUrl { get; set; }
         public int Degree { get; set; }
         public bool IsCenter { get; set; }
         public bool IsOwnCard { get; set; }
@@ -580,6 +613,7 @@ public sealed class NetworkGraphService : INetworkGraphService
                 Subtitle = Subtitle,
                 CardId = CardId,
                 Company = Company,
+                PhotoUrl = PhotoUrl,
                 Degree = Degree,
                 IsCenter = IsCenter,
                 IsOwnCard = IsOwnCard,

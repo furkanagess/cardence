@@ -116,11 +116,11 @@ class _CreateEventGroupSheetState extends State<CreateEventGroupSheet> {
   Future<void> _goToPickCards() async {
     final name = _groupName;
     if (name.isEmpty) {
-      setState(() => _nameErrorText = 'Etkinlik adı boş olamaz');
+      setState(() => _nameErrorText = context.l10n.eventGroupNameRequired);
       return;
     }
     if (NewEventGroupNameDialog.isDuplicateName(name, widget.existingNames)) {
-      setState(() => _nameErrorText = 'Bu isimde bir etkinlik grubu zaten var');
+      setState(() => _nameErrorText = context.l10n.eventGroupNameDuplicate);
       return;
     }
 
@@ -238,8 +238,8 @@ class _CreateEventGroupSheetHeader extends StatelessWidget {
 
     final title = step == 0 ? context.l10n.yeniEtkinlikGrubu : context.l10n.selectCards;
     final subtitle = step == 0
-        ? 'Etkinliğin adını, konumunu ve tarihini girin.'
-        : 'İsterseniz kart seçmeden de grubu oluşturabilirsiniz.';
+        ? context.l10n.eventGroupDetailsStepSubtitle
+        : context.l10n.eventGroupCardsStepSubtitle;
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 4, 20, 16),
@@ -550,8 +550,8 @@ class _CreateEventGroupPickCardsStep extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
             child: Text(
               selectedCardIds.isEmpty
-                  ? 'Henüz kart seçilmedi'
-                  : '${selectedCardIds.length} kart seçildi',
+                  ? context.l10n.noCardsSelectedYet
+                  : context.l10n.cardsSelectedCount(selectedCardIds.length),
               style: textTheme.labelLarge?.copyWith(
                 color: selectedCardIds.isEmpty
                     ? colorScheme.onSurfaceVariant
@@ -634,8 +634,8 @@ class _CreateEventGroupSheetFooter extends StatelessWidget {
                       )
                     : CustomButton(
                         label: selectedCount == 0
-                            ? 'Grubu oluştur'
-                            : '$selectedCount kartla oluştur',
+                            ? context.l10n.createGroup
+                            : context.l10n.createGroupWithCards(selectedCount),
                         onPressed: loadingCards ? null : onSubmit,
                       ),
               ),

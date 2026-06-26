@@ -13,24 +13,16 @@ import 'linkedin_oauth_scopes.dart';
 
 /// LinkedIn OAuth authorization code.
 ///
-/// Mobil: gömülü WebView ile HTTPS callback yakalanır.
+/// LinkedIn, gömülü WebView içinde OAuth'a izin vermediği için tüm
+/// platformlarda sistem tarayıcısı (Custom Tabs / ASWebAuthenticationSession)
+/// kullanılır. Yalnızca eklenti bulunamazsa mobilde gömülü WebView'a düşülür.
 Future<String?> requestLinkedInAuthorizationCode(BuildContext context) async {
-  if (!kIsWeb && (Platform.isIOS || Platform.isAndroid)) {
-    if (!context.mounted) {
-      return null;
-    }
-
-    final webViewCode = await _requestWithEmbeddedWebView(context);
-    if (webViewCode != null && webViewCode.isNotEmpty) {
-      return webViewCode;
-    }
-
-    return null;
-  }
-
   try {
     return await _requestWithSystemBrowser();
   } on MissingPluginException {
+    if (kIsWeb || !(Platform.isIOS || Platform.isAndroid)) {
+      return null;
+    }
     if (!context.mounted) {
       return null;
     }

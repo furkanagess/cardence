@@ -1,11 +1,11 @@
 /// RevenueCat yapılandırması.
 ///
-/// Dashboard'da `premium_wallet` entitlement kimliği tanımlı olmalıdır.
+/// Dashboard'da `cardence-pro` entitlement kimliği tanımlı olmalıdır.
 class RevenueCatConfig {
   RevenueCatConfig._();
 
   static const apiKey = 'test_mAIxZapqCdeWRwUtwXUNmNoJPoS';
-  static const premiumEntitlementId = 'premium_wallet';
+  static const premiumEntitlementId = 'cardence-pro';
 
   /// Current offering içindeki paket kimliği (RevenueCat dashboard).
   /// Örnek: \$rc_monthly, \$rc_annual veya custom package id.

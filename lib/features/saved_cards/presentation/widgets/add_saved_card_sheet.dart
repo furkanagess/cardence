@@ -79,9 +79,9 @@ class AddSavedCardSheet extends StatelessWidget {
             Text(
               canAdd
                   ? (quota.hasUnlimitedWallet
-                      ? 'Sınırsız kart ekleyebilirsiniz.'
-                      : '${quota.remaining} kart daha ekleyebilirsiniz.')
-                  : 'Cüzdanınız dolu. Paket yükselterek sınırı artırabilirsiniz.',
+                      ? context.l10n.walletUnlimitedCardsCanAdd
+                      : context.l10n.walletRemainingCardsCanAdd(quota.remaining))
+                  : context.l10n.walletFullUpgradeLimit,
               style: textTheme.bodyMedium?.copyWith(
                 color: canAdd
                     ? colorScheme.onSurfaceVariant

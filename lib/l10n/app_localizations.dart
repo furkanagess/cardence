@@ -3157,6 +3157,360 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Kullanım koşulları hakkında sorularınız için uygulama içindeki Destek bölümünden bize ulaşabilirsiniz.'**
   String get termsSection7Body;
+
+  /// No description provided for @hidePreview.
+  ///
+  /// In tr, this message translates to:
+  /// **'Önizlemeyi gizle'**
+  String get hidePreview;
+
+  /// No description provided for @showPreview.
+  ///
+  /// In tr, this message translates to:
+  /// **'Önizlemeyi göster'**
+  String get showPreview;
+
+  /// No description provided for @createdOnShare.
+  ///
+  /// In tr, this message translates to:
+  /// **'Paylaşınca oluşturulur'**
+  String get createdOnShare;
+
+  /// No description provided for @shareCardSubject.
+  ///
+  /// In tr, this message translates to:
+  /// **'Cardence kartım'**
+  String get shareCardSubject;
+
+  /// No description provided for @shareCardMessage.
+  ///
+  /// In tr, this message translates to:
+  /// **'Merhaba! Cardence kartımı seninle paylaşıyorum.\n\nKart: {name}\nKart ID: {cardId}\n\nCardence uygulamasında Kayıtlı Kartlar bölümünden \"Kart ID ile ekle\" seçeneğine bu numarayı yazarak kartımı kaydedebilirsin.'**
+  String shareCardMessage(String name, String cardId);
+
+  /// No description provided for @provinceLabel.
+  ///
+  /// In tr, this message translates to:
+  /// **'İl'**
+  String get provinceLabel;
+
+  /// No description provided for @districtLabel.
+  ///
+  /// In tr, this message translates to:
+  /// **'İlçe'**
+  String get districtLabel;
+
+  /// No description provided for @twitterX.
+  ///
+  /// In tr, this message translates to:
+  /// **'Twitter / X'**
+  String get twitterX;
+
+  /// No description provided for @walletUnlimitedCardsCanAdd.
+  ///
+  /// In tr, this message translates to:
+  /// **'Sınırsız kart ekleyebilirsiniz.'**
+  String get walletUnlimitedCardsCanAdd;
+
+  /// No description provided for @walletRemainingCardsCanAdd.
+  ///
+  /// In tr, this message translates to:
+  /// **'{count} kart daha ekleyebilirsiniz.'**
+  String walletRemainingCardsCanAdd(int count);
+
+  /// No description provided for @walletFullUpgradeLimit.
+  ///
+  /// In tr, this message translates to:
+  /// **'Cüzdanınız dolu. Paket yükselterek sınırı artırabilirsiniz.'**
+  String get walletFullUpgradeLimit;
+
+  /// No description provided for @premiumBenefitUnlimitedSavedCards.
+  ///
+  /// In tr, this message translates to:
+  /// **'Sınırsız kart kaydı'**
+  String get premiumBenefitUnlimitedSavedCards;
+
+  /// No description provided for @premiumBenefitUnlimitedEventGroups.
+  ///
+  /// In tr, this message translates to:
+  /// **'Sınırsız etkinlik grubu organizasyonu'**
+  String get premiumBenefitUnlimitedEventGroups;
+
+  /// No description provided for @premiumBenefitUnlimitedManualPhoto.
+  ///
+  /// In tr, this message translates to:
+  /// **'Sınırsız elle ve fotoğrafla kart ekleme'**
+  String get premiumBenefitUnlimitedManualPhoto;
+
+  /// No description provided for @premiumBenefitQrAndCardId.
+  ///
+  /// In tr, this message translates to:
+  /// **'QR ve kart ID ile hızlı ekleme'**
+  String get premiumBenefitQrAndCardId;
+
+  /// No description provided for @quotaPremiumAllLimitsRemoved.
+  ///
+  /// In tr, this message translates to:
+  /// **'Premium ile tüm limitler kalktı'**
+  String get quotaPremiumAllLimitsRemoved;
+
+  /// No description provided for @quotaFreePlanRights.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ücretsiz plandaki haklarınız'**
+  String get quotaFreePlanRights;
+
+  /// No description provided for @oneTrial.
+  ///
+  /// In tr, this message translates to:
+  /// **'1 deneme'**
+  String get oneTrial;
+
+  /// No description provided for @premiumRequired.
+  ///
+  /// In tr, this message translates to:
+  /// **'Premium gerekli'**
+  String get premiumRequired;
+
+  /// No description provided for @canCreateNewCard.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yeni kart oluşturabilirsiniz'**
+  String get canCreateNewCard;
+
+  /// No description provided for @cardLimitReached.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kart limitine ulaşıldı'**
+  String get cardLimitReached;
+
+  /// No description provided for @createUnlimitedGroups.
+  ///
+  /// In tr, this message translates to:
+  /// **'İstediğiniz kadar grup oluşturun'**
+  String get createUnlimitedGroups;
+
+  /// No description provided for @eventGroupsRemaining.
+  ///
+  /// In tr, this message translates to:
+  /// **'{count} grup hakkı kaldı'**
+  String eventGroupsRemaining(int count);
+
+  /// No description provided for @groupLimitReached.
+  ///
+  /// In tr, this message translates to:
+  /// **'Grup limitine ulaşıldı'**
+  String get groupLimitReached;
+
+  /// No description provided for @addUnlimitedManualPhoto.
+  ///
+  /// In tr, this message translates to:
+  /// **'İstediğiniz kadar ekleyin'**
+  String get addUnlimitedManualPhoto;
+
+  /// No description provided for @limitedTrialOnFreePlan.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ücretsiz planda sınırlı deneme'**
+  String get limitedTrialOnFreePlan;
+
+  /// No description provided for @eventFilterFallback.
+  ///
+  /// In tr, this message translates to:
+  /// **'Etkinlik'**
+  String get eventFilterFallback;
+
+  /// No description provided for @eventGroupNameRequired.
+  ///
+  /// In tr, this message translates to:
+  /// **'Etkinlik adı boş olamaz'**
+  String get eventGroupNameRequired;
+
+  /// No description provided for @eventGroupNameDuplicate.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu isimde bir etkinlik grubu zaten var'**
+  String get eventGroupNameDuplicate;
+
+  /// No description provided for @eventGroupDetailsStepSubtitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Etkinliğin adını, konumunu ve tarihini girin.'**
+  String get eventGroupDetailsStepSubtitle;
+
+  /// No description provided for @eventGroupCardsStepSubtitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'İsterseniz kart seçmeden de grubu oluşturabilirsiniz.'**
+  String get eventGroupCardsStepSubtitle;
+
+  /// No description provided for @noCardsSelectedYet.
+  ///
+  /// In tr, this message translates to:
+  /// **'Henüz kart seçilmedi'**
+  String get noCardsSelectedYet;
+
+  /// No description provided for @cardsSelectedCount.
+  ///
+  /// In tr, this message translates to:
+  /// **'{count} kart seçildi'**
+  String cardsSelectedCount(int count);
+
+  /// No description provided for @createGroup.
+  ///
+  /// In tr, this message translates to:
+  /// **'Grubu oluştur'**
+  String get createGroup;
+
+  /// No description provided for @createGroupWithCards.
+  ///
+  /// In tr, this message translates to:
+  /// **'{count} kartla oluştur'**
+  String createGroupWithCards(int count);
+
+  /// No description provided for @pickSavedCardsForGroupSubtitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'{groupName} grubuna eklenecek kayıtlı kartları seçin.'**
+  String pickSavedCardsForGroupSubtitle(String groupName);
+
+  /// No description provided for @addCardsToGroup.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kartları gruba ekle'**
+  String get addCardsToGroup;
+
+  /// No description provided for @addCardsToGroupCount.
+  ///
+  /// In tr, this message translates to:
+  /// **'{count} kartı gruba ekle'**
+  String addCardsToGroupCount(int count);
+
+  /// No description provided for @pickEventGroupsForCardSubtitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'{cardTitle} kartının eklenebileceği grupları işaretleyin.'**
+  String pickEventGroupsForCardSubtitle(String cardTitle);
+
+  /// No description provided for @addToGroups.
+  ///
+  /// In tr, this message translates to:
+  /// **'Gruplara ekle'**
+  String get addToGroups;
+
+  /// No description provided for @addToGroupsCount.
+  ///
+  /// In tr, this message translates to:
+  /// **'{count} gruba ekle'**
+  String addToGroupsCount(int count);
+
+  /// No description provided for @savedCardFieldHintDisplayName.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kişinin adı ve soyadı'**
+  String get savedCardFieldHintDisplayName;
+
+  /// No description provided for @savedCardFieldHintEmail.
+  ///
+  /// In tr, this message translates to:
+  /// **'ornek@firma.com'**
+  String get savedCardFieldHintEmail;
+
+  /// No description provided for @savedCardFieldHintPhone.
+  ///
+  /// In tr, this message translates to:
+  /// **'+90 5XX XXX XX XX'**
+  String get savedCardFieldHintPhone;
+
+  /// No description provided for @savedCardFieldHintCompany.
+  ///
+  /// In tr, this message translates to:
+  /// **'Çalıştığı şirket'**
+  String get savedCardFieldHintCompany;
+
+  /// No description provided for @savedCardFieldHintTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ünvan veya rol'**
+  String get savedCardFieldHintTitle;
+
+  /// No description provided for @savedCardFieldHintWebsite.
+  ///
+  /// In tr, this message translates to:
+  /// **'https://...'**
+  String get savedCardFieldHintWebsite;
+
+  /// No description provided for @savedCardFieldHintLinkedin.
+  ///
+  /// In tr, this message translates to:
+  /// **'LinkedIn profil URL'**
+  String get savedCardFieldHintLinkedin;
+
+  /// No description provided for @savedCardFieldHintAddress.
+  ///
+  /// In tr, this message translates to:
+  /// **'Açık adres'**
+  String get savedCardFieldHintAddress;
+
+  /// No description provided for @savedCardFieldHintCity.
+  ///
+  /// In tr, this message translates to:
+  /// **'İstanbul'**
+  String get savedCardFieldHintCity;
+
+  /// No description provided for @savedCardFieldHintCountry.
+  ///
+  /// In tr, this message translates to:
+  /// **'Türkiye'**
+  String get savedCardFieldHintCountry;
+
+  /// No description provided for @savedCardFieldHintDepartment.
+  ///
+  /// In tr, this message translates to:
+  /// **'Satış, AR-GE vb.'**
+  String get savedCardFieldHintDepartment;
+
+  /// No description provided for @savedCardFieldHintSchool.
+  ///
+  /// In tr, this message translates to:
+  /// **'Mezun olunan okul'**
+  String get savedCardFieldHintSchool;
+
+  /// No description provided for @savedCardFieldHintAbout.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kısa tanıtım'**
+  String get savedCardFieldHintAbout;
+
+  /// No description provided for @savedCardFieldHintSkills.
+  ///
+  /// In tr, this message translates to:
+  /// **'Virgülle ayırın'**
+  String get savedCardFieldHintSkills;
+
+  /// No description provided for @savedCardFieldHintAttendedEvents.
+  ///
+  /// In tr, this message translates to:
+  /// **'Web Summit 2025, SaaStr Annual…'**
+  String get savedCardFieldHintAttendedEvents;
+
+  /// No description provided for @savedCardFieldHintTwitter.
+  ///
+  /// In tr, this message translates to:
+  /// **'@kullanici veya profil URL'**
+  String get savedCardFieldHintTwitter;
+
+  /// No description provided for @savedCardFieldHintInstagram.
+  ///
+  /// In tr, this message translates to:
+  /// **'@kullanici veya profil URL'**
+  String get savedCardFieldHintInstagram;
+
+  /// No description provided for @savedCardFieldHintBirthday.
+  ///
+  /// In tr, this message translates to:
+  /// **'15 Mart veya 15.03.1990'**
+  String get savedCardFieldHintBirthday;
 }
 
 class _AppLocalizationsDelegate

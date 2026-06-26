@@ -156,7 +156,7 @@ class _NetworkGraphViewState extends State<NetworkGraphView> {
                 Text(
                   state.scope == GraphScope.event
                       ? 'Bu etkinlikteki kartlar, şirketler ve bağlantılar görsel olarak gösterilir.'
-                      : 'Kartlarınız, kayıtlı kartlar ve şirket/etkinlik düğümleri arasındaki ilişkiler.',
+                      : 'Senin kaydettiğin kişiler ile seni kaydeden kişiler arasındaki bağlantılar; şirket ve etkinlik düğümleriyle birlikte gösterilir.',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         color: Theme.of(context).colorScheme.onSurfaceVariant,
                         height: 1.35,

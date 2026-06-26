@@ -1647,4 +1647,206 @@ class AppLocalizationsTr extends AppLocalizations {
   @override
   String get termsSection7Body =>
       'Kullanım koşulları hakkında sorularınız için uygulama içindeki Destek bölümünden bize ulaşabilirsiniz.';
+
+  @override
+  String get hidePreview => 'Önizlemeyi gizle';
+
+  @override
+  String get showPreview => 'Önizlemeyi göster';
+
+  @override
+  String get createdOnShare => 'Paylaşınca oluşturulur';
+
+  @override
+  String get shareCardSubject => 'Cardence kartım';
+
+  @override
+  String shareCardMessage(String name, String cardId) {
+    return 'Merhaba! Cardence kartımı seninle paylaşıyorum.\n\nKart: $name\nKart ID: $cardId\n\nCardence uygulamasında Kayıtlı Kartlar bölümünden \"Kart ID ile ekle\" seçeneğine bu numarayı yazarak kartımı kaydedebilirsin.';
+  }
+
+  @override
+  String get provinceLabel => 'İl';
+
+  @override
+  String get districtLabel => 'İlçe';
+
+  @override
+  String get twitterX => 'Twitter / X';
+
+  @override
+  String get walletUnlimitedCardsCanAdd => 'Sınırsız kart ekleyebilirsiniz.';
+
+  @override
+  String walletRemainingCardsCanAdd(int count) {
+    return '$count kart daha ekleyebilirsiniz.';
+  }
+
+  @override
+  String get walletFullUpgradeLimit =>
+      'Cüzdanınız dolu. Paket yükselterek sınırı artırabilirsiniz.';
+
+  @override
+  String get premiumBenefitUnlimitedSavedCards => 'Sınırsız kart kaydı';
+
+  @override
+  String get premiumBenefitUnlimitedEventGroups =>
+      'Sınırsız etkinlik grubu organizasyonu';
+
+  @override
+  String get premiumBenefitUnlimitedManualPhoto =>
+      'Sınırsız elle ve fotoğrafla kart ekleme';
+
+  @override
+  String get premiumBenefitQrAndCardId => 'QR ve kart ID ile hızlı ekleme';
+
+  @override
+  String get quotaPremiumAllLimitsRemoved => 'Premium ile tüm limitler kalktı';
+
+  @override
+  String get quotaFreePlanRights => 'Ücretsiz plandaki haklarınız';
+
+  @override
+  String get oneTrial => '1 deneme';
+
+  @override
+  String get premiumRequired => 'Premium gerekli';
+
+  @override
+  String get canCreateNewCard => 'Yeni kart oluşturabilirsiniz';
+
+  @override
+  String get cardLimitReached => 'Kart limitine ulaşıldı';
+
+  @override
+  String get createUnlimitedGroups => 'İstediğiniz kadar grup oluşturun';
+
+  @override
+  String eventGroupsRemaining(int count) {
+    return '$count grup hakkı kaldı';
+  }
+
+  @override
+  String get groupLimitReached => 'Grup limitine ulaşıldı';
+
+  @override
+  String get addUnlimitedManualPhoto => 'İstediğiniz kadar ekleyin';
+
+  @override
+  String get limitedTrialOnFreePlan => 'Ücretsiz planda sınırlı deneme';
+
+  @override
+  String get eventFilterFallback => 'Etkinlik';
+
+  @override
+  String get eventGroupNameRequired => 'Etkinlik adı boş olamaz';
+
+  @override
+  String get eventGroupNameDuplicate =>
+      'Bu isimde bir etkinlik grubu zaten var';
+
+  @override
+  String get eventGroupDetailsStepSubtitle =>
+      'Etkinliğin adını, konumunu ve tarihini girin.';
+
+  @override
+  String get eventGroupCardsStepSubtitle =>
+      'İsterseniz kart seçmeden de grubu oluşturabilirsiniz.';
+
+  @override
+  String get noCardsSelectedYet => 'Henüz kart seçilmedi';
+
+  @override
+  String cardsSelectedCount(int count) {
+    return '$count kart seçildi';
+  }
+
+  @override
+  String get createGroup => 'Grubu oluştur';
+
+  @override
+  String createGroupWithCards(int count) {
+    return '$count kartla oluştur';
+  }
+
+  @override
+  String pickSavedCardsForGroupSubtitle(String groupName) {
+    return '$groupName grubuna eklenecek kayıtlı kartları seçin.';
+  }
+
+  @override
+  String get addCardsToGroup => 'Kartları gruba ekle';
+
+  @override
+  String addCardsToGroupCount(int count) {
+    return '$count kartı gruba ekle';
+  }
+
+  @override
+  String pickEventGroupsForCardSubtitle(String cardTitle) {
+    return '$cardTitle kartının eklenebileceği grupları işaretleyin.';
+  }
+
+  @override
+  String get addToGroups => 'Gruplara ekle';
+
+  @override
+  String addToGroupsCount(int count) {
+    return '$count gruba ekle';
+  }
+
+  @override
+  String get savedCardFieldHintDisplayName => 'Kişinin adı ve soyadı';
+
+  @override
+  String get savedCardFieldHintEmail => 'ornek@firma.com';
+
+  @override
+  String get savedCardFieldHintPhone => '+90 5XX XXX XX XX';
+
+  @override
+  String get savedCardFieldHintCompany => 'Çalıştığı şirket';
+
+  @override
+  String get savedCardFieldHintTitle => 'Ünvan veya rol';
+
+  @override
+  String get savedCardFieldHintWebsite => 'https://...';
+
+  @override
+  String get savedCardFieldHintLinkedin => 'LinkedIn profil URL';
+
+  @override
+  String get savedCardFieldHintAddress => 'Açık adres';
+
+  @override
+  String get savedCardFieldHintCity => 'İstanbul';
+
+  @override
+  String get savedCardFieldHintCountry => 'Türkiye';
+
+  @override
+  String get savedCardFieldHintDepartment => 'Satış, AR-GE vb.';
+
+  @override
+  String get savedCardFieldHintSchool => 'Mezun olunan okul';
+
+  @override
+  String get savedCardFieldHintAbout => 'Kısa tanıtım';
+
+  @override
+  String get savedCardFieldHintSkills => 'Virgülle ayırın';
+
+  @override
+  String get savedCardFieldHintAttendedEvents =>
+      'Web Summit 2025, SaaStr Annual…';
+
+  @override
+  String get savedCardFieldHintTwitter => '@kullanici veya profil URL';
+
+  @override
+  String get savedCardFieldHintInstagram => '@kullanici veya profil URL';
+
+  @override
+  String get savedCardFieldHintBirthday => '15 Mart veya 15.03.1990';
 }

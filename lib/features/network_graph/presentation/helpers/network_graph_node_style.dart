@@ -67,7 +67,9 @@ class NetworkGraphNodeStyle {
         );
       case GraphNodeType.company:
         return NetworkGraphNodeStyle(
-          background: isDark ? const Color(0xFF2A3340) : const Color(0xFFE8EDF4),
+          background: isDark
+              ? AppColors.graphCompanyNodeDark
+              : AppColors.graphCompanyNodeLight,
           foreground: isDark ? AppColors.textPrimaryDark : AppColors.secondary,
           border: isDark ? AppColors.outlineDark : AppColors.outline,
           icon: Icons.business_outlined,
@@ -75,9 +77,11 @@ class NetworkGraphNodeStyle {
         );
       case GraphNodeType.event:
         return NetworkGraphNodeStyle(
-          background: isDark ? const Color(0xFF2B3544) : const Color(0xFFE3EBF5),
-          foreground: isDark ? AppColors.primaryDarkTheme : AppColors.info,
-          border: isDark ? AppColors.primaryDarkTheme : AppColors.primaryLight,
+          background: isDark
+              ? AppColors.graphEventNodeDark
+              : AppColors.graphEventNodeLight,
+          foreground: AppColors.graphEventAccent,
+          border: AppColors.graphEventAccent,
           icon: Icons.event_outlined,
           size: 50,
         );

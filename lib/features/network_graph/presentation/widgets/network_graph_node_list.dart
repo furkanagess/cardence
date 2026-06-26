@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/widgets/atoms/profile_avatar.dart';
 import '../../domain/entities/graph_node.dart';
 import '../../domain/entities/graph_node_type.dart';
 
@@ -56,11 +57,18 @@ class NetworkGraphNodeTile extends StatelessWidget {
         side: BorderSide(color: colorScheme.outlineVariant),
       ),
       child: ListTile(
-        leading: CircleAvatar(
-          backgroundColor: colorScheme.secondaryContainer,
-          foregroundColor: colorScheme.onSecondaryContainer,
-          child: Icon(NetworkGraphNodeIcon.iconFor(node.type), size: 20),
-        ),
+        leading: (node.photoUrl?.trim().isNotEmpty ?? false)
+            ? ProfileAvatar(
+                photoUrl: node.photoUrl,
+                displayName: node.label,
+                size: 40,
+                circular: true,
+              )
+            : CircleAvatar(
+                backgroundColor: colorScheme.secondaryContainer,
+                foregroundColor: colorScheme.onSecondaryContainer,
+                child: Icon(NetworkGraphNodeIcon.iconFor(node.type), size: 20),
+              ),
         title: Text(
           node.label,
           maxLines: 1,

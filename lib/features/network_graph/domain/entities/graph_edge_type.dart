@@ -2,6 +2,7 @@
 enum GraphEdgeType {
   owns,
   saved,
+  savedBy,
   scanned,
   viewed,
   contactClicked,
