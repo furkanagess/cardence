@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/l10n/app_l10n.dart';
 import '../../../../core/l10n/l10n_extensions.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -276,7 +277,9 @@ class _AddManualCardBottomActions extends StatelessWidget {
           a.draft != b.draft,
       builder: (context, state) {
         final isLastPage = state.isLastPage;
-        final primaryLabel = isLastPage ? 'Kartı kaydet' : 'Devam →';
+        final primaryLabel = isLastPage
+            ? AppL10n.saveCard(context.l10n)
+            : AppL10n.continueWithArrow(context.l10n);
 
         return OnboardingBottomBar(
           stepCount: AddManualCardState.stepCount,

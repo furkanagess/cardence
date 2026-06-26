@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/l10n/app_l10n.dart';
 import '../../../../core/l10n/l10n_extensions.dart';
 
 import '../../../../core/theme/app_colors.dart';
@@ -80,6 +81,8 @@ class _SavedCardsScreenToolbarState extends State<SavedCardsScreenToolbar> {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
 
+    final l10n = context.l10n;
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
       child: AnimatedSize(
@@ -93,10 +96,10 @@ class _SavedCardsScreenToolbarState extends State<SavedCardsScreenToolbar> {
                   ? CustomTextField(
                       controller: _searchController,
                       focusNode: _searchFocusNode,
-                      hintText: context.l10n.isimirketEPosta,
+                      hintText: AppL10n.isimirketEPosta(l10n),
                       prefixIcon: const Icon(Icons.search_rounded, size: 22),
                       suffixIcon: IconButton(
-                        tooltip: context.l10n.aramayKapat,
+                        tooltip: AppL10n.aramayKapat(l10n),
                         onPressed: () => _collapseSearch(clearQuery: true),
                         icon: const Icon(Icons.close_rounded, size: 20),
                         visualDensity: VisualDensity.compact,
@@ -109,12 +112,12 @@ class _SavedCardsScreenToolbarState extends State<SavedCardsScreenToolbar> {
                       segments: [
                         ButtonSegment(
                           value: 0,
-                          label: Text(context.l10n.kart),
+                          label: Text(AppL10n.kart(l10n)),
                           icon: Icon(Icons.style_rounded, size: 18),
                         ),
                         ButtonSegment(
                           value: 1,
-                          label: Text(context.l10n.liste),
+                          label: Text(AppL10n.liste(l10n)),
                           icon: Icon(Icons.view_list_rounded, size: 18),
                         ),
                       ],
@@ -126,7 +129,9 @@ class _SavedCardsScreenToolbarState extends State<SavedCardsScreenToolbar> {
             ),
             if (!_searchExpanded) ...[
               IconButton(
-                tooltip: widget.hasActiveSearch ? 'Arama aktif' : 'Ara',
+                tooltip: widget.hasActiveSearch
+                    ? AppL10n.searchActive(l10n)
+                    : AppL10n.search(l10n),
                 onPressed: _expandSearch,
                 icon: Badge(
                   isLabelVisible: widget.hasActiveSearch,
@@ -145,8 +150,8 @@ class _SavedCardsScreenToolbarState extends State<SavedCardsScreenToolbar> {
             ],
             IconButton(
               tooltip: widget.hasActiveFilters
-                  ? 'Filtre (${widget.activeFilterCount})'
-                  : 'Filtrele',
+                  ? AppL10n.filterActive(l10n, widget.activeFilterCount)
+                  : AppL10n.filter(l10n),
               onPressed: widget.onOpenFilters,
               icon: Badge(
                 isLabelVisible: widget.hasActiveFilters,

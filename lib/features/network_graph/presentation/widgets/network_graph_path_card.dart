@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/l10n/app_l10n.dart';
+import '../../../../core/l10n/l10n_extensions.dart';
 import '../../domain/entities/network_graph_path.dart';
 import 'network_graph_node_list.dart';
 
@@ -21,6 +23,7 @@ class NetworkGraphPathCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final l10n = context.l10n;
 
     return Card(
       elevation: 0,
@@ -40,7 +43,7 @@ class NetworkGraphPathCard extends StatelessWidget {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    'Bağlantı yolu',
+                    AppL10n.connectionPath(l10n),
                     style: theme.textTheme.titleSmall?.copyWith(
                       fontWeight: FontWeight.w800,
                     ),
@@ -48,7 +51,7 @@ class NetworkGraphPathCard extends StatelessWidget {
                 ),
                 if (path != null || pathSourceLabel != null)
                   IconButton(
-                    tooltip: 'Temizle',
+                    tooltip: AppL10n.clear(l10n),
                     onPressed: onClear,
                     icon: const Icon(Icons.close_rounded),
                   ),
@@ -62,7 +65,7 @@ class NetworkGraphPathCard extends StatelessWidget {
               )
             else if (pathSourceLabel != null && path == null)
               Text(
-                'Hedef kart seçin: $pathSourceLabel',
+                AppL10n.selectDestinationCard(l10n, pathSourceLabel!),
                 style: theme.textTheme.bodyMedium?.copyWith(
                   color: colorScheme.onSurfaceVariant,
                   height: 1.35,
@@ -70,7 +73,7 @@ class NetworkGraphPathCard extends StatelessWidget {
               )
             else if (path != null && !path!.found)
               Text(
-                'Seçilen kartlar arasında bu grafikte doğrudan bir yol bulunamadı.',
+                AppL10n.noPathFoundBetweenCards(l10n),
                 style: theme.textTheme.bodyMedium?.copyWith(
                   color: colorScheme.onSurfaceVariant,
                   height: 1.35,
@@ -78,7 +81,11 @@ class NetworkGraphPathCard extends StatelessWidget {
               )
             else if (path != null && path!.found) ...[
               Text(
-                '${path!.length} adım • ${path!.pathNodeIds.length} düğüm',
+                AppL10n.pathStepsAndNodes(
+                  l10n,
+                  path!.length,
+                  path!.pathNodeIds.length,
+                ),
                 style: theme.textTheme.bodyMedium?.copyWith(
                   color: colorScheme.onSurfaceVariant,
                 ),
@@ -88,7 +95,7 @@ class NetworkGraphPathCard extends StatelessWidget {
             ]
             else
               Text(
-                'İki kart düğümüne dokunarak aralarındaki en kısa yolu bulun.',
+                AppL10n.tapTwoNodesToFindPath(l10n),
                 style: theme.textTheme.bodyMedium?.copyWith(
                   color: colorScheme.onSurfaceVariant,
                   height: 1.35,

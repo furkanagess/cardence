@@ -1,5 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../l10n/app_localizations.dart';
 import '../../../../core/network/auth_api_exception.dart';
 import '../../../event_groups/domain/usecases/get_event_groups.dart';
 import '../../domain/entities/add_saved_card_result.dart';
@@ -172,9 +173,11 @@ class SavedCardsCubit extends Cubit<SavedCardsState> {
   }
 
   List<({String value, String label})> eventFilterOptionsForSource(
+    AppLocalizations l10n,
     List<SavedCard> sourceCards,
   ) {
     return SavedCardsListLogic.eventFilterOptions(
+      l10n: l10n,
       sourceCards: sourceCards,
       eventGroups: state.eventGroups,
     );

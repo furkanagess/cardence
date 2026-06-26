@@ -2,6 +2,8 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
+import '../../../../core/l10n/l10n_extensions.dart';
+
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/atoms/profile_avatar.dart';
 import '../../domain/entities/graph_edge.dart';
@@ -208,7 +210,7 @@ class _NetworkGraphFullscreenView extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Ağ Grafiği'),
+        title: Text(context.l10n.networkGraph),
         leading: IconButton(
           icon: const Icon(Icons.close_rounded),
           onPressed: () => Navigator.of(context).pop(),
@@ -266,57 +268,125 @@ class _GraphNodeBubble extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    final Widget visual = _showAvatar
-        ? Container(
-            width: style.size,
-            height: style.size,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              border: Border.all(
-                color: style.border,
-                width: node.isCenter ? 3 : 2,
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: AppColors.primaryDark.withValues(alpha: 0.18),
-                  blurRadius: 10,
-                  offset: const Offset(0, 4),
-                ),
-              ],
+    final isCompany = node.type == GraphNodeType.company ||
+        node.type == GraphNodeType.organization;
+    final isEvent = node.type == GraphNodeType.event ||
+        node.type == GraphNodeType.organizationEvent;
+
+    Widget visual;
+
+    if (isEvent) {
+      visual = Transform.rotate(
+        angle: math.pi / 4,
+        child: Container(
+          width: style.size * 0.9,
+          height: style.size * 0.9,
+          decoration: BoxDecoration(
+            color: style.background,
+            shape: BoxShape.rectangle,
+            borderRadius: BorderRadius.circular(6),
+            border: Border.all(
+              color: style.border,
+              width: node.isCenter ? 3 : 1.5,
             ),
-            child: ClipOval(
-              child: ProfileAvatar(
-                photoUrl: node.photoUrl,
-                displayName: node.label,
-                size: style.size,
-                circular: true,
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.primaryDark.withValues(alpha: 0.12),
+                blurRadius: 8,
+                offset: const Offset(0, 3),
               ),
-            ),
-          )
-        : Container(
-            width: style.size,
-            height: style.size,
-            decoration: BoxDecoration(
-              color: style.background,
-              shape: BoxShape.circle,
-              border: Border.all(
-                color: style.border,
-                width: node.isCenter ? 3 : 1.5,
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: AppColors.primaryDark.withValues(alpha: 0.12),
-                  blurRadius: 8,
-                  offset: const Offset(0, 3),
-                ),
-              ],
-            ),
+            ],
+          ),
+          child: Transform.rotate(
+            angle: -math.pi / 4,
             child: Icon(
               style.icon,
               color: style.foreground,
               size: style.size * 0.4,
             ),
-          );
+          ),
+        ),
+      );
+    } else if (isCompany) {
+      visual = Container(
+        width: style.size,
+        height: style.size,
+        decoration: BoxDecoration(
+          color: style.background,
+          shape: BoxShape.rectangle,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(
+            color: style.border,
+            width: node.isCenter ? 3 : 1.5,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.primaryDark.withValues(alpha: 0.12),
+              blurRadius: 8,
+              offset: const Offset(0, 3),
+            ),
+          ],
+        ),
+        child: Icon(
+          style.icon,
+          color: style.foreground,
+          size: style.size * 0.4,
+        ),
+      );
+    } else {
+      // Person / Card / User (Circular)
+      visual = _showAvatar
+          ? Container(
+              width: style.size,
+              height: style.size,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: style.border,
+                  width: node.isCenter ? 3 : 2,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.primaryDark.withValues(alpha: 0.18),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: ClipOval(
+                child: ProfileAvatar(
+                  photoUrl: node.photoUrl,
+                  displayName: node.isOwnCard ? context.l10n.you : node.label,
+                  size: style.size,
+                  circular: true,
+                ),
+              ),
+            )
+          : Container(
+              width: style.size,
+              height: style.size,
+              decoration: BoxDecoration(
+                color: style.background,
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: style.border,
+                  width: node.isCenter ? 3 : 1.5,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.primaryDark.withValues(alpha: 0.12),
+                    blurRadius: 8,
+                    offset: const Offset(0, 3),
+                  ),
+                ],
+              ),
+              child: Icon(
+                style.icon,
+                color: style.foreground,
+                size: style.size * 0.4,
+              ),
+            );
+    }
 
     final content = Column(
       mainAxisSize: MainAxisSize.min,
@@ -333,7 +403,7 @@ class _GraphNodeBubble extends StatelessWidget {
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
               child: Text(
-                node.label,
+                node.isOwnCard ? context.l10n.you : node.label,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 textAlign: TextAlign.center,

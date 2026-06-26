@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/l10n/app_l10n.dart';
 import '../../../../core/l10n/l10n_extensions.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -150,7 +151,7 @@ class _ScanPhysicalCardViewState extends State<_ScanPhysicalCardView>
                     children: [
                       AddCardPhotoCaptureZone(
                         label: context.l10n.nYz,
-                        hint: 'Ön yüzü çekin',
+                        hint: AppL10n.takeFrontSidePhoto(context.l10n),
                         required: true,
                         imagePath: state.frontImagePath,
                         enabled: state.canCapture,
@@ -162,7 +163,7 @@ class _ScanPhysicalCardViewState extends State<_ScanPhysicalCardView>
                       const SizedBox(height: 20),
                       AddCardPhotoCaptureZone(
                         label: context.l10n.arkaYz,
-                        hint: 'Arka yüzü ekleyin (varsa)',
+                        hint: AppL10n.addBackSidePhoto(context.l10n),
                         required: false,
                         imagePath: state.backImagePath,
                         enabled: state.canCapture,

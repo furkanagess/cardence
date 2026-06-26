@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/l10n/app_l10n.dart';
 import '../../../core/l10n/l10n_extensions.dart';
 import 'package:flip_card/flip_card.dart';
 
@@ -14,7 +15,7 @@ class FlippablePersonCard extends StatefulWidget {
     this.titleSecondary,
     this.frontEntries = const [],
     this.backEntries = const [],
-    this.emptyMessage = 'Henüz bilgi yok',
+    this.emptyMessage,
     this.backEmptyMessage,
     this.onBackEmptyActionTap,
     this.backEmptyActionLabel,
@@ -45,7 +46,7 @@ class FlippablePersonCard extends StatefulWidget {
 
   /// Arka yüzde gösterilecek alanlar (örn. iletişim, linkler).
   final List<({String label, String value})> backEntries;
-  final String emptyMessage;
+  final String? emptyMessage;
   final String? backEmptyMessage;
   final VoidCallback? onBackEmptyActionTap;
   final String? backEmptyActionLabel;
@@ -176,18 +177,23 @@ class _FlippablePersonCardState extends State<FlippablePersonCard>
     final entries = widget.backEntries;
     if (entries.isEmpty) return false;
     return entries.every(
-      (e) => e.label == 'Hakkımda' || e.label == context.l10n.yetenekler,
+      (e) =>
+          e.label == AppL10n.hakkmda(context.l10n) ||
+          e.label == context.l10n.yetenekler,
     );
   }
 
   Widget _buildFront(BuildContext context) {
+    final defaultEmpty = AppL10n.noInfoYet(context.l10n);
+    final resolvedEmpty = widget.emptyMessage ?? defaultEmpty;
+
     return PersonInfoCard(
       title: widget.title,
       titleSecondary: widget.titleSecondary,
       entries: widget.frontEntries
           .take(FlippablePersonCard.maxVisibleEntriesPerSide)
           .toList(),
-      emptyMessage: widget.emptyMessage,
+      emptyMessage: resolvedEmpty,
       compact: true,
       fillHeight: true,
       accentColor: widget.accentColor,
@@ -210,6 +216,8 @@ class _FlippablePersonCardState extends State<FlippablePersonCard>
     final hasBackContent = widget.backEntries.isNotEmpty;
     final showCenteredAddNote =
         !hasBackContent && widget.onBackEmptyActionTap != null;
+    final defaultEmpty = AppL10n.noInfoYet(context.l10n);
+    final resolvedEmpty = widget.emptyMessage ?? defaultEmpty;
 
     return showCenteredAddNote
         ? _buildBackShell(
@@ -234,7 +242,7 @@ class _FlippablePersonCardState extends State<FlippablePersonCard>
             entries: widget.backEntries
                 .take(FlippablePersonCard.maxVisibleEntriesPerSide)
                 .toList(),
-            emptyMessage: widget.backEmptyMessage ?? widget.emptyMessage,
+            emptyMessage: widget.backEmptyMessage ?? resolvedEmpty,
             emptyActionLabel: widget.backEmptyActionLabel,
             onEmptyActionTap: widget.onBackEmptyActionTap,
             onNoteEditTap: widget.onBackEditTap,

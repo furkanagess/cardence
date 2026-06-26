@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import '../../../../core/l10n/app_l10n.dart';
 import '../../../../core/l10n/l10n_extensions.dart';
 import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -127,7 +128,7 @@ class _SavedCardDetailPageState extends State<SavedCardDetailPage> {
           content: Text(
             _eventGroups.isEmpty
                 ? context.l10n.henzEtkinlikGrubuYok
-                : 'Bu kart zaten tüm gruplarda',
+                : AppL10n.cardAlreadyInAllGroups(context.l10n),
           ),
           behavior: SnackBarBehavior.floating,
         ),
@@ -150,7 +151,7 @@ class _SavedCardDetailPageState extends State<SavedCardDetailPage> {
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('${selectedIds.length} gruba eklendi'),
+        content: Text(AppL10n.addedToGroupsMessage(context.l10n, selectedIds.length)),
         behavior: SnackBarBehavior.floating,
       ),
     );
@@ -181,7 +182,7 @@ class _SavedCardDetailPageState extends State<SavedCardDetailPage> {
       builder: (context) => AlertDialog(
         title: Text(context.l10n.kartSil),
         content: Text(
-          '"$_displayName" kartını cüzdanınızdan silmek istediğinize emin misiniz?',
+          AppL10n.deleteCardConfirmQuestion(context.l10n, _displayName),
         ),
         actions: [
           TextButton(
@@ -215,7 +216,7 @@ class _SavedCardDetailPageState extends State<SavedCardDetailPage> {
       Navigator.of(context).pop();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('$_displayName cüzdandan silindi'),
+          content: Text(AppL10n.cardDeletedFromWalletMessage(context.l10n, _displayName)),
           behavior: SnackBarBehavior.floating,
         ),
       );
@@ -294,7 +295,7 @@ class _SavedCardDetailPageState extends State<SavedCardDetailPage> {
   String get _displayName {
     final name = _card.displayName?.trim();
     if (name == null || name.isEmpty) {
-      return 'Kart ${_card.cardId}';
+      return '${AppL10n.kart(context.l10n)} ${_card.cardId}';
     }
     return name;
   }
@@ -343,7 +344,7 @@ class _SavedCardDetailPageState extends State<SavedCardDetailPage> {
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('${def.label} kaydedildi'),
+        content: Text(AppL10n.fieldSaved(context.l10n, def.label)),
         behavior: SnackBarBehavior.floating,
       ),
     );
@@ -415,7 +416,7 @@ class _SavedCardDetailPageState extends State<SavedCardDetailPage> {
 
   String _savedAtDescription(int? ms) {
     if (ms == null) return context.l10n.kaydedildiTarihBilinmiyor;
-    return 'Kaydedildi: ${_formatSavedAt(ms)}';
+    return AppL10n.savedAtLabel(context.l10n, _formatSavedAt(ms));
   }
 
   Future<void> _copyToClipboard(String label, String value) async {
@@ -423,7 +424,7 @@ class _SavedCardDetailPageState extends State<SavedCardDetailPage> {
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('$label panoya kopyalandı'),
+        content: Text(AppL10n.copiedToClipboardMessage(context.l10n, label)),
         behavior: SnackBarBehavior.floating,
         duration: const Duration(seconds: 2),
       ),
@@ -457,7 +458,7 @@ class _SavedCardDetailPageState extends State<SavedCardDetailPage> {
   Future<void> _launchWebsite(
     String url, {
     String contactType = 'website',
-    String errorMessage = 'Bağlantı açılamadı',
+    String? errorMessage,
   }) async {
     unawaited(_trackContactClick(contactType));
     var normalized = url.trim();
@@ -469,7 +470,8 @@ class _SavedCardDetailPageState extends State<SavedCardDetailPage> {
     if (uri == null ||
         !await launchUrl(uri, mode: LaunchMode.externalApplication)) {
       if (!mounted) return;
-      _showLaunchError(errorMessage);
+      final defaultErrorMsg = AppL10n.couldNotOpenLink(context.l10n);
+      _showLaunchError(errorMessage ?? defaultErrorMsg);
     }
   }
 
@@ -669,8 +671,8 @@ class _SavedCardDetailPageState extends State<SavedCardDetailPage> {
                     ? _EmptyStateCard(
                         icon: Icons.contact_page_outlined,
                         message: _canAddFields
-                            ? 'Henüz ek bilgi yok. Bilgi ekle ile adres, etkinlik ve daha fazlasını ekleyin.'
-                            : 'Bu kartta ek bilgi yok.',
+                            ? AppL10n.noExtraInfoYet(context.l10n)
+                            : AppL10n.noExtraInfoInThisCard(context.l10n),
                         actionLabel:
                             _canAddFields ? context.l10n.bilgiEkle : null,
                         onAction: _canAddFields ? _openAddFieldFlow : null,
@@ -714,7 +716,10 @@ class _SavedCardDetailPageState extends State<SavedCardDetailPage> {
                           : null,
                   child: SkillsChipDisplay(
                     skills: _skills,
-                    onSkillTap: (skill) => _copyToClipboard('Yetenek', skill),
+                    onSkillTap: (skill) => _copyToClipboard(
+                      AppL10n.nodeTypeSkill(context.l10n),
+                      skill,
+                    ),
                   ),
                 ),
               ],
@@ -1055,7 +1060,7 @@ class _ContactFieldRow extends StatelessWidget {
                 ),
               if (canOpen || !canEdit)
                 IconButton(
-                  tooltip: canOpen ? 'Aç' : context.l10n.kopyala,
+                  tooltip: canOpen ? AppL10n.open(context.l10n) : context.l10n.kopyala,
                   visualDensity: VisualDensity.compact,
                   onPressed: canOpen ? field.onTap : onCopy,
                   icon: Icon(

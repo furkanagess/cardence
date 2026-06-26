@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/l10n/app_l10n.dart';
 import '../../../../core/l10n/l10n_extensions.dart';
 
 import '../../../../core/constants/app_constants.dart';
@@ -131,7 +132,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     children: [
                       SettingsProfileHeader(
                         displayName: (displayName == null || displayName.isEmpty)
-                            ? 'Cardence kullanıcısı'
+                            ? AppL10n.cardenceUser(context.l10n)
                             : displayName,
                         email: email,
                         photoUrl: widget.userPhotoUrl,

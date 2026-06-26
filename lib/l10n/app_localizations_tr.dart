@@ -1077,9 +1077,6 @@ class AppLocalizationsTr extends AppLocalizations {
   String get pozisyonunuzuGiriniz => 'Pozisyonunuzu giriniz';
 
   @override
-  String get premium => 'Premium\\';
-
-  @override
   String get premiumCzdan => 'Premium cüzdan';
 
   @override
@@ -1510,7 +1507,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get close => 'Kapat';
 
   @override
-  String savedCardsCount(int count, int max) {
+  String savedCardsCount(int count) {
     return '$count kayıtlı kart';
   }
 
@@ -1849,4 +1846,354 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get savedCardFieldHintBirthday => '15 Mart veya 15.03.1990';
+
+  @override
+  String deleteEventGroupConfirmMessage(String groupName) {
+    return '\"$groupName\" etkinlik grubunu silmek istediğinize emin misiniz?';
+  }
+
+  @override
+  String get deleteEventGroupConfirmSubMessage =>
+      'Gruptaki kart bağlantıları kaldırılır.';
+
+  @override
+  String eventGroupDeletedMessage(String groupName) {
+    return '\"$groupName\" silindi';
+  }
+
+  @override
+  String get viewEventNetwork => 'Etkinlik ağını görüntüle';
+
+  @override
+  String cardsAddedToGroupMessage(int count) {
+    return '$count kart gruba eklendi';
+  }
+
+  @override
+  String eventGroupCreatedMessage(String groupName) {
+    return '\"$groupName\" etkinlik grubu oluşturuldu';
+  }
+
+  @override
+  String eventGroupCreatedWithCardsMessage(String groupName, int count) {
+    return '\"$groupName\" grubu $count kartla oluşturuldu';
+  }
+
+  @override
+  String get networkGraph => 'Ağ Grafiği';
+
+  @override
+  String get networkStatistics => 'Ağ İstatistikleri';
+
+  @override
+  String get networkGraphLoadFailed => 'Ağ grafiği alınamadı.';
+
+  @override
+  String get networkGraphEventDescription =>
+      'Bu etkinlikteki kartlar, şirketler ve bağlantılar görsel olarak gösterilir.';
+
+  @override
+  String get networkGraphPersonalDescription =>
+      'Senin kaydettiğin kişiler ile seni kaydeden kişiler arasındaki bağlantılar; şirket ve etkinlik düğümleriyle birlikte gösterilir.';
+
+  @override
+  String get viewScope => 'Görünüm kapsamı';
+
+  @override
+  String get personalNetwork => 'Kişisel ağ';
+
+  @override
+  String get eventNetwork => 'Etkinlik ağı';
+
+  @override
+  String get createEventGroupFirstForNetwork =>
+      'Etkinlik ağı için önce bir etkinlik grubu oluşturun.';
+
+  @override
+  String get networkGraphNotYetCreated => 'Ağ grafiği henüz oluşmadı';
+
+  @override
+  String get networkGraphEmptySubtitle =>
+      'Kart kaydettikçe, QR okutuldukça ve etkinlik grupları kullandıkça bağlantılar burada görünür.';
+
+  @override
+  String get refresh => 'Yenile';
+
+  @override
+  String get connections => 'Bağlantılar';
+
+  @override
+  String get edgeTypeSaved => 'Senin kaydettiğin';
+
+  @override
+  String get edgeTypeScanned => 'QR tarandı';
+
+  @override
+  String get edgeTypeViewed => 'Görüntülendi';
+
+  @override
+  String get edgeTypeContactClicked => 'İletişim tıklandı';
+
+  @override
+  String get edgeTypeWorksAt => 'Şirkette çalışıyor';
+
+  @override
+  String get edgeTypeMetAtEvent => 'Etkinlikte tanışıldı';
+
+  @override
+  String get edgeTypeCoSaved => 'Aynı cüzdanda';
+
+  @override
+  String get edgeTypeSameCompany => 'Aynı şirket';
+
+  @override
+  String get edgeTypeAssignedLead => 'Lead atandı';
+
+  @override
+  String get edgeTypeOrgEventLink => 'Organizasyon etkinliği';
+
+  @override
+  String get edgeTypeEventLink => 'Etkinlik bağı';
+
+  @override
+  String get strongestNodes => 'En güçlü düğümler';
+
+  @override
+  String get connectionsCount => 'bağ';
+
+  @override
+  String get nodeTypeUser => 'Kullanıcı';
+
+  @override
+  String get nodeTypeCompany => 'Şirket';
+
+  @override
+  String get nodeTypeOrganizationEvent => 'Organizasyon etkinliği';
+
+  @override
+  String get node => 'Düğüm';
+
+  @override
+  String get edge => 'Bağ';
+
+  @override
+  String get connectionPath => 'Bağlantı yolu';
+
+  @override
+  String selectDestinationCard(String label) {
+    return 'Hedef kart seçin: $label';
+  }
+
+  @override
+  String get noPathFoundBetweenCards =>
+      'Seçilen kartlar arasında bu grafikte doğrudan bir yol bulunamadı.';
+
+  @override
+  String pathStepsAndNodes(int steps, int nodes) {
+    return '$steps adım • $nodes düğüm';
+  }
+
+  @override
+  String get tapTwoNodesToFindPath =>
+      'İki kart düğümüne dokunarak aralarındaki en kısa yolu bulun.';
+
+  @override
+  String get createMyCard => 'Kartımı oluştur';
+
+  @override
+  String get continueWithArrow => 'Devam →';
+
+  @override
+  String get swipeHorizontalToSwitchCards =>
+      'Yatay kaydırarak kartlar arasında geçin; düzenlemek için karta dokunun.';
+
+  @override
+  String get tapCardToEdit => 'Düzenlemek için karta dokunun.';
+
+  @override
+  String get cardLimitReachedPremiumUpgrade =>
+      'Kart limitine ulaştınız. Yeni kart oluşturmak için Premium\'a geçebilirsiniz.';
+
+  @override
+  String get viewNetworkGraph => 'Ağ grafiğini görüntüle';
+
+  @override
+  String get cardsNotYetSaved => 'Kartlarınız henüz kaydedilmedi.';
+
+  @override
+  String cardsAddedToWalletTimes(int count) {
+    return 'Kartlarınız toplam $count kez cüzdana eklendi.';
+  }
+
+  @override
+  String get cardenceDataSecurityMessage =>
+      'Cardence ağındaki tüm veri transferleri uçtan uca şifrelenir ve kimlik doğrulama protokolleri ile korunur.';
+
+  @override
+  String get saveCard => 'Kartı kaydet';
+
+  @override
+  String get cardAlreadyInAllGroups => 'Bu kart zaten tüm gruplarda';
+
+  @override
+  String deleteCardConfirmQuestion(String displayName) {
+    return '\"$displayName\" kartını cüzdanınızdan silmek istediğinize emin misiniz?';
+  }
+
+  @override
+  String cardDeletedFromWalletMessage(String displayName) {
+    return '\"$displayName\" cüzdandan silindi';
+  }
+
+  @override
+  String get februaryShort => 'Şub';
+
+  @override
+  String get augustShort => 'Ağu';
+
+  @override
+  String copiedToClipboardMessage(String label) {
+    return '$label panoya kopyalandı';
+  }
+
+  @override
+  String get couldNotOpenLink => 'Bağlantı açılamadı';
+
+  @override
+  String get noExtraInfoYet =>
+      'Henüz ek bilgi yok. Bilgi ekle ile adres, etkinlik ve daha fazlasını ekleyin.';
+
+  @override
+  String get open => 'Aç';
+
+  @override
+  String get takeFrontSidePhoto => 'Ön yüzü çekin';
+
+  @override
+  String get addBackSidePhoto => 'Arka yüzü ekleyin (varsa)';
+
+  @override
+  String get requiredField => 'ZORUNLU';
+
+  @override
+  String get optionalField => 'OPSİYONEL';
+
+  @override
+  String freePlanMaxCardsLimitMessage(int count) {
+    return 'Ücretsiz planda en fazla $count kart saklayabilirsiniz.';
+  }
+
+  @override
+  String get upgradeLimitOption => 'Paket al, sınırı artır';
+
+  @override
+  String get goToPremiumOption => 'Premium pakete geç';
+
+  @override
+  String get premium => 'Premium';
+
+  @override
+  String get free => 'Ücretsiz';
+
+  @override
+  String remainingCardsCount(int count) {
+    return '$count kart kaldı';
+  }
+
+  @override
+  String get cardenceUser => 'Cardence kullanıcısı';
+
+  @override
+  String get userLabel => 'Kullanıcı';
+
+  @override
+  String get selectDate => 'Tarih seçin';
+
+  @override
+  String get purchaseSuccessful => 'Satın alım başarılı';
+
+  @override
+  String get premiumWalletActivatedMessage =>
+      'Premium cüzdanınız etkinleştirildi. Artık tüm premium özelliklerden yararlanabilirsiniz.';
+
+  @override
+  String get addSkillHint => 'Yetenek ekle (örn. Flutter)';
+
+  @override
+  String get noInfoYet => 'Henüz bilgi yok';
+
+  @override
+  String get addAboutDescriptionPlaceholder =>
+      'Hakkımda bilginizi ekleyebilirsiniz.';
+
+  @override
+  String get retry => 'Tekrar dene';
+
+  @override
+  String get nodeTypeCard => 'Kart';
+
+  @override
+  String get nodeTypeEvent => 'Etkinlik';
+
+  @override
+  String get nodeTypeOrganization => 'Organizasyon';
+
+  @override
+  String get nodeTypeSkill => 'Yetenek';
+
+  @override
+  String get nodeTypeLocation => 'Konum';
+
+  @override
+  String get edgeTypeOwns => 'Kart sahibi';
+
+  @override
+  String get edgeTypeSavedBy => 'Seni kaydeden';
+
+  @override
+  String get graphMetricNode => 'Düğüm';
+
+  @override
+  String get graphMetricEdge => 'Bağ';
+
+  @override
+  String get graphMetricCenter => 'Merkez';
+
+  @override
+  String get you => 'Sen';
+
+  @override
+  String get clear => 'Temizle';
+
+  @override
+  String get searchActive => 'Arama aktif';
+
+  @override
+  String get search => 'Ara';
+
+  @override
+  String filterActive(int count) {
+    return 'Filtre ($count)';
+  }
+
+  @override
+  String get filter => 'Filtrele';
+
+  @override
+  String get noExtraInfoInThisCard => 'Bu kartta ek bilgi yok.';
+
+  @override
+  String fieldSaved(String fieldName) {
+    return '$fieldName kaydedildi';
+  }
+
+  @override
+  String addedToGroupsMessage(int count) {
+    return '$count gruba eklendi';
+  }
+
+  @override
+  String savedAtLabel(String date) {
+    return 'Kaydedildi: $date';
+  }
 }

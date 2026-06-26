@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/l10n/app_l10n.dart';
 import '../../../../core/l10n/l10n_extensions.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -222,8 +223,8 @@ class _ProfilePageState extends State<ProfilePage> {
             padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
             child: Text(
               _cards.length > 1
-                  ? 'Yatay kaydırarak kartlar arasında geçin; düzenlemek için karta dokunun.'
-                  : 'Düzenlemek için karta dokunun.',
+                  ? AppL10n.swipeHorizontalToSwitchCards(context.l10n)
+                  : AppL10n.tapCardToEdit(context.l10n),
               style: textTheme.bodyMedium?.copyWith(
                 color: colorScheme.onSurfaceVariant,
                 height: 1.4,
@@ -258,7 +259,7 @@ class _ProfilePageState extends State<ProfilePage> {
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
               child: Text(
-                'Kart limitine ulaştınız. Yeni kart oluşturmak için Premium\'a geçebilirsiniz.',
+                AppL10n.cardLimitReachedPremiumUpgrade(context.l10n),
                 style: textTheme.bodySmall?.copyWith(
                   color: colorScheme.onSurfaceVariant,
                   height: 1.35,
@@ -294,7 +295,7 @@ class _ProfilePageState extends State<ProfilePage> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: CustomButton.tonal(
-                label: 'Ağ grafiğini görüntüle',
+                label: AppL10n.viewNetworkGraph(context.l10n),
                 icon: Icons.hub_outlined,
                 onPressed: _openNetworkGraph,
               ),

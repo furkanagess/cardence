@@ -336,7 +336,6 @@
   "pozisyonZorunludur": "Pozisyon zorunludur",
   "pozisyonuGiriniz": "Pozisyonu giriniz",
   "pozisyonunuzuGiriniz": "Pozisyonunuzu giriniz",
-  "premium": "Premium\\",
   "premiumCzdan": "Premium cüzdan",
   "premiumCzdanEtkinletirilemedi": "Premium cüzdan etkinleştirilemedi.",
   "productDesigner": "Product Designer",
@@ -476,9 +475,6 @@
   "@savedCardsCount": {
     "placeholders": {
       "count": {
-        "type": "int"
-      },
-      "max": {
         "type": "int"
       }
     }
@@ -674,5 +670,231 @@
   "savedCardFieldHintAttendedEvents": "Web Summit 2025, SaaStr Annual…",
   "savedCardFieldHintTwitter": "@kullanici veya profil URL",
   "savedCardFieldHintInstagram": "@kullanici veya profil URL",
-  "savedCardFieldHintBirthday": "15 Mart veya 15.03.1990"
+  "savedCardFieldHintBirthday": "15 Mart veya 15.03.1990",
+  "deleteEventGroupConfirmMessage": "\"{groupName}\" etkinlik grubunu silmek istediğinize emin misiniz?",
+  "@deleteEventGroupConfirmMessage": {
+    "placeholders": {
+      "groupName": {
+        "type": "String"
+      }
+    }
+  },
+  "deleteEventGroupConfirmSubMessage": "Gruptaki kart bağlantıları kaldırılır.",
+  "eventGroupDeletedMessage": "\"{groupName}\" silindi",
+  "@eventGroupDeletedMessage": {
+    "placeholders": {
+      "groupName": {
+        "type": "String"
+      }
+    }
+  },
+  "viewEventNetwork": "Etkinlik ağını görüntüle",
+  "cardsAddedToGroupMessage": "{count} kart gruba eklendi",
+  "@cardsAddedToGroupMessage": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "eventGroupCreatedMessage": "\"{groupName}\" etkinlik grubu oluşturuldu",
+  "@eventGroupCreatedMessage": {
+    "placeholders": {
+      "groupName": {
+        "type": "String"
+      }
+    }
+  },
+  "eventGroupCreatedWithCardsMessage": "\"{groupName}\" grubu {count} kartla oluşturuldu",
+  "@eventGroupCreatedWithCardsMessage": {
+    "placeholders": {
+      "groupName": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "networkGraph": "Ağ Grafiği",
+  "networkStatistics": "Ağ İstatistikleri",
+  "networkGraphLoadFailed": "Ağ grafiği alınamadı.",
+  "networkGraphEventDescription": "Bu etkinlikteki kartlar, şirketler ve bağlantılar görsel olarak gösterilir.",
+  "networkGraphPersonalDescription": "Senin kaydettiğin kişiler ile seni kaydeden kişiler arasındaki bağlantılar; şirket ve etkinlik düğümleriyle birlikte gösterilir.",
+  "viewScope": "Görünüm kapsamı",
+  "personalNetwork": "Kişisel ağ",
+  "eventNetwork": "Etkinlik ağı",
+  "createEventGroupFirstForNetwork": "Etkinlik ağı için önce bir etkinlik grubu oluşturun.",
+  "networkGraphNotYetCreated": "Ağ grafiği henüz oluşmadı",
+  "networkGraphEmptySubtitle": "Kart kaydettikçe, QR okutuldukça ve etkinlik grupları kullandıkça bağlantılar burada görünür.",
+  "refresh": "Yenile",
+  "connections": "Bağlantılar",
+  "edgeTypeSaved": "Senin kaydettiğin",
+  "edgeTypeScanned": "QR tarandı",
+  "edgeTypeViewed": "Görüntülendi",
+  "edgeTypeContactClicked": "İletişim tıklandı",
+  "edgeTypeWorksAt": "Şirkette çalışıyor",
+  "edgeTypeMetAtEvent": "Etkinlikte tanışıldı",
+  "edgeTypeCoSaved": "Aynı cüzdanda",
+  "edgeTypeSameCompany": "Aynı şirket",
+  "edgeTypeAssignedLead": "Lead atandı",
+  "edgeTypeOrgEventLink": "Organizasyon etkinliği",
+  "edgeTypeEventLink": "Etkinlik bağı",
+  "strongestNodes": "En güçlü düğümler",
+  "connectionsCount": "bağ",
+  "nodeTypeUser": "Kullanıcı",
+  "nodeTypeCompany": "Şirket",
+  "nodeTypeOrganizationEvent": "Organizasyon etkinliği",
+  "node": "Düğüm",
+  "edge": "Bağ",
+  "connectionPath": "Bağlantı yolu",
+  "selectDestinationCard": "Hedef kart seçin: {label}",
+  "@selectDestinationCard": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "noPathFoundBetweenCards": "Seçilen kartlar arasında bu grafikte doğrudan bir yol bulunamadı.",
+  "pathStepsAndNodes": "{steps} adım • {nodes} düğüm",
+  "@pathStepsAndNodes": {
+    "placeholders": {
+      "steps": {
+        "type": "int"
+      },
+      "nodes": {
+        "type": "int"
+      }
+    }
+  },
+  "tapTwoNodesToFindPath": "İki kart düğümüne dokunarak aralarındaki en kısa yolu bulun.",
+  "createMyCard": "Kartımı oluştur",
+  "continueWithArrow": "Devam →",
+  "swipeHorizontalToSwitchCards": "Yatay kaydırarak kartlar arasında geçin; düzenlemek için karta dokunun.",
+  "tapCardToEdit": "Düzenlemek için karta dokunun.",
+  "cardLimitReachedPremiumUpgrade": "Kart limitine ulaştınız. Yeni kart oluşturmak için Premium'a geçebilirsiniz.",
+  "viewNetworkGraph": "Ağ grafiğini görüntüle",
+  "cardsNotYetSaved": "Kartlarınız henüz kaydedilmedi.",
+  "cardsAddedToWalletTimes": "Kartlarınız toplam {count} kez cüzdana eklendi.",
+  "@cardsAddedToWalletTimes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "cardenceDataSecurityMessage": "Cardence ağındaki tüm veri transferleri uçtan uca şifrelenir ve kimlik doğrulama protokolleri ile korunur.",
+  "saveCard": "Kartı kaydet",
+  "cardAlreadyInAllGroups": "Bu kart zaten tüm gruplarda",
+  "deleteCardConfirmQuestion": "\"{displayName}\" kartını cüzdanınızdan silmek istediğinize emin misiniz?",
+  "@deleteCardConfirmQuestion": {
+    "placeholders": {
+      "displayName": {
+        "type": "String"
+      }
+    }
+  },
+  "cardDeletedFromWalletMessage": "\"{displayName}\" cüzdandan silindi",
+  "@cardDeletedFromWalletMessage": {
+    "placeholders": {
+      "displayName": {
+        "type": "String"
+      }
+    }
+  },
+  "februaryShort": "Şub",
+  "augustShort": "Ağu",
+  "copiedToClipboardMessage": "{label} panoya kopyalandı",
+  "@copiedToClipboardMessage": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "couldNotOpenLink": "Bağlantı açılamadı",
+  "noExtraInfoYet": "Henüz ek bilgi yok. Bilgi ekle ile adres, etkinlik ve daha fazlasını ekleyin.",
+  "open": "Aç",
+  "takeFrontSidePhoto": "Ön yüzü çekin",
+  "addBackSidePhoto": "Arka yüzü ekleyin (varsa)",
+  "requiredField": "ZORUNLU",
+  "optionalField": "OPSİYONEL",
+  "freePlanMaxCardsLimitMessage": "Ücretsiz planda en fazla {count} kart saklayabilirsiniz.",
+  "@freePlanMaxCardsLimitMessage": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "upgradeLimitOption": "Paket al, sınırı artır",
+  "goToPremiumOption": "Premium pakete geç",
+  "premium": "Premium",
+  "free": "Ücretsiz",
+  "remainingCardsCount": "{count} kart kaldı",
+  "@remainingCardsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "cardenceUser": "Cardence kullanıcısı",
+  "userLabel": "Kullanıcı",
+  "selectDate": "Tarih seçin",
+  "purchaseSuccessful": "Satın alım başarılı",
+  "premiumWalletActivatedMessage": "Premium cüzdanınız etkinleştirildi. Artık tüm premium özelliklerden yararlanabilirsiniz.",
+  "addSkillHint": "Yetenek ekle (örn. Flutter)",
+  "noInfoYet": "Henüz bilgi yok",
+  "addAboutDescriptionPlaceholder": "Hakkımda bilginizi ekleyebilirsiniz.",
+  "retry": "Tekrar dene",
+  "nodeTypeCard": "Kart",
+  "nodeTypeEvent": "Etkinlik",
+  "nodeTypeOrganization": "Organizasyon",
+  "nodeTypeSkill": "Yetenek",
+  "nodeTypeLocation": "Konum",
+  "edgeTypeOwns": "Kart sahibi",
+  "edgeTypeSavedBy": "Seni kaydeden",
+  "graphMetricNode": "Düğüm",
+  "graphMetricEdge": "Bağ",
+  "graphMetricCenter": "Merkez",
+  "you": "Sen",
+  "clear": "Temizle",
+  "searchActive": "Arama aktif",
+  "search": "Ara",
+  "filterActive": "Filtre ({count})",
+  "@filterActive": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "filter": "Filtrele",
+  "noExtraInfoInThisCard": "Bu kartta ek bilgi yok.",
+  "fieldSaved": "{fieldName} kaydedildi",
+  "@fieldSaved": {
+    "placeholders": {
+      "fieldName": {
+        "type": "String"
+      }
+    }
+  },
+  "addedToGroupsMessage": "{count} gruba eklendi",
+  "@addedToGroupsMessage": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "savedAtLabel": "Kaydedildi: {date}",
+  "@savedAtLabel": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  }
 }

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../../l10n/app_l10n.dart';
+import '../../l10n/l10n_extensions.dart';
 
 import '../../validation/app_validators.dart';
 import 'comma_separated_chip_input.dart';
@@ -10,21 +12,24 @@ class SkillsChipInput extends StatelessWidget {
     super.key,
     this.value,
     required this.onChanged,
-    this.label = 'Yetenekler',
-    this.hintText = 'Yetenek ekle (örn. Flutter)',
+    this.label,
+    this.hintText,
   });
 
   final String? value;
   final ValueChanged<String?> onChanged;
-  final String label;
-  final String hintText;
+  final String? label;
+  final String? hintText;
 
   @override
   Widget build(BuildContext context) {
+    final resolvedLabel = label ?? AppL10n.yetenekler(context.l10n);
+    final resolvedHint = hintText ?? AppL10n.addSkillHint(context.l10n);
+
     return CommaSeparatedChipInput(
-      label: label,
+      label: resolvedLabel,
       value: value,
-      hintText: hintText,
+      hintText: resolvedHint,
       prefixIcon: Icons.workspace_premium_outlined,
       canAddItem: AppValidators.isValidSkillDraft,
       onChanged: onChanged,

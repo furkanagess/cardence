@@ -2114,12 +2114,6 @@ abstract class AppLocalizations {
   /// **'Pozisyonunuzu giriniz'**
   String get pozisyonunuzuGiriniz;
 
-  /// No description provided for @premium.
-  ///
-  /// In tr, this message translates to:
-  /// **'Premium\\'**
-  String get premium;
-
   /// No description provided for @premiumCzdan.
   ///
   /// In tr, this message translates to:
@@ -2934,7 +2928,7 @@ abstract class AppLocalizations {
   ///
   /// In tr, this message translates to:
   /// **'{count} kayıtlı kart'**
-  String savedCardsCount(int count, int max);
+  String savedCardsCount(int count);
 
   /// No description provided for @kartYzundeGosterilecekAlanlar.
   ///
@@ -3511,6 +3505,612 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'15 Mart veya 15.03.1990'**
   String get savedCardFieldHintBirthday;
+
+  /// No description provided for @deleteEventGroupConfirmMessage.
+  ///
+  /// In tr, this message translates to:
+  /// **'\"{groupName}\" etkinlik grubunu silmek istediğinize emin misiniz?'**
+  String deleteEventGroupConfirmMessage(String groupName);
+
+  /// No description provided for @deleteEventGroupConfirmSubMessage.
+  ///
+  /// In tr, this message translates to:
+  /// **'Gruptaki kart bağlantıları kaldırılır.'**
+  String get deleteEventGroupConfirmSubMessage;
+
+  /// No description provided for @eventGroupDeletedMessage.
+  ///
+  /// In tr, this message translates to:
+  /// **'\"{groupName}\" silindi'**
+  String eventGroupDeletedMessage(String groupName);
+
+  /// No description provided for @viewEventNetwork.
+  ///
+  /// In tr, this message translates to:
+  /// **'Etkinlik ağını görüntüle'**
+  String get viewEventNetwork;
+
+  /// No description provided for @cardsAddedToGroupMessage.
+  ///
+  /// In tr, this message translates to:
+  /// **'{count} kart gruba eklendi'**
+  String cardsAddedToGroupMessage(int count);
+
+  /// No description provided for @eventGroupCreatedMessage.
+  ///
+  /// In tr, this message translates to:
+  /// **'\"{groupName}\" etkinlik grubu oluşturuldu'**
+  String eventGroupCreatedMessage(String groupName);
+
+  /// No description provided for @eventGroupCreatedWithCardsMessage.
+  ///
+  /// In tr, this message translates to:
+  /// **'\"{groupName}\" grubu {count} kartla oluşturuldu'**
+  String eventGroupCreatedWithCardsMessage(String groupName, int count);
+
+  /// No description provided for @networkGraph.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ağ Grafiği'**
+  String get networkGraph;
+
+  /// No description provided for @networkStatistics.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ağ İstatistikleri'**
+  String get networkStatistics;
+
+  /// No description provided for @networkGraphLoadFailed.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ağ grafiği alınamadı.'**
+  String get networkGraphLoadFailed;
+
+  /// No description provided for @networkGraphEventDescription.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu etkinlikteki kartlar, şirketler ve bağlantılar görsel olarak gösterilir.'**
+  String get networkGraphEventDescription;
+
+  /// No description provided for @networkGraphPersonalDescription.
+  ///
+  /// In tr, this message translates to:
+  /// **'Senin kaydettiğin kişiler ile seni kaydeden kişiler arasındaki bağlantılar; şirket ve etkinlik düğümleriyle birlikte gösterilir.'**
+  String get networkGraphPersonalDescription;
+
+  /// No description provided for @viewScope.
+  ///
+  /// In tr, this message translates to:
+  /// **'Görünüm kapsamı'**
+  String get viewScope;
+
+  /// No description provided for @personalNetwork.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kişisel ağ'**
+  String get personalNetwork;
+
+  /// No description provided for @eventNetwork.
+  ///
+  /// In tr, this message translates to:
+  /// **'Etkinlik ağı'**
+  String get eventNetwork;
+
+  /// No description provided for @createEventGroupFirstForNetwork.
+  ///
+  /// In tr, this message translates to:
+  /// **'Etkinlik ağı için önce bir etkinlik grubu oluşturun.'**
+  String get createEventGroupFirstForNetwork;
+
+  /// No description provided for @networkGraphNotYetCreated.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ağ grafiği henüz oluşmadı'**
+  String get networkGraphNotYetCreated;
+
+  /// No description provided for @networkGraphEmptySubtitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kart kaydettikçe, QR okutuldukça ve etkinlik grupları kullandıkça bağlantılar burada görünür.'**
+  String get networkGraphEmptySubtitle;
+
+  /// No description provided for @refresh.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yenile'**
+  String get refresh;
+
+  /// No description provided for @connections.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bağlantılar'**
+  String get connections;
+
+  /// No description provided for @edgeTypeSaved.
+  ///
+  /// In tr, this message translates to:
+  /// **'Senin kaydettiğin'**
+  String get edgeTypeSaved;
+
+  /// No description provided for @edgeTypeScanned.
+  ///
+  /// In tr, this message translates to:
+  /// **'QR tarandı'**
+  String get edgeTypeScanned;
+
+  /// No description provided for @edgeTypeViewed.
+  ///
+  /// In tr, this message translates to:
+  /// **'Görüntülendi'**
+  String get edgeTypeViewed;
+
+  /// No description provided for @edgeTypeContactClicked.
+  ///
+  /// In tr, this message translates to:
+  /// **'İletişim tıklandı'**
+  String get edgeTypeContactClicked;
+
+  /// No description provided for @edgeTypeWorksAt.
+  ///
+  /// In tr, this message translates to:
+  /// **'Şirkette çalışıyor'**
+  String get edgeTypeWorksAt;
+
+  /// No description provided for @edgeTypeMetAtEvent.
+  ///
+  /// In tr, this message translates to:
+  /// **'Etkinlikte tanışıldı'**
+  String get edgeTypeMetAtEvent;
+
+  /// No description provided for @edgeTypeCoSaved.
+  ///
+  /// In tr, this message translates to:
+  /// **'Aynı cüzdanda'**
+  String get edgeTypeCoSaved;
+
+  /// No description provided for @edgeTypeSameCompany.
+  ///
+  /// In tr, this message translates to:
+  /// **'Aynı şirket'**
+  String get edgeTypeSameCompany;
+
+  /// No description provided for @edgeTypeAssignedLead.
+  ///
+  /// In tr, this message translates to:
+  /// **'Lead atandı'**
+  String get edgeTypeAssignedLead;
+
+  /// No description provided for @edgeTypeOrgEventLink.
+  ///
+  /// In tr, this message translates to:
+  /// **'Organizasyon etkinliği'**
+  String get edgeTypeOrgEventLink;
+
+  /// No description provided for @edgeTypeEventLink.
+  ///
+  /// In tr, this message translates to:
+  /// **'Etkinlik bağı'**
+  String get edgeTypeEventLink;
+
+  /// No description provided for @strongestNodes.
+  ///
+  /// In tr, this message translates to:
+  /// **'En güçlü düğümler'**
+  String get strongestNodes;
+
+  /// No description provided for @connectionsCount.
+  ///
+  /// In tr, this message translates to:
+  /// **'bağ'**
+  String get connectionsCount;
+
+  /// No description provided for @nodeTypeUser.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kullanıcı'**
+  String get nodeTypeUser;
+
+  /// No description provided for @nodeTypeCompany.
+  ///
+  /// In tr, this message translates to:
+  /// **'Şirket'**
+  String get nodeTypeCompany;
+
+  /// No description provided for @nodeTypeOrganizationEvent.
+  ///
+  /// In tr, this message translates to:
+  /// **'Organizasyon etkinliği'**
+  String get nodeTypeOrganizationEvent;
+
+  /// No description provided for @node.
+  ///
+  /// In tr, this message translates to:
+  /// **'Düğüm'**
+  String get node;
+
+  /// No description provided for @edge.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bağ'**
+  String get edge;
+
+  /// No description provided for @connectionPath.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bağlantı yolu'**
+  String get connectionPath;
+
+  /// No description provided for @selectDestinationCard.
+  ///
+  /// In tr, this message translates to:
+  /// **'Hedef kart seçin: {label}'**
+  String selectDestinationCard(String label);
+
+  /// No description provided for @noPathFoundBetweenCards.
+  ///
+  /// In tr, this message translates to:
+  /// **'Seçilen kartlar arasında bu grafikte doğrudan bir yol bulunamadı.'**
+  String get noPathFoundBetweenCards;
+
+  /// No description provided for @pathStepsAndNodes.
+  ///
+  /// In tr, this message translates to:
+  /// **'{steps} adım • {nodes} düğüm'**
+  String pathStepsAndNodes(int steps, int nodes);
+
+  /// No description provided for @tapTwoNodesToFindPath.
+  ///
+  /// In tr, this message translates to:
+  /// **'İki kart düğümüne dokunarak aralarındaki en kısa yolu bulun.'**
+  String get tapTwoNodesToFindPath;
+
+  /// No description provided for @createMyCard.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kartımı oluştur'**
+  String get createMyCard;
+
+  /// No description provided for @continueWithArrow.
+  ///
+  /// In tr, this message translates to:
+  /// **'Devam →'**
+  String get continueWithArrow;
+
+  /// No description provided for @swipeHorizontalToSwitchCards.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yatay kaydırarak kartlar arasında geçin; düzenlemek için karta dokunun.'**
+  String get swipeHorizontalToSwitchCards;
+
+  /// No description provided for @tapCardToEdit.
+  ///
+  /// In tr, this message translates to:
+  /// **'Düzenlemek için karta dokunun.'**
+  String get tapCardToEdit;
+
+  /// No description provided for @cardLimitReachedPremiumUpgrade.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kart limitine ulaştınız. Yeni kart oluşturmak için Premium\'a geçebilirsiniz.'**
+  String get cardLimitReachedPremiumUpgrade;
+
+  /// No description provided for @viewNetworkGraph.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ağ grafiğini görüntüle'**
+  String get viewNetworkGraph;
+
+  /// No description provided for @cardsNotYetSaved.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kartlarınız henüz kaydedilmedi.'**
+  String get cardsNotYetSaved;
+
+  /// No description provided for @cardsAddedToWalletTimes.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kartlarınız toplam {count} kez cüzdana eklendi.'**
+  String cardsAddedToWalletTimes(int count);
+
+  /// No description provided for @cardenceDataSecurityMessage.
+  ///
+  /// In tr, this message translates to:
+  /// **'Cardence ağındaki tüm veri transferleri uçtan uca şifrelenir ve kimlik doğrulama protokolleri ile korunur.'**
+  String get cardenceDataSecurityMessage;
+
+  /// No description provided for @saveCard.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kartı kaydet'**
+  String get saveCard;
+
+  /// No description provided for @cardAlreadyInAllGroups.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu kart zaten tüm gruplarda'**
+  String get cardAlreadyInAllGroups;
+
+  /// No description provided for @deleteCardConfirmQuestion.
+  ///
+  /// In tr, this message translates to:
+  /// **'\"{displayName}\" kartını cüzdanınızdan silmek istediğinize emin misiniz?'**
+  String deleteCardConfirmQuestion(String displayName);
+
+  /// No description provided for @cardDeletedFromWalletMessage.
+  ///
+  /// In tr, this message translates to:
+  /// **'\"{displayName}\" cüzdandan silindi'**
+  String cardDeletedFromWalletMessage(String displayName);
+
+  /// No description provided for @februaryShort.
+  ///
+  /// In tr, this message translates to:
+  /// **'Şub'**
+  String get februaryShort;
+
+  /// No description provided for @augustShort.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ağu'**
+  String get augustShort;
+
+  /// No description provided for @copiedToClipboardMessage.
+  ///
+  /// In tr, this message translates to:
+  /// **'{label} panoya kopyalandı'**
+  String copiedToClipboardMessage(String label);
+
+  /// No description provided for @couldNotOpenLink.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bağlantı açılamadı'**
+  String get couldNotOpenLink;
+
+  /// No description provided for @noExtraInfoYet.
+  ///
+  /// In tr, this message translates to:
+  /// **'Henüz ek bilgi yok. Bilgi ekle ile adres, etkinlik ve daha fazlasını ekleyin.'**
+  String get noExtraInfoYet;
+
+  /// No description provided for @open.
+  ///
+  /// In tr, this message translates to:
+  /// **'Aç'**
+  String get open;
+
+  /// No description provided for @takeFrontSidePhoto.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ön yüzü çekin'**
+  String get takeFrontSidePhoto;
+
+  /// No description provided for @addBackSidePhoto.
+  ///
+  /// In tr, this message translates to:
+  /// **'Arka yüzü ekleyin (varsa)'**
+  String get addBackSidePhoto;
+
+  /// No description provided for @requiredField.
+  ///
+  /// In tr, this message translates to:
+  /// **'ZORUNLU'**
+  String get requiredField;
+
+  /// No description provided for @optionalField.
+  ///
+  /// In tr, this message translates to:
+  /// **'OPSİYONEL'**
+  String get optionalField;
+
+  /// No description provided for @freePlanMaxCardsLimitMessage.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ücretsiz planda en fazla {count} kart saklayabilirsiniz.'**
+  String freePlanMaxCardsLimitMessage(int count);
+
+  /// No description provided for @upgradeLimitOption.
+  ///
+  /// In tr, this message translates to:
+  /// **'Paket al, sınırı artır'**
+  String get upgradeLimitOption;
+
+  /// No description provided for @goToPremiumOption.
+  ///
+  /// In tr, this message translates to:
+  /// **'Premium pakete geç'**
+  String get goToPremiumOption;
+
+  /// No description provided for @premium.
+  ///
+  /// In tr, this message translates to:
+  /// **'Premium'**
+  String get premium;
+
+  /// No description provided for @free.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ücretsiz'**
+  String get free;
+
+  /// No description provided for @remainingCardsCount.
+  ///
+  /// In tr, this message translates to:
+  /// **'{count} kart kaldı'**
+  String remainingCardsCount(int count);
+
+  /// No description provided for @cardenceUser.
+  ///
+  /// In tr, this message translates to:
+  /// **'Cardence kullanıcısı'**
+  String get cardenceUser;
+
+  /// No description provided for @userLabel.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kullanıcı'**
+  String get userLabel;
+
+  /// No description provided for @selectDate.
+  ///
+  /// In tr, this message translates to:
+  /// **'Tarih seçin'**
+  String get selectDate;
+
+  /// No description provided for @purchaseSuccessful.
+  ///
+  /// In tr, this message translates to:
+  /// **'Satın alım başarılı'**
+  String get purchaseSuccessful;
+
+  /// No description provided for @premiumWalletActivatedMessage.
+  ///
+  /// In tr, this message translates to:
+  /// **'Premium cüzdanınız etkinleştirildi. Artık tüm premium özelliklerden yararlanabilirsiniz.'**
+  String get premiumWalletActivatedMessage;
+
+  /// No description provided for @addSkillHint.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yetenek ekle (örn. Flutter)'**
+  String get addSkillHint;
+
+  /// No description provided for @noInfoYet.
+  ///
+  /// In tr, this message translates to:
+  /// **'Henüz bilgi yok'**
+  String get noInfoYet;
+
+  /// No description provided for @addAboutDescriptionPlaceholder.
+  ///
+  /// In tr, this message translates to:
+  /// **'Hakkımda bilginizi ekleyebilirsiniz.'**
+  String get addAboutDescriptionPlaceholder;
+
+  /// No description provided for @retry.
+  ///
+  /// In tr, this message translates to:
+  /// **'Tekrar dene'**
+  String get retry;
+
+  /// No description provided for @nodeTypeCard.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kart'**
+  String get nodeTypeCard;
+
+  /// No description provided for @nodeTypeEvent.
+  ///
+  /// In tr, this message translates to:
+  /// **'Etkinlik'**
+  String get nodeTypeEvent;
+
+  /// No description provided for @nodeTypeOrganization.
+  ///
+  /// In tr, this message translates to:
+  /// **'Organizasyon'**
+  String get nodeTypeOrganization;
+
+  /// No description provided for @nodeTypeSkill.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yetenek'**
+  String get nodeTypeSkill;
+
+  /// No description provided for @nodeTypeLocation.
+  ///
+  /// In tr, this message translates to:
+  /// **'Konum'**
+  String get nodeTypeLocation;
+
+  /// No description provided for @edgeTypeOwns.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kart sahibi'**
+  String get edgeTypeOwns;
+
+  /// No description provided for @edgeTypeSavedBy.
+  ///
+  /// In tr, this message translates to:
+  /// **'Seni kaydeden'**
+  String get edgeTypeSavedBy;
+
+  /// No description provided for @graphMetricNode.
+  ///
+  /// In tr, this message translates to:
+  /// **'Düğüm'**
+  String get graphMetricNode;
+
+  /// No description provided for @graphMetricEdge.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bağ'**
+  String get graphMetricEdge;
+
+  /// No description provided for @graphMetricCenter.
+  ///
+  /// In tr, this message translates to:
+  /// **'Merkez'**
+  String get graphMetricCenter;
+
+  /// No description provided for @you.
+  ///
+  /// In tr, this message translates to:
+  /// **'Sen'**
+  String get you;
+
+  /// No description provided for @clear.
+  ///
+  /// In tr, this message translates to:
+  /// **'Temizle'**
+  String get clear;
+
+  /// No description provided for @searchActive.
+  ///
+  /// In tr, this message translates to:
+  /// **'Arama aktif'**
+  String get searchActive;
+
+  /// No description provided for @search.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ara'**
+  String get search;
+
+  /// No description provided for @filterActive.
+  ///
+  /// In tr, this message translates to:
+  /// **'Filtre ({count})'**
+  String filterActive(int count);
+
+  /// No description provided for @filter.
+  ///
+  /// In tr, this message translates to:
+  /// **'Filtrele'**
+  String get filter;
+
+  /// No description provided for @noExtraInfoInThisCard.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu kartta ek bilgi yok.'**
+  String get noExtraInfoInThisCard;
+
+  /// No description provided for @fieldSaved.
+  ///
+  /// In tr, this message translates to:
+  /// **'{fieldName} kaydedildi'**
+  String fieldSaved(String fieldName);
+
+  /// No description provided for @addedToGroupsMessage.
+  ///
+  /// In tr, this message translates to:
+  /// **'{count} gruba eklendi'**
+  String addedToGroupsMessage(int count);
+
+  /// No description provided for @savedAtLabel.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kaydedildi: {date}'**
+  String savedAtLabel(String date);
 }
 
 class _AppLocalizationsDelegate

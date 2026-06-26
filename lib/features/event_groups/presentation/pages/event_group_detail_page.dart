@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/l10n/app_l10n.dart';
 import '../../../../core/l10n/l10n_extensions.dart';
 
 import '../../../../core/theme/app_colors.dart';
@@ -105,9 +106,10 @@ class _EventGroupDetailPageState extends State<EventGroupDetailPage> {
 
   Future<void> _openAddCardsPicker() async {
     if (_availableToAdd.isEmpty) {
+      final l10n = context.l10n;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(context.l10n.grubaEklenecekKaytlKartKalmad),
+          content: Text(AppL10n.grubaEklenecekKaytlKartKalmad(l10n)),
           behavior: SnackBarBehavior.floating,
         ),
       );
@@ -137,7 +139,7 @@ class _EventGroupDetailPageState extends State<EventGroupDetailPage> {
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('$addedCount kart gruba eklendi'),
+        content: Text(AppL10n.cardsAddedToGroupMessage(context.l10n, addedCount)),
         behavior: SnackBarBehavior.floating,
       ),
     );
@@ -160,21 +162,22 @@ class _EventGroupDetailPageState extends State<EventGroupDetailPage> {
   }
 
   Future<void> _confirmDeleteGroup() async {
+    final l10n = context.l10n;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(context.l10n.grubuSil),
+        title: Text(AppL10n.grubuSil(l10n)),
         content: Text(
-          '"${widget.group.name}" etkinlik grubunu silmek istediğinize emin misiniz? '
-          'Gruptaki kart bağlantıları kaldırılır.',
+          '${AppL10n.deleteEventGroupConfirmMessage(l10n, widget.group.name)}\n'
+          '${AppL10n.deleteEventGroupConfirmSubMessage(l10n)}',
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: Text(context.l10n.iptal),
+            child: Text(AppL10n.iptal(l10n)),
           ),
           CustomButton(
-            label: context.l10n.sil,
+            label: AppL10n.sil(l10n),
             onPressed: () => Navigator.of(context).pop(true),
             fullWidth: false,
             style: FilledButton.styleFrom(
@@ -197,7 +200,7 @@ class _EventGroupDetailPageState extends State<EventGroupDetailPage> {
     Navigator.of(context).pop();
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('"${widget.group.name}" silindi'),
+        content: Text(AppL10n.eventGroupDeletedMessage(context.l10n, widget.group.name)),
         behavior: SnackBarBehavior.floating,
       ),
     );
@@ -220,12 +223,13 @@ class _EventGroupDetailPageState extends State<EventGroupDetailPage> {
             ),
             child: StatefulBuilder(
               builder: (context, setModalState) {
+                final l10n = context.l10n;
                 return Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     Text(
-                      context.l10n.kiiNotu,
+                      AppL10n.kiiNotu(l10n),
                       style: Theme.of(context).textTheme.titleMedium,
                     ),
                     const SizedBox(height: 10),
@@ -237,12 +241,12 @@ class _EventGroupDetailPageState extends State<EventGroupDetailPage> {
                       onChanged: (value) =>
                           setModalState(() => draftNote = value),
                       decoration: InputDecoration(
-                        hintText: context.l10n.buKiiHakkndaNotYazn,
+                        hintText: AppL10n.buKiiHakkndaNotYazn(l10n),
                       ),
                     ),
                     const SizedBox(height: 8),
                     CustomButton(
-                      label: context.l10n.kaydet,
+                      label: AppL10n.kaydet(l10n),
                       onPressed: () =>
                           Navigator.of(context).pop(draftNote.trim()),
                       fullWidth: false,
@@ -288,7 +292,7 @@ class _EventGroupDetailPageState extends State<EventGroupDetailPage> {
         child: Material(
           color: Colors.transparent,
           child: CustomButton(
-            label: context.l10n.buGrubuSil,
+            label: AppL10n.buGrubuSil(context.l10n),
             icon: Icons.delete_outline_rounded,
             onPressed: _confirmDeleteGroup,
             style: FilledButton.styleFrom(
@@ -338,7 +342,7 @@ class _EventGroupDetailPageState extends State<EventGroupDetailPage> {
               ),
               const SizedBox(height: 16),
               Text(
-                context.l10n.buGruptaKartYok,
+                AppL10n.buGruptaKartYok(context.l10n),
                 style: textTheme.titleMedium?.copyWith(
                   color: colorScheme.onSurfaceVariant,
                 ),
@@ -346,7 +350,7 @@ class _EventGroupDetailPageState extends State<EventGroupDetailPage> {
               ),
               const SizedBox(height: 8),
               Text(
-                context.l10n.kaydedilenKartlarnzdanSeerekBuGruba,
+                AppL10n.kaydedilenKartlarnzdanSeerekBuGruba(context.l10n),
                 style: textTheme.bodySmall?.copyWith(
                   color: colorScheme.onSurfaceVariant,
                 ),
@@ -354,7 +358,7 @@ class _EventGroupDetailPageState extends State<EventGroupDetailPage> {
               ),
               const SizedBox(height: 24),
               CustomButton(
-                label: context.l10n.kartEkle,
+                label: AppL10n.kartEkle(context.l10n),
                 icon: Icons.add_rounded,
                 onPressed: _availableToAdd.isEmpty ? null : _openAddCardsPicker,
                 fullWidth: false,
@@ -409,13 +413,13 @@ class _EventGroupDetailPageState extends State<EventGroupDetailPage> {
               widget.getNetworkGraphPath != null)
             CardenceAppBar.iconAction(
               icon: Icons.hub_outlined,
-              tooltip: 'Etkinlik ağını görüntüle',
+              tooltip: AppL10n.viewEventNetwork(context.l10n),
               onPressed: _openNetworkGraph,
             ),
           if (!_loading && _availableToAdd.isNotEmpty)
             CardenceAppBar.iconAction(
               icon: Icons.person_add_alt_1_rounded,
-              tooltip: context.l10n.kartEkle,
+              tooltip: AppL10n.kartEkle(context.l10n),
               onPressed: _openAddCardsPicker,
             ),
         ],
@@ -474,7 +478,7 @@ class _SavedCardPreviewTile extends StatelessWidget {
         backgroundColor: card.previewBackgroundColor,
         frontEntries: const [],
         backEntries: card.backAboutEntries,
-        emptyMessage: context.l10n.kartBilgisiYok,
+        emptyMessage: AppL10n.kartBilgisiYok(context.l10n),
         cardId: card.cardId,
         onTap: onTap,
         contactEmail: card.email,

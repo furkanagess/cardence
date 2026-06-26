@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/l10n/app_l10n.dart';
 import '../../../core/l10n/l10n_extensions.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
@@ -12,13 +13,13 @@ class BirthdayPickerField extends StatefulWidget {
     required this.label,
     this.value,
     required this.onChanged,
-    this.hintText = 'Tarih seçin',
+    this.hintText,
   });
 
   final String label;
   final String? value;
   final ValueChanged<String?> onChanged;
-  final String hintText;
+  final String? hintText;
 
   @override
   State<BirthdayPickerField> createState() => _BirthdayPickerFieldState();
@@ -76,6 +77,7 @@ class _BirthdayPickerFieldState extends State<BirthdayPickerField> {
     final textTheme = Theme.of(context).textTheme;
     final displayText = _localeReady ? BirthdayFormat.display(widget.value) : '';
     final hasValue = widget.value != null && widget.value!.trim().isNotEmpty;
+    final hint = widget.hintText ?? AppL10n.selectDate(context.l10n);
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 14),
@@ -85,7 +87,7 @@ class _BirthdayPickerFieldState extends State<BirthdayPickerField> {
         child: InputDecorator(
           decoration: InputDecoration(
             labelText: widget.label,
-            hintText: widget.hintText,
+            hintText: hint,
             filled: true,
             fillColor:
                 colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
@@ -108,7 +110,7 @@ class _BirthdayPickerFieldState extends State<BirthdayPickerField> {
                   ),
           ),
           child: Text(
-            hasValue ? displayText : widget.hintText,
+            hasValue ? displayText : hint,
             style: textTheme.bodyLarge?.copyWith(
               color: hasValue
                   ? colorScheme.onSurface

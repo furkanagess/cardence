@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/l10n/app_l10n.dart';
 import '../../../../core/l10n/l10n_extensions.dart';
 
 import '../../../../core/theme/app_colors.dart';
@@ -83,8 +84,8 @@ class ProfileInteractionStats extends StatelessWidget {
                       const SizedBox(height: 2),
                       Text(
                         totalWalletSaveCount == 0
-                            ? 'Kartlarınız henüz kaydedilmedi.'
-                            : 'Kartlarınız toplam $totalWalletSaveCount kez cüzdana eklendi.',
+                            ? AppL10n.cardsNotYetSaved(context.l10n)
+                            : AppL10n.cardsAddedToWalletTimes(context.l10n, totalWalletSaveCount),
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                               color: colorScheme.onSurfaceVariant,
                               height: 1.35,

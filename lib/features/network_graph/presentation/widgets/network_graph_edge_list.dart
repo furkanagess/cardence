@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/l10n/l10n_extensions.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../../domain/entities/graph_edge.dart';
 import '../../domain/entities/graph_edge_type.dart';
 
@@ -23,7 +25,7 @@ class NetworkGraphEdgeList extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Bağlantılar',
+          context.l10n.connections,
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.w700,
               ),
@@ -69,7 +71,7 @@ class NetworkGraphEdgeTile extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    NetworkGraphEdgeLabel.labelFor(edge.type),
+                    NetworkGraphEdgeLabel.labelFor(context.l10n, edge.type),
                     style: theme.textTheme.titleSmall?.copyWith(
                       fontWeight: FontWeight.w700,
                     ),
@@ -122,20 +124,20 @@ class NetworkGraphEdgeIcon {
 class NetworkGraphEdgeLabel {
   const NetworkGraphEdgeLabel._();
 
-  static String labelFor(GraphEdgeType type) {
+  static String labelFor(AppLocalizations l10n, GraphEdgeType type) {
     return switch (type) {
-      GraphEdgeType.owns => 'Kart sahibi',
-      GraphEdgeType.saved => 'Senin kaydettiğin',
-      GraphEdgeType.savedBy => 'Seni kaydeden',
-      GraphEdgeType.scanned => 'QR tarandı',
-      GraphEdgeType.viewed => 'Görüntülendi',
-      GraphEdgeType.contactClicked => 'İletişim tıklandı',
-      GraphEdgeType.worksAt => 'Şirkette çalışıyor',
-      GraphEdgeType.metAtEvent => 'Etkinlikte tanışıldı',
-      GraphEdgeType.coSaved => 'Aynı cüzdanda',
-      GraphEdgeType.sameCompany => 'Aynı şirket',
-      GraphEdgeType.assignedLead => 'Lead atandı',
-      GraphEdgeType.orgEventLink => 'Organizasyon etkinliği',
+      GraphEdgeType.owns => l10n.edgeTypeOwns,
+      GraphEdgeType.saved => l10n.edgeTypeSaved,
+      GraphEdgeType.savedBy => l10n.edgeTypeSavedBy,
+      GraphEdgeType.scanned => l10n.edgeTypeScanned,
+      GraphEdgeType.viewed => l10n.edgeTypeViewed,
+      GraphEdgeType.contactClicked => l10n.edgeTypeContactClicked,
+      GraphEdgeType.worksAt => l10n.edgeTypeWorksAt,
+      GraphEdgeType.metAtEvent => l10n.edgeTypeMetAtEvent,
+      GraphEdgeType.coSaved => l10n.edgeTypeCoSaved,
+      GraphEdgeType.sameCompany => l10n.edgeTypeSameCompany,
+      GraphEdgeType.assignedLead => l10n.edgeTypeAssignedLead,
+      GraphEdgeType.orgEventLink => l10n.edgeTypeOrgEventLink,
     };
   }
 }

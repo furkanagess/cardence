@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/l10n/app_l10n.dart';
+import '../../../../core/l10n/l10n_extensions.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../../../../core/widgets/atoms/profile_avatar.dart';
 import '../../domain/entities/graph_node.dart';
 import '../../domain/entities/graph_node_type.dart';
@@ -24,7 +27,7 @@ class NetworkGraphNodeList extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'En güçlü düğümler',
+          AppL10n.strongestNodes(context.l10n),
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.w700,
               ),
@@ -60,7 +63,7 @@ class NetworkGraphNodeTile extends StatelessWidget {
         leading: (node.photoUrl?.trim().isNotEmpty ?? false)
             ? ProfileAvatar(
                 photoUrl: node.photoUrl,
-                displayName: node.label,
+                displayName: node.isOwnCard ? context.l10n.you : node.label,
                 size: 40,
                 circular: true,
               )
@@ -70,7 +73,7 @@ class NetworkGraphNodeTile extends StatelessWidget {
                 child: Icon(NetworkGraphNodeIcon.iconFor(node.type), size: 20),
               ),
         title: Text(
-          node.label,
+          node.isOwnCard ? context.l10n.you : node.label,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
           style: theme.textTheme.titleSmall?.copyWith(
@@ -78,7 +81,7 @@ class NetworkGraphNodeTile extends StatelessWidget {
           ),
         ),
         subtitle: Text(
-          node.subtitle ?? NetworkGraphNodeLabel.labelFor(node.type),
+          node.subtitle ?? NetworkGraphNodeLabel.labelFor(context.l10n, node.type),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),
@@ -92,7 +95,7 @@ class NetworkGraphNodeTile extends StatelessWidget {
               ),
             ),
             Text(
-              'bağ',
+              AppL10n.connectionsCount(context.l10n),
               style: theme.textTheme.bodySmall?.copyWith(
                 color: colorScheme.onSurfaceVariant,
               ),
@@ -124,16 +127,16 @@ class NetworkGraphNodeIcon {
 class NetworkGraphNodeLabel {
   const NetworkGraphNodeLabel._();
 
-  static String labelFor(GraphNodeType type) {
+  static String labelFor(AppLocalizations l10n, GraphNodeType type) {
     return switch (type) {
-      GraphNodeType.user => 'Kullanıcı',
-      GraphNodeType.card => 'Kart',
-      GraphNodeType.company => 'Şirket',
-      GraphNodeType.event => 'Etkinlik',
-      GraphNodeType.organization => 'Organizasyon',
-      GraphNodeType.organizationEvent => 'Organizasyon etkinliği',
-      GraphNodeType.skill => 'Yetenek',
-      GraphNodeType.location => 'Konum',
+      GraphNodeType.user => AppL10n.nodeTypeUser(l10n),
+      GraphNodeType.card => AppL10n.nodeTypeCard(l10n),
+      GraphNodeType.company => AppL10n.nodeTypeCompany(l10n),
+      GraphNodeType.event => AppL10n.nodeTypeEvent(l10n),
+      GraphNodeType.organization => AppL10n.nodeTypeOrganization(l10n),
+      GraphNodeType.organizationEvent => AppL10n.nodeTypeOrganizationEvent(l10n),
+      GraphNodeType.skill => AppL10n.nodeTypeSkill(l10n),
+      GraphNodeType.location => AppL10n.nodeTypeLocation(l10n),
     };
   }
 }

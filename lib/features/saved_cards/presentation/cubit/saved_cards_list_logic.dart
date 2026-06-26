@@ -1,3 +1,5 @@
+import '../../../../core/l10n/app_l10n.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../../../event_groups/domain/entities/event_group.dart';
 import '../../domain/entities/saved_card.dart';
 import 'saved_cards_filter_models.dart';
@@ -19,70 +21,73 @@ class SavedCardsListLogic {
     required List<SavedCard> cards,
     required String query,
   }) {
-    final normalized = query.trim().toLowerCase();
-    if (normalized.isEmpty) return cards;
+    final clean = query.trim().toLowerCase();
+    if (clean.isEmpty) return cards;
 
     return cards.where((card) {
-      return _searchableText(card).contains(normalized);
+      final name = card.displayName?.toLowerCase() ?? '';
+      final company = card.company?.toLowerCase() ?? '';
+      final email = card.email?.toLowerCase() ?? '';
+      return name.contains(clean) ||
+          company.contains(clean) ||
+          email.contains(clean);
     }).toList();
-  }
-
-  static String _searchableText(SavedCard card) {
-    return [
-      card.displayName,
-      card.company,
-      card.title,
-      card.email,
-      card.phone,
-      card.cardId,
-      card.note,
-    ].whereType<String>().join(' ').toLowerCase();
   }
 
   static List<SavedCard> applyFiltersAndSort({
     required List<SavedCard> cards,
     required SavedCardsFilterSelection filter,
   }) {
-    var filtered = cards.where((card) {
+    final filtered = cards.where((card) {
       if (filter.eventFilter != SavedCardsFilterSelection.allEventsValue) {
         if (filter.eventFilter == SavedCardsFilterSelection.ungroupedValue) {
           if (card.linkedEventGroupIds.isNotEmpty) return false;
-        } else if (!card.linkedEventGroupIds.contains(filter.eventFilter)) {
-          return false;
+        } else {
+          if (!card.linkedEventGroupIds.contains(filter.eventFilter)) {
+            return false;
+          }
         }
       }
 
-      if (filter.dateFilter == SavedCardsDateFilter.all) return true;
-      final savedAt = card.savedAt;
-      if (savedAt == null) return false;
-      final date = DateTime.fromMillisecondsSinceEpoch(savedAt);
-      final now = DateTime.now();
+      if (filter.dateFilter != SavedCardsDateFilter.all) {
+        final savedAtMs = card.savedAt;
+        if (savedAtMs == null) return false;
+        final date = DateTime.fromMillisecondsSinceEpoch(savedAtMs);
 
-      switch (filter.dateFilter) {
-        case SavedCardsDateFilter.last7:
-          return date.isAfter(now.subtract(const Duration(days: 7)));
-        case SavedCardsDateFilter.last30:
-          return date.isAfter(now.subtract(const Duration(days: 30)));
-        case SavedCardsDateFilter.custom:
-          final range = filter.customDateRange;
-          if (range == null) return true;
-          final start = DateTime(
-            range.start.year,
-            range.start.month,
-            range.start.day,
-          );
-          final end = DateTime(
-            range.end.year,
-            range.end.month,
-            range.end.day,
-            23,
-            59,
-            59,
-          );
-          return !date.isBefore(start) && !date.isAfter(end);
-        case SavedCardsDateFilter.all:
-          return true;
+        final now = DateTime.now();
+        switch (filter.dateFilter) {
+          case SavedCardsDateFilter.all:
+            break;
+          case SavedCardsDateFilter.last7:
+            final threshold = now.subtract(const Duration(days: 7));
+            if (date.isBefore(threshold)) return false;
+            break;
+          case SavedCardsDateFilter.last30:
+            final threshold = now.subtract(const Duration(days: 30));
+            if (date.isBefore(threshold)) return false;
+            break;
+          case SavedCardsDateFilter.custom:
+            final range = filter.customDateRange;
+            if (range == null) return false;
+            final startOfDay =
+                DateTime(range.start.year, range.start.month, range.start.day);
+            final endOfDay = DateTime(
+              range.end.year,
+              range.end.month,
+              range.end.day,
+              23,
+              59,
+              59,
+              999,
+            );
+            if (date.isBefore(startOfDay) || date.isAfter(endOfDay)) {
+              return false;
+            }
+            break;
+        }
       }
+
+      return true;
     }).toList();
 
     filtered.sort((a, b) {
@@ -106,16 +111,20 @@ class SavedCardsListLogic {
   }
 
   static List<({String value, String label})> eventFilterOptions({
+    required AppLocalizations l10n,
     required List<SavedCard> sourceCards,
     required List<EventGroup> eventGroups,
   }) {
     final options = <({String value, String label})>[
-      (value: SavedCardsFilterSelection.allEventsValue, label: 'Tüm etkinlikler'),
+      (
+        value: SavedCardsFilterSelection.allEventsValue,
+        label: AppL10n.tmEtkinlikler(l10n)
+      ),
     ];
     if (sourceCards.any((c) => c.linkedEventGroupIds.isEmpty)) {
       options.add((
         value: SavedCardsFilterSelection.ungroupedValue,
-        label: 'Grupsuz',
+        label: AppL10n.grupsuz(l10n),
       ));
     }
     for (final group in eventGroups) {

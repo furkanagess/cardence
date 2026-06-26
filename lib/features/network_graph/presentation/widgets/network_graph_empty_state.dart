@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/l10n/l10n_extensions.dart';
+
 class NetworkGraphEmptyState extends StatelessWidget {
   const NetworkGraphEmptyState({
     super.key,
@@ -26,7 +28,7 @@ class NetworkGraphEmptyState extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             Text(
-              'Ağ grafiği henüz oluşmadı',
+              context.l10n.networkGraphNotYetCreated,
               textAlign: TextAlign.center,
               style: theme.textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.w700,
@@ -34,7 +36,7 @@ class NetworkGraphEmptyState extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              'Kart kaydettikçe, QR okutuldukça ve etkinlik grupları kullandıkça bağlantılar burada görünür.',
+              context.l10n.networkGraphEmptySubtitle,
               textAlign: TextAlign.center,
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: colorScheme.onSurfaceVariant,
@@ -45,7 +47,7 @@ class NetworkGraphEmptyState extends StatelessWidget {
             FilledButton.tonalIcon(
               onPressed: onRefresh,
               icon: const Icon(Icons.refresh_rounded),
-              label: const Text('Yenile'),
+              label: Text(context.l10n.refresh),
             ),
           ],
         ),

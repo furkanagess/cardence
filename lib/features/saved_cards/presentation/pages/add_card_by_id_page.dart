@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/l10n/app_l10n.dart';
 import '../../../../core/l10n/l10n_extensions.dart';
 import 'package:flutter/services.dart';
 
@@ -164,8 +165,7 @@ class _AddCardByIdPageState extends State<AddCardByIdPage> {
                   const SizedBox(height: 24),
                   AddCardTipCard.security(
                     title: context.l10n.gvenliPaylam,
-                    text:
-                        'Cardence ağındaki tüm veri transferleri uçtan uca şifrelenir ve kimlik doğrulama protokolleri ile korunur.',
+                    text: AppL10n.cardenceDataSecurityMessage(context.l10n),
                   ),
                 ],
               ),

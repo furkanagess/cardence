@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/l10n/app_l10n.dart';
 import '../../../../core/l10n/l10n_extensions.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/network/auth_api_exception.dart';
@@ -168,12 +169,13 @@ class _EventGroupsPageState extends State<EventGroupsPage> {
       if (!mounted) return;
 
       final cardCount = result.selectedCardIds.length;
+      final l10n = context.l10n;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
             cardCount == 0
-                ? '"${result.name}" etkinlik grubu oluşturuldu'
-                : '"${result.name}" grubu $cardCount kartla oluşturuldu',
+                ? AppL10n.eventGroupCreatedMessage(l10n, result.name)
+                : AppL10n.eventGroupCreatedWithCardsMessage(l10n, result.name, cardCount),
           ),
           behavior: SnackBarBehavior.floating,
         ),
@@ -235,7 +237,7 @@ class _EventGroupsPageState extends State<EventGroupsPage> {
               ),
               const SizedBox(height: 16),
               Text(
-                context.l10n.henzEtkinlikGrubuYok,
+                AppL10n.henzEtkinlikGrubuYok(context.l10n),
                 style: textTheme.titleMedium?.copyWith(
                   color: colorScheme.onSurfaceVariant,
                 ),
@@ -243,7 +245,7 @@ class _EventGroupsPageState extends State<EventGroupsPage> {
               ),
               const SizedBox(height: 8),
               Text(
-                context.l10n.saAlttakiIleYeniEtkinlik,
+                AppL10n.saAlttakiIleYeniEtkinlik(context.l10n),
                 style: textTheme.bodySmall?.copyWith(
                   color: colorScheme.onSurfaceVariant,
                 ),
@@ -262,12 +264,13 @@ class _EventGroupsPageState extends State<EventGroupsPage> {
         final group = _groups[index];
         final cardCount = _savedCardCountForGroup(group.id, savedCards);
         final meta = EventGroupMetaFormatter.summaryFor(group);
+        final l10n = context.l10n;
         final subtitle = [
           if (meta != null) meta,
           if (cardCount == 0)
-            context.l10n.noCardsInGroup
+            AppL10n.noCardsInGroup(l10n)
           else
-            '$cardCount kayıtlı kart',
+            AppL10n.savedCardsCount(l10n, cardCount),
         ].join(' · ');
         return Padding(
           padding: const EdgeInsets.only(bottom: 12),

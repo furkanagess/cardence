@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/l10n/app_l10n.dart';
 import '../../../../core/l10n/l10n_extensions.dart';
 
 import '../../../../core/theme/app_colors.dart';
@@ -56,7 +57,7 @@ class SavedCardsWalletHeader extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    ' / ${quota.walletCapacityLabel} kart',
+                    ' / ${quota.walletCapacityLabel} ${AppL10n.kart(context.l10n)}',
                     style: textTheme.bodyMedium?.copyWith(
                       color: colorScheme.onSurfaceVariant,
                     ),
@@ -77,7 +78,10 @@ class SavedCardsWalletHeader extends StatelessWidget {
               if (atLimit && !quota.isPremium) ...[
                 const SizedBox(height: 10),
                 Text(
-                  'Ücretsiz planda en fazla ${SavedCardsWalletLimits.freeMaxCards} kart saklayabilirsiniz.',
+                  AppL10n.freePlanMaxCardsLimitMessage(
+                    context.l10n,
+                    SavedCardsWalletLimits.freeMaxCards,
+                  ),
                   style: textTheme.bodySmall?.copyWith(
                     color: colorScheme.onSurfaceVariant,
                     height: 1.35,
@@ -89,7 +93,9 @@ class SavedCardsWalletHeader extends StatelessWidget {
                 Align(
                   alignment: Alignment.centerLeft,
                   child: CustomButton.tonal(
-                    label: atLimit ? 'Paket al, sınırı artır' : 'Premium pakete geç',
+                    label: atLimit
+                        ? AppL10n.upgradeLimitOption(context.l10n)
+                        : AppL10n.goToPremiumOption(context.l10n),
                     icon: Icons.workspace_premium_outlined,
                     onPressed: onUpgradeTap,
                     fullWidth: false,

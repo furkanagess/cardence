@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/l10n/app_l10n.dart';
+import '../../../../core/l10n/l10n_extensions.dart';
 import '../../domain/entities/network_graph.dart';
 
 class NetworkGraphOverviewCard extends StatelessWidget {
@@ -14,6 +16,7 @@ class NetworkGraphOverviewCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final l10n = context.l10n;
 
     return Card(
       elevation: 0,
@@ -27,7 +30,7 @@ class NetworkGraphOverviewCard extends StatelessWidget {
           children: [
             Expanded(
               child: NetworkGraphMetricTile(
-                label: 'Düğüm',
+                label: AppL10n.graphMetricNode(l10n),
                 value: graph.metrics.nodeCount.toString(),
               ),
             ),
@@ -38,7 +41,7 @@ class NetworkGraphOverviewCard extends StatelessWidget {
             ),
             Expanded(
               child: NetworkGraphMetricTile(
-                label: 'Bağ',
+                label: AppL10n.graphMetricEdge(l10n),
                 value: graph.metrics.edgeCount.toString(),
               ),
             ),
@@ -49,8 +52,8 @@ class NetworkGraphOverviewCard extends StatelessWidget {
             ),
             Expanded(
               child: NetworkGraphMetricTile(
-                label: 'Merkez',
-                value: graph.metrics.centerCardId ?? 'Sen',
+                label: AppL10n.graphMetricCenter(l10n),
+                value: graph.metrics.centerCardId ?? AppL10n.you(l10n),
               ),
             ),
           ],

@@ -16,17 +16,17 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get adYalnzcaHarfIermeliEn =>
-      'Ad yalnızca harf içermeli (en az 2 karakter)';
+      'First name must contain only letters (at least 2 characters)';
 
   @override
   String get adZorunludur => 'First name is required';
 
   @override
-  String get adres => 'Adres';
+  String get adres => 'Address';
 
   @override
   String get adresSosyalMedyaVeEtkinlik =>
-      'Adres, sosyal medya ve event gibi isteğe bağlı alanlar.';
+      'Optional fields such as address, social media, and events.';
 
   @override
   String get aiConsultant => 'AI Consultant';
@@ -35,24 +35,24 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ak => 'Light';
 
   @override
-  String get alanKaldr => 'Alanı kaldır';
+  String get alanKaldr => 'Remove field';
 
   @override
-  String get alanlarDoldukaGrnr => 'Alanlar doldukça görünür';
+  String get alanlarDoldukaGrnr => 'Fields appear as they are filled';
 
   @override
   String get appStorePlayStorezerinden =>
-      'App Store / Play Store üzerinden güvenli ödeme.';
+      'Secure payment via App Store / Play Store.';
 
   @override
-  String get appStoreVeyaPlayStore => 'App Store veya Play Store\\';
+  String get appStoreVeyaPlayStore => 'App Store or Play Store';
 
   @override
   String get apple => 'Apple';
 
   @override
   String get aramaVeyaFiltreKriterleriniDeitirin =>
-      'Arama veya filtre kriterlerini değiştirin.';
+      'Change search or filter criteria.';
 
   @override
   String get aramayKapat => 'Close search';
@@ -61,26 +61,26 @@ class AppLocalizationsEn extends AppLocalizations {
   String get aramayTemizle => 'Clear search';
 
   @override
-  String get aramayaUyanKartYok => 'Aramaya uyan card yok';
+  String get aramayaUyanKartYok => 'No matching cards found';
 
   @override
-  String get arkaPlanMetinRengiVe => 'Arka plan, metin rengi ve card stili.';
+  String get arkaPlanMetinRengiVe => 'Background, text color, and card style.';
 
   @override
   String get arkaPlanVeMetinRengi =>
-      'Arka plan ve metin rengi seçimleri anında kaydedilir.';
+      'Background and text color choices are saved instantly.';
 
   @override
-  String get arkaYz => 'Arka yüz';
+  String get arkaYz => 'Back side';
 
   @override
-  String get arkaYzFotorafYok => 'Arka yüz photoı yok';
+  String get arkaYzFotorafYok => 'No back side photo';
 
   @override
-  String get arkaYzdeGster => 'Arka yüzde göster';
+  String get arkaYzdeGster => 'Show on the back side';
 
   @override
-  String get arkadalarnaner => 'Arkadaşlarına öner';
+  String get arkadalarnaner => 'Recommend to your friends';
 
   @override
   String get artDirector => 'Art Director';
@@ -93,135 +93,135 @@ class AppLocalizationsEn extends AppLocalizations {
       'Connection error. Please try again.';
 
   @override
-  String get beceriEkle => 'Beceri ekle';
+  String get beceriEkle => 'Add skill';
 
   @override
-  String get beceriler => 'Beceriler';
+  String get beceriler => 'Skills';
 
   @override
-  String get bilgiEkle => 'Bilgi ekle';
+  String get bilgiEkle => 'Add info';
 
   @override
   String get bilgiGirildikeKarttaGrnr =>
       'Details appear on the card as you fill them in';
 
   @override
-  String get bilgiler => 'Bilgiler';
+  String get bilgiler => 'Information';
 
   @override
-  String get bilgilerOkunuyor => 'Bilgiler okunuyor…';
+  String get bilgilerOkunuyor => 'Reading information…';
 
   @override
-  String get bilgileriDzenle => 'Bilgileri düzenle';
+  String get bilgileriDzenle => 'Edit information';
 
   @override
-  String get bilgileriElleGir => 'Bilgileri elle gir';
+  String get bilgileriElleGir => 'Enter details manually';
 
   @override
-  String get bilgileriOku => 'Bilgileri oku';
+  String get bilgileriOku => 'Read details';
 
   @override
-  String get bilinmiyor => 'Bilinmiyor';
+  String get bilinmiyor => 'Unknown';
 
   @override
   String get biziDeerlendirin => 'Rate us';
 
   @override
-  String get brakmakIinKonumuSein => 'Bırakmak için konumu select';
+  String get brakmakIinKonumuSein => 'Select location to drop';
 
   @override
   String get brandStrategist => 'Brand Strategist';
 
   @override
   String get buAlanCardenceKartndaDzenlenemez =>
-      'Bu alan Cardence cardında düzenlenemez';
+      'This field cannot be edited on Cardence card';
 
   @override
-  String get buGrubuSil => 'Bu grubu sil';
+  String get buGrubuSil => 'Delete this group';
 
   @override
-  String get buGruptaKartYok => 'Bu groupta card yok';
+  String get buGruptaKartYok => 'No cards in this group';
 
   @override
-  String get buKartZatenCzdannzda => 'Bu card zaten walletınızda.';
+  String get buKartZatenCzdannzda => 'This card is already in your wallet.';
 
   @override
-  String get buKartZatenKaytl => 'Bu card zaten kayıtlı';
+  String get buKartZatenKaytl => 'This card is already saved';
 
   @override
   String get buKiiHakkndaEklemekIstediiniz =>
-      'Bu kişi hakkında eklemek istediğiniz notlar...';
+      'Notes you want to add about this person...';
 
   @override
-  String get buKiiHakkndaNotYazn => 'Bu kişi hakkında not write';
+  String get buKiiHakkndaNotYazn => 'Write a note about this person';
 
   @override
-  String get buKisiHakkindaNotYazin => 'Bu kisi hakkinda not yazin';
+  String get buKisiHakkindaNotYazin => 'Write a note about this person';
 
   @override
   String get cardence => 'Cardence';
 
   @override
-  String get cardence2 => 'Cardence\\';
+  String get cardence2 => 'Cardence';
 
   @override
-  String get cardenceProOl => 'Cardence Pro ol';
+  String get cardenceProOl => 'Upgrade to Cardence Pro';
 
   @override
   String get cretsizHakknzDolduPremiumGerekli =>
-      'Ücretsiz hakkınız doldu · Premium gerekli';
+      'Free limit reached · Premium required';
 
   @override
   String get cretsizPlandaTekKartOluturabilirsiniz =>
-      'Ücretsiz planda tek card oluşturabilirsiniz. Premium ile daha fazla card ekleyin.';
+      'You can create a single card on the free plan. Add more cards with Premium.';
 
   @override
   String get cretsizPlandaYalnzca1Kart =>
-      'Ücretsiz planda yalnızca 1 card oluşturabilirsiniz. Premium ile daha fazla card ekleyin.';
+      'You can create only 1 card on the free plan. Add more cards with Premium.';
 
   @override
-  String get czdanKotanz => 'Wallet kotanız';
+  String get czdanKotanz => 'Your wallet quota';
 
   @override
-  String get czdanKotasAlnamad => 'Wallet kotası alınamadı.';
+  String get czdanKotasAlnamad => 'Could not get wallet quota.';
 
   @override
   String get czdanVeAbonelik => 'Wallet & subscription';
 
   @override
-  String get czdanaEklendi => 'Walleta Eklendi';
+  String get czdanaEklendi => 'Added to Wallet';
 
   @override
   String get dahaFazlaKiiKartSaklayn =>
-      'Daha fazla kişi cardı saklayın ve eventlerinizi ölçaddedrin.';
+      'Save more cards and scale your events.';
 
   @override
   String get dataScientist => 'Data Scientist';
 
   @override
   String get deiikliklernizlemeyeAnndaYansrKaydetmek =>
-      'Değişiklikler önizlemeye anında yansır; kaydetmek için Kaydet\\';
+      'Changes are instantly reflected in the preview; tap Save to persist.';
 
   @override
-  String get departman => 'Departman';
+  String get departman => 'Department';
 
   @override
-  String get destek => 'Destek';
+  String get destek => 'Support';
 
   @override
   String get destekGizlilikVeUygulamaBilgileri =>
-      'Destek, gizlilik ve uygulama bilgileri';
+      'Support, privacy, and app information';
 
   @override
-  String get destekTalebiGnderilemedi => 'Destek talebi gönderilemedi.';
+  String get destekTalebiGnderilemedi => 'Support request could not be sent.';
 
   @override
   String get destekTalebiGnderilemediLtfenTekrar =>
-      'Destek talebi gönderilemedi. Please tekrar try.';
+      'Support request could not be sent. Please try again.';
 
   @override
   String get destekTalebinizAlndEnKsa =>
-      'Destek talebiniz alındı. En kısa sürede dönüş yapacağız.';
+      'Your support request was received. We will get back to you as soon as possible.';
 
   @override
   String get destekVeYardm => 'Support & help';
@@ -236,19 +236,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get devopsEngineer => 'DevOps Engineer';
 
   @override
-  String get dierKiiBuQr => 'Diğer kişi bu QR\\';
+  String get dierKiiBuQr => 'The other person scans this QR';
 
   @override
-  String get dorulamaKodu => 'Doğrulama kodu';
+  String get dorulamaKodu => 'Verification code';
 
   @override
   String get doumGn => 'Birthday';
 
   @override
-  String get doumGnSein => 'Doğum günü select';
+  String get doumGnSein => 'Select birthday';
 
   @override
-  String get duzenle => 'Duzenle';
+  String get duzenle => 'Edit';
 
   @override
   String get dzenle => 'Edit';
@@ -260,90 +260,90 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ePostaZorunludur => 'Email is required';
 
   @override
-  String get ehir => 'Şehir';
+  String get ehir => 'City';
 
   @override
-  String get ekBilgiler => 'Ek bilgiler';
+  String get ekBilgiler => 'Additional info';
 
   @override
   String get ekle => 'Add';
 
   @override
-  String get eklenmeTarihi => 'Eklenme tarihi';
+  String get eklenmeTarihi => 'Date added';
 
   @override
-  String get etkinlikAd => 'Event adı';
+  String get etkinlikAd => 'Event name';
 
   @override
-  String get etkinlikEklernWebSummit => 'Event ekle (örn. Web Summit)';
+  String get etkinlikEklernWebSummit => 'Add event (e.g., Web Summit)';
 
   @override
-  String get etkinlikFotoraf => 'Event photoı';
+  String get etkinlikFotoraf => 'Event photo';
 
   @override
-  String get etkinlikFotorafYklenemedi => 'Event photoı could not be loaded.';
+  String get etkinlikFotorafYklenemedi => 'Event photo could not be loaded.';
 
   @override
-  String get etkinlikGrubu => 'Event Grubu';
+  String get etkinlikGrubu => 'Event Group';
 
   @override
-  String get etkinlikGrubu2 => 'Event grubu';
+  String get etkinlikGrubu2 => 'Event group';
 
   @override
-  String get etkinlikGrubuAlnamad => 'Event grubu alınamadı.';
+  String get etkinlikGrubuAlnamad => 'Could not load event group.';
 
   @override
-  String get etkinlikGrubuEkle => 'Event grubu ekle';
+  String get etkinlikGrubuEkle => 'Add event group';
 
   @override
-  String get etkinlikGrubuOluturulamad => 'Event grubu oluşturulamadı.';
+  String get etkinlikGrubuOluturulamad => 'Could not create event group.';
 
   @override
-  String get etkinlikGrubuSe => 'Event grubu seç';
+  String get etkinlikGrubuSe => 'Select event group';
 
   @override
-  String get etkinlikGrubuSilinemedi => 'Event grubu silinemedi.';
+  String get etkinlikGrubuSilinemedi => 'Could not delete event group.';
 
   @override
   String get etkinlikGruplar => 'Event groups';
 
   @override
-  String get etkinlikGruplarAlnamad => 'Event groupları alınamadı.';
+  String get etkinlikGruplarAlnamad => 'Could not load event groups.';
 
   @override
-  String get etkinlikTarihi => 'Event tarihi';
+  String get etkinlikTarihi => 'Event date';
 
   @override
-  String get farklBirAramaTerimiDeneyin => 'Farklı bir arama terimi try.';
+  String get farklBirAramaTerimiDeneyin => 'Try a different search term.';
 
   @override
   String get farklFiltreDeneyinVeyaFiltreleri =>
-      'Farklı filtre try veya filtreleri temizleyin.';
+      'Try different filters or clear filters.';
 
   @override
-  String get filtreler => 'Filtreler';
+  String get filtreler => 'Filters';
 
   @override
-  String get filtreleriTemizle => 'Filtreleri temizle';
+  String get filtreleriTemizle => 'Clear filters';
 
   @override
-  String get filtreyeUyanKartYok => 'Filtreye uyan card yok';
+  String get filtreyeUyanKartYok => 'No cards matching the filters';
 
   @override
-  String get finansAnalisti => 'Finans Analisti';
+  String get finansAnalisti => 'Financial Analyst';
 
   @override
-  String get fotorafKaldr => 'Photoı kaldır';
+  String get fotorafKaldr => 'Remove photo';
 
   @override
   String get fotorafekilemediKameraIzniniKontrol =>
-      'Photo çekilemedi. Kamera iznini kontrol edin.';
+      'Could not take photo. Check camera permission.';
 
   @override
   String get frontendDeveloper => 'Frontend Developer';
 
   @override
-  String get galeri => 'Galeri';
+  String get galeri => 'Gallery';
 
   @override
   String get geerliBirEPostaAdresi => 'Enter a valid email address';
@@ -352,26 +352,25 @@ class AppLocalizationsEn extends AppLocalizations {
   String get geerliBirPozisyonGirin => 'Enter a valid position';
 
   @override
-  String get geerliBirTelefonNumarasGirin =>
-      'Enter a valid telefon numarası enter.';
+  String get geerliBirTelefonNumarasGirin => 'Enter a valid phone number.';
 
   @override
   String get geerliBirirketAdGirin => 'Enter a valid company name';
 
   @override
-  String get geersizKartKimlii => 'Invalid card kimliği.';
+  String get geersizKartKimlii => 'Invalid card ID.';
 
   @override
-  String get geersizKartYant => 'Invalid card yanıtı.';
+  String get geersizKartYant => 'Invalid card response.';
 
   @override
-  String get geersizOturumYant => 'Invalid oturum yanıtı.';
+  String get geersizOturumYant => 'Invalid session response.';
 
   @override
-  String get geersizProfilYant => 'Invalid profil yanıtı.';
+  String get geersizProfilYant => 'Invalid profile response.';
 
   @override
-  String get genel => 'Genel';
+  String get genel => 'General';
 
   @override
   String get genelSoru => 'General question';
@@ -380,14 +379,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get geri => 'Back';
 
   @override
-  String get geriYklenecekSatnAlmBulunamad =>
-      'Geri yüklenecek satın alım not found.';
+  String get geriYklenecekSatnAlmBulunamad => 'No purchases found to restore.';
 
   @override
   String get giriYap => 'Sign in';
 
   @override
-  String get gizlilikPolitikas => 'Gizlilik Politikası';
+  String get gizlilikPolitikas => 'Privacy Policy';
 
   @override
   String get gizlilikPolitikas2 => 'Privacy policy';
@@ -402,30 +400,30 @@ class AppLocalizationsEn extends AppLocalizations {
   String get growthManager => 'Growth Manager';
 
   @override
-  String get grubaEkle => 'Gruba ekle';
+  String get grubaEkle => 'Add to group';
 
   @override
   String get grubaEklenecekKaytlKartKalmad =>
-      'Gruba eklenecek kayıtlı card kalmadı';
+      'No saved cards left to add to group';
 
   @override
-  String get grubuSil => 'Grubu sil';
+  String get grubuSil => 'Delete group';
 
   @override
-  String get grupsuz => 'Groupsuz';
+  String get grupsuz => 'Unassigned';
 
   @override
-  String get gvenliPaylam => 'Güvenli Paylaşım';
+  String get gvenliPaylam => 'Secure Sharing';
 
   @override
   String get gvenliinizIinHesabnzaTekrarGiri =>
-      'Güvenliğiniz için hesabınıza tekrar giriş yapmanız gerekiyor.';
+      'For your security, you need to sign in to your account again.';
 
   @override
   String get hakkmda => 'About me';
 
   @override
-  String get hakkmdaHerZamanGsterilir => 'Hakkımda her zaman gösterilir.';
+  String get hakkmdaHerZamanGsterilir => 'About me is always shown.';
 
   @override
   String get hakknda => 'About';
@@ -438,30 +436,30 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get henzEtkinlikGrubuYokEtkinlik =>
-      'No event grubu yok. Event groupları sekmesinden yeni group oluşturabilirsiniz.';
+      'No event groups yet. You can create a new group from the event groups tab.';
 
   @override
-  String get henzKartYok => 'No card yok';
+  String get henzKartYok => 'No cards yet';
 
   @override
-  String get henzKartnYok => 'No cardın yok';
+  String get henzKartnYok => 'You don\'t have any cards yet';
 
   @override
   String get henzKartnzYok => 'You have no cards yet';
 
   @override
   String get henzKartnzYokProfildenKart =>
-      'No cardınız yok. Profilden card oluşturduktan sonra görünüm ayarlarını yapabilirsiniz.';
+      'You don\'t have any cards yet. You can adjust appearance settings after creating a card from your profile.';
 
   @override
   String get henzKaydedilmiKartYokKaydedilen =>
-      'No kaydedilmiş card yok. Kaydedilen Cardlar sekmesinden QR ile card ekleyebilirsiniz.';
+      'No saved cards yet. You can add cards via QR code from the Saved Cards tab.';
 
   @override
   String get henzKaytlKartYok => 'No saved cards yet';
 
   @override
-  String get hesabnzaGiriYapn => 'Hesabınıza giriş yapın';
+  String get hesabnzaGiriYapn => 'Sign in to your account';
 
   @override
   String get hesapVeGiri => 'Account & sign-in';
@@ -471,43 +469,43 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get iOrtaklklarVeGvenlikBildirimleri =>
-      'İş ortaklıkları ve güvenlik bildirimleri için gereklidir.';
+      'Required for business partnerships and security notifications.';
 
   @override
   String get ingilizce => 'English';
 
   @override
-  String get ifremiUnuttum => 'Passwordmi unuttum';
+  String get ifremiUnuttum => 'Forgot password';
 
   @override
-  String get ifreniziTekrarGirin => 'Passwordnizi tekrar enter';
+  String get ifreniziTekrarGirin => 'Please re-enter your password';
 
   @override
-  String get ifreyiGncelle => 'Passwordyi güncelle';
+  String get ifreyiGncelle => 'Update password';
 
   @override
-  String get ilAra => 'İl ara';
+  String get ilAra => 'Search province';
 
   @override
-  String get ileAra => 'İlçe ara';
+  String get ileAra => 'Search district';
 
   @override
   String get ilemBaarsz => 'Operation failed.';
 
   @override
   String get ilemTamamlanamadLtfenTekrarDeneyin =>
-      'İşlem tamamlanamadı. Please tekrar try.';
+      'Operation could not be completed. Please try again.';
 
   @override
-  String get iletiimIinEPostaAdresiniz => 'İletişim için e-posta adresiniz';
+  String get iletiimIinEPostaAdresiniz => 'Your email address for contact';
 
   @override
   String get iletiimProfilVeKiiselNot =>
-      'İletişim, profil ve kişisel not bilgilerini ekleyin';
+      'Add contact, profile, and personal note info';
 
   @override
   String get ilkKartnzOluturunIEtkinlik =>
-      'İlk cardınızı oluşturun; iş, event veya kişisel kullanım için ayrı cardlar ekleyebilirsiniz.';
+      'Create your first card; you can add separate cards for work, events, or personal use.';
 
   @override
   String get instagram => 'Instagram';
@@ -519,71 +517,70 @@ class AppLocalizationsEn extends AppLocalizations {
   String get irket => 'Company';
 
   @override
-  String get irketAdnGiriniz => 'Şirket adını enteriz';
+  String get irketAdnGiriniz => 'Enter company name';
 
   @override
   String get irketZorunludur => 'Company is required';
 
   @override
-  String get isimSirketCom => 'isim@sirket.com';
+  String get isimSirketCom => 'name@company.com';
 
   @override
-  String get isimirketEPosta => 'İsim, şirket, e-posta…';
+  String get isimirketEPosta => 'Name, company, email...';
 
   @override
-  String get isimsizKart => 'İsimsiz card';
+  String get isimsizKart => 'Unnamed card';
 
   @override
   String get isteeBalEtkinliiListedeGrsel =>
-      'İsteğe bağlı — etkinliği listede görsel olarak ayırt edin.';
+      'Optional — visually distinguish the event in the list.';
 
   @override
   String get istersenWebSiteniVeLinkedin =>
-      'İstersen web siteni ve LinkedIn profilini ekle.';
+      'You can add your website and LinkedIn profile if you wish.';
 
   @override
   String get istersenizimdiEkleyinSonraDa =>
-      'İsterseniz şimdi ekleyin, sonra da düzenleyebilirsiniz';
+      'You can add it now and edit it later if you want';
 
   @override
-  String get k => 'Çık';
+  String get k => 'Exit';
 
   @override
   String get kYap => 'Log out';
 
   @override
-  String get kamera => 'Kamera';
+  String get kamera => 'Camera';
 
   @override
-  String get kameraVeyaGaleridenEkleyin => 'Kamera veya galeriden ekleyin';
+  String get kameraVeyaGaleridenEkleyin => 'Add from camera or gallery';
 
   @override
-  String get kamerayKullanarakBilgileriTara =>
-      'Kamerayı kullanarak bilgileri tara';
+  String get kamerayKullanarakBilgileriTara => 'Scan details using the camera';
 
   @override
   String get kapasiteyiArtr => 'Increase capacity';
 
   @override
-  String get kapat => 'Kapat';
+  String get kapat => 'Close';
 
   @override
   String get kart => 'Card';
 
   @override
-  String get kartAd => 'Card adı';
+  String get kartAd => 'Card name';
 
   @override
   String get kartAdZorunludur => 'Card name is required';
 
   @override
-  String get kartBilgileri => 'Card bilgileri';
+  String get kartBilgileri => 'Card info';
 
   @override
-  String get kartBilgisiAlnamad => 'Card bilgisi alınamadı.';
+  String get kartBilgisiAlnamad => 'Could not retrieve card details.';
 
   @override
-  String get kartBilgisiYok => 'Card bilgisi yok';
+  String get kartBilgisiYok => 'No card details';
 
   @override
   String get kartBilgisiYokDzenleIle => 'No card info yet — add via Edit';
@@ -592,211 +589,212 @@ class AppLocalizationsEn extends AppLocalizations {
   String get kartBulunamad => 'Card not found.';
 
   @override
-  String get kartCzdanaEklenemedi => 'Card walleta eklenemedi.';
+  String get kartCzdanaEklenemedi => 'Card could not be added to wallet.';
 
   @override
-  String get kartCzdandanSil => 'Cardı walletdan sil';
+  String get kartCzdandanSil => 'Delete card from wallet';
 
   @override
-  String get kartCzdannzaEklendi => 'Card walletınıza added';
+  String get kartCzdannzaEklendi => 'Card added to your wallet';
 
   @override
-  String get kartEkle => 'Card ekle';
+  String get kartEkle => 'Add card';
 
   @override
-  String get kartEkle2 => 'Cardı ekle';
+  String get kartEkle2 => 'Add card';
 
   @override
-  String get kartGncellenemedi => 'Card güncellenemedi.';
+  String get kartGncellenemedi => 'Card could not be updated.';
 
   @override
-  String get kartGrnm => 'Card Görünümü';
+  String get kartGrnm => 'Card Appearance';
 
   @override
-  String get kartGrnm2 => 'Card görünümü';
+  String get kartGrnm2 => 'Card appearance';
 
   @override
-  String get kartGruptankarlamad => 'Card grouptan çıkarılamadı.';
+  String get kartGruptankarlamad => 'Card could not be removed from group.';
 
   @override
-  String get kartId => 'KART ID';
+  String get kartId => 'Card ID';
 
   @override
   String get kartId2 => 'Card ID';
 
   @override
-  String get kartId3 => 'Card ID\\';
+  String get kartId3 => 'Card ID';
 
   @override
   String get kartIdCardid => 'Card ID: \$cardId';
 
   @override
-  String get kartIdGirin => 'Card ID enter';
+  String get kartIdGirin => 'Enter Card ID';
 
   @override
-  String get kartIdIleEkle => 'Card ID ile ekle';
+  String get kartIdIleEkle => 'Add with Card ID';
 
   @override
-  String get kartIdKopyaland => 'Card ID kopyalandı';
+  String get kartIdKopyaland => 'Card ID copied';
 
   @override
-  String get kartIdKopyalandId => 'Card ID kopyalandı: \$id';
+  String get kartIdKopyalandId => 'Card ID copied: \$id';
 
   @override
   String get kartIdOluturulamadLtfenTekrar =>
       'Could not create Card ID. Please try again.';
 
   @override
-  String get kartIdTam6Haneli => 'Card ID tam 6 haneli sayı olmalıdır';
+  String get kartIdTam6Haneli => 'Card ID must be exactly a 6-digit number';
 
   @override
-  String get kartKaydedildi => 'Card kaydedildi';
+  String get kartKaydedildi => 'Card saved';
 
   @override
   String get kartKaydedilemedi => 'Card could not be saved.';
 
   @override
   String get kartKaydedilemediLtfenTekrarDeneyin =>
-      'Card could not be saved. Please tekrar try.';
+      'Card could not be saved. Please try again.';
 
   @override
   String get kartKaydetmedennceSonKez =>
-      'Cardı kaydetmeden önce son kez kontrol edin.';
+      'Review your card one last time before saving.';
 
   @override
-  String get kartKaytSays => 'Card kayıt sayısı';
+  String get kartKaytSays => 'Number of saved cards';
 
   @override
-  String get kartKimliiEksik => 'Card kimliği eksik.';
+  String get kartKimliiEksik => 'Card ID is missing.';
 
   @override
   String get kartKimliiOluturulamadLtfenTekrar =>
-      'Card kimliği oluşturulamadı. Please tekrar try.';
+      'Could not create card ID. Please try again.';
 
   @override
-  String get kartKotasDoldu => 'Card kotası doldu';
+  String get kartKotasDoldu => 'Card capacity full';
 
   @override
-  String get kartPayla => 'Cardı paylaş';
+  String get kartPayla => 'Share card';
 
   @override
   String get kartPaylaDediinizdeBenzersizBir =>
       'A unique number is assigned when you share the card.';
 
   @override
-  String get kartRengi => 'KART RENGİ';
+  String get kartRengi => 'CARD COLOR';
 
   @override
-  String get kartRengi2 => 'Card rengi';
+  String get kartRengi2 => 'Card color';
 
   @override
-  String get kartRenkleri => 'Card renkleri';
+  String get kartRenkleri => 'Card colors';
 
   @override
-  String get kartSahibiHakkndaKsaBilgi => 'Card sahibi hakkında kısa bilgi...';
+  String get kartSahibiHakkndaKsaBilgi => 'Short bio about the cardholder...';
 
   @override
-  String get kartSil => 'Cardı sil';
+  String get kartSil => 'Delete card';
 
   @override
-  String get kartSilinemedi => 'Card silinemedi.';
+  String get kartSilinemedi => 'Card could not be deleted.';
 
   @override
   String get kartSilinemediLtfenTekrarDeneyin =>
-      'Card silinemedi. Please tekrar try.';
+      'Card could not be deleted. Please try again.';
 
   @override
-  String get kartVeMetinRenginiDzenleyin => 'Card ve metin rengini düzenleyin.';
+  String get kartVeMetinRenginiDzenleyin => 'Edit card and text colors.';
 
   @override
-  String get kartYzVeAlanDzeni => 'Card yüzü ve alan düzeni';
+  String get kartYzVeAlanDzeni => 'Card face and field layout';
 
   @override
   String get kartYzndeGrnecekIletiimVe =>
-      'Card yüzünde görünecek iletişim ve profil alanları.';
+      'Contact and profile fields shown on the card face.';
 
   @override
-  String get kartZatenKaytl => 'Card zaten kayıtlı';
+  String get kartZatenKaytl => 'Card already saved';
 
   @override
   String get kartaEklemekIstediinizAlanSein =>
-      'Carda eklemek istediğiniz alanı select';
+      'Select the field you want to add to the card';
 
   @override
   String get kartevirmekIinSaAlttaki =>
-      'Cardı çevirmek için sağ alttaki ikona dokunun';
+      'Tap the icon at the bottom right to flip the card';
 
   @override
-  String get kartlar => 'Cardlar';
+  String get kartlar => 'Cards';
 
   @override
-  String get kartlarAlnamad => 'Cardlar alınamadı.';
+  String get kartlarAlnamad => 'Could not retrieve cards.';
 
   @override
-  String get kartlarGrubaEklenemedi => 'Cardlar gruba eklenemedi.';
+  String get kartlarGrubaEklenemedi => 'Cards could not be added to the group.';
 
   @override
   String get kartlarm => 'My Cards';
 
   @override
-  String get kartndaGrnsn => 'Cardında Görünsün';
+  String get kartndaGrnsn => 'Show on Card';
 
   @override
-  String get kartnizleme => 'Card önizleme';
+  String get kartnizleme => 'Card preview';
 
   @override
   String get kartnzOluturunPaylanVeAnz =>
-      'Cardınızı oluşturun, paylaşın ve ağınızı genişletin.';
+      'Create your card, share it, and expand your network.';
 
   @override
-  String get kartnzPaylan => 'Cardınızı paylaşın';
+  String get kartnzPaylan => 'Share your card';
 
   @override
-  String get kartnzdaGrnecekAdnzGirin => 'Cardınızda görünecek adınızı enter';
+  String get kartnzdaGrnecekAdnzGirin =>
+      'Enter your name to be shown on the card';
 
   @override
   String get kartnznDijitalKimliinizelletirin =>
-      'Cardınızın dijital kimliğini özelleştirin.';
+      'Customize your card\'s digital identity.';
 
   @override
   String get kartnznnYzndeGrnecekBilgiler =>
-      'Cardınızın ön yüzünde görünecek bilgiler';
+      'Information shown on the front side of your card';
 
   @override
   String get kartvizitBilgileriniManuelYazn =>
-      'Cardvizit bilgilerini manuel write';
+      'Enter business card details manually';
 
   @override
-  String get kartvizitFotorafla => 'Cardvizit photola';
+  String get kartvizitFotorafla => 'Scan business card';
 
   @override
   String get kartvizitinnYzndeGrnecekBilgiler =>
-      'Cardvizitin ön yüzünde görünecek bilgiler';
+      'Information shown on the front side of the business card';
 
   @override
-  String get kartvizitteGrnenAdGirin => 'Cardvizitte görünen adı enter';
+  String get kartvizitteGrnenAdGirin => 'Enter name shown on the business card';
 
   @override
-  String get kartzelletir => 'Cardı özelleştir';
+  String get kartzelletir => 'Customize card';
 
   @override
-  String get katldEtkinlikler => 'Katıldığı eventler';
+  String get katldEtkinlikler => 'Attended events';
 
   @override
-  String get kaydedildiTarihBilinmiyor => 'Kaydedildi: tarih bilinmiyor';
+  String get kaydedildiTarihBilinmiyor => 'Saved: date unknown';
 
   @override
   String get kaydedilenKartlar => 'Saved Cards';
 
   @override
-  String get kaydedilenKartlardanSe => 'Kaydedilen cardlardan seç';
+  String get kaydedilenKartlardanSe => 'Select from saved cards';
 
   @override
   String get kaydedilenKartlarnzdanSeerekBuGruba =>
-      'Kaydedilen cardlarınızdan seçerek bu gruba card ekleyebilirsiniz.';
+      'You can add cards to this group by selecting from your saved cards.';
 
   @override
-  String get kaydedilmemiDeiiklikler => 'Kaydedilmemiş değişiklikler';
+  String get kaydedilmemiDeiiklikler => 'Unsaved changes';
 
   @override
   String get kaydet => 'Save';
@@ -806,53 +804,53 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get kaytlEPostaAdresinizeSfrlama =>
-      'Kayıtlı e-posta adresinize sıfırlama kodu gönderilir.';
+      'A reset code will be sent to your registered email address.';
 
   @override
   String get kaytlKartLimitinizDolduPremium =>
-      'Kayıtlı card limitiniz doldu. Premium ile sınırsız card saklayabilir ve manuel / photola eklemeye devam edebilirsiniz.';
+      'Your saved card limit is reached. With Premium, you can store unlimited cards and continue adding manually or via scanning.';
 
   @override
-  String get kaytlKartlar => 'Kayıtlı cardlar';
+  String get kaytlKartlar => 'Saved cards';
 
   @override
-  String get kaytlKartlarAlnamad => 'Kayıtlı cardlar alınamadı.';
+  String get kaytlKartlarAlnamad => 'Could not retrieve saved cards.';
 
   @override
-  String get kendiKartlarm => 'Kendi cardlarım';
+  String get kendiKartlarm => 'My own cards';
 
   @override
-  String get kendinizdenKsacaBahsedin => 'Kendinizden kısaca bahsedin...';
+  String get kendinizdenKsacaBahsedin => 'Tell us briefly about yourself...';
 
   @override
-  String get kiiNotu => 'Kişi notu';
+  String get kiiNotu => 'Personal note';
 
   @override
-  String get kisiNotu => 'Kisi notu';
+  String get kisiNotu => 'Personal note';
 
   @override
-  String get kodGnder => 'Kod gönder';
+  String get kodGnder => 'Send code';
 
   @override
-  String get kodGnderildi => 'Kod gönderildi';
+  String get kodGnderildi => 'Code sent';
 
   @override
-  String get konu => 'Konu';
+  String get konu => 'Subject';
 
   @override
-  String get konum => 'Konum';
+  String get konum => 'Location';
 
   @override
-  String get kopyala => 'Kopyala';
+  String get kopyala => 'Copy';
 
   @override
-  String get kotaDoldu => 'Kota doldu';
+  String get kotaDoldu => 'Quota full';
 
   @override
   String get koyu => 'Dark';
 
   @override
-  String get kullanmKoullar => 'Kullanım Koşulları';
+  String get kullanmKoullar => 'Terms of Use';
 
   @override
   String get learningDesigner => 'Learning Designer';
@@ -861,61 +859,61 @@ class AppLocalizationsEn extends AppLocalizations {
   String get linkedin => 'LinkedIn';
 
   @override
-  String get linkedinAlamad => 'LinkedIn açılamadı';
+  String get linkedinAlamad => 'Could not open LinkedIn';
 
   @override
-  String get linkedinComInKullanici => 'linkedin.com/in/kullanici';
+  String get linkedinComInKullanici => 'linkedin.com/in/username';
 
   @override
   String get linkedinComInUsername => 'linkedin.com/in/username';
 
   @override
-  String get linkedinIleGiri => 'LinkedIn ile giriş';
+  String get linkedinIleGiri => 'Sign in with LinkedIn';
 
   @override
-  String get linkedinIleGiriBaarsz => 'LinkedIn ile giriş failed.';
+  String get linkedinIleGiriBaarsz => 'Sign in with LinkedIn failed.';
 
   @override
-  String get linkedinProfilLinki => 'LinkedIn profil linki';
+  String get linkedinProfilLinki => 'LinkedIn profile link';
 
   @override
-  String get liste => 'Liste';
+  String get liste => 'List';
 
   @override
-  String get listeVeKartGrnmneBirlikte =>
-      'Liste ve card görünümüne birlikte uygulanır.';
+  String get listeVeKartGrnmneBirlikte => 'Applied to both list and card view.';
 
   @override
-  String get lke => 'Ülke';
+  String get lke => 'Country';
 
   @override
-  String get lkeAra => 'Ülke ara';
+  String get lkeAra => 'Search country';
 
   @override
-  String get ltfenZorunluAlanlarDoldurun => 'Please zorunlu alanları doldurun.';
+  String get ltfenZorunluAlanlarDoldurun =>
+      'Please fill in the required fields.';
 
   @override
   String get maazaSayfasAlamadLtfenTekrar =>
-      'Mağaza sayfası açılamadı. Please tekrar try.';
+      'Could not open the store page. Please try again.';
 
   @override
-  String get manuelFotorafEkleme => 'Manuel & photo ekleme';
+  String get manuelFotorafEkleme => 'Add manually & from photo';
 
   @override
   String get marketingSpecialist => 'Marketing Specialist';
 
   @override
-  String get mesajnz => 'Mesajınız';
+  String get mesajnz => 'Your message';
 
   @override
   String get metinOkunamadBilgileriManuelDzenleyerek =>
-      'Metin okunamadı. Bilgileri manuel düzenleyerek kaydedebilirsiniz.';
+      'Text could not be read. You can edit details manually and save.';
 
   @override
-  String get metinRengi => 'METİN RENGİ';
+  String get metinRengi => 'TEXT COLOR';
 
   @override
-  String get metinRengi2 => 'Metin rengi';
+  String get metinRengi2 => 'Text color';
 
   @override
   String get mobileEngineer => 'Mobile Engineer';
@@ -924,41 +922,41 @@ class AppLocalizationsEn extends AppLocalizations {
   String get motionDesigner => 'Motion Designer';
 
   @override
-  String get msg1HizmetinKapsam => '1. Hizmetin kapsamı';
+  String get msg1HizmetinKapsam => '1. Scope of service';
 
   @override
-  String get msg1KartKald => '1 card kaldı';
+  String get msg1KartKald => '1 card remaining';
 
   @override
-  String get msg1ToplananVeriler => '1. Toplanan veriler';
+  String get msg1ToplananVeriler => '1. Collected data';
 
   @override
   String get msg1cretsizDenemeSonrasndaPremium =>
-      '1 ücretsiz deneme · sonrasında Premium gerekir';
+      '1 free trial · Premium required thereafter';
 
   @override
-  String get msg2HesapOluturma => '2. Hesap oluşturma';
+  String get msg2HesapOluturma => '2. Account creation';
 
   @override
-  String get msg2VerilerinKullanm => '2. Verilerin kullanımı';
+  String get msg2VerilerinKullanm => '2. Data usage';
 
   @override
-  String get msg3KabulEdilebilirKullanm => '3. Kabul edilebilir kullanım';
+  String get msg3KabulEdilebilirKullanm => '3. Acceptable use';
 
   @override
-  String get msg3VeriPaylam => '3. Veri paylaşımı';
+  String get msg3VeriPaylam => '3. Data sharing';
 
   @override
-  String get msg4FikriMlkiyet => '4. Fikri mülkiyet';
+  String get msg4FikriMlkiyet => '4. Intellectual property';
 
   @override
-  String get msg4SaklamaSresi => '4. Saklama süresi';
+  String get msg4SaklamaSresi => '4. Retention period';
 
   @override
-  String get msg5Haklarnz => '5. Haklarınız';
+  String get msg5Haklarnz => '5. Your rights';
 
   @override
-  String get msg5HizmetDeiiklikleri => '5. Hizmet değişiklikleri';
+  String get msg5HizmetDeiiklikleri => '5. Service changes';
 
   @override
   String get msg5xxXxxXxXx => '5XX XXX XX XX';
@@ -967,62 +965,62 @@ class AppLocalizationsEn extends AppLocalizations {
   String get msg5xxXxxXxXx2 => '5xx xxx xx xx';
 
   @override
-  String get msg6Gvenlik => '6. Güvenlik';
+  String get msg6Gvenlik => '6. Security';
 
   @override
-  String get msg6HaneliKod => '6 haneli kod';
+  String get msg6HaneliKod => '6-digit code';
 
   @override
-  String get msg6HanelizelKimlikIle => '6 haneli özel kimlik ile ekle';
+  String get msg6HanelizelKimlikIle => 'Add with 6-digit custom ID';
 
   @override
-  String get msg6SorumlulukSnr => '6. Sorumluluk sınırı';
+  String get msg6SorumlulukSnr => '6. Limitation of liability';
 
   @override
-  String get msg7PolitikaGncellemeleri => '7. Politika güncellemeleri';
+  String get msg7PolitikaGncellemeleri => '7. Policy updates';
 
   @override
-  String get msg7letiim => '7. İletişim';
+  String get msg7letiim => '7. Contact';
 
   @override
-  String get nYz => 'Ön yüz';
+  String get nYz => 'Front side';
 
   @override
-  String get nYzIletiim => 'Ön yüz — iletişim';
+  String get nYzIletiim => 'Front side — contact';
 
   @override
-  String get nYzdeGster => 'Ön yüzde göster';
+  String get nYzdeGster => 'Show on front side';
 
   @override
   String get nYzdeIletiimBilgileriniEn =>
-      'Ön yüzde iletişim bilgilerini (en fazla 3), arka yüzde isteğe bağlı yetenekleri seç.';
+      'Select contact details for the front (max 3), and optional skills for the back.';
 
   @override
-  String get niversiteVeyaLiseAd => 'Üniversite veya lise adı';
+  String get niversiteVeyaLiseAd => 'University or high school name';
 
   @override
-  String get nizleme => 'Önizleme';
+  String get nizleme => 'Preview';
 
   @override
-  String get not => 'Not';
+  String get not => 'Note';
 
   @override
-  String get notEkle => 'Not ekle';
+  String get notEkle => 'Add note';
 
   @override
-  String get notKaydedildi => 'Not kaydedildi';
+  String get notKaydedildi => 'Note saved';
 
   @override
-  String get notlar => 'Notlar';
+  String get notlar => 'Notes';
 
   @override
-  String get notunuzuBurayaYazn => 'Notunuzu buraya write…';
+  String get notunuzuBurayaYazn => 'Write your note here...';
 
   @override
-  String get okul => 'Okul';
+  String get okul => 'School';
 
   @override
-  String get onboarding => 'Onboarding\\';
+  String get onboarding => 'Onboarding';
 
   @override
   String get operationsManager => 'Operations Manager';
@@ -1031,38 +1029,38 @@ class AppLocalizationsEn extends AppLocalizations {
   String get opsiyonel => 'Optional';
 
   @override
-  String get ornekEmailCom => 'ornek@email.com';
+  String get ornekEmailCom => 'example@email.com';
 
   @override
-  String get ornekMailCom => 'ornek@mail.com';
+  String get ornekMailCom => 'example@mail.com';
 
   @override
-  String get otomatik => 'Otomatik';
+  String get otomatik => 'Automatic';
 
   @override
   String get otomatikArkaPlanaGreOkunabilir =>
-      'Otomatik: arka plana göre okunabilir renk.';
+      'Automatic: readable color based on background.';
 
   @override
-  String get oturumBilgisiAlnamad => 'Oturum bilgisi alınamadı.';
+  String get oturumBilgisiAlnamad => 'Session info could not be retrieved.';
 
   @override
-  String get oturumBulunamad => 'Oturum not found.';
+  String get oturumBulunamad => 'Session not found.';
 
   @override
   String get oturumBulunamadLtfenTekrarGiri =>
       'Session not found. Please sign in again.';
 
   @override
-  String get oturumSonaErdi => 'Oturum sona erdi';
+  String get oturumSonaErdi => 'Session expired';
 
   @override
   String get oturumunuzKapatlacakVeGiriEkranna =>
-      'Oturumunuz kapatılacak ve giriş ekranına yönlendirileceksiniz. Kayıtlı cardlarınız bir sonraki girişinizde yeniden yüklenecektir.';
+      'You will be logged out and redirected to the login screen. Your saved cards will be reloaded on your next login.';
 
   @override
   String get paylalanKartKimliiniGirinBilgiler =>
-      'Paylaşılan card kimliğini enter. Bilgiler sunucudaki güncel cardvizitten alınır.';
+      'Enter the shared card ID. Details are fetched from the live business card on the server.';
 
   @override
   String get pozisyon => 'Position';
@@ -1071,20 +1069,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String get pozisyonZorunludur => 'Position is required';
 
   @override
-  String get pozisyonuGiriniz => 'Pozisyonu enteriz';
+  String get pozisyonuGiriniz => 'Enter position';
 
   @override
-  String get pozisyonunuzuGiriniz => 'Pozisyonunuzu enteriz';
-
-  @override
-  String get premium => 'Premium\\';
+  String get pozisyonunuzuGiriniz => 'Enter your position';
 
   @override
   String get premiumCzdan => 'Premium wallet';
 
   @override
   String get premiumCzdanEtkinletirilemedi =>
-      'Premium wallet etkinleştirilemedi.';
+      'Premium wallet could not be activated.';
 
   @override
   String get productDesigner => 'Product Designer';
@@ -1094,78 +1089,79 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get profesyonelKimliiniziYnetmekIinYeni =>
-      'Profesyonel kimliğinizi yönetmek için yeni bir hesap oluşturun.';
+      'Create a new account to manage your professional identity.';
 
   @override
   String get profilBilgileriniziDoldurupIlkKartnz =>
-      'Profil bilgilerinizi doldurup ilk cardınızı oluşturun veya aşağıdan yeni card ekleyin.';
+      'Fill in your profile details to create your first card, or add a new card below.';
 
   @override
-  String get profilBilgisiAlnamad => 'Profil bilgisi alınamadı.';
+  String get profilBilgisiAlnamad => 'Could not load profile details.';
 
   @override
-  String get profilFotorafIsteeBal => 'Profil photoı (isteğe bağlı)';
+  String get profilFotorafIsteeBal => 'Profile photo (optional)';
 
   @override
   String get profilFotorafKartlarnzaDaUyguland =>
-      'Profil photoı cardlarınıza da uygulandı.';
+      'Profile photo is also applied to your cards.';
 
   @override
-  String get profilFotorafYklenemedi => 'Profil photoı could not be loaded.';
+  String get profilFotorafYklenemedi => 'Profile photo could not be loaded.';
 
   @override
   String get profilFotorafnzKartnzdaGrnrsterseniz =>
-      'Profil photoınız cardınızda görünür. İsterseniz atlayabilirsiniz.';
+      'Your profile photo appears on your card. You can skip this if you want.';
 
   @override
-  String get profilIstatistikleriAlnamad => 'Profil istatistikleri alınamadı.';
+  String get profilIstatistikleriAlnamad =>
+      'Could not load profile statistics.';
 
   @override
-  String get qrIlePayla => 'QR ile paylaş';
+  String get qrIlePayla => 'Share with QR';
 
   @override
-  String get renkleriDzenle => 'Renkleri düzenle';
+  String get renkleriDzenle => 'Edit colors';
 
   @override
-  String get rnKartmKonferans2025 => 'Örn. İş cardım, Konferans 2025';
+  String get rnKartmKonferans2025 => 'e.g., My work card, Conference 2025';
 
   @override
-  String get rnMehmet => 'Örn: Mehmet';
+  String get rnMehmet => 'e.g., Mehmet';
 
   @override
-  String get rnWebSummit2026 => 'Örn. Web Summit 2026';
+  String get rnWebSummit2026 => 'e.g., Web Summit 2026';
 
   @override
-  String get rnYlmaz => 'Örn: Yılmaz';
+  String get rnYlmaz => 'e.g., Yilmaz';
 
   @override
   String get rnekKartlarGsteriliyorlkKartnz =>
-      'Örnek cardlar gösteriliyor. İlk cardınızı eklediğinizde gerçek walletınız başlar.';
+      'Sample cards are shown. Your real wallet starts once you add your first card.';
 
   @override
-  String get rnstanbulKongreMerkezi => 'Örn. İstanbul Kongre Merkezi';
+  String get rnstanbulKongreMerkezi => 'e.g., Istanbul Congress Center';
 
   @override
   String get saAlttakiEkleIleQr =>
-      'Sağ alttaki Ekle ile QR okutun veya card ID enter';
+      'Scan QR or enter Card ID using Add at the bottom right';
 
   @override
   String get saAlttakiIleYeniEtkinlik =>
-      'Sağ alttaki + ile yeni event grubu oluşturabilirsiniz.';
+      'You can create a new event group using the + at the bottom right.';
 
   @override
   String get sadeceSaysalKarakterlerKabulEdilir =>
-      'Sadece sayısal karakterler kabul edilir.';
+      'Only numeric characters are accepted.';
 
   @override
   String get sadeceSizinGrdnzEtiketKart =>
-      'Sadece sizin gördüğünüz etiket; card yüzündeki isim “Ad Soyad” alanıdır.';
+      'Label visible only to you; the name on the card face is the \"Full Name\" field.';
 
   @override
   String get salesLead => 'Sales Lead';
 
   @override
-  String get satnAlmlarGeriYkle => 'Satın alımları geri yükle';
+  String get satnAlmlarGeriYkle => 'Restore purchases';
 
   @override
   String get securityArchitect => 'Security Architect';
@@ -1174,7 +1170,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get sfrla => 'Reset';
 
   @override
-  String get sfrlamaKoduGnderildi => 'Sıfırlama kodu gönderildi.';
+  String get sfrlamaKoduGnderildi => 'Reset code sent.';
 
   @override
   String get sil => 'Delete';
@@ -1186,7 +1182,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get snrsz => 'Unlimited';
 
   @override
-  String get snrszKartSaklama => 'Sınırsız card saklama';
+  String get snrszKartSaklama => 'Unlimited card storage';
 
   @override
   String get son30Gn => 'Last 30 days';
@@ -1195,20 +1191,20 @@ class AppLocalizationsEn extends AppLocalizations {
   String get son7Gn => 'Last 7 days';
 
   @override
-  String get sonEtkileimler => 'Son etkileşimler';
+  String get sonEtkileimler => 'Recent interactions';
 
   @override
   String get sonuBulunamad => 'No results found';
 
   @override
-  String get sorularnzIinBizeUlan => 'Sorularınız için bize ulaşın';
+  String get sorularnzIinBizeUlan => 'Contact us for your questions';
 
   @override
   String get sorununuzuVeyaTalebiniziKsacaAklayn =>
-      'Sorununuzu veya talebinizi kısaca açıklayın…';
+      'Explain your issue or request briefly…';
 
   @override
-  String get soyad => 'Soyad';
+  String get soyad => 'Last name';
 
   @override
   String get soyadYalnzcaHarfIermeliEn =>
@@ -1221,68 +1217,68 @@ class AppLocalizationsEn extends AppLocalizations {
   String get sralama => 'Sort';
 
   @override
-  String get srm => 'Sürüm';
+  String get srm => 'Version';
 
   @override
-  String get sunucuYantOkunamad => 'Sunucu yanıtı okunamadı.';
+  String get sunucuYantOkunamad => 'Could not read server response.';
 
   @override
   String get supplyChainLead => 'Supply Chain Lead';
 
   @override
-  String get talebiGnder => 'Talebi gönder';
+  String get talebiGnder => 'Submit request';
 
   @override
   String get tamam => 'OK';
 
   @override
-  String get tarih => 'Tarih';
+  String get tarih => 'Date';
 
   @override
-  String get tarihSein => 'Tarih select';
+  String get tarihSein => 'Select date';
 
   @override
   String get turkce => 'Turkish';
 
   @override
-  String get tasarm => 'Tasarım';
+  String get tasarm => 'Design';
 
   @override
   String get telefon => 'Phone';
 
   @override
   String get telefonNumarasEnFazla20 =>
-      'Telefon numarası en fazla 20 karakter olabilir.';
+      'Phone number can be at most 20 characters.';
 
   @override
   String get telefonNumarasEnFazlaMaxphonelength =>
-      'Telefon numarası en fazla \$maxPhoneLength karakter olabilir.';
+      'Phone number can be at most \$maxPhoneLength characters.';
 
   @override
-  String get temizle => 'Temizle';
+  String get temizle => 'Clear';
 
   @override
   String get tm => 'All';
 
   @override
-  String get tmEtkinlikler => 'Tüm eventler';
+  String get tmEtkinlikler => 'All events';
 
   @override
   String get tmTarihler => 'All dates';
 
   @override
   String get toplantProjeVeyaHatrlatmaNotu =>
-      'Toplantı, proje veya hatırlatma notu ekleyin';
+      'Add a meeting, project, or reminder note';
 
   @override
   String get uAnrnekKartlarGryorsunuz =>
-      'Şu an örnek cardlar görüyorsunuz. İlk cardınızı eklediğinizde gerçek kotanız burada görünür.';
+      'You are currently seeing sample cards. Your real quota will appear here once you add your first card.';
 
   @override
   String get uxResearcher => 'UX Researcher';
 
   @override
-  String get uygula => 'Uygula';
+  String get uygula => 'Apply';
 
   @override
   String get uygulamaDiliniSein => 'Choose app language';
@@ -1291,50 +1287,50 @@ class AppLocalizationsEn extends AppLocalizations {
   String get uygulamaTemasnSein => 'Choose app theme';
 
   @override
-  String get webSitesi => 'Web sitesi';
+  String get webSitesi => 'Website';
 
   @override
-  String get webSitesiHttps => 'Web sitesi (https://...)';
+  String get webSitesiHttps => 'Website (https://...)';
 
   @override
-  String get webSosyal => 'Web & Sosyal';
+  String get webSosyal => 'Web & Social';
 
   @override
   String get wwwExampleCom => 'www.example.com';
 
   @override
-  String get wwwSirketCom => 'www.sirket.com';
+  String get wwwSirketCom => 'www.company.com';
 
   @override
   String get xTwitter => 'X (Twitter)';
 
   @override
   String get yaptnzDeiikliklerKaydedilmedikmakIstediinize =>
-      'Yaptığınız değişiklikler kaydedilmedi. Çıkmak istediğinize emin misiniz?';
+      'Your changes are not saved. Are you sure you want to exit?';
 
   @override
-  String get yeniEtkinlikGrubu => 'Yeni event grubu';
+  String get yeniEtkinlikGrubu => 'New event group';
 
   @override
-  String get yeniKart => 'Yeni card';
+  String get yeniKart => 'New card';
 
   @override
-  String get yeniKartOlutur => 'Yeni card oluştur';
+  String get yeniKartOlutur => 'Create new card';
 
   @override
-  String get yenidenek => 'Yeniden çek';
+  String get yenidenek => 'Retake';
 
   @override
-  String get yeniifre => 'Yeni password';
+  String get yeniifre => 'New password';
 
   @override
-  String get yeniifreTekrar => 'Yeni password tekrar';
+  String get yeniifreTekrar => 'Repeat new password';
 
   @override
   String get yetenekler => 'Skills';
 
   @override
-  String get ykleniyor => 'Yükleniyor…';
+  String get ykleniyor => 'Loading...';
 
   @override
   String get zA => 'Z → A';
@@ -1343,10 +1339,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get zelAralk => 'Custom range';
 
   @override
-  String get zelKartRengi => 'Özel card rengi';
+  String get zelKartRengi => 'Custom card color';
 
   @override
-  String get zelMetinRengi => 'Özel metin rengi';
+  String get zelMetinRengi => 'Custom text color';
 
   @override
   String get zelliknerisi => 'Feature request';
@@ -1508,7 +1504,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get close => 'Close';
 
   @override
-  String savedCardsCount(int count, int max) {
+  String savedCardsCount(int count) {
     return '$count saved cards';
   }
 
@@ -1846,4 +1842,354 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get savedCardFieldHintBirthday => 'March 15 or 03/15/1990';
+
+  @override
+  String deleteEventGroupConfirmMessage(String groupName) {
+    return 'Are you sure you want to delete the \"$groupName\" event group?';
+  }
+
+  @override
+  String get deleteEventGroupConfirmSubMessage =>
+      'Card links in the group will be removed.';
+
+  @override
+  String eventGroupDeletedMessage(String groupName) {
+    return '\"$groupName\" deleted';
+  }
+
+  @override
+  String get viewEventNetwork => 'View event network';
+
+  @override
+  String cardsAddedToGroupMessage(int count) {
+    return '$count cards added to group';
+  }
+
+  @override
+  String eventGroupCreatedMessage(String groupName) {
+    return '\"$groupName\" event group created';
+  }
+
+  @override
+  String eventGroupCreatedWithCardsMessage(String groupName, int count) {
+    return '\"$groupName\" group created with $count cards';
+  }
+
+  @override
+  String get networkGraph => 'Network Graph';
+
+  @override
+  String get networkStatistics => 'Network Statistics';
+
+  @override
+  String get networkGraphLoadFailed => 'Failed to load network graph.';
+
+  @override
+  String get networkGraphEventDescription =>
+      'Cards, companies, and connections in this event are displayed visually.';
+
+  @override
+  String get networkGraphPersonalDescription =>
+      'Connections between the people you saved and those who saved you are shown, along with company and event nodes.';
+
+  @override
+  String get viewScope => 'View scope';
+
+  @override
+  String get personalNetwork => 'Personal network';
+
+  @override
+  String get eventNetwork => 'Event network';
+
+  @override
+  String get createEventGroupFirstForNetwork =>
+      'Create an event group first for the event network.';
+
+  @override
+  String get networkGraphNotYetCreated => 'Network graph not yet created';
+
+  @override
+  String get networkGraphEmptySubtitle =>
+      'As you save cards, scan QRs, and use event groups, connections will appear here.';
+
+  @override
+  String get refresh => 'Refresh';
+
+  @override
+  String get connections => 'Connections';
+
+  @override
+  String get edgeTypeSaved => 'Saved by you';
+
+  @override
+  String get edgeTypeScanned => 'QR scanned';
+
+  @override
+  String get edgeTypeViewed => 'Viewed';
+
+  @override
+  String get edgeTypeContactClicked => 'Contact clicked';
+
+  @override
+  String get edgeTypeWorksAt => 'Works at company';
+
+  @override
+  String get edgeTypeMetAtEvent => 'Met at event';
+
+  @override
+  String get edgeTypeCoSaved => 'In same wallet';
+
+  @override
+  String get edgeTypeSameCompany => 'Same company';
+
+  @override
+  String get edgeTypeAssignedLead => 'Lead assigned';
+
+  @override
+  String get edgeTypeOrgEventLink => 'Organization event';
+
+  @override
+  String get edgeTypeEventLink => 'Event link';
+
+  @override
+  String get strongestNodes => 'Strongest nodes';
+
+  @override
+  String get connectionsCount => 'conn';
+
+  @override
+  String get nodeTypeUser => 'User';
+
+  @override
+  String get nodeTypeCompany => 'Company';
+
+  @override
+  String get nodeTypeOrganizationEvent => 'Organization event';
+
+  @override
+  String get node => 'Node';
+
+  @override
+  String get edge => 'Link';
+
+  @override
+  String get connectionPath => 'Connection path';
+
+  @override
+  String selectDestinationCard(String label) {
+    return 'Select destination card: $label';
+  }
+
+  @override
+  String get noPathFoundBetweenCards =>
+      'No direct path found between the selected cards in this graph.';
+
+  @override
+  String pathStepsAndNodes(int steps, int nodes) {
+    return '$steps steps • $nodes nodes';
+  }
+
+  @override
+  String get tapTwoNodesToFindPath =>
+      'Tap two card nodes to find the shortest path between them.';
+
+  @override
+  String get createMyCard => 'Create my card';
+
+  @override
+  String get continueWithArrow => 'Continue →';
+
+  @override
+  String get swipeHorizontalToSwitchCards =>
+      'Swipe horizontally to switch cards; tap a card to edit.';
+
+  @override
+  String get tapCardToEdit => 'Tap card to edit.';
+
+  @override
+  String get cardLimitReachedPremiumUpgrade =>
+      'You have reached your card limit. You can upgrade to Premium to create new cards.';
+
+  @override
+  String get viewNetworkGraph => 'View network graph';
+
+  @override
+  String get cardsNotYetSaved => 'Your cards have not been saved yet.';
+
+  @override
+  String cardsAddedToWalletTimes(int count) {
+    return 'Your cards have been added to wallets $count times in total.';
+  }
+
+  @override
+  String get cardenceDataSecurityMessage =>
+      'All data transfers within the Cardence network are encrypted end-to-end and protected by authentication protocols.';
+
+  @override
+  String get saveCard => 'Save card';
+
+  @override
+  String get cardAlreadyInAllGroups => 'This card is already in all groups';
+
+  @override
+  String deleteCardConfirmQuestion(String displayName) {
+    return 'Are you sure you want to delete the card \"$displayName\" from your wallet?';
+  }
+
+  @override
+  String cardDeletedFromWalletMessage(String displayName) {
+    return '\"$displayName\" deleted from wallet';
+  }
+
+  @override
+  String get februaryShort => 'Feb';
+
+  @override
+  String get augustShort => 'Aug';
+
+  @override
+  String copiedToClipboardMessage(String label) {
+    return '$label copied to clipboard';
+  }
+
+  @override
+  String get couldNotOpenLink => 'Could not open link';
+
+  @override
+  String get noExtraInfoYet =>
+      'No extra info yet. Use \"Add Info\" to add address, events, and more.';
+
+  @override
+  String get open => 'Open';
+
+  @override
+  String get takeFrontSidePhoto => 'Take front side photo';
+
+  @override
+  String get addBackSidePhoto => 'Add back side photo (if any)';
+
+  @override
+  String get requiredField => 'REQUIRED';
+
+  @override
+  String get optionalField => 'OPTIONAL';
+
+  @override
+  String freePlanMaxCardsLimitMessage(int count) {
+    return 'You can save up to $count cards in the free plan.';
+  }
+
+  @override
+  String get upgradeLimitOption => 'Get plan, increase limit';
+
+  @override
+  String get goToPremiumOption => 'Go to Premium';
+
+  @override
+  String get premium => 'Premium';
+
+  @override
+  String get free => 'Free';
+
+  @override
+  String remainingCardsCount(int count) {
+    return '$count cards remaining';
+  }
+
+  @override
+  String get cardenceUser => 'Cardence user';
+
+  @override
+  String get userLabel => 'User';
+
+  @override
+  String get selectDate => 'Select date';
+
+  @override
+  String get purchaseSuccessful => 'Purchase successful';
+
+  @override
+  String get premiumWalletActivatedMessage =>
+      'Your premium wallet has been activated. You can now benefit from all premium features.';
+
+  @override
+  String get addSkillHint => 'Add skill (e.g. Flutter)';
+
+  @override
+  String get noInfoYet => 'No info yet';
+
+  @override
+  String get addAboutDescriptionPlaceholder =>
+      'You can add information about yourself.';
+
+  @override
+  String get retry => 'Retry';
+
+  @override
+  String get nodeTypeCard => 'Card';
+
+  @override
+  String get nodeTypeEvent => 'Event';
+
+  @override
+  String get nodeTypeOrganization => 'Organization';
+
+  @override
+  String get nodeTypeSkill => 'Skill';
+
+  @override
+  String get nodeTypeLocation => 'Location';
+
+  @override
+  String get edgeTypeOwns => 'Card owner';
+
+  @override
+  String get edgeTypeSavedBy => 'Saved you';
+
+  @override
+  String get graphMetricNode => 'Node';
+
+  @override
+  String get graphMetricEdge => 'Connection';
+
+  @override
+  String get graphMetricCenter => 'Center';
+
+  @override
+  String get you => 'You';
+
+  @override
+  String get clear => 'Clear';
+
+  @override
+  String get searchActive => 'Search active';
+
+  @override
+  String get search => 'Search';
+
+  @override
+  String filterActive(int count) {
+    return 'Filter ($count)';
+  }
+
+  @override
+  String get filter => 'Filter';
+
+  @override
+  String get noExtraInfoInThisCard => 'No extra info on this card.';
+
+  @override
+  String fieldSaved(String fieldName) {
+    return '$fieldName saved';
+  }
+
+  @override
+  String addedToGroupsMessage(int count) {
+    return 'Added to $count groups';
+  }
+
+  @override
+  String savedAtLabel(String date) {
+    return 'Saved: $date';
+  }
 }

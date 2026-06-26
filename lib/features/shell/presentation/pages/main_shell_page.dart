@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/l10n/app_l10n.dart';
 import '../../../../core/l10n/l10n_extensions.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -261,7 +262,7 @@ class _MainShellPageState extends State<MainShellPage> {
               ? draft!.displayName!
               : (draft?.cardName?.trim().isNotEmpty == true
                   ? draft!.cardName!
-                  : 'Kullanıcı'));
+                  : AppL10n.userLabel(context.l10n)));
 
       await Navigator.of(context).push(
         MaterialPageRoute<void>(

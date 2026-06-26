@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/l10n/app_l10n.dart';
 import '../../../../core/l10n/l10n_extensions.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -297,7 +298,9 @@ class _OnboardingBottomActions extends StatelessWidget {
         final isLastPage = state.isLastPage;
         final isSaving = state.isSaving;
 
-        final primaryLabel = isLastPage ? 'Kartımı oluştur' : 'Devam →';
+        final primaryLabel = isLastPage
+            ? AppL10n.createMyCard(context.l10n)
+            : AppL10n.continueWithArrow(context.l10n);
 
         return OnboardingBottomBar(
           stepCount: OnboardingState.stepCount,

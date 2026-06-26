@@ -25,16 +25,25 @@ class NetworkGraphNodeStyle {
     required bool isHighlighted,
     required bool isPathEndpoint,
   }) {
-    final base = _baseForType(node.type, isDark);
     if (isPathEndpoint) {
       return NetworkGraphNodeStyle(
         background: AppColors.primary,
         foreground: AppColors.textOnPrimary,
-        border: AppColors.primaryLight,
-        icon: _iconFor(node.type),
+        border: node.isOwnCard ? Colors.amber : AppColors.primaryLight,
+        icon: node.isOwnCard ? Icons.person_pin_rounded : _iconFor(node.type),
         size: _sizeFor(node.degree) + 6,
       );
     }
+    if (node.isOwnCard) {
+      return NetworkGraphNodeStyle(
+        background: isDark ? AppColors.primaryContainerDark : AppColors.primaryContainer,
+        foreground: isDark ? AppColors.onPrimaryContainerDark : AppColors.onPrimaryContainer,
+        border: Colors.amber,
+        icon: Icons.person_pin_rounded,
+        size: 58,
+      );
+    }
+    final base = _baseForType(node.type, isDark);
     if (isHighlighted) {
       return NetworkGraphNodeStyle(
         background: base.background.withValues(alpha: 0.92),

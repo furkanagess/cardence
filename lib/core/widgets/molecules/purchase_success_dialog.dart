@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../../l10n/app_l10n.dart';
+import '../../l10n/l10n_extensions.dart';
 
 import '../../theme/app_colors.dart';
 import '../atoms/custom_button.dart';
@@ -7,15 +9,14 @@ import '../atoms/custom_button.dart';
 class PurchaseSuccessDialog extends StatelessWidget {
   const PurchaseSuccessDialog({
     super.key,
-    this.title = 'Satın alım başarılı',
-    this.message =
-        'Premium cüzdanınız etkinleştirildi. Artık tüm premium özelliklerden yararlanabilirsiniz.',
-    this.confirmLabel = 'Tamam',
+    this.title,
+    this.message,
+    this.confirmLabel,
   });
 
-  final String title;
-  final String message;
-  final String confirmLabel;
+  final String? title;
+  final String? message;
+  final String? confirmLabel;
 
   static Future<void> show(
     BuildContext context, {
@@ -26,9 +27,8 @@ class PurchaseSuccessDialog extends StatelessWidget {
       context: context,
       barrierDismissible: true,
       builder: (context) => PurchaseSuccessDialog(
-        title: title ?? 'Satın alım başarılı',
-        message: message ??
-            'Premium cüzdanınız etkinleştirildi. Artık tüm premium özelliklerden yararlanabilirsiniz.',
+        title: title,
+        message: message,
       ),
     );
   }
@@ -38,6 +38,11 @@ class PurchaseSuccessDialog extends StatelessWidget {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final isDark = theme.brightness == Brightness.dark;
+
+    final resolvedTitle = title ?? AppL10n.purchaseSuccessful(context.l10n);
+    final resolvedMessage =
+        message ?? AppL10n.premiumWalletActivatedMessage(context.l10n);
+    final resolvedConfirm = confirmLabel ?? AppL10n.tamam(context.l10n);
 
     return Dialog(
       insetPadding: const EdgeInsets.symmetric(horizontal: 28),
@@ -72,7 +77,7 @@ class PurchaseSuccessDialog extends StatelessWidget {
             ),
             const SizedBox(height: 20),
             Text(
-              title,
+              resolvedTitle,
               textAlign: TextAlign.center,
               style: theme.textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.w600,
@@ -82,7 +87,7 @@ class PurchaseSuccessDialog extends StatelessWidget {
             ),
             const SizedBox(height: 10),
             Text(
-              message,
+              resolvedMessage,
               textAlign: TextAlign.center,
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: colorScheme.onSurfaceVariant,
@@ -91,7 +96,7 @@ class PurchaseSuccessDialog extends StatelessWidget {
             ),
             const SizedBox(height: 28),
             CustomButton(
-              label: confirmLabel,
+              label: resolvedConfirm,
               onPressed: () => Navigator.of(context).pop(),
               style: FilledButton.styleFrom(
                 backgroundColor: AppColors.success,

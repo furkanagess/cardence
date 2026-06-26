@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/l10n/app_l10n.dart';
 import '../../../core/l10n/l10n_extensions.dart';
 
 import '../../utils/card_contact_visibility.dart';
@@ -19,7 +20,7 @@ class PersonInfoCard extends StatelessWidget {
     this.title,
     this.titleSecondary,
     required this.entries,
-    this.emptyMessage = 'Henüz bilgi yok',
+    this.emptyMessage,
     this.emptyActionLabel,
     this.onEmptyActionTap,
     this.onNoteEditTap,
@@ -55,7 +56,7 @@ class PersonInfoCard extends StatelessWidget {
   final List<({String label, String value})> entries;
 
   /// Hiç başlık ve entry yoksa gösterilecek metin.
-  final String emptyMessage;
+  final String? emptyMessage;
   final String? emptyActionLabel;
   final VoidCallback? onEmptyActionTap;
   final VoidCallback? onNoteEditTap;
@@ -203,6 +204,7 @@ class PersonInfoCard extends StatelessWidget {
         titleSecondary != null && titleSecondary!.trim().isNotEmpty;
     final visibleEntries = compact ? entries.take(3).toList() : entries;
     final hasEntries = visibleEntries.isNotEmpty;
+    final resolvedEmpty = emptyMessage ?? AppL10n.noInfoYet(context.l10n);
 
     final surfaceColor = backgroundColor ?? colorScheme.surface;
     final Color onSurface;
@@ -227,7 +229,7 @@ class PersonInfoCard extends StatelessWidget {
         title: title,
         titleSecondary: titleSecondary,
         entries: entries,
-        emptyMessage: emptyMessage,
+        emptyMessage: resolvedEmpty,
         emptyActionLabel: emptyActionLabel,
         onEmptyActionTap: onEmptyActionTap,
         onNoteEditTap: onNoteEditTap,
@@ -403,7 +405,7 @@ class PersonInfoCard extends StatelessWidget {
                                 ),
                               )
                             : Text(
-                                emptyMessage,
+                                resolvedEmpty,
                                 style: textTheme.bodyLarge?.copyWith(
                                   color: onSurfaceVariant,
                                 ),
@@ -1014,7 +1016,7 @@ class _CompactBusinessCardFace extends StatelessWidget {
         Expanded(
           flex: hasSkills ? 3 : 1,
           child: Text(
-            hasAbout ? about! : 'Hakkımda bilginizi ekleyebilirsiniz.',
+            hasAbout ? about : 'Hakkımda bilginizi ekleyebilirsiniz.',
             style: textTheme.bodySmall?.copyWith(
               color: hasAbout ? onSurface : onSurfaceVariant,
               fontWeight: FontWeight.w500,
@@ -1038,7 +1040,7 @@ class _CompactBusinessCardFace extends StatelessWidget {
           Expanded(
             flex: 2,
             child: Text(
-              skills!,
+              skills,
               style: textTheme.bodySmall?.copyWith(
                 color: onSurface,
                 fontWeight: FontWeight.w500,

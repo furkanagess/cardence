@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/l10n/l10n_extensions.dart';
+
 import '../../../event_groups/domain/entities/event_group.dart';
 import '../../domain/entities/graph_scope.dart';
 
@@ -27,7 +29,7 @@ class NetworkGraphScopeBar extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Görünüm kapsamı',
+          context.l10n.viewScope,
           style: Theme.of(context).textTheme.titleSmall?.copyWith(
                 fontWeight: FontWeight.w700,
               ),
@@ -38,13 +40,13 @@ class NetworkGraphScopeBar extends StatelessWidget {
           runSpacing: 8,
           children: [
             ChoiceChip(
-              label: const Text('Kişisel ağ'),
+              label: Text(context.l10n.personalNetwork),
               selected: scope == GraphScope.personal,
               onSelected: scope == GraphScope.personal ? null : (_) => onPersonalSelected?.call(),
             ),
             if (eventGroups.isNotEmpty)
               ChoiceChip(
-                label: const Text('Etkinlik ağı'),
+                label: Text(context.l10n.eventNetwork),
                 selected: scope == GraphScope.event,
                 onSelected: scope == GraphScope.event
                     ? null
@@ -61,7 +63,7 @@ class NetworkGraphScopeBar extends StatelessWidget {
             key: ValueKey(selectedEventGroupId),
             initialValue: selectedEventGroupId ?? eventGroups.first.id,
             decoration: InputDecoration(
-              labelText: 'Etkinlik grubu',
+              labelText: context.l10n.etkinlikGrubu2,
               border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
               contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
             ),
@@ -84,7 +86,7 @@ class NetworkGraphScopeBar extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.only(top: 8),
             child: Text(
-              'Etkinlik ağı için önce bir etkinlik grubu oluşturun.',
+              context.l10n.createEventGroupFirstForNetwork,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: colorScheme.onSurfaceVariant,
                   ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../core/l10n/l10n_extensions.dart';
 import '../../domain/entities/add_saved_card_result.dart';
 import '../../domain/entities/saved_card.dart';
 import '../cubit/saved_cards_cubit.dart';
@@ -78,7 +79,7 @@ mixin SavedCardsPageEffectsMixin<T extends StatefulWidget> on State<T> {
     List<SavedCard> sourceCards,
   ) async {
     final cubit = context.read<SavedCardsCubit>();
-    final eventOptions = cubit.eventFilterOptionsForSource(sourceCards);
+    final eventOptions = cubit.eventFilterOptionsForSource(context.l10n, sourceCards);
 
     var initialFilter = cubit.state.filter;
     if (!eventOptions.any((o) => o.value == initialFilter.eventFilter)) {

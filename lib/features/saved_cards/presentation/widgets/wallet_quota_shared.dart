@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/l10n/app_l10n.dart';
 import '../../../../core/l10n/l10n_extensions.dart';
 import '../../../../l10n/app_localizations.dart';
 
@@ -33,7 +34,7 @@ class WalletQuotaPlanChip extends StatelessWidget {
         ? AppColors.success.withValues(alpha: 0.12)
         : colorScheme.surfaceContainerHighest.withValues(alpha: 0.85);
     final foreground = isPremium ? AppColors.success : colorScheme.onSurfaceVariant;
-    final label = isPremium ? 'Premium' : 'Ücretsiz';
+    final label = isPremium ? AppL10n.premium(context.l10n) : AppL10n.free(context.l10n);
 
     return Container(
       padding: EdgeInsets.symmetric(
@@ -97,6 +98,91 @@ class WalletQuotaProgressBar extends StatelessWidget {
 }
 
 enum WalletQuotaLimitTone { neutral, success, warning, error }
+
+class WalletQuotaLimitMessage extends StatelessWidget {
+  const WalletQuotaLimitMessage({
+    super.key,
+    required this.quota,
+    this.tone = WalletQuotaLimitTone.neutral,
+    this.centered = false,
+  });
+
+  final SavedCardsWalletQuota quota;
+  final WalletQuotaLimitTone tone;
+  final bool centered;
+
+  @override
+  Widget build(BuildContext context) {
+    if (quota.hasUnlimitedWallet) {
+      return const SizedBox.shrink();
+    }
+
+    final l10n = context.l10n;
+    final text = quota.isPremium
+        ? AppL10n.quotaPremiumAllLimitsRemoved(l10n)
+        : AppL10n.freePlanMaxCardsLimitMessage(l10n, quota.maxCards);
+
+    Color? textColor;
+    switch (tone) {
+      case WalletQuotaLimitTone.success:
+        textColor = AppColors.success;
+        break;
+      case WalletQuotaLimitTone.warning:
+        textColor = AppColors.warning;
+        break;
+      case WalletQuotaLimitTone.error:
+        textColor = AppColors.error;
+        break;
+      case WalletQuotaLimitTone.neutral:
+        textColor = Theme.of(context).colorScheme.onSurfaceVariant;
+        break;
+    }
+
+    return Text(
+      text,
+      textAlign: centered ? TextAlign.center : TextAlign.start,
+      style: TextStyle(
+        fontSize: 12,
+        fontWeight: FontWeight.w500,
+        color: textColor,
+        height: 1.3,
+      ),
+    );
+  }
+}
+
+class WalletQuotaLimitIndicator extends StatelessWidget {
+  const WalletQuotaLimitIndicator({
+    super.key,
+    required this.label,
+  });
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final background = colorScheme.surfaceContainerHighest.withValues(alpha: 0.85);
+    final foreground = colorScheme.onSurfaceVariant;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(
+        color: background,
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          fontSize: 12,
+          fontWeight: FontWeight.w700,
+          color: foreground,
+          letterSpacing: -0.1,
+        ),
+      ),
+    );
+  }
+}
 
 class WalletQuotaLimitRow extends StatelessWidget {
   const WalletQuotaLimitRow({
@@ -237,8 +323,8 @@ class _ValueBadge extends StatelessWidget {
 }
 
 String walletQuotaRemainingLabel(AppLocalizations l10n, SavedCardsWalletQuota quota) {
-  if (quota.hasUnlimitedWallet) return l10n.snrsz;
-  if (!quota.canAddMore) return l10n.kotaDoldu;
-  if (quota.remaining == 1) return l10n.msg1KartKald;
-  return '${quota.remaining} kart kaldı';
+  if (quota.hasUnlimitedWallet) return AppL10n.snrsz(l10n);
+  if (!quota.canAddMore) return AppL10n.kotaDoldu(l10n);
+  if (quota.remaining == 1) return AppL10n.msg1KartKald(l10n);
+  return AppL10n.remainingCardsCount(l10n, quota.remaining);
 }
