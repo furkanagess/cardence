@@ -59,6 +59,15 @@ Railway Dashboard → API servisi → **Settings**:
 | `Api__PublicBaseUrl`         | `https://cardenceapi.app`    |
 | `AllowedHosts`               | `cardenceapi.app;www.cardenceapi.app;healthcheck.railway.app;*.up.railway.app` |
 | `Database__UseInMemory`      | `false`                      |
+| `Email__SmtpHost`            | `smtp.sendgrid.net`          |
+| `Email__SmtpPort`            | `587`                        |
+| `Email__SmtpUsername`        | `apikey`                     |
+| `Email__SmtpPassword`        | SendGrid API key (`SG.xxx`)  |
+| `Email__FromAddress`         | `noreply@cardenceapi.app`    |
+| `PasswordReset__ResetBaseUrl`| `https://cardenceapi.app/auth/reset-password` |
+
+> **Şifre sıfırlama maili:** SendGrid'de API key oluşturun ve gönderen adresini doğrulayın.
+> Detay: [`railway.env.example`](../railway.env.example) → `Email__*` değişkenleri.
 
 6. **Settings → Networking → Custom Domain** → `cardenceapi.app` ekle
 7. Railway'in verdiği CNAME hedefini domain DNS'ine yaz

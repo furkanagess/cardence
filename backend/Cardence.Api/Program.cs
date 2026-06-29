@@ -284,6 +284,24 @@ app.Lifetime.ApplicationStarted.Register(() =>
     var logger = app.Services.GetRequiredService<ILoggerFactory>().CreateLogger("Cardence.Api");
     logger.LogInformation("Public API base URL: {PublicBaseUrl}", publicBaseUrl);
     logger.LogInformation("Swagger UI: {SwaggerUrl}/swagger", publicBaseUrl);
+
+    var emailOptions = app.Configuration
+        .GetSection(EmailOptions.SectionName)
+        .Get<EmailOptions>() ?? new EmailOptions();
+    if (emailOptions.IsConfigured)
+    {
+        logger.LogInformation(
+            "Email SMTP configured: {Host}:{Port}, From={FromAddress}",
+            emailOptions.SmtpHost,
+            emailOptions.SmtpPort,
+            emailOptions.FromAddress);
+    }
+    else if (app.Environment.IsProduction())
+    {
+        logger.LogWarning(
+            "Email SMTP is not configured. Password reset links will be logged only. " +
+            "Set Email__SmtpHost, Email__SmtpPassword and related variables on Railway.");
+    }
 });
 
 app.UseHttpsRedirection();

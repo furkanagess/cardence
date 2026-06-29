@@ -1,5 +1,15 @@
 {
-  "LinkedInAuth": {
-    "ClientSecret": "YOUR_LINKEDIN_CLIENT_SECRET"
+  "Email": {
+    "FromName": "Cardence",
+    "FromAddress": "noreply@cardenceapi.app",
+    "SmtpHost": "smtp.sendgrid.net",
+    "SmtpPort": 587,
+    "SmtpUsername": "apikey",
+    "SmtpPassword": "SG.YOUR_SENDGRID_API_KEY",
+    "UseSsl": true
+  },
+  "PasswordReset": {
+    "ResetBaseUrl": "https://cardenceapi.app/auth/reset-password",
+    "TokenLifetimeMinutes": 30
   }
 }

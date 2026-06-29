@@ -20,5 +20,18 @@
       "Default": "Information"
     }
   },
-  "AllowedHosts": "cardenceapi.app;www.cardenceapi.app;healthcheck.railway.app;*.up.railway.app"
+  "AllowedHosts": "cardenceapi.app;www.cardenceapi.app;healthcheck.railway.app;*.up.railway.app",
+  "Email": {
+    "FromName": "Cardence",
+    "FromAddress": "noreply@cardenceapi.app",
+    "SmtpHost": "smtp.sendgrid.net",
+    "SmtpPort": 587,
+    "SmtpUsername": "apikey",
+    "SmtpPassword": "",
+    "UseSsl": true
+  },
+  "PasswordReset": {
+    "ResetBaseUrl": "https://cardenceapi.app/auth/reset-password",
+    "TokenLifetimeMinutes": 30
+  }
 }

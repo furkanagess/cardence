@@ -15,4 +15,5 @@ public sealed class User
     public ICollection<Card> Cards { get; set; } = [];
     public ICollection<SavedCard> SavedCards { get; set; } = [];
     public ICollection<UserAuthProvider> AuthProviders { get; set; } = [];
+    public ICollection<PasswordResetToken> PasswordResetTokens { get; set; } = [];
 }

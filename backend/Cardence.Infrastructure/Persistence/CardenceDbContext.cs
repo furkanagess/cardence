@@ -21,6 +21,7 @@ public sealed class CardenceDbContext : DbContext
     public DbSet<SavedCardEventGroup> SavedCardEventGroups => Set<SavedCardEventGroup>();
     public DbSet<SubscriptionEvent> SubscriptionEvents => Set<SubscriptionEvent>();
     public DbSet<CardInteraction> CardInteractions => Set<CardInteraction>();
+    public DbSet<PasswordResetToken> PasswordResetTokens => Set<PasswordResetToken>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

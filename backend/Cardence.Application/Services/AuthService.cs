@@ -23,10 +23,13 @@ public sealed class AuthService : IAuthService
     private readonly ISavedCardRepository _savedCardRepository;
     private readonly IJwtTokenService _jwtTokenService;
     private readonly IAuthTokenStore _authTokenStore;
+    private readonly IPasswordResetTokenRepository _passwordResetTokenRepository;
+    private readonly IEmailSender _emailSender;
     private readonly IPasswordHasher _passwordHasher;
     private readonly IProfilePhotoStorage _profilePhotoStorage;
     private readonly JwtOptions _jwtOptions;
     private readonly LinkedInAuthOptions _linkedInAuthOptions;
+    private readonly PasswordResetOptions _passwordResetOptions;
     private readonly ILogger<AuthService> _logger;
 
     private static readonly HashSet<string> AllowedPhotoContentTypes = new(StringComparer.OrdinalIgnoreCase)
@@ -46,10 +49,13 @@ public sealed class AuthService : IAuthService
         ISavedCardRepository savedCardRepository,
         IJwtTokenService jwtTokenService,
         IAuthTokenStore authTokenStore,
+        IPasswordResetTokenRepository passwordResetTokenRepository,
+        IEmailSender emailSender,
         IPasswordHasher passwordHasher,
         IProfilePhotoStorage profilePhotoStorage,
         IOptions<JwtOptions> jwtOptions,
         IOptions<LinkedInAuthOptions> linkedInAuthOptions,
+        IOptions<PasswordResetOptions> passwordResetOptions,
         ILogger<AuthService> logger)
     {
         _userRepository = userRepository;
@@ -60,10 +66,13 @@ public sealed class AuthService : IAuthService
         _savedCardRepository = savedCardRepository;
         _jwtTokenService = jwtTokenService;
         _authTokenStore = authTokenStore;
+        _passwordResetTokenRepository = passwordResetTokenRepository;
+        _emailSender = emailSender;
         _passwordHasher = passwordHasher;
         _profilePhotoStorage = profilePhotoStorage;
         _jwtOptions = jwtOptions.Value;
         _linkedInAuthOptions = linkedInAuthOptions.Value;
+        _passwordResetOptions = passwordResetOptions.Value;
         _logger = logger;
     }
 
@@ -642,16 +651,15 @@ public sealed class AuthService : IAuthService
         if (!string.IsNullOrWhiteSpace(request.Email))
         {
             var email = request.Email.Trim().ToLowerInvariant();
-            var user = await _userRepository.GetByEmailAsync(email, cancellationToken);
-            if (user is null)
+            if (!IsValidEmail(email))
             {
                 return AuthServiceResponse<object?>.Fail(
-                    AuthErrorCodes.UserNotFound,
-                    "UserNotFound",
-                    "Bu e-posta ile kayıtlı kullanıcı bulunamadı.");
+                    AuthErrorCodes.InvalidRequest,
+                    "InvalidRequest",
+                    "Geçerli bir e-posta adresi girin.");
             }
 
-            return await SendResetOtpInternalAsync(BuildResetEmailOtpKey(email), email, "email", cancellationToken);
+            return await SendPasswordResetEmailInternalAsync(email, cancellationToken);
         }
 
         if (!string.IsNullOrWhiteSpace(request.Phone))
@@ -679,14 +687,6 @@ public sealed class AuthService : IAuthService
         ResetPasswordRequest request,
         CancellationToken cancellationToken = default)
     {
-        if (string.IsNullOrWhiteSpace(request.OtpCode))
-        {
-            return FailSession(
-                AuthErrorCodes.InvalidRequest,
-                "InvalidRequest",
-                "Doğrulama kodu gereklidir.");
-        }
-
         if (string.IsNullOrWhiteSpace(request.NewPassword))
         {
             return FailSession(
@@ -702,6 +702,19 @@ public sealed class AuthService : IAuthService
                 AuthErrorCodes.InvalidRequest,
                 "InvalidRequest",
                 passwordError);
+        }
+
+        if (!string.IsNullOrWhiteSpace(request.ResetToken))
+        {
+            return await ResetPasswordWithTokenAsync(request, cancellationToken);
+        }
+
+        if (string.IsNullOrWhiteSpace(request.OtpCode))
+        {
+            return FailSession(
+                AuthErrorCodes.InvalidRequest,
+                "InvalidRequest",
+                "Doğrulama kodu veya sıfırlama bağlantısı gereklidir.");
         }
 
         User? user;
@@ -748,6 +761,103 @@ public sealed class AuthService : IAuthService
         await _userRepository.UpdateAsync(user, cancellationToken);
 
         return await CreateSessionAsync(user, "Şifre güncellendi.", cancellationToken);
+    }
+
+    private async Task<AuthServiceResponse<object?>> SendPasswordResetEmailInternalAsync(
+        string email,
+        CancellationToken cancellationToken)
+    {
+        const string successMessage =
+            "Eğer bu e-posta sistemde kayıtlıysa şifre sıfırlama bağlantısı gönderildi.";
+
+        var user = await _userRepository.GetByEmailAsync(email, cancellationToken);
+        if (user is null)
+        {
+            _logger.LogInformation(
+                "Password reset requested for unknown email {Email}",
+                email);
+            return AuthServiceResponse<object?>.Ok(null, successMessage);
+        }
+
+        await _passwordResetTokenRepository.InvalidateActiveTokensAsync(user.Id, cancellationToken);
+
+        var rawToken = SecureTokenGenerator.CreateUrlSafeToken();
+        var tokenHash = TokenHashing.HashSha256(rawToken);
+        var now = DateTime.UtcNow;
+
+        await _passwordResetTokenRepository.AddAsync(new PasswordResetToken
+        {
+            Id = Guid.NewGuid(),
+            UserId = user.Id,
+            TokenHash = tokenHash,
+            ExpiresAt = now.AddMinutes(_passwordResetOptions.TokenLifetimeMinutes),
+            CreatedAt = now,
+        }, cancellationToken);
+
+        var resetUrl = BuildPasswordResetUrl(rawToken, email);
+
+        try
+        {
+            await _emailSender.SendPasswordResetEmailAsync(email, resetUrl, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to send password reset email to {Email}", email);
+        }
+
+        return AuthServiceResponse<object?>.Ok(null, successMessage);
+    }
+
+    private async Task<AuthServiceResponse<AuthSessionEntity>> ResetPasswordWithTokenAsync(
+        ResetPasswordRequest request,
+        CancellationToken cancellationToken)
+    {
+        var rawToken = request.ResetToken!.Trim();
+        var tokenHash = TokenHashing.HashSha256(rawToken);
+        var resetToken = await _passwordResetTokenRepository.GetValidByTokenHashAsync(
+            tokenHash,
+            cancellationToken);
+
+        if (resetToken is null)
+        {
+            return FailSession(
+                AuthErrorCodes.InvalidResetToken,
+                "InvalidResetToken",
+                "Şifre sıfırlama bağlantısı geçersiz veya süresi dolmuş.");
+        }
+
+        if (!string.IsNullOrWhiteSpace(request.Email))
+        {
+            var email = request.Email.Trim().ToLowerInvariant();
+            if (resetToken.User.Email is null
+                || !string.Equals(resetToken.User.Email, email, StringComparison.OrdinalIgnoreCase))
+            {
+                return FailSession(
+                    AuthErrorCodes.InvalidResetToken,
+                    "InvalidResetToken",
+                    "Şifre sıfırlama bağlantısı geçersiz veya süresi dolmuş.");
+            }
+        }
+
+        var user = resetToken.User;
+        user.PasswordHash = _passwordHasher.Hash(request.NewPassword!);
+        user.UpdatedAt = DateTime.UtcNow;
+        resetToken.UsedAt = DateTime.UtcNow;
+
+        await _userRepository.UpdateAsync(user, cancellationToken);
+        await _passwordResetTokenRepository.UpdateAsync(resetToken, cancellationToken);
+
+        return await CreateSessionAsync(user, "Şifre güncellendi.", cancellationToken);
+    }
+
+    private string BuildPasswordResetUrl(string rawToken, string email)
+    {
+        var baseUrl = string.IsNullOrWhiteSpace(_passwordResetOptions.ResetBaseUrl)
+            ? "https://cardenceapi.app/auth/reset-password"
+            : _passwordResetOptions.ResetBaseUrl.Trim().TrimEnd('/');
+
+        var separator = baseUrl.Contains('?', StringComparison.Ordinal) ? '&' : '?';
+        return $"{baseUrl}{separator}token={Uri.EscapeDataString(rawToken)}&email={Uri.EscapeDataString(email)}";
     }
 
     public async Task<AuthServiceResponse<UserProfileEntity>> CompleteOnboardingAsync(

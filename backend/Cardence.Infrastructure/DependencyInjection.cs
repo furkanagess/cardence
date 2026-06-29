@@ -1,6 +1,7 @@
 using Cardence.Application.Interfaces;
 using Cardence.Application.Options;
 using Cardence.Infrastructure.Auth;
+using Cardence.Infrastructure.Email;
 using Cardence.Infrastructure.Health;
 using Cardence.Infrastructure.Persistence;
 using Cardence.Infrastructure.Repositories;
@@ -24,6 +25,8 @@ public static class DependencyInjection
         services.Configure<MonitoringOptions>(configuration.GetSection(MonitoringOptions.SectionName));
         services.Configure<LinkedInAuthOptions>(configuration.GetSection(LinkedInAuthOptions.SectionName));
         services.Configure<RevenueCatOptions>(configuration.GetSection(RevenueCatOptions.SectionName));
+        services.Configure<EmailOptions>(configuration.GetSection(EmailOptions.SectionName));
+        services.Configure<PasswordResetOptions>(configuration.GetSection(PasswordResetOptions.SectionName));
 
         services.AddHttpClient<ILinkedInAuthService, LinkedInAuthService>();
 
@@ -61,6 +64,10 @@ public static class DependencyInjection
         services.AddScoped<IWalletEntitlementRepository, WalletEntitlementRepository>();
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IUserAuthProviderRepository, UserAuthProviderRepository>();
+        services.AddScoped<IPasswordResetTokenRepository, PasswordResetTokenRepository>();
+        services.AddScoped<SmtpEmailSender>();
+        services.AddScoped<LoggingEmailSender>();
+        services.AddScoped<IEmailSender, EmailSenderRouter>();
         services.AddScoped<ISupportRequestRepository, SupportRequestRepository>();
         services.AddScoped<IEventGroupRepository, EventGroupRepository>();
         services.AddScoped<ISubscriptionEventRepository, SubscriptionEventRepository>();
