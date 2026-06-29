@@ -21,10 +21,22 @@ public sealed class EmailSenderRouter : IEmailSender
         string resetUrl,
         CancellationToken cancellationToken = default)
     {
-        IEmailSender sender = _options.IsConfigured
-            ? _serviceProvider.GetRequiredService<SmtpEmailSender>()
-            : _serviceProvider.GetRequiredService<LoggingEmailSender>();
-
+        IEmailSender sender = ResolveSender();
         return sender.SendPasswordResetEmailAsync(toEmail, resetUrl, cancellationToken);
+    }
+
+    private IEmailSender ResolveSender()
+    {
+        if (!_options.IsConfigured)
+        {
+            return _serviceProvider.GetRequiredService<LoggingEmailSender>();
+        }
+
+        // Bulut sağlayıcılar giden SMTP portlarını engellediği için SendGrid'de
+        // HTTPS (443) tabanlı Web API tercih edilir; diğer hostlarda klasik SMTP.
+        var usesSendGrid = _options.SmtpHost.Contains("sendgrid", StringComparison.OrdinalIgnoreCase);
+        return usesSendGrid
+            ? _serviceProvider.GetRequiredService<SendGridApiEmailSender>()
+            : _serviceProvider.GetRequiredService<SmtpEmailSender>();
     }
 }

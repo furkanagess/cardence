@@ -33,6 +33,7 @@ public sealed class SmtpEmailSender : IEmailSender
         {
             EnableSsl = _options.UseSsl,
             DeliveryMethod = SmtpDeliveryMethod.Network,
+            Timeout = 20000,
             Credentials = new NetworkCredential(
                 _options.SmtpUsername,
                 _options.SmtpPassword),

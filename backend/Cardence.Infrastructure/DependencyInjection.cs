@@ -67,6 +67,10 @@ public static class DependencyInjection
         services.AddScoped<IPasswordResetTokenRepository, PasswordResetTokenRepository>();
         services.AddScoped<SmtpEmailSender>();
         services.AddScoped<LoggingEmailSender>();
+        services.AddHttpClient<SendGridApiEmailSender>(client =>
+        {
+            client.Timeout = TimeSpan.FromSeconds(20);
+        });
         services.AddScoped<IEmailSender, EmailSenderRouter>();
         services.AddScoped<ISupportRequestRepository, SupportRequestRepository>();
         services.AddScoped<IEventGroupRepository, EventGroupRepository>();
