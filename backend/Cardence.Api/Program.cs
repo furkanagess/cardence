@@ -375,7 +375,7 @@ app.MapHealthChecks("/health/ready", new HealthCheckOptions
 {
     Predicate = check => check.Tags.Contains("ready"),
     ResponseWriter = HealthCheckResponseWriter.WriteReadyResponse,
-});
+}).AllowAnonymous();
 
 app.Run();
 
