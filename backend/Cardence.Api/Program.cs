@@ -286,38 +286,39 @@ app.UseSerilogRequestLogging();
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.UseCors("Cardence");
 
-if (app.Environment.IsDevelopment())
+// Swagger her ortamda açıktır ve auth middleware'inden ÖNCE çalışır; böylece
+// arayüz token olmadan görüntülenebilir. API endpoint'leri ise global
+// FallbackPolicy nedeniyle yetki ister; kullanıcı Swagger'daki "Authorize"
+// (Bearer token) bölümünden auth sağlayarak çağrı yapar.
+app.UseSwagger(options =>
 {
-    app.UseSwagger(options =>
+    options.PreSerializeFilters.Add((swaggerDoc, _) =>
     {
-        options.PreSerializeFilters.Add((swaggerDoc, _) =>
-        {
-            swaggerDoc.Servers =
-            [
-                new OpenApiServer
-                {
-                    Url = publicBaseUrl,
-                    Description = "Cardence API",
-                },
-            ];
-        });
+        swaggerDoc.Servers =
+        [
+            new OpenApiServer
+            {
+                Url = publicBaseUrl,
+                Description = "Cardence API",
+            },
+        ];
     });
-    app.UseSwaggerUI(options =>
-    {
-        options.SwaggerEndpoint("/swagger/v1/swagger.json", "Cardence API v1");
-        options.RoutePrefix = "swagger";
-        options.DocumentTitle = $"Cardence API — {publicBaseUrl}";
-    });
-}
+});
+app.UseSwaggerUI(options =>
+{
+    options.SwaggerEndpoint("/swagger/v1/swagger.json", "Cardence API v1");
+    options.RoutePrefix = "swagger";
+    options.DocumentTitle = $"Cardence API — {publicBaseUrl}";
+});
+
+// Kök adres doğrudan Swagger arayüzüne yönlenir.
+app.MapGet("/", () => Results.Redirect("/swagger")).AllowAnonymous();
 
 app.Lifetime.ApplicationStarted.Register(() =>
 {
     var logger = app.Services.GetRequiredService<ILoggerFactory>().CreateLogger("Cardence.Api");
     logger.LogInformation("Public API base URL: {PublicBaseUrl}", publicBaseUrl);
-    if (app.Environment.IsDevelopment())
-    {
-        logger.LogInformation("Swagger UI: {SwaggerUrl}/swagger", publicBaseUrl);
-    }
+    logger.LogInformation("Swagger UI: {SwaggerUrl}/swagger", publicBaseUrl);
 
     var emailOptions = app.Configuration
         .GetSection(EmailOptions.SectionName)
