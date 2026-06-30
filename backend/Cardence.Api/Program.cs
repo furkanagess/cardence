@@ -1,6 +1,7 @@
 using System.Text;
 using Cardence.Api.Health;
 using Cardence.Api.Middleware;
+using Cardence.Api.Swagger;
 using Cardence.Application;
 using Cardence.Application.Common;
 using Cardence.Application.Options;
@@ -173,7 +174,9 @@ builder.Services.AddSwaggerGen(options =>
 
     options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
-        Description = "JWT Authorization header. Example: \"Bearer {token}\"",
+        Description =
+            "JWT Bearer token. Önce LoginWithEmail / Register ile token alın, " +
+            "sonra yalnızca token değerini (Bearer öneki olmadan) girin.",
         Name = "Authorization",
         In = ParameterLocation.Header,
         Type = SecuritySchemeType.Http,
@@ -181,20 +184,8 @@ builder.Services.AddSwaggerGen(options =>
         BearerFormat = "JWT",
     });
 
-    options.AddSecurityRequirement(new OpenApiSecurityRequirement
-    {
-        {
-            new OpenApiSecurityScheme
-            {
-                Reference = new OpenApiReference
-                {
-                    Type = ReferenceType.SecurityScheme,
-                    Id = "Bearer",
-                },
-            },
-            Array.Empty<string>()
-        },
-    });
+    // Global requirement yerine BearerAuthOperationFilter endpoint bazında uygular.
+    options.OperationFilter<BearerAuthOperationFilter>();
 
     options.TagActionsBy(api =>
     {
