@@ -1,12 +1,14 @@
 using Cardence.Application.Common;
 using Cardence.Application.Interfaces;
 using Cardence.Application.Options;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 
 namespace Cardence.Api.Controllers;
 
 [ApiController]
+[Authorize]
 [Route("")]
 [Tags("Health")]
 public sealed class HealthController : ControllerBase

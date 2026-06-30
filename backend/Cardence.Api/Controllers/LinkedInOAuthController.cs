@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebUtilities;
 
@@ -8,6 +9,7 @@ namespace Cardence.Api.Controllers;
 /// tarayıcıda açılırsa kısa bir onay sayfası gösterilir.
 /// </summary>
 [ApiController]
+[AllowAnonymous]
 [Route("auth/linkedin")]
 [Tags("Authentication")]
 public sealed class LinkedInOAuthController : ControllerBase

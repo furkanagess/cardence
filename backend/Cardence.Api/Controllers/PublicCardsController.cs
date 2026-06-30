@@ -1,10 +1,12 @@
 using Cardence.Application.Common;
 using Cardence.Application.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Cardence.Api.Controllers;
 
 [ApiController]
+[Authorize]
 [Route("")]
 [Tags("PublicCards")]
 public sealed class PublicCardsController : ControllerBase

@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Cardence.Api.Controllers;
@@ -7,6 +8,7 @@ namespace Cardence.Api.Controllers;
 /// Mobil uygulama deep link desteklemiyorsa kullanici buradan yeni sifre belirler.
 /// </summary>
 [ApiController]
+[AllowAnonymous]
 [Route("auth/reset-password")]
 [Tags("Authentication")]
 public sealed class PasswordResetController : ControllerBase

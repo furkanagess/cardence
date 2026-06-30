@@ -21,6 +21,7 @@ public sealed class AuthenticationController : ControllerBase
         _currentUserService = currentUserService;
     }
 
+    [AllowAnonymous]
     [HttpPost("Authentication")]
     [ProducesResponseType(typeof(AuthServiceResponse<AuthSessionEntity>), StatusCodes.Status200OK)]
     public async Task<ActionResult<AuthServiceResponse<AuthSessionEntity>>> Authentication(
@@ -31,6 +32,7 @@ public sealed class AuthenticationController : ControllerBase
         return Ok(response);
     }
 
+    [AllowAnonymous]
     [HttpPost("LoginWithPhone")]
     [ProducesResponseType(typeof(AuthServiceResponse<AuthSessionEntity>), StatusCodes.Status200OK)]
     public async Task<ActionResult<AuthServiceResponse<AuthSessionEntity>>> LoginWithPhone(
@@ -41,6 +43,7 @@ public sealed class AuthenticationController : ControllerBase
         return Ok(response);
     }
 
+    [AllowAnonymous]
     [HttpPost("LoginWithEmail")]
     [ProducesResponseType(typeof(AuthServiceResponse<AuthSessionEntity>), StatusCodes.Status200OK)]
     public async Task<ActionResult<AuthServiceResponse<AuthSessionEntity>>> LoginWithEmail(
@@ -51,6 +54,7 @@ public sealed class AuthenticationController : ControllerBase
         return Ok(response);
     }
 
+    [AllowAnonymous]
     [HttpPost("LoginWithLinkedIn")]
     [ProducesResponseType(typeof(AuthServiceResponse<AuthSessionEntity>), StatusCodes.Status200OK)]
     public async Task<ActionResult<AuthServiceResponse<AuthSessionEntity>>> LoginWithLinkedIn(
@@ -61,6 +65,7 @@ public sealed class AuthenticationController : ControllerBase
         return Ok(response);
     }
 
+    [AllowAnonymous]
     [HttpPost("SendOTP")]
     [ProducesResponseType(typeof(AuthServiceResponse<object?>), StatusCodes.Status200OK)]
     public async Task<ActionResult<AuthServiceResponse<object?>>> SendOtp(
@@ -71,6 +76,7 @@ public sealed class AuthenticationController : ControllerBase
         return Ok(response);
     }
 
+    [AllowAnonymous]
     [HttpPost("RefreshAuthentication")]
     [ProducesResponseType(typeof(AuthServiceResponse<AuthSessionEntity>), StatusCodes.Status200OK)]
     public async Task<ActionResult<AuthServiceResponse<AuthSessionEntity>>> RefreshAuthentication(
@@ -81,6 +87,7 @@ public sealed class AuthenticationController : ControllerBase
         return Ok(response);
     }
 
+    [AllowAnonymous]
     [HttpPost("Register")]
     [ProducesResponseType(typeof(AuthServiceResponse<AuthSessionEntity>), StatusCodes.Status200OK)]
     public async Task<ActionResult<AuthServiceResponse<AuthSessionEntity>>> Register(
@@ -102,6 +109,7 @@ public sealed class AuthenticationController : ControllerBase
         return Ok(response);
     }
 
+    [AllowAnonymous]
     [HttpPost("ForgotPassword")]
     [ProducesResponseType(typeof(AuthServiceResponse<object?>), StatusCodes.Status200OK)]
     public async Task<ActionResult<AuthServiceResponse<object?>>> ForgotPassword(
@@ -112,6 +120,7 @@ public sealed class AuthenticationController : ControllerBase
         return Ok(response);
     }
 
+    [AllowAnonymous]
     [HttpPost("ResetPassword")]
     [ProducesResponseType(typeof(AuthServiceResponse<AuthSessionEntity>), StatusCodes.Status200OK)]
     public async Task<ActionResult<AuthServiceResponse<AuthSessionEntity>>> ResetPassword(

@@ -2,10 +2,12 @@ using System.Text;
 using Cardence.Api.Health;
 using Cardence.Api.Middleware;
 using Cardence.Application;
+using Cardence.Application.Common;
 using Cardence.Application.Options;
 using Cardence.Infrastructure;
 using Cardence.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.HttpOverrides;
@@ -123,9 +125,35 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions.SigningKey)),
             ClockSkew = TimeSpan.FromMinutes(1),
         };
+
+        // API isteklerinde tarayıcı yönlendirmesi yerine 401 JSON döner.
+        options.Events = new JwtBearerEvents
+        {
+            OnChallenge = async context =>
+            {
+                context.HandleResponse();
+                context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                context.Response.ContentType = "application/json";
+
+                var traceId = context.HttpContext.TraceIdentifier;
+                var payload = ApiResponse<object?>.Fail(
+                    ErrorCodes.Unauthorized,
+                    "Yetkilendirme gerekli.",
+                    traceId: traceId);
+
+                await context.Response.WriteAsJsonAsync(payload);
+            },
+        };
     });
 
-builder.Services.AddAuthorization();
+builder.Services.AddAuthorization(options =>
+{
+    options.FallbackPolicy = new AuthorizationPolicyBuilder()
+        .RequireAuthenticatedUser()
+        .AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme)
+        .Build();
+});
+
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
@@ -258,32 +286,38 @@ app.UseSerilogRequestLogging();
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.UseCors("Cardence");
 
-app.UseSwagger(options =>
+if (app.Environment.IsDevelopment())
 {
-    options.PreSerializeFilters.Add((swaggerDoc, _) =>
+    app.UseSwagger(options =>
     {
-        swaggerDoc.Servers =
-        [
-            new OpenApiServer
-            {
-                Url = publicBaseUrl,
-                Description = "Cardence API",
-            },
-        ];
+        options.PreSerializeFilters.Add((swaggerDoc, _) =>
+        {
+            swaggerDoc.Servers =
+            [
+                new OpenApiServer
+                {
+                    Url = publicBaseUrl,
+                    Description = "Cardence API",
+                },
+            ];
+        });
     });
-});
-app.UseSwaggerUI(options =>
-{
-    options.SwaggerEndpoint("/swagger/v1/swagger.json", "Cardence API v1");
-    options.RoutePrefix = "swagger";
-    options.DocumentTitle = $"Cardence API — {publicBaseUrl}";
-});
+    app.UseSwaggerUI(options =>
+    {
+        options.SwaggerEndpoint("/swagger/v1/swagger.json", "Cardence API v1");
+        options.RoutePrefix = "swagger";
+        options.DocumentTitle = $"Cardence API — {publicBaseUrl}";
+    });
+}
 
 app.Lifetime.ApplicationStarted.Register(() =>
 {
     var logger = app.Services.GetRequiredService<ILoggerFactory>().CreateLogger("Cardence.Api");
     logger.LogInformation("Public API base URL: {PublicBaseUrl}", publicBaseUrl);
-    logger.LogInformation("Swagger UI: {SwaggerUrl}/swagger", publicBaseUrl);
+    if (app.Environment.IsDevelopment())
+    {
+        logger.LogInformation("Swagger UI: {SwaggerUrl}/swagger", publicBaseUrl);
+    }
 
     var emailOptions = app.Configuration
         .GetSection(EmailOptions.SectionName)
@@ -306,6 +340,28 @@ app.Lifetime.ApplicationStarted.Register(() =>
 
 app.UseHttpsRedirection();
 
+app.UseAuthentication();
+app.UseAuthorization();
+
+// /uploads yalnızca kimliği doğrulanmış kullanıcılara açık.
+app.Use(async (context, next) =>
+{
+    if (context.Request.Path.StartsWithSegments("/uploads")
+        && !(context.User.Identity?.IsAuthenticated ?? false))
+    {
+        context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+        context.Response.ContentType = "application/json";
+        await context.Response.WriteAsJsonAsync(
+            ApiResponse<object?>.Fail(
+                ErrorCodes.Unauthorized,
+                "Yetkilendirme gerekli.",
+                traceId: context.TraceIdentifier));
+        return;
+    }
+
+    await next();
+});
+
 var uploadsPath = Path.Combine(app.Environment.ContentRootPath, "uploads");
 Directory.CreateDirectory(uploadsPath);
 app.UseStaticFiles(new StaticFileOptions
@@ -314,8 +370,6 @@ app.UseStaticFiles(new StaticFileOptions
     RequestPath = "/uploads",
 });
 
-app.UseAuthentication();
-app.UseAuthorization();
 app.MapControllers();
 app.MapHealthChecks("/health/ready", new HealthCheckOptions
 {
