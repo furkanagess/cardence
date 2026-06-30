@@ -806,7 +806,26 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get kaytlEPostaAdresinizeSfrlama =>
-      'Kayıtlı e-posta adresinize sıfırlama kodu gönderilir.';
+      'Kayıtlı e-posta adresinize şifre sıfırlama bağlantısı gönderilir.';
+
+  @override
+  String get sifreSifirlamaBaglantisiGonder => 'Sıfırlama bağlantısı gönder';
+
+  @override
+  String get sifreSifirlamaBaglantisiGonderildi =>
+      'Sıfırlama bağlantısı gönderildi';
+
+  @override
+  String get ePostaKutunuzuKontrolEdin =>
+      'E-posta kutunuzu kontrol edin ve gelen bağlantıya tıklayarak yeni şifrenizi belirleyin.';
+
+  @override
+  String get sifreSifirlamaLinkAcildi =>
+      'Yeni şifrenizi aşağıdan belirleyebilirsiniz.';
+
+  @override
+  String get sifreSifirlamaBaglantisiGecersiz =>
+      'Şifre sıfırlama bağlantısı geçersiz veya süresi dolmuş.';
 
   @override
   String get kaytlKartLimitinizDolduPremium =>
@@ -1433,6 +1452,13 @@ class AppLocalizationsTr extends AppLocalizations {
       'Destek talebi gönderilemedi. Lütfen tekrar deneyin.';
 
   @override
+  String get supportInvalidRequest =>
+      'Geçerli bir e-posta ve en az 10 karakterlik bir mesaj girin.';
+
+  @override
+  String get enAz10Karakter => 'En az 10 karakter';
+
+  @override
   String get cardencePaylasBirlikteBaglanti =>
       'Cardence\'i paylaş, birlikte bağlantı kurun';
 
@@ -1744,11 +1770,87 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get eventGroupDetailsStepSubtitle =>
-      'Etkinliğin adını, konumunu ve tarihini girin.';
+      'Etkinliğin adını, konumunu, başlangıç saatini ve isteğe bağlı bitiş saatini girin.';
 
   @override
   String get eventGroupCardsStepSubtitle =>
-      'İsterseniz kart seçmeden de grubu oluşturabilirsiniz.';
+      'Kayıtlı kart seçin veya Card ID ile davet edin. İsterseniz kart seçmeden de etkinliği oluşturabilirsiniz.';
+
+  @override
+  String get eventStartRequired => 'Başlangıç tarihi ve saati seçin.';
+
+  @override
+  String get eventLocationRequired => 'Etkinlik konumu gereklidir.';
+
+  @override
+  String get eventEndRequiresDateAndTime =>
+      'Bitiş için tarih ve saat birlikte seçilmelidir.';
+
+  @override
+  String get eventEndBeforeStart => 'Bitiş zamanı başlangıçtan önce olamaz.';
+
+  @override
+  String get eventStart => 'Başlangıç';
+
+  @override
+  String get eventEndOptional => 'Bitiş (opsiyonel)';
+
+  @override
+  String get eventPickTime => 'Saat seç';
+
+  @override
+  String get eventInviteByCardId => 'Card ID ile davet et';
+
+  @override
+  String get eventActiveSection => 'Devam eden / Yaklaşan';
+
+  @override
+  String get eventEndedSection => 'Biten etkinlikler';
+
+  @override
+  String get eventStatusUpcoming => 'Yaklaşıyor';
+
+  @override
+  String get eventStatusOngoing => 'Devam ediyor';
+
+  @override
+  String get eventStatusEnded => 'Bitti';
+
+  @override
+  String get eventEditTitle => 'Etkinliği düzenle';
+
+  @override
+  String eventGroupUpdatedMessage(String name) {
+    return '\"$name\" güncellendi';
+  }
+
+  @override
+  String get eventInviteCardsTitle => 'Card ID ile kart davet et';
+
+  @override
+  String get eventInviteCardsSubtitle =>
+      'Card ID girerek bu etkinliğe kart ekleyin. Geçersiz ID\'ler raporlanır.';
+
+  @override
+  String get eventSendInvites => 'Davet gönder';
+
+  @override
+  String get eventCardIdHint => 'Örn. 123456';
+
+  @override
+  String eventInvitedCardIdsCount(int count) {
+    return '$count Card ID eklendi';
+  }
+
+  @override
+  String eventCardsInvitedMessage(int count) {
+    return '$count kart davet edildi';
+  }
+
+  @override
+  String eventInvalidCardIdsMessage(int count) {
+    return '$count geçersiz Card ID';
+  }
 
   @override
   String get noCardsSelectedYet => 'Henüz kart seçilmedi';

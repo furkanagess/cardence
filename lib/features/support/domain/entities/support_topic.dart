@@ -7,22 +7,7 @@ enum SupportTopic {
   wallet,
 }
 
-extension SupportTopicLabels on SupportTopic {
-  String get label {
-    switch (this) {
-      case SupportTopic.general:
-        return 'Genel soru';
-      case SupportTopic.bug:
-        return 'Hata bildirimi';
-      case SupportTopic.feature:
-        return 'Özellik önerisi';
-      case SupportTopic.account:
-        return 'Hesap ve giriş';
-      case SupportTopic.wallet:
-        return 'Cüzdan ve abonelik';
-    }
-  }
-
+extension SupportTopicApi on SupportTopic {
   String get apiValue {
     switch (this) {
       case SupportTopic.general:

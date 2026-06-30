@@ -1,3 +1,4 @@
+import '../../../../core/l10n/app_error_keys.dart';
 import '../../../../core/network/api_response_parser.dart';
 import '../../../../core/network/auth_api_exception.dart';
 import '../../../../core/network/dio_api_client.dart';
@@ -19,7 +20,7 @@ class SupportRemoteDataSourceImpl implements SupportRemoteDataSource {
   SupportRequestResultModel _parseResult(Map<String, dynamic> json) {
     final data = ApiResponseParser.readMap(json['data'] ?? json['Data']);
     if (data == null) {
-      throw AuthApiException('Destek talebi gönderilemedi.');
+      throw AuthApiException(AppErrorKeys.supportRequestFailed);
     }
     return SupportRequestResultModel.fromJson(data);
   }
@@ -33,7 +34,7 @@ class SupportRemoteDataSourceImpl implements SupportRemoteDataSource {
       '/SubmitSupportRequest',
       body: body,
       accessToken: accessToken,
-      fallbackError: 'Destek talebi gönderilemedi.',
+      fallbackError: AppErrorKeys.supportRequestFailed,
     );
     return _parseResult(json);
   }

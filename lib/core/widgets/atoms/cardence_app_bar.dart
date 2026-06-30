@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'custom_button.dart';
+
 /// AppBar başlık ve ikon hiyerarşisi.
 ///
 /// - [root]: Ana kabuk sekmeleri — ortalanmış başlık, geri yok.
@@ -82,15 +84,10 @@ class CardenceAppBar extends StatelessWidget implements PreferredSizeWidget {
     VoidCallback? onPressed,
     bool loading = false,
   }) {
-    return TextButton(
-      onPressed: loading ? null : onPressed,
-      child: loading
-          ? const SizedBox(
-              width: 20,
-              height: 20,
-              child: CircularProgressIndicator(strokeWidth: 2),
-            )
-          : Text(label),
+    return CustomButton.text(
+      label: label,
+      onPressed: onPressed,
+      isLoading: loading,
     );
   }
 
@@ -129,10 +126,10 @@ class CardenceAppBar extends StatelessWidget implements PreferredSizeWidget {
     required String label,
     required VoidCallback onPressed,
   }) {
-    return TextButton(
+    return CustomButton.text(
+      label: label,
       onPressed: onPressed,
       style: _flowButtonStyle(context),
-      child: Text(label),
     );
   }
 

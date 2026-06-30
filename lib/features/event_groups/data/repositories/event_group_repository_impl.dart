@@ -2,6 +2,7 @@ import '../../../../core/auth/auth_token_provider.dart';
 import '../../../../core/network/auth_api_exception.dart';
 import '../../domain/entities/event_group.dart';
 import '../../domain/entities/event_group_create_input.dart';
+import '../../domain/entities/event_group_update_input.dart';
 import '../../domain/repositories/event_group_repository.dart';
 import '../datasources/event_group_local_datasource.dart';
 import '../datasources/event_group_remote_datasource.dart';
@@ -53,7 +54,9 @@ class EventGroupRepositoryImpl implements EventGroupRepository {
     var created = await _remote.createEventGroup(
       name: input.name,
       location: input.location,
-      eventDate: input.eventDate,
+      startAt: input.startAt,
+      endAt: input.endAt,
+      invitedCardIds: input.invitedCardIds,
       accessToken: token,
     );
 
@@ -70,6 +73,69 @@ class EventGroupRepositoryImpl implements EventGroupRepository {
     final updated = [...localGroups, created];
     await _cacheGroups(updated);
     return created.toEntity();
+  }
+
+  Future<EventGroupModel> _upsertLocalGroup(EventGroupModel updated) async {
+    final localGroups = await _local.getEventGroups();
+    final index = localGroups.indexWhere((group) => group.id == updated.id);
+    final next = [...localGroups];
+    if (index >= 0) {
+      next[index] = updated;
+    } else {
+      next.add(updated);
+    }
+    await _cacheGroups(next);
+    return updated;
+  }
+
+  @override
+  Future<EventGroup> updateEventGroup(EventGroupUpdateInput input) async {
+    final token = await _requireAccessToken();
+    var updated = await _remote.updateEventGroup(
+      groupId: input.id,
+      name: input.name,
+      location: input.location,
+      startAt: input.startAt,
+      endAt: input.endAt,
+      clearPhoto: input.clearPhoto,
+      accessToken: token,
+    );
+
+    final photoFilePath = input.photoFilePath?.trim();
+    if (photoFilePath != null && photoFilePath.isNotEmpty) {
+      updated = await _remote.uploadEventGroupPhoto(
+        groupId: updated.id,
+        filePath: photoFilePath,
+        accessToken: token,
+      );
+    }
+
+    await _upsertLocalGroup(updated);
+    return updated.toEntity();
+  }
+
+  @override
+  Future<EventGroup> inviteCardsByCardId({
+    required String groupId,
+    required List<String> cardIds,
+  }) async {
+    if (cardIds.isEmpty) {
+      final groups = await getEventGroups();
+      final existing = groups.firstWhere(
+        (group) => group.id == groupId,
+        orElse: () => throw AuthApiException('Etkinlik grubu bulunamadı.'),
+      );
+      return existing;
+    }
+
+    final token = await _requireAccessToken();
+    final updated = await _remote.inviteCardsByCardId(
+      groupId: groupId,
+      cardIds: cardIds,
+      accessToken: token,
+    );
+    await _upsertLocalGroup(updated);
+    return updated.toEntity();
   }
 
   @override

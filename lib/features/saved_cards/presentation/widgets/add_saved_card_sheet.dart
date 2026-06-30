@@ -93,7 +93,7 @@ class AddSavedCardSheet extends StatelessWidget {
             _MethodTile(
               icon: Icons.edit_note_rounded,
               title: context.l10n.bilgileriElleGir,
-              subtitle: quota.manualEntryMethodSubtitle,
+              subtitle: context.l10n.kartvizitBilgileriniManuelYazn,
               enabled: canAdd && canAddManualSavedCard,
               premiumLocked: !canAddManualSavedCard,
               onTap: canAdd && canAddManualSavedCard
@@ -109,7 +109,7 @@ class AddSavedCardSheet extends StatelessWidget {
             _MethodTile(
               icon: Icons.photo_camera_outlined,
               title: context.l10n.kartvizitFotorafla,
-              subtitle: quota.photoScanMethodSubtitle,
+              subtitle: context.l10n.kamerayKullanarakBilgileriTara,
               enabled: canAdd && canAddManualSavedCard,
               premiumLocked: !canAddManualSavedCard,
               onTap: canAdd && canAddManualSavedCard

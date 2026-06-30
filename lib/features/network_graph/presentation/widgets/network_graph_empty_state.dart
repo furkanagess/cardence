@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/l10n/l10n_extensions.dart';
+import '../../../../core/widgets/atoms/custom_button.dart';
 
 class NetworkGraphEmptyState extends StatelessWidget {
   const NetworkGraphEmptyState({
@@ -44,10 +45,11 @@ class NetworkGraphEmptyState extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 20),
-            FilledButton.tonalIcon(
+            CustomButton.tonal(
+              label: context.l10n.refresh,
+              icon: Icons.refresh_rounded,
               onPressed: onRefresh,
-              icon: const Icon(Icons.refresh_rounded),
-              label: Text(context.l10n.refresh),
+              fullWidth: false,
             ),
           ],
         ),

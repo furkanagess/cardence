@@ -33,7 +33,8 @@ abstract class AuthRemoteDataSource {
   Future<AuthSessionModel> resetPassword({
     String? email,
     String? phone,
-    required String otpCode,
+    String? otpCode,
+    String? resetToken,
     required String newPassword,
   });
 
@@ -182,15 +183,19 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   Future<AuthSessionModel> resetPassword({
     String? email,
     String? phone,
-    required String otpCode,
+    String? otpCode,
+    String? resetToken,
     required String newPassword,
   }) async {
     final body = <String, dynamic>{
-      'otpCode': otpCode,
       'newPassword': newPassword,
     };
     if (email != null && email.isNotEmpty) body['email'] = email;
     if (phone != null && phone.isNotEmpty) body['phone'] = phone;
+    if (otpCode != null && otpCode.isNotEmpty) body['otpCode'] = otpCode;
+    if (resetToken != null && resetToken.isNotEmpty) {
+      body['resetToken'] = resetToken;
+    }
     final json = await _client.post(
       '/ResetPassword',
       body: body,

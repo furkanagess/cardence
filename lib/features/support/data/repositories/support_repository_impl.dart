@@ -1,3 +1,4 @@
+import '../../../../core/l10n/app_error_keys.dart';
 import '../../../../core/auth/auth_token_provider.dart';
 import '../../../../core/network/auth_api_exception.dart';
 import '../../domain/entities/support_request.dart';
@@ -21,9 +22,7 @@ class SupportRepositoryImpl implements SupportRepository {
   @override
   Future<SupportRequestResult> submit(SupportRequest request) async {
     if (!request.isValid) {
-      throw AuthApiException(
-        'Geçerli bir e-posta ve en az 10 karakterlik bir mesaj girin.',
-      );
+      throw AuthApiException(AppErrorKeys.supportInvalidRequest);
     }
 
     final token = await _requireAccessToken();

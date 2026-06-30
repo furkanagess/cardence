@@ -660,8 +660,17 @@ class _InfoRow extends StatelessWidget {
                           ),
                         ),
                         if (onEditTap != null)
-                          TextButton(
+                          CustomButton.text(
+                            label: context.l10n.duzenle,
                             onPressed: onEditTap,
+                            height: 28,
+                            labelStyle: (compact
+                                    ? textTheme.labelSmall
+                                    : textTheme.labelMedium)
+                                ?.copyWith(
+                              color: onSurfaceVariant,
+                              fontWeight: FontWeight.w600,
+                            ),
                             style: TextButton.styleFrom(
                               visualDensity: VisualDensity.compact,
                               padding: const EdgeInsets.symmetric(
@@ -669,16 +678,6 @@ class _InfoRow extends StatelessWidget {
                                 vertical: 2,
                               ),
                               minimumSize: const Size(0, 28),
-                            ),
-                            child: Text(
-                              context.l10n.duzenle,
-                              style: (compact
-                                      ? textTheme.labelSmall
-                                      : textTheme.labelMedium)
-                                  ?.copyWith(
-                                color: onSurfaceVariant,
-                                fontWeight: FontWeight.w600,
-                              ),
                             ),
                           ),
                       ],
@@ -1001,6 +1000,39 @@ class _CompactBusinessCardFace extends StatelessWidget {
     final skills = _skillsText?.trim();
     final hasSkills = skills != null && skills.isNotEmpty;
 
+    if (!hasAbout && !hasSkills) {
+      return _buildEmptyState(context);
+    }
+
+    if (!hasAbout && hasSkills) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            context.l10n.yetenekler,
+            style: textTheme.titleSmall?.copyWith(
+              fontWeight: FontWeight.w800,
+              color: onSurface,
+              letterSpacing: 0.2,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Expanded(
+            child: Text(
+              skills,
+              style: textTheme.bodySmall?.copyWith(
+                color: onSurface,
+                fontWeight: FontWeight.w500,
+                height: 1.35,
+              ),
+              maxLines: 14,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
+      );
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -1016,9 +1048,9 @@ class _CompactBusinessCardFace extends StatelessWidget {
         Expanded(
           flex: hasSkills ? 3 : 1,
           child: Text(
-            hasAbout ? about : 'Hakkımda bilginizi ekleyebilirsiniz.',
+            about!,
             style: textTheme.bodySmall?.copyWith(
-              color: hasAbout ? onSurface : onSurfaceVariant,
+              color: onSurface,
               fontWeight: FontWeight.w500,
               height: 1.4,
             ),
@@ -1372,19 +1404,18 @@ class _CompactBusinessCardFace extends StatelessWidget {
               ),
             ),
             if (onNoteEditTap != null)
-              TextButton(
+              CustomButton.text(
+                label: context.l10n.dzenle,
                 onPressed: onNoteEditTap,
+                height: 28,
+                labelStyle: textTheme.labelSmall?.copyWith(
+                  color: onSurfaceVariant,
+                  fontWeight: FontWeight.w600,
+                ),
                 style: TextButton.styleFrom(
                   visualDensity: VisualDensity.compact,
                   padding: const EdgeInsets.symmetric(horizontal: 8),
                   minimumSize: const Size(0, 28),
-                ),
-                child: Text(
-                  context.l10n.dzenle,
-                  style: textTheme.labelSmall?.copyWith(
-                    color: onSurfaceVariant,
-                    fontWeight: FontWeight.w600,
-                  ),
                 ),
               ),
           ],

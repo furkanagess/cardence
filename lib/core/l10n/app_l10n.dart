@@ -48,6 +48,9 @@ abstract final class AppL10n {
   static String noCardsInGroup(AppLocalizations l10n) => l10n.noCardsInGroup;
   static String eventGroupCreatedMessage(AppLocalizations l10n, String name) => l10n.eventGroupCreatedMessage(name);
   static String eventGroupCreatedWithCardsMessage(AppLocalizations l10n, String name, int count) => l10n.eventGroupCreatedWithCardsMessage(name, count);
+  static String eventGroupUpdatedMessage(AppLocalizations l10n, String name) => l10n.eventGroupUpdatedMessage(name);
+  static String eventCardsInvitedMessage(AppLocalizations l10n, int count) => l10n.eventCardsInvitedMessage(count);
+  static String eventInvalidCardIdsMessage(AppLocalizations l10n, int count) => l10n.eventInvalidCardIdsMessage(count);
   static String henzEtkinlikGrubuYok(AppLocalizations l10n) => l10n.henzEtkinlikGrubuYok;
   static String saAlttakiIleYeniEtkinlik(AppLocalizations l10n) => l10n.saAlttakiIleYeniEtkinlik;
   static String grubaEklenecekKaytlKartKalmad(AppLocalizations l10n) => l10n.grubaEklenecekKaytlKartKalmad;

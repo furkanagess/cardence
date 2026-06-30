@@ -15,12 +15,14 @@ class EventGroupInfoBanner extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final dateText = EventGroupMetaFormatter.formatDate(group.eventDate);
+    final dateText = EventGroupMetaFormatter.formatRange(
+      group.startAt,
+      group.endAt,
+    );
     final location = group.location?.trim();
     final hasPhoto = group.photoUrl?.trim().isNotEmpty == true;
     final hasMeta =
-        (dateText != null && dateText.isNotEmpty) ||
-        (location != null && location.isNotEmpty);
+        dateText.isNotEmpty || (location != null && location.isNotEmpty);
 
     if (!hasPhoto && !hasMeta) {
       return const SizedBox.shrink();
@@ -65,7 +67,7 @@ class EventGroupInfoBanner extends StatelessWidget {
                 ),
                 if (hasMeta) const SizedBox(height: 14),
               ],
-              if (dateText != null && dateText.isNotEmpty)
+              if (dateText.isNotEmpty)
                 _InfoRow(
                   icon: Icons.calendar_month_outlined,
                   label: context.l10n.tarih,
@@ -73,8 +75,7 @@ class EventGroupInfoBanner extends StatelessWidget {
                   textTheme: textTheme,
                   colorScheme: colorScheme,
                 ),
-              if (dateText != null &&
-                  dateText.isNotEmpty &&
+              if (dateText.isNotEmpty &&
                   location != null &&
                   location.isNotEmpty)
                 const SizedBox(height: 10),

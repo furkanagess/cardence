@@ -249,7 +249,12 @@
   "kaydedilmemiDeiiklikler": "Unsaved changes",
   "kaydet": "Save",
   "kaytOl": "Sign up",
-  "kaytlEPostaAdresinizeSfrlama": "A reset code will be sent to your registered email address.",
+  "kaytlEPostaAdresinizeSfrlama": "A password reset link will be sent to your registered email address.",
+  "sifreSifirlamaBaglantisiGonder": "Send reset link",
+  "sifreSifirlamaBaglantisiGonderildi": "Reset link sent",
+  "ePostaKutunuzuKontrolEdin": "Check your inbox and tap the link to set your new password.",
+  "sifreSifirlamaLinkAcildi": "Set your new password below.",
+  "sifreSifirlamaBaglantisiGecersiz": "The password reset link is invalid or has expired.",
   "kaytlKartLimitinizDolduPremium": "Your saved card limit is reached. With Premium, you can store unlimited cards and continue adding manually or via scanning.",
   "kaytlKartlar": "Saved cards",
   "kaytlKartlarAlnamad": "Could not retrieve saved cards.",
@@ -448,6 +453,8 @@
   "invalidCardResponse": "Invalid card response.",
   "connectionError": "Connection error. Please try again.",
   "supportRequestFailedRetry": "Could not send support request. Please try again.",
+  "supportInvalidRequest": "Enter a valid email and a message of at least 10 characters.",
+  "enAz10Karakter": "At least 10 characters",
   "cardencePaylasBirlikteBaglanti": "Share Cardence and connect together",
   "balang": "Getting started",
   "kimlik": "Identity",
@@ -599,8 +606,58 @@
   "eventFilterFallback": "Event",
   "eventGroupNameRequired": "Event name cannot be empty",
   "eventGroupNameDuplicate": "An event group with this name already exists",
-  "eventGroupDetailsStepSubtitle": "Enter the event name, location, and date.",
-  "eventGroupCardsStepSubtitle": "You can create the group without selecting cards.",
+  "eventGroupDetailsStepSubtitle": "Enter the event name, location, start time, and optional end time.",
+  "eventGroupCardsStepSubtitle": "Select saved cards or invite by Card ID. You can create the event without cards.",
+  "eventStartRequired": "Select a start date and time.",
+  "eventLocationRequired": "Event location is required.",
+  "eventEndRequiresDateAndTime": "Select both date and time for the end.",
+  "eventEndBeforeStart": "End time cannot be before the start time.",
+  "eventStart": "Start",
+  "eventEndOptional": "End (optional)",
+  "eventPickTime": "Select time",
+  "eventInviteByCardId": "Invite by Card ID",
+  "eventActiveSection": "Ongoing / Upcoming",
+  "eventEndedSection": "Ended events",
+  "eventStatusUpcoming": "Upcoming",
+  "eventStatusOngoing": "Ongoing",
+  "eventStatusEnded": "Ended",
+  "eventEditTitle": "Edit event",
+  "eventGroupUpdatedMessage": "\"{name}\" updated",
+  "@eventGroupUpdatedMessage": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "eventInviteCardsTitle": "Invite cards by Card ID",
+  "eventInviteCardsSubtitle": "Add cards to this event by entering Card IDs. Invalid IDs are reported.",
+  "eventSendInvites": "Send invites",
+  "eventCardIdHint": "e.g. 123456",
+  "eventInvitedCardIdsCount": "{count} Card IDs added",
+  "@eventInvitedCardIdsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "eventCardsInvitedMessage": "{count} cards invited",
+  "@eventCardsInvitedMessage": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "eventInvalidCardIdsMessage": "{count} invalid Card IDs",
+  "@eventInvalidCardIdsMessage": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "noCardsSelectedYet": "No cards selected yet",
   "cardsSelectedCount": "{count} cards selected",
   "@cardsSelectedCount": {

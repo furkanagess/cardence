@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
+import 'profile_photo_normalizer.dart';
 import '../permissions/media_permission_datasource.dart';
 import '../widgets/molecules/profile_photo_source_sheet.dart';
 
@@ -24,6 +25,8 @@ class ProfilePhotoImagePicker {
   Future<String?> pickImagePath(
     BuildContext context, {
     ProfilePhotoPickErrorHandler? onError,
+    bool correctFrontCameraMirror = true,
+    CameraDevice preferredCamera = CameraDevice.front,
   }) async {
     final source = await showProfilePhotoSourceSheet(context);
     if (source == null) return null;
@@ -58,9 +61,16 @@ class ProfilePhotoImagePicker {
         maxWidth: 1024,
         maxHeight: 1024,
         imageQuality: 85,
-        preferredCameraDevice: CameraDevice.front,
+        preferredCameraDevice: preferredCamera,
       );
-      return image?.path;
+      if (image == null) return null;
+
+      if (source == ImageSource.camera &&
+          correctFrontCameraMirror &&
+          preferredCamera == CameraDevice.front) {
+        return ProfilePhotoNormalizer.normalizeCameraCapture(image.path);
+      }
+      return image.path;
     } catch (_) {
       onError?.call('Fotoğraf seçilemedi. İzinleri kontrol edip tekrar deneyin.');
       return null;

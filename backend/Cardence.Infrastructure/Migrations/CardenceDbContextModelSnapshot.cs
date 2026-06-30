@@ -274,6 +274,10 @@ namespace Cardence.Infrastructure.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
+                    b.Property<DateTime?>("EndAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("end_at_utc");
+
                     b.Property<DateTime?>("EventDate")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("event_date");
@@ -294,6 +298,15 @@ namespace Cardence.Infrastructure.Migrations
                         .HasColumnType("character varying(2048)")
                         .HasColumnName("photo_url");
 
+                    b.Property<DateTime>("StartAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("start_at_utc");
+
+                    b.Property<string>("Timezone")
+                        .HasMaxLength(80)
+                        .HasColumnType("character varying(80)")
+                        .HasColumnName("timezone");
+
                     b.Property<Guid>("UserId")
                         .HasColumnType("uuid")
                         .HasColumnName("user_id");
@@ -302,9 +315,13 @@ namespace Cardence.Infrastructure.Migrations
 
                     b.HasIndex("UserId");
 
+                    b.HasIndex("UserId", "EndAtUtc");
+
                     b.HasIndex("UserId", "Name")
                         .IsUnique()
                         .HasDatabaseName("ux_event_groups_user_name");
+
+                    b.HasIndex("UserId", "StartAtUtc");
 
                     b.ToTable("event_groups", (string)null);
                 });

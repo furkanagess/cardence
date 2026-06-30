@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 
@@ -7,17 +10,38 @@ import 'core/network/interceptors/chuck_interceptor_service.dart';
 
 final GlobalKey<NavigatorState> rootNavigatorKey = GlobalKey<NavigatorState>();
 
-void main() async {
+void main() {
+  runZonedGuarded(_bootstrap, (error, stackTrace) {
+    debugPrint('[main] Uncaught zone error: $error');
+    debugPrintStack(stackTrace: stackTrace);
+  });
+}
+
+Future<void> _bootstrap() async {
   final widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
+
+  FlutterError.onError = (details) {
+    FlutterError.presentError(details);
+    debugPrint('[main] FlutterError: ${details.exception}');
+  };
 
   ChuckInterceptorService.instance.ensureInitialized(
     navigatorKey: rootNavigatorKey,
   );
 
-  final result = await AppInit.init();
-  FlutterNativeSplash.remove();
+  try {
+    final result = await AppInit.init();
+    _runApp(result);
+  } catch (error, stackTrace) {
+    debugPrint('[main] AppInit failed: $error');
+    debugPrintStack(stackTrace: stackTrace);
+  } finally {
+    FlutterNativeSplash.remove();
+  }
+}
 
+void _runApp(AppInitResult result) {
   runApp(App(
     rootNavigatorKey: rootNavigatorKey,
     restoreAuthSession: result.restoreAuthSession,
@@ -51,6 +75,8 @@ void main() async {
     requestAppReview: result.requestAppReview,
     getEventGroups: result.getEventGroups,
     createEventGroup: result.createEventGroup,
+    updateEventGroup: result.updateEventGroup,
+    inviteEventGroupCardsByCardId: result.inviteEventGroupCardsByCardId,
     deleteEventGroup: result.deleteEventGroup,
     linkEventGroupCards: result.linkEventGroupCards,
     linkSavedCardsToEventGroup: result.linkSavedCardsToEventGroup,

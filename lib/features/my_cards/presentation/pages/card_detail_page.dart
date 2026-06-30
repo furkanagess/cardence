@@ -187,9 +187,9 @@ class _CardDetailPageState extends State<CardDetailPage> {
           ),
         ),
         actions: [
-          TextButton(
+          CustomButton.text(
+            label: context.l10n.iptal,
             onPressed: () => Navigator.of(context).pop(),
-            child: Text(context.l10n.iptal),
           ),
           CustomButton(
             label: context.l10n.uygula,
@@ -258,9 +258,9 @@ class _CardDetailPageState extends State<CardDetailPage> {
           ),
         ),
         actions: [
-          TextButton(
+          CustomButton.text(
+            label: context.l10n.iptal,
             onPressed: () => Navigator.of(context).pop(),
-            child: Text(context.l10n.iptal),
           ),
           CustomButton(
             label: context.l10n.uygula,
@@ -423,9 +423,9 @@ class _CardDetailPageState extends State<CardDetailPage> {
           ),
         ),
         actions: [
-          TextButton(
+          CustomButton.text(
+            label: context.l10n.kapat,
             onPressed: () => Navigator.of(context).pop(),
-            child: Text(context.l10n.kapat),
           ),
         ],
       ),

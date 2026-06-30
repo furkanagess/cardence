@@ -224,9 +224,9 @@ class _CardViewPageState extends State<CardViewPage> {
           ),
         ),
         actions: [
-          TextButton(
+          CustomButton.text(
+            label: context.l10n.iptal,
             onPressed: () => Navigator.of(context).pop(),
-            child: Text(context.l10n.iptal),
           ),
           CustomButton(
             label: context.l10n.uygula,
@@ -287,7 +287,10 @@ class _CardViewPageState extends State<CardViewPage> {
           ),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.of(ctx).pop(), child: Text(context.l10n.iptal)),
+          CustomButton.text(
+            label: context.l10n.iptal,
+            onPressed: () => Navigator.of(ctx).pop(),
+          ),
           CustomButton(
             label: context.l10n.uygula,
             onPressed: () {

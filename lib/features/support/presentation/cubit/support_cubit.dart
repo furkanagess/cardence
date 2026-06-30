@@ -1,5 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../core/l10n/app_error_keys.dart';
 import '../../../../core/network/auth_api_exception.dart';
 import '../../domain/entities/support_request.dart';
 import '../../domain/entities/support_topic.dart';
@@ -59,7 +60,7 @@ class SupportCubit extends Cubit<SupportState> {
         emit(
           state.copyWith(
             status: SupportStatus.failure,
-            errorMessage: 'Destek talebi gönderilemedi. Lütfen tekrar deneyin.',
+            errorMessage: AppErrorKeys.supportRequestFailedRetry,
           ),
         );
       }

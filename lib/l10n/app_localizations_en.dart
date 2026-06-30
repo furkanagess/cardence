@@ -804,7 +804,24 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get kaytlEPostaAdresinizeSfrlama =>
-      'A reset code will be sent to your registered email address.';
+      'A password reset link will be sent to your registered email address.';
+
+  @override
+  String get sifreSifirlamaBaglantisiGonder => 'Send reset link';
+
+  @override
+  String get sifreSifirlamaBaglantisiGonderildi => 'Reset link sent';
+
+  @override
+  String get ePostaKutunuzuKontrolEdin =>
+      'Check your inbox and tap the link to set your new password.';
+
+  @override
+  String get sifreSifirlamaLinkAcildi => 'Set your new password below.';
+
+  @override
+  String get sifreSifirlamaBaglantisiGecersiz =>
+      'The password reset link is invalid or has expired.';
 
   @override
   String get kaytlKartLimitinizDolduPremium =>
@@ -1430,6 +1447,13 @@ class AppLocalizationsEn extends AppLocalizations {
       'Could not send support request. Please try again.';
 
   @override
+  String get supportInvalidRequest =>
+      'Enter a valid email and a message of at least 10 characters.';
+
+  @override
+  String get enAz10Karakter => 'At least 10 characters';
+
+  @override
   String get cardencePaylasBirlikteBaglanti =>
       'Share Cardence and connect together';
 
@@ -1740,11 +1764,87 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get eventGroupDetailsStepSubtitle =>
-      'Enter the event name, location, and date.';
+      'Enter the event name, location, start time, and optional end time.';
 
   @override
   String get eventGroupCardsStepSubtitle =>
-      'You can create the group without selecting cards.';
+      'Select saved cards or invite by Card ID. You can create the event without cards.';
+
+  @override
+  String get eventStartRequired => 'Select a start date and time.';
+
+  @override
+  String get eventLocationRequired => 'Event location is required.';
+
+  @override
+  String get eventEndRequiresDateAndTime =>
+      'Select both date and time for the end.';
+
+  @override
+  String get eventEndBeforeStart => 'End time cannot be before the start time.';
+
+  @override
+  String get eventStart => 'Start';
+
+  @override
+  String get eventEndOptional => 'End (optional)';
+
+  @override
+  String get eventPickTime => 'Select time';
+
+  @override
+  String get eventInviteByCardId => 'Invite by Card ID';
+
+  @override
+  String get eventActiveSection => 'Ongoing / Upcoming';
+
+  @override
+  String get eventEndedSection => 'Ended events';
+
+  @override
+  String get eventStatusUpcoming => 'Upcoming';
+
+  @override
+  String get eventStatusOngoing => 'Ongoing';
+
+  @override
+  String get eventStatusEnded => 'Ended';
+
+  @override
+  String get eventEditTitle => 'Edit event';
+
+  @override
+  String eventGroupUpdatedMessage(String name) {
+    return '\"$name\" updated';
+  }
+
+  @override
+  String get eventInviteCardsTitle => 'Invite cards by Card ID';
+
+  @override
+  String get eventInviteCardsSubtitle =>
+      'Add cards to this event by entering Card IDs. Invalid IDs are reported.';
+
+  @override
+  String get eventSendInvites => 'Send invites';
+
+  @override
+  String get eventCardIdHint => 'e.g. 123456';
+
+  @override
+  String eventInvitedCardIdsCount(int count) {
+    return '$count Card IDs added';
+  }
+
+  @override
+  String eventCardsInvitedMessage(int count) {
+    return '$count cards invited';
+  }
+
+  @override
+  String eventInvalidCardIdsMessage(int count) {
+    return '$count invalid Card IDs';
+  }
 
   @override
   String get noCardsSelectedYet => 'No cards selected yet';

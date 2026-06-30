@@ -23,7 +23,8 @@ class EventGroupsLoadingShimmer extends StatelessWidget {
         itemBuilder: (context, index) {
           return DecoratedBox(
             decoration: BoxDecoration(
-              color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.45),
+              color:
+                  colorScheme.surfaceContainerHighest.withValues(alpha: 0.45),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
                 color: isDark

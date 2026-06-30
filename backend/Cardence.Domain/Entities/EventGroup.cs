@@ -6,6 +6,9 @@ public sealed class EventGroup
     public Guid UserId { get; set; }
     public string Name { get; set; } = string.Empty;
     public string? Location { get; set; }
+    public DateTime StartAtUtc { get; set; }
+    public DateTime? EndAtUtc { get; set; }
+    public string? Timezone { get; set; }
     public DateTime? EventDate { get; set; }
     public string? PhotoUrl { get; set; }
     public DateTime CreatedAt { get; set; }

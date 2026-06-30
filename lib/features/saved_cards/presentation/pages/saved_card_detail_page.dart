@@ -17,6 +17,8 @@ import '../../../../core/widgets/organisms/flippable_person_card.dart';
 import '../../../event_groups/domain/entities/event_group.dart';
 import '../../../event_groups/domain/usecases/get_event_groups.dart';
 import '../../../event_groups/domain/usecases/delete_event_group.dart';
+import '../../../event_groups/domain/usecases/update_event_group.dart';
+import '../../../event_groups/domain/usecases/invite_event_group_cards_by_card_id.dart';
 import '../../domain/usecases/link_saved_cards_to_event_group.dart';
 import '../../../event_groups/presentation/pages/event_group_detail_page.dart';
 import '../../../event_groups/presentation/widgets/pick_event_groups_for_card_sheet.dart';
@@ -28,7 +30,7 @@ import '../../domain/usecases/save_saved_card.dart';
 import '../../domain/usecases/track_saved_card_contact_click.dart';
 import '../../domain/helpers/saved_card_field_catalog.dart';
 import '../../domain/extensions/saved_card_preview_colors.dart';
-import '../../domain/extensions/saved_card_preview_entries.dart';
+import '../helpers/saved_card_flip_back_entries.dart';
 import '../widgets/saved_card_add_field_sheet.dart';
 
 /// Kaydedilen bir kisinin tam detay ekrani: onizleme, hizli aksiyonlar, tum alanlar.
@@ -39,6 +41,8 @@ class SavedCardDetailPage extends StatefulWidget {
     required this.onSave,
     required this.getEventGroups,
     this.getSavedCards,
+    this.updateEventGroup,
+    this.inviteEventGroupCardsByCardId,
     this.deleteEventGroup,
     this.linkSavedCardsToEventGroup,
     this.saveSavedCard,
@@ -51,6 +55,8 @@ class SavedCardDetailPage extends StatefulWidget {
   final Future<void> Function(SavedCard updated) onSave;
   final GetEventGroups getEventGroups;
   final GetSavedCards? getSavedCards;
+  final UpdateEventGroup? updateEventGroup;
+  final InviteEventGroupCardsByCardId? inviteEventGroupCardsByCardId;
   final DeleteEventGroup? deleteEventGroup;
   final LinkSavedCardsToEventGroup? linkSavedCardsToEventGroup;
   final SaveSavedCard? saveSavedCard;
@@ -95,6 +101,8 @@ class _SavedCardDetailPageState extends State<SavedCardDetailPage> {
 
   bool get _canOpenGroupDetail =>
       widget.getSavedCards != null &&
+      widget.updateEventGroup != null &&
+      widget.inviteEventGroupCardsByCardId != null &&
       widget.deleteEventGroup != null &&
       widget.linkSavedCardsToEventGroup != null &&
       widget.saveSavedCard != null &&
@@ -164,6 +172,9 @@ class _SavedCardDetailPageState extends State<SavedCardDetailPage> {
         builder: (context) => EventGroupDetailPage(
           group: group,
           getEventGroups: widget.getEventGroups,
+          updateEventGroup: widget.updateEventGroup!,
+          inviteEventGroupCardsByCardId:
+              widget.inviteEventGroupCardsByCardId!,
           deleteEventGroup: widget.deleteEventGroup!,
           linkSavedCardsToEventGroup: widget.linkSavedCardsToEventGroup!,
           getSavedCards: widget.getSavedCards!,
@@ -185,9 +196,9 @@ class _SavedCardDetailPageState extends State<SavedCardDetailPage> {
           AppL10n.deleteCardConfirmQuestion(context.l10n, _displayName),
         ),
         actions: [
-          TextButton(
+          CustomButton.text(
+            label: context.l10n.iptal,
             onPressed: () => Navigator.of(context).pop(false),
-            child: Text(context.l10n.iptal),
           ),
           CustomButton(
             label: context.l10n.sil,
@@ -390,7 +401,7 @@ class _SavedCardDetailPageState extends State<SavedCardDetailPage> {
   }
 
   List<({String label, String value})> get _previewBackEntries =>
-      _card.backAboutEntries;
+      savedCardFlipBackEntries(_card, context.l10n);
 
   bool _has(String? value) => value != null && value.trim().isNotEmpty;
 
@@ -615,11 +626,16 @@ class _SavedCardDetailPageState extends State<SavedCardDetailPage> {
       backEntries: _previewBackEntries,
       emptyMessage: context.l10n.kartBilgisiYok,
       cardId: _card.cardId,
+      onBackEmptyActionTap:
+          savedCardShouldOfferFlipBackNote(_card) ? _openNoteEditor : null,
+      backEmptyActionLabel: context.l10n.notEkle,
+      onBackEditTap: _openNoteEditor,
       contactEmail: _card.email,
       contactPhone: _card.phone,
       contactWebsite: _card.website,
       contactLinkedin: _card.linkedin,
       visibleContactFields: _visibleContactFields,
+      showPremiumBadge: _card.isOwnerPremium,
     );
 
     final preview = Center(
@@ -835,14 +851,15 @@ class _DetailSection extends StatelessWidget {
                 ),
               ),
               if (actionLabel != null && onAction != null)
-                TextButton(
+                CustomButton.text(
+                  label: actionLabel!,
                   onPressed: onAction,
+                  height: 0,
                   style: TextButton.styleFrom(
                     padding: const EdgeInsets.symmetric(horizontal: 8),
                     minimumSize: Size.zero,
                     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   ),
-                  child: Text(actionLabel!),
                 ),
             ],
           ),

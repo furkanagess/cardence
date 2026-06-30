@@ -2,12 +2,23 @@ import 'package:flutter/material.dart';
 
 import '../../theme/app_colors.dart';
 
-/// Uygulama genelinde birincil aksiyon butonu.
+/// Uygulama genelinde tek buton atomu.
 ///
-/// Tema [FilledButtonTheme] ile uyumludur; tüm ekranlarda bu widget kullanılmalıdır.
+/// Tüm butonlar bu widget üzerinden kullanılır. Görsel hiyerarşi [variant] ile
+/// belirlenir:
+/// * [CustomButtonVariant.primary] – birincil dolu aksiyon
+/// * [CustomButtonVariant.tonal] – ikincil yumuşak aksiyon
+/// * [CustomButtonVariant.text] – metin / link aksiyonu (örn. İptal)
+/// * [CustomButtonVariant.outlined] – çerçeveli ikincil aksiyon
+///
+/// Metin her zaman ortalanır ve [height] yalnızca **minimum** yükseklik olarak
+/// uygulanır; içerik (büyük yazı tipi ölçeği veya çok satır) gerektirdiğinde
+/// buton büyür, metni asla sıkıştırmaz/kırpmaz.
 enum CustomButtonVariant {
   primary,
   tonal,
+  text,
+  outlined,
 }
 
 class CustomButton extends StatelessWidget {
@@ -40,6 +51,34 @@ class CustomButton extends StatelessWidget {
     this.visualDensity,
   }) : variant = CustomButtonVariant.tonal;
 
+  const CustomButton.text({
+    super.key,
+    required this.label,
+    this.onPressed,
+    this.enabled = true,
+    this.isLoading = false,
+    this.fullWidth = false,
+    this.height = 44,
+    this.icon,
+    this.labelStyle,
+    this.style,
+    this.visualDensity,
+  }) : variant = CustomButtonVariant.text;
+
+  const CustomButton.outlined({
+    super.key,
+    required this.label,
+    this.onPressed,
+    this.enabled = true,
+    this.isLoading = false,
+    this.fullWidth = true,
+    this.height = 48,
+    this.icon,
+    this.labelStyle,
+    this.style,
+    this.visualDensity,
+  }) : variant = CustomButtonVariant.outlined;
+
   final String label;
   final TextStyle? labelStyle;
   final VoidCallback? onPressed;
@@ -54,13 +93,19 @@ class CustomButton extends StatelessWidget {
 
   bool get _isInteractive => enabled && !isLoading && onPressed != null;
 
-  static ButtonStyle _effectiveStyle(
-    ButtonStyle? style, {
-    VisualDensity? visualDensity,
-  }) {
-    return (style ?? const ButtonStyle()).copyWith(
+  /// Sabit yükseklik dayatmaz; [height] minimum yükseklik olur ve metin
+  /// gerektiğinde büyüyebilmesi için dikey büyüme serbest bırakılır.
+  ButtonStyle _effectiveStyle() {
+    final base = (style ?? const ButtonStyle()).copyWith(
       alignment: Alignment.center,
       visualDensity: visualDensity,
+    );
+
+    return base.copyWith(
+      minimumSize: base.minimumSize ??
+          WidgetStateProperty.all(Size(0, height)),
+      maximumSize: base.maximumSize ??
+          WidgetStateProperty.all(const Size.fromWidth(double.infinity)),
     );
   }
 
@@ -70,67 +115,98 @@ class CustomButton extends StatelessWidget {
         textAlign: TextAlign.center,
       );
 
-  @override
-  Widget build(BuildContext context) {
+  Color _loadingColor(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final loadingColor = variant == CustomButtonVariant.primary
-        ? (Theme.of(context).brightness == Brightness.light
-            ? AppColors.textOnPrimary
-            : AppColors.backgroundDark)
-        : colorScheme.primary;
-
-    if (isLoading) {
-      final loadingButton = FilledButton(
-        onPressed: null,
-        style: _effectiveStyle(style),
-        child: SizedBox(
-          width: 22,
-          height: 22,
-          child: CircularProgressIndicator(
-            strokeWidth: 2,
-            color: loadingColor,
-          ),
-        ),
-      );
-      if (!fullWidth) return loadingButton;
-      return SizedBox(width: double.infinity, height: height, child: loadingButton);
+    if (variant == CustomButtonVariant.primary) {
+      return Theme.of(context).brightness == Brightness.light
+          ? AppColors.textOnPrimary
+          : AppColors.backgroundDark;
     }
+    return colorScheme.primary;
+  }
 
-    final Widget button;
+  Widget _buildButton(BuildContext context, Widget child) {
+    final effectiveStyle = _effectiveStyle();
+    final pressHandler = _isInteractive ? onPressed : null;
+    final hasIcon = icon != null && !isLoading;
+
     switch (variant) {
       case CustomButtonVariant.primary:
-        button = icon != null
+        return hasIcon
             ? FilledButton.icon(
-                onPressed: _isInteractive ? onPressed : null,
-                style: _effectiveStyle(style),
+                onPressed: pressHandler,
+                style: effectiveStyle,
                 icon: Icon(icon, size: 18),
-                label: _labelText(),
+                label: child,
               )
             : FilledButton(
-                onPressed: _isInteractive ? onPressed : null,
-                style: _effectiveStyle(style),
-                child: _labelText(),
+                onPressed: pressHandler,
+                style: effectiveStyle,
+                child: child,
               );
       case CustomButtonVariant.tonal:
-        button = icon != null
+        return hasIcon
             ? FilledButton.tonalIcon(
-                onPressed: _isInteractive ? onPressed : null,
-                style: _effectiveStyle(style, visualDensity: visualDensity),
+                onPressed: pressHandler,
+                style: effectiveStyle,
                 icon: Icon(icon, size: 18),
-                label: _labelText(),
+                label: child,
               )
             : FilledButton.tonal(
-                onPressed: _isInteractive ? onPressed : null,
-                style: _effectiveStyle(style, visualDensity: visualDensity),
-                child: _labelText(),
+                onPressed: pressHandler,
+                style: effectiveStyle,
+                child: child,
+              );
+      case CustomButtonVariant.text:
+        return hasIcon
+            ? TextButton.icon(
+                onPressed: pressHandler,
+                style: effectiveStyle,
+                icon: Icon(icon, size: 18),
+                label: child,
+              )
+            : TextButton(
+                onPressed: pressHandler,
+                style: effectiveStyle,
+                child: child,
+              );
+      case CustomButtonVariant.outlined:
+        return hasIcon
+            ? OutlinedButton.icon(
+                onPressed: pressHandler,
+                style: effectiveStyle,
+                icon: Icon(icon, size: 18),
+                label: child,
+              )
+            : OutlinedButton(
+                onPressed: pressHandler,
+                style: effectiveStyle,
+                child: child,
               );
     }
+  }
 
-    if (!fullWidth) return button;
+  @override
+  Widget build(BuildContext context) {
+    final Widget child = isLoading
+        ? SizedBox(
+            width: 22,
+            height: 22,
+            child: CircularProgressIndicator(
+              strokeWidth: 2,
+              color: _loadingColor(context),
+            ),
+          )
+        : _labelText();
 
-    return SizedBox(
-      width: double.infinity,
-      height: height,
+    final button = _buildButton(context, child);
+
+    final constraints = fullWidth
+        ? BoxConstraints(minWidth: double.infinity, minHeight: height)
+        : BoxConstraints(minHeight: height);
+
+    return ConstrainedBox(
+      constraints: constraints,
       child: button,
     );
   }

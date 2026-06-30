@@ -3,25 +3,21 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/l10n/l10n_extensions.dart';
 import '../../../../core/l10n/api_error_localizer.dart';
-
-import '../../../event_groups/domain/entities/event_group.dart';
 import '../../../event_groups/domain/usecases/get_event_groups.dart';
 import '../../../../core/widgets/atoms/cardence_app_bar.dart';
+import '../../../../core/widgets/atoms/custom_button.dart';
 import '../../../../core/widgets/organisms/cardence_scaffold.dart';
-import '../../../../core/l10n/app_l10n.dart';
 import '../../domain/entities/graph_scope.dart';
 import '../../domain/entities/network_graph.dart';
 import '../../domain/usecases/get_network_graph.dart';
 import '../../domain/usecases/get_network_graph_path.dart';
 import '../cubit/network_graph_cubit.dart';
 import '../cubit/network_graph_state.dart';
-import '../widgets/network_graph_canvas.dart';
-import '../widgets/network_graph_edge_list.dart';
+import '../pages/network_graph_stats_page.dart';
+import '../widgets/network_graph_canvas.dart' show NetworkGraphInteractiveArea;
 import '../widgets/network_graph_empty_state.dart';
 import '../widgets/network_graph_legend.dart';
-import '../widgets/network_graph_node_list.dart';
 import '../widgets/network_graph_path_card.dart';
-import '../widgets/network_graph_scope_bar.dart';
 
 class NetworkGraphPage extends StatelessWidget {
   const NetworkGraphPage({
@@ -61,7 +57,7 @@ class NetworkGraphPage extends StatelessWidget {
   }
 }
 
-class NetworkGraphView extends StatefulWidget {
+class NetworkGraphView extends StatelessWidget {
   const NetworkGraphView({
     super.key,
     required this.getEventGroups,
@@ -70,29 +66,6 @@ class NetworkGraphView extends StatefulWidget {
 
   final GetEventGroups getEventGroups;
   final String? initialEventGroupName;
-
-  @override
-  State<NetworkGraphView> createState() => _NetworkGraphViewState();
-}
-
-class _NetworkGraphViewState extends State<NetworkGraphView> {
-  List<EventGroup> _eventGroups = [];
-  bool _loadingGroups = true;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadEventGroups();
-  }
-
-  Future<void> _loadEventGroups() async {
-    final groups = await widget.getEventGroups();
-    if (!mounted) return;
-    setState(() {
-      _eventGroups = groups;
-      _loadingGroups = false;
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -116,7 +89,8 @@ class _NetworkGraphViewState extends State<NetworkGraphView> {
                     IconButton(
                       icon: const Icon(Icons.analytics_outlined),
                       tooltip: context.l10n.networkStatistics,
-                      onPressed: () => _showGraphStatsDialog(context, graph),
+                      onPressed: () =>
+                          NetworkGraphStatsPage.open(context, graph),
                     ),
                   ]
                 : null,
@@ -147,83 +121,62 @@ class _NetworkGraphViewState extends State<NetworkGraphView> {
     }
 
     if (graph == null || graph.nodes.isEmpty) {
-      return Column(
-        children: [
-          Expanded(
-            child: NetworkGraphEmptyState(
-              onRefresh: () => cubit.reloadCurrent(),
-            ),
-          ),
-          if (!_loadingGroups)
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
-              child: NetworkGraphScopeBar(
-                scope: state.scope,
-                eventGroups: _eventGroups,
-                selectedEventGroupId: state.eventGroupId,
-                onPersonalSelected: () => cubit.selectPersonalScope(),
-                onEventSelected: (group) => cubit.selectEventScope(group.id),
-              ),
-            ),
-        ],
+      return NetworkGraphEmptyState(
+        onRefresh: () => cubit.reloadCurrent(),
       );
     }
 
-    return RefreshIndicator(
-      onRefresh: cubit.reloadCurrent,
-      child: ListView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        padding: EdgeInsets.fromLTRB(
-          20,
-          12,
-          20,
-          32 + MediaQuery.paddingOf(context).bottom,
-        ),
-        children: [
-          if (!_loadingGroups)
-            NetworkGraphScopeBar(
-              scope: state.scope,
-              eventGroups: _eventGroups,
-              selectedEventGroupId: state.eventGroupId,
-              onPersonalSelected: cubit.selectPersonalScope,
-              onEventSelected: (group) =>
-                  cubit.selectEventScope(group.id),
+    final colorScheme = Theme.of(context).colorScheme;
+    final bottomInset = MediaQuery.paddingOf(context).bottom;
+    final showPathPanel = state.isPathLoading ||
+        state.path != null ||
+        state.pathSourceCardId != null;
+
+    return Stack(
+      children: [
+        Positioned.fill(
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  colorScheme.surface,
+                  colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
+                ],
+              ),
             ),
-          if (state.scope == GraphScope.event &&
-              widget.initialEventGroupName != null &&
-              state.eventGroupId != null) ...[
-            const SizedBox(height: 8),
-            Text(
-              widget.initialEventGroupName!,
-              style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                    fontWeight: FontWeight.w700,
+            child: state.isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : NetworkGraphInteractiveArea(
+                    nodes: graph.nodes,
+                    edges: graph.edges,
+                    highlightedNodeIds: state.highlightedNodeIds,
+                    pathNodeIds: state.path?.pathNodeIds ?? const [],
+                    onCardNodeTap: cubit.tapCardNode,
                   ),
+          ),
+        ),
+        if (showPathPanel)
+          Positioned(
+            left: 16,
+            right: 16,
+            bottom: 16 + bottomInset,
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                maxHeight: MediaQuery.sizeOf(context).height * 0.4,
+              ),
+              child: SingleChildScrollView(
+                child: NetworkGraphPathCard(
+                  path: state.path,
+                  isLoading: state.isPathLoading,
+                  pathSourceLabel: _getPathSourceLabel(state, context),
+                  onClear: cubit.clearPathSelection,
+                ),
+              ),
             ),
-          ],
-          const SizedBox(height: 16),
-          if (state.isLoading)
-            const Padding(
-              padding: EdgeInsets.symmetric(vertical: 24),
-              child: Center(child: CircularProgressIndicator()),
-            )
-          else ...[
-            NetworkGraphCanvas(
-              nodes: graph.nodes,
-              edges: graph.edges,
-              highlightedNodeIds: state.highlightedNodeIds,
-              pathNodeIds: state.path?.pathNodeIds ?? const [],
-              onCardNodeTap: cubit.tapCardNode,
-            ),
-            const SizedBox(height: 16),
-            NetworkGraphPathCard(
-              path: state.path,
-              isLoading: state.isPathLoading,
-              pathSourceLabel: _getPathSourceLabel(state, context),
-              onClear: cubit.clearPathSelection,
-            ),
-          ],
-        ],
-      ),
+          ),
+      ],
     );
   }
 
@@ -269,133 +222,13 @@ class _NetworkGraphViewState extends State<NetworkGraphView> {
             ),
           ),
           actions: [
-            TextButton(
+            CustomButton.text(
+              label: context.l10n.close,
               onPressed: () => Navigator.pop(context),
-              child: Text(context.l10n.close),
             ),
           ],
         );
       },
-    );
-  }
-
-  void _showGraphStatsDialog(BuildContext context, NetworkGraph graph) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-
-    showDialog<void>(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Row(
-            children: [
-              Icon(Icons.analytics_outlined, color: colorScheme.primary),
-              const SizedBox(width: 8),
-              Text(
-                context.l10n.networkStatistics,
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ],
-          ),
-          content: SizedBox(
-            width: double.maxFinite,
-            child: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildStatItem(
-                    context,
-                    icon: Icons.hub_outlined,
-                    label: AppL10n.graphMetricNode(context.l10n),
-                    value: graph.metrics.nodeCount.toString(),
-                  ),
-                  const SizedBox(height: 12),
-                  _buildStatItem(
-                    context,
-                    icon: Icons.route_outlined,
-                    label: AppL10n.graphMetricEdge(context.l10n),
-                    value: graph.metrics.edgeCount.toString(),
-                  ),
-                  const SizedBox(height: 12),
-                  _buildStatItem(
-                    context,
-                    icon: Icons.center_focus_strong_outlined,
-                    label: AppL10n.graphMetricCenter(context.l10n),
-                    value: graph.metrics.centerCardId ?? context.l10n.you,
-                  ),
-                  const SizedBox(height: 24),
-                  const Divider(),
-                  const SizedBox(height: 16),
-                  NetworkGraphNodeList(nodes: graph.nodes),
-                  if (graph.edges.isNotEmpty) ...[
-                    const SizedBox(height: 24),
-                    const Divider(),
-                    const SizedBox(height: 16),
-                    NetworkGraphEdgeList(edges: graph.edges),
-                  ],
-                ],
-              ),
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text(context.l10n.close),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  Widget _buildStatItem(
-    BuildContext context, {
-    required IconData icon,
-    required String label,
-    required String value,
-  }) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(
-        color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: colorScheme.outlineVariant),
-      ),
-      child: Row(
-        children: [
-          CircleAvatar(
-            backgroundColor: colorScheme.primary.withValues(alpha: 0.1),
-            child: Icon(icon, color: colorScheme.primary, size: 20),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  label,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: colorScheme.onSurfaceVariant,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  value,
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
     );
   }
 
@@ -449,10 +282,11 @@ class NetworkGraphErrorState extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 18),
-            FilledButton.tonalIcon(
+            CustomButton.tonal(
+              label: context.l10n.retry,
+              icon: Icons.refresh_rounded,
               onPressed: onRetry,
-              icon: const Icon(Icons.refresh_rounded),
-              label: Text(context.l10n.retry),
+              fullWidth: false,
             ),
           ],
         ),

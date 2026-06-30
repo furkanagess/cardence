@@ -36,4 +36,8 @@ public interface IEventGroupService
         string contentType,
         long contentLength,
         CancellationToken cancellationToken = default);
+
+    Task<EventGroupDto> InviteCardsByCardIdAsync(
+        InviteEventGroupCardsByCardIdRequest request,
+        CancellationToken cancellationToken = default);
 }

@@ -131,7 +131,7 @@ class _SupportViewState extends State<_SupportView> {
                               maxLength: 2000,
                               textInputAction: TextInputAction.newline,
                               onChanged: cubit.setMessage,
-                              helperText: 'En az 10 karakter',
+                              helperText: context.l10n.enAz10Karakter,
                             ),
                           ],
                         ),

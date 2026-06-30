@@ -99,6 +99,7 @@ class AppTheme {
           foregroundColor:
               isLight ? AppColors.textOnPrimary : AppColors.backgroundDark,
           elevation: 0,
+          alignment: Alignment.center,
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(_radius),
@@ -111,6 +112,7 @@ class AppTheme {
           foregroundColor:
               isLight ? AppColors.textOnPrimary : AppColors.backgroundDark,
           elevation: 0,
+          alignment: Alignment.center,
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(_radius),
@@ -121,12 +123,14 @@ class AppTheme {
         style: TextButton.styleFrom(
           foregroundColor:
               isLight ? AppColors.primary : AppColors.primaryDarkTheme,
+          alignment: Alignment.center,
         ),
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
           foregroundColor:
               isLight ? AppColors.primary : AppColors.primaryDarkTheme,
+          alignment: Alignment.center,
           side: BorderSide(
             color: isLight ? AppColors.primary : AppColors.primaryDarkTheme,
           ),

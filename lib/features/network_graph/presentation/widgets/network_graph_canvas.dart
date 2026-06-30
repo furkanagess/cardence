@@ -189,6 +189,53 @@ class NetworkGraphArea extends StatelessWidget {
   }
 }
 
+/// Pan / zoom destekli tam ekran grafik alanı. Hem sayfa gövdesinde
+/// (varsayılan tam ekran) hem de modal tam ekran görünümünde kullanılır.
+class NetworkGraphInteractiveArea extends StatelessWidget {
+  const NetworkGraphInteractiveArea({
+    super.key,
+    required this.nodes,
+    required this.edges,
+    this.highlightedNodeIds = const {},
+    this.pathNodeIds = const [],
+    this.onCardNodeTap,
+  });
+
+  final List<GraphNode> nodes;
+  final List<GraphEdge> edges;
+  final Set<String> highlightedNodeIds;
+  final List<String> pathNodeIds;
+  final ValueChanged<GraphNode>? onCardNodeTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final base = Size(constraints.maxWidth, constraints.maxHeight);
+        final canvas = Size(base.width * 1.4, base.height * 1.4);
+
+        return InteractiveViewer(
+          constrained: false,
+          minScale: 0.4,
+          maxScale: 4,
+          boundaryMargin: const EdgeInsets.all(160),
+          child: SizedBox(
+            width: canvas.width,
+            height: canvas.height,
+            child: NetworkGraphArea(
+              nodes: nodes,
+              edges: edges,
+              highlightedNodeIds: highlightedNodeIds,
+              pathNodeIds: pathNodeIds,
+              onCardNodeTap: onCardNodeTap,
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
 class _NetworkGraphFullscreenView extends StatelessWidget {
   const _NetworkGraphFullscreenView({
     required this.nodes,
@@ -218,29 +265,12 @@ class _NetworkGraphFullscreenView extends StatelessWidget {
       ),
       body: ColoredBox(
         color: colorScheme.surface,
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            final base = Size(constraints.maxWidth, constraints.maxHeight);
-            final canvas = Size(base.width * 1.4, base.height * 1.4);
-
-            return InteractiveViewer(
-              constrained: false,
-              minScale: 0.4,
-              maxScale: 4,
-              boundaryMargin: const EdgeInsets.all(160),
-              child: SizedBox(
-                width: canvas.width,
-                height: canvas.height,
-                child: NetworkGraphArea(
-                  nodes: nodes,
-                  edges: edges,
-                  highlightedNodeIds: highlightedNodeIds,
-                  pathNodeIds: pathNodeIds,
-                  onCardNodeTap: onCardNodeTap,
-                ),
-              ),
-            );
-          },
+        child: NetworkGraphInteractiveArea(
+          nodes: nodes,
+          edges: edges,
+          highlightedNodeIds: highlightedNodeIds,
+          pathNodeIds: pathNodeIds,
+          onCardNodeTap: onCardNodeTap,
         ),
       ),
     );

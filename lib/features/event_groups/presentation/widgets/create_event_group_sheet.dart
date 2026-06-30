@@ -2,33 +2,37 @@ import 'package:flutter/material.dart';
 import '../../../../core/l10n/l10n_extensions.dart';
 
 import '../../../../core/theme/app_colors.dart';
-import '../../../../core/utils/birthday_format.dart';
 import '../../../../core/widgets/atoms/custom_button.dart';
 import '../../../../core/widgets/atoms/custom_text_field.dart';
-import '../../../../core/widgets/molecules/birthday_picker_field.dart';
 import '../../../../core/widgets/molecules/new_event_group_name_dialog.dart';
 import '../../../saved_cards/domain/entities/saved_card.dart';
 import '../../../saved_cards/domain/usecases/get_saved_cards.dart';
 import '../../../saved_cards/presentation/widgets/saved_card_selectable_list.dart';
 import 'event_group_cover_thumbnail.dart';
 import 'event_group_photo_picker_field.dart';
+import 'event_group_schedule_picker_section.dart';
+import 'event_group_card_id_invite_field.dart';
 import '../helpers/event_group_meta_formatter.dart';
 
 /// Yeni etkinlik grubu oluşturma akışının sonucu.
 class CreateEventGroupResult {
   const CreateEventGroupResult({
     required this.name,
-    this.location,
-    this.eventDate,
+    required this.location,
+    required this.startAt,
+    this.endAt,
     this.photoFilePath,
     required this.selectedCardIds,
+    required this.invitedCardIds,
   });
 
   final String name;
-  final String? location;
-  final DateTime? eventDate;
+  final String location;
+  final DateTime startAt;
+  final DateTime? endAt;
   final String? photoFilePath;
   final Set<String> selectedCardIds;
+  final List<String> invitedCardIds;
 }
 
 /// 1. adım: grup adı · 2. adım: Kaydedilen Kartlar listesi görünümünde seçim.
@@ -74,10 +78,17 @@ class _CreateEventGroupSheetState extends State<CreateEventGroupSheet> {
   int _step = _stepName;
   late final TextEditingController _nameController;
   late final TextEditingController _locationController;
+  late final TextEditingController _cardIdController;
   String? _nameErrorText;
-  String? _eventDateValue;
+  String? _locationErrorText;
+  String? _scheduleErrorText;
+  DateTime? _startDate;
+  TimeOfDay? _startTime;
+  DateTime? _endDate;
+  TimeOfDay? _endTime;
   String? _photoFilePath;
   late final Set<String> _selectedCardIds;
+  late final Set<String> _invitedCardIds;
   List<SavedCard> _pickableCards = [];
   bool _loadingCards = false;
 
@@ -86,8 +97,11 @@ class _CreateEventGroupSheetState extends State<CreateEventGroupSheet> {
     super.initState();
     _nameController = TextEditingController();
     _locationController = TextEditingController();
+    _cardIdController = TextEditingController();
     _nameController.addListener(_clearNameErrorOnEdit);
+    _locationController.addListener(_clearLocationErrorOnEdit);
     _selectedCardIds = {};
+    _invitedCardIds = {};
   }
 
   void _clearNameErrorOnEdit() {
@@ -95,11 +109,18 @@ class _CreateEventGroupSheetState extends State<CreateEventGroupSheet> {
     setState(() => _nameErrorText = null);
   }
 
+  void _clearLocationErrorOnEdit() {
+    if (_locationErrorText == null) return;
+    setState(() => _locationErrorText = null);
+  }
+
   @override
   void dispose() {
     _nameController.removeListener(_clearNameErrorOnEdit);
+    _locationController.removeListener(_clearLocationErrorOnEdit);
     _nameController.dispose();
     _locationController.dispose();
+    _cardIdController.dispose();
     super.dispose();
   }
 
@@ -110,11 +131,15 @@ class _CreateEventGroupSheetState extends State<CreateEventGroupSheet> {
     return location.isEmpty ? null : location;
   }
 
-  DateTime? get _parsedEventDate =>
-      _eventDateValue == null ? null : BirthdayFormat.tryParse(_eventDateValue);
+  DateTime? get _startAt => _combineDateAndTime(_startDate, _startTime);
+
+  DateTime? get _endAt => _combineDateAndTime(_endDate, _endTime);
 
   Future<void> _goToPickCards() async {
     final name = _groupName;
+    final location = _locationSummary;
+    final startAt = _startAt;
+    final endAt = _endAt;
     if (name.isEmpty) {
       setState(() => _nameErrorText = context.l10n.eventGroupNameRequired);
       return;
@@ -123,8 +148,26 @@ class _CreateEventGroupSheetState extends State<CreateEventGroupSheet> {
       setState(() => _nameErrorText = context.l10n.eventGroupNameDuplicate);
       return;
     }
+    if (location == null || location.isEmpty) {
+      setState(() => _locationErrorText = context.l10n.eventLocationRequired);
+      return;
+    }
+    if (startAt == null) {
+      setState(() => _scheduleErrorText = context.l10n.eventStartRequired);
+      return;
+    }
+    if ((_endDate == null) != (_endTime == null)) {
+      setState(
+          () => _scheduleErrorText = context.l10n.eventEndRequiresDateAndTime);
+      return;
+    }
+    if (endAt != null && endAt.isBefore(startAt)) {
+      setState(() => _scheduleErrorText = context.l10n.eventEndBeforeStart);
+      return;
+    }
 
     setState(() {
+      _scheduleErrorText = null;
       _step = _stepPickCards;
       _loadingCards = true;
     });
@@ -143,13 +186,20 @@ class _CreateEventGroupSheetState extends State<CreateEventGroupSheet> {
 
   void _submit() {
     final location = _locationController.text.trim();
+    final startAt = _startAt;
+    if (location.isEmpty || startAt == null) {
+      _goBackToName();
+      return;
+    }
     Navigator.of(context).pop(
       CreateEventGroupResult(
         name: _groupName,
-        location: location.isEmpty ? null : location,
-        eventDate: _parsedEventDate,
+        location: location,
+        startAt: startAt,
+        endAt: _endAt,
         photoFilePath: _photoFilePath,
         selectedCardIds: Set<String>.from(_selectedCardIds),
+        invitedCardIds: _invitedCardIds.toList(),
       ),
     );
   }
@@ -162,6 +212,87 @@ class _CreateEventGroupSheetState extends State<CreateEventGroupSheet> {
         _selectedCardIds.add(cardId);
       }
     });
+  }
+
+  void _addInvitedCardId() {
+    final cardId = _cardIdController.text.trim();
+    if (cardId.isEmpty) return;
+    setState(() {
+      _invitedCardIds.add(cardId);
+      _cardIdController.clear();
+    });
+  }
+
+  void _removeInvitedCardId(String cardId) {
+    setState(() => _invitedCardIds.remove(cardId));
+  }
+
+  Future<void> _pickStartDate() async {
+    final picked = await _pickDate(initialDate: _startDate ?? DateTime.now());
+    if (picked == null) return;
+    setState(() {
+      _startDate = picked;
+      _scheduleErrorText = null;
+    });
+  }
+
+  Future<void> _pickStartTime() async {
+    final picked = await _pickTime(initialTime: _startTime ?? TimeOfDay.now());
+    if (picked == null) return;
+    setState(() {
+      _startTime = picked;
+      _scheduleErrorText = null;
+    });
+  }
+
+  Future<void> _pickEndDate() async {
+    final picked =
+        await _pickDate(initialDate: _endDate ?? _startDate ?? DateTime.now());
+    if (picked == null) return;
+    setState(() {
+      _endDate = picked;
+      _scheduleErrorText = null;
+    });
+  }
+
+  Future<void> _pickEndTime() async {
+    final picked =
+        await _pickTime(initialTime: _endTime ?? _startTime ?? TimeOfDay.now());
+    if (picked == null) return;
+    setState(() {
+      _endTime = picked;
+      _scheduleErrorText = null;
+    });
+  }
+
+  void _clearEnd() {
+    setState(() {
+      _endDate = null;
+      _endTime = null;
+      _scheduleErrorText = null;
+    });
+  }
+
+  Future<DateTime?> _pickDate({required DateTime initialDate}) {
+    final now = DateTime.now();
+    return showDatePicker(
+      context: context,
+      initialDate: initialDate,
+      firstDate: DateTime(now.year - 1),
+      lastDate: DateTime(now.year + 10),
+    );
+  }
+
+  Future<TimeOfDay?> _pickTime({required TimeOfDay initialTime}) {
+    return showTimePicker(
+      context: context,
+      initialTime: initialTime,
+    );
+  }
+
+  DateTime? _combineDateAndTime(DateTime? date, TimeOfDay? time) {
+    if (date == null || time == null) return null;
+    return DateTime(date.year, date.month, date.day, time.hour, time.minute);
   }
 
   @override
@@ -189,10 +320,18 @@ class _CreateEventGroupSheetState extends State<CreateEventGroupSheet> {
                         nameController: _nameController,
                         locationController: _locationController,
                         nameErrorText: _nameErrorText,
-                        eventDateValue: _eventDateValue,
+                        locationErrorText: _locationErrorText,
+                        startDate: _startDate,
+                        startTime: _startTime,
+                        endDate: _endDate,
+                        endTime: _endTime,
+                        scheduleErrorText: _scheduleErrorText,
                         photoFilePath: _photoFilePath,
-                        onEventDateChanged: (value) =>
-                            setState(() => _eventDateValue = value),
+                        onPickStartDate: _pickStartDate,
+                        onPickStartTime: _pickStartTime,
+                        onPickEndDate: _pickEndDate,
+                        onPickEndTime: _pickEndTime,
+                        onClearEnd: _clearEnd,
                         onPhotoChanged: (value) =>
                             setState(() => _photoFilePath = value),
                         onContinue: _goToPickCards,
@@ -201,19 +340,24 @@ class _CreateEventGroupSheetState extends State<CreateEventGroupSheet> {
                         key: const ValueKey('cards'),
                         groupName: _groupName,
                         location: _locationSummary,
-                        eventDate: _parsedEventDate,
+                        startAt: _startAt!,
+                        endAt: _endAt,
                         photoFilePath: _photoFilePath,
+                        cardIdController: _cardIdController,
                         loadingCards: _loadingCards,
                         pickableCards: _pickableCards,
                         selectedCardIds: _selectedCardIds,
+                        invitedCardIds: _invitedCardIds,
                         onToggleCard: _toggleCard,
+                        onAddInvitedCardId: _addInvitedCardId,
+                        onRemoveInvitedCardId: _removeInvitedCardId,
                       ),
               ),
             ),
             _CreateEventGroupSheetFooter(
               step: _step,
               loadingCards: _loadingCards,
-              selectedCount: _selectedCardIds.length,
+              selectedCount: _selectedCardIds.length + _invitedCardIds.length,
               onBack: _goBackToName,
               onContinue: _goToPickCards,
               onSubmit: _submit,
@@ -236,7 +380,8 @@ class _CreateEventGroupSheetHeader extends StatelessWidget {
     final colorScheme = theme.colorScheme;
     final isDark = theme.brightness == Brightness.dark;
 
-    final title = step == 0 ? context.l10n.yeniEtkinlikGrubu : context.l10n.selectCards;
+    final title =
+        step == 0 ? context.l10n.yeniEtkinlikGrubu : context.l10n.selectCards;
     final subtitle = step == 0
         ? context.l10n.eventGroupDetailsStepSubtitle
         : context.l10n.eventGroupCardsStepSubtitle;
@@ -323,12 +468,10 @@ class _StepIndicatorDot extends StatelessWidget {
     final circleColor = highlighted
         ? colorScheme.primary
         : (isDark ? AppColors.surfaceVariantDark : AppColors.surfaceVariant);
-    final contentColor = highlighted
-        ? colorScheme.onPrimary
-        : colorScheme.onSurfaceVariant;
-    final titleColor = highlighted
-        ? colorScheme.primary
-        : colorScheme.onSurfaceVariant;
+    final contentColor =
+        highlighted ? colorScheme.onPrimary : colorScheme.onSurfaceVariant;
+    final titleColor =
+        highlighted ? colorScheme.primary : colorScheme.onSurfaceVariant;
 
     return SizedBox(
       width: 56,
@@ -374,9 +517,18 @@ class _CreateEventGroupDetailsStep extends StatelessWidget {
     required this.nameController,
     required this.locationController,
     required this.nameErrorText,
-    required this.eventDateValue,
+    required this.locationErrorText,
+    required this.startDate,
+    required this.startTime,
+    required this.endDate,
+    required this.endTime,
+    required this.scheduleErrorText,
     required this.photoFilePath,
-    required this.onEventDateChanged,
+    required this.onPickStartDate,
+    required this.onPickStartTime,
+    required this.onPickEndDate,
+    required this.onPickEndTime,
+    required this.onClearEnd,
     required this.onPhotoChanged,
     required this.onContinue,
   });
@@ -384,9 +536,18 @@ class _CreateEventGroupDetailsStep extends StatelessWidget {
   final TextEditingController nameController;
   final TextEditingController locationController;
   final String? nameErrorText;
-  final String? eventDateValue;
+  final String? locationErrorText;
+  final DateTime? startDate;
+  final TimeOfDay? startTime;
+  final DateTime? endDate;
+  final TimeOfDay? endTime;
+  final String? scheduleErrorText;
   final String? photoFilePath;
-  final ValueChanged<String?> onEventDateChanged;
+  final VoidCallback onPickStartDate;
+  final VoidCallback onPickStartTime;
+  final VoidCallback onPickEndDate;
+  final VoidCallback onPickEndTime;
+  final VoidCallback onClearEnd;
   final ValueChanged<String?> onPhotoChanged;
   final VoidCallback onContinue;
 
@@ -431,20 +592,27 @@ class _CreateEventGroupDetailsStep extends StatelessWidget {
                     controller: locationController,
                     labelText: context.l10n.konum,
                     hintText: context.l10n.rnstanbulKongreMerkezi,
+                    errorText: locationErrorText,
                     textInputAction: TextInputAction.next,
                   ),
                   const SizedBox(height: 14),
-                      BirthdayPickerField(
-                        label: context.l10n.etkinlikTarihi,
-                        value: eventDateValue,
-                        hintText: context.l10n.tarihSein,
-                        onChanged: onEventDateChanged,
-                      ),
-                      const SizedBox(height: 18),
-                      EventGroupPhotoPickerField(
-                        value: photoFilePath,
-                        onChanged: onPhotoChanged,
-                      ),
+                  EventGroupSchedulePickerSection(
+                    startDate: startDate,
+                    startTime: startTime,
+                    endDate: endDate,
+                    endTime: endTime,
+                    errorText: scheduleErrorText,
+                    onPickStartDate: onPickStartDate,
+                    onPickStartTime: onPickStartTime,
+                    onPickEndDate: onPickEndDate,
+                    onPickEndTime: onPickEndTime,
+                    onClearEnd: onClearEnd,
+                  ),
+                  const SizedBox(height: 18),
+                  EventGroupPhotoPickerField(
+                    value: photoFilePath,
+                    onChanged: onPhotoChanged,
+                  ),
                 ],
               ),
             ),
@@ -460,22 +628,32 @@ class _CreateEventGroupPickCardsStep extends StatelessWidget {
     super.key,
     required this.groupName,
     required this.location,
-    required this.eventDate,
+    required this.startAt,
+    required this.endAt,
     required this.photoFilePath,
+    required this.cardIdController,
     required this.loadingCards,
     required this.pickableCards,
     required this.selectedCardIds,
+    required this.invitedCardIds,
     required this.onToggleCard,
+    required this.onAddInvitedCardId,
+    required this.onRemoveInvitedCardId,
   });
 
   final String groupName;
   final String? location;
-  final DateTime? eventDate;
+  final DateTime startAt;
+  final DateTime? endAt;
   final String? photoFilePath;
+  final TextEditingController cardIdController;
   final bool loadingCards;
   final List<SavedCard> pickableCards;
   final Set<String> selectedCardIds;
+  final Set<String> invitedCardIds;
   final void Function(String cardId) onToggleCard;
+  final VoidCallback onAddInvitedCardId;
+  final ValueChanged<String> onRemoveInvitedCardId;
 
   @override
   Widget build(BuildContext context) {
@@ -484,7 +662,7 @@ class _CreateEventGroupPickCardsStep extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final meta = EventGroupMetaFormatter.summary(
       location: location,
-      eventDate: eventDate,
+      eventDate: startAt,
     );
 
     return Column(
@@ -548,16 +726,28 @@ class _CreateEventGroupPickCardsStep extends StatelessWidget {
         if (!loadingCards)
           Padding(
             padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
-            child: Text(
-              selectedCardIds.isEmpty
-                  ? context.l10n.noCardsSelectedYet
-                  : context.l10n.cardsSelectedCount(selectedCardIds.length),
-              style: textTheme.labelLarge?.copyWith(
-                color: selectedCardIds.isEmpty
-                    ? colorScheme.onSurfaceVariant
-                    : colorScheme.primary,
-                fontWeight: FontWeight.w600,
-              ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                EventGroupCardIdInviteField(
+                  controller: cardIdController,
+                  invitedCardIds: invitedCardIds,
+                  onAdd: onAddInvitedCardId,
+                  onRemove: onRemoveInvitedCardId,
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  selectedCardIds.isEmpty
+                      ? context.l10n.noCardsSelectedYet
+                      : context.l10n.cardsSelectedCount(selectedCardIds.length),
+                  style: textTheme.labelLarge?.copyWith(
+                    color: selectedCardIds.isEmpty
+                        ? colorScheme.onSurfaceVariant
+                        : colorScheme.primary,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
             ),
           ),
         Expanded(
@@ -620,9 +810,9 @@ class _CreateEventGroupSheetFooter extends StatelessWidget {
           child: Row(
             children: [
               if (step == 1) ...[
-                TextButton(
+                CustomButton.text(
+                  label: context.l10n.geri,
                   onPressed: loadingCards ? null : onBack,
-                  child: Text(context.l10n.geri),
                 ),
                 const SizedBox(width: 8),
               ],

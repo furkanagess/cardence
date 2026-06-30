@@ -36,7 +36,9 @@ import '../../features/event_groups/domain/usecases/get_event_groups.dart';
 import '../../features/event_groups/data/datasources/event_group_remote_datasource.dart';
 import '../../features/event_groups/domain/usecases/create_event_group.dart';
 import '../../features/event_groups/domain/usecases/delete_event_group.dart';
+import '../../features/event_groups/domain/usecases/invite_event_group_cards_by_card_id.dart';
 import '../../features/event_groups/domain/usecases/link_event_group_cards.dart';
+import '../../features/event_groups/domain/usecases/update_event_group.dart';
 import '../../features/onboarding/data/datasources/onboarding_local_datasource.dart';
 import '../../features/onboarding/data/repositories/onboarding_repository_impl.dart';
 import '../../features/onboarding/domain/usecases/complete_onboarding.dart';
@@ -114,12 +116,15 @@ class AppInit {
 
     final subscriptionRepo = SubscriptionRepositoryImpl();
     final configureSubscriptions = ConfigureSubscriptions(subscriptionRepo);
-    await configureSubscriptions();
+    await _guardInit('RevenueCat configure', configureSubscriptions.call);
     final identifySubscriptionUser = IdentifySubscriptionUser(subscriptionRepo);
     final logoutSubscriptionUser = LogoutSubscriptionUser(subscriptionRepo);
 
     final interstitialAdRepo = InterstitialAdRepositoryImpl();
-    await InitializeMobileAds(interstitialAdRepo)();
+    await _guardInit(
+      'MobileAds init',
+      InitializeMobileAds(interstitialAdRepo).call,
+    );
     final postAddCardAdCounter = PostAddCardAdCounterLocalDataSource(prefs);
     final showPostAddCardMonetization = ShowPostAddCardMonetization(
       interstitialAdRepo,
@@ -203,7 +208,10 @@ class AppInit {
 
     final session = await authLocal.getSession();
     if (session != null && session.userId.isNotEmpty) {
-      await identifySubscriptionUser(session.userId);
+      await _guardInit(
+        'RevenueCat identify',
+        () => identifySubscriptionUser(session.userId),
+      );
     }
 
     return AppInitResult(
@@ -239,6 +247,8 @@ class AppInit {
       requestAppReview: appReview.requestAppReview,
       getEventGroups: eventGroups.getEventGroups,
       createEventGroup: eventGroups.createEventGroup,
+      updateEventGroup: eventGroups.updateEventGroup,
+      inviteEventGroupCardsByCardId: eventGroups.inviteEventGroupCardsByCardId,
       deleteEventGroup: eventGroups.deleteEventGroup,
       linkEventGroupCards: eventGroups.linkEventGroupCards,
       getSavedCards: savedCards.getSavedCards,
@@ -316,6 +326,8 @@ class AppInit {
   static ({
     GetEventGroups getEventGroups,
     CreateEventGroup createEventGroup,
+    UpdateEventGroup updateEventGroup,
+    InviteEventGroupCardsByCardId inviteEventGroupCardsByCardId,
     DeleteEventGroup deleteEventGroup,
     LinkEventGroupCards linkEventGroupCards,
   }) _initEventGroups({
@@ -330,15 +342,34 @@ class AppInit {
     return (
       getEventGroups: GetEventGroups(repo),
       createEventGroup: CreateEventGroup(repo),
+      updateEventGroup: UpdateEventGroup(repo),
+      inviteEventGroupCardsByCardId: InviteEventGroupCardsByCardId(repo),
       deleteEventGroup: DeleteEventGroup(repo),
       linkEventGroupCards: LinkEventGroupCards(repo),
     );
   }
 
   static Future<void> _initFirebase() async {
-    await Firebase.initializeApp(
-      options: DefaultFirebaseOptions.currentPlatform,
-    );
+    await _guardInit('Firebase init', () async {
+      if (Firebase.apps.isNotEmpty) return;
+      await Firebase.initializeApp(
+        options: DefaultFirebaseOptions.currentPlatform,
+      );
+    });
+  }
+
+  /// Üçüncü taraf SDK başlatmalarını izole eder; biri patlarsa uygulama
+  /// açılışı (release/TestFlight) çökmesin diye hatayı yutar ve loglar.
+  static Future<void> _guardInit(
+    String label,
+    Future<void> Function() action,
+  ) async {
+    try {
+      await action();
+    } catch (error, stackTrace) {
+      debugPrint('[AppInit] $label failed: $error');
+      debugPrintStack(stackTrace: stackTrace);
+    }
   }
 
   static Future<SharedPreferences> _initSharedPreferences() async {
@@ -524,6 +555,8 @@ class AppInitResult {
     required this.requestAppReview,
     required this.getEventGroups,
     required this.createEventGroup,
+    required this.updateEventGroup,
+    required this.inviteEventGroupCardsByCardId,
     required this.deleteEventGroup,
     required this.linkEventGroupCards,
     required this.getSavedCards,
@@ -574,6 +607,8 @@ class AppInitResult {
   final RequestAppReview requestAppReview;
   final GetEventGroups getEventGroups;
   final CreateEventGroup createEventGroup;
+  final UpdateEventGroup updateEventGroup;
+  final InviteEventGroupCardsByCardId inviteEventGroupCardsByCardId;
   final DeleteEventGroup deleteEventGroup;
   final LinkEventGroupCards linkEventGroupCards;
   final GetSavedCards getSavedCards;

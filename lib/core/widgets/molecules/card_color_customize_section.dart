@@ -65,9 +65,9 @@ class CardColorCustomizeSection extends StatelessWidget {
           ),
         ),
         actions: [
-          TextButton(
+          CustomButton.text(
+            label: context.l10n.iptal,
             onPressed: () => Navigator.of(ctx).pop(),
-            child: Text(context.l10n.iptal),
           ),
           CustomButton(
             label: context.l10n.uygula,
@@ -108,9 +108,9 @@ class CardColorCustomizeSection extends StatelessWidget {
           ),
         ),
         actions: [
-          TextButton(
+          CustomButton.text(
+            label: context.l10n.iptal,
             onPressed: () => Navigator.of(ctx).pop(),
-            child: Text(context.l10n.iptal),
           ),
           CustomButton(
             label: context.l10n.uygula,

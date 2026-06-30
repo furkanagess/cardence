@@ -129,14 +129,15 @@ class LoginEmailFormState extends State<LoginEmailForm> {
           const SizedBox(height: 2),
           Align(
             alignment: Alignment.centerLeft,
-            child: TextButton(
+            child: CustomButton.text(
+              label: context.l10n.ifremiUnuttum,
               onPressed: widget.isLoading ? null : widget.onForgotPassword,
+              height: 32,
               style: TextButton.styleFrom(
                 padding: EdgeInsets.zero,
                 minimumSize: const Size(0, 32),
                 tapTargetSize: MaterialTapTargetSize.shrinkWrap,
               ),
-              child: Text(context.l10n.ifremiUnuttum),
             ),
           ),
         ],

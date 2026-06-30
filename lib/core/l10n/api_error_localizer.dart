@@ -61,6 +61,10 @@ class ApiErrorLocalizer {
         return l10n.cardRemoveFromGroupFailed;
       case 'supportRequestFailed':
         return l10n.supportRequestFailed;
+      case 'supportRequestFailedRetry':
+        return l10n.supportRequestFailedRetry;
+      case 'supportInvalidRequest':
+        return l10n.supportInvalidRequest;
       case 'walletQuotaLoadFailed':
         return l10n.walletQuotaLoadFailed;
       case 'cardAddToWalletFailed':
@@ -73,6 +77,8 @@ class ApiErrorLocalizer {
         return l10n.invalidCardResponse;
       case 'connectionError':
         return l10n.connectionError;
+      case 'invalidResetToken':
+        return l10n.sifreSifirlamaBaglantisiGecersiz;
       default:
         return key;
     }
@@ -107,8 +113,15 @@ class ApiErrorLocalizer {
       'Geçersiz kart yanıtı.': 'invalidCardResponse',
       'Bağlantı hatası. Lütfen tekrar deneyin.': 'connectionError',
       'Destek talebi gönderilemedi. Lütfen tekrar deneyin.':
-          'supportRequestFailed',
+          'supportRequestFailedRetry',
+      'Geçerli bir e-posta ve en az 10 karakterlik bir mesaj girin.':
+          'supportInvalidRequest',
+      'Şifre sıfırlama bağlantısı geçersiz veya süresi dolmuş.':
+          'invalidResetToken',
       AppErrorKeys.connectionError: 'connectionError',
+      AppErrorKeys.supportRequestFailed: 'supportRequestFailed',
+      AppErrorKeys.supportRequestFailedRetry: 'supportRequestFailedRetry',
+      AppErrorKeys.supportInvalidRequest: 'supportInvalidRequest',
     },
     'en': {
       'Oturum bulunamadı. Lütfen tekrar giriş yapın.': 'sessionNotFoundLogin',
@@ -138,8 +151,15 @@ class ApiErrorLocalizer {
       'Geçersiz kart yanıtı.': 'invalidCardResponse',
       'Bağlantı hatası. Lütfen tekrar deneyin.': 'connectionError',
       'Destek talebi gönderilemedi. Lütfen tekrar deneyin.':
-          'supportRequestFailed',
+          'supportRequestFailedRetry',
+      'Geçerli bir e-posta ve en az 10 karakterlik bir mesaj girin.':
+          'supportInvalidRequest',
+      'Şifre sıfırlama bağlantısı geçersiz veya süresi dolmuş.':
+          'invalidResetToken',
       AppErrorKeys.connectionError: 'connectionError',
+      AppErrorKeys.supportRequestFailed: 'supportRequestFailed',
+      AppErrorKeys.supportRequestFailedRetry: 'supportRequestFailedRetry',
+      AppErrorKeys.supportInvalidRequest: 'supportInvalidRequest',
     },
   };
 }

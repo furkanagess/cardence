@@ -66,6 +66,7 @@ dependencies:
   qr_flutter: ^4.1.0
   share_plus: ^10.1.4
   image_picker: ^1.1.2
+  image: ^4.5.4
   permission_handler: ^11.4.0
   google_mlkit_text_recognition: ^0.14.0
   path_provider: ^2.1.5
@@ -86,6 +87,7 @@ dependencies:
   intl: ^0.20.2
   in_app_review: ^2.0.12
   flutter_web_auth_2: ^5.0.3
+  app_links: ^6.4.0
 
 dev_dependencies:
   flutter_test:

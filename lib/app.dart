@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:app_links/app_links.dart';
+import 'dart:async';
 
 import 'l10n/app_localizations.dart';
 
@@ -23,10 +25,14 @@ import 'features/auth/domain/usecases/reset_password.dart';
 import 'features/auth/domain/usecases/restore_auth_session.dart';
 import 'features/auth/domain/usecases/upload_profile_photo.dart';
 import 'features/auth/presentation/pages/login_page.dart';
+import 'features/auth/presentation/pages/reset_password_from_link_page.dart';
+import 'features/auth/presentation/helpers/password_reset_deep_link.dart';
 import 'features/event_groups/domain/usecases/get_event_groups.dart';
 import 'features/event_groups/domain/usecases/create_event_group.dart';
 import 'features/event_groups/domain/usecases/delete_event_group.dart';
+import 'features/event_groups/domain/usecases/invite_event_group_cards_by_card_id.dart';
 import 'features/event_groups/domain/usecases/link_event_group_cards.dart';
+import 'features/event_groups/domain/usecases/update_event_group.dart';
 import 'features/onboarding/domain/usecases/get_onboarding_completed.dart';
 import 'features/onboarding/domain/usecases/get_onboarding_draft_card.dart';
 import 'features/onboarding/domain/usecases/get_onboarding_draft_cards.dart';
@@ -99,6 +105,8 @@ class App extends StatefulWidget {
     required this.requestAppReview,
     required this.getEventGroups,
     required this.createEventGroup,
+    required this.updateEventGroup,
+    required this.inviteEventGroupCardsByCardId,
     required this.deleteEventGroup,
     required this.linkEventGroupCards,
     required this.linkSavedCardsToEventGroup,
@@ -149,6 +157,8 @@ class App extends StatefulWidget {
   final RequestAppReview requestAppReview;
   final GetEventGroups getEventGroups;
   final CreateEventGroup createEventGroup;
+  final UpdateEventGroup updateEventGroup;
+  final InviteEventGroupCardsByCardId inviteEventGroupCardsByCardId;
   final DeleteEventGroup deleteEventGroup;
   final LinkEventGroupCards linkEventGroupCards;
   final LinkSavedCardsToEventGroup linkSavedCardsToEventGroup;
@@ -175,6 +185,8 @@ class _AppState extends State<App> {
   late ThemePreference _themePreference;
   late LocalePreference _localePreference;
   bool _showPostOnboardingPaywall = false;
+  final AppLinks _appLinks = AppLinks();
+  StreamSubscription<Uri>? _passwordResetLinkSub;
 
   @override
   void initState() {
@@ -188,6 +200,45 @@ class _AppState extends State<App> {
     _bootstrap();
     _loadTheme();
     _loadLocale();
+    _initPasswordResetLinks();
+  }
+
+  @override
+  void dispose() {
+    _passwordResetLinkSub?.cancel();
+    super.dispose();
+  }
+
+  Future<void> _initPasswordResetLinks() async {
+    try {
+      final initial = await _appLinks.getInitialLink();
+      if (initial != null) {
+        _handlePasswordResetUri(initial);
+      }
+    } catch (_) {}
+
+    _passwordResetLinkSub = _appLinks.uriLinkStream.listen(
+      _handlePasswordResetUri,
+      onError: (_) {},
+    );
+  }
+
+  void _handlePasswordResetUri(Uri uri) {
+    final params = parsePasswordResetLink(uri);
+    if (params == null || !mounted) {
+      return;
+    }
+
+    widget.rootNavigatorKey.currentState?.push(
+      MaterialPageRoute<void>(
+        builder: (_) => ResetPasswordFromLinkPage(
+          resetPassword: widget.resetPassword,
+          resetToken: params.token,
+          email: params.email,
+          onResetSuccess: _onLoginSuccess,
+        ),
+      ),
+    );
   }
 
   Future<void> _bootstrap() async {
@@ -319,6 +370,8 @@ class _AppState extends State<App> {
           persistOnboardingCard: widget.persistOnboardingCard,
           getEventGroups: widget.getEventGroups,
           createEventGroup: widget.createEventGroup,
+          updateEventGroup: widget.updateEventGroup,
+          inviteEventGroupCardsByCardId: widget.inviteEventGroupCardsByCardId,
           deleteEventGroup: widget.deleteEventGroup,
           linkEventGroupCards: widget.linkEventGroupCards,
           linkSavedCardsToEventGroup: widget.linkSavedCardsToEventGroup,

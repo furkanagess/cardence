@@ -12,7 +12,25 @@ public sealed class SaveEventGroupRequestValidator : AbstractValidator<SaveEvent
             .MaximumLength(200);
 
         RuleFor(x => x.Location)
+            .NotEmpty()
             .MaximumLength(500)
-            .When(x => !string.IsNullOrWhiteSpace(x.Location));
+            .WithMessage("Etkinlik konumu gereklidir.");
+
+        RuleFor(x => x)
+            .Must(x => x.StartAt.HasValue || x.EventDate.HasValue)
+            .WithMessage("Etkinlik başlangıç tarihi ve saati gereklidir.");
+
+        RuleFor(x => x)
+            .Must(x => !x.EndAt.HasValue || (x.StartAt ?? x.EventDate).HasValue && x.EndAt.Value >= (x.StartAt ?? x.EventDate)!.Value)
+            .WithMessage("Bitiş tarihi başlangıç tarihinden önce olamaz.");
+
+        RuleFor(x => x.InvitedCardIds)
+            .Must(ids => ids.Count <= 50)
+            .WithMessage("Tek seferde en fazla 50 kart davet edilebilir.");
+
+        RuleForEach(x => x.InvitedCardIds)
+            .MaximumLength(64)
+            .Must(cardId => !string.IsNullOrWhiteSpace(cardId))
+            .WithMessage("Card ID boş olamaz.");
     }
 }

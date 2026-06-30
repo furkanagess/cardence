@@ -328,7 +328,7 @@ class _CaptureBadge extends StatelessWidget {
     final color = required ? colorScheme.error : colorScheme.onSurfaceVariant;
 
     return Text(
-      required ? 'ZORUNLU' : 'OPSİYONEL',
+      required ? context.l10n.requiredField : context.l10n.optionalField,
       style: textTheme.labelSmall?.copyWith(
         color: color,
         fontWeight: FontWeight.w700,

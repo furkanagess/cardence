@@ -1,8 +1,8 @@
 import 'package:equatable/equatable.dart';
 
-enum ForgotPasswordStatus { initial, loading, success, failure, otpSent }
+enum ForgotPasswordStatus { initial, loading, linkSent, failure }
 
-enum ForgotPasswordStep { email, reset }
+enum ForgotPasswordStep { email, linkSent }
 
 class ForgotPasswordState extends Equatable {
   const ForgotPasswordState({
@@ -18,7 +18,7 @@ class ForgotPasswordState extends Equatable {
   final String? errorMessage;
 
   bool get isLoading => status == ForgotPasswordStatus.loading;
-  bool get isOtpStep => step == ForgotPasswordStep.reset;
+  bool get isLinkSentStep => step == ForgotPasswordStep.linkSent;
 
   ForgotPasswordState copyWith({
     ForgotPasswordStatus? status,

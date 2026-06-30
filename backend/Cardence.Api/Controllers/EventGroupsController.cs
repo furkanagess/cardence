@@ -87,6 +87,16 @@ public sealed class EventGroupsController : ControllerBase
         return Ok(ApiResponse<EventGroupDto>.Ok(group, HttpContext.TraceIdentifier));
     }
 
+    [HttpPost("InviteEventGroupCardsByCardId")]
+    [ProducesResponseType(typeof(ApiResponse<EventGroupDto>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<ApiResponse<EventGroupDto>>> InviteEventGroupCardsByCardId(
+        [FromBody] InviteEventGroupCardsByCardIdRequest request,
+        CancellationToken cancellationToken)
+    {
+        var group = await _eventGroupService.InviteCardsByCardIdAsync(request, cancellationToken);
+        return Ok(ApiResponse<EventGroupDto>.Ok(group, HttpContext.TraceIdentifier));
+    }
+
     [HttpPost("LinkEventGroupCards")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     public async Task<IActionResult> LinkEventGroupCards(

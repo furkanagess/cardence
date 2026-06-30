@@ -172,12 +172,13 @@ class SavedCardAddFieldSheet {
                     if (initialValue != null &&
                         initialValue.trim().isNotEmpty) ...[
                       const SizedBox(height: 8),
-                      TextButton(
+                      CustomButton.text(
+                        label: context.l10n.alanKaldr,
                         onPressed: () => Navigator.of(context).pop(''),
+                        fullWidth: true,
                         style: TextButton.styleFrom(
                           foregroundColor: AppColors.error,
                         ),
-                        child: Text(context.l10n.alanKaldr),
                       ),
                     ],
                   ],

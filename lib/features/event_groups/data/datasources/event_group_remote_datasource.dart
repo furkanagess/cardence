@@ -9,8 +9,26 @@ abstract class EventGroupRemoteDataSource {
 
   Future<EventGroupModel> createEventGroup({
     required String name,
-    String? location,
-    DateTime? eventDate,
+    required String location,
+    required DateTime startAt,
+    DateTime? endAt,
+    List<String> invitedCardIds = const [],
+    required String accessToken,
+  });
+
+  Future<EventGroupModel> updateEventGroup({
+    required String groupId,
+    required String name,
+    required String location,
+    required DateTime startAt,
+    DateTime? endAt,
+    bool clearPhoto = false,
+    required String accessToken,
+  });
+
+  Future<EventGroupModel> inviteCardsByCardId({
+    required String groupId,
+    required List<String> cardIds,
     required String accessToken,
   });
 
@@ -80,20 +98,18 @@ class EventGroupRemoteDataSourceImpl implements EventGroupRemoteDataSource {
   @override
   Future<EventGroupModel> createEventGroup({
     required String name,
-    String? location,
-    DateTime? eventDate,
+    required String location,
+    required DateTime startAt,
+    DateTime? endAt,
+    List<String> invitedCardIds = const [],
     required String accessToken,
   }) async {
     final body = <String, dynamic>{
       'name': name,
-      if (location != null && location.trim().isNotEmpty)
-        'location': location.trim(),
-      if (eventDate != null)
-        'eventDate': DateTime.utc(
-          eventDate.year,
-          eventDate.month,
-          eventDate.day,
-        ).toIso8601String(),
+      'location': location.trim(),
+      'startAt': startAt.toUtc().toIso8601String(),
+      if (endAt != null) 'endAt': endAt.toUtc().toIso8601String(),
+      if (invitedCardIds.isNotEmpty) 'invitedCardIds': invitedCardIds,
     };
 
     final json = await _client.post(
@@ -101,6 +117,52 @@ class EventGroupRemoteDataSourceImpl implements EventGroupRemoteDataSource {
       body: body,
       accessToken: accessToken,
       fallbackError: 'Etkinlik grubu oluşturulamadı.',
+    );
+    return _parseGroup(json);
+  }
+
+  @override
+  Future<EventGroupModel> updateEventGroup({
+    required String groupId,
+    required String name,
+    required String location,
+    required DateTime startAt,
+    DateTime? endAt,
+    bool clearPhoto = false,
+    required String accessToken,
+  }) async {
+    final body = <String, dynamic>{
+      'id': groupId,
+      'name': name,
+      'location': location.trim(),
+      'startAt': startAt.toUtc().toIso8601String(),
+      if (endAt != null) 'endAt': endAt.toUtc().toIso8601String(),
+      'clearPhoto': clearPhoto,
+    };
+
+    final json = await _client.put(
+      '/UpdateEventGroup',
+      body: body,
+      accessToken: accessToken,
+      fallbackError: 'Etkinlik grubu güncellenemedi.',
+    );
+    return _parseGroup(json);
+  }
+
+  @override
+  Future<EventGroupModel> inviteCardsByCardId({
+    required String groupId,
+    required List<String> cardIds,
+    required String accessToken,
+  }) async {
+    final json = await _client.post(
+      '/InviteEventGroupCardsByCardId',
+      body: {
+        'id': groupId,
+        'cardIds': cardIds,
+      },
+      accessToken: accessToken,
+      fallbackError: 'Kartlar davet edilemedi.',
     );
     return _parseGroup(json);
   }

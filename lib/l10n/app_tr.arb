@@ -249,7 +249,12 @@
   "kaydedilmemiDeiiklikler": "Kaydedilmemiş değişiklikler",
   "kaydet": "Kaydet",
   "kaytOl": "Kayıt ol",
-  "kaytlEPostaAdresinizeSfrlama": "Kayıtlı e-posta adresinize sıfırlama kodu gönderilir.",
+  "kaytlEPostaAdresinizeSfrlama": "Kayıtlı e-posta adresinize şifre sıfırlama bağlantısı gönderilir.",
+  "sifreSifirlamaBaglantisiGonder": "Sıfırlama bağlantısı gönder",
+  "sifreSifirlamaBaglantisiGonderildi": "Sıfırlama bağlantısı gönderildi",
+  "ePostaKutunuzuKontrolEdin": "E-posta kutunuzu kontrol edin ve gelen bağlantıya tıklayarak yeni şifrenizi belirleyin.",
+  "sifreSifirlamaLinkAcildi": "Yeni şifrenizi aşağıdan belirleyebilirsiniz.",
+  "sifreSifirlamaBaglantisiGecersiz": "Şifre sıfırlama bağlantısı geçersiz veya süresi dolmuş.",
   "kaytlKartLimitinizDolduPremium": "Kayıtlı kart limitiniz doldu. Premium ile sınırsız kart saklayabilir ve manuel / fotoğrafla eklemeye devam edebilirsiniz.",
   "kaytlKartlar": "Kayıtlı kartlar",
   "kaytlKartlarAlnamad": "Kayıtlı kartlar alınamadı.",
@@ -448,6 +453,8 @@
   "invalidCardResponse": "Geçersiz kart yanıtı.",
   "connectionError": "Bağlantı hatası. Lütfen tekrar deneyin.",
   "supportRequestFailedRetry": "Destek talebi gönderilemedi. Lütfen tekrar deneyin.",
+  "supportInvalidRequest": "Geçerli bir e-posta ve en az 10 karakterlik bir mesaj girin.",
+  "enAz10Karakter": "En az 10 karakter",
   "cardencePaylasBirlikteBaglanti": "Cardence'i paylaş, birlikte bağlantı kurun",
   "balang": "Başlangıç",
   "kimlik": "Kimlik",
@@ -599,8 +606,58 @@
   "eventFilterFallback": "Etkinlik",
   "eventGroupNameRequired": "Etkinlik adı boş olamaz",
   "eventGroupNameDuplicate": "Bu isimde bir etkinlik grubu zaten var",
-  "eventGroupDetailsStepSubtitle": "Etkinliğin adını, konumunu ve tarihini girin.",
-  "eventGroupCardsStepSubtitle": "İsterseniz kart seçmeden de grubu oluşturabilirsiniz.",
+  "eventGroupDetailsStepSubtitle": "Etkinliğin adını, konumunu, başlangıç saatini ve isteğe bağlı bitiş saatini girin.",
+  "eventGroupCardsStepSubtitle": "Kayıtlı kart seçin veya Card ID ile davet edin. İsterseniz kart seçmeden de etkinliği oluşturabilirsiniz.",
+  "eventStartRequired": "Başlangıç tarihi ve saati seçin.",
+  "eventLocationRequired": "Etkinlik konumu gereklidir.",
+  "eventEndRequiresDateAndTime": "Bitiş için tarih ve saat birlikte seçilmelidir.",
+  "eventEndBeforeStart": "Bitiş zamanı başlangıçtan önce olamaz.",
+  "eventStart": "Başlangıç",
+  "eventEndOptional": "Bitiş (opsiyonel)",
+  "eventPickTime": "Saat seç",
+  "eventInviteByCardId": "Card ID ile davet et",
+  "eventActiveSection": "Devam eden / Yaklaşan",
+  "eventEndedSection": "Biten etkinlikler",
+  "eventStatusUpcoming": "Yaklaşıyor",
+  "eventStatusOngoing": "Devam ediyor",
+  "eventStatusEnded": "Bitti",
+  "eventEditTitle": "Etkinliği düzenle",
+  "eventGroupUpdatedMessage": "\"{name}\" güncellendi",
+  "@eventGroupUpdatedMessage": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "eventInviteCardsTitle": "Card ID ile kart davet et",
+  "eventInviteCardsSubtitle": "Card ID girerek bu etkinliğe kart ekleyin. Geçersiz ID'ler raporlanır.",
+  "eventSendInvites": "Davet gönder",
+  "eventCardIdHint": "Örn. 123456",
+  "eventInvitedCardIdsCount": "{count} Card ID eklendi",
+  "@eventInvitedCardIdsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "eventCardsInvitedMessage": "{count} kart davet edildi",
+  "@eventCardsInvitedMessage": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "eventInvalidCardIdsMessage": "{count} geçersiz Card ID",
+  "@eventInvalidCardIdsMessage": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "noCardsSelectedYet": "Henüz kart seçilmedi",
   "cardsSelectedCount": "{count} kart seçildi",
   "@cardsSelectedCount": {

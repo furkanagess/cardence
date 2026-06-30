@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/l10n/l10n_extensions.dart';
+import '../../../../core/widgets/atoms/custom_button.dart';
 
 class SavedCardsEmptyResultsView extends StatelessWidget {
   const SavedCardsEmptyResultsView({
@@ -76,14 +77,14 @@ class SavedCardsEmptyResultsView extends StatelessWidget {
             if (_hasConstraints) ...[
               const SizedBox(height: 20),
               if (hasSearch)
-                TextButton(
+                CustomButton.text(
+                  label: context.l10n.aramayTemizle,
                   onPressed: onClearSearch,
-                  child: Text(context.l10n.aramayTemizle),
                 ),
               if (hasFilters)
-                TextButton(
+                CustomButton.text(
+                  label: context.l10n.filtreleriTemizle,
                   onPressed: onClearFilters,
-                  child: Text(context.l10n.filtreleriTemizle),
                 ),
             ] else ...[
               const SizedBox(height: 8),

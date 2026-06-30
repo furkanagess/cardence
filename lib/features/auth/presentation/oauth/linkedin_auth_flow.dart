@@ -43,7 +43,6 @@ Future<String?> _requestWithSystemBrowser() async {
       'redirect_uri': redirectUri,
       'state': state,
       'scope': linkedInAuthorizationScope,
-      'enable_extended_login': 'true',
     },
   );
 
@@ -119,7 +118,6 @@ class _LinkedInAuthCodePageState extends State<_LinkedInAuthCodePage> {
         'redirect_uri': LinkedInAuthConfig.redirectUri,
         'state': _state,
         'scope': linkedInAuthorizationScope,
-        'enable_extended_login': 'true',
       },
     );
   }

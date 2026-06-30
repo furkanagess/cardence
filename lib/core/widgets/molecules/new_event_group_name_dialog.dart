@@ -85,9 +85,9 @@ class _NewEventGroupNameDialogState extends State<NewEventGroupNameDialog> {
         onSubmitted: (_) => _submit(),
       ),
       actions: [
-        TextButton(
+        CustomButton.text(
+          label: context.l10n.iptal,
           onPressed: () => Navigator.of(context).pop(),
-          child: Text(context.l10n.iptal),
         ),
         CustomButton(
           label: context.l10n.ekle,

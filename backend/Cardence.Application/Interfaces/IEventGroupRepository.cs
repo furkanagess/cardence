@@ -38,6 +38,12 @@ public interface IEventGroupRepository
         IReadOnlyList<string> cardIds,
         CancellationToken cancellationToken = default);
 
+    Task<IReadOnlyList<string>> InviteCardsByCardIdsAsync(
+        Guid userId,
+        Guid groupId,
+        IReadOnlyList<string> cardIds,
+        CancellationToken cancellationToken = default);
+
     Task UnlinkCardAsync(
         Guid userId,
         Guid groupId,

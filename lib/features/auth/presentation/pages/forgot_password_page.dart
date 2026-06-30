@@ -6,7 +6,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/widgets/atoms/cardence_app_bar.dart';
 import '../../../../core/widgets/organisms/cardence_scaffold.dart';
 import '../../domain/usecases/forgot_password.dart';
-import '../../domain/usecases/reset_password.dart';
 import '../bloc/forgot_password_bloc.dart';
 import '../bloc/forgot_password_event.dart';
 import '../bloc/forgot_password_state.dart';
@@ -16,38 +15,24 @@ class ForgotPasswordPage extends StatelessWidget {
   const ForgotPasswordPage({
     super.key,
     required this.forgotPassword,
-    required this.resetPassword,
-    required this.onResetSuccess,
     this.initialEmail,
   });
 
   final ForgotPassword forgotPassword;
-  final ResetPassword resetPassword;
-  final VoidCallback onResetSuccess;
   final String? initialEmail;
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => ForgotPasswordBloc(
-        forgotPassword: forgotPassword,
-        resetPassword: resetPassword,
-      ),
-      child: _ForgotPasswordView(
-        initialEmail: initialEmail,
-        onResetSuccess: onResetSuccess,
-      ),
+      create: (_) => ForgotPasswordBloc(forgotPassword: forgotPassword),
+      child: _ForgotPasswordView(initialEmail: initialEmail),
     );
   }
 }
 
 class _ForgotPasswordView extends StatelessWidget {
-  const _ForgotPasswordView({
-    required this.onResetSuccess,
-    this.initialEmail,
-  });
+  const _ForgotPasswordView({this.initialEmail});
 
-  final VoidCallback onResetSuccess;
   final String? initialEmail;
 
   @override
@@ -55,20 +40,6 @@ class _ForgotPasswordView extends StatelessWidget {
     return BlocListener<ForgotPasswordBloc, ForgotPasswordState>(
       listenWhen: (prev, curr) => prev.status != curr.status,
       listener: (context, state) {
-        if (state.status == ForgotPasswordStatus.success) {
-          Navigator.of(context).pop();
-          onResetSuccess();
-        }
-        if (state.status == ForgotPasswordStatus.otpSent) {
-          ScaffoldMessenger.of(context)
-            ..hideCurrentSnackBar()
-            ..showSnackBar(
-              SnackBar(
-                content: Text(context.l10n.sfrlamaKoduGnderildi),
-                behavior: SnackBarBehavior.floating,
-              ),
-            );
-        }
         if (state.status == ForgotPasswordStatus.failure &&
             state.errorMessage != null) {
           ScaffoldMessenger.of(context)
@@ -96,33 +67,16 @@ class _ForgotPasswordView extends StatelessWidget {
                       ScrollViewKeyboardDismissBehavior.onDrag,
                   child: ForgotPasswordForm(
                     isLoading: state.isLoading,
-                    isOtpStep: state.isOtpStep,
+                    isLinkSentStep: state.isLinkSentStep,
                     pendingEmail: state.pendingEmail,
                     initialEmail: initialEmail,
-                    onRequestOtp: (email) => context
+                    onRequestLink: (email) => context
                         .read<ForgotPasswordBloc>()
-                        .add(ForgotPasswordOtpRequested(email: email)),
-                    onResetPassword: ({
-                      required email,
-                      required otpCode,
-                      required newPassword,
-                    }) =>
-                        context.read<ForgotPasswordBloc>().add(
-                              ForgotPasswordResetSubmitted(
-                                email: email,
-                                otpCode: otpCode,
-                                newPassword: newPassword,
-                              ),
-                            ),
-                    onBack: () {
-                      if (state.isOtpStep) {
-                        context.read<ForgotPasswordBloc>().add(
-                              const ForgotPasswordBackToEmail(),
-                            );
-                        return;
-                      }
-                      Navigator.of(context).pop();
-                    },
+                        .add(ForgotPasswordLinkRequested(email: email)),
+                    onBackToEmail: () => context
+                        .read<ForgotPasswordBloc>()
+                        .add(const ForgotPasswordBackToEmail()),
+                    onBack: () => Navigator.of(context).pop(),
                   ),
                 );
               },

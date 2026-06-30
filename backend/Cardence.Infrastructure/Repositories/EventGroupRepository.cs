@@ -1,4 +1,5 @@
 using Cardence.Application.Interfaces;
+using Cardence.Domain.Constants;
 using Cardence.Domain.Entities;
 using Cardence.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
@@ -139,6 +140,100 @@ public sealed class EventGroupRepository : IEventGroupRepository
         }
 
         await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    public async Task<IReadOnlyList<string>> InviteCardsByCardIdsAsync(
+        Guid userId,
+        Guid groupId,
+        IReadOnlyList<string> cardIds,
+        CancellationToken cancellationToken = default)
+    {
+        var distinctCardIds = NormalizeCardIds(cardIds);
+        if (distinctCardIds.Count == 0)
+        {
+            return [];
+        }
+
+        var ownedCards = await _dbContext.Cards
+            .Where(card => distinctCardIds.Contains(card.CardId))
+            .ToListAsync(cancellationToken);
+
+        var foundCardIds = ownedCards
+            .Select(card => card.CardId)
+            .ToHashSet(StringComparer.Ordinal);
+        var invalidCardIds = distinctCardIds
+            .Where(cardId => !foundCardIds.Contains(cardId))
+            .ToList();
+
+        if (ownedCards.Count == 0)
+        {
+            return invalidCardIds;
+        }
+
+        var existingSavedCards = await _dbContext.SavedCards
+            .Where(card => card.UserId == userId && foundCardIds.Contains(card.CardId))
+            .ToListAsync(cancellationToken);
+
+        var savedByCardId = existingSavedCards
+            .ToDictionary(card => card.CardId, StringComparer.Ordinal);
+        var nextSortOrder = await _dbContext.SavedCards
+            .CountAsync(card => card.UserId == userId, cancellationToken);
+        var now = DateTime.UtcNow;
+
+        foreach (var ownedCard in ownedCards)
+        {
+            if (savedByCardId.ContainsKey(ownedCard.CardId))
+            {
+                continue;
+            }
+
+            var savedCard = CreateSavedCardFromBusinessCard(
+                userId,
+                ownedCard,
+                nextSortOrder++,
+                now);
+            _dbContext.SavedCards.Add(savedCard);
+            savedByCardId[ownedCard.CardId] = savedCard;
+
+            if (ownedCard.UserId != userId)
+            {
+                ownedCard.SaveCount += 1;
+                _dbContext.CardInteractions.Add(new CardInteraction
+                {
+                    Id = Guid.NewGuid(),
+                    ActorUserId = userId,
+                    TargetCardEntityId = ownedCard.Id,
+                    TargetCardPublicId = ownedCard.CardId,
+                    EventType = CardInteractionTypes.CardSaved,
+                    Source = CardCreationMethods.CardenceLink,
+                    OccurredAt = now,
+                });
+            }
+        }
+
+        var savedCardIds = savedByCardId.Values.Select(card => card.Id).ToList();
+        var existingLinks = await _dbContext.SavedCardEventGroups
+            .Where(link => link.EventGroupId == groupId && savedCardIds.Contains(link.SavedCardId))
+            .Select(link => link.SavedCardId)
+            .ToListAsync(cancellationToken);
+        var existingLinkSet = existingLinks.ToHashSet();
+
+        foreach (var savedCard in savedByCardId.Values)
+        {
+            if (existingLinkSet.Contains(savedCard.Id))
+            {
+                continue;
+            }
+
+            _dbContext.SavedCardEventGroups.Add(new SavedCardEventGroup
+            {
+                SavedCardId = savedCard.Id,
+                EventGroupId = groupId,
+            });
+        }
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+        return invalidCardIds;
     }
 
     public async Task UnlinkCardAsync(
@@ -285,5 +380,55 @@ public sealed class EventGroupRepository : IEventGroupRepository
         {
             card.LinkedEventGroupIds = linkMap.GetValueOrDefault(card.Id) ?? [];
         }
+    }
+
+    private static List<string> NormalizeCardIds(IReadOnlyList<string> cardIds)
+    {
+        return cardIds
+            .Select(cardId => cardId.Trim())
+            .Where(cardId => !string.IsNullOrEmpty(cardId))
+            .Distinct(StringComparer.Ordinal)
+            .ToList();
+    }
+
+    private static SavedCard CreateSavedCardFromBusinessCard(
+        Guid userId,
+        Card card,
+        int sortOrder,
+        DateTime now)
+    {
+        return new SavedCard
+        {
+            Id = Guid.NewGuid(),
+            UserId = userId,
+            CardId = card.CardId,
+            CreationMethod = CardCreationMethods.CardenceLink,
+            DisplayName = card.DisplayName,
+            Email = card.Email,
+            Phone = card.Phone,
+            Company = card.Company,
+            Title = card.Title,
+            Website = card.Website,
+            Linkedin = card.Linkedin,
+            Skills = card.Skills,
+            School = card.School,
+            About = card.About,
+            Address = card.Address,
+            City = card.City,
+            Country = card.Country,
+            Department = card.Department,
+            AttendedEvents = card.AttendedEvents,
+            Twitter = card.Twitter,
+            Instagram = card.Instagram,
+            Birthday = card.Birthday,
+            PhotoUrl = card.PhotoUrl,
+            AccentColor = card.AccentColor,
+            BackgroundColor = card.BackgroundColor,
+            SavedAt = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
+            SortOrder = sortOrder,
+            IsOwnerPremium = card.IsOwnerPremium,
+            CreatedAt = now,
+            UpdatedAt = now,
+        };
     }
 }

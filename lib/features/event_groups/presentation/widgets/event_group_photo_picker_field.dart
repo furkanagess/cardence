@@ -2,6 +2,7 @@ import 'dart:io';
 import '../../../../core/l10n/l10n_extensions.dart';
 
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../../../../core/media/profile_photo_image_picker.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -12,15 +13,19 @@ class EventGroupPhotoPickerField extends StatelessWidget {
     super.key,
     required this.value,
     required this.onChanged,
+    this.previewUrl,
   });
 
   final String? value;
+  final String? previewUrl;
   final ValueChanged<String?> onChanged;
 
   Future<void> _pickPhoto(BuildContext context) async {
     final picker = ProfilePhotoImagePicker();
     final path = await picker.pickImagePath(
       context,
+      correctFrontCameraMirror: false,
+      preferredCamera: CameraDevice.rear,
       onError: (message, {bool openSettings = false}) {
         if (!context.mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
@@ -40,7 +45,10 @@ class EventGroupPhotoPickerField extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final hasPhoto = value != null && value!.isNotEmpty;
+    final hasLocalPhoto = value != null && value!.isNotEmpty;
+    final remoteUrl = previewUrl?.trim();
+    final hasRemotePhoto = !hasLocalPhoto && remoteUrl != null && remoteUrl.isNotEmpty;
+    final hasPhoto = hasLocalPhoto || hasRemotePhoto;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -73,14 +81,32 @@ class EventGroupPhotoPickerField extends StatelessWidget {
                 children: [
                   ClipRRect(
                     borderRadius: BorderRadius.circular(12),
-                    child: hasPhoto
+                    child: hasLocalPhoto
                         ? Image.file(
                             File(value!),
                             width: 64,
                             height: 64,
                             fit: BoxFit.cover,
                           )
-                        : Container(
+                        : hasRemotePhoto
+                            ? Image.network(
+                                remoteUrl,
+                                width: 64,
+                                height: 64,
+                                fit: BoxFit.cover,
+                                errorBuilder: (_, __, ___) => Container(
+                                  width: 64,
+                                  height: 64,
+                                  color: AppColors.primary.withValues(
+                                    alpha: isDark ? 0.22 : 0.1,
+                                  ),
+                                  child: Icon(
+                                    Icons.broken_image_outlined,
+                                    color: colorScheme.primary,
+                                  ),
+                                ),
+                              )
+                            : Container(
                             width: 64,
                             height: 64,
                             color: AppColors.primary.withValues(

@@ -28,6 +28,7 @@ public sealed class EventGroupService : IEventGroupService
     private readonly IValidator<SaveEventGroupRequest> _saveValidator;
     private readonly IValidator<UpdateEventGroupRequest> _updateValidator;
     private readonly IValidator<LinkEventGroupCardsRequest> _linkValidator;
+    private readonly IValidator<InviteEventGroupCardsByCardIdRequest> _inviteByCardIdValidator;
 
     public EventGroupService(
         IEventGroupRepository eventGroupRepository,
@@ -37,7 +38,8 @@ public sealed class EventGroupService : IEventGroupService
         IEventGroupPhotoStorage eventGroupPhotoStorage,
         IValidator<SaveEventGroupRequest> saveValidator,
         IValidator<UpdateEventGroupRequest> updateValidator,
-        IValidator<LinkEventGroupCardsRequest> linkValidator)
+        IValidator<LinkEventGroupCardsRequest> linkValidator,
+        IValidator<InviteEventGroupCardsByCardIdRequest> inviteByCardIdValidator)
     {
         _eventGroupRepository = eventGroupRepository;
         _businessCardRepository = businessCardRepository;
@@ -47,6 +49,7 @@ public sealed class EventGroupService : IEventGroupService
         _saveValidator = saveValidator;
         _updateValidator = updateValidator;
         _linkValidator = linkValidator;
+        _inviteByCardIdValidator = inviteByCardIdValidator;
     }
 
     public async Task<IReadOnlyList<EventGroupDto>> GetAllAsync(
@@ -64,7 +67,13 @@ public sealed class EventGroupService : IEventGroupService
             result.Add(EventGroupMapper.ToDto(group, cardCount));
         }
 
-        return result;
+        return result
+            .OrderBy(group => group.Status == EventGroupStatuses.Ended ? 1 : 0)
+            .ThenBy(group => group.Status == EventGroupStatuses.Ongoing ? 0 : 1)
+            .ThenBy(group => group.Status == EventGroupStatuses.Ended
+                ? DateTime.MaxValue.Ticks - (group.EndAt ?? group.StartAt).Ticks
+                : group.StartAt.Ticks)
+            .ToList();
     }
 
     public async Task<EventGroupDto> CreateAsync(
@@ -75,6 +84,8 @@ public sealed class EventGroupService : IEventGroupService
 
         var userId = _currentUser.GetRequiredUserId();
         var name = request.Name.Trim();
+        var startAt = NormalizeStartAt(request.StartAt, request.EventDate);
+        var endAt = NormalizeEventDate(request.EndAt);
         await EnsureUniqueNameAsync(userId, name, excludeGroupId: null, cancellationToken);
         await EnsureCanCreateEventGroupAsync(userId, cancellationToken);
 
@@ -84,12 +95,24 @@ public sealed class EventGroupService : IEventGroupService
             UserId = userId,
             Name = name,
             Location = NormalizeOptionalText(request.Location),
-            EventDate = NormalizeEventDate(request.EventDate),
+            StartAtUtc = startAt,
+            EndAtUtc = endAt,
+            EventDate = startAt,
             CreatedAt = DateTime.UtcNow,
         };
 
         await _eventGroupRepository.AddAsync(entity, cancellationToken);
-        return EventGroupMapper.ToDto(entity, cardCount: 0);
+
+        var invalidCardIds = await _eventGroupRepository.InviteCardsByCardIdsAsync(
+            userId,
+            entity.Id,
+            request.InvitedCardIds,
+            cancellationToken);
+        var cardCount = await _eventGroupRepository.CountCardsInGroupAsync(
+            entity.Id,
+            cancellationToken);
+
+        return EventGroupMapper.ToDto(entity, cardCount, invalidCardIds);
     }
 
     public async Task<EventGroupDto> UpdateAsync(
@@ -104,11 +127,15 @@ public sealed class EventGroupService : IEventGroupService
             ?? throw new NotFoundException("EventGroup", request.Id);
 
         var name = request.Name.Trim();
+        var startAt = NormalizeStartAt(request.StartAt, request.EventDate);
+        var endAt = NormalizeEventDate(request.EndAt);
         await EnsureUniqueNameAsync(userId, name, excludeGroupId: groupId, cancellationToken);
 
         entity.Name = name;
         entity.Location = NormalizeOptionalText(request.Location);
-        entity.EventDate = NormalizeEventDate(request.EventDate);
+        entity.StartAtUtc = startAt;
+        entity.EndAtUtc = endAt;
+        entity.EventDate = startAt;
         if (request.ClearPhoto)
         {
             await _eventGroupPhotoStorage.DeleteEventGroupPhotoAsync(
@@ -237,6 +264,29 @@ public sealed class EventGroupService : IEventGroupService
         return EventGroupMapper.ToDto(entity, cardCount);
     }
 
+    public async Task<EventGroupDto> InviteCardsByCardIdAsync(
+        InviteEventGroupCardsByCardIdRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        await _inviteByCardIdValidator.ValidateAndThrowAsync(request, cancellationToken);
+
+        var userId = _currentUser.GetRequiredUserId();
+        var groupId = ParseGroupId(request.Id);
+        var entity = await _eventGroupRepository.GetByUserAndIdAsync(userId, groupId, cancellationToken)
+            ?? throw new NotFoundException("EventGroup", request.Id);
+
+        var invalidCardIds = await _eventGroupRepository.InviteCardsByCardIdsAsync(
+            userId,
+            groupId,
+            request.CardIds,
+            cancellationToken);
+        var cardCount = await _eventGroupRepository.CountCardsInGroupAsync(
+            entity.Id,
+            cancellationToken);
+
+        return EventGroupMapper.ToDto(entity, cardCount, invalidCardIds);
+    }
+
     private async Task EnsureUniqueNameAsync(
         Guid userId,
         string name,
@@ -304,8 +354,19 @@ public sealed class EventGroupService : IEventGroupService
         }
 
         return date.Kind == DateTimeKind.Utc
-            ? date.Date
-            : date.ToUniversalTime().Date;
+            ? date
+            : date.ToUniversalTime();
+    }
+
+    private static DateTime NormalizeStartAt(DateTime? startAt, DateTime? legacyEventDate)
+    {
+        var normalized = NormalizeEventDate(startAt ?? legacyEventDate);
+        if (normalized is null)
+        {
+            throw new ValidationException("Etkinlik başlangıç tarihi ve saati gereklidir.");
+        }
+
+        return normalized.Value;
     }
 
     private static Guid ParseGroupId(string groupId)

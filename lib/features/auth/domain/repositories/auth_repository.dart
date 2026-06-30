@@ -37,7 +37,8 @@ abstract class AuthRepository {
   Future<AuthSession> resetPassword({
     String? email,
     String? phone,
-    required String otpCode,
+    String? otpCode,
+    String? resetToken,
     required String newPassword,
   });
 

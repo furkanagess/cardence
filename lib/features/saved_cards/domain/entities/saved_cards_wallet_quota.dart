@@ -88,10 +88,6 @@ class SavedCardsWalletQuota {
   String get remainingSlotsLabel =>
       hasUnlimitedWallet ? 'Sınırsız' : '$remaining boş slot';
 
-  String get manualEntryMethodSubtitle => 'Kartvizit bilgilerini manuel yazın';
-
-  String get photoScanMethodSubtitle => 'Kamerayı kullanarak bilgileri tara';
-
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||

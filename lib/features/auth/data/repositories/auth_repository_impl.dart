@@ -246,13 +246,15 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<AuthSession> resetPassword({
     String? email,
     String? phone,
-    required String otpCode,
+    String? otpCode,
+    String? resetToken,
     required String newPassword,
   }) async {
     final model = await _remote.resetPassword(
       email: email,
       phone: phone,
       otpCode: otpCode,
+      resetToken: resetToken,
       newPassword: newPassword,
     );
     final session = await _persist(model);

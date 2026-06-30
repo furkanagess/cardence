@@ -1595,8 +1595,38 @@ abstract class AppLocalizations {
   /// No description provided for @kaytlEPostaAdresinizeSfrlama.
   ///
   /// In tr, this message translates to:
-  /// **'Kayıtlı e-posta adresinize sıfırlama kodu gönderilir.'**
+  /// **'Kayıtlı e-posta adresinize şifre sıfırlama bağlantısı gönderilir.'**
   String get kaytlEPostaAdresinizeSfrlama;
+
+  /// No description provided for @sifreSifirlamaBaglantisiGonder.
+  ///
+  /// In tr, this message translates to:
+  /// **'Sıfırlama bağlantısı gönder'**
+  String get sifreSifirlamaBaglantisiGonder;
+
+  /// No description provided for @sifreSifirlamaBaglantisiGonderildi.
+  ///
+  /// In tr, this message translates to:
+  /// **'Sıfırlama bağlantısı gönderildi'**
+  String get sifreSifirlamaBaglantisiGonderildi;
+
+  /// No description provided for @ePostaKutunuzuKontrolEdin.
+  ///
+  /// In tr, this message translates to:
+  /// **'E-posta kutunuzu kontrol edin ve gelen bağlantıya tıklayarak yeni şifrenizi belirleyin.'**
+  String get ePostaKutunuzuKontrolEdin;
+
+  /// No description provided for @sifreSifirlamaLinkAcildi.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yeni şifrenizi aşağıdan belirleyebilirsiniz.'**
+  String get sifreSifirlamaLinkAcildi;
+
+  /// No description provided for @sifreSifirlamaBaglantisiGecersiz.
+  ///
+  /// In tr, this message translates to:
+  /// **'Şifre sıfırlama bağlantısı geçersiz veya süresi dolmuş.'**
+  String get sifreSifirlamaBaglantisiGecersiz;
 
   /// No description provided for @kaytlKartLimitinizDolduPremium.
   ///
@@ -2786,6 +2816,18 @@ abstract class AppLocalizations {
   /// **'Destek talebi gönderilemedi. Lütfen tekrar deneyin.'**
   String get supportRequestFailedRetry;
 
+  /// No description provided for @supportInvalidRequest.
+  ///
+  /// In tr, this message translates to:
+  /// **'Geçerli bir e-posta ve en az 10 karakterlik bir mesaj girin.'**
+  String get supportInvalidRequest;
+
+  /// No description provided for @enAz10Karakter.
+  ///
+  /// In tr, this message translates to:
+  /// **'En az 10 karakter'**
+  String get enAz10Karakter;
+
   /// No description provided for @cardencePaylasBirlikteBaglanti.
   ///
   /// In tr, this message translates to:
@@ -3329,14 +3371,146 @@ abstract class AppLocalizations {
   /// No description provided for @eventGroupDetailsStepSubtitle.
   ///
   /// In tr, this message translates to:
-  /// **'Etkinliğin adını, konumunu ve tarihini girin.'**
+  /// **'Etkinliğin adını, konumunu, başlangıç saatini ve isteğe bağlı bitiş saatini girin.'**
   String get eventGroupDetailsStepSubtitle;
 
   /// No description provided for @eventGroupCardsStepSubtitle.
   ///
   /// In tr, this message translates to:
-  /// **'İsterseniz kart seçmeden de grubu oluşturabilirsiniz.'**
+  /// **'Kayıtlı kart seçin veya Card ID ile davet edin. İsterseniz kart seçmeden de etkinliği oluşturabilirsiniz.'**
   String get eventGroupCardsStepSubtitle;
+
+  /// No description provided for @eventStartRequired.
+  ///
+  /// In tr, this message translates to:
+  /// **'Başlangıç tarihi ve saati seçin.'**
+  String get eventStartRequired;
+
+  /// No description provided for @eventLocationRequired.
+  ///
+  /// In tr, this message translates to:
+  /// **'Etkinlik konumu gereklidir.'**
+  String get eventLocationRequired;
+
+  /// No description provided for @eventEndRequiresDateAndTime.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bitiş için tarih ve saat birlikte seçilmelidir.'**
+  String get eventEndRequiresDateAndTime;
+
+  /// No description provided for @eventEndBeforeStart.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bitiş zamanı başlangıçtan önce olamaz.'**
+  String get eventEndBeforeStart;
+
+  /// No description provided for @eventStart.
+  ///
+  /// In tr, this message translates to:
+  /// **'Başlangıç'**
+  String get eventStart;
+
+  /// No description provided for @eventEndOptional.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bitiş (opsiyonel)'**
+  String get eventEndOptional;
+
+  /// No description provided for @eventPickTime.
+  ///
+  /// In tr, this message translates to:
+  /// **'Saat seç'**
+  String get eventPickTime;
+
+  /// No description provided for @eventInviteByCardId.
+  ///
+  /// In tr, this message translates to:
+  /// **'Card ID ile davet et'**
+  String get eventInviteByCardId;
+
+  /// No description provided for @eventActiveSection.
+  ///
+  /// In tr, this message translates to:
+  /// **'Devam eden / Yaklaşan'**
+  String get eventActiveSection;
+
+  /// No description provided for @eventEndedSection.
+  ///
+  /// In tr, this message translates to:
+  /// **'Biten etkinlikler'**
+  String get eventEndedSection;
+
+  /// No description provided for @eventStatusUpcoming.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yaklaşıyor'**
+  String get eventStatusUpcoming;
+
+  /// No description provided for @eventStatusOngoing.
+  ///
+  /// In tr, this message translates to:
+  /// **'Devam ediyor'**
+  String get eventStatusOngoing;
+
+  /// No description provided for @eventStatusEnded.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bitti'**
+  String get eventStatusEnded;
+
+  /// No description provided for @eventEditTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Etkinliği düzenle'**
+  String get eventEditTitle;
+
+  /// No description provided for @eventGroupUpdatedMessage.
+  ///
+  /// In tr, this message translates to:
+  /// **'\"{name}\" güncellendi'**
+  String eventGroupUpdatedMessage(String name);
+
+  /// No description provided for @eventInviteCardsTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Card ID ile kart davet et'**
+  String get eventInviteCardsTitle;
+
+  /// No description provided for @eventInviteCardsSubtitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Card ID girerek bu etkinliğe kart ekleyin. Geçersiz ID\'ler raporlanır.'**
+  String get eventInviteCardsSubtitle;
+
+  /// No description provided for @eventSendInvites.
+  ///
+  /// In tr, this message translates to:
+  /// **'Davet gönder'**
+  String get eventSendInvites;
+
+  /// No description provided for @eventCardIdHint.
+  ///
+  /// In tr, this message translates to:
+  /// **'Örn. 123456'**
+  String get eventCardIdHint;
+
+  /// No description provided for @eventInvitedCardIdsCount.
+  ///
+  /// In tr, this message translates to:
+  /// **'{count} Card ID eklendi'**
+  String eventInvitedCardIdsCount(int count);
+
+  /// No description provided for @eventCardsInvitedMessage.
+  ///
+  /// In tr, this message translates to:
+  /// **'{count} kart davet edildi'**
+  String eventCardsInvitedMessage(int count);
+
+  /// No description provided for @eventInvalidCardIdsMessage.
+  ///
+  /// In tr, this message translates to:
+  /// **'{count} geçersiz Card ID'**
+  String eventInvalidCardIdsMessage(int count);
 
   /// No description provided for @noCardsSelectedYet.
   ///

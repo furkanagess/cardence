@@ -37,7 +37,8 @@ class PickEventGroupsForCardSheet extends StatefulWidget {
       _PickEventGroupsForCardSheetState();
 }
 
-class _PickEventGroupsForCardSheetState extends State<PickEventGroupsForCardSheet> {
+class _PickEventGroupsForCardSheetState
+    extends State<PickEventGroupsForCardSheet> {
   late final Set<String> _selectedIds;
 
   @override

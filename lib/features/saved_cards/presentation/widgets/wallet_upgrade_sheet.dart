@@ -94,7 +94,8 @@ class WalletUpgradeSheet extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 8),
-            TextButton(
+            CustomButton.text(
+              label: context.l10n.satnAlmlarGeriYkle,
               onPressed: () async {
                 final restored = await restoreWalletPurchases();
                 if (!context.mounted) return;
@@ -111,7 +112,6 @@ class WalletUpgradeSheet extends StatelessWidget {
                   ),
                 );
               },
-              child: Text(context.l10n.satnAlmlarGeriYkle),
             ),
             const SizedBox(height: 4),
             Text(

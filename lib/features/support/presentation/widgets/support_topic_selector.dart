@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/l10n/l10n_extensions.dart';
 
 import '../../../../core/theme/app_colors.dart';
+import '../helpers/support_topic_labels.dart';
 import '../../domain/entities/support_topic.dart';
 
 class SupportTopicSelector extends StatelessWidget {
@@ -36,7 +37,7 @@ class SupportTopicSelector extends StatelessWidget {
           children: SupportTopic.values.map((topic) {
             final isSelected = topic == selected;
             return FilterChip(
-              label: Text(topic.label),
+              label: Text(supportTopicLabel(context.l10n, topic)),
               selected: isSelected,
               showCheckmark: false,
               onSelected: (_) => onChanged(topic),

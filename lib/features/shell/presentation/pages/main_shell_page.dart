@@ -9,7 +9,9 @@ import '../../../../core/widgets/organisms/cardence_scaffold.dart';
 import '../../../event_groups/domain/usecases/get_event_groups.dart';
 import '../../../event_groups/domain/usecases/create_event_group.dart';
 import '../../../event_groups/domain/usecases/delete_event_group.dart';
+import '../../../event_groups/domain/usecases/invite_event_group_cards_by_card_id.dart';
 import '../../../event_groups/domain/usecases/link_event_group_cards.dart';
+import '../../../event_groups/domain/usecases/update_event_group.dart';
 import '../../../saved_cards/domain/usecases/add_saved_card.dart';
 import '../../../saved_cards/domain/usecases/delete_saved_card.dart';
 import '../../../saved_cards/domain/usecases/get_saved_cards.dart';
@@ -53,6 +55,8 @@ class MainShellPage extends StatefulWidget {
     required this.persistOnboardingCard,
     required this.getEventGroups,
     required this.createEventGroup,
+    required this.updateEventGroup,
+    required this.inviteEventGroupCardsByCardId,
     required this.deleteEventGroup,
     required this.linkEventGroupCards,
     required this.linkSavedCardsToEventGroup,
@@ -86,6 +90,8 @@ class MainShellPage extends StatefulWidget {
   final PersistOnboardingCard persistOnboardingCard;
   final GetEventGroups getEventGroups;
   final CreateEventGroup createEventGroup;
+  final UpdateEventGroup updateEventGroup;
+  final InviteEventGroupCardsByCardId inviteEventGroupCardsByCardId;
   final DeleteEventGroup deleteEventGroup;
   final LinkEventGroupCards linkEventGroupCards;
   final LinkSavedCardsToEventGroup linkSavedCardsToEventGroup;
@@ -193,6 +199,9 @@ class _MainShellPageState extends State<MainShellPage> {
               SavedCardsPage(
                 getEventGroups: widget.getEventGroups,
                 getSavedCards: widget.getSavedCards,
+                updateEventGroup: widget.updateEventGroup,
+                inviteEventGroupCardsByCardId:
+                    widget.inviteEventGroupCardsByCardId,
                 deleteEventGroup: widget.deleteEventGroup,
                 linkSavedCardsToEventGroup: widget.linkSavedCardsToEventGroup,
                 saveSavedCard: widget.saveSavedCard,
@@ -208,6 +217,9 @@ class _MainShellPageState extends State<MainShellPage> {
               EventGroupsPage(
                 getEventGroups: widget.getEventGroups,
                 createEventGroup: widget.createEventGroup,
+                updateEventGroup: widget.updateEventGroup,
+                inviteEventGroupCardsByCardId:
+                    widget.inviteEventGroupCardsByCardId,
                 deleteEventGroup: widget.deleteEventGroup,
                 linkSavedCardsToEventGroup: widget.linkSavedCardsToEventGroup,
                 getSavedCards: widget.getSavedCards,

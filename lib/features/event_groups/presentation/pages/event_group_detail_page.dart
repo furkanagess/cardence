@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/l10n/app_l10n.dart';
 import '../../../../core/l10n/l10n_extensions.dart';
+import '../../../../core/network/auth_api_exception.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/atoms/cardence_app_bar.dart';
@@ -9,21 +11,27 @@ import '../../../../core/widgets/organisms/cardence_scaffold.dart';
 import '../../../../core/widgets/organisms/flippable_person_card.dart';
 import '../../../saved_cards/domain/entities/saved_card.dart';
 import '../../../saved_cards/domain/extensions/saved_card_preview_colors.dart';
-import '../../../saved_cards/domain/extensions/saved_card_preview_entries.dart';
+import '../../../saved_cards/presentation/helpers/saved_card_flip_back_entries.dart';
 import '../../../saved_cards/domain/usecases/delete_saved_card.dart';
 import '../../../saved_cards/domain/usecases/get_saved_cards.dart';
 import '../../../saved_cards/domain/usecases/save_saved_card.dart';
+import '../../../saved_cards/presentation/cubit/saved_cards_cubit.dart';
 import '../../../saved_cards/presentation/pages/saved_card_detail_page.dart';
 import '../../../network_graph/domain/entities/graph_scope.dart';
 import '../../../network_graph/domain/usecases/get_network_graph.dart';
 import '../../../network_graph/domain/usecases/get_network_graph_path.dart';
 import '../../../network_graph/presentation/helpers/network_graph_launcher.dart';
 import '../../domain/entities/event_group.dart';
+import '../../domain/entities/event_group_update_input.dart';
 import '../../domain/usecases/get_event_groups.dart';
 import '../../domain/usecases/delete_event_group.dart';
+import '../../domain/usecases/update_event_group.dart';
+import '../../domain/usecases/invite_event_group_cards_by_card_id.dart';
 import '../../../saved_cards/domain/usecases/link_saved_cards_to_event_group.dart';
 import '../widgets/event_group_info_banner.dart';
 import '../widgets/pick_saved_cards_for_group_sheet.dart';
+import '../widgets/edit_event_group_sheet.dart';
+import '../widgets/invite_event_group_cards_sheet.dart';
 
 /// Bir etkinlik grubunun detayı: bu gruba bağlı kayıtlı kartlar listelenir.
 class EventGroupDetailPage extends StatefulWidget {
@@ -31,6 +39,8 @@ class EventGroupDetailPage extends StatefulWidget {
     super.key,
     required this.group,
     required this.getEventGroups,
+    required this.updateEventGroup,
+    required this.inviteEventGroupCardsByCardId,
     required this.deleteEventGroup,
     required this.linkSavedCardsToEventGroup,
     required this.getSavedCards,
@@ -42,6 +52,8 @@ class EventGroupDetailPage extends StatefulWidget {
 
   final EventGroup group;
   final GetEventGroups getEventGroups;
+  final UpdateEventGroup updateEventGroup;
+  final InviteEventGroupCardsByCardId inviteEventGroupCardsByCardId;
   final DeleteEventGroup deleteEventGroup;
   final LinkSavedCardsToEventGroup linkSavedCardsToEventGroup;
   final GetSavedCards getSavedCards;
@@ -55,13 +67,16 @@ class EventGroupDetailPage extends StatefulWidget {
 }
 
 class _EventGroupDetailPageState extends State<EventGroupDetailPage> {
+  late EventGroup _group;
   List<SavedCard> _linkedCards = [];
   List<SavedCard> _availableToAdd = [];
   bool _loading = true;
+  bool _saving = false;
 
   @override
   void initState() {
     super.initState();
+    _group = widget.group;
     _load();
   }
 
@@ -72,10 +87,10 @@ class _EventGroupDetailPageState extends State<EventGroupDetailPage> {
     final allCards = cards;
     setState(() {
       _linkedCards = allCards
-          .where((c) => c.linkedEventGroupIds.contains(widget.group.id))
+          .where((c) => c.linkedEventGroupIds.contains(_group.id))
           .toList();
       _availableToAdd = allCards
-          .where((c) => !c.linkedEventGroupIds.contains(widget.group.id))
+          .where((c) => !c.linkedEventGroupIds.contains(_group.id))
           .toList();
       _loading = false;
     });
@@ -93,6 +108,8 @@ class _EventGroupDetailPageState extends State<EventGroupDetailPage> {
           card: card,
           getEventGroups: widget.getEventGroups,
           getSavedCards: widget.getSavedCards,
+          updateEventGroup: widget.updateEventGroup,
+          inviteEventGroupCardsByCardId: widget.inviteEventGroupCardsByCardId,
           deleteEventGroup: widget.deleteEventGroup,
           linkSavedCardsToEventGroup: widget.linkSavedCardsToEventGroup,
           saveSavedCard: widget.saveSavedCard,
@@ -102,6 +119,114 @@ class _EventGroupDetailPageState extends State<EventGroupDetailPage> {
       ),
     );
     await _load();
+  }
+
+  Future<void> _openEditGroup() async {
+    final groups = await widget.getEventGroups();
+    final existingNames = groups
+        .where((group) => group.id != _group.id)
+        .map((group) => group.name)
+        .toList();
+    if (!mounted) return;
+
+    final result = await EditEventGroupSheet.show(
+      context,
+      group: _group,
+      existingNames: existingNames,
+    );
+    if (!mounted || result == null) return;
+
+    setState(() => _saving = true);
+    try {
+      final updated = await widget.updateEventGroup(
+        EventGroupUpdateInput(
+          id: _group.id,
+          name: result.name,
+          location: result.location,
+          startAt: result.startAt,
+          endAt: result.endAt,
+          photoFilePath: result.photoFilePath,
+          clearPhoto: result.clearPhoto,
+        ),
+      );
+      if (!mounted) return;
+      setState(() => _group = updated);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            AppL10n.eventGroupUpdatedMessage(context.l10n, updated.name),
+          ),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    } on AuthApiException catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(e.message),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => _saving = false);
+    }
+  }
+
+  Future<void> _openInviteByCardId() async {
+    final cardIds = await InviteEventGroupCardsSheet.show(context);
+    if (!mounted || cardIds == null || cardIds.isEmpty) return;
+
+    setState(() => _saving = true);
+    try {
+      final updated = await widget.inviteEventGroupCardsByCardId(
+        groupId: _group.id,
+        cardIds: cardIds,
+      );
+      if (!mounted) return;
+
+      final validCount = cardIds.length - updated.invalidCardIds.length;
+      if (validCount > 0) {
+        await context.read<SavedCardsCubit>().refreshAll();
+        await _load();
+      }
+
+      if (!mounted) return;
+      setState(() => _group = updated);
+
+      final l10n = context.l10n;
+      final messages = <String>[];
+      if (validCount > 0) {
+        messages.add(AppL10n.eventCardsInvitedMessage(l10n, validCount));
+      }
+      if (updated.invalidCardIds.isNotEmpty) {
+        messages.add(
+          AppL10n.eventInvalidCardIdsMessage(
+            l10n,
+            updated.invalidCardIds.length,
+          ),
+        );
+      }
+      if (messages.isEmpty) {
+        messages.add(l10n.invalidCardId);
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(messages.join('\n')),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    } on AuthApiException catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(e.message),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => _saving = false);
+    }
   }
 
   Future<void> _openAddCardsPicker() async {
@@ -119,15 +244,15 @@ class _EventGroupDetailPageState extends State<EventGroupDetailPage> {
     final selectedIds = await PickSavedCardsForGroupSheet.show(
       context,
       cards: _availableToAdd,
-      eventGroupId: widget.group.id,
-      eventGroupName: widget.group.name,
+      eventGroupId: _group.id,
+      eventGroupName: _group.name,
       addOnly: true,
     );
     if (!mounted || selectedIds == null || selectedIds.isEmpty) return;
 
     final allCards = await widget.getSavedCards();
     await widget.linkSavedCardsToEventGroup(
-      groupId: widget.group.id,
+      groupId: _group.id,
       allCards: allCards,
       cardIdsToAdd: selectedIds.toList(),
     );
@@ -139,7 +264,8 @@ class _EventGroupDetailPageState extends State<EventGroupDetailPage> {
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(AppL10n.cardsAddedToGroupMessage(context.l10n, addedCount)),
+        content:
+            Text(AppL10n.cardsAddedToGroupMessage(context.l10n, addedCount)),
         behavior: SnackBarBehavior.floating,
       ),
     );
@@ -156,8 +282,8 @@ class _EventGroupDetailPageState extends State<EventGroupDetailPage> {
       getNetworkGraphPath: getNetworkGraphPath,
       getEventGroups: widget.getEventGroups,
       initialScope: GraphScope.event,
-      eventGroupId: widget.group.id,
-      eventGroupName: widget.group.name,
+      eventGroupId: _group.id,
+      eventGroupName: _group.name,
     );
   }
 
@@ -168,13 +294,13 @@ class _EventGroupDetailPageState extends State<EventGroupDetailPage> {
       builder: (context) => AlertDialog(
         title: Text(AppL10n.grubuSil(l10n)),
         content: Text(
-          '${AppL10n.deleteEventGroupConfirmMessage(l10n, widget.group.name)}\n'
+          '${AppL10n.deleteEventGroupConfirmMessage(l10n, _group.name)}\n'
           '${AppL10n.deleteEventGroupConfirmSubMessage(l10n)}',
         ),
         actions: [
-          TextButton(
+          CustomButton.text(
+            label: AppL10n.iptal(l10n),
             onPressed: () => Navigator.of(context).pop(false),
-            child: Text(AppL10n.iptal(l10n)),
           ),
           CustomButton(
             label: AppL10n.sil(l10n),
@@ -193,14 +319,15 @@ class _EventGroupDetailPageState extends State<EventGroupDetailPage> {
   }
 
   Future<void> _deleteGroup() async {
-    await widget.deleteEventGroup(widget.group.id);
+    await widget.deleteEventGroup(_group.id);
     await widget.getSavedCards();
 
     if (!mounted) return;
     Navigator.of(context).pop();
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(AppL10n.eventGroupDeletedMessage(context.l10n, widget.group.name)),
+        content: Text(
+            AppL10n.eventGroupDeletedMessage(context.l10n, _group.name)),
         behavior: SnackBarBehavior.floating,
       ),
     );
@@ -322,7 +449,7 @@ class _EventGroupDetailPageState extends State<EventGroupDetailPage> {
         padding: EdgeInsets.fromLTRB(0, 0, 0, bottomInset),
         child: Column(
           children: [
-            EventGroupInfoBanner(group: widget.group),
+            EventGroupInfoBanner(group: _group),
             Padding(
               padding: const EdgeInsets.fromLTRB(24, 24, 24, 0),
               child: ConstrainedBox(
@@ -335,40 +462,49 @@ class _EventGroupDetailPageState extends State<EventGroupDetailPage> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-              Icon(
-                Icons.credit_card_off_rounded,
-                size: 64,
-                color: colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
-              ),
-              const SizedBox(height: 16),
-              Text(
-                AppL10n.buGruptaKartYok(context.l10n),
-                style: textTheme.titleMedium?.copyWith(
-                  color: colorScheme.onSurfaceVariant,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                AppL10n.kaydedilenKartlarnzdanSeerekBuGruba(context.l10n),
-                style: textTheme.bodySmall?.copyWith(
-                  color: colorScheme.onSurfaceVariant,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 24),
-              CustomButton(
-                label: AppL10n.kartEkle(context.l10n),
-                icon: Icons.add_rounded,
-                onPressed: _availableToAdd.isEmpty ? null : _openAddCardsPicker,
-                fullWidth: false,
-                style: FilledButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  foregroundColor: AppColors.textOnPrimary,
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-                ),
-              ),
+                    Icon(
+                      Icons.credit_card_off_rounded,
+                      size: 64,
+                      color:
+                          colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      AppL10n.buGruptaKartYok(context.l10n),
+                      style: textTheme.titleMedium?.copyWith(
+                        color: colorScheme.onSurfaceVariant,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      AppL10n.kaydedilenKartlarnzdanSeerekBuGruba(context.l10n),
+                      style: textTheme.bodySmall?.copyWith(
+                        color: colorScheme.onSurfaceVariant,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 24),
+                    CustomButton(
+                      label: AppL10n.kartEkle(context.l10n),
+                      icon: Icons.add_rounded,
+                      onPressed:
+                          _availableToAdd.isEmpty ? null : _openAddCardsPicker,
+                      fullWidth: false,
+                      style: FilledButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        foregroundColor: AppColors.textOnPrimary,
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 20, vertical: 14),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    CustomButton.tonal(
+                      label: context.l10n.eventInviteByCardId,
+                      icon: Icons.badge_outlined,
+                      onPressed: _openInviteByCardId,
+                      fullWidth: false,
+                    ),
                   ],
                 ),
               ),
@@ -383,7 +519,7 @@ class _EventGroupDetailPageState extends State<EventGroupDetailPage> {
       itemCount: _linkedCards.length + 1,
       itemBuilder: (context, index) {
         if (index == 0) {
-          return EventGroupInfoBanner(group: widget.group);
+          return EventGroupInfoBanner(group: _group);
         }
 
         final card = _linkedCards[index - 1];
@@ -407,8 +543,18 @@ class _EventGroupDetailPageState extends State<EventGroupDetailPage> {
 
     return CardenceScaffold(
       appBar: CardenceAppBar(
-        title: widget.group.name,
+        title: _group.name,
         actions: [
+          CardenceAppBar.iconAction(
+            icon: Icons.edit_outlined,
+            tooltip: context.l10n.duzenle,
+            onPressed: _saving ? null : _openEditGroup,
+          ),
+          CardenceAppBar.iconAction(
+            icon: Icons.badge_outlined,
+            tooltip: context.l10n.eventInviteByCardId,
+            onPressed: _saving ? null : _openInviteByCardId,
+          ),
           if (widget.getNetworkGraph != null &&
               widget.getNetworkGraphPath != null)
             CardenceAppBar.iconAction(
@@ -424,7 +570,7 @@ class _EventGroupDetailPageState extends State<EventGroupDetailPage> {
             ),
         ],
       ),
-      body: _loading
+      body: _loading || _saving
           ? const Center(child: CircularProgressIndicator())
           : Stack(
               fit: StackFit.expand,
@@ -477,7 +623,7 @@ class _SavedCardPreviewTile extends StatelessWidget {
         accentColor: card.previewAccentColor,
         backgroundColor: card.previewBackgroundColor,
         frontEntries: const [],
-        backEntries: card.backAboutEntries,
+        backEntries: savedCardFlipBackEntries(card, context.l10n),
         emptyMessage: AppL10n.kartBilgisiYok(context.l10n),
         cardId: card.cardId,
         onTap: onTap,

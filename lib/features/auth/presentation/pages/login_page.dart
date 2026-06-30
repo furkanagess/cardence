@@ -122,9 +122,7 @@ class _AuthViewState extends State<_AuthView>
       MaterialPageRoute<void>(
         builder: (_) => ForgotPasswordPage(
           forgotPassword: widget.forgotPassword,
-          resetPassword: widget.resetPassword,
           initialEmail: initialEmail,
-          onResetSuccess: widget.onAuthSuccess,
         ),
       ),
     );

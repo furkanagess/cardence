@@ -25,6 +25,8 @@ import '../../../ads/domain/usecases/show_post_add_card_monetization.dart';
 import '../../../subscriptions/domain/usecases/restore_wallet_purchases.dart';
 import '../../../event_groups/domain/usecases/get_event_groups.dart';
 import '../../../event_groups/domain/usecases/delete_event_group.dart';
+import '../../../event_groups/domain/usecases/update_event_group.dart';
+import '../../../event_groups/domain/usecases/invite_event_group_cards_by_card_id.dart';
 import '../../domain/usecases/link_saved_cards_to_event_group.dart';
 
 /// Kayıtlı kartlar sayfası yan etkileri: snackbar, sheet ve navigasyon.
@@ -171,6 +173,8 @@ mixin SavedCardsPageEffectsMixin<T extends StatefulWidget> on State<T> {
     String? heroTag,
     required GetEventGroups getEventGroups,
     required GetSavedCards getSavedCards,
+    required UpdateEventGroup updateEventGroup,
+    required InviteEventGroupCardsByCardId inviteEventGroupCardsByCardId,
     required DeleteEventGroup deleteEventGroup,
     required LinkSavedCardsToEventGroup linkSavedCardsToEventGroup,
     required SaveSavedCard saveSavedCard,
@@ -185,6 +189,8 @@ mixin SavedCardsPageEffectsMixin<T extends StatefulWidget> on State<T> {
           heroTag: heroTag,
           getEventGroups: getEventGroups,
           getSavedCards: getSavedCards,
+          updateEventGroup: updateEventGroup,
+          inviteEventGroupCardsByCardId: inviteEventGroupCardsByCardId,
           deleteEventGroup: deleteEventGroup,
           linkSavedCardsToEventGroup: linkSavedCardsToEventGroup,
           saveSavedCard: saveSavedCard,
