@@ -1,3 +1,4 @@
+using Cardence.Application.Common;
 using Cardence.Application.Interfaces;
 using Cardence.Domain.Constants;
 using Cardence.Domain.Entities;
@@ -170,30 +171,156 @@ public sealed class EventGroupRepository : IEventGroupRepository
             return invalidCardIds;
         }
 
-        var existingSavedCards = await _dbContext.SavedCards
-            .Where(card => card.UserId == userId && foundCardIds.Contains(card.CardId))
-            .ToListAsync(cancellationToken);
-
-        var savedByCardId = existingSavedCards
-            .ToDictionary(card => card.CardId, StringComparer.Ordinal);
-        var nextSortOrder = await _dbContext.SavedCards
-            .CountAsync(card => card.UserId == userId, cancellationToken);
         var now = DateTime.UtcNow;
-
         foreach (var ownedCard in ownedCards)
         {
-            if (savedByCardId.ContainsKey(ownedCard.CardId))
+            if (ownedCard.UserId == userId)
             {
+                await EnsureBusinessCardLinkedToGroupAsync(
+                    userId,
+                    groupId,
+                    ownedCard,
+                    now,
+                    cancellationToken);
                 continue;
             }
 
-            var savedCard = CreateSavedCardFromBusinessCard(
+            await CreatePendingInviteIfNeededAsync(
+                userId,
+                groupId,
+                ownedCard,
+                now,
+                cancellationToken);
+        }
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+        return invalidCardIds;
+    }
+
+    public async Task<IReadOnlyList<EventGroupCardInvite>> GetPendingInvitationsForInviteeAsync(
+        Guid inviteeUserId,
+        CancellationToken cancellationToken = default)
+    {
+        return await _dbContext.EventGroupCardInvites
+            .AsNoTracking()
+            .Include(invite => invite.EventGroup)
+            .Include(invite => invite.InviterUser)
+            .Include(invite => invite.Card)
+            .Where(invite =>
+                invite.InviteeUserId == inviteeUserId &&
+                invite.Status == EventGroupInvitationStatuses.Pending)
+            .OrderByDescending(invite => invite.CreatedAtUtc)
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task<EventGroupCardInvite?> GetInvitationForInviteeAsync(
+        Guid inviteeUserId,
+        Guid invitationId,
+        CancellationToken cancellationToken = default)
+    {
+        return await _dbContext.EventGroupCardInvites
+            .Include(invite => invite.EventGroup)
+            .Include(invite => invite.InviterUser)
+            .Include(invite => invite.Card)
+            .FirstOrDefaultAsync(
+                invite =>
+                    invite.Id == invitationId &&
+                    invite.InviteeUserId == inviteeUserId,
+                cancellationToken);
+    }
+
+    public async Task AcceptInvitationAsync(
+        EventGroupCardInvite invitation,
+        CancellationToken cancellationToken = default)
+    {
+        if (invitation.Status != EventGroupInvitationStatuses.Pending)
+        {
+            return;
+        }
+
+        var now = DateTime.UtcNow;
+        await EnsureBusinessCardLinkedToGroupAsync(
+            invitation.InviterUserId,
+            invitation.EventGroupId,
+            invitation.Card,
+            now,
+            cancellationToken);
+
+        invitation.Status = EventGroupInvitationStatuses.Accepted;
+        invitation.RespondedAtUtc = now;
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    public async Task RejectInvitationAsync(
+        EventGroupCardInvite invitation,
+        CancellationToken cancellationToken = default)
+    {
+        if (invitation.Status != EventGroupInvitationStatuses.Pending)
+        {
+            return;
+        }
+
+        invitation.Status = EventGroupInvitationStatuses.Rejected;
+        invitation.RespondedAtUtc = DateTime.UtcNow;
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    private async Task CreatePendingInviteIfNeededAsync(
+        Guid inviterUserId,
+        Guid groupId,
+        Card ownedCard,
+        DateTime now,
+        CancellationToken cancellationToken)
+    {
+        var existingInvite = await _dbContext.EventGroupCardInvites
+            .Where(invite =>
+                invite.EventGroupId == groupId &&
+                invite.CardEntityId == ownedCard.Id)
+            .OrderByDescending(invite => invite.CreatedAtUtc)
+            .FirstOrDefaultAsync(cancellationToken);
+
+        if (existingInvite is not null &&
+            (existingInvite.Status == EventGroupInvitationStatuses.Pending ||
+             existingInvite.Status == EventGroupInvitationStatuses.Accepted))
+        {
+            return;
+        }
+
+        _dbContext.EventGroupCardInvites.Add(new EventGroupCardInvite
+        {
+            Id = Guid.NewGuid(),
+            EventGroupId = groupId,
+            InviterUserId = inviterUserId,
+            InviteeUserId = ownedCard.UserId,
+            CardEntityId = ownedCard.Id,
+            CardId = ownedCard.CardId,
+            Status = EventGroupInvitationStatuses.Pending,
+            CreatedAtUtc = now,
+        });
+    }
+
+    private async Task EnsureBusinessCardLinkedToGroupAsync(
+        Guid userId,
+        Guid groupId,
+        Card ownedCard,
+        DateTime now,
+        CancellationToken cancellationToken)
+    {
+        var savedCard = await _dbContext.SavedCards
+            .FirstOrDefaultAsync(
+                card => card.UserId == userId && card.CardId == ownedCard.CardId,
+                cancellationToken);
+
+        if (savedCard is null)
+        {
+            var nextSortOrder = await _dbContext.SavedCards
+                .CountAsync(card => card.UserId == userId, cancellationToken);
+            savedCard = CreateSavedCardFromBusinessCard(
                 userId,
                 ownedCard,
-                nextSortOrder++,
+                nextSortOrder,
                 now);
             _dbContext.SavedCards.Add(savedCard);
-            savedByCardId[ownedCard.CardId] = savedCard;
 
             if (ownedCard.UserId != userId)
             {
@@ -211,29 +338,20 @@ public sealed class EventGroupRepository : IEventGroupRepository
             }
         }
 
-        var savedCardIds = savedByCardId.Values.Select(card => card.Id).ToList();
-        var existingLinks = await _dbContext.SavedCardEventGroups
-            .Where(link => link.EventGroupId == groupId && savedCardIds.Contains(link.SavedCardId))
-            .Select(link => link.SavedCardId)
-            .ToListAsync(cancellationToken);
-        var existingLinkSet = existingLinks.ToHashSet();
-
-        foreach (var savedCard in savedByCardId.Values)
+        var alreadyLinked = await _dbContext.SavedCardEventGroups
+            .AnyAsync(
+                link => link.EventGroupId == groupId && link.SavedCardId == savedCard.Id,
+                cancellationToken);
+        if (alreadyLinked)
         {
-            if (existingLinkSet.Contains(savedCard.Id))
-            {
-                continue;
-            }
-
-            _dbContext.SavedCardEventGroups.Add(new SavedCardEventGroup
-            {
-                SavedCardId = savedCard.Id,
-                EventGroupId = groupId,
-            });
+            return;
         }
 
-        await _dbContext.SaveChangesAsync(cancellationToken);
-        return invalidCardIds;
+        _dbContext.SavedCardEventGroups.Add(new SavedCardEventGroup
+        {
+            SavedCardId = savedCard.Id,
+            EventGroupId = groupId,
+        });
     }
 
     public async Task UnlinkCardAsync(

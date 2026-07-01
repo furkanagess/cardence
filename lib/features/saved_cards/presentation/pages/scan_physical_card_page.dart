@@ -101,36 +101,9 @@ class _ScanPhysicalCardViewState extends State<_ScanPhysicalCardView>
   Widget build(BuildContext context) {
     return BlocConsumer<ScanPhysicalCardCubit, ScanPhysicalCardState>(
       listenWhen: (previous, current) =>
-          (previous.completedDraft == null &&
-              current.completedDraft != null) ||
-          (previous.errorMessage != current.errorMessage &&
-              current.errorMessage != null),
+          previous.completedDraft == null && current.completedDraft != null,
       listener: (context, state) {
-        if (state.completedDraft != null) {
-          _openManualReview(context, state);
-          return;
-        }
-        final message = state.errorMessage;
-        if (message == null) return;
-
-        final cubit = context.read<ScanPhysicalCardCubit>();
-        final openSettings = state.cameraPermission ==
-            ScanCameraPermissionStatus.permanentlyDenied;
-
-        ScaffoldMessenger.of(context)
-          ..hideCurrentSnackBar()
-          ..showSnackBar(
-            SnackBar(
-              content: Text(message),
-              behavior: SnackBarBehavior.floating,
-              action: openSettings
-                  ? SnackBarAction(
-                      label: context.l10n.ayarlar,
-                      onPressed: cubit.openCameraSettings,
-                    )
-                  : null,
-            ),
-          );
+        _openManualReview(context, state);
       },
       builder: (context, state) {
         final textTheme = Theme.of(context).textTheme;

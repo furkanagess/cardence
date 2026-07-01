@@ -107,22 +107,7 @@ class _OnboardingContentState extends State<_OnboardingContent> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<OnboardingCubit, OnboardingState>(
-      listenWhen: (prev, curr) =>
-          curr.errorMessage != null && prev.errorMessage != curr.errorMessage,
-      listener: (context, state) {
-        final message = state.errorMessage;
-        if (message == null) return;
-        ScaffoldMessenger.of(context)
-          ..hideCurrentSnackBar()
-          ..showSnackBar(
-            SnackBar(
-              content: Text(message),
-              behavior: SnackBarBehavior.floating,
-            ),
-          );
-      },
-      child: BlocBuilder<OnboardingCubit, OnboardingState>(
+    return BlocBuilder<OnboardingCubit, OnboardingState>(
         buildWhen: (a, b) => a.currentPageIndex != b.currentPageIndex,
         builder: (context, flowState) {
           return PopScope(
@@ -191,8 +176,7 @@ class _OnboardingContentState extends State<_OnboardingContent> {
             ),
           );
         },
-      ),
-    );
+      );
   }
 
   Widget _buildStep(
@@ -267,25 +251,6 @@ class _OnboardingBottomActions extends StatelessWidget {
   final VoidCallback onFinish;
   final Future<void> Function(int index) onGoToPage;
 
-  void _showValidationSnackBar(BuildContext context, String message) {
-    final colorScheme = Theme.of(context).colorScheme;
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(
-        SnackBar(
-          content: Text(
-            message,
-            style: TextStyle(
-              color: colorScheme.onError,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          backgroundColor: colorScheme.error,
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-  }
-
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<OnboardingCubit, OnboardingState>(
@@ -313,10 +278,6 @@ class _OnboardingBottomActions extends StatelessWidget {
           onPrimaryPressed: () async {
             if (isLastPage) {
               if (!state.canFinish(context.l10n)) {
-                _showValidationSnackBar(
-                  context,
-                  context.l10n.ltfenZorunluAlanlarDoldurun,
-                );
                 return;
               }
               final completed =
@@ -327,7 +288,6 @@ class _OnboardingBottomActions extends StatelessWidget {
 
             final error = state.validationErrorForCurrentStep(context.l10n);
             if (error != null) {
-              _showValidationSnackBar(context, error);
               return;
             }
 

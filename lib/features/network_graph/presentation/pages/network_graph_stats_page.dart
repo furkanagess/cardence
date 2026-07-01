@@ -5,6 +5,7 @@ import '../../../../core/l10n/l10n_extensions.dart';
 import '../../../../core/widgets/atoms/cardence_app_bar.dart';
 import '../../../../core/widgets/organisms/cardence_scaffold.dart';
 import '../../domain/entities/network_graph.dart';
+import '../helpers/network_graph_display.dart';
 import '../widgets/network_graph_edge_list.dart';
 import '../widgets/network_graph_node_list.dart';
 
@@ -56,12 +57,14 @@ class NetworkGraphStatsPage extends StatelessWidget {
           _NetworkGraphStatItem(
             icon: Icons.center_focus_strong_outlined,
             label: AppL10n.graphMetricCenter(l10n),
-            value: graph.metrics.centerCardId ?? l10n.you,
+            value: NetworkGraphDisplay.centerMetricValue(graph, l10n),
           ),
           const SizedBox(height: 24),
           const Divider(),
           const SizedBox(height: 16),
-          NetworkGraphNodeList(nodes: graph.nodes),
+          NetworkGraphNodeList(
+            nodes: NetworkGraphDisplay.visibleNodes(graph.nodes),
+          ),
           if (graph.edges.isNotEmpty) ...[
             const SizedBox(height: 24),
             const Divider(),

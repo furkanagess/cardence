@@ -28,6 +28,9 @@ import 'features/auth/presentation/pages/login_page.dart';
 import 'features/auth/presentation/pages/reset_password_from_link_page.dart';
 import 'features/auth/presentation/helpers/password_reset_deep_link.dart';
 import 'features/event_groups/domain/usecases/get_event_groups.dart';
+import 'features/event_groups/domain/usecases/get_event_group_invitations.dart';
+import 'features/event_groups/domain/usecases/accept_event_group_invitation.dart';
+import 'features/event_groups/domain/usecases/reject_event_group_invitation.dart';
 import 'features/event_groups/domain/usecases/create_event_group.dart';
 import 'features/event_groups/domain/usecases/delete_event_group.dart';
 import 'features/event_groups/domain/usecases/invite_event_group_cards_by_card_id.dart';
@@ -104,6 +107,9 @@ class App extends StatefulWidget {
     required this.submitSupportRequest,
     required this.requestAppReview,
     required this.getEventGroups,
+    required this.getEventGroupInvitations,
+    required this.acceptEventGroupInvitation,
+    required this.rejectEventGroupInvitation,
     required this.createEventGroup,
     required this.updateEventGroup,
     required this.inviteEventGroupCardsByCardId,
@@ -156,6 +162,9 @@ class App extends StatefulWidget {
   final SubmitSupportRequest submitSupportRequest;
   final RequestAppReview requestAppReview;
   final GetEventGroups getEventGroups;
+  final GetEventGroupInvitations getEventGroupInvitations;
+  final AcceptEventGroupInvitation acceptEventGroupInvitation;
+  final RejectEventGroupInvitation rejectEventGroupInvitation;
   final CreateEventGroup createEventGroup;
   final UpdateEventGroup updateEventGroup;
   final InviteEventGroupCardsByCardId inviteEventGroupCardsByCardId;
@@ -250,8 +259,13 @@ class _AppState extends State<App> {
       return;
     }
 
-    final onboardingDone = restored.onboardingCompleted == true;
-    await widget.syncOnboardingFromServer(completed: onboardingDone);
+    var onboardingDone = restored.onboardingCompleted == true;
+    if (restored.onboardingCompleted == null) {
+      onboardingDone = await widget.getOnboardingCompleted();
+    }
+    unawaited(
+      widget.syncOnboardingFromServer(completed: onboardingDone),
+    );
 
     setState(() {
       _destination =
@@ -369,6 +383,9 @@ class _AppState extends State<App> {
           getOnboardingDraftCards: widget.getOnboardingDraftCards,
           persistOnboardingCard: widget.persistOnboardingCard,
           getEventGroups: widget.getEventGroups,
+          getEventGroupInvitations: widget.getEventGroupInvitations,
+          acceptEventGroupInvitation: widget.acceptEventGroupInvitation,
+          rejectEventGroupInvitation: widget.rejectEventGroupInvitation,
           createEventGroup: widget.createEventGroup,
           updateEventGroup: widget.updateEventGroup,
           inviteEventGroupCardsByCardId: widget.inviteEventGroupCardsByCardId,

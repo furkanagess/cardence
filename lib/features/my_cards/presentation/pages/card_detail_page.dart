@@ -98,31 +98,13 @@ class _CardDetailPageState extends State<CardDetailPage> {
         _savedDraft = synced;
       });
       widget.onDraftUpdated?.call(synced);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(context.l10n.kartKaydedildi),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-    } on AuthApiException catch (e) {
+          } on AuthApiException catch (e) {
       if (!mounted) return;
       setState(() => _saving = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(e.message),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-    } catch (_) {
+          } catch (_) {
       if (!mounted) return;
       setState(() => _saving = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(context.l10n.kartKaydedilemediLtfenTekrarDeneyin),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-    }
+          }
   }
 
   Future<bool> _confirmDiscardChanges() {
@@ -284,13 +266,7 @@ class _CardDetailPageState extends State<CardDetailPage> {
   Future<void> _copyCardId(String cardId) async {
     await Clipboard.setData(ClipboardData(text: cardId));
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(context.l10n.kartIdKopyaland),
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
-  }
+      }
 
   String _shareMessage(BuildContext context, String cardId) {
     final name = _draft.listTitle;
@@ -329,15 +305,9 @@ class _CardDetailPageState extends State<CardDetailPage> {
         _shareMessage(context, cardId),
         subject: context.l10n.shareCardSubject,
       );
-    } on AuthApiException catch (e) {
+    } on AuthApiException {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(e.message),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-    } finally {
+      } finally {
       if (mounted) setState(() => _sharing = false);
     }
   }
@@ -355,13 +325,7 @@ class _CardDetailPageState extends State<CardDetailPage> {
     } on AuthApiException catch (e) {
       if (!mounted) return;
       setState(() => _sharing = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(e.message),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-      return;
+            return;
     }
     if (!mounted) return;
     setState(() => _sharing = false);

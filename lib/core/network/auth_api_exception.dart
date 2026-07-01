@@ -4,12 +4,14 @@ class AuthApiException implements Exception {
     this.code,
     this.statusCode,
     this.errorCode,
+    this.isNetworkError = false,
   });
 
   final String message;
   final int? code;
   final int? statusCode;
   final String? errorCode;
+  final bool isNetworkError;
 
   bool get isUnauthorized => statusCode == 401;
 

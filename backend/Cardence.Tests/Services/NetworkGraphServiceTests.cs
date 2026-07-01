@@ -92,13 +92,13 @@ public sealed class NetworkGraphServiceTests
             node.Id == GraphNodeIds.Card("111111") &&
             node.IsOwnCard &&
             node.IsCenter);
+        graph.Nodes.Should().NotContain(node => node.Type == "user");
         graph.Nodes.Should().Contain(node => node.Id == GraphNodeIds.Card("222222"));
         graph.Nodes.Should().Contain(node =>
             node.Id == GraphNodeIds.Card("999999") &&
             node.PhotoUrl == "https://cdn.example/avatar.png");
         graph.Nodes.Should().Contain(node => node.Id == GraphNodeIds.Company("Acme"));
         graph.Nodes.Should().Contain(node => node.Id == GraphNodeIds.Event(eventGroup.Id));
-        graph.Edges.Should().Contain(edge => edge.Type == "owns");
         graph.Edges.Should().Contain(edge => edge.Type == "saved");
         graph.Edges.Should().Contain(edge => edge.Type == "saved_by");
         graph.Edges.Should().Contain(edge => edge.Type == "works_at");
@@ -127,12 +127,10 @@ public sealed class NetworkGraphServiceTests
         var path = await _service.GetPathAsync("111111", "222222");
 
         path.Found.Should().BeTrue();
-        path.Length.Should().Be(2);
+        path.Length.Should().Be(1);
         path.PathNodeIds.Should().Equal(
             GraphNodeIds.Card("111111"),
-            GraphNodeIds.User(_userId),
             GraphNodeIds.Card("222222"));
-        path.Edges.Should().Contain(edge => edge.Type == "owns");
         path.Edges.Should().Contain(edge => edge.Type == "saved");
     }
 

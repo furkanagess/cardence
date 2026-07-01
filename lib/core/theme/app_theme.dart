@@ -186,16 +186,6 @@ class AppTheme {
           borderRadius: BorderRadius.circular(8),
         ),
       ),
-      snackBarTheme: SnackBarThemeData(
-        behavior: SnackBarBehavior.floating,
-        backgroundColor: isLight ? AppColors.textPrimary : AppColors.surfaceVariantDark,
-        contentTextStyle: TextStyle(
-          color: isLight ? AppColors.textOnPrimary : AppColors.textPrimaryDark,
-        ),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(_radius),
-        ),
-      ),
       dialogTheme: DialogThemeData(
         backgroundColor: isLight ? AppColors.surfaceLight : AppColors.surfaceDark,
         surfaceTintColor: Colors.transparent,

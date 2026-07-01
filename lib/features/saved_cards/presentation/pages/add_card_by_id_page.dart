@@ -55,22 +55,13 @@ class _AddCardByIdPageState extends State<AddCardByIdPage> {
       case AddSavedCardSuccess():
         Navigator.of(context).pop(result);
       case AddSavedCardDuplicate():
-        _showError(context.l10n.buKartZatenCzdannzda);
+        break;
       case AddSavedCardLimitReached():
       case AddSavedCardPremiumRequired():
         Navigator.of(context).pop(result);
-      case AddSavedCardInvalidPayload(:final message):
-        _showError(message);
+      case AddSavedCardInvalidPayload():
+        break;
     }
-  }
-
-  void _showError(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
   }
 
   String? _validateCardId(String? value) {

@@ -19,6 +19,7 @@ public sealed class CardenceDbContext : DbContext
     public DbSet<SupportRequest> SupportRequests => Set<SupportRequest>();
     public DbSet<EventGroup> EventGroups => Set<EventGroup>();
     public DbSet<SavedCardEventGroup> SavedCardEventGroups => Set<SavedCardEventGroup>();
+    public DbSet<EventGroupCardInvite> EventGroupCardInvites => Set<EventGroupCardInvite>();
     public DbSet<SubscriptionEvent> SubscriptionEvents => Set<SubscriptionEvent>();
     public DbSet<CardInteraction> CardInteractions => Set<CardInteraction>();
     public DbSet<PasswordResetToken> PasswordResetTokens => Set<PasswordResetToken>();

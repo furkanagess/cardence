@@ -97,6 +97,37 @@ public sealed class EventGroupsController : ControllerBase
         return Ok(ApiResponse<EventGroupDto>.Ok(group, HttpContext.TraceIdentifier));
     }
 
+    [HttpGet("EventGroupInvitations")]
+    [ProducesResponseType(typeof(ApiResponse<IReadOnlyList<EventGroupInvitationDto>>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<ApiResponse<IReadOnlyList<EventGroupInvitationDto>>>> GetEventGroupInvitations(
+        CancellationToken cancellationToken)
+    {
+        var invitations = await _eventGroupService.GetPendingInvitationsAsync(cancellationToken);
+        return Ok(ApiResponse<IReadOnlyList<EventGroupInvitationDto>>.Ok(
+            invitations,
+            HttpContext.TraceIdentifier));
+    }
+
+    [HttpPost("AcceptEventGroupInvitation")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    public async Task<IActionResult> AcceptEventGroupInvitation(
+        [FromBody] RespondEventGroupInvitationRequest request,
+        CancellationToken cancellationToken)
+    {
+        await _eventGroupService.AcceptInvitationAsync(request, cancellationToken);
+        return NoContent();
+    }
+
+    [HttpPost("RejectEventGroupInvitation")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    public async Task<IActionResult> RejectEventGroupInvitation(
+        [FromBody] RespondEventGroupInvitationRequest request,
+        CancellationToken cancellationToken)
+    {
+        await _eventGroupService.RejectInvitationAsync(request, cancellationToken);
+        return NoContent();
+    }
+
     [HttpPost("LinkEventGroupCards")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     public async Task<IActionResult> LinkEventGroupCards(

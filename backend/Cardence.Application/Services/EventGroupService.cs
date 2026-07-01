@@ -29,6 +29,7 @@ public sealed class EventGroupService : IEventGroupService
     private readonly IValidator<UpdateEventGroupRequest> _updateValidator;
     private readonly IValidator<LinkEventGroupCardsRequest> _linkValidator;
     private readonly IValidator<InviteEventGroupCardsByCardIdRequest> _inviteByCardIdValidator;
+    private readonly IValidator<RespondEventGroupInvitationRequest> _respondInvitationValidator;
 
     public EventGroupService(
         IEventGroupRepository eventGroupRepository,
@@ -39,7 +40,8 @@ public sealed class EventGroupService : IEventGroupService
         IValidator<SaveEventGroupRequest> saveValidator,
         IValidator<UpdateEventGroupRequest> updateValidator,
         IValidator<LinkEventGroupCardsRequest> linkValidator,
-        IValidator<InviteEventGroupCardsByCardIdRequest> inviteByCardIdValidator)
+        IValidator<InviteEventGroupCardsByCardIdRequest> inviteByCardIdValidator,
+        IValidator<RespondEventGroupInvitationRequest> respondInvitationValidator)
     {
         _eventGroupRepository = eventGroupRepository;
         _businessCardRepository = businessCardRepository;
@@ -50,6 +52,7 @@ public sealed class EventGroupService : IEventGroupService
         _updateValidator = updateValidator;
         _linkValidator = linkValidator;
         _inviteByCardIdValidator = inviteByCardIdValidator;
+        _respondInvitationValidator = respondInvitationValidator;
     }
 
     public async Task<IReadOnlyList<EventGroupDto>> GetAllAsync(
@@ -287,6 +290,67 @@ public sealed class EventGroupService : IEventGroupService
         return EventGroupMapper.ToDto(entity, cardCount, invalidCardIds);
     }
 
+    public async Task<IReadOnlyList<EventGroupInvitationDto>> GetPendingInvitationsAsync(
+        CancellationToken cancellationToken = default)
+    {
+        var userId = _currentUser.GetRequiredUserId();
+        var invitations = await _eventGroupRepository.GetPendingInvitationsForInviteeAsync(
+            userId,
+            cancellationToken);
+
+        return invitations
+            .Select(EventGroupInvitationMapper.ToDto)
+            .ToList();
+    }
+
+    public async Task AcceptInvitationAsync(
+        RespondEventGroupInvitationRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        await _respondInvitationValidator.ValidateAndThrowAsync(request, cancellationToken);
+
+        var userId = _currentUser.GetRequiredUserId();
+        var invitationId = ParseInvitationId(request.Id);
+        var invitation = await _eventGroupRepository.GetInvitationForInviteeAsync(
+            userId,
+            invitationId,
+            cancellationToken)
+            ?? throw new NotFoundException("EventGroupInvitation", request.Id);
+
+        if (invitation.Status != EventGroupInvitationStatuses.Pending)
+        {
+            throw new ConflictException(
+                "Invitation is no longer pending.",
+                ErrorCodes.EventGroupInvitationNotPending);
+        }
+
+        await _eventGroupRepository.AcceptInvitationAsync(invitation, cancellationToken);
+    }
+
+    public async Task RejectInvitationAsync(
+        RespondEventGroupInvitationRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        await _respondInvitationValidator.ValidateAndThrowAsync(request, cancellationToken);
+
+        var userId = _currentUser.GetRequiredUserId();
+        var invitationId = ParseInvitationId(request.Id);
+        var invitation = await _eventGroupRepository.GetInvitationForInviteeAsync(
+            userId,
+            invitationId,
+            cancellationToken)
+            ?? throw new NotFoundException("EventGroupInvitation", request.Id);
+
+        if (invitation.Status != EventGroupInvitationStatuses.Pending)
+        {
+            throw new ConflictException(
+                "Invitation is no longer pending.",
+                ErrorCodes.EventGroupInvitationNotPending);
+        }
+
+        await _eventGroupRepository.RejectInvitationAsync(invitation, cancellationToken);
+    }
+
     private async Task EnsureUniqueNameAsync(
         Guid userId,
         string name,
@@ -374,6 +438,16 @@ public sealed class EventGroupService : IEventGroupService
         if (!Guid.TryParse(groupId, out var parsed))
         {
             throw new ValidationException("Invalid event group id.");
+        }
+
+        return parsed;
+    }
+
+    private static Guid ParseInvitationId(string invitationId)
+    {
+        if (!Guid.TryParse(invitationId, out var parsed))
+        {
+            throw new ValidationException("Invalid invitation id.");
         }
 
         return parsed;

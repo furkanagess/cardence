@@ -10,7 +10,6 @@ import 'saved_cards_filter_models.dart';
 
 enum SavedCardsEffectType {
   none,
-  showSnackbar,
   openFilters,
   openAddCard,
   openUpgradeSheet,
@@ -36,7 +35,6 @@ class SavedCardsState extends Equatable {
     ),
     this.searchQuery = '',
     this.effectType = SavedCardsEffectType.none,
-    this.snackbarMessage,
     this.lastAddCardResult,
   });
 
@@ -48,7 +46,6 @@ class SavedCardsState extends Equatable {
   final SavedCardsFilterSelection filter;
   final String searchQuery;
   final SavedCardsEffectType effectType;
-  final String? snackbarMessage;
   final AddSavedCardResult? lastAddCardResult;
 
   bool get hasActiveFilters => filter.hasActiveFilters;
@@ -64,7 +61,6 @@ class SavedCardsState extends Equatable {
     SavedCardsFilterSelection? filter,
     String? searchQuery,
     SavedCardsEffectType? effectType,
-    String? snackbarMessage,
     AddSavedCardResult? lastAddCardResult,
     bool clearEffect = false,
     bool clearLastAddCardResult = false,
@@ -80,7 +76,6 @@ class SavedCardsState extends Equatable {
       effectType: clearEffect
           ? SavedCardsEffectType.none
           : (effectType ?? this.effectType),
-      snackbarMessage: clearEffect ? null : (snackbarMessage ?? this.snackbarMessage),
       lastAddCardResult: clearLastAddCardResult
           ? null
           : (lastAddCardResult ?? this.lastAddCardResult),
@@ -97,7 +92,6 @@ class SavedCardsState extends Equatable {
         filter,
         searchQuery,
         effectType,
-        snackbarMessage,
         lastAddCardResult,
       ];
 }

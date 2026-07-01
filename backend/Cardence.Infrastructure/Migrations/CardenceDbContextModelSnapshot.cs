@@ -326,6 +326,62 @@ namespace Cardence.Infrastructure.Migrations
                     b.ToTable("event_groups", (string)null);
                 });
 
+            modelBuilder.Entity("Cardence.Domain.Entities.EventGroupCardInvite", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("CardEntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("card_entity_id");
+
+                    b.Property<string>("CardId")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("card_id");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at_utc");
+
+                    b.Property<Guid>("EventGroupId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("event_group_id");
+
+                    b.Property<Guid>("InviteeUserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("invitee_user_id");
+
+                    b.Property<Guid>("InviterUserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("inviter_user_id");
+
+                    b.Property<DateTime?>("RespondedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("responded_at_utc");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("status");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CardEntityId");
+
+                    b.HasIndex("InviterUserId");
+
+                    b.HasIndex("InviteeUserId", "Status");
+
+                    b.HasIndex("EventGroupId", "CardEntityId", "Status");
+
+                    b.ToTable("event_group_card_invites", (string)null);
+                });
+
             modelBuilder.Entity("Cardence.Domain.Entities.PasswordResetToken", b =>
                 {
                     b.Property<Guid>("Id")
@@ -799,6 +855,41 @@ namespace Cardence.Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("Cardence.Domain.Entities.EventGroupCardInvite", b =>
+                {
+                    b.HasOne("Cardence.Domain.Entities.Card", "Card")
+                        .WithMany()
+                        .HasForeignKey("CardEntityId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Cardence.Domain.Entities.EventGroup", "EventGroup")
+                        .WithMany("CardInvites")
+                        .HasForeignKey("EventGroupId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Cardence.Domain.Entities.User", "InviteeUser")
+                        .WithMany()
+                        .HasForeignKey("InviteeUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Cardence.Domain.Entities.User", "InviterUser")
+                        .WithMany()
+                        .HasForeignKey("InviterUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Card");
+
+                    b.Navigation("EventGroup");
+
+                    b.Navigation("InviteeUser");
+
+                    b.Navigation("InviterUser");
+                });
+
             modelBuilder.Entity("Cardence.Domain.Entities.PasswordResetToken", b =>
                 {
                     b.HasOne("Cardence.Domain.Entities.User", "User")
@@ -886,6 +977,8 @@ namespace Cardence.Infrastructure.Migrations
 
             modelBuilder.Entity("Cardence.Domain.Entities.EventGroup", b =>
                 {
+                    b.Navigation("CardInvites");
+
                     b.Navigation("SavedCardLinks");
                 });
 

@@ -607,6 +607,23 @@
   "eventGroupNameRequired": "Event name cannot be empty",
   "eventGroupNameDuplicate": "An event group with this name already exists",
   "eventGroupDetailsStepSubtitle": "Enter the event name, location, start time, and optional end time.",
+  "eventCreateStepProgress": "Step {current} / {total}",
+  "@eventCreateStepProgress": {
+    "placeholders": {
+      "current": { "type": "int" },
+      "total": { "type": "int" }
+    }
+  },
+  "eventCreateNameSubtitle": "Give your event a name.",
+  "eventCreateLocationSubtitle": "Select country, province and district; optionally add a venue name.",
+  "eventLocationVenueLabel": "Venue name",
+  "eventLocationVenueHint": "e.g. Istanbul Congress Center",
+  "eventLocationRegionRequired": "Country and province/district are required.",
+  "eventCreateStartSubtitle": "Select the start date and time.",
+  "eventCreateScheduleSubtitle": "Select the start date and time; optionally add an end as well.",
+  "eventCreateEndSubtitle": "Optionally set an end date and time. You can skip this step.",
+  "eventCreatePhotoSubtitle": "Add a cover photo for the event list. You can skip this step.",
+  "eventSkip": "Skip",
   "eventGroupCardsStepSubtitle": "Select saved cards or invite by Card ID. You can create the event without cards.",
   "eventStartRequired": "Select a start date and time.",
   "eventLocationRequired": "Event location is required.",
@@ -617,6 +634,31 @@
   "eventPickTime": "Select time",
   "eventInviteByCardId": "Invite by Card ID",
   "eventActiveSection": "Ongoing / Upcoming",
+  "eventInvitationTitle": "You are invited to an event",
+  "eventInvitationMessage": "{inviterName} invited you to \"{eventName}\"",
+  "@eventInvitationMessage": {
+    "placeholders": {
+      "inviterName": {
+        "type": "String"
+      },
+      "eventName": {
+        "type": "String"
+      }
+    }
+  },
+  "eventInvitationCardLabel": "Your card: {cardName}",
+  "@eventInvitationCardLabel": {
+    "placeholders": {
+      "cardName": {
+        "type": "String"
+      }
+    }
+  },
+  "eventInvitationAccept": "Accept",
+  "eventInvitationReject": "Decline",
+  "eventInvitationAccepted": "Invitation accepted",
+  "eventInvitationRejected": "Invitation declined",
+  "eventInvitationsSection": "Invitations",
   "eventEndedSection": "Ended events",
   "eventStatusUpcoming": "Upcoming",
   "eventStatusOngoing": "Ongoing",
@@ -916,6 +958,7 @@
   "graphMetricNode": "Node",
   "graphMetricEdge": "Connection",
   "graphMetricCenter": "Center",
+  "graphMetricCenterFallback": "—",
   "you": "You",
   "clear": "Clear",
   "searchActive": "Search active",

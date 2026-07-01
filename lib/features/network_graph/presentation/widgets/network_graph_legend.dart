@@ -46,12 +46,12 @@ class NetworkGraphLegend extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 const _NodeLegendShape(
-                  type: GraphNodeType.user,
+                  type: GraphNodeType.card,
                   isOwnCard: true,
                 ),
                 const SizedBox(width: 6),
                 Text(
-                  context.l10n.you,
+                  context.l10n.kendiKartlarm,
                   style: theme.textTheme.labelSmall?.copyWith(
                     fontWeight: FontWeight.w700,
                   ),

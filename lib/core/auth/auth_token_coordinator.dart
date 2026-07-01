@@ -27,8 +27,8 @@ class AuthTokenCoordinator {
   final Future<void> Function()? _onSessionCleared;
   final Dio _refreshDio = Dio(
     BaseOptions(
-      connectTimeout: const Duration(seconds: 30),
-      receiveTimeout: const Duration(seconds: 30),
+      connectTimeout: const Duration(seconds: 8),
+      receiveTimeout: const Duration(seconds: 8),
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
@@ -54,7 +54,9 @@ class AuthTokenCoordinator {
     }
 
     final refreshed = await refreshSession();
-    if (!refreshed) return null;
+    if (!refreshed) {
+      return session.accessToken.isNotEmpty ? session.accessToken : null;
+    }
 
     final updated = await _local.getSession();
     return updated?.accessToken;

@@ -93,8 +93,6 @@ public sealed class NetworkGraphService : INetworkGraphService
     {
         var userId = _currentUser.GetRequiredUserId();
         var graph = new GraphAccumulator(query.CenterCardId);
-        var userNodeId = GraphNodeIds.User(userId);
-        graph.AddNode(userNodeId, "user", "You", isCenter: query.CenterCardId is null);
 
         var ownCards = await _businessCardRepository.GetByUserIdAsync(userId, cancellationToken);
         var savedCards = await _savedCardRepository.GetByUserIdAsync(userId, cancellationToken);
@@ -103,18 +101,44 @@ public sealed class NetworkGraphService : INetworkGraphService
             ownCards.Select(card => card.Id).ToList(),
             cancellationToken);
 
+        var hubOwnCard = ResolveHubOwnCard(ownCards, query.CenterCardId);
+        var hubNodeId = hubOwnCard is null ? null : GraphNodeIds.Card(hubOwnCard.CardId);
+        var useDefaultCenter = query.CenterCardId is null;
+
         foreach (var card in ownCards)
         {
-            AddBusinessCardNode(graph, card, isOwnCard: true);
-            graph.AddEdge(userNodeId, GraphNodeIds.Card(card.CardId), "owns", GraphEdgeType.Owns);
+            var isHub = hubOwnCard is not null && card.Id == hubOwnCard.Id;
+            AddBusinessCardNode(
+                graph,
+                card,
+                isOwnCard: true,
+                isCenter: isHub && (useDefaultCenter || !string.IsNullOrWhiteSpace(query.CenterCardId)));
             AddCompanyLink(graph, GraphNodeIds.Card(card.CardId), card.Company);
+        }
+
+        foreach (var card in ownCards.Where(card => hubOwnCard is null || card.Id != hubOwnCard.Id))
+        {
+            if (hubNodeId is null)
+            {
+                continue;
+            }
+
+            graph.AddEdge(
+                hubNodeId,
+                GraphNodeIds.Card(card.CardId),
+                "owns",
+                GraphEdgeType.Owns);
         }
 
         // Kullanıcının kaydettiği kişiler (giden bağlantılar).
         foreach (var card in savedCards)
         {
             AddSavedCardNode(graph, card);
-            graph.AddEdge(userNodeId, GraphNodeIds.Card(card.CardId), "saved", GraphEdgeType.Saved);
+            if (hubNodeId is not null)
+            {
+                graph.AddEdge(hubNodeId, GraphNodeIds.Card(card.CardId), "saved", GraphEdgeType.Saved);
+            }
+
             AddCompanyLink(graph, GraphNodeIds.Card(card.CardId), card.Company);
         }
 
@@ -124,7 +148,27 @@ public sealed class NetworkGraphService : INetworkGraphService
         return graph.ToDto(
             "personal",
             query.MaxNodes,
-            query.CenterCardId);
+            query.CenterCardId ?? hubOwnCard?.CardId);
+    }
+
+    private static Card? ResolveHubOwnCard(IReadOnlyList<Card> ownCards, string? centerCardId)
+    {
+        if (ownCards.Count == 0)
+        {
+            return null;
+        }
+
+        if (!string.IsNullOrWhiteSpace(centerCardId))
+        {
+            var centered = ownCards.FirstOrDefault(card =>
+                string.Equals(card.CardId, centerCardId, StringComparison.Ordinal));
+            if (centered is not null)
+            {
+                return centered;
+            }
+        }
+
+        return ownCards[0];
     }
 
     /// <summary>
@@ -231,7 +275,11 @@ public sealed class NetworkGraphService : INetworkGraphService
             query.CenterCardId);
     }
 
-    private static void AddBusinessCardNode(GraphAccumulator graph, Card card, bool isOwnCard)
+    private static void AddBusinessCardNode(
+        GraphAccumulator graph,
+        Card card,
+        bool isOwnCard,
+        bool isCenter = false)
     {
         var label = FirstNonEmpty(card.DisplayName, card.CardName, card.CardId);
         var subtitle = JoinSubtitle(card.Company, card.Title);
@@ -243,6 +291,7 @@ public sealed class NetworkGraphService : INetworkGraphService
             card.CardId,
             card.Company,
             photoUrl: card.PhotoUrl,
+            isCenter: isCenter,
             isOwnCard: isOwnCard);
     }
 

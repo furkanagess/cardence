@@ -174,13 +174,7 @@ class _MyCardEditPageState extends State<MyCardEditPage> {
   Future<void> _save({bool popAfter = true}) async {
     if (_saving) return;
     if (_cardNameController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(context.l10n.kartAdZorunludur),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-      return;
+            return;
     }
     setState(() => _saving = true);
     final draft = _buildDraft();
@@ -198,22 +192,10 @@ class _MyCardEditPageState extends State<MyCardEditPage> {
     } on AuthApiException catch (e) {
       if (!mounted) return;
       setState(() => _saving = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(e.message),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-    } catch (_) {
+          } catch (_) {
       if (!mounted) return;
       setState(() => _saving = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(context.l10n.kartKaydedilemediLtfenTekrarDeneyin),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-    }
+          }
   }
 
   Future<bool> _confirmDiscardChanges() {

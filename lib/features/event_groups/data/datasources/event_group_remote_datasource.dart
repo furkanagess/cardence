@@ -3,6 +3,7 @@ import '../../../../core/network/auth_api_exception.dart';
 import '../../../../core/network/dio_api_client.dart';
 import 'package:dio/dio.dart';
 import '../models/event_group_model.dart';
+import '../models/event_group_invitation_model.dart';
 
 abstract class EventGroupRemoteDataSource {
   Future<List<EventGroupModel>> getEventGroups({required String accessToken});
@@ -52,6 +53,20 @@ abstract class EventGroupRemoteDataSource {
   Future<void> unlinkCard({
     required String groupId,
     required String cardId,
+    required String accessToken,
+  });
+
+  Future<List<EventGroupInvitationModel>> getPendingInvitations({
+    required String accessToken,
+  });
+
+  Future<void> acceptInvitation({
+    required String invitationId,
+    required String accessToken,
+  });
+
+  Future<void> rejectInvitation({
+    required String invitationId,
     required String accessToken,
   });
 }
@@ -230,6 +245,59 @@ class EventGroupRemoteDataSourceImpl implements EventGroupRemoteDataSource {
       },
       accessToken: accessToken,
       fallbackError: 'Kart gruptan çıkarılamadı.',
+    );
+  }
+
+  List<EventGroupInvitationModel> _parseInvitationList(Map<String, dynamic> json) {
+    final data = json['data'] ?? json['Data'];
+    if (data is! List) {
+      throw AuthApiException('Etkinlik davetleri alınamadı.');
+    }
+
+    return data
+        .map((item) => EventGroupInvitationModel.fromJson(
+              Map<String, dynamic>.from(item as Map),
+            ))
+        .toList();
+  }
+
+  @override
+  Future<List<EventGroupInvitationModel>> getPendingInvitations({
+    required String accessToken,
+  }) async {
+    final json = await _client.get(
+      '/EventGroupInvitations',
+      accessToken: accessToken,
+      fallbackError: 'Etkinlik davetleri alınamadı.',
+    );
+    return _parseInvitationList(json);
+  }
+
+  @override
+  Future<void> acceptInvitation({
+    required String invitationId,
+    required String accessToken,
+  }) async {
+    await _client.post(
+      '/AcceptEventGroupInvitation',
+      body: {'id': invitationId},
+      accessToken: accessToken,
+      fallbackError: 'Davet kabul edilemedi.',
+      requireData: false,
+    );
+  }
+
+  @override
+  Future<void> rejectInvitation({
+    required String invitationId,
+    required String accessToken,
+  }) async {
+    await _client.post(
+      '/RejectEventGroupInvitation',
+      body: {'id': invitationId},
+      accessToken: accessToken,
+      fallbackError: 'Davet reddedilemedi.',
+      requireData: false,
     );
   }
 }

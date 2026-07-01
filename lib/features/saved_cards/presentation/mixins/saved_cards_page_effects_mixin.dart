@@ -29,7 +29,7 @@ import '../../../event_groups/domain/usecases/update_event_group.dart';
 import '../../../event_groups/domain/usecases/invite_event_group_cards_by_card_id.dart';
 import '../../domain/usecases/link_saved_cards_to_event_group.dart';
 
-/// Kayıtlı kartlar sayfası yan etkileri: snackbar, sheet ve navigasyon.
+/// Kayıtlı kartlar sayfası yan etkileri: sheet ve navigasyon.
 mixin SavedCardsPageEffectsMixin<T extends StatefulWidget> on State<T> {
   void handleSavedCardsStateChanges(
     BuildContext context,
@@ -43,17 +43,6 @@ mixin SavedCardsPageEffectsMixin<T extends StatefulWidget> on State<T> {
     switch (state.effectType) {
       case SavedCardsEffectType.none:
         break;
-      case SavedCardsEffectType.showSnackbar:
-        final message = state.snackbarMessage;
-        if (message != null) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(message),
-              behavior: SnackBarBehavior.floating,
-            ),
-          );
-        }
-        context.read<SavedCardsCubit>().clearEffect();
       case SavedCardsEffectType.openFilters:
         _openFiltersSheet(context, sourceCards);
         context.read<SavedCardsCubit>().clearEffect();

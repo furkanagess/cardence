@@ -105,13 +105,7 @@ class WalletUpgradeSheet extends StatelessWidget {
                   Navigator.of(context).pop(WalletUpgradeSheetResult.restored);
                   return;
                 }
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(context.l10n.geriYklenecekSatnAlmBulunamad),
-                    behavior: SnackBarBehavior.floating,
-                  ),
-                );
-              },
+                              },
             ),
             const SizedBox(height: 4),
             Text(

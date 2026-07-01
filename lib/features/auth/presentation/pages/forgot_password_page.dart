@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../../../core/l10n/api_error_localizer.dart';
 import '../../../../core/l10n/l10n_extensions.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -37,50 +36,32 @@ class _ForgotPasswordView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<ForgotPasswordBloc, ForgotPasswordState>(
-      listenWhen: (prev, curr) => prev.status != curr.status,
-      listener: (context, state) {
-        if (state.status == ForgotPasswordStatus.failure &&
-            state.errorMessage != null) {
-          ScaffoldMessenger.of(context)
-            ..hideCurrentSnackBar()
-            ..showSnackBar(
-              SnackBar(
-                content: Text(
-                  ApiErrorLocalizer.localize(context.l10n, state.errorMessage!),
+    return CardenceScaffold(
+      resizeToAvoidBottomInset: true,
+      appBar: CardenceAppBar(title: context.l10n.ifremiUnuttum),
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
+          child: BlocBuilder<ForgotPasswordBloc, ForgotPasswordState>(
+            builder: (context, state) {
+              return SingleChildScrollView(
+                keyboardDismissBehavior:
+                    ScrollViewKeyboardDismissBehavior.onDrag,
+                child: ForgotPasswordForm(
+                  isLoading: state.isLoading,
+                  isLinkSentStep: state.isLinkSentStep,
+                  pendingEmail: state.pendingEmail,
+                  initialEmail: initialEmail,
+                  onRequestLink: (email) => context
+                      .read<ForgotPasswordBloc>()
+                      .add(ForgotPasswordLinkRequested(email: email)),
+                  onBackToEmail: () => context
+                      .read<ForgotPasswordBloc>()
+                      .add(const ForgotPasswordBackToEmail()),
+                  onBack: () => Navigator.of(context).pop(),
                 ),
-                behavior: SnackBarBehavior.floating,
-              ),
-            );
-        }
-      },
-      child: CardenceScaffold(
-        resizeToAvoidBottomInset: true,
-        appBar: CardenceAppBar(title: context.l10n.ifremiUnuttum),
-        body: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
-            child: BlocBuilder<ForgotPasswordBloc, ForgotPasswordState>(
-              builder: (context, state) {
-                return SingleChildScrollView(
-                  keyboardDismissBehavior:
-                      ScrollViewKeyboardDismissBehavior.onDrag,
-                  child: ForgotPasswordForm(
-                    isLoading: state.isLoading,
-                    isLinkSentStep: state.isLinkSentStep,
-                    pendingEmail: state.pendingEmail,
-                    initialEmail: initialEmail,
-                    onRequestLink: (email) => context
-                        .read<ForgotPasswordBloc>()
-                        .add(ForgotPasswordLinkRequested(email: email)),
-                    onBackToEmail: () => context
-                        .read<ForgotPasswordBloc>()
-                        .add(const ForgotPasswordBackToEmail()),
-                    onBack: () => Navigator.of(context).pop(),
-                  ),
-                );
-              },
-            ),
+              );
+            },
           ),
         ),
       ),

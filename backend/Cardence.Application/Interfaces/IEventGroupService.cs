@@ -40,4 +40,15 @@ public interface IEventGroupService
     Task<EventGroupDto> InviteCardsByCardIdAsync(
         InviteEventGroupCardsByCardIdRequest request,
         CancellationToken cancellationToken = default);
+
+    Task<IReadOnlyList<EventGroupInvitationDto>> GetPendingInvitationsAsync(
+        CancellationToken cancellationToken = default);
+
+    Task AcceptInvitationAsync(
+        RespondEventGroupInvitationRequest request,
+        CancellationToken cancellationToken = default);
+
+    Task RejectInvitationAsync(
+        RespondEventGroupInvitationRequest request,
+        CancellationToken cancellationToken = default);
 }

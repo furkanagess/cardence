@@ -10,6 +10,7 @@ import '../../domain/entities/graph_edge.dart';
 import '../../domain/entities/graph_edge_type.dart';
 import '../../domain/entities/graph_node.dart';
 import '../../domain/entities/graph_node_type.dart';
+import '../helpers/network_graph_display.dart';
 import '../helpers/network_graph_layout.dart';
 import '../helpers/network_graph_node_style.dart';
 
@@ -386,7 +387,7 @@ class _GraphNodeBubble extends StatelessWidget {
               child: ClipOval(
                 child: ProfileAvatar(
                   photoUrl: node.photoUrl,
-                  displayName: node.isOwnCard ? context.l10n.you : node.label,
+                  displayName: NetworkGraphDisplay.nodeLabel(node),
                   size: style.size,
                   circular: true,
                 ),
@@ -433,7 +434,7 @@ class _GraphNodeBubble extends StatelessWidget {
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
               child: Text(
-                node.isOwnCard ? context.l10n.you : node.label,
+                NetworkGraphDisplay.nodeLabel(node),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 textAlign: TextAlign.center,

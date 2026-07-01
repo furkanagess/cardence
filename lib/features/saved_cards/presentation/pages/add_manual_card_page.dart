@@ -67,19 +67,11 @@ class _AddManualCardPageState extends State<AddManualCardPage> {
       case AddSavedCardSuccess():
         Navigator.of(context).pop(result);
       case AddSavedCardDuplicate():
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(context.l10n.buKartZatenCzdannzda),
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
       case AddSavedCardLimitReached():
       case AddSavedCardPremiumRequired():
         Navigator.of(context).pop(result);
-      case AddSavedCardInvalidPayload(:final message):
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(message), behavior: SnackBarBehavior.floating),
-        );
+      case AddSavedCardInvalidPayload():
+        break;
     }
   }
 
@@ -113,21 +105,7 @@ class _AddManualCardContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<AddManualCardCubit, AddManualCardState>(
-      listenWhen: (a, b) => a.errorMessage != b.errorMessage,
-      listener: (context, state) {
-        final message = state.errorMessage;
-        if (message == null) return;
-        ScaffoldMessenger.of(context)
-          ..hideCurrentSnackBar()
-          ..showSnackBar(
-            SnackBar(
-              content: Text(message),
-              behavior: SnackBarBehavior.floating,
-            ),
-          );
-      },
-      child: BlocBuilder<AddManualCardCubit, AddManualCardState>(
+    return BlocBuilder<AddManualCardCubit, AddManualCardState>(
         buildWhen: (a, b) => a.currentPageIndex != b.currentPageIndex,
         builder: (context, flowState) {
           return PopScope(
@@ -198,8 +176,7 @@ class _AddManualCardContent extends StatelessWidget {
             ),
           );
         },
-      ),
-    );
+      );
   }
 
   Widget _buildStep(
@@ -248,25 +225,6 @@ class _AddManualCardBottomActions extends StatelessWidget {
   final Future<void> Function(int index) onGoToPage;
   final Future<void> Function() onSubmit;
 
-  void _showValidationSnackBar(BuildContext context, String message) {
-    final colorScheme = Theme.of(context).colorScheme;
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(
-        SnackBar(
-          content: Text(
-            message,
-            style: TextStyle(
-              color: colorScheme.onError,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          backgroundColor: colorScheme.error,
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-  }
-
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<AddManualCardCubit, AddManualCardState>(
@@ -292,10 +250,6 @@ class _AddManualCardBottomActions extends StatelessWidget {
           onPrimaryPressed: () async {
             if (isLastPage) {
               if (!state.canFinish(context.l10n)) {
-                _showValidationSnackBar(
-                  context,
-                  context.l10n.ltfenZorunluAlanlarDoldurun,
-                );
                 return;
               }
               await onSubmit();
@@ -304,7 +258,6 @@ class _AddManualCardBottomActions extends StatelessWidget {
 
             final error = state.validationErrorForCurrentStep(context.l10n);
             if (error != null) {
-              _showValidationSnackBar(context, error);
               return;
             }
 

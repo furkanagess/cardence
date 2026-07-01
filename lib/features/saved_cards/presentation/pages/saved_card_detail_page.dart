@@ -131,17 +131,7 @@ class _SavedCardDetailPageState extends State<SavedCardDetailPage> {
     final available = _availableGroupsForCard;
     if (available.isEmpty) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            _eventGroups.isEmpty
-                ? context.l10n.henzEtkinlikGrubuYok
-                : AppL10n.cardAlreadyInAllGroups(context.l10n),
-          ),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-      return;
+            return;
     }
 
     final selectedIds = await PickEventGroupsForCardSheet.show(
@@ -157,13 +147,7 @@ class _SavedCardDetailPageState extends State<SavedCardDetailPage> {
     }
     await _persistCard(_card.copyWith(linkedEventGroupIds: ids));
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(AppL10n.addedToGroupsMessage(context.l10n, selectedIds.length)),
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
-  }
+      }
 
   Future<void> _openEventGroupDetail(EventGroup group) async {
     if (!_canOpenGroupDetail) return;
@@ -225,31 +209,13 @@ class _SavedCardDetailPageState extends State<SavedCardDetailPage> {
       await deleteSavedCard(_card.cardId);
       if (!mounted) return;
       Navigator.of(context).pop();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(AppL10n.cardDeletedFromWalletMessage(context.l10n, _displayName)),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-    } on AuthApiException catch (e) {
+          } on AuthApiException catch (e) {
       if (!mounted) return;
       setState(() => _deleting = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(e.message),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-    } catch (_) {
+          } catch (_) {
       if (!mounted) return;
       setState(() => _deleting = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(context.l10n.kartSilinemediLtfenTekrarDeneyin),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-    }
+          }
   }
 
   Widget _buildStickyDeleteBar(BuildContext context) {
@@ -334,13 +300,7 @@ class _SavedCardDetailPageState extends State<SavedCardDetailPage> {
   Future<void> _openEditField(SavedCardFieldDefinition def) async {
     if (!def.isEditable(_card)) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(context.l10n.buAlanCardenceKartndaDzenlenemez),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-      return;
+            return;
     }
 
     final value = await SavedCardAddFieldSheet.editFieldValue(
@@ -353,13 +313,7 @@ class _SavedCardDetailPageState extends State<SavedCardDetailPage> {
     final updated = def.writeValue(_card, value);
     await _persistCard(updated);
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(AppL10n.fieldSaved(context.l10n, def.label)),
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
-  }
+      }
 
   _ContactFieldData _contactDataFor(SavedCardFieldDefinition def) {
     final value = def.readValue(_card)!.trim();
@@ -433,14 +387,7 @@ class _SavedCardDetailPageState extends State<SavedCardDetailPage> {
   Future<void> _copyToClipboard(String label, String value) async {
     await Clipboard.setData(ClipboardData(text: value));
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(AppL10n.copiedToClipboardMessage(context.l10n, label)),
-        behavior: SnackBarBehavior.floating,
-        duration: const Duration(seconds: 2),
-      ),
-    );
-  }
+      }
 
   Future<void> _launchLinkedIn() async {
     final linkedin = _card.linkedin?.trim();
@@ -480,16 +427,8 @@ class _SavedCardDetailPageState extends State<SavedCardDetailPage> {
     final uri = Uri.tryParse(normalized);
     if (uri == null ||
         !await launchUrl(uri, mode: LaunchMode.externalApplication)) {
-      if (!mounted) return;
-      final defaultErrorMsg = AppL10n.couldNotOpenLink(context.l10n);
-      _showLaunchError(errorMessage ?? defaultErrorMsg);
+      return;
     }
-  }
-
-  void _showLaunchError(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message), behavior: SnackBarBehavior.floating),
-    );
   }
 
   String _contactTypeFor(SavedCardFieldDefinition def) {
@@ -596,13 +535,7 @@ class _SavedCardDetailPageState extends State<SavedCardDetailPage> {
     );
     await _persistCard(updated);
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(context.l10n.notKaydedildi),
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
-  }
+      }
 
   @override
   Widget build(BuildContext context) {

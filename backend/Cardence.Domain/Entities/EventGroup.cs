@@ -15,4 +15,5 @@ public sealed class EventGroup
 
     public User User { get; set; } = null!;
     public ICollection<SavedCardEventGroup> SavedCardLinks { get; set; } = [];
+    public ICollection<EventGroupCardInvite> CardInvites { get; set; } = [];
 }

@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 
@@ -33,10 +32,10 @@ Future<void> _bootstrap() async {
   try {
     final result = await AppInit.init();
     _runApp(result);
+    FlutterNativeSplash.remove();
   } catch (error, stackTrace) {
     debugPrint('[main] AppInit failed: $error');
     debugPrintStack(stackTrace: stackTrace);
-  } finally {
     FlutterNativeSplash.remove();
   }
 }
@@ -74,6 +73,9 @@ void _runApp(AppInitResult result) {
     submitSupportRequest: result.submitSupportRequest,
     requestAppReview: result.requestAppReview,
     getEventGroups: result.getEventGroups,
+    getEventGroupInvitations: result.getEventGroupInvitations,
+    acceptEventGroupInvitation: result.acceptEventGroupInvitation,
+    rejectEventGroupInvitation: result.rejectEventGroupInvitation,
     createEventGroup: result.createEventGroup,
     updateEventGroup: result.updateEventGroup,
     inviteEventGroupCardsByCardId: result.inviteEventGroupCardsByCardId,

@@ -64,4 +64,21 @@ public interface IEventGroupRepository
     Task PopulateLinkedGroupIdsAsync(
         IReadOnlyList<SavedCard> cards,
         CancellationToken cancellationToken = default);
+
+    Task<IReadOnlyList<EventGroupCardInvite>> GetPendingInvitationsForInviteeAsync(
+        Guid inviteeUserId,
+        CancellationToken cancellationToken = default);
+
+    Task<EventGroupCardInvite?> GetInvitationForInviteeAsync(
+        Guid inviteeUserId,
+        Guid invitationId,
+        CancellationToken cancellationToken = default);
+
+    Task AcceptInvitationAsync(
+        EventGroupCardInvite invitation,
+        CancellationToken cancellationToken = default);
+
+    Task RejectInvitationAsync(
+        EventGroupCardInvite invitation,
+        CancellationToken cancellationToken = default);
 }

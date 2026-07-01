@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/l10n/app_l10n.dart';
 import '../../../../core/l10n/l10n_extensions.dart';
 import '../../domain/entities/network_graph.dart';
+import '../helpers/network_graph_display.dart';
 
 class NetworkGraphOverviewCard extends StatelessWidget {
   const NetworkGraphOverviewCard({
@@ -53,7 +54,7 @@ class NetworkGraphOverviewCard extends StatelessWidget {
             Expanded(
               child: NetworkGraphMetricTile(
                 label: AppL10n.graphMetricCenter(l10n),
-                value: graph.metrics.centerCardId ?? AppL10n.you(l10n),
+                value: NetworkGraphDisplay.centerMetricValue(graph, l10n),
               ),
             ),
           ],

@@ -7,6 +7,9 @@ import '../../../../core/constants/app_constants.dart';
 import '../../../../core/widgets/atoms/cardence_app_bar.dart';
 import '../../../../core/widgets/organisms/cardence_scaffold.dart';
 import '../../../event_groups/domain/usecases/get_event_groups.dart';
+import '../../../event_groups/domain/usecases/get_event_group_invitations.dart';
+import '../../../event_groups/domain/usecases/accept_event_group_invitation.dart';
+import '../../../event_groups/domain/usecases/reject_event_group_invitation.dart';
 import '../../../event_groups/domain/usecases/create_event_group.dart';
 import '../../../event_groups/domain/usecases/delete_event_group.dart';
 import '../../../event_groups/domain/usecases/invite_event_group_cards_by_card_id.dart';
@@ -54,6 +57,9 @@ class MainShellPage extends StatefulWidget {
     required this.getOnboardingDraftCards,
     required this.persistOnboardingCard,
     required this.getEventGroups,
+    required this.getEventGroupInvitations,
+    required this.acceptEventGroupInvitation,
+    required this.rejectEventGroupInvitation,
     required this.createEventGroup,
     required this.updateEventGroup,
     required this.inviteEventGroupCardsByCardId,
@@ -89,6 +95,9 @@ class MainShellPage extends StatefulWidget {
   final GetOnboardingDraftCards getOnboardingDraftCards;
   final PersistOnboardingCard persistOnboardingCard;
   final GetEventGroups getEventGroups;
+  final GetEventGroupInvitations getEventGroupInvitations;
+  final AcceptEventGroupInvitation acceptEventGroupInvitation;
+  final RejectEventGroupInvitation rejectEventGroupInvitation;
   final CreateEventGroup createEventGroup;
   final UpdateEventGroup updateEventGroup;
   final InviteEventGroupCardsByCardId inviteEventGroupCardsByCardId;
@@ -216,6 +225,9 @@ class _MainShellPageState extends State<MainShellPage> {
               ),
               EventGroupsPage(
                 getEventGroups: widget.getEventGroups,
+                getEventGroupInvitations: widget.getEventGroupInvitations,
+                acceptEventGroupInvitation: widget.acceptEventGroupInvitation,
+                rejectEventGroupInvitation: widget.rejectEventGroupInvitation,
                 createEventGroup: widget.createEventGroup,
                 updateEventGroup: widget.updateEventGroup,
                 inviteEventGroupCardsByCardId:

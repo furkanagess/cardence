@@ -225,31 +225,14 @@ class SavedCardsCubit extends Cubit<SavedCardsState> {
     switch (result) {
       case AddSavedCardSuccess():
         await refreshAll();
-        if (isClosed) return;
-        emit(
-          state.copyWith(
-            effectType: SavedCardsEffectType.showSnackbar,
-            snackbarMessage: 'Kart cüzdanınıza eklendi',
-          ),
-        );
       case AddSavedCardDuplicate():
-        emit(
-          state.copyWith(
-            effectType: SavedCardsEffectType.showSnackbar,
-            snackbarMessage: 'Bu kart zaten kayıtlı',
-          ),
-        );
+        break;
       case AddSavedCardLimitReached():
         emit(state.copyWith(effectType: SavedCardsEffectType.openUpgradeSheet));
       case AddSavedCardPremiumRequired():
         emit(state.copyWith(effectType: SavedCardsEffectType.openUpgradeSheet));
-      case AddSavedCardInvalidPayload(:final message):
-        emit(
-          state.copyWith(
-            effectType: SavedCardsEffectType.showSnackbar,
-            snackbarMessage: message,
-          ),
-        );
+      case AddSavedCardInvalidPayload():
+        break;
     }
   }
 

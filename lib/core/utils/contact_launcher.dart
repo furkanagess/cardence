@@ -10,10 +10,7 @@ class ContactLauncher {
     if (trimmed.isEmpty) return;
 
     final uri = Uri(scheme: 'mailto', path: trimmed);
-    if (!await launchUrl(uri)) {
-      if (!context.mounted) return;
-      _showError(context, 'E-posta uygulaması açılamadı');
-    }
+    await launchUrl(uri);
   }
 
   static Future<void> launchPhone(BuildContext context, String phone) async {
@@ -24,10 +21,7 @@ class ContactLauncher {
     if (dial.isEmpty) return;
 
     final uri = Uri(scheme: 'tel', path: dial);
-    if (!await launchUrl(uri)) {
-      if (!context.mounted) return;
-      _showError(context, 'Telefon uygulaması açılamadı');
-    }
+    await launchUrl(uri);
   }
 
   static Future<void> launchWebUrl(BuildContext context, String url) async {
@@ -40,15 +34,6 @@ class ContactLauncher {
     final uri = Uri.tryParse(normalized);
     if (uri == null) return;
 
-    if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
-      if (!context.mounted) return;
-      _showError(context, 'Bağlantı açılamadı');
-    }
-  }
-
-  static void _showError(BuildContext context, String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
-    );
+    await launchUrl(uri, mode: LaunchMode.externalApplication);
   }
 }

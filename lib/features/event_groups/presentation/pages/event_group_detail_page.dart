@@ -151,23 +151,9 @@ class _EventGroupDetailPageState extends State<EventGroupDetailPage> {
       );
       if (!mounted) return;
       setState(() => _group = updated);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            AppL10n.eventGroupUpdatedMessage(context.l10n, updated.name),
-          ),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-    } on AuthApiException catch (e) {
+          } on AuthApiException {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(e.message),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-    } finally {
+      } finally {
       if (mounted) setState(() => _saving = false);
     }
   }
@@ -210,21 +196,9 @@ class _EventGroupDetailPageState extends State<EventGroupDetailPage> {
         messages.add(l10n.invalidCardId);
       }
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(messages.join('\n')),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-    } on AuthApiException catch (e) {
+          } on AuthApiException {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(e.message),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-    } finally {
+      } finally {
       if (mounted) setState(() => _saving = false);
     }
   }
@@ -232,13 +206,7 @@ class _EventGroupDetailPageState extends State<EventGroupDetailPage> {
   Future<void> _openAddCardsPicker() async {
     if (_availableToAdd.isEmpty) {
       final l10n = context.l10n;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(AppL10n.grubaEklenecekKaytlKartKalmad(l10n)),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-      return;
+            return;
     }
 
     final selectedIds = await PickSavedCardsForGroupSheet.show(
@@ -262,14 +230,7 @@ class _EventGroupDetailPageState extends State<EventGroupDetailPage> {
     if (!mounted) return;
     await _load();
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content:
-            Text(AppL10n.cardsAddedToGroupMessage(context.l10n, addedCount)),
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
-  }
+      }
 
   Future<void> _openNetworkGraph() async {
     final getNetworkGraph = widget.getNetworkGraph;
@@ -324,14 +285,7 @@ class _EventGroupDetailPageState extends State<EventGroupDetailPage> {
 
     if (!mounted) return;
     Navigator.of(context).pop();
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-            AppL10n.eventGroupDeletedMessage(context.l10n, _group.name)),
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
-  }
+      }
 
   Future<void> _openAddNoteModal(SavedCard card) async {
     var draftNote = card.note ?? '';

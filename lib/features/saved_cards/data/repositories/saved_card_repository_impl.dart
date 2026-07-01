@@ -80,8 +80,8 @@ class SavedCardRepositoryImpl implements SavedCardRepository {
             .toList();
         await _cacheCards(mergedCards);
         return mergedCards.map((model) => model.toEntity()).toList();
-      } on AuthApiException {
-        rethrow;
+      } on AuthApiException catch (e) {
+        if (!e.isNetworkError) rethrow;
       } catch (_) {
         // Sunucu erişilemezse yerel önbelleğe düş.
       }

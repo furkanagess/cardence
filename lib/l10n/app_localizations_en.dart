@@ -1767,6 +1767,46 @@ class AppLocalizationsEn extends AppLocalizations {
       'Enter the event name, location, start time, and optional end time.';
 
   @override
+  String eventCreateStepProgress(int current, int total) {
+    return 'Step $current / $total';
+  }
+
+  @override
+  String get eventCreateNameSubtitle => 'Give your event a name.';
+
+  @override
+  String get eventCreateLocationSubtitle =>
+      'Select country, province and district; optionally add a venue name.';
+
+  @override
+  String get eventLocationVenueLabel => 'Venue name';
+
+  @override
+  String get eventLocationVenueHint => 'e.g. Istanbul Congress Center';
+
+  @override
+  String get eventLocationRegionRequired =>
+      'Country and province/district are required.';
+
+  @override
+  String get eventCreateStartSubtitle => 'Select the start date and time.';
+
+  @override
+  String get eventCreateScheduleSubtitle =>
+      'Select the start date and time; optionally add an end as well.';
+
+  @override
+  String get eventCreateEndSubtitle =>
+      'Optionally set an end date and time. You can skip this step.';
+
+  @override
+  String get eventCreatePhotoSubtitle =>
+      'Add a cover photo for the event list. You can skip this step.';
+
+  @override
+  String get eventSkip => 'Skip';
+
+  @override
   String get eventGroupCardsStepSubtitle =>
       'Select saved cards or invite by Card ID. You can create the event without cards.';
 
@@ -1797,6 +1837,34 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get eventActiveSection => 'Ongoing / Upcoming';
+
+  @override
+  String get eventInvitationTitle => 'You are invited to an event';
+
+  @override
+  String eventInvitationMessage(String inviterName, String eventName) {
+    return '$inviterName invited you to \"$eventName\"';
+  }
+
+  @override
+  String eventInvitationCardLabel(String cardName) {
+    return 'Your card: $cardName';
+  }
+
+  @override
+  String get eventInvitationAccept => 'Accept';
+
+  @override
+  String get eventInvitationReject => 'Decline';
+
+  @override
+  String get eventInvitationAccepted => 'Invitation accepted';
+
+  @override
+  String get eventInvitationRejected => 'Invitation declined';
+
+  @override
+  String get eventInvitationsSection => 'Invitations';
 
   @override
   String get eventEndedSection => 'Ended events';
@@ -2254,6 +2322,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get graphMetricCenter => 'Center';
+
+  @override
+  String get graphMetricCenterFallback => '—';
 
   @override
   String get you => 'You';

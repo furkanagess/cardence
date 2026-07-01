@@ -607,6 +607,23 @@
   "eventGroupNameRequired": "Etkinlik adı boş olamaz",
   "eventGroupNameDuplicate": "Bu isimde bir etkinlik grubu zaten var",
   "eventGroupDetailsStepSubtitle": "Etkinliğin adını, konumunu, başlangıç saatini ve isteğe bağlı bitiş saatini girin.",
+  "eventCreateStepProgress": "Adım {current} / {total}",
+  "@eventCreateStepProgress": {
+    "placeholders": {
+      "current": { "type": "int" },
+      "total": { "type": "int" }
+    }
+  },
+  "eventCreateNameSubtitle": "Etkinliğinize bir ad verin.",
+  "eventCreateLocationSubtitle": "Ülke, il ve ilçe seçin; isteğe bağlı mekan adı ekleyin.",
+  "eventLocationVenueLabel": "Mekan adı",
+  "eventLocationVenueHint": "Örn. İstanbul Kongre Merkezi",
+  "eventLocationRegionRequired": "Ülke ve il/ilçe seçimi gereklidir.",
+  "eventCreateStartSubtitle": "Başlangıç tarihi ve saatini seçin.",
+  "eventCreateScheduleSubtitle": "Başlangıç tarih ve saatini seçin; isterseniz bitiş de ekleyin.",
+  "eventCreateEndSubtitle": "İsterseniz bitiş tarihi ve saatini belirleyin. Atlayabilirsiniz.",
+  "eventCreatePhotoSubtitle": "Listede görünecek bir kapak fotoğrafı ekleyin. Atlayabilirsiniz.",
+  "eventSkip": "Atla",
   "eventGroupCardsStepSubtitle": "Kayıtlı kart seçin veya Card ID ile davet edin. İsterseniz kart seçmeden de etkinliği oluşturabilirsiniz.",
   "eventStartRequired": "Başlangıç tarihi ve saati seçin.",
   "eventLocationRequired": "Etkinlik konumu gereklidir.",
@@ -617,6 +634,31 @@
   "eventPickTime": "Saat seç",
   "eventInviteByCardId": "Card ID ile davet et",
   "eventActiveSection": "Devam eden / Yaklaşan",
+  "eventInvitationTitle": "Bir etkinliğe davetlisiniz",
+  "eventInvitationMessage": "{inviterName} sizi \"{eventName}\" etkinliğine davet etti",
+  "@eventInvitationMessage": {
+    "placeholders": {
+      "inviterName": {
+        "type": "String"
+      },
+      "eventName": {
+        "type": "String"
+      }
+    }
+  },
+  "eventInvitationCardLabel": "Kartınız: {cardName}",
+  "@eventInvitationCardLabel": {
+    "placeholders": {
+      "cardName": {
+        "type": "String"
+      }
+    }
+  },
+  "eventInvitationAccept": "Kabul et",
+  "eventInvitationReject": "Reddet",
+  "eventInvitationAccepted": "Davet kabul edildi",
+  "eventInvitationRejected": "Davet reddedildi",
+  "eventInvitationsSection": "Davetler",
   "eventEndedSection": "Biten etkinlikler",
   "eventStatusUpcoming": "Yaklaşıyor",
   "eventStatusOngoing": "Devam ediyor",
@@ -916,6 +958,7 @@
   "graphMetricNode": "Düğüm",
   "graphMetricEdge": "Bağ",
   "graphMetricCenter": "Merkez",
+  "graphMetricCenterFallback": "—",
   "you": "Sen",
   "clear": "Temizle",
   "searchActive": "Arama aktif",

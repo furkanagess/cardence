@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import '../../../../core/auth/auth_token_coordinator.dart';
 import '../../domain/entities/auth_session.dart';
 import '../../domain/entities/last_login_credentials.dart';
@@ -84,6 +86,12 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   Future<UserProfile> _resolveProfile(AuthSessionModel session) async {
+    final cached = await _readCachedProfile();
+    if (cached != null) {
+      unawaited(_refreshProfileInBackground(session));
+      return cached;
+    }
+
     try {
       return await _fetchAndPersistProfile(session);
     } on AuthApiException catch (e) {
@@ -98,14 +106,16 @@ class AuthRepositoryImpl implements AuthRepository {
         throw AuthApiException('Oturum bulunamadı. Lütfen tekrar giriş yapın.');
       }
 
-      final cached = await _readCachedProfile();
-      if (cached != null) return cached;
       return _profileFromSession(session.toEntity());
     } catch (_) {
-      final cached = await _readCachedProfile();
-      if (cached != null) return cached;
       return _profileFromSession(session.toEntity());
     }
+  }
+
+  Future<void> _refreshProfileInBackground(AuthSessionModel session) async {
+    try {
+      await _fetchAndPersistProfile(session);
+    } catch (_) {}
   }
 
   @override
@@ -127,31 +137,39 @@ class AuthRepositoryImpl implements AuthRepository {
       return const RestoreSessionResult(isAuthenticated: false);
     }
 
-    final token = await _coordinator?.getValidAccessToken();
-    if (token == null) {
-      await clearSession();
+    final stored = await _local.getSession();
+    if (stored == null) {
       return const RestoreSessionResult(isAuthenticated: false);
     }
 
-    try {
-      final stored = await _local.getSession();
-      if (stored == null) {
-        return const RestoreSessionResult(isAuthenticated: false);
-      }
+    final cached = await _readCachedProfile();
+    if (cached != null) {
+      unawaited(_refreshProfileInBackground(stored));
+      return RestoreSessionResult(
+        isAuthenticated: true,
+        onboardingCompleted: cached.onboardingCompleted,
+      );
+    }
 
+    try {
       final profile = await _resolveProfile(stored);
       return RestoreSessionResult(
         isAuthenticated: true,
         onboardingCompleted: profile.onboardingCompleted,
       );
-    } on AuthApiException {
-      await clearSession();
-      return const RestoreSessionResult(isAuthenticated: false);
-    } catch (_) {
-      final cached = await _readCachedProfile();
+    } on AuthApiException catch (e) {
+      if (e.isUnauthorized) {
+        await clearSession();
+        return const RestoreSessionResult(isAuthenticated: false);
+      }
       return RestoreSessionResult(
         isAuthenticated: true,
         onboardingCompleted: cached?.onboardingCompleted,
+      );
+    } catch (_) {
+      return RestoreSessionResult(
+        isAuthenticated: true,
+        onboardingCompleted: null,
       );
     }
   }

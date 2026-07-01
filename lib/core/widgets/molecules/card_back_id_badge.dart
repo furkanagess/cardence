@@ -26,16 +26,7 @@ class CardBackIdBadge extends StatelessWidget {
   Future<void> _copy(BuildContext context, String id) async {
     await Clipboard.setData(ClipboardData(text: id));
     if (!context.mounted) return;
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(
-        SnackBar(
-          content: Text(context.l10n.kartIdKopyalandId),
-          behavior: SnackBarBehavior.floating,
-          duration: const Duration(seconds: 2),
-        ),
-      );
-  }
+      }
 
   @override
   Widget build(BuildContext context) {

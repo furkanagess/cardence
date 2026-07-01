@@ -3374,6 +3374,72 @@ abstract class AppLocalizations {
   /// **'Etkinliğin adını, konumunu, başlangıç saatini ve isteğe bağlı bitiş saatini girin.'**
   String get eventGroupDetailsStepSubtitle;
 
+  /// No description provided for @eventCreateStepProgress.
+  ///
+  /// In tr, this message translates to:
+  /// **'Adım {current} / {total}'**
+  String eventCreateStepProgress(int current, int total);
+
+  /// No description provided for @eventCreateNameSubtitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Etkinliğinize bir ad verin.'**
+  String get eventCreateNameSubtitle;
+
+  /// No description provided for @eventCreateLocationSubtitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ülke, il ve ilçe seçin; isteğe bağlı mekan adı ekleyin.'**
+  String get eventCreateLocationSubtitle;
+
+  /// No description provided for @eventLocationVenueLabel.
+  ///
+  /// In tr, this message translates to:
+  /// **'Mekan adı'**
+  String get eventLocationVenueLabel;
+
+  /// No description provided for @eventLocationVenueHint.
+  ///
+  /// In tr, this message translates to:
+  /// **'Örn. İstanbul Kongre Merkezi'**
+  String get eventLocationVenueHint;
+
+  /// No description provided for @eventLocationRegionRequired.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ülke ve il/ilçe seçimi gereklidir.'**
+  String get eventLocationRegionRequired;
+
+  /// No description provided for @eventCreateStartSubtitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Başlangıç tarihi ve saatini seçin.'**
+  String get eventCreateStartSubtitle;
+
+  /// No description provided for @eventCreateScheduleSubtitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Başlangıç tarih ve saatini seçin; isterseniz bitiş de ekleyin.'**
+  String get eventCreateScheduleSubtitle;
+
+  /// No description provided for @eventCreateEndSubtitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'İsterseniz bitiş tarihi ve saatini belirleyin. Atlayabilirsiniz.'**
+  String get eventCreateEndSubtitle;
+
+  /// No description provided for @eventCreatePhotoSubtitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Listede görünecek bir kapak fotoğrafı ekleyin. Atlayabilirsiniz.'**
+  String get eventCreatePhotoSubtitle;
+
+  /// No description provided for @eventSkip.
+  ///
+  /// In tr, this message translates to:
+  /// **'Atla'**
+  String get eventSkip;
+
   /// No description provided for @eventGroupCardsStepSubtitle.
   ///
   /// In tr, this message translates to:
@@ -3433,6 +3499,54 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Devam eden / Yaklaşan'**
   String get eventActiveSection;
+
+  /// No description provided for @eventInvitationTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bir etkinliğe davetlisiniz'**
+  String get eventInvitationTitle;
+
+  /// No description provided for @eventInvitationMessage.
+  ///
+  /// In tr, this message translates to:
+  /// **'{inviterName} sizi \"{eventName}\" etkinliğine davet etti'**
+  String eventInvitationMessage(String inviterName, String eventName);
+
+  /// No description provided for @eventInvitationCardLabel.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kartınız: {cardName}'**
+  String eventInvitationCardLabel(String cardName);
+
+  /// No description provided for @eventInvitationAccept.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kabul et'**
+  String get eventInvitationAccept;
+
+  /// No description provided for @eventInvitationReject.
+  ///
+  /// In tr, this message translates to:
+  /// **'Reddet'**
+  String get eventInvitationReject;
+
+  /// No description provided for @eventInvitationAccepted.
+  ///
+  /// In tr, this message translates to:
+  /// **'Davet kabul edildi'**
+  String get eventInvitationAccepted;
+
+  /// No description provided for @eventInvitationRejected.
+  ///
+  /// In tr, this message translates to:
+  /// **'Davet reddedildi'**
+  String get eventInvitationRejected;
+
+  /// No description provided for @eventInvitationsSection.
+  ///
+  /// In tr, this message translates to:
+  /// **'Davetler'**
+  String get eventInvitationsSection;
 
   /// No description provided for @eventEndedSection.
   ///
@@ -4225,6 +4339,12 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Merkez'**
   String get graphMetricCenter;
+
+  /// No description provided for @graphMetricCenterFallback.
+  ///
+  /// In tr, this message translates to:
+  /// **'—'**
+  String get graphMetricCenterFallback;
 
   /// No description provided for @you.
   ///

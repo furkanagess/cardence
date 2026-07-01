@@ -17,6 +17,7 @@ import '../pages/network_graph_stats_page.dart';
 import '../widgets/network_graph_canvas.dart' show NetworkGraphInteractiveArea;
 import '../widgets/network_graph_empty_state.dart';
 import '../widgets/network_graph_legend.dart';
+import '../helpers/network_graph_display.dart';
 import '../widgets/network_graph_path_card.dart';
 
 class NetworkGraphPage extends StatelessWidget {
@@ -149,7 +150,7 @@ class NetworkGraphView extends StatelessWidget {
             child: state.isLoading
                 ? const Center(child: CircularProgressIndicator())
                 : NetworkGraphInteractiveArea(
-                    nodes: graph.nodes,
+                    nodes: NetworkGraphDisplay.visibleNodes(graph.nodes),
                     edges: graph.edges,
                     highlightedNodeIds: state.highlightedNodeIds,
                     pathNodeIds: state.path?.pathNodeIds ?? const [],
@@ -239,7 +240,7 @@ class NetworkGraphView extends StatelessWidget {
 
     for (final node in graph.nodes) {
       if (node.cardId == cardId || node.id == 'card:$cardId') {
-        return node.isOwnCard ? context.l10n.you : node.label;
+        return NetworkGraphDisplay.nodeLabel(node);
       }
     }
     return cardId;

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../../../core/l10n/l10n_extensions.dart';
 
 import '../../../../core/media/profile_photo_image_picker.dart';
 import '../../../../core/permissions/media_permission_datasource.dart';
@@ -49,24 +48,6 @@ class _SettingsProfileHeaderState extends State<SettingsProfileHeader> {
     }
   }
 
-  void _showError(String message, {bool openSettings = false}) {
-    if (!mounted) return;
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(
-        SnackBar(
-          content: Text(message),
-          behavior: SnackBarBehavior.floating,
-          action: openSettings
-              ? SnackBarAction(
-                  label: context.l10n.ayarlar,
-                  onPressed: _mediaPermission.openSettings,
-                )
-              : null,
-        ),
-      );
-  }
-
   Future<void> _pickAndUploadPhoto() async {
     if (_busy) return;
 
@@ -74,7 +55,7 @@ class _SettingsProfileHeaderState extends State<SettingsProfileHeader> {
     try {
       final path = await _photoPicker.pickImagePath(
         context,
-        onError: _showError,
+        onError: (_, {bool openSettings = false}) {},
       );
       if (path == null || !mounted) return;
 
@@ -82,16 +63,7 @@ class _SettingsProfileHeaderState extends State<SettingsProfileHeader> {
       if (!mounted) return;
       setState(() => _photoUrl = profile.photoUrl);
       widget.onPhotoUpdated?.call(profile.photoUrl);
-      ScaffoldMessenger.of(context)
-        ..hideCurrentSnackBar()
-        ..showSnackBar(
-          SnackBar(
-            content: Text(context.l10n.profilFotorafKartlarnzaDaUyguland),
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-    } catch (e) {
-      _showError(e.toString().replaceFirst('AuthApiException: ', ''));
+    } catch (_) {
     } finally {
       if (mounted) setState(() => _busy = false);
     }

@@ -7,6 +7,9 @@ import '../../../../core/widgets/molecules/new_event_group_name_dialog.dart';
 import '../../domain/entities/event_group.dart';
 import 'event_group_photo_picker_field.dart';
 import 'event_group_schedule_picker_section.dart';
+import 'event_group_location_picker_field.dart';
+import '../helpers/event_group_location_composer.dart';
+import '../../../../core/location/country_location_data_cache.dart';
 
 class EditEventGroupResult {
   const EditEventGroupResult({
@@ -41,6 +44,7 @@ class EditEventGroupSheet extends StatefulWidget {
     required EventGroup group,
     required List<String> existingNames,
   }) {
+    CountryLocationDataCache.warmUp();
     return showModalBottomSheet<EditEventGroupResult>(
       context: context,
       isScrollControlled: true,
@@ -63,7 +67,9 @@ class EditEventGroupSheet extends StatefulWidget {
 
 class _EditEventGroupSheetState extends State<EditEventGroupSheet> {
   late final TextEditingController _nameController;
-  late final TextEditingController _locationController;
+  late final TextEditingController _venueController;
+  String? _locationCountry;
+  String? _locationCity;
   String? _nameErrorText;
   String? _locationErrorText;
   String? _scheduleErrorText;
@@ -79,8 +85,10 @@ class _EditEventGroupSheetState extends State<EditEventGroupSheet> {
   void initState() {
     super.initState();
     _nameController = TextEditingController(text: widget.group.name);
-    _locationController =
-        TextEditingController(text: widget.group.location ?? '');
+    final parsed = EventGroupLocationComposer.parse(widget.group.location);
+    _locationCountry = parsed.country;
+    _locationCity = parsed.city;
+    _venueController = TextEditingController(text: parsed.venue ?? '');
     _initialPhotoUrl = widget.group.photoUrl;
     final startLocal = widget.group.startAt.toLocal();
     _startDate = DateTime(startLocal.year, startLocal.month, startLocal.day);
@@ -96,9 +104,15 @@ class _EditEventGroupSheetState extends State<EditEventGroupSheet> {
   @override
   void dispose() {
     _nameController.dispose();
-    _locationController.dispose();
+    _venueController.dispose();
     super.dispose();
   }
+
+  String get _composedLocation => EventGroupLocationComposer.compose(
+        venue: _venueController.text,
+        country: _locationCountry,
+        city: _locationCity,
+      );
 
   DateTime? get _startAt => _combineDateAndTime(_startDate, _startTime);
 
@@ -128,7 +142,7 @@ class _EditEventGroupSheetState extends State<EditEventGroupSheet> {
 
   void _submit() {
     final name = _nameController.text.trim();
-    final location = _locationController.text.trim();
+    final location = _composedLocation.trim();
     final startAt = _startAt;
     final endAt = _endAt;
 
@@ -141,8 +155,13 @@ class _EditEventGroupSheetState extends State<EditEventGroupSheet> {
       setState(() => _nameErrorText = context.l10n.eventGroupNameDuplicate);
       return;
     }
-    if (location.isEmpty) {
-      setState(() => _locationErrorText = context.l10n.eventLocationRequired);
+    if (!EventGroupLocationComposer.isRegionComplete(
+      _locationCountry,
+      _locationCity,
+    )) {
+      setState(
+        () => _locationErrorText = context.l10n.eventLocationRegionRequired,
+      );
       return;
     }
     if (startAt == null) {
@@ -222,11 +241,24 @@ class _EditEventGroupSheetState extends State<EditEventGroupSheet> {
                           textInputAction: TextInputAction.next,
                         ),
                         const SizedBox(height: 14),
-                        CustomTextField(
-                          controller: _locationController,
-                          labelText: context.l10n.konum,
+                        EventGroupLocationPickerField(
+                          country: _locationCountry,
+                          city: _locationCity,
+                          venueController: _venueController,
                           errorText: _locationErrorText,
-                          textInputAction: TextInputAction.next,
+                          onCountryChanged: (value) => setState(() {
+                            _locationCountry = value;
+                            _locationErrorText = null;
+                          }),
+                          onCityChanged: (value) => setState(() {
+                            _locationCity = value;
+                            _locationErrorText = null;
+                          }),
+                          onVenueChanged: () {
+                            if (_locationErrorText != null) {
+                              setState(() => _locationErrorText = null);
+                            }
+                          },
                         ),
                         const SizedBox(height: 14),
                         EventGroupSchedulePickerSection(

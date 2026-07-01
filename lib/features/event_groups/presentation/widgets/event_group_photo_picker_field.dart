@@ -26,15 +26,7 @@ class EventGroupPhotoPickerField extends StatelessWidget {
       context,
       correctFrontCameraMirror: false,
       preferredCamera: CameraDevice.rear,
-      onError: (message, {bool openSettings = false}) {
-        if (!context.mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(message),
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-      },
+      onError: (_, {bool openSettings = false}) {},
     );
     if (path == null) return;
     onChanged(path);

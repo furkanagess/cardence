@@ -2,6 +2,7 @@ import '../../../../core/auth/auth_token_provider.dart';
 import '../../../../core/network/auth_api_exception.dart';
 import '../../domain/entities/event_group.dart';
 import '../../domain/entities/event_group_create_input.dart';
+import '../../domain/entities/event_group_invitation.dart';
 import '../../domain/entities/event_group_update_input.dart';
 import '../../domain/repositories/event_group_repository.dart';
 import '../datasources/event_group_local_datasource.dart';
@@ -37,8 +38,8 @@ class EventGroupRepositoryImpl implements EventGroupRepository {
         final remoteGroups = await _remote.getEventGroups(accessToken: token);
         await _cacheGroups(remoteGroups);
         return remoteGroups.map((model) => model.toEntity()).toList();
-      } on AuthApiException {
-        rethrow;
+      } on AuthApiException catch (e) {
+        if (!e.isNetworkError) rethrow;
       } catch (_) {
         // Sunucu erişilemezse yerel önbelleğe düş.
       }
@@ -46,6 +47,40 @@ class EventGroupRepositoryImpl implements EventGroupRepository {
 
     final localGroups = await _local.getEventGroups();
     return localGroups.map((model) => model.toEntity()).toList();
+  }
+
+  @override
+  Future<List<EventGroupInvitation>> getPendingInvitations() async {
+    final token = await _tryAccessToken();
+    if (token == null) return [];
+
+    try {
+      final invitations = await _remote.getPendingInvitations(
+        accessToken: token,
+      );
+      return invitations.map((model) => model.toEntity()).toList();
+    } on AuthApiException catch (e) {
+      if (e.isNetworkError || e.statusCode == 404) return [];
+      rethrow;
+    }
+  }
+
+  @override
+  Future<void> acceptInvitation(String invitationId) async {
+    final token = await _requireAccessToken();
+    await _remote.acceptInvitation(
+      invitationId: invitationId,
+      accessToken: token,
+    );
+  }
+
+  @override
+  Future<void> rejectInvitation(String invitationId) async {
+    final token = await _requireAccessToken();
+    await _remote.rejectInvitation(
+      invitationId: invitationId,
+      accessToken: token,
+    );
   }
 
   @override

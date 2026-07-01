@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../../../core/l10n/api_error_localizer.dart';
 import '../../../../core/l10n/l10n_extensions.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -66,27 +65,7 @@ class _SupportViewState extends State<_SupportView> {
       listenWhen: (prev, curr) => prev.status != curr.status,
       listener: (context, state) {
         if (state.status == SupportStatus.success) {
-          ScaffoldMessenger.of(context)
-            ..hideCurrentSnackBar()
-            ..showSnackBar(
-              SnackBar(
-                content: Text(context.l10n.destekTalebinizAlndEnKsa),
-                behavior: SnackBarBehavior.floating,
-              ),
-            );
           Navigator.of(context).pop();
-        }
-        if (state.status == SupportStatus.failure && state.errorMessage != null) {
-          ScaffoldMessenger.of(context)
-            ..hideCurrentSnackBar()
-            ..showSnackBar(
-              SnackBar(
-                content: Text(
-                  ApiErrorLocalizer.localize(context.l10n, state.errorMessage!),
-                ),
-                behavior: SnackBarBehavior.floating,
-              ),
-            );
         }
       },
       child: CardenceScaffold(

@@ -1,5 +1,4 @@
 import 'dart:math' as math;
-import '../../../../core/l10n/api_error_localizer.dart';
 import '../../../../core/l10n/l10n_extensions.dart';
 
 import 'package:flutter/material.dart';
@@ -145,15 +144,7 @@ class _AuthViewState extends State<_AuthView>
       if (!context.mounted) {
         return;
       }
-      ScaffoldMessenger.of(context)
-        ..hideCurrentSnackBar()
-        ..showSnackBar(
-          SnackBar(
-            content: Text(context.l10n.linkedinLoginFailed),
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-    }
+          }
   }
 
   @override
@@ -166,18 +157,6 @@ class _AuthViewState extends State<_AuthView>
       listener: (context, state) {
         if (state.status == LoginStatus.success) {
           widget.onAuthSuccess();
-        }
-        if (state.status == LoginStatus.failure && state.errorMessage != null) {
-          ScaffoldMessenger.of(context)
-            ..hideCurrentSnackBar()
-            ..showSnackBar(
-              SnackBar(
-                content: Text(
-                  ApiErrorLocalizer.localize(context.l10n, state.errorMessage!),
-                ),
-                behavior: SnackBarBehavior.floating,
-              ),
-            );
         }
       },
       child: BlocBuilder<LoginBloc, LoginState>(

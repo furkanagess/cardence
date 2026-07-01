@@ -1,10 +1,9 @@
-import 'dart:convert';
 import '../../../core/l10n/l10n_extensions.dart';
+import '../../../core/location/country_location_data_cache.dart';
 
 import 'package:csc_picker/dropdown_with_search.dart';
 import 'package:csc_picker/model/select_status_model.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart' show rootBundle;
 
 /// Ülke, il ve ilçe seçimi; formdaki diğer alanlarla aynı görünümde.
 class CountryCityPickerField extends StatefulWidget {
@@ -32,9 +31,6 @@ class CountryCityPickerField extends StatefulWidget {
 }
 
 class _CountryCityPickerFieldState extends State<CountryCityPickerField> {
-  static const _countryAssetPath =
-      'packages/csc_picker/lib/assets/country.json';
-
   final List<String> _countryOptions = [];
   final List<String> _stateOptions = [];
   final List<String> _districtOptions = [];
@@ -61,11 +57,7 @@ class _CountryCityPickerFieldState extends State<CountryCityPickerField> {
   }
 
   Future<void> _bootstrap() async {
-    final raw = await rootBundle.loadString(_countryAssetPath);
-    final decoded = jsonDecode(raw) as List;
-    _countries = decoded
-        .map((item) => Country.fromJson(item as Map<String, dynamic>))
-        .toList();
+    _countries = await CountryLocationDataCache.ensureLoaded();
 
     _countryOptions
       ..clear()

@@ -47,24 +47,6 @@ class _OnboardingPhotoPickerState extends State<OnboardingPhotoPicker> {
     }
   }
 
-  void _showError(String message, {bool openSettings = false}) {
-    if (!mounted) return;
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(
-        SnackBar(
-          content: Text(message),
-          behavior: SnackBarBehavior.floating,
-          action: openSettings
-              ? SnackBarAction(
-                  label: context.l10n.ayarlar,
-                  onPressed: _mediaPermission.openSettings,
-                )
-              : null,
-        ),
-      );
-  }
-
   Future<void> _pickAndUploadPhoto() async {
     if (_busy) return;
 
@@ -72,7 +54,7 @@ class _OnboardingPhotoPickerState extends State<OnboardingPhotoPicker> {
     try {
       final path = await _photoPicker.pickImagePath(
         context,
-        onError: _showError,
+        onError: (_, {bool openSettings = false}) {},
       );
       if (path == null || !mounted) return;
 
@@ -80,8 +62,7 @@ class _OnboardingPhotoPickerState extends State<OnboardingPhotoPicker> {
       if (!mounted) return;
       setState(() => _photoUrl = profile.photoUrl);
       widget.onPhotoUrlChanged(profile.photoUrl);
-    } catch (e) {
-      _showError(e.toString().replaceFirst('AuthApiException: ', ''));
+    } catch (_) {
     } finally {
       if (mounted) setState(() => _busy = false);
     }

@@ -97,14 +97,7 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   Future<void> _rateApp() async {
-    final opened = await widget.requestAppReview();
-    if (!mounted || opened) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(context.l10n.maazaSayfasAlamadLtfenTekrar),
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
+    await widget.requestAppReview();
   }
 
   @override

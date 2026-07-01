@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 
 import 'auth_api_exception.dart';
+import '../l10n/app_error_keys.dart';
 
 /// Cardence API yanıt zarfı (envelope) ayrıştırma.
 class ApiResponseParser {
@@ -156,9 +157,31 @@ class ApiResponseParser {
       }
     }
 
+    final isNetworkError = _isNetworkDioException(exception);
     return AuthApiException(
-      exception.message ?? fallbackError,
+      isNetworkError
+          ? AppErrorKeys.connectionError
+          : (exception.message ?? fallbackError),
       statusCode: response?.statusCode,
+      isNetworkError: isNetworkError,
     );
+  }
+
+  static bool _isNetworkDioException(DioException exception) {
+    switch (exception.type) {
+      case DioExceptionType.connectionError:
+      case DioExceptionType.connectionTimeout:
+      case DioExceptionType.sendTimeout:
+      case DioExceptionType.receiveTimeout:
+        return true;
+      case DioExceptionType.unknown:
+        final message = exception.message?.toLowerCase() ?? '';
+        return message.contains('connection') ||
+            message.contains('socket') ||
+            message.contains('network') ||
+            message.contains('host lookup');
+      default:
+        return false;
+    }
   }
 }

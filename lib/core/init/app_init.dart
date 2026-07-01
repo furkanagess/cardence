@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/widgets.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -33,6 +35,9 @@ import 'complete_onboarding_flow.dart';
 import '../../features/event_groups/data/datasources/event_group_local_datasource.dart';
 import '../../features/event_groups/data/repositories/event_group_repository_impl.dart';
 import '../../features/event_groups/domain/usecases/get_event_groups.dart';
+import '../../features/event_groups/domain/usecases/get_event_group_invitations.dart';
+import '../../features/event_groups/domain/usecases/accept_event_group_invitation.dart';
+import '../../features/event_groups/domain/usecases/reject_event_group_invitation.dart';
 import '../../features/event_groups/data/datasources/event_group_remote_datasource.dart';
 import '../../features/event_groups/domain/usecases/create_event_group.dart';
 import '../../features/event_groups/domain/usecases/delete_event_group.dart';
@@ -116,15 +121,11 @@ class AppInit {
 
     final subscriptionRepo = SubscriptionRepositoryImpl();
     final configureSubscriptions = ConfigureSubscriptions(subscriptionRepo);
-    await _guardInit('RevenueCat configure', configureSubscriptions.call);
     final identifySubscriptionUser = IdentifySubscriptionUser(subscriptionRepo);
     final logoutSubscriptionUser = LogoutSubscriptionUser(subscriptionRepo);
 
     final interstitialAdRepo = InterstitialAdRepositoryImpl();
-    await _guardInit(
-      'MobileAds init',
-      InitializeMobileAds(interstitialAdRepo).call,
-    );
+    final initializeMobileAds = InitializeMobileAds(interstitialAdRepo);
     final postAddCardAdCounter = PostAddCardAdCounterLocalDataSource(prefs);
     final showPostAddCardMonetization = ShowPostAddCardMonetization(
       interstitialAdRepo,
@@ -207,12 +208,14 @@ class AppInit {
     );
 
     final session = await authLocal.getSession();
-    if (session != null && session.userId.isNotEmpty) {
-      await _guardInit(
-        'RevenueCat identify',
-        () => identifySubscriptionUser(session.userId),
-      );
-    }
+    unawaited(
+      _initDeferredMonetization(
+        configureSubscriptions: configureSubscriptions,
+        initializeMobileAds: initializeMobileAds,
+        identifySubscriptionUser: identifySubscriptionUser,
+        userId: session?.userId,
+      ),
+    );
 
     return AppInitResult(
       restoreAuthSession: auth.restoreAuthSession,
@@ -246,6 +249,9 @@ class AppInit {
       submitSupportRequest: support.submitSupportRequest,
       requestAppReview: appReview.requestAppReview,
       getEventGroups: eventGroups.getEventGroups,
+      getEventGroupInvitations: eventGroups.getEventGroupInvitations,
+      acceptEventGroupInvitation: eventGroups.acceptEventGroupInvitation,
+      rejectEventGroupInvitation: eventGroups.rejectEventGroupInvitation,
       createEventGroup: eventGroups.createEventGroup,
       updateEventGroup: eventGroups.updateEventGroup,
       inviteEventGroupCardsByCardId: eventGroups.inviteEventGroupCardsByCardId,
@@ -325,6 +331,9 @@ class AppInit {
 
   static ({
     GetEventGroups getEventGroups,
+    GetEventGroupInvitations getEventGroupInvitations,
+    AcceptEventGroupInvitation acceptEventGroupInvitation,
+    RejectEventGroupInvitation rejectEventGroupInvitation,
     CreateEventGroup createEventGroup,
     UpdateEventGroup updateEventGroup,
     InviteEventGroupCardsByCardId inviteEventGroupCardsByCardId,
@@ -341,6 +350,9 @@ class AppInit {
     );
     return (
       getEventGroups: GetEventGroups(repo),
+      getEventGroupInvitations: GetEventGroupInvitations(repo),
+      acceptEventGroupInvitation: AcceptEventGroupInvitation(repo),
+      rejectEventGroupInvitation: RejectEventGroupInvitation(repo),
       createEventGroup: CreateEventGroup(repo),
       updateEventGroup: UpdateEventGroup(repo),
       inviteEventGroupCardsByCardId: InviteEventGroupCardsByCardId(repo),
@@ -369,6 +381,23 @@ class AppInit {
     } catch (error, stackTrace) {
       debugPrint('[AppInit] $label failed: $error');
       debugPrintStack(stackTrace: stackTrace);
+    }
+  }
+
+  /// RevenueCat ve AdMob açılışı bloklamaz; ilk kare sonrası arka planda yüklenir.
+  static Future<void> _initDeferredMonetization({
+    required ConfigureSubscriptions configureSubscriptions,
+    required InitializeMobileAds initializeMobileAds,
+    required IdentifySubscriptionUser identifySubscriptionUser,
+    required String? userId,
+  }) async {
+    await _guardInit('RevenueCat configure', configureSubscriptions.call);
+    await _guardInit('MobileAds init', initializeMobileAds.call);
+    if (userId != null && userId.isNotEmpty) {
+      await _guardInit(
+        'RevenueCat identify',
+        () => identifySubscriptionUser(userId),
+      );
     }
   }
 
@@ -554,6 +583,9 @@ class AppInitResult {
     required this.submitSupportRequest,
     required this.requestAppReview,
     required this.getEventGroups,
+    required this.getEventGroupInvitations,
+    required this.acceptEventGroupInvitation,
+    required this.rejectEventGroupInvitation,
     required this.createEventGroup,
     required this.updateEventGroup,
     required this.inviteEventGroupCardsByCardId,
@@ -606,6 +638,9 @@ class AppInitResult {
   final SubmitSupportRequest submitSupportRequest;
   final RequestAppReview requestAppReview;
   final GetEventGroups getEventGroups;
+  final GetEventGroupInvitations getEventGroupInvitations;
+  final AcceptEventGroupInvitation acceptEventGroupInvitation;
+  final RejectEventGroupInvitation rejectEventGroupInvitation;
   final CreateEventGroup createEventGroup;
   final UpdateEventGroup updateEventGroup;
   final InviteEventGroupCardsByCardId inviteEventGroupCardsByCardId;

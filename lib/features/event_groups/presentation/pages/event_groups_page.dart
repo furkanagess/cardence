@@ -13,13 +13,19 @@ import '../../../subscriptions/domain/usecases/restore_wallet_purchases.dart';
 import '../../../network_graph/domain/usecases/get_network_graph.dart';
 import '../../../network_graph/domain/usecases/get_network_graph_path.dart';
 import '../../domain/entities/event_group.dart';
+import '../../domain/entities/event_group_invitation.dart';
 import '../helpers/event_group_meta_formatter.dart';
 import '../widgets/create_event_group_sheet.dart';
+import '../../../../core/location/country_location_data_cache.dart';
 import '../widgets/event_group_cover_thumbnail.dart';
+import '../widgets/event_group_invitation_card.dart';
 import '../widgets/event_groups_loading_shimmer.dart';
 import '../widgets/event_groups_draggable_fab.dart';
 import '../../domain/entities/event_group_create_input.dart';
 import '../../domain/usecases/get_event_groups.dart';
+import '../../domain/usecases/get_event_group_invitations.dart';
+import '../../domain/usecases/accept_event_group_invitation.dart';
+import '../../domain/usecases/reject_event_group_invitation.dart';
 import '../../domain/usecases/create_event_group.dart';
 import '../../domain/usecases/update_event_group.dart';
 import '../../domain/usecases/invite_event_group_cards_by_card_id.dart';
@@ -36,6 +42,9 @@ class EventGroupsPage extends StatefulWidget {
   const EventGroupsPage({
     super.key,
     required this.getEventGroups,
+    required this.getEventGroupInvitations,
+    required this.acceptEventGroupInvitation,
+    required this.rejectEventGroupInvitation,
     required this.createEventGroup,
     required this.updateEventGroup,
     required this.inviteEventGroupCardsByCardId,
@@ -50,6 +59,9 @@ class EventGroupsPage extends StatefulWidget {
   });
 
   final GetEventGroups getEventGroups;
+  final GetEventGroupInvitations getEventGroupInvitations;
+  final AcceptEventGroupInvitation acceptEventGroupInvitation;
+  final RejectEventGroupInvitation rejectEventGroupInvitation;
   final CreateEventGroup createEventGroup;
   final UpdateEventGroup updateEventGroup;
   final InviteEventGroupCardsByCardId inviteEventGroupCardsByCardId;
@@ -68,25 +80,66 @@ class EventGroupsPage extends StatefulWidget {
 
 class _EventGroupsPageState extends State<EventGroupsPage> {
   List<EventGroup> _groups = [];
+  List<EventGroupInvitation> _invitations = [];
   bool _loading = true;
   bool _creatingGroup = false;
+  String? _respondingInvitationId;
 
   static const double _contentBottomInset = 128;
 
   @override
   void initState() {
     super.initState();
+    CountryLocationDataCache.warmUp();
     _loadGroups();
   }
 
   Future<void> _loadGroups() async {
     setState(() => _loading = true);
-    final groups = await widget.getEventGroups();
-    if (!mounted) return;
-    setState(() {
-      _groups = groups;
-      _loading = false;
-    });
+    try {
+      final groups = await widget.getEventGroups();
+      if (!mounted) return;
+      setState(() {
+        _groups = groups;
+        _loading = false;
+      });
+    } on AuthApiException {
+      if (!mounted) return;
+      setState(() => _loading = false);
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _loading = false);
+    }
+
+    try {
+      final invitations = await widget.getEventGroupInvitations();
+      if (!mounted) return;
+      setState(() => _invitations = invitations);
+    } catch (_) {
+      // Davet endpoint'i henüz production'da olmayabilir; grup listesi etkilenmesin.
+    }
+  }
+
+  Future<void> _respondToInvitation({
+    required EventGroupInvitation invitation,
+    required bool accept,
+  }) async {
+    if (_respondingInvitationId != null) return;
+
+    setState(() => _respondingInvitationId = invitation.id);
+    try {
+      if (accept) {
+        await widget.acceptEventGroupInvitation(invitation.id);
+      } else {
+        await widget.rejectEventGroupInvitation(invitation.id);
+      }
+      if (!mounted) return;
+      await _loadGroups();
+    } on AuthApiException {
+      if (!mounted) return;
+    } finally {
+      if (mounted) setState(() => _respondingInvitationId = null);
+    }
   }
 
   int _savedCardCountForGroup(String groupId, List<SavedCard> savedCards) {
@@ -102,31 +155,32 @@ class _EventGroupsPageState extends State<EventGroupsPage> {
 
   Future<void> _createNewEventGroup() async {
     if (_creatingGroup) return;
-    setState(() => _creatingGroup = true);
 
-    try {
-      final savedCardsCubit = context.read<SavedCardsCubit>();
-      final planCubit = context.read<PlanCubit>();
-      final planAllowsGroup = _canAddGroupFromPlan(planCubit.state);
-      final quota = savedCardsCubit.state.quota;
-      if (!planAllowsGroup || !quota.canAddEventGroup) {
-        await WalletPaywallFlow.show(
-          context,
-          cubit: savedCardsCubit,
-        );
-        if (mounted) {
-          await planCubit.refresh();
-        }
-        return;
-      }
-
-      final result = await CreateEventGroupSheet.show(
+    final savedCardsCubit = context.read<SavedCardsCubit>();
+    final planCubit = context.read<PlanCubit>();
+    final planAllowsGroup = _canAddGroupFromPlan(planCubit.state);
+    final quota = savedCardsCubit.state.quota;
+    if (!planAllowsGroup || !quota.canAddEventGroup) {
+      await WalletPaywallFlow.show(
         context,
-        existingNames: _groups.map((g) => g.name).toList(),
-        getSavedCards: widget.getSavedCards,
+        cubit: savedCardsCubit,
       );
-      if (!mounted || result == null) return;
+      if (mounted) {
+        await planCubit.refresh();
+      }
+      return;
+    }
 
+    final result = await CreateEventGroupSheet.show(
+      context,
+      existingNames: _groups.map((g) => g.name).toList(),
+      getSavedCards: widget.getSavedCards,
+      initialPickableCards: savedCardsCubit.state.cards,
+    );
+    if (!mounted || result == null) return;
+
+    setState(() => _creatingGroup = true);
+    try {
       EventGroup newGroup;
       try {
         newGroup = await widget.createEventGroup(
@@ -152,12 +206,6 @@ class _EventGroupsPageState extends State<EventGroupsPage> {
           }
           return;
         }
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(e.message),
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
         return;
       }
 
@@ -181,21 +229,7 @@ class _EventGroupsPageState extends State<EventGroupsPage> {
       if (!mounted) return;
       await _loadGroups();
       if (!mounted) return;
-
-      final cardCount = result.selectedCardIds.length + validInvitedCount;
-      final l10n = context.l10n;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            cardCount == 0
-                ? AppL10n.eventGroupCreatedMessage(l10n, result.name)
-                : AppL10n.eventGroupCreatedWithCardsMessage(
-                    l10n, result.name, cardCount),
-          ),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-    } finally {
+} finally {
       if (mounted) setState(() => _creatingGroup = false);
     }
   }
@@ -238,7 +272,7 @@ class _EventGroupsPageState extends State<EventGroupsPage> {
       return const EventGroupsLoadingShimmer();
     }
 
-    if (_groups.isEmpty) {
+    if (_groups.isEmpty && _invitations.isEmpty) {
       return Center(
         child: Padding(
           padding: const EdgeInsets.all(24),
@@ -282,6 +316,11 @@ class _EventGroupsPageState extends State<EventGroupsPage> {
     return ListView(
       padding: const EdgeInsets.fromLTRB(20, 16, 20, _contentBottomInset),
       children: [
+        if (_invitations.isNotEmpty) ...[
+          _buildInvitationsSection(context),
+          if (activeGroups.isNotEmpty || endedGroups.isNotEmpty)
+            const SizedBox(height: 16),
+        ],
         if (activeGroups.isNotEmpty)
           _buildSection(
             context,
@@ -298,6 +337,44 @@ class _EventGroupsPageState extends State<EventGroupsPage> {
             savedCards: savedCards,
           ),
         ],
+      ],
+    );
+  }
+
+  Widget _buildInvitationsSection(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(bottom: 10),
+          child: Text(
+            context.l10n.eventInvitationsSection,
+            style: textTheme.titleSmall?.copyWith(
+              color: colorScheme.onSurface,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+        ),
+        ..._invitations.map(
+          (invitation) => Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: EventGroupInvitationCard(
+              invitation: invitation,
+              isResponding: _respondingInvitationId == invitation.id,
+              onAccept: () => _respondToInvitation(
+                invitation: invitation,
+                accept: true,
+              ),
+              onReject: () => _respondToInvitation(
+                invitation: invitation,
+                accept: false,
+              ),
+            ),
+          ),
+        ),
       ],
     );
   }

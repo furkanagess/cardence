@@ -1773,6 +1773,46 @@ class AppLocalizationsTr extends AppLocalizations {
       'Etkinliğin adını, konumunu, başlangıç saatini ve isteğe bağlı bitiş saatini girin.';
 
   @override
+  String eventCreateStepProgress(int current, int total) {
+    return 'Adım $current / $total';
+  }
+
+  @override
+  String get eventCreateNameSubtitle => 'Etkinliğinize bir ad verin.';
+
+  @override
+  String get eventCreateLocationSubtitle =>
+      'Ülke, il ve ilçe seçin; isteğe bağlı mekan adı ekleyin.';
+
+  @override
+  String get eventLocationVenueLabel => 'Mekan adı';
+
+  @override
+  String get eventLocationVenueHint => 'Örn. İstanbul Kongre Merkezi';
+
+  @override
+  String get eventLocationRegionRequired =>
+      'Ülke ve il/ilçe seçimi gereklidir.';
+
+  @override
+  String get eventCreateStartSubtitle => 'Başlangıç tarihi ve saatini seçin.';
+
+  @override
+  String get eventCreateScheduleSubtitle =>
+      'Başlangıç tarih ve saatini seçin; isterseniz bitiş de ekleyin.';
+
+  @override
+  String get eventCreateEndSubtitle =>
+      'İsterseniz bitiş tarihi ve saatini belirleyin. Atlayabilirsiniz.';
+
+  @override
+  String get eventCreatePhotoSubtitle =>
+      'Listede görünecek bir kapak fotoğrafı ekleyin. Atlayabilirsiniz.';
+
+  @override
+  String get eventSkip => 'Atla';
+
+  @override
   String get eventGroupCardsStepSubtitle =>
       'Kayıtlı kart seçin veya Card ID ile davet edin. İsterseniz kart seçmeden de etkinliği oluşturabilirsiniz.';
 
@@ -1803,6 +1843,34 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get eventActiveSection => 'Devam eden / Yaklaşan';
+
+  @override
+  String get eventInvitationTitle => 'Bir etkinliğe davetlisiniz';
+
+  @override
+  String eventInvitationMessage(String inviterName, String eventName) {
+    return '$inviterName sizi \"$eventName\" etkinliğine davet etti';
+  }
+
+  @override
+  String eventInvitationCardLabel(String cardName) {
+    return 'Kartınız: $cardName';
+  }
+
+  @override
+  String get eventInvitationAccept => 'Kabul et';
+
+  @override
+  String get eventInvitationReject => 'Reddet';
+
+  @override
+  String get eventInvitationAccepted => 'Davet kabul edildi';
+
+  @override
+  String get eventInvitationRejected => 'Davet reddedildi';
+
+  @override
+  String get eventInvitationsSection => 'Davetler';
 
   @override
   String get eventEndedSection => 'Biten etkinlikler';
@@ -2260,6 +2328,9 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get graphMetricCenter => 'Merkez';
+
+  @override
+  String get graphMetricCenterFallback => '—';
 
   @override
   String get you => 'Sen';

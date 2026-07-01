@@ -6,6 +6,7 @@ import '../../../../l10n/app_localizations.dart';
 import '../../../../core/widgets/atoms/profile_avatar.dart';
 import '../../domain/entities/graph_node.dart';
 import '../../domain/entities/graph_node_type.dart';
+import '../helpers/network_graph_display.dart';
 
 class NetworkGraphNodeList extends StatelessWidget {
   const NetworkGraphNodeList({
@@ -63,7 +64,7 @@ class NetworkGraphNodeTile extends StatelessWidget {
         leading: (node.photoUrl?.trim().isNotEmpty ?? false)
             ? ProfileAvatar(
                 photoUrl: node.photoUrl,
-                displayName: node.isOwnCard ? context.l10n.you : node.label,
+                displayName: NetworkGraphDisplay.nodeLabel(node),
                 size: 40,
                 circular: true,
               )
@@ -73,7 +74,7 @@ class NetworkGraphNodeTile extends StatelessWidget {
                 child: Icon(NetworkGraphNodeIcon.iconFor(node.type), size: 20),
               ),
         title: Text(
-          node.isOwnCard ? context.l10n.you : node.label,
+          NetworkGraphDisplay.nodeLabel(node),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
           style: theme.textTheme.titleSmall?.copyWith(
