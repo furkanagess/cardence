@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import '../../media/authenticated_image_loader.dart';
 import '../../media/api_media_urls.dart';
 
-/// API `/uploads` görselleri için Bearer token ile yükleme yapar.
+/// Cardence API `/uploads` ve harici görselleri yükler.
 class AuthenticatedNetworkImage extends StatefulWidget {
   const AuthenticatedNetworkImage({
     super.key,
@@ -32,8 +32,11 @@ class AuthenticatedNetworkImage extends StatefulWidget {
 class _AuthenticatedNetworkImageState extends State<AuthenticatedNetworkImage> {
   Uint8List? _bytes;
   bool _failed = false;
+  bool _usePlainNetwork = false;
 
   String? get _resolvedUrl => ApiMediaUrls.resolve(widget.imageUrl);
+
+  bool get _isApiUpload => ApiMediaUrls.isApiUploadUrl(widget.imageUrl);
 
   @override
   void initState() {
@@ -61,39 +64,45 @@ class _AuthenticatedNetworkImageState extends State<AuthenticatedNetworkImage> {
       setState(() {
         _bytes = null;
         _failed = true;
+        _usePlainNetwork = false;
       });
       return;
     }
 
-    if (!AuthenticatedImageLoader.shouldUseAuthenticatedLoader(url)) {
+    if (!_isApiUpload) {
       if (!mounted) return;
       setState(() {
         _bytes = null;
         _failed = false;
+        _usePlainNetwork = true;
       });
       return;
     }
 
-    final cached = AuthenticatedImageLoader.cachedBytes(url);
+    final cached = AuthenticatedImageLoader.cachedBytes(widget.imageUrl);
     if (cached != null) {
       if (!mounted) return;
       setState(() {
         _bytes = cached;
         _failed = false;
+        _usePlainNetwork = false;
       });
       return;
     }
 
+    if (!mounted) return;
     setState(() {
       _bytes = null;
       _failed = false;
+      _usePlainNetwork = false;
     });
 
-    final bytes = await AuthenticatedImageLoader.loadBytes(url);
+    final bytes = await AuthenticatedImageLoader.loadBytes(widget.imageUrl);
     if (!mounted) return;
     setState(() {
       _bytes = bytes;
       _failed = bytes == null;
+      _usePlainNetwork = false;
     });
   }
 
@@ -107,7 +116,7 @@ class _AuthenticatedNetworkImageState extends State<AuthenticatedNetworkImage> {
       );
     }
 
-    if (!ApiMediaUrls.requiresAuthentication(url)) {
+    if (_usePlainNetwork) {
       return _sized(
         Image.network(
           url,

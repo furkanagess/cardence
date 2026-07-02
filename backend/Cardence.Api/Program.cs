@@ -334,10 +334,8 @@ app.Lifetime.ApplicationStarted.Register(() =>
 app.UseHttpsRedirection();
 
 app.UseAuthentication();
-app.UseAuthorization();
 
-// /uploads varsayılan olarak kimliği doğrulanmış kullanıcılara açık;
-// kartvizit profil fotoğrafları (paylaşılan kartlarda) herkese açıktır.
+// /uploads erişimi burada denetlenir; statik dosyalar global FallbackPolicy'den önce sunulur.
 app.Use(async (context, next) =>
 {
     if (context.Request.Path.StartsWithSegments("/uploads")
@@ -370,6 +368,8 @@ app.UseStaticFiles(new StaticFileOptions
     RequestPath = "/uploads",
     ContentTypeProvider = uploadContentTypes,
 });
+
+app.UseAuthorization();
 
 app.MapControllers();
 app.MapHealthChecks("/health/ready", new HealthCheckOptions

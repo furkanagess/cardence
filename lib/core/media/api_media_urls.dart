@@ -23,24 +23,25 @@ class ApiMediaUrls {
     return '$base$path';
   }
 
-  static String _normalizedPath(String? url) {
+  static String normalizedPath(String? url) {
     final resolved = resolve(url);
     if (resolved == null) return '';
     return Uri.tryParse(resolved)?.path ?? '';
   }
 
-  static bool requiresAuthentication(String? url) {
-    final path = _normalizedPath(url);
-    if (path.isEmpty || !path.startsWith('/uploads/')) return false;
-    if (isPublicProfilePhotoPath(path)) return false;
-
+  /// Cardence API `/uploads` dosyası mı?
+  static bool isApiUploadUrl(String? url) {
     final resolved = resolve(url);
     if (resolved == null) return false;
 
+    final parsed = Uri.tryParse(resolved);
+    if (parsed == null || !parsed.path.startsWith('/uploads/')) {
+      return false;
+    }
+
     final baseHost = Uri.tryParse(ApiConfig.baseUrl)?.host;
-    final uriHost = Uri.tryParse(resolved)?.host;
     if (baseHost == null || baseHost.isEmpty) return true;
-    return uriHost == baseHost;
+    return parsed.host == baseHost;
   }
 
   /// Kartvizit profil fotoğrafları paylaşımda herkese açıktır:
@@ -55,6 +56,9 @@ class ApiMediaUrls {
     final fileName = segments[3].toLowerCase();
     return fileName.startsWith('profile.');
   }
+
+  static bool isPublicProfilePhotoUrl(String? url) =>
+      isPublicProfilePhotoPath(normalizedPath(url));
 
   static bool _isUserIdSegment(String segment) {
     return _guidPattern.hasMatch(segment) ||

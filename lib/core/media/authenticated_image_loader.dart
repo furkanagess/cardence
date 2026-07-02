@@ -5,10 +5,7 @@ import 'package:dio/dio.dart';
 import '../auth/auth_token_coordinator.dart';
 import 'api_media_urls.dart';
 
-/// `/uploads` altındaki korumalı görselleri Bearer token ile yükler.
-///
-/// Ana [DioClient] JSON API istekleri içindir; görseller bu sınıftaki ayrı
-/// istemci ile `Accept: image/*` başlığıyla alınır.
+/// Cardence `/uploads` görsellerini yükler; gerektiğinde Bearer token ekler.
 class AuthenticatedImageLoader {
   AuthenticatedImageLoader._();
 
@@ -45,7 +42,7 @@ class AuthenticatedImageLoader {
     final inFlight = _inFlight[resolved];
     if (inFlight != null) return inFlight;
 
-    final future = _fetchBytes(resolved);
+    final future = _loadResolved(resolved, url);
     _inFlight[resolved] = future;
     try {
       return await future;
@@ -54,15 +51,41 @@ class AuthenticatedImageLoader {
     }
   }
 
-  static Future<Uint8List?> _fetchBytes(String resolvedUrl) async {
-    final token = await AuthTokenCoordinator.instance?.getValidAccessToken();
-    if (token == null || token.isEmpty) return null;
+  static Future<Uint8List?> _loadResolved(
+    String resolvedUrl,
+    String sourceUrl,
+  ) async {
+    if (!ApiMediaUrls.isApiUploadUrl(sourceUrl)) return null;
 
+    final token =
+        await AuthTokenCoordinator.instance?.getValidAccessToken();
+
+    if (token != null && token.isNotEmpty) {
+      final authed = await _fetchBytes(resolvedUrl, bearerToken: token);
+      if (authed != null) return authed;
+    }
+
+    if (ApiMediaUrls.isPublicProfilePhotoUrl(sourceUrl)) {
+      return _fetchBytes(resolvedUrl);
+    }
+
+    return null;
+  }
+
+  static Future<Uint8List?> _fetchBytes(
+    String resolvedUrl, {
+    String? bearerToken,
+  }) async {
     try {
+      final headers = <String, String>{};
+      if (bearerToken != null && bearerToken.isNotEmpty) {
+        headers['Authorization'] = 'Bearer $bearerToken';
+      }
+
       final response = await _mediaClient.get<List<int>>(
         resolvedUrl,
         options: Options(
-          headers: {'Authorization': 'Bearer $token'},
+          headers: headers.isEmpty ? null : headers,
           followRedirects: true,
         ),
       );
@@ -76,9 +99,6 @@ class AuthenticatedImageLoader {
       return null;
     }
   }
-
-  static bool shouldUseAuthenticatedLoader(String? url) =>
-      ApiMediaUrls.requiresAuthentication(url);
 
   static void evict(String url) {
     final resolved = ApiMediaUrls.resolve(url);
