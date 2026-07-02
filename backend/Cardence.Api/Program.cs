@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.Extensions.FileProviders;
@@ -335,11 +336,13 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 
-// /uploads yalnızca kimliği doğrulanmış kullanıcılara açık.
+// /uploads varsayılan olarak kimliği doğrulanmış kullanıcılara açık;
+// kartvizit profil fotoğrafları (paylaşılan kartlarda) herkese açıktır.
 app.Use(async (context, next) =>
 {
     if (context.Request.Path.StartsWithSegments("/uploads")
-        && !(context.User.Identity?.IsAuthenticated ?? false))
+        && !(context.User.Identity?.IsAuthenticated ?? false)
+        && !IsPublicProfilePhotoUpload(context.Request.Path))
     {
         context.Response.StatusCode = StatusCodes.Status401Unauthorized;
         context.Response.ContentType = "application/json";
@@ -356,10 +359,16 @@ app.Use(async (context, next) =>
 
 var uploadsPath = Path.Combine(app.Environment.ContentRootPath, "uploads");
 Directory.CreateDirectory(uploadsPath);
+var uploadContentTypes = new FileExtensionContentTypeProvider();
+uploadContentTypes.Mappings[".jpg"] = "image/jpeg";
+uploadContentTypes.Mappings[".jpeg"] = "image/jpeg";
+uploadContentTypes.Mappings[".png"] = "image/png";
+uploadContentTypes.Mappings[".webp"] = "image/webp";
 app.UseStaticFiles(new StaticFileOptions
 {
     FileProvider = new PhysicalFileProvider(uploadsPath),
     RequestPath = "/uploads",
+    ContentTypeProvider = uploadContentTypes,
 });
 
 app.MapControllers();
@@ -370,5 +379,56 @@ app.MapHealthChecks("/health/ready", new HealthCheckOptions
 }).AllowAnonymous();
 
 app.Run();
+
+static bool IsPublicProfilePhotoUpload(PathString path)
+{
+    var value = path.Value;
+    if (string.IsNullOrEmpty(value))
+    {
+        return false;
+    }
+
+    var segments = value.Split('/', StringSplitOptions.RemoveEmptyEntries);
+    if (segments.Length != 4)
+    {
+        return false;
+    }
+
+    if (!segments[0].Equals("uploads", StringComparison.OrdinalIgnoreCase)
+        || !segments[1].Equals("users", StringComparison.OrdinalIgnoreCase))
+    {
+        return false;
+    }
+
+    if (!IsUserIdSegment(segments[2]))
+    {
+        return false;
+    }
+
+    return segments[3].StartsWith("profile.", StringComparison.OrdinalIgnoreCase);
+}
+
+static bool IsUserIdSegment(string segment)
+{
+    if (Guid.TryParse(segment, out _))
+    {
+        return true;
+    }
+
+    if (segment.Length != 32)
+    {
+        return false;
+    }
+
+    foreach (var ch in segment)
+    {
+        if (!Uri.IsHexDigit(ch))
+        {
+            return false;
+        }
+    }
+
+    return true;
+}
 
 public partial class Program;

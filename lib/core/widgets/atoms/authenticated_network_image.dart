@@ -33,23 +33,30 @@ class _AuthenticatedNetworkImageState extends State<AuthenticatedNetworkImage> {
   Uint8List? _bytes;
   bool _failed = false;
 
+  String? get _resolvedUrl => ApiMediaUrls.resolve(widget.imageUrl);
+
   @override
   void initState() {
     super.initState();
+    final cached = AuthenticatedImageLoader.cachedBytes(widget.imageUrl);
+    if (cached != null) {
+      _bytes = cached;
+    }
     _load();
   }
 
   @override
   void didUpdateWidget(covariant AuthenticatedNetworkImage oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.imageUrl.trim() != widget.imageUrl.trim()) {
+    if (ApiMediaUrls.resolve(oldWidget.imageUrl) !=
+        ApiMediaUrls.resolve(widget.imageUrl)) {
       _load();
     }
   }
 
   Future<void> _load() async {
-    final url = widget.imageUrl.trim();
-    if (url.isEmpty) {
+    final url = _resolvedUrl;
+    if (url == null || url.isEmpty) {
       if (!mounted) return;
       setState(() {
         _bytes = null;
@@ -62,6 +69,16 @@ class _AuthenticatedNetworkImageState extends State<AuthenticatedNetworkImage> {
       if (!mounted) return;
       setState(() {
         _bytes = null;
+        _failed = false;
+      });
+      return;
+    }
+
+    final cached = AuthenticatedImageLoader.cachedBytes(url);
+    if (cached != null) {
+      if (!mounted) return;
+      setState(() {
+        _bytes = cached;
         _failed = false;
       });
       return;
@@ -82,8 +99,8 @@ class _AuthenticatedNetworkImageState extends State<AuthenticatedNetworkImage> {
 
   @override
   Widget build(BuildContext context) {
-    final url = widget.imageUrl.trim();
-    if (url.isEmpty || _failed) {
+    final url = _resolvedUrl;
+    if (url == null || url.isEmpty || _failed) {
       return _sized(
         widget.errorBuilder?.call(context) ??
             const ColoredBox(color: Colors.transparent),
@@ -95,6 +112,7 @@ class _AuthenticatedNetworkImageState extends State<AuthenticatedNetworkImage> {
         Image.network(
           url,
           fit: widget.fit,
+          gaplessPlayback: true,
           errorBuilder: (_, __, ___) =>
               widget.errorBuilder?.call(context) ??
               const ColoredBox(color: Colors.transparent),
