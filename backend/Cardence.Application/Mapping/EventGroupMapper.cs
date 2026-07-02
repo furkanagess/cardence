@@ -14,6 +14,7 @@ public static class EventGroupMapper
         Id = entity.Id.ToString(),
         Name = entity.Name,
         Location = entity.Location,
+        Description = entity.Description,
         StartAt = entity.StartAtUtc,
         EndAt = entity.EndAtUtc,
         Status = EventGroupStatuses.Resolve(entity.StartAtUtc, entity.EndAtUtc),

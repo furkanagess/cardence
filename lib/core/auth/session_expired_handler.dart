@@ -13,22 +13,56 @@ class SessionExpiredHandler {
 
   GlobalKey<NavigatorState>? _navigatorKey;
   Future<void> Function()? _onForceLogout;
+  Future<bool> Function()? _hasStoredSession;
   bool _sessionExpiredDialogActive = false;
 
   void configure({
     required GlobalKey<NavigatorState> navigatorKey,
     required Future<void> Function() onForceLogout,
+    Future<bool> Function()? hasStoredSession,
   }) {
     _navigatorKey = navigatorKey;
     _onForceLogout = onForceLogout;
+    _hasStoredSession = hasStoredSession;
   }
 
-  void handleIfNeeded(AuthApiException error) {
+  void handleIfNeeded(
+    AuthApiException error, {
+    bool trustCallerHadSession = false,
+  }) {
     if (!error.requiresReLogin || _sessionExpiredDialogActive) return;
     _sessionExpiredDialogActive = true;
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      unawaited(_showDialog(error.message));
+      unawaited(
+        _maybeShowDialog(
+          error.message,
+          skipSessionCheck: trustCallerHadSession,
+        ),
+      );
     });
+  }
+
+  Future<void> _maybeShowDialog(
+    String message, {
+    bool skipSessionCheck = false,
+  }) async {
+    if (!skipSessionCheck) {
+      final checker = _hasStoredSession;
+      if (checker != null) {
+        try {
+          final hasSession = await checker();
+          if (!hasSession) {
+            _sessionExpiredDialogActive = false;
+            return;
+          }
+        } catch (_) {
+          _sessionExpiredDialogActive = false;
+          return;
+        }
+      }
+    }
+
+    await _showDialog(message);
   }
 
   Future<void> _showDialog(String message) async {

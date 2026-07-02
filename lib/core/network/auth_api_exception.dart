@@ -17,7 +17,6 @@ class AuthApiException implements Exception {
 
   /// Oturum yenilenemez; kullanıcı tekrar giriş yapmalı.
   bool get requiresReLogin =>
-      isUnauthorized ||
       message.contains('Oturum süresi doldu') ||
       message.contains('Oturum bulunamadı') ||
       message.contains('Session expired') ||

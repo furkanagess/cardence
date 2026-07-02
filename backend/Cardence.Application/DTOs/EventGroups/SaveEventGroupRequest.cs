@@ -4,6 +4,7 @@ public sealed class SaveEventGroupRequest
 {
     public string Name { get; init; } = string.Empty;
     public string? Location { get; init; }
+    public string? Description { get; init; }
     public DateTime? StartAt { get; init; }
     public DateTime? EndAt { get; init; }
     public DateTime? EventDate { get; init; }

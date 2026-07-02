@@ -19,6 +19,10 @@ public sealed class UpdateEventGroupRequestValidator : AbstractValidator<UpdateE
             .MaximumLength(500)
             .WithMessage("Etkinlik konumu gereklidir.");
 
+        RuleFor(x => x.Description)
+            .MaximumLength(2000)
+            .When(x => !string.IsNullOrWhiteSpace(x.Description));
+
         RuleFor(x => x)
             .Must(x => x.StartAt.HasValue || x.EventDate.HasValue)
             .WithMessage("Etkinlik başlangıç tarihi ve saati gereklidir.");

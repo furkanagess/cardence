@@ -14,4 +14,5 @@ public sealed class EventGroupInvitationDto
     public string? CardDisplayName { get; set; }
     public string Status { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; }
+    public DateTime ExpiresAt { get; set; }
 }

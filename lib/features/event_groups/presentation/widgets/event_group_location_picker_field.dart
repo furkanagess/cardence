@@ -16,6 +16,7 @@ class EventGroupLocationPickerField extends StatelessWidget {
     required this.onCountryChanged,
     required this.onCityChanged,
     required this.onVenueChanged,
+    this.showComposedPreview = true,
   });
 
   final String? country;
@@ -25,6 +26,7 @@ class EventGroupLocationPickerField extends StatelessWidget {
   final ValueChanged<String?> onCountryChanged;
   final ValueChanged<String?> onCityChanged;
   final VoidCallback onVenueChanged;
+  final bool showComposedPreview;
 
   @override
   Widget build(BuildContext context) {
@@ -59,7 +61,8 @@ class EventGroupLocationPickerField extends StatelessWidget {
           onChanged: (_) => onVenueChanged(),
         ),
         const SizedBox(height: 8),
-        if (EventGroupLocationComposer.isRegionComplete(country, city))
+        if (showComposedPreview &&
+            EventGroupLocationComposer.isRegionComplete(country, city))
           Text(
             EventGroupLocationComposer.compose(
               venue: venueController.text,

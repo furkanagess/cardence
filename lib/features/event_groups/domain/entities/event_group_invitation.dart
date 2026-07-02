@@ -12,6 +12,7 @@ class EventGroupInvitation {
     this.cardDisplayName,
     required this.status,
     required this.createdAt,
+    required this.expiresAt,
   });
 
   final String id;
@@ -26,4 +27,5 @@ class EventGroupInvitation {
   final String? cardDisplayName;
   final String status;
   final DateTime createdAt;
+  final DateTime expiresAt;
 }

@@ -5,6 +5,7 @@ class EventGroupUpdateInput {
     required this.location,
     required this.startAt,
     this.endAt,
+    this.description,
     this.photoFilePath,
     this.clearPhoto = false,
   });
@@ -14,6 +15,7 @@ class EventGroupUpdateInput {
   final String location;
   final DateTime startAt;
   final DateTime? endAt;
+  final String? description;
   final String? photoFilePath;
   final bool clearPhoto;
 }

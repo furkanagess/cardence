@@ -38,6 +38,7 @@ public sealed class CardConfiguration : IEntityTypeConfiguration<Card>
         builder.Property(x => x.PhotoUrl).HasMaxLength(2048).HasColumnName("photo_url");
         builder.Property(x => x.AccentColor).HasMaxLength(7).HasColumnName("accent_color");
         builder.Property(x => x.BackgroundColor).HasMaxLength(7).HasColumnName("background_color");
+        builder.Property(x => x.CardEffect).HasMaxLength(32).HasColumnName("card_effect");
         builder.Property(x => x.SaveCount).HasColumnName("save_count").HasDefaultValue(0);
         builder.Property(x => x.IsOwnerPremium).HasColumnName("is_owner_premium").HasDefaultValue(false);
         builder.Property(x => x.CreatedAt).HasColumnName("created_at");

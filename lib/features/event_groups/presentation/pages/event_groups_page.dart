@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../core/l10n/app_l10n.dart';
 import '../../../../core/l10n/l10n_extensions.dart';
-import '../../../../core/theme/app_colors.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/network/auth_api_exception.dart';
 import '../../../plans/presentation/cubit/plan_cubit.dart';
@@ -14,10 +13,9 @@ import '../../../network_graph/domain/usecases/get_network_graph.dart';
 import '../../../network_graph/domain/usecases/get_network_graph_path.dart';
 import '../../domain/entities/event_group.dart';
 import '../../domain/entities/event_group_invitation.dart';
-import '../helpers/event_group_meta_formatter.dart';
-import '../widgets/create_event_group_sheet.dart';
+import '../pages/create_event_group_page.dart';
 import '../../../../core/location/country_location_data_cache.dart';
-import '../widgets/event_group_cover_thumbnail.dart';
+import '../widgets/event_group_list_card.dart';
 import '../widgets/event_group_invitation_card.dart';
 import '../widgets/event_groups_loading_shimmer.dart';
 import '../widgets/event_groups_draggable_fab.dart';
@@ -171,7 +169,7 @@ class _EventGroupsPageState extends State<EventGroupsPage> {
       return;
     }
 
-    final result = await CreateEventGroupSheet.show(
+    final result = await CreateEventGroupPage.push(
       context,
       existingNames: _groups.map((g) => g.name).toList(),
       getSavedCards: widget.getSavedCards,
@@ -189,6 +187,7 @@ class _EventGroupsPageState extends State<EventGroupsPage> {
             location: result.location,
             startAt: result.startAt,
             endAt: result.endAt,
+            description: result.description,
             photoFilePath: result.photoFilePath,
             invitedCardIds: result.invitedCardIds,
           ),
@@ -344,6 +343,10 @@ class _EventGroupsPageState extends State<EventGroupsPage> {
   Widget _buildInvitationsSection(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
     final colorScheme = Theme.of(context).colorScheme;
+    final screenWidth = MediaQuery.sizeOf(context).width;
+    const horizontalPeek = 24.0;
+    const listHorizontalPadding = 20.0;
+    final cardWidth = screenWidth - (listHorizontalPadding * 2) - horizontalPeek;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -358,21 +361,32 @@ class _EventGroupsPageState extends State<EventGroupsPage> {
             ),
           ),
         ),
-        ..._invitations.map(
-          (invitation) => Padding(
-            padding: const EdgeInsets.only(bottom: 12),
-            child: EventGroupInvitationCard(
-              invitation: invitation,
-              isResponding: _respondingInvitationId == invitation.id,
-              onAccept: () => _respondToInvitation(
-                invitation: invitation,
-                accept: true,
-              ),
-              onReject: () => _respondToInvitation(
-                invitation: invitation,
-                accept: false,
-              ),
-            ),
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          clipBehavior: Clip.none,
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              for (var index = 0; index < _invitations.length; index++) ...[
+                if (index > 0) const SizedBox(width: 12),
+                SizedBox(
+                  width: cardWidth,
+                  child: EventGroupInvitationCard(
+                    invitation: _invitations[index],
+                    isResponding:
+                        _respondingInvitationId == _invitations[index].id,
+                    onAccept: () => _respondToInvitation(
+                      invitation: _invitations[index],
+                      accept: true,
+                    ),
+                    onReject: () => _respondToInvitation(
+                      invitation: _invitations[index],
+                      accept: false,
+                    ),
+                  ),
+                ),
+              ],
+            ],
           ),
         ),
       ],
@@ -401,98 +415,25 @@ class _EventGroupsPageState extends State<EventGroupsPage> {
           ),
         ),
         ...groups.map(
-          (group) => _buildGroupTile(context, group, savedCards),
+          (group) => Padding(
+            padding: const EdgeInsets.only(bottom: 14),
+            child: EventGroupListCard(
+              group: group,
+              linkedCardCount: _savedCardCountForGroup(group.id, savedCards),
+              onTap: () => _openDetail(group),
+            ),
+          ),
         ),
       ],
     );
   }
 
-  Widget _buildGroupTile(
-    BuildContext context,
-    EventGroup group,
-    List<SavedCard> savedCards,
-  ) {
-    final textTheme = Theme.of(context).textTheme;
-    final colorScheme = Theme.of(context).colorScheme;
-    final cardCount = _savedCardCountForGroup(group.id, savedCards);
-    final meta = EventGroupMetaFormatter.summaryFor(group);
-    final l10n = context.l10n;
-    final subtitle = [
-      if (meta != null) meta,
-      if (cardCount == 0)
-        AppL10n.noCardsInGroup(l10n)
-      else
-        AppL10n.savedCardsCount(l10n, cardCount),
-    ].join(' · ');
-
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Material(
-        color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
-        borderRadius: BorderRadius.circular(12),
-        child: InkWell(
-          borderRadius: BorderRadius.circular(12),
-          onTap: () => _openDetail(group),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-            child: Row(
-              children: [
-                SizedBox(
-                  width: 44,
-                  height: 44,
-                  child: EventGroupCoverThumbnail(
-                    photoUrl: group.photoUrl,
-                    size: 44,
-                  ),
-                ),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              group.name,
-                              style: textTheme.titleMedium?.copyWith(
-                                fontWeight: FontWeight.w600,
-                                color: colorScheme.onSurface,
-                              ),
-                            ),
-                          ),
-                          _EventStatusBadge(status: group.status),
-                        ],
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        subtitle,
-                        style: textTheme.bodySmall?.copyWith(
-                          color: colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Icon(
-                  Icons.chevron_right_rounded,
-                  color: colorScheme.onSurfaceVariant,
-                  size: 24,
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
   void _openDetail(EventGroup group) {
+    final groupsPageContext = context;
     Navigator.of(context)
         .push(
           MaterialPageRoute<void>(
-            builder: (context) => EventGroupDetailPage(
+            builder: (_) => EventGroupDetailPage(
               group: group,
               getEventGroups: widget.getEventGroups,
               updateEventGroup: widget.updateEventGroup,
@@ -505,51 +446,11 @@ class _EventGroupsPageState extends State<EventGroupsPage> {
               deleteSavedCard: widget.deleteSavedCard,
               getNetworkGraph: widget.getNetworkGraph,
               getNetworkGraphPath: widget.getNetworkGraphPath,
+              onSavedCardsChanged: () =>
+                  groupsPageContext.read<SavedCardsCubit>().refreshAll(),
             ),
           ),
         )
         .then((_) => _loadGroups());
-  }
-}
-
-class _EventStatusBadge extends StatelessWidget {
-  const _EventStatusBadge({required this.status});
-
-  final EventGroupStatus status;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-    final color = switch (status) {
-      EventGroupStatus.ongoing => AppColors.success,
-      EventGroupStatus.upcoming => theme.colorScheme.primary,
-      EventGroupStatus.ended => theme.colorScheme.onSurfaceVariant,
-    };
-
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: isDark ? 0.18 : 0.1),
-        borderRadius: BorderRadius.circular(999),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-        child: Text(
-          _statusLabel(context, status),
-          style: theme.textTheme.labelSmall?.copyWith(
-            color: color,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-      ),
-    );
-  }
-
-  String _statusLabel(BuildContext context, EventGroupStatus status) {
-    return switch (status) {
-      EventGroupStatus.upcoming => context.l10n.eventStatusUpcoming,
-      EventGroupStatus.ongoing => context.l10n.eventStatusOngoing,
-      EventGroupStatus.ended => context.l10n.eventStatusEnded,
-    };
   }
 }

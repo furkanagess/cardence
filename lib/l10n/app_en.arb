@@ -184,6 +184,7 @@
   "kartBilgisiYokDzenleIle": "No card info yet — add via Edit",
   "kartBulunamad": "Card not found.",
   "kartCzdanaEklenemedi": "Card could not be added to wallet.",
+  "addCardByIdSending": "Adding card to wallet…",
   "kartCzdandanSil": "Delete card from wallet",
   "kartCzdannzaEklendi": "Card added to your wallet",
   "kartEkle": "Add card",
@@ -290,6 +291,7 @@
   "metinOkunamadBilgileriManuelDzenleyerek": "Text could not be read. You can edit details manually and save.",
   "metinRengi": "TEXT COLOR",
   "metinRengi2": "Text color",
+  "rastgeleRenk": "Random color",
   "mobileEngineer": "Mobile Engineer",
   "motionDesigner": "Motion Designer",
   "msg1HizmetinKapsam": "1. Scope of service",
@@ -406,6 +408,7 @@
   "uygula": "Apply",
   "uygulamaDiliniSein": "Choose app language",
   "uygulamaTemasnSein": "Choose app theme",
+  "uygulamaRengi": "App accent color",
   "webSitesi": "Website",
   "webSitesiHttps": "Website (https://...)",
   "webSosyal": "Web & Social",
@@ -425,6 +428,30 @@
   "zelAralk": "Custom range",
   "zelKartRengi": "Custom card color",
   "zelMetinRengi": "Custom text color",
+  "kartEfekti": "Card effect",
+  "efektYok": "None",
+  "efektYildiz": "Stars",
+  "efektParlama": "Sparkle",
+  "efektShimmer": "Shimmer",
+  "efektNeon": "Neon",
+  "efektIsilti": "Glow",
+  "efektAurora": "Aurora",
+  "efektNabiz": "Pulse",
+  "efektHolografik": "Holographic",
+  "efektYagmur": "Rain",
+  "efektKar": "Snow",
+  "efektAtes": "Fire",
+  "efektKonfeti": "Confetti",
+  "efektKozmik": "Cosmic",
+  "efektDalga": "Ripple",
+  "efektElmas": "Diamond",
+  "efektGunbatimi": "Sunset",
+  "efektBuz": "Frost",
+  "efektMatrix": "Matrix",
+  "kartEfektleriDeneyinKayitPro": "Try effects freely; Pro is required to save them.",
+  "seciliKartEfektiProGerekli": "The selected effect requires Pro. Remove the effect or upgrade to Pro to create your card.",
+  "efektKayitProGerekli": "Pro is required to save card effects. Your card was saved without the effect.",
+  "pro": "Pro",
   "zelliknerisi": "Feature request",
   "sessionNotFoundLogin": "Session not found. Please sign in again.",
   "sessionNotFound": "Session not found.",
@@ -621,6 +648,19 @@
   "eventLocationRegionRequired": "Country and province/district are required.",
   "eventCreateStartSubtitle": "Select the start date and time.",
   "eventCreateScheduleSubtitle": "Select the start date and time; optionally add an end as well.",
+  "eventCreateDetailsSubtitle": "Share agenda, dress code, or other details. You can skip this step.",
+  "eventDescription": "About this event",
+  "eventDescriptionHint": "Agenda, speakers, dress code, parking info…",
+  "eventDescriptionTooLong": "Description can be at most 2000 characters.",
+  "eventAboutSection": "About",
+  "eventLinkedCardsSection": "Linked cards ({count})",
+  "@eventLinkedCardsSection": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "eventCreateEndSubtitle": "Optionally set an end date and time. You can skip this step.",
   "eventCreatePhotoSubtitle": "Add a cover photo for the event list. You can skip this step.",
   "eventSkip": "Skip",
@@ -632,9 +672,31 @@
   "eventStart": "Start",
   "eventEndOptional": "End (optional)",
   "eventPickTime": "Select time",
+  "eventScheduleStartHelper": "Participants will see the event starting at this date and time.",
+  "eventScheduleEndHelper": "End time is optional; add it if you want to show how long the event lasts.",
+  "eventScheduleDateField": "Date",
+  "eventScheduleTimeField": "Time",
+  "eventSchedulePlannedStart": "Planned start",
+  "eventSchedulePlannedRange": "Planned duration",
+  "eventScheduleRequired": "Required",
   "eventInviteByCardId": "Invite by Card ID",
   "eventActiveSection": "Ongoing / Upcoming",
-  "eventInvitationTitle": "You are invited to an event",
+  "eventInvitationTitle": "You're invited to \"{eventName}\"",
+  "@eventInvitationTitle": {
+    "placeholders": {
+      "eventName": {
+        "type": "String"
+      }
+    }
+  },
+  "eventInvitationInvitedBy": "{inviterName} invited you",
+  "@eventInvitationInvitedBy": {
+    "placeholders": {
+      "inviterName": {
+        "type": "String"
+      }
+    }
+  },
   "eventInvitationMessage": "{inviterName} invited you to \"{eventName}\"",
   "@eventInvitationMessage": {
     "placeholders": {
@@ -654,8 +716,19 @@
       }
     }
   },
-  "eventInvitationAccept": "Accept",
+  "eventInvitationAccept": "Join",
+  "eventInvitationAcceptHint": "Your card will be linked to this event",
   "eventInvitationReject": "Decline",
+  "eventInvitationRejectHint": "Remove this invitation from your list",
+  "eventInvitationResponsePrompt": "How would you like to respond?",
+  "eventInvitationDaysRemaining": "{count, plural, =0{Starts today} =1{1 day left} other{{count} days left}}",
+  "@eventInvitationDaysRemaining": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "eventInvitationAccepted": "Invitation accepted",
   "eventInvitationRejected": "Invitation declined",
   "eventInvitationsSection": "Invitations",
@@ -675,6 +748,9 @@
   "eventInviteCardsTitle": "Invite cards by Card ID",
   "eventInviteCardsSubtitle": "Add cards to this event by entering Card IDs. Invalid IDs are reported.",
   "eventSendInvites": "Send invites",
+  "eventSendingInvites": "Sending invites…",
+  "eventInvitesSentSuccess": "Invites sent successfully",
+  "eventInviteSendFailed": "Could not send invites. Please try again.",
   "eventCardIdHint": "e.g. 123456",
   "eventInvitedCardIdsCount": "{count} Card IDs added",
   "@eventInvitedCardIdsCount": {

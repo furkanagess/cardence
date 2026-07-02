@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import '../../../../core/auth/auth_token_coordinator.dart';
+import '../../../../core/media/authenticated_image_loader.dart';
 import '../../domain/entities/auth_session.dart';
 import '../../domain/entities/last_login_credentials.dart';
 import '../../domain/entities/restore_session_result.dart';
@@ -314,6 +315,9 @@ class AuthRepositoryImpl implements AuthRepository {
       accessToken: token,
     );
     final entity = profile.toEntity();
+    if (entity.photoUrl != null && entity.photoUrl!.trim().isNotEmpty) {
+      AuthenticatedImageLoader.evict(entity.photoUrl!.trim());
+    }
     final enriched = _mergeProfile(
       AuthSessionModel.fromEntity(session),
       entity,

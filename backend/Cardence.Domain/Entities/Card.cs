@@ -31,6 +31,7 @@ public sealed class Card
     public string? PhotoUrl { get; set; }
     public string? AccentColor { get; set; }
     public string? BackgroundColor { get; set; }
+    public string? CardEffect { get; set; }
     public int SaveCount { get; set; }
     public bool IsOwnerPremium { get; set; }
     public DateTime CreatedAt { get; set; }

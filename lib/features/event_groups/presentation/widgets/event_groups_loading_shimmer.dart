@@ -19,61 +19,67 @@ class EventGroupsLoadingShimmer extends StatelessWidget {
       child: ListView.separated(
         padding: const EdgeInsets.fromLTRB(20, 16, 20, _contentBottomInset),
         itemCount: _itemCount,
-        separatorBuilder: (_, __) => const SizedBox(height: 12),
+        separatorBuilder: (_, __) => const SizedBox(height: 14),
         itemBuilder: (context, index) {
           return DecoratedBox(
             decoration: BoxDecoration(
-              color:
-                  colorScheme.surfaceContainerHighest.withValues(alpha: 0.45),
-              borderRadius: BorderRadius.circular(12),
+              color: colorScheme.surface,
+              borderRadius: BorderRadius.circular(18),
               border: Border.all(
                 color: isDark
-                    ? AppColors.outlineDark.withValues(alpha: 0.25)
-                    : AppColors.outlineVariant.withValues(alpha: 0.55),
+                    ? AppColors.outlineDark.withValues(alpha: 0.35)
+                    : AppColors.outlineVariant.withValues(alpha: 0.75),
               ),
             ),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-              child: Row(
-                children: [
-                  ShimmerPlaceholder(
-                    width: 44,
-                    height: 44,
-                    borderRadius: 10,
-                  ),
-                  const SizedBox(width: 14),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        FractionallySizedBox(
-                          widthFactor: index.isEven ? 0.72 : 0.58,
-                          alignment: Alignment.centerLeft,
-                          child: const ShimmerPlaceholder(
-                            height: 16,
-                            borderRadius: 8,
-                          ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const ShimmerPlaceholder(
+                  height: 132,
+                  borderRadius: 0,
+                ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      FractionallySizedBox(
+                        widthFactor: index.isEven ? 0.72 : 0.58,
+                        alignment: Alignment.centerLeft,
+                        child: const ShimmerPlaceholder(
+                          height: 18,
+                          borderRadius: 8,
                         ),
-                        const SizedBox(height: 8),
-                        FractionallySizedBox(
-                          widthFactor: index.isEven ? 0.48 : 0.42,
-                          alignment: Alignment.centerLeft,
-                          child: const ShimmerPlaceholder(
-                            height: 12,
-                            borderRadius: 8,
+                      ),
+                      const SizedBox(height: 12),
+                      Row(
+                        children: [
+                          ShimmerPlaceholder(
+                            width: index.isEven ? 148 : 128,
+                            height: 28,
+                            borderRadius: 999,
                           ),
+                          const SizedBox(width: 8),
+                          ShimmerPlaceholder(
+                            width: index.isEven ? 112 : 96,
+                            height: 28,
+                            borderRadius: 999,
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 14),
+                      FractionallySizedBox(
+                        widthFactor: 0.42,
+                        alignment: Alignment.centerLeft,
+                        child: const ShimmerPlaceholder(
+                          height: 14,
+                          borderRadius: 8,
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(width: 8),
-                  const ShimmerPlaceholder(
-                    width: 24,
-                    height: 24,
-                    borderRadius: 8,
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
           );
         },

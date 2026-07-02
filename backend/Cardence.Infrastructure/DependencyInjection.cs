@@ -1,6 +1,7 @@
 using Cardence.Application.Interfaces;
 using Cardence.Application.Options;
 using Cardence.Infrastructure.Auth;
+using Cardence.Infrastructure.Background;
 using Cardence.Infrastructure.Email;
 using Cardence.Infrastructure.Health;
 using Cardence.Infrastructure.Persistence;
@@ -79,6 +80,8 @@ public static class DependencyInjection
         services.AddScoped<IHealthStatusReader, HealthStatusReader>();
         services.AddScoped<IProfilePhotoStorage, LocalProfilePhotoStorage>();
         services.AddScoped<IEventGroupPhotoStorage, LocalEventGroupPhotoStorage>();
+
+        services.AddHostedService<ExpiredEventGroupInvitationCleanupService>();
 
         return services;
     }

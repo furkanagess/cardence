@@ -61,7 +61,7 @@ class OnboardingProgressHeader extends StatelessWidget {
   }
 }
 
-/// AppBar'da isteğe bağlı adım rozeti.
+/// İsteğe bağlı adım rozeti.
 class OnboardingOptionalBadge extends StatelessWidget {
   const OnboardingOptionalBadge({super.key});
 
@@ -86,7 +86,7 @@ class OnboardingOptionalBadge extends StatelessWidget {
   }
 }
 
-/// Alt aksiyon çubuğu (ilerleme noktaları + birincil buton).
+/// Alt aksiyon çubuğu (ilerleme noktaları + geri / birincil buton).
 class OnboardingBottomBar extends StatelessWidget {
   const OnboardingBottomBar({
     super.key,
@@ -98,6 +98,8 @@ class OnboardingBottomBar extends StatelessWidget {
     this.enabled = true,
     this.showStepIndicator = true,
     this.onStepSelected,
+    this.onBackPressed,
+    this.backLabel,
   });
 
   final int stepCount;
@@ -108,6 +110,8 @@ class OnboardingBottomBar extends StatelessWidget {
   final bool enabled;
   final bool showStepIndicator;
   final ValueChanged<int>? onStepSelected;
+  final VoidCallback? onBackPressed;
+  final String? backLabel;
 
   /// İçeriğin alt bar arkasından kayması için alt boşluk.
   static double contentBottomInset(
@@ -123,10 +127,12 @@ class OnboardingBottomBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    const primaryLabelStyle = TextStyle(
+    const actionButtonHeight = 48.0;
+    const actionLabelStyle = TextStyle(
       fontWeight: FontWeight.w700,
       fontSize: 17,
       letterSpacing: 0.1,
+      height: 1,
     );
 
     return Material(
@@ -169,13 +175,42 @@ class OnboardingBottomBar extends StatelessWidget {
                 ),
                 const SizedBox(height: 14),
               ],
-              CustomButton(
-                label: primaryLabel,
-                labelStyle: primaryLabelStyle,
-                onPressed: onPrimaryPressed,
-                enabled: enabled,
-                isLoading: isLoading,
-              ),
+              if (onBackPressed != null && backLabel != null)
+                Row(
+                  children: [
+                    Expanded(
+                      flex: 2,
+                      child: CustomButton.outlined(
+                        label: backLabel!,
+                        labelStyle: actionLabelStyle,
+                        height: actionButtonHeight,
+                        onPressed: isLoading ? null : onBackPressed,
+                        enabled: !isLoading,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      flex: 3,
+                      child: CustomButton(
+                        label: primaryLabel,
+                        labelStyle: actionLabelStyle,
+                        height: actionButtonHeight,
+                        onPressed: onPrimaryPressed,
+                        enabled: enabled,
+                        isLoading: isLoading,
+                      ),
+                    ),
+                  ],
+                )
+              else
+                CustomButton(
+                  label: primaryLabel,
+                  labelStyle: actionLabelStyle,
+                  height: actionButtonHeight,
+                  onPressed: onPrimaryPressed,
+                  enabled: enabled,
+                  isLoading: isLoading,
+                ),
             ],
           ),
         ),

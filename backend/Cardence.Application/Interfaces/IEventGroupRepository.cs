@@ -81,4 +81,6 @@ public interface IEventGroupRepository
     Task RejectInvitationAsync(
         EventGroupCardInvite invitation,
         CancellationToken cancellationToken = default);
+
+    Task DeleteExpiredInvitationsAsync(CancellationToken cancellationToken = default);
 }

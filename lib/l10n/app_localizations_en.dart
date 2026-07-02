@@ -592,6 +592,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get kartCzdanaEklenemedi => 'Card could not be added to wallet.';
 
   @override
+  String get addCardByIdSending => 'Adding card to wallet…';
+
+  @override
   String get kartCzdandanSil => 'Delete card from wallet';
 
   @override
@@ -931,6 +934,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get metinRengi2 => 'Text color';
+
+  @override
+  String get rastgeleRenk => 'Random color';
 
   @override
   String get mobileEngineer => 'Mobile Engineer';
@@ -1304,6 +1310,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get uygulamaTemasnSein => 'Choose app theme';
 
   @override
+  String get uygulamaRengi => 'App accent color';
+
+  @override
   String get webSitesi => 'Website';
 
   @override
@@ -1360,6 +1369,81 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get zelMetinRengi => 'Custom text color';
+
+  @override
+  String get kartEfekti => 'Card effect';
+
+  @override
+  String get efektYok => 'None';
+
+  @override
+  String get efektYildiz => 'Stars';
+
+  @override
+  String get efektParlama => 'Sparkle';
+
+  @override
+  String get efektShimmer => 'Shimmer';
+
+  @override
+  String get efektNeon => 'Neon';
+
+  @override
+  String get efektIsilti => 'Glow';
+
+  @override
+  String get efektAurora => 'Aurora';
+
+  @override
+  String get efektNabiz => 'Pulse';
+
+  @override
+  String get efektHolografik => 'Holographic';
+
+  @override
+  String get efektYagmur => 'Rain';
+
+  @override
+  String get efektKar => 'Snow';
+
+  @override
+  String get efektAtes => 'Fire';
+
+  @override
+  String get efektKonfeti => 'Confetti';
+
+  @override
+  String get efektKozmik => 'Cosmic';
+
+  @override
+  String get efektDalga => 'Ripple';
+
+  @override
+  String get efektElmas => 'Diamond';
+
+  @override
+  String get efektGunbatimi => 'Sunset';
+
+  @override
+  String get efektBuz => 'Frost';
+
+  @override
+  String get efektMatrix => 'Matrix';
+
+  @override
+  String get kartEfektleriDeneyinKayitPro =>
+      'Try effects freely; Pro is required to save them.';
+
+  @override
+  String get seciliKartEfektiProGerekli =>
+      'The selected effect requires Pro. Remove the effect or upgrade to Pro to create your card.';
+
+  @override
+  String get efektKayitProGerekli =>
+      'Pro is required to save card effects. Your card was saved without the effect.';
+
+  @override
+  String get pro => 'Pro';
 
   @override
   String get zelliknerisi => 'Feature request';
@@ -1796,6 +1880,29 @@ class AppLocalizationsEn extends AppLocalizations {
       'Select the start date and time; optionally add an end as well.';
 
   @override
+  String get eventCreateDetailsSubtitle =>
+      'Share agenda, dress code, or other details. You can skip this step.';
+
+  @override
+  String get eventDescription => 'About this event';
+
+  @override
+  String get eventDescriptionHint =>
+      'Agenda, speakers, dress code, parking info…';
+
+  @override
+  String get eventDescriptionTooLong =>
+      'Description can be at most 2000 characters.';
+
+  @override
+  String get eventAboutSection => 'About';
+
+  @override
+  String eventLinkedCardsSection(int count) {
+    return 'Linked cards ($count)';
+  }
+
+  @override
   String get eventCreateEndSubtitle =>
       'Optionally set an end date and time. You can skip this step.';
 
@@ -1833,13 +1940,43 @@ class AppLocalizationsEn extends AppLocalizations {
   String get eventPickTime => 'Select time';
 
   @override
+  String get eventScheduleStartHelper =>
+      'Participants will see the event starting at this date and time.';
+
+  @override
+  String get eventScheduleEndHelper =>
+      'End time is optional; add it if you want to show how long the event lasts.';
+
+  @override
+  String get eventScheduleDateField => 'Date';
+
+  @override
+  String get eventScheduleTimeField => 'Time';
+
+  @override
+  String get eventSchedulePlannedStart => 'Planned start';
+
+  @override
+  String get eventSchedulePlannedRange => 'Planned duration';
+
+  @override
+  String get eventScheduleRequired => 'Required';
+
+  @override
   String get eventInviteByCardId => 'Invite by Card ID';
 
   @override
   String get eventActiveSection => 'Ongoing / Upcoming';
 
   @override
-  String get eventInvitationTitle => 'You are invited to an event';
+  String eventInvitationTitle(String eventName) {
+    return 'You\'re invited to \"$eventName\"';
+  }
+
+  @override
+  String eventInvitationInvitedBy(String inviterName) {
+    return '$inviterName invited you';
+  }
 
   @override
   String eventInvitationMessage(String inviterName, String eventName) {
@@ -1852,10 +1989,33 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get eventInvitationAccept => 'Accept';
+  String get eventInvitationAccept => 'Join';
+
+  @override
+  String get eventInvitationAcceptHint =>
+      'Your card will be linked to this event';
 
   @override
   String get eventInvitationReject => 'Decline';
+
+  @override
+  String get eventInvitationRejectHint =>
+      'Remove this invitation from your list';
+
+  @override
+  String get eventInvitationResponsePrompt => 'How would you like to respond?';
+
+  @override
+  String eventInvitationDaysRemaining(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count days left',
+      one: '1 day left',
+      zero: 'Starts today',
+    );
+    return '$_temp0';
+  }
 
   @override
   String get eventInvitationAccepted => 'Invitation accepted';
@@ -1895,6 +2055,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get eventSendInvites => 'Send invites';
+
+  @override
+  String get eventSendingInvites => 'Sending invites…';
+
+  @override
+  String get eventInvitesSentSuccess => 'Invites sent successfully';
+
+  @override
+  String get eventInviteSendFailed =>
+      'Could not send invites. Please try again.';
 
   @override
   String get eventCardIdHint => 'e.g. 123456';

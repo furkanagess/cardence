@@ -26,6 +26,7 @@ public static class EventGroupInvitationMapper
             CardDisplayName = invite.Card.DisplayName ?? invite.Card.CardName,
             Status = invite.Status,
             CreatedAt = invite.CreatedAtUtc,
+            ExpiresAt = invite.ExpiresAtUtc,
         };
     }
 }

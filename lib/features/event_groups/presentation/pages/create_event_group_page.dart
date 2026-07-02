@@ -1,21 +1,26 @@
 import 'package:flutter/material.dart';
 import '../../../../core/l10n/l10n_extensions.dart';
 
+import '../../../../core/location/country_location_data_cache.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/atoms/custom_button.dart';
 import '../../../../core/widgets/atoms/custom_text_field.dart';
 import '../../../../core/widgets/molecules/new_event_group_name_dialog.dart';
+import '../../../../core/widgets/organisms/cardence_scaffold.dart';
+import '../../../onboarding/presentation/widgets/onboarding_flow_ui.dart';
 import '../../../saved_cards/domain/entities/saved_card.dart';
 import '../../../saved_cards/domain/usecases/get_saved_cards.dart';
 import '../../../saved_cards/presentation/widgets/saved_card_selectable_list.dart';
-import 'event_group_cover_thumbnail.dart';
-import 'event_group_photo_picker_field.dart';
-import 'event_group_schedule_picker_section.dart';
-import 'event_group_card_id_invite_field.dart';
-import 'event_group_location_picker_field.dart';
+import '../helpers/create_event_group_step_meta.dart';
 import '../helpers/event_group_location_composer.dart';
-import '../../../../core/location/country_location_data_cache.dart';
 import '../helpers/event_group_meta_formatter.dart';
+import '../widgets/create_event_group_filled_summary.dart';
+import '../widgets/create_event_group_step_header.dart';
+import '../widgets/event_group_card_id_invite_field.dart';
+import '../widgets/event_group_cover_thumbnail.dart';
+import '../widgets/event_group_location_picker_field.dart';
+import '../widgets/event_group_photo_picker_field.dart';
+import '../widgets/event_group_schedule_picker_section.dart';
 
 /// Yeni etkinlik grubu oluşturma akışının sonucu.
 class CreateEventGroupResult {
@@ -24,6 +29,7 @@ class CreateEventGroupResult {
     required this.location,
     required this.startAt,
     this.endAt,
+    this.description,
     this.photoFilePath,
     required this.selectedCardIds,
     required this.invitedCardIds,
@@ -33,6 +39,7 @@ class CreateEventGroupResult {
   final String location;
   final DateTime startAt;
   final DateTime? endAt;
+  final String? description;
   final String? photoFilePath;
   final Set<String> selectedCardIds;
   final List<String> invitedCardIds;
@@ -42,13 +49,14 @@ enum _CreateEventStep {
   name,
   location,
   schedule,
+  details,
   photo,
   cards,
 }
 
-/// Her bilgi ayrı adımda: ad · konum · tarih/saat · fotoğraf · kartlar.
-class CreateEventGroupSheet extends StatefulWidget {
-  const CreateEventGroupSheet({
+/// Her bilgi ayrı adımda: ad · konum · tarih/saat · detay · fotoğraf · kartlar.
+class CreateEventGroupPage extends StatefulWidget {
+  const CreateEventGroupPage({
     super.key,
     required this.existingNames,
     required this.getSavedCards,
@@ -59,44 +67,40 @@ class CreateEventGroupSheet extends StatefulWidget {
   final GetSavedCards getSavedCards;
   final List<SavedCard>? initialPickableCards;
 
-  static Future<CreateEventGroupResult?> show(
+  static Future<CreateEventGroupResult?> push(
     BuildContext context, {
     required List<String> existingNames,
     required GetSavedCards getSavedCards,
     List<SavedCard>? initialPickableCards,
   }) {
     CountryLocationDataCache.warmUp();
-    return showModalBottomSheet<CreateEventGroupResult>(
-      context: context,
-      isScrollControlled: true,
-      showDragHandle: true,
-      useSafeArea: true,
-      backgroundColor: Theme.of(context).colorScheme.surface,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-      ),
-      builder: (context) => CreateEventGroupSheet(
-        existingNames: existingNames,
-        getSavedCards: getSavedCards,
-        initialPickableCards: initialPickableCards,
+    return Navigator.of(context).push<CreateEventGroupResult>(
+      MaterialPageRoute(
+        builder: (context) => CreateEventGroupPage(
+          existingNames: existingNames,
+          getSavedCards: getSavedCards,
+          initialPickableCards: initialPickableCards,
+        ),
       ),
     );
   }
 
   @override
-  State<CreateEventGroupSheet> createState() => _CreateEventGroupSheetState();
+  State<CreateEventGroupPage> createState() => _CreateEventGroupPageState();
 }
 
-class _CreateEventGroupSheetState extends State<CreateEventGroupSheet> {
+class _CreateEventGroupPageState extends State<CreateEventGroupPage> {
   _CreateEventStep _step = _CreateEventStep.name;
   late final TextEditingController _nameController;
   late final TextEditingController _venueController;
   late final TextEditingController _cardIdController;
+  late final TextEditingController _descriptionController;
   String? _locationCountry;
   String? _locationCity;
   String? _nameErrorText;
   String? _locationErrorText;
   String? _scheduleErrorText;
+  String? _descriptionErrorText;
   DateTime? _startDate;
   TimeOfDay? _startTime;
   DateTime? _endDate;
@@ -113,6 +117,7 @@ class _CreateEventGroupSheetState extends State<CreateEventGroupSheet> {
     _nameController = TextEditingController();
     _venueController = TextEditingController();
     _cardIdController = TextEditingController();
+    _descriptionController = TextEditingController();
     _nameController.addListener(_clearNameErrorOnEdit);
     _selectedCardIds = {};
     _invitedCardIds = {};
@@ -128,6 +133,7 @@ class _CreateEventGroupSheetState extends State<CreateEventGroupSheet> {
     _nameController.dispose();
     _venueController.dispose();
     _cardIdController.dispose();
+    _descriptionController.dispose();
     super.dispose();
   }
 
@@ -158,7 +164,8 @@ class _CreateEventGroupSheetState extends State<CreateEventGroupSheet> {
 
   DateTime? get _endAt => _combineDateAndTime(_endDate, _endTime);
 
-  bool get _canSkipCurrentStep => _step == _CreateEventStep.photo;
+  bool get _canSkipCurrentStep =>
+      _step == _CreateEventStep.details || _step == _CreateEventStep.photo;
 
   bool _validateCurrentStep() {
     switch (_step) {
@@ -190,6 +197,16 @@ class _CreateEventGroupSheetState extends State<CreateEventGroupSheet> {
           return false;
         }
         return _validateEndStep();
+      case _CreateEventStep.details:
+        final description = _descriptionController.text.trim();
+        if (description.length > 2000) {
+          setState(
+            () => _descriptionErrorText = context.l10n.eventDescriptionTooLong,
+          );
+          return false;
+        }
+        setState(() => _descriptionErrorText = null);
+        return true;
       case _CreateEventStep.photo:
       case _CreateEventStep.cards:
         return true;
@@ -221,6 +238,7 @@ class _CreateEventGroupSheetState extends State<CreateEventGroupSheet> {
 
   Future<void> _goToNext() async {
     if (!_validateCurrentStep()) return;
+    FocusManager.instance.primaryFocus?.unfocus();
 
     if (_step == _CreateEventStep.photo) {
       await _loadCardsAndAdvance();
@@ -233,6 +251,14 @@ class _CreateEventGroupSheetState extends State<CreateEventGroupSheet> {
   }
 
   Future<void> _skipCurrentStep() async {
+    if (_step == _CreateEventStep.details) {
+      setState(() {
+        _descriptionController.clear();
+        _descriptionErrorText = null;
+        _step = _CreateEventStep.photo;
+      });
+      return;
+    }
     if (_step == _CreateEventStep.photo) {
       setState(() {
         _photoFilePath = null;
@@ -244,6 +270,7 @@ class _CreateEventGroupSheetState extends State<CreateEventGroupSheet> {
 
   void _goBack() {
     if (_step.index == 0) return;
+    FocusManager.instance.primaryFocus?.unfocus();
     setState(() => _step = _CreateEventStep.values[_step.index - 1]);
   }
 
@@ -281,6 +308,9 @@ class _CreateEventGroupSheetState extends State<CreateEventGroupSheet> {
         location: location,
         startAt: startAt,
         endAt: _endAt,
+        description: _descriptionController.text.trim().isEmpty
+            ? null
+            : _descriptionController.text.trim(),
         photoFilePath: _photoFilePath,
         selectedCardIds: Set<String>.from(_selectedCardIds),
         invitedCardIds: _invitedCardIds.toList(),
@@ -298,13 +328,8 @@ class _CreateEventGroupSheetState extends State<CreateEventGroupSheet> {
     });
   }
 
-  void _addInvitedCardId() {
-    final cardId = _cardIdController.text.trim();
-    if (cardId.isEmpty) return;
-    setState(() {
-      _invitedCardIds.add(cardId);
-      _cardIdController.clear();
-    });
+  void _addInvitedCardId(String cardId) {
+    setState(() => _invitedCardIds.add(cardId));
   }
 
   void _removeInvitedCardId(String cardId) {
@@ -312,7 +337,10 @@ class _CreateEventGroupSheetState extends State<CreateEventGroupSheet> {
   }
 
   Future<void> _pickStartDate() async {
-    final picked = await _pickDate(initialDate: _startDate ?? DateTime.now());
+    final picked = await _pickDate(
+      initialDate: _startDate ?? DateTime.now(),
+      helpText: context.l10n.eventScheduleDateField,
+    );
     if (picked == null) return;
     setState(() {
       _startDate = picked;
@@ -321,7 +349,10 @@ class _CreateEventGroupSheetState extends State<CreateEventGroupSheet> {
   }
 
   Future<void> _pickStartTime() async {
-    final picked = await _pickTime(initialTime: _startTime ?? TimeOfDay.now());
+    final picked = await _pickTime(
+      initialTime: _startTime ?? TimeOfDay.now(),
+      helpText: context.l10n.eventScheduleTimeField,
+    );
     if (picked == null) return;
     setState(() {
       _startTime = picked;
@@ -330,8 +361,10 @@ class _CreateEventGroupSheetState extends State<CreateEventGroupSheet> {
   }
 
   Future<void> _pickEndDate() async {
-    final picked =
-        await _pickDate(initialDate: _endDate ?? _startDate ?? DateTime.now());
+    final picked = await _pickDate(
+      initialDate: _endDate ?? _startDate ?? DateTime.now(),
+      helpText: context.l10n.eventEndOptional,
+    );
     if (picked == null) return;
     setState(() {
       _endDate = picked;
@@ -340,8 +373,10 @@ class _CreateEventGroupSheetState extends State<CreateEventGroupSheet> {
   }
 
   Future<void> _pickEndTime() async {
-    final picked =
-        await _pickTime(initialTime: _endTime ?? _startTime ?? TimeOfDay.now());
+    final picked = await _pickTime(
+      initialTime: _endTime ?? _startTime ?? TimeOfDay.now(),
+      helpText: context.l10n.eventEndOptional,
+    );
     if (picked == null) return;
     setState(() {
       _endTime = picked;
@@ -357,20 +392,52 @@ class _CreateEventGroupSheetState extends State<CreateEventGroupSheet> {
     });
   }
 
-  Future<DateTime?> _pickDate({required DateTime initialDate}) {
+  Future<DateTime?> _pickDate({
+    required DateTime initialDate,
+    required String helpText,
+  }) {
     final now = DateTime.now();
     return showDatePicker(
       context: context,
       initialDate: initialDate,
       firstDate: DateTime(now.year - 1),
       lastDate: DateTime(now.year + 10),
+      helpText: helpText,
+      cancelText: context.l10n.iptal,
+      confirmText: context.l10n.tamam,
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: Theme.of(context).colorScheme.copyWith(
+                  primary: AppColors.primary,
+                ),
+          ),
+          child: child!,
+        );
+      },
     );
   }
 
-  Future<TimeOfDay?> _pickTime({required TimeOfDay initialTime}) {
+  Future<TimeOfDay?> _pickTime({
+    required TimeOfDay initialTime,
+    required String helpText,
+  }) {
     return showTimePicker(
       context: context,
       initialTime: initialTime,
+      helpText: helpText,
+      cancelText: context.l10n.iptal,
+      confirmText: context.l10n.tamam,
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: Theme.of(context).colorScheme.copyWith(
+                  primary: AppColors.primary,
+                ),
+          ),
+          child: child!,
+        );
+      },
     );
   }
 
@@ -381,281 +448,230 @@ class _CreateEventGroupSheetState extends State<CreateEventGroupSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final sheetHeight = MediaQuery.sizeOf(context).height * 0.88;
+    final isFirstStep = _step == _CreateEventStep.name;
+    final isCardsStep = _step == _CreateEventStep.cards;
+    final selectedCount =
+        _selectedCardIds.length + _invitedCardIds.length;
 
-    return Padding(
-      padding: EdgeInsets.only(
-        bottom: MediaQuery.viewInsetsOf(context).bottom,
-      ),
-      child: SizedBox(
-        height: sheetHeight,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            _CreateEventGroupSheetHeader(step: _step),
-            Expanded(
-              child: AnimatedSwitcher(
-                duration: const Duration(milliseconds: 150),
-                switchInCurve: Curves.easeOutCubic,
-                switchOutCurve: Curves.easeInCubic,
-                child: _buildStepContent(),
+    return PopScope(
+      canPop: isFirstStep,
+      onPopInvokedWithResult: (didPop, _) {
+        if (didPop || isFirstStep) return;
+        _goBack();
+      },
+      child: CardenceScaffold(
+        resizeToAvoidBottomInset: false,
+        body: SafeArea(
+          bottom: false,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              CreateEventGroupStepHeader(currentIndex: _step.index),
+              Expanded(
+                child: IndexedStack(
+                  index: _step.index,
+                  sizing: StackFit.expand,
+                  children: [
+                    _buildNameStep(),
+                    _buildLocationStep(),
+                    _buildScheduleStep(),
+                    _buildDetailsStep(),
+                    _buildPhotoStep(),
+                    _buildCardsStep(),
+                  ],
+                ),
               ),
-            ),
-            _CreateEventGroupSheetFooter(
-              step: _step,
-              loadingCards: _loadingCards,
-              selectedCount: _selectedCardIds.length + _invitedCardIds.length,
-              canSkip: _canSkipCurrentStep,
-              onBack: _goBack,
-              onSkip: _skipCurrentStep,
-              onContinue: _goToNext,
-              onSubmit: _submit,
-            ),
-          ],
+              _CreateEventGroupKeyboardAwareBottom(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (_canSkipCurrentStep)
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(20, 0, 20, 4),
+                        child: Align(
+                          alignment: Alignment.centerRight,
+                          child: CustomButton.text(
+                            label: context.l10n.eventSkip,
+                            onPressed:
+                                _loadingCards ? null : _skipCurrentStep,
+                          ),
+                        ),
+                      ),
+                    OnboardingBottomBar(
+                      stepCount: CreateEventGroupStepMeta.stepCount,
+                      currentIndex: _step.index,
+                      showStepIndicator: false,
+                      backLabel: context.l10n.geri,
+                      onBackPressed:
+                          isFirstStep || _loadingCards ? null : _goBack,
+                      primaryLabel: isCardsStep
+                          ? (selectedCount == 0
+                              ? context.l10n.createGroup
+                              : context.l10n.createGroupWithCards(
+                                  selectedCount,
+                                ))
+                          : context.l10n.devam,
+                      onPrimaryPressed:
+                          _loadingCards ? null : (isCardsStep ? _submit : _goToNext),
+                      isLoading: _loadingCards,
+                      enabled: !_loadingCards,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildStepContent() {
-    switch (_step) {
-      case _CreateEventStep.name:
-        return _CreateEventNameStep(
-          key: const ValueKey('name'),
-          nameController: _nameController,
-          nameErrorText: _nameErrorText,
-          onContinue: _goToNext,
-        );
-      case _CreateEventStep.location:
-        return _CreateEventLocationStep(
-          key: const ValueKey('location'),
-          country: _locationCountry,
-          city: _locationCity,
-          venueController: _venueController,
-          locationErrorText: _locationErrorText,
-          onCountryChanged: (value) => setState(() {
-            _locationCountry = value;
-            _clearLocationErrorOnEdit();
-          }),
-          onCityChanged: (value) => setState(() {
-            _locationCity = value;
-            _clearLocationErrorOnEdit();
-          }),
-          onVenueChanged: _clearLocationErrorOnEdit,
-        );
-      case _CreateEventStep.schedule:
-        return _CreateEventScheduleStep(
-          key: const ValueKey('schedule'),
-          startDate: _startDate,
-          startTime: _startTime,
-          endDate: _endDate,
-          endTime: _endTime,
-          scheduleErrorText: _scheduleErrorText,
-          onPickStartDate: _pickStartDate,
-          onPickStartTime: _pickStartTime,
-          onPickEndDate: _pickEndDate,
-          onPickEndTime: _pickEndTime,
-          onClearEnd: _clearEnd,
-        );
-      case _CreateEventStep.photo:
-        return _CreateEventPhotoStep(
-          key: const ValueKey('photo'),
-          photoFilePath: _photoFilePath,
-          onPhotoChanged: (value) => setState(() => _photoFilePath = value),
-        );
-      case _CreateEventStep.cards:
-        return _CreateEventGroupPickCardsStep(
-          key: const ValueKey('cards'),
-          groupName: _groupName,
-          location: _locationSummary,
-          startAt: _startAt!,
-          endAt: _endAt,
-          photoFilePath: _photoFilePath,
-          cardIdController: _cardIdController,
-          loadingCards: _loadingCards,
-          pickableCards: _pickableCards,
-          selectedCardIds: _selectedCardIds,
-          invitedCardIds: _invitedCardIds,
-          onToggleCard: _toggleCard,
-          onAddInvitedCardId: _addInvitedCardId,
-          onRemoveInvitedCardId: _removeInvitedCardId,
-        );
-    }
+  Widget _buildFilledSummaryHeader() {
+    return CreateEventGroupFilledSummary(
+      name: _groupName,
+      location: _locationSummary,
+      startAt: _startAt,
+      endAt: _endAt,
+      photoFilePath: _photoFilePath,
+    );
   }
-}
 
-class _CreateEventGroupSheetHeader extends StatelessWidget {
-  const _CreateEventGroupSheetHeader({required this.step});
-
-  final _CreateEventStep step;
-
-  bool get _isCardsStep => step == _CreateEventStep.cards;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-    final isDark = theme.brightness == Brightness.dark;
-
-    final title = _isCardsStep
-        ? context.l10n.selectCards
-        : context.l10n.yeniEtkinlikGrubu;
-
-    final subtitle = _isCardsStep
-        ? context.l10n.eventGroupCardsStepSubtitle
-        : switch (step) {
-            _CreateEventStep.name => context.l10n.eventCreateNameSubtitle,
-            _CreateEventStep.location => context.l10n.eventCreateLocationSubtitle,
-            _CreateEventStep.schedule => context.l10n.eventCreateScheduleSubtitle,
-            _CreateEventStep.photo => context.l10n.eventCreatePhotoSubtitle,
-            _CreateEventStep.cards => context.l10n.eventGroupCardsStepSubtitle,
-          };
-
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 4, 20, 16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Row(
-            children: [
-              _StepIndicatorDot(
-                label: '1',
-                title: context.l10n.bilgiler,
-                active: !_isCardsStep,
-                completed: _isCardsStep,
-              ),
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8),
-                  child: DecoratedBox(
-                    decoration: BoxDecoration(
-                      color: _isCardsStep
-                          ? colorScheme.primary
-                          : (isDark
-                              ? AppColors.outlineDark.withValues(alpha: 0.45)
-                              : AppColors.outlineVariant),
-                      borderRadius: BorderRadius.circular(999),
-                    ),
-                    child: const SizedBox(height: 2),
-                  ),
-                ),
-              ),
-              _StepIndicatorDot(
-                label: '2',
-                title: context.l10n.kartlar,
-                active: _isCardsStep,
-                completed: false,
-              ),
-            ],
-          ),
-          if (!_isCardsStep) ...[
-            const SizedBox(height: 10),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                context.l10n.eventCreateStepProgress(
-                  step.index + 1,
-                  _CreateEventStep.cards.index,
-                ),
-                style: theme.textTheme.labelSmall?.copyWith(
-                  color: colorScheme.onSurfaceVariant,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-          ],
-          const SizedBox(height: 18),
-          Text(
-            title,
-            style: theme.textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.w700,
-              color: colorScheme.onSurface,
-            ),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            subtitle,
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: colorScheme.onSurfaceVariant,
-              height: 1.35,
-            ),
-          ),
-        ],
+  Widget _buildNameStep() {
+    return _CreateEventStepLayer(
+      child: _CreateEventNameStep(
+        nameController: _nameController,
+        nameErrorText: _nameErrorText,
+        onContinue: _goToNext,
       ),
+    );
+  }
+
+  Widget _buildLocationStep() {
+    return _CreateEventStepLayer(
+      child: _CreateEventLocationStep(
+        summaryHeader: _buildFilledSummaryHeader(),
+        country: _locationCountry,
+        city: _locationCity,
+        venueController: _venueController,
+        locationErrorText: _locationErrorText,
+        onCountryChanged: (value) => setState(() {
+          _locationCountry = value;
+          _clearLocationErrorOnEdit();
+        }),
+        onCityChanged: (value) => setState(() {
+          _locationCity = value;
+          _clearLocationErrorOnEdit();
+        }),
+        onVenueChanged: _clearLocationErrorOnEdit,
+      ),
+    );
+  }
+
+  Widget _buildScheduleStep() {
+    return _CreateEventStepLayer(
+      child: _CreateEventScheduleStep(
+        summaryHeader: _buildFilledSummaryHeader(),
+        startDate: _startDate,
+        startTime: _startTime,
+        endDate: _endDate,
+        endTime: _endTime,
+        scheduleErrorText: _scheduleErrorText,
+        onPickStartDate: _pickStartDate,
+        onPickStartTime: _pickStartTime,
+        onPickEndDate: _pickEndDate,
+        onPickEndTime: _pickEndTime,
+        onClearEnd: _clearEnd,
+      ),
+    );
+  }
+
+  Widget _buildDetailsStep() {
+    return _CreateEventStepLayer(
+      child: _CreateEventDetailsStep(
+        summaryHeader: _buildFilledSummaryHeader(),
+        descriptionController: _descriptionController,
+        descriptionErrorText: _descriptionErrorText,
+      ),
+    );
+  }
+
+  Widget _buildPhotoStep() {
+    return _CreateEventStepLayer(
+      child: _CreateEventPhotoStep(
+        summaryHeader: _buildFilledSummaryHeader(),
+        photoFilePath: _photoFilePath,
+        onPhotoChanged: (value) => setState(() => _photoFilePath = value),
+      ),
+    );
+  }
+
+  Widget _buildCardsStep() {
+    final startAt = _startAt;
+    if (startAt == null) {
+      return const SizedBox.shrink();
+    }
+
+    return _CreateEventGroupPickCardsStep(
+      groupName: _groupName,
+      location: _locationSummary,
+      startAt: startAt,
+      endAt: _endAt,
+      photoFilePath: _photoFilePath,
+      cardIdController: _cardIdController,
+      loadingCards: _loadingCards,
+      pickableCards: _pickableCards,
+      selectedCardIds: _selectedCardIds,
+      invitedCardIds: _invitedCardIds,
+      onToggleCard: _toggleCard,
+      onAddInvitedCardId: _addInvitedCardId,
+      onRemoveInvitedCardId: _removeInvitedCardId,
     );
   }
 }
 
-class _StepIndicatorDot extends StatelessWidget {
-  const _StepIndicatorDot({
-    required this.label,
-    required this.title,
-    required this.active,
-    required this.completed,
-  });
+class _CreateEventStepLayer extends StatelessWidget {
+  const _CreateEventStepLayer({required this.child});
 
-  final String label;
-  final String title;
-  final bool active;
-  final bool completed;
+  final Widget child;
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Align(
+      alignment: Alignment.topCenter,
+      widthFactor: 1,
+      heightFactor: 1,
+      child: child,
+    );
+  }
+}
 
-    final highlighted = active || completed;
-    final circleColor = highlighted
-        ? colorScheme.primary
-        : (isDark ? AppColors.surfaceVariantDark : AppColors.surfaceVariant);
-    final contentColor =
-        highlighted ? colorScheme.onPrimary : colorScheme.onSurfaceVariant;
-    final titleColor =
-        highlighted ? colorScheme.primary : colorScheme.onSurfaceVariant;
+class _CreateEventGroupKeyboardAwareBottom extends StatelessWidget {
+  const _CreateEventGroupKeyboardAwareBottom({required this.child});
 
-    return SizedBox(
-      width: 56,
-      child: Column(
-        children: [
-          AnimatedContainer(
-            duration: const Duration(milliseconds: 200),
-            width: 28,
-            height: 28,
-            decoration: BoxDecoration(
-              color: circleColor,
-              shape: BoxShape.circle,
-            ),
-            alignment: Alignment.center,
-            child: completed
-                ? Icon(Icons.check_rounded, size: 16, color: contentColor)
-                : Text(
-                    label,
-                    style: textTheme.labelLarge?.copyWith(
-                      color: contentColor,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            title,
-            textAlign: TextAlign.center,
-            style: textTheme.labelSmall?.copyWith(
-              color: titleColor,
-              fontWeight: highlighted ? FontWeight.w600 : FontWeight.w500,
-            ),
-          ),
-        ],
-      ),
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final bottomInset = MediaQuery.viewInsetsOf(context).bottom;
+    return AnimatedPadding(
+      duration: const Duration(milliseconds: 120),
+      curve: Curves.easeOut,
+      padding: EdgeInsets.only(bottom: bottomInset),
+      child: child,
     );
   }
 }
 
 class _CreateEventStepCard extends StatelessWidget {
-  const _CreateEventStepCard({required this.child});
+  const _CreateEventStepCard({
+    required this.child,
+    this.scrollController,
+    this.header,
+  });
 
   final Widget child;
+  final ScrollController? scrollController;
+  final Widget? header;
 
   @override
   Widget build(BuildContext context) {
@@ -663,23 +679,34 @@ class _CreateEventStepCard extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return SingleChildScrollView(
+      controller: scrollController,
+      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
       padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: colorScheme.surfaceContainerLowest.withValues(
-            alpha: isDark ? 0.55 : 0.85,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (header != null) header!,
+          Align(
+            alignment: Alignment.topCenter,
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                color: colorScheme.surfaceContainerLowest.withValues(
+                  alpha: isDark ? 0.55 : 0.85,
+                ),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: isDark
+                      ? AppColors.outlineDark.withValues(alpha: 0.35)
+                      : AppColors.outlineVariant.withValues(alpha: 0.75),
+                ),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 18, 16, 18),
+                child: child,
+              ),
+            ),
           ),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: isDark
-                ? AppColors.outlineDark.withValues(alpha: 0.35)
-                : AppColors.outlineVariant.withValues(alpha: 0.75),
-          ),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 18, 16, 18),
-          child: child,
-        ),
+        ],
       ),
     );
   }
@@ -715,7 +742,7 @@ class _CreateEventNameStep extends StatelessWidget {
 
 class _CreateEventLocationStep extends StatelessWidget {
   const _CreateEventLocationStep({
-    super.key,
+    required this.summaryHeader,
     required this.country,
     required this.city,
     required this.venueController,
@@ -725,6 +752,7 @@ class _CreateEventLocationStep extends StatelessWidget {
     required this.onVenueChanged,
   });
 
+  final Widget summaryHeader;
   final String? country;
   final String? city;
   final TextEditingController venueController;
@@ -736,6 +764,7 @@ class _CreateEventLocationStep extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return _CreateEventStepCard(
+      header: summaryHeader,
       child: EventGroupLocationPickerField(
         country: country,
         city: city,
@@ -744,14 +773,15 @@ class _CreateEventLocationStep extends StatelessWidget {
         onCountryChanged: onCountryChanged,
         onCityChanged: onCityChanged,
         onVenueChanged: onVenueChanged,
+        showComposedPreview: false,
       ),
     );
   }
 }
 
-class _CreateEventScheduleStep extends StatelessWidget {
+class _CreateEventScheduleStep extends StatefulWidget {
   const _CreateEventScheduleStep({
-    super.key,
+    required this.summaryHeader,
     required this.startDate,
     required this.startTime,
     required this.endDate,
@@ -764,6 +794,7 @@ class _CreateEventScheduleStep extends StatelessWidget {
     required this.onClearEnd,
   });
 
+  final Widget summaryHeader;
   final DateTime? startDate;
   final TimeOfDay? startTime;
   final DateTime? endDate;
@@ -776,19 +807,107 @@ class _CreateEventScheduleStep extends StatelessWidget {
   final VoidCallback onClearEnd;
 
   @override
+  State<_CreateEventScheduleStep> createState() =>
+      _CreateEventScheduleStepState();
+}
+
+class _CreateEventScheduleStepState extends State<_CreateEventScheduleStep> {
+  final ScrollController _scrollController = ScrollController();
+  final GlobalKey _endSectionKey = GlobalKey();
+  bool _wasEndSectionVisible = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _wasEndSectionVisible = _isEndSectionVisible(widget);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  bool _isEndSectionVisible(_CreateEventScheduleStep step) {
+    if (step.endDate != null || step.endTime != null) return true;
+    return step.startDate != null && step.startTime != null;
+  }
+
+  @override
+  void didUpdateWidget(covariant _CreateEventScheduleStep oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final wasVisible = _wasEndSectionVisible;
+    final isVisible = _isEndSectionVisible(widget);
+    _wasEndSectionVisible = isVisible;
+    if (!wasVisible && isVisible) {
+      _scrollToEndSection();
+    }
+  }
+
+  void _scrollToEndSection() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        final targetContext = _endSectionKey.currentContext;
+        if (targetContext == null) return;
+        Scrollable.ensureVisible(
+          targetContext,
+          alignment: 0.02,
+          duration: const Duration(milliseconds: 320),
+          curve: Curves.easeOutCubic,
+        );
+      });
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     return _CreateEventStepCard(
+      scrollController: _scrollController,
+      header: widget.summaryHeader,
       child: EventGroupSchedulePickerSection(
-        startDate: startDate,
-        startTime: startTime,
-        endDate: endDate,
-        endTime: endTime,
-        errorText: scheduleErrorText,
-        onPickStartDate: onPickStartDate,
-        onPickStartTime: onPickStartTime,
-        onPickEndDate: onPickEndDate,
-        onPickEndTime: onPickEndTime,
-        onClearEnd: onClearEnd,
+        startDate: widget.startDate,
+        startTime: widget.startTime,
+        endDate: widget.endDate,
+        endTime: widget.endTime,
+        errorText: widget.scheduleErrorText,
+        onPickStartDate: widget.onPickStartDate,
+        onPickStartTime: widget.onPickStartTime,
+        onPickEndDate: widget.onPickEndDate,
+        onPickEndTime: widget.onPickEndTime,
+        onClearEnd: widget.onClearEnd,
+        showInlineSummary: false,
+        revealEndWhenStartComplete: true,
+        endSectionKey: _endSectionKey,
+      ),
+    );
+  }
+}
+
+class _CreateEventDetailsStep extends StatelessWidget {
+  const _CreateEventDetailsStep({
+    required this.summaryHeader,
+    required this.descriptionController,
+    required this.descriptionErrorText,
+  });
+
+  final Widget summaryHeader;
+  final TextEditingController descriptionController;
+  final String? descriptionErrorText;
+
+  @override
+  Widget build(BuildContext context) {
+    return _CreateEventStepCard(
+      header: summaryHeader,
+      child: CustomTextField(
+        controller: descriptionController,
+        labelText: context.l10n.eventDescription,
+        hintText: context.l10n.eventDescriptionHint,
+        errorText: descriptionErrorText,
+        minLines: 4,
+        maxLines: 8,
+        maxLength: 2000,
+        textInputAction: TextInputAction.newline,
       ),
     );
   }
@@ -796,17 +915,19 @@ class _CreateEventScheduleStep extends StatelessWidget {
 
 class _CreateEventPhotoStep extends StatelessWidget {
   const _CreateEventPhotoStep({
-    super.key,
+    required this.summaryHeader,
     required this.photoFilePath,
     required this.onPhotoChanged,
   });
 
+  final Widget summaryHeader;
   final String? photoFilePath;
   final ValueChanged<String?> onPhotoChanged;
 
   @override
   Widget build(BuildContext context) {
     return _CreateEventStepCard(
+      header: summaryHeader,
       child: EventGroupPhotoPickerField(
         value: photoFilePath,
         onChanged: onPhotoChanged,
@@ -844,7 +965,7 @@ class _CreateEventGroupPickCardsStep extends StatelessWidget {
   final Set<String> selectedCardIds;
   final Set<String> invitedCardIds;
   final void Function(String cardId) onToggleCard;
-  final VoidCallback onAddInvitedCardId;
+  final void Function(String cardId) onAddInvitedCardId;
   final ValueChanged<String> onRemoveInvitedCardId;
 
   @override
@@ -952,91 +1073,6 @@ class _CreateEventGroupPickCardsStep extends StatelessWidget {
                 ),
         ),
       ],
-    );
-  }
-}
-
-class _CreateEventGroupSheetFooter extends StatelessWidget {
-  const _CreateEventGroupSheetFooter({
-    required this.step,
-    required this.loadingCards,
-    required this.selectedCount,
-    required this.canSkip,
-    required this.onBack,
-    required this.onSkip,
-    required this.onContinue,
-    required this.onSubmit,
-  });
-
-  final _CreateEventStep step;
-  final bool loadingCards;
-  final int selectedCount;
-  final bool canSkip;
-  final VoidCallback onBack;
-  final VoidCallback onSkip;
-  final VoidCallback onContinue;
-  final VoidCallback onSubmit;
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final isCardsStep = step == _CreateEventStep.cards;
-
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
-        border: Border(
-          top: BorderSide(
-            color: isDark
-                ? AppColors.outlineDark.withValues(alpha: 0.45)
-                : AppColors.outlineVariant.withValues(alpha: 0.9),
-          ),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.primary.withValues(alpha: isDark ? 0.08 : 0.04),
-            blurRadius: 16,
-            offset: const Offset(0, -4),
-          ),
-        ],
-      ),
-      child: SafeArea(
-        top: false,
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(20, 14, 20, 16),
-          child: Row(
-            children: [
-              if (step.index > 0) ...[
-                CustomButton.text(
-                  label: context.l10n.geri,
-                  onPressed: loadingCards ? null : onBack,
-                ),
-                const SizedBox(width: 8),
-              ],
-              if (canSkip) ...[
-                CustomButton.text(
-                  label: context.l10n.eventSkip,
-                  onPressed: loadingCards ? null : onSkip,
-                ),
-                const SizedBox(width: 8),
-              ],
-              Expanded(
-                child: isCardsStep
-                    ? CustomButton(
-                        label: selectedCount == 0
-                            ? context.l10n.createGroup
-                            : context.l10n.createGroupWithCards(selectedCount),
-                        onPressed: loadingCards ? null : onSubmit,
-                      )
-                    : CustomButton(
-                        label: context.l10n.devam,
-                        onPressed: onContinue,
-                      ),
-              ),
-            ],
-          ),
-        ),
-      ),
     );
   }
 }

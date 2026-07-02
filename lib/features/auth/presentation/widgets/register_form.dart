@@ -17,13 +17,9 @@ class RegisterForm extends StatefulWidget {
     super.key,
     required this.isLoading,
     required this.onSubmit,
-    this.initialEmail,
-    this.initialPhone,
   });
 
   final bool isLoading;
-  final String? initialEmail;
-  final String? initialPhone;
   final void Function({
     required String displayName,
     required String email,
@@ -47,36 +43,6 @@ class _RegisterFormState extends State<RegisterForm> {
   String? _phoneError;
   String? _passwordError;
   bool _termsAccepted = false;
-
-  @override
-  void initState() {
-    super.initState();
-    final email = widget.initialEmail?.trim();
-    if (email != null && email.isNotEmpty) {
-      _emailController.text = email;
-    }
-    final phone = widget.initialPhone?.trim();
-    if (phone != null && phone.isNotEmpty) {
-      _phoneNumber = phone;
-    }
-  }
-
-  @override
-  void didUpdateWidget(RegisterForm oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    final email = widget.initialEmail?.trim();
-    if (email != null &&
-        email.isNotEmpty &&
-        email != _emailController.text.trim()) {
-      _emailController.text = email;
-    }
-    final phone = widget.initialPhone?.trim();
-    if (phone != null &&
-        phone.isNotEmpty &&
-        phone != _phoneNumber.trim()) {
-      setState(() => _phoneNumber = phone);
-    }
-  }
 
   @override
   void dispose() {
@@ -198,7 +164,6 @@ class _RegisterFormState extends State<RegisterForm> {
         const SizedBox(height: 12),
         OnboardingFieldLabel(label: context.l10n.telefon),
         IntlPhoneField(
-          key: ValueKey(_phoneNumber),
           decoration: CustomTextField.themedDecoration(
             context,
             hintText: context.l10n.msg5xxXxxXxXx,

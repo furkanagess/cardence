@@ -6,6 +6,7 @@ import 'package:image_picker/image_picker.dart';
 
 import '../../../../core/media/profile_photo_image_picker.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/widgets/atoms/authenticated_network_image.dart';
 
 /// Opsiyonel etkinlik fotoğrafı seçimi.
 class EventGroupPhotoPickerField extends StatelessWidget {
@@ -81,12 +82,12 @@ class EventGroupPhotoPickerField extends StatelessWidget {
                             fit: BoxFit.cover,
                           )
                         : hasRemotePhoto
-                            ? Image.network(
-                                remoteUrl,
+                            ? AuthenticatedNetworkImage(
+                                imageUrl: remoteUrl,
                                 width: 64,
                                 height: 64,
                                 fit: BoxFit.cover,
-                                errorBuilder: (_, __, ___) => Container(
+                                errorBuilder: (_) => Container(
                                   width: 64,
                                   height: 64,
                                   color: AppColors.primary.withValues(

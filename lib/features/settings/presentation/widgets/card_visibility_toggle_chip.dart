@@ -56,7 +56,7 @@ class CardVisibilityToggleChip extends StatelessWidget {
                     color: AppColors.textOnPrimary,
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.check_rounded,
                     size: 14,
                     color: AppColors.primary,

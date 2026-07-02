@@ -35,10 +35,16 @@ class LoginEmailFormState extends State<LoginEmailForm> {
   final _passwordController = TextEditingController();
   String? _emailError;
   String? _passwordError;
+  bool _autofillDismissed = false;
 
   @override
   void initState() {
     super.initState();
+    _applyInitialEmail();
+  }
+
+  void _applyInitialEmail() {
+    if (_autofillDismissed) return;
     final email = widget.initialEmail?.trim();
     if (email != null && email.isNotEmpty) {
       _emailController.text = email;
@@ -48,11 +54,26 @@ class LoginEmailFormState extends State<LoginEmailForm> {
   @override
   void didUpdateWidget(LoginEmailForm oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (_autofillDismissed) return;
+
     final email = widget.initialEmail?.trim();
-    if (email != null &&
-        email.isNotEmpty &&
-        email != _emailController.text.trim()) {
+    if (email == null || email.isEmpty) return;
+    if (email != _emailController.text.trim()) {
       _emailController.text = email;
+    }
+  }
+
+  void _handleEmailChanged(String value) {
+    if (_emailError != null) {
+      setState(() => _emailError = null);
+    }
+
+    final initialEmail = widget.initialEmail?.trim();
+    if (!_autofillDismissed &&
+        initialEmail != null &&
+        initialEmail.isNotEmpty &&
+        value.trim() != initialEmail) {
+      setState(() => _autofillDismissed = true);
     }
   }
 
@@ -110,9 +131,7 @@ class LoginEmailFormState extends State<LoginEmailForm> {
             color: colorScheme.onSurfaceVariant,
           ),
           errorText: _emailError,
-          onChanged: (_) {
-            if (_emailError != null) setState(() => _emailError = null);
-          },
+          onChanged: _handleEmailChanged,
         ),
         const SizedBox(height: 10),
         AuthPasswordField(

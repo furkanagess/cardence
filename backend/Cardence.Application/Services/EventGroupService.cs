@@ -98,6 +98,7 @@ public sealed class EventGroupService : IEventGroupService
             UserId = userId,
             Name = name,
             Location = NormalizeOptionalText(request.Location),
+            Description = NormalizeOptionalText(request.Description),
             StartAtUtc = startAt,
             EndAtUtc = endAt,
             EventDate = startAt,
@@ -136,6 +137,7 @@ public sealed class EventGroupService : IEventGroupService
 
         entity.Name = name;
         entity.Location = NormalizeOptionalText(request.Location);
+        entity.Description = NormalizeOptionalText(request.Description);
         entity.StartAtUtc = startAt;
         entity.EndAtUtc = endAt;
         entity.EventDate = startAt;
@@ -324,6 +326,11 @@ public sealed class EventGroupService : IEventGroupService
                 ErrorCodes.EventGroupInvitationNotPending);
         }
 
+        if (EventGroupInvitationPolicy.IsExpired(invitation.ExpiresAtUtc))
+        {
+            throw new NotFoundException("EventGroupInvitation", request.Id);
+        }
+
         await _eventGroupRepository.AcceptInvitationAsync(invitation, cancellationToken);
     }
 
@@ -346,6 +353,11 @@ public sealed class EventGroupService : IEventGroupService
             throw new ConflictException(
                 "Invitation is no longer pending.",
                 ErrorCodes.EventGroupInvitationNotPending);
+        }
+
+        if (EventGroupInvitationPolicy.IsExpired(invitation.ExpiresAtUtc))
+        {
+            throw new NotFoundException("EventGroupInvitation", request.Id);
         }
 
         await _eventGroupRepository.RejectInvitationAsync(invitation, cancellationToken);

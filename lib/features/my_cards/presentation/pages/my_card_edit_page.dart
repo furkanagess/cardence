@@ -7,13 +7,15 @@ import '../../../../core/widgets/atoms/cardence_app_bar.dart';
 import '../../../../core/widgets/atoms/custom_button.dart';
 import '../../../../core/widgets/organisms/cardence_scaffold.dart';
 import '../../../../core/widgets/molecules/cardence_confirm_dialog.dart';
-import '../../../../core/widgets/molecules/card_color_customize_section.dart';
+import '../../../../core/widgets/molecules/card_appearance_customize_section.dart';
+import '../../../../core/widgets/organisms/flippable_person_card.dart';
 import '../../../../core/widgets/molecules/birthday_picker_field.dart';
 import '../../../../core/widgets/molecules/comma_separated_chip_input.dart';
 import '../../../../core/widgets/molecules/country_city_picker_field.dart';
 import '../../../../core/widgets/molecules/skills_chip_input.dart';
 import '../widgets/collapsible_card_preview_panel.dart';
 import '../widgets/my_card_preview_helpers.dart';
+import '../helpers/card_effect_premium_helper.dart';
 import '../../../onboarding/domain/entities/onboarding_card_draft.dart';
 import '../../../../core/network/auth_api_exception.dart';
 import '../../../business_cards/domain/usecases/persist_onboarding_card.dart';
@@ -177,8 +179,19 @@ class _MyCardEditPageState extends State<MyCardEditPage> {
             return;
     }
     setState(() => _saving = true);
-    final draft = _buildDraft();
+    final originalDraft = _buildDraft();
+    var draft = originalDraft;
     try {
+      final resolved = await prepareCardDraftForPersist(context, draft);
+      if (!mounted) return;
+      if (resolved == null) {
+        setState(() => _saving = false);
+        return;
+      }
+      draft = resolved;
+      if (resolved.cardEffect != originalDraft.cardEffect) {
+        setState(() => _baselineDraft = resolved);
+      }
       final updated = await widget.persistOnboardingCard(draft);
       if (!mounted) return;
       setState(() {
@@ -217,6 +230,7 @@ class _MyCardEditPageState extends State<MyCardEditPage> {
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
+      useSafeArea: true,
       backgroundColor: colorScheme.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
@@ -225,76 +239,102 @@ class _MyCardEditPageState extends State<MyCardEditPage> {
         return StatefulBuilder(
           builder: (context, sheetSetState) {
             final draft = _buildDraft();
-            return Padding(
-              padding: EdgeInsets.fromLTRB(
-                20,
-                12,
-                20,
-                20 + MediaQuery.paddingOf(sheetContext).bottom,
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Center(
-                    child: Container(
-                      width: 40,
-                      height: 4,
-                      margin: const EdgeInsets.only(bottom: 16),
-                      decoration: BoxDecoration(
-                        color: colorScheme.outline.withValues(alpha: 0.4),
-                        borderRadius: BorderRadius.circular(2),
+            return DraggableScrollableSheet(
+              expand: false,
+              initialChildSize: 0.88,
+              minChildSize: 0.45,
+              maxChildSize: 0.92,
+              builder: (_, scrollController) {
+                return ListView(
+                  controller: scrollController,
+                  padding: EdgeInsets.fromLTRB(
+                    20,
+                    12,
+                    20,
+                    16 + MediaQuery.paddingOf(sheetContext).bottom,
+                  ),
+                  children: [
+                    Center(
+                      child: Container(
+                        width: 40,
+                        height: 4,
+                        margin: const EdgeInsets.only(bottom: 16),
+                        decoration: BoxDecoration(
+                          color: colorScheme.outline.withValues(alpha: 0.4),
+                          borderRadius: BorderRadius.circular(2),
+                        ),
                       ),
                     ),
-                  ),
-                  Text(
-                    context.l10n.kartRenkleri,
-                    style: Theme.of(sheetContext).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w700,
+                    Text(
+                      context.l10n.kartRenkleri,
+                      style: Theme.of(sheetContext).textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w700,
+                          ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      context.l10n.changesReflectInPreview,
+                      style: Theme.of(sheetContext).textTheme.bodySmall?.copyWith(
+                            color: colorScheme.onSurfaceVariant,
+                            height: 1.35,
+                          ),
+                    ),
+                    const SizedBox(height: 16),
+                    CardAppearanceCustomizeSection(
+                      backgroundColor: draft.backgroundColor,
+                      accentColor: draft.accentColor,
+                      cardEffect: draft.cardEffect,
+                      compact: true,
+                      lastUsedPaletteBackgroundColor:
+                          draft.lastUsedPaletteBackgroundColor,
+                      previewBuilder: (bg, accent, effect) => AspectRatio(
+                        aspectRatio: FlippablePersonCard.cardAspectRatio,
+                        child: MyCardPreviewHelpers.flippableCardWithColors(
+                          draft: draft,
+                          l10n: context.l10n,
+                          backgroundColor: bg,
+                          accentColor: accent,
+                          cardEffect: effect,
                         ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    context.l10n.changesReflectInPreview,
-                    style: Theme.of(sheetContext).textTheme.bodySmall?.copyWith(
-                          color: colorScheme.onSurfaceVariant,
-                          height: 1.35,
-                        ),
-                  ),
-                  const SizedBox(height: 20),
-                  CardColorCustomizeSection(
-                    backgroundColor: draft.backgroundColor,
-                    accentColor: draft.accentColor,
-                    lastUsedPaletteBackgroundColor:
-                        draft.lastUsedPaletteBackgroundColor,
-                    onBackgroundColorChanged: (hex) {
-                      setState(() {
-                        _baselineDraft = hex == null
-                            ? _baselineDraft.copyWith(clearBackgroundColor: true)
-                            : _baselineDraft.copyWith(backgroundColor: hex);
-                      });
-                      sheetSetState(() {});
-                    },
-                    onAccentColorChanged: (hex) {
-                      setState(() {
-                        _baselineDraft = hex == null
-                            ? _baselineDraft.copyWith(clearAccentColor: true)
-                            : _baselineDraft.copyWith(accentColor: hex);
-                      });
-                      sheetSetState(() {});
-                    },
-                    onLastUsedPaletteBackgroundChanged: (hex) {
-                      setState(() {
-                        _baselineDraft = _baselineDraft.copyWith(
-                          lastUsedPaletteBackgroundColor: hex,
-                        );
-                      });
-                      sheetSetState(() {});
-                    },
-                  ),
-                  const SizedBox(height: 8),
-                ],
-              ),
+                      ),
+                      onBackgroundColorChanged: (hex) {
+                        setState(() {
+                          _baselineDraft = hex == null
+                              ? _baselineDraft.copyWith(clearBackgroundColor: true)
+                              : _baselineDraft.copyWith(backgroundColor: hex);
+                        });
+                        sheetSetState(() {});
+                      },
+                      onAccentColorChanged: (hex) {
+                        setState(() {
+                          _baselineDraft = hex == null
+                              ? _baselineDraft.copyWith(clearAccentColor: true)
+                              : _baselineDraft.copyWith(accentColor: hex);
+                        });
+                        sheetSetState(() {});
+                      },
+                      onEffectChanged: (effect) {
+                        setState(() {
+                          _baselineDraft =
+                              _baselineDraft.copyWith(cardEffect: effect);
+                        });
+                        sheetSetState(() {});
+                      },
+                      onLastUsedPaletteBackgroundChanged: (hex) {
+                        setState(() {
+                          _baselineDraft = _baselineDraft.copyWith(
+                            backgroundColor: hex,
+                            lastUsedPaletteBackgroundColor: hex,
+                          );
+                        });
+                        sheetSetState(() {});
+                      },
+                      showSaveButton: true,
+                      onSave: () => Navigator.of(sheetContext).pop(),
+                    ),
+                  ],
+                );
+              },
             );
           },
         );

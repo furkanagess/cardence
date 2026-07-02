@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'app_colors.dart';
 
 /// Cardence uygulama teması (light + dark).
-/// Kurumsal, resmi görünüm: lacivert vurgu, nötr yüzeyler, sakin tipografi.
+/// Kurumsal, profesyonel görünüm: petrol-safir vurgu, nötr yüzeyler, sakin tipografi.
 class AppTheme {
   AppTheme._();
 
@@ -61,7 +61,8 @@ class AppTheme {
         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       ),
       navigationBarTheme: NavigationBarThemeData(
-        backgroundColor: isLight ? AppColors.surfaceLight : AppColors.surfaceDark,
+        backgroundColor:
+            isLight ? AppColors.surfaceLight : AppColors.surfaceDark,
         indicatorColor: isLight
             ? AppColors.primaryContainer
             : AppColors.primaryContainerDark,
@@ -73,20 +74,23 @@ class AppTheme {
             );
           }
           return textTheme.labelMedium?.copyWith(
-            color: isLight ? AppColors.textSecondary : AppColors.textSecondaryDark,
+            color:
+                isLight ? AppColors.textSecondary : AppColors.textSecondaryDark,
           );
         }),
         iconTheme: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
-            return const IconThemeData(color: AppColors.primary);
+            return IconThemeData(color: AppColors.primary);
           }
           return IconThemeData(
-            color: isLight ? AppColors.textSecondary : AppColors.textSecondaryDark,
+            color:
+                isLight ? AppColors.textSecondary : AppColors.textSecondaryDark,
           );
         }),
       ),
       bottomNavigationBarTheme: BottomNavigationBarThemeData(
-        backgroundColor: isLight ? AppColors.surfaceLight : AppColors.surfaceDark,
+        backgroundColor:
+            isLight ? AppColors.surfaceLight : AppColors.surfaceDark,
         selectedItemColor: AppColors.primary,
         unselectedItemColor:
             isLight ? AppColors.textSecondary : AppColors.textSecondaryDark,
@@ -95,7 +99,8 @@ class AppTheme {
       ),
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
-          backgroundColor: isLight ? AppColors.primary : AppColors.primaryDarkTheme,
+          backgroundColor:
+              isLight ? AppColors.primary : AppColors.primaryDarkTheme,
           foregroundColor:
               isLight ? AppColors.textOnPrimary : AppColors.backgroundDark,
           elevation: 0,
@@ -108,7 +113,8 @@ class AppTheme {
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: isLight ? AppColors.primary : AppColors.primaryDarkTheme,
+          backgroundColor:
+              isLight ? AppColors.primary : AppColors.primaryDarkTheme,
           foregroundColor:
               isLight ? AppColors.textOnPrimary : AppColors.backgroundDark,
           elevation: 0,
@@ -141,7 +147,8 @@ class AppTheme {
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: isLight ? AppColors.surfaceLight : AppColors.surfaceVariantDark,
+        fillColor:
+            isLight ? AppColors.surfaceLight : AppColors.surfaceVariantDark,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(_radius),
         ),
@@ -163,7 +170,8 @@ class AppTheme {
           borderSide: const BorderSide(color: AppColors.error),
         ),
         labelStyle: TextStyle(
-          color: isLight ? AppColors.textSecondary : AppColors.textSecondaryDark,
+          color:
+              isLight ? AppColors.textSecondary : AppColors.textSecondaryDark,
         ),
         hintStyle: TextStyle(
           color: isLight ? AppColors.textDisabled : AppColors.textSecondaryDark,
@@ -187,21 +195,24 @@ class AppTheme {
         ),
       ),
       dialogTheme: DialogThemeData(
-        backgroundColor: isLight ? AppColors.surfaceLight : AppColors.surfaceDark,
+        backgroundColor:
+            isLight ? AppColors.surfaceLight : AppColors.surfaceDark,
         surfaceTintColor: Colors.transparent,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
         ),
       ),
       bottomSheetTheme: BottomSheetThemeData(
-        backgroundColor: isLight ? AppColors.surfaceLight : AppColors.surfaceDark,
+        backgroundColor:
+            isLight ? AppColors.surfaceLight : AppColors.surfaceDark,
         surfaceTintColor: Colors.transparent,
         shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
         ),
       ),
       listTileTheme: ListTileThemeData(
-        iconColor: isLight ? AppColors.textSecondary : AppColors.textSecondaryDark,
+        iconColor:
+            isLight ? AppColors.textSecondary : AppColors.textSecondaryDark,
         textColor: isLight ? AppColors.textPrimary : AppColors.textPrimaryDark,
       ),
       segmentedButtonTheme: SegmentedButtonThemeData(
@@ -248,7 +259,7 @@ class AppTheme {
   }
 
   static ColorScheme get _lightColorScheme {
-    return const ColorScheme.light(
+    return ColorScheme.light(
       primary: AppColors.primary,
       onPrimary: AppColors.textOnPrimary,
       primaryContainer: AppColors.primaryContainer,
@@ -268,7 +279,7 @@ class AppTheme {
   }
 
   static ColorScheme get _darkColorScheme {
-    return const ColorScheme.dark(
+    return ColorScheme.dark(
       primary: AppColors.primaryDarkTheme,
       onPrimary: AppColors.backgroundDark,
       primaryContainer: AppColors.primaryContainerDark,
@@ -287,8 +298,7 @@ class AppTheme {
 
   static TextTheme _textTheme(Brightness brightness) {
     final isLight = brightness == Brightness.light;
-    final primary =
-        isLight ? AppColors.textPrimary : AppColors.textPrimaryDark;
+    final primary = isLight ? AppColors.textPrimary : AppColors.textPrimaryDark;
     final secondary =
         isLight ? AppColors.textSecondary : AppColors.textSecondaryDark;
 

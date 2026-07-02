@@ -27,10 +27,12 @@ public sealed class EventGroupCardInviteConfiguration
             .HasMaxLength(20)
             .IsRequired();
         builder.Property(x => x.CreatedAtUtc).HasColumnName("created_at_utc");
+        builder.Property(x => x.ExpiresAtUtc).HasColumnName("expires_at_utc");
         builder.Property(x => x.RespondedAtUtc).HasColumnName("responded_at_utc");
 
         builder.HasIndex(x => new { x.InviteeUserId, x.Status });
         builder.HasIndex(x => new { x.EventGroupId, x.CardEntityId, x.Status });
+        builder.HasIndex(x => x.ExpiresAtUtc);
 
         builder.HasOne(x => x.EventGroup)
             .WithMany(x => x.CardInvites)

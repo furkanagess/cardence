@@ -11,9 +11,7 @@ import '../../theme/app_colors.dart';
 /// * [CustomButtonVariant.text] – metin / link aksiyonu (örn. İptal)
 /// * [CustomButtonVariant.outlined] – çerçeveli ikincil aksiyon
 ///
-/// Metin her zaman ortalanır ve [height] yalnızca **minimum** yükseklik olarak
-/// uygulanır; içerik (büyük yazı tipi ölçeği veya çok satır) gerektirdiğinde
-/// buton büyür, metni asla sıkıştırmaz/kırpmaz.
+/// Metin her zaman ortalanır; [height] buton yüksekliğini belirler.
 enum CustomButtonVariant {
   primary,
   tonal,
@@ -93,19 +91,30 @@ class CustomButton extends StatelessWidget {
 
   bool get _isInteractive => enabled && !isLoading && onPressed != null;
 
+  /// [style] içindeki minimumSize, [height] değerinden büyükse o değer kullanılır.
+  double _resolvedHeight() {
+    final styleMinHeight =
+        style?.minimumSize?.resolve(const <WidgetState>{})?.height ?? 0;
+    return styleMinHeight > height ? styleMinHeight : height;
+  }
+
   /// Sabit yükseklik dayatmaz; [height] minimum yükseklik olur ve metin
   /// gerektiğinde büyüyebilmesi için dikey büyüme serbest bırakılır.
-  ButtonStyle _effectiveStyle() {
+  ButtonStyle _effectiveStyle(double resolvedHeight) {
     final base = (style ?? const ButtonStyle()).copyWith(
       alignment: Alignment.center,
-      visualDensity: visualDensity,
+      visualDensity: visualDensity ?? VisualDensity.standard,
+      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
     );
 
     return base.copyWith(
-      minimumSize: base.minimumSize ??
-          WidgetStateProperty.all(Size(0, height)),
-      maximumSize: base.maximumSize ??
-          WidgetStateProperty.all(const Size.fromWidth(double.infinity)),
+      minimumSize: WidgetStateProperty.all(
+        Size(fullWidth ? double.infinity : 0, resolvedHeight),
+      ),
+      padding: base.padding ??
+          WidgetStateProperty.all(
+            const EdgeInsets.symmetric(horizontal: 16),
+          ),
     );
   }
 
@@ -113,6 +122,9 @@ class CustomButton extends StatelessWidget {
         label,
         style: labelStyle,
         textAlign: TextAlign.center,
+        textHeightBehavior: const TextHeightBehavior(
+          leadingDistribution: TextLeadingDistribution.even,
+        ),
       );
 
   Color _loadingColor(BuildContext context) {
@@ -125,8 +137,12 @@ class CustomButton extends StatelessWidget {
     return colorScheme.primary;
   }
 
-  Widget _buildButton(BuildContext context, Widget child) {
-    final effectiveStyle = _effectiveStyle();
+  Widget _buildButton(
+    BuildContext context,
+    Widget child,
+    double resolvedHeight,
+  ) {
+    final effectiveStyle = _effectiveStyle(resolvedHeight);
     final pressHandler = _isInteractive ? onPressed : null;
     final hasIcon = icon != null && !isLoading;
 
@@ -188,6 +204,7 @@ class CustomButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final resolvedHeight = _resolvedHeight();
     final Widget child = isLoading
         ? SizedBox(
             width: 22,
@@ -199,14 +216,11 @@ class CustomButton extends StatelessWidget {
           )
         : _labelText();
 
-    final button = _buildButton(context, child);
+    final button = _buildButton(context, child, resolvedHeight);
 
-    final constraints = fullWidth
-        ? BoxConstraints(minWidth: double.infinity, minHeight: height)
-        : BoxConstraints(minHeight: height);
-
-    return ConstrainedBox(
-      constraints: constraints,
+    return SizedBox(
+      height: resolvedHeight,
+      width: fullWidth ? double.infinity : null,
       child: button,
     );
   }

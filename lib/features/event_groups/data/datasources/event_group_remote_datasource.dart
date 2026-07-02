@@ -13,6 +13,7 @@ abstract class EventGroupRemoteDataSource {
     required String location,
     required DateTime startAt,
     DateTime? endAt,
+    String? description,
     List<String> invitedCardIds = const [],
     required String accessToken,
   });
@@ -23,6 +24,7 @@ abstract class EventGroupRemoteDataSource {
     required String location,
     required DateTime startAt,
     DateTime? endAt,
+    String? description,
     bool clearPhoto = false,
     required String accessToken,
   });
@@ -116,14 +118,18 @@ class EventGroupRemoteDataSourceImpl implements EventGroupRemoteDataSource {
     required String location,
     required DateTime startAt,
     DateTime? endAt,
+    String? description,
     List<String> invitedCardIds = const [],
     required String accessToken,
   }) async {
+    final trimmedDescription = description?.trim();
     final body = <String, dynamic>{
       'name': name,
       'location': location.trim(),
       'startAt': startAt.toUtc().toIso8601String(),
       if (endAt != null) 'endAt': endAt.toUtc().toIso8601String(),
+      if (trimmedDescription != null && trimmedDescription.isNotEmpty)
+        'description': trimmedDescription,
       if (invitedCardIds.isNotEmpty) 'invitedCardIds': invitedCardIds,
     };
 
@@ -143,15 +149,18 @@ class EventGroupRemoteDataSourceImpl implements EventGroupRemoteDataSource {
     required String location,
     required DateTime startAt,
     DateTime? endAt,
+    String? description,
     bool clearPhoto = false,
     required String accessToken,
   }) async {
+    final trimmedDescription = description?.trim();
     final body = <String, dynamic>{
       'id': groupId,
       'name': name,
       'location': location.trim(),
       'startAt': startAt.toUtc().toIso8601String(),
       if (endAt != null) 'endAt': endAt.toUtc().toIso8601String(),
+      'description': trimmedDescription ?? '',
       'clearPhoto': clearPhoto,
     };
 

@@ -90,6 +90,11 @@ namespace Cardence.Infrastructure.Migrations
                         .HasColumnType("character varying(50)")
                         .HasColumnName("birthday");
 
+                    b.Property<string>("CardEffect")
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("card_effect");
+
                     b.Property<string>("CardId")
                         .IsRequired()
                         .HasMaxLength(6)
@@ -274,6 +279,11 @@ namespace Cardence.Infrastructure.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
+                    b.Property<string>("Description")
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)")
+                        .HasColumnName("description");
+
                     b.Property<DateTime?>("EndAtUtc")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("end_at_utc");
@@ -351,6 +361,10 @@ namespace Cardence.Infrastructure.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("event_group_id");
 
+                    b.Property<DateTime>("ExpiresAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("expires_at_utc");
+
                     b.Property<Guid>("InviteeUserId")
                         .HasColumnType("uuid")
                         .HasColumnName("invitee_user_id");
@@ -372,6 +386,8 @@ namespace Cardence.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("CardEntityId");
+
+                    b.HasIndex("ExpiresAtUtc");
 
                     b.HasIndex("InviterUserId");
 

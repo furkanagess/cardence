@@ -44,8 +44,8 @@ class AddCardStickyAction extends StatelessWidget {
             onPressed: enabled ? onPressed : null,
             enabled: enabled,
             isLoading: isLoading,
+            height: 52,
             style: FilledButton.styleFrom(
-              minimumSize: const Size.fromHeight(52),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(14),
               ),

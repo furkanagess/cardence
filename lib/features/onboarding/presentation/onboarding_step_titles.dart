@@ -1,6 +1,6 @@
 import '../../../l10n/app_localizations.dart';
 
-/// Onboarding adım başlıkları (AppBar).
+/// Onboarding adım başlıkları.
 class OnboardingStepTitles {
   OnboardingStepTitles._();
 

@@ -44,6 +44,7 @@ class OnboardingPreviewHelpers {
       contactLinkedin: draft.linkedin,
       visibleContactFields: CardVisibilityHelper.visibleFrontContactKeys(draft),
       contactFieldsTappable: contactFieldsTappable,
+      cardEffect: draft.cardEffect,
     );
   }
 }

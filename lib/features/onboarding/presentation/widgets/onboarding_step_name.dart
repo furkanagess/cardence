@@ -28,6 +28,8 @@ class OnboardingStepName extends StatefulWidget {
 class _OnboardingStepNameState extends State<OnboardingStepName> {
   late final TextEditingController _firstNameController;
   late final TextEditingController _lastNameController;
+  late final Listenable _previewListenable;
+  bool _suppressDraftEmit = false;
 
   @override
   void initState() {
@@ -35,6 +37,10 @@ class _OnboardingStepNameState extends State<OnboardingStepName> {
     final parts = OnboardingNameHelper.split(widget.draft.displayName);
     _firstNameController = TextEditingController(text: parts.first);
     _lastNameController = TextEditingController(text: parts.last);
+    _previewListenable =
+        Listenable.merge([_firstNameController, _lastNameController]);
+    _firstNameController.addListener(_emitDisplayName);
+    _lastNameController.addListener(_emitDisplayName);
   }
 
   @override
@@ -42,23 +48,30 @@ class _OnboardingStepNameState extends State<OnboardingStepName> {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.draft.displayName != widget.draft.displayName) {
       final parts = OnboardingNameHelper.split(widget.draft.displayName);
+      _suppressDraftEmit = true;
       if (_firstNameController.text != parts.first) {
         _firstNameController.text = parts.first;
       }
       if (_lastNameController.text != parts.last) {
         _lastNameController.text = parts.last;
       }
+      _suppressDraftEmit = false;
     }
   }
 
   @override
   void dispose() {
-    _firstNameController.dispose();
-    _lastNameController.dispose();
+    _firstNameController
+      ..removeListener(_emitDisplayName)
+      ..dispose();
+    _lastNameController
+      ..removeListener(_emitDisplayName)
+      ..dispose();
     super.dispose();
   }
 
   void _emitDisplayName() {
+    if (_suppressDraftEmit) return;
     final combined = OnboardingNameHelper.combine(
       _firstNameController.text,
       _lastNameController.text,
@@ -83,7 +96,6 @@ class _OnboardingStepNameState extends State<OnboardingStepName> {
   @override
   Widget build(BuildContext context) {
     return OnboardingStepShell(
-      subtitle: context.l10n.kartnzdaGrnecekAdnzGirin,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -95,10 +107,6 @@ class _OnboardingStepNameState extends State<OnboardingStepName> {
             textInputAction: TextInputAction.next,
             hintText: context.l10n.rnMehmet,
             prefixIcon: const Icon(Icons.person_outline),
-            onChanged: (_) {
-              _emitDisplayName();
-              setState(() {});
-            },
           ),
           const SizedBox(height: 16),
           OnboardingFieldLabel(label: context.l10n.soyad, required: true),
@@ -108,14 +116,15 @@ class _OnboardingStepNameState extends State<OnboardingStepName> {
             textInputAction: TextInputAction.done,
             hintText: context.l10n.rnYlmaz,
             prefixIcon: const Icon(Icons.person_outline),
-            onChanged: (_) {
-              _emitDisplayName();
-              setState(() {});
-            },
           ),
           const SizedBox(height: 24),
-          Center(
-            child: OnboardingCardPreviewFrame(draft: _previewDraft),
+          ListenableBuilder(
+            listenable: _previewListenable,
+            builder: (context, _) {
+              return Center(
+                child: OnboardingCardPreviewFrame(draft: _previewDraft),
+              );
+            },
           ),
         ],
       ),

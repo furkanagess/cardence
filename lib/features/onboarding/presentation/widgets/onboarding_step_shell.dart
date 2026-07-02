@@ -15,12 +15,10 @@ class OnboardingStepShell extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
-    final keyboardInset = MediaQuery.viewInsetsOf(context).bottom;
     final hasSubtitle = subtitle != null && subtitle!.trim().isNotEmpty;
 
-    return SingleChildScrollView(
-      padding: EdgeInsets.fromLTRB(20, 8, 20, 24 + keyboardInset),
-      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -34,7 +32,10 @@ class OnboardingStepShell extends StatelessWidget {
             ),
             const SizedBox(height: 16),
           ],
-          child,
+          Align(
+            alignment: Alignment.topCenter,
+            child: child,
+          ),
         ],
       ),
     );
@@ -43,7 +44,7 @@ class OnboardingStepShell extends StatelessWidget {
 
 /// Form alanı etiketi; zorunlu alanlarda yıldız gösterir.
 class OnboardingFieldLabel extends StatelessWidget {
-  OnboardingFieldLabel({
+  const OnboardingFieldLabel({
     super.key,
     required this.label,
     this.required = false,

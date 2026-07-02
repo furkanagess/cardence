@@ -91,6 +91,7 @@ class EventGroupRepositoryImpl implements EventGroupRepository {
       location: input.location,
       startAt: input.startAt,
       endAt: input.endAt,
+      description: input.description,
       invitedCardIds: input.invitedCardIds,
       accessToken: token,
     );
@@ -132,6 +133,7 @@ class EventGroupRepositoryImpl implements EventGroupRepository {
       location: input.location,
       startAt: input.startAt,
       endAt: input.endAt,
+      description: input.description,
       clearPhoto: input.clearPhoto,
       accessToken: token,
     );

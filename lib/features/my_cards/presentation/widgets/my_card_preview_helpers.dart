@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../l10n/app_localizations.dart';
+import '../../../../core/domain/card_visual_effect.dart';
 import '../../../onboarding/presentation/widgets/onboarding_card_preview_frame.dart';
 import '../../../onboarding/domain/entities/onboarding_card_draft.dart';
 
@@ -40,6 +41,7 @@ class MyCardPreviewHelpers {
     VoidCallback? onTap,
     VoidCallback? onDoubleTap,
     String? emptyMessage,
+    bool gatePremiumEffects = false,
     Key? key,
   }) {
     return OnboardingCardPreviewFrame(
@@ -49,6 +51,28 @@ class MyCardPreviewHelpers {
       onDoubleTap: onDoubleTap,
       emptyMessage: emptyMessage ?? l10n.alanlarDoldukaGrnr,
       normalizeForDisplay: true,
+      gatePremiumEffects: gatePremiumEffects,
+    );
+  }
+
+  static Widget flippableCardWithColors({
+    required OnboardingCardDraft draft,
+    required AppLocalizations l10n,
+    String? backgroundColor,
+    String? accentColor,
+    CardVisualEffect? cardEffect,
+    String? emptyMessage,
+  }) {
+    return flippableCard(
+      draft: draft.copyWith(
+        backgroundColor: backgroundColor,
+        accentColor: accentColor,
+        cardEffect: cardEffect,
+        clearBackgroundColor: backgroundColor == null,
+        clearAccentColor: accentColor == null,
+      ),
+      l10n: l10n,
+      emptyMessage: emptyMessage,
     );
   }
 }

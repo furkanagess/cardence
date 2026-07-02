@@ -10,6 +10,7 @@ class EventGroup {
     required this.id,
     required this.name,
     this.location,
+    this.description,
     required this.startAt,
     this.endAt,
     this.status = EventGroupStatus.upcoming,
@@ -20,6 +21,7 @@ class EventGroup {
   final String id;
   final String name;
   final String? location;
+  final String? description;
   final DateTime startAt;
   final DateTime? endAt;
   final EventGroupStatus status;

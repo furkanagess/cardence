@@ -9,6 +9,7 @@ class OnboardingState extends Equatable {
     this.currentPageIndex = 0,
     OnboardingCardDraft? draft,
     this.isSaving = false,
+    this.isPhotoUploading = false,
     this.errorMessage,
   }) : draft = draft ??
             OnboardingCardDraft(
@@ -20,6 +21,7 @@ class OnboardingState extends Equatable {
   final int currentPageIndex;
   final OnboardingCardDraft draft;
   final bool isSaving;
+  final bool isPhotoUploading;
   final String? errorMessage;
 
   /// name, professional, photo, optional, preview
@@ -51,23 +53,31 @@ class OnboardingState extends Equatable {
       validationErrorForStep(l10n, currentPageIndex);
 
   /// Mevcut adımda Devam / Tamamla aktif mi.
-  bool canProceedCurrentStep(AppLocalizations l10n) {
-    if (isLastPage) return canFinish(l10n);
+  bool canProceedCurrentStep(
+    AppLocalizations l10n, {
+    required bool isPremium,
+  }) {
+    if (isLastPage) return canFinish(l10n, isPremium: isPremium);
     return validationErrorForCurrentStep(l10n) == null;
   }
 
-  bool canFinish(AppLocalizations l10n) =>
+  bool canFinish(
+    AppLocalizations l10n, {
+    required bool isPremium,
+  }) =>
       OnboardingValidation.fieldsAreValid(
         displayName: draft.displayName,
         company: draft.company,
         title: draft.title,
         email: draft.email,
-      );
+      ) &&
+      !(draft.cardEffect.requiresPremium && !isPremium);
 
   OnboardingState copyWith({
     int? currentPageIndex,
     OnboardingCardDraft? draft,
     bool? isSaving,
+    bool? isPhotoUploading,
     String? errorMessage,
     bool clearError = false,
   }) {
@@ -75,10 +85,12 @@ class OnboardingState extends Equatable {
       currentPageIndex: currentPageIndex ?? this.currentPageIndex,
       draft: draft ?? this.draft,
       isSaving: isSaving ?? this.isSaving,
+      isPhotoUploading: isPhotoUploading ?? this.isPhotoUploading,
       errorMessage: clearError ? null : errorMessage ?? this.errorMessage,
     );
   }
 
   @override
-  List<Object?> get props => [currentPageIndex, draft, isSaving, errorMessage];
+  List<Object?> get props =>
+      [currentPageIndex, draft, isSaving, isPhotoUploading, errorMessage];
 }

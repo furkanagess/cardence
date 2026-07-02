@@ -17,6 +17,7 @@ class EditEventGroupResult {
     required this.location,
     required this.startAt,
     this.endAt,
+    this.description,
     this.photoFilePath,
     this.clearPhoto = false,
   });
@@ -25,6 +26,7 @@ class EditEventGroupResult {
   final String location;
   final DateTime startAt;
   final DateTime? endAt;
+  final String? description;
   final String? photoFilePath;
   final bool clearPhoto;
 }
@@ -68,11 +70,13 @@ class EditEventGroupSheet extends StatefulWidget {
 class _EditEventGroupSheetState extends State<EditEventGroupSheet> {
   late final TextEditingController _nameController;
   late final TextEditingController _venueController;
+  late final TextEditingController _descriptionController;
   String? _locationCountry;
   String? _locationCity;
   String? _nameErrorText;
   String? _locationErrorText;
   String? _scheduleErrorText;
+  String? _descriptionErrorText;
   late DateTime? _startDate;
   late TimeOfDay? _startTime;
   DateTime? _endDate;
@@ -85,6 +89,9 @@ class _EditEventGroupSheetState extends State<EditEventGroupSheet> {
   void initState() {
     super.initState();
     _nameController = TextEditingController(text: widget.group.name);
+    _descriptionController = TextEditingController(
+      text: widget.group.description ?? '',
+    );
     final parsed = EventGroupLocationComposer.parse(widget.group.location);
     _locationCountry = parsed.country;
     _locationCity = parsed.city;
@@ -105,6 +112,7 @@ class _EditEventGroupSheetState extends State<EditEventGroupSheet> {
   void dispose() {
     _nameController.dispose();
     _venueController.dispose();
+    _descriptionController.dispose();
     super.dispose();
   }
 
@@ -177,6 +185,13 @@ class _EditEventGroupSheetState extends State<EditEventGroupSheet> {
       setState(() => _scheduleErrorText = context.l10n.eventEndBeforeStart);
       return;
     }
+    final description = _descriptionController.text.trim();
+    if (description.length > 2000) {
+      setState(
+        () => _descriptionErrorText = context.l10n.eventDescriptionTooLong,
+      );
+      return;
+    }
 
     Navigator.of(context).pop(
       EditEventGroupResult(
@@ -184,6 +199,7 @@ class _EditEventGroupSheetState extends State<EditEventGroupSheet> {
         location: location,
         startAt: startAt,
         endAt: endAt,
+        description: description.isEmpty ? null : description,
         photoFilePath: _photoFilePath,
         clearPhoto: _clearPhoto,
       ),
@@ -317,7 +333,18 @@ class _EditEventGroupSheetState extends State<EditEventGroupSheet> {
                             });
                           },
                         ),
-                        const SizedBox(height: 18),
+                        const SizedBox(height: 14),
+                        CustomTextField(
+                          controller: _descriptionController,
+                          labelText: context.l10n.eventDescription,
+                          hintText: context.l10n.eventDescriptionHint,
+                          errorText: _descriptionErrorText,
+                          minLines: 3,
+                          maxLines: 6,
+                          maxLength: 2000,
+                          textInputAction: TextInputAction.newline,
+                        ),
+                        const SizedBox(height: 14),
                         EventGroupPhotoPickerField(
                           value: _photoFilePath,
                           previewUrl:

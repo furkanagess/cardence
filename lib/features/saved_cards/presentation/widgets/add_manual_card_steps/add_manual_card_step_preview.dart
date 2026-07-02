@@ -45,6 +45,17 @@ class AddManualCardStepPreview extends StatelessWidget {
           CardColorCustomizeSection(
             backgroundColor: draft.backgroundColor,
             accentColor: draft.accentColor,
+            previewBuilder: (bg, accent) => OnboardingCardPreviewFrame(
+              draft: ManualSavedCardPreviewHelper.toPreviewDraft(
+                draft.copyWith(
+                  backgroundColor: bg,
+                  accentColor: accent,
+                  clearBackgroundColor: bg == null,
+                  clearAccentColor: accent == null,
+                ),
+              ),
+              flipOnTouch: false,
+            ),
             onBackgroundColorChanged: (hex) {
               onChanged(
                 hex == null

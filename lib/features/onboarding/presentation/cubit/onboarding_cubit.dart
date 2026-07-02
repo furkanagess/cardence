@@ -1,3 +1,4 @@
+import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/network/auth_api_exception.dart';
@@ -16,14 +17,59 @@ class OnboardingCubit extends Cubit<OnboardingState> {
 
   final Future<void> Function() _completeOnboarding;
   final PersistOnboardingCard persistOnboardingCard;
+  OnboardingCardDraft? _pendingDraft;
+  bool _draftEmitScheduled = false;
 
   void setPage(int index) {
     if (index < 0 || index >= OnboardingState.stepCount) return;
+    if (index == state.currentPageIndex) return;
     emit(state.copyWith(currentPageIndex: index, clearError: true));
   }
 
+  /// Metin alanı gibi sık güncellemeler — bir sonraki frame'de birleştirilir.
   void updateDraft(OnboardingCardDraft draft) {
+    _scheduleDraftEmit(draft);
+  }
+
+  /// Renk/efekt gibi anlık seçimler — gecikme olmadan uygulanır.
+  void updateDraftImmediate(OnboardingCardDraft draft) {
+    _flushPendingDraft();
+    _emitDraftIfChanged(draft);
+  }
+
+  void _scheduleDraftEmit(OnboardingCardDraft draft) {
+    if (draft == state.draft) return;
+    _pendingDraft = draft;
+    if (_draftEmitScheduled) return;
+    _draftEmitScheduled = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _draftEmitScheduled = false;
+      if (isClosed) return;
+      final next = _pendingDraft;
+      _pendingDraft = null;
+      if (next == null) return;
+      _emitDraftIfChanged(next);
+    });
+  }
+
+  void _flushPendingDraft() {
+    if (!_draftEmitScheduled) return;
+    _draftEmitScheduled = false;
+    final next = _pendingDraft;
+    _pendingDraft = null;
+    if (next != null) {
+      _emitDraftIfChanged(next);
+    }
+  }
+
+  void _emitDraftIfChanged(OnboardingCardDraft draft) {
+    if (draft == state.draft) return;
     emit(state.copyWith(draft: draft, clearError: true));
+  }
+
+  void setPhotoUploading(bool isPhotoUploading) {
+    if (state.isPhotoUploading == isPhotoUploading) return;
+    emit(state.copyWith(isPhotoUploading: isPhotoUploading));
   }
 
   void nextPage() {

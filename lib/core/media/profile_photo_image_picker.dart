@@ -68,9 +68,12 @@ class ProfilePhotoImagePicker {
       if (source == ImageSource.camera &&
           correctFrontCameraMirror &&
           preferredCamera == CameraDevice.front) {
-        return ProfilePhotoNormalizer.normalizeCameraCapture(image.path);
+        return ProfilePhotoNormalizer.normalizePick(
+          image.path,
+          mirrorFrontCamera: true,
+        );
       }
-      return image.path;
+      return ProfilePhotoNormalizer.normalizePick(image.path);
     } catch (_) {
       onError?.call('Fotoğraf seçilemedi. İzinleri kontrol edip tekrar deneyin.');
       return null;

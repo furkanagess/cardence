@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Cardence.Api.Controllers;
 
 [ApiController]
-[Authorize]
+[AllowAnonymous]
 [Route("")]
 [Tags("PublicCards")]
 public sealed class PublicCardsController : ControllerBase

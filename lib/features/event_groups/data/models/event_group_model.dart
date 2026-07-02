@@ -7,6 +7,7 @@ class EventGroupModel {
     required this.id,
     required this.name,
     this.location,
+    this.description,
     required this.startAt,
     this.endAt,
     this.status = EventGroupStatus.upcoming,
@@ -18,6 +19,7 @@ class EventGroupModel {
   final String id;
   final String name;
   final String? location;
+  final String? description;
   final DateTime startAt;
   final DateTime? endAt;
   final EventGroupStatus status;
@@ -30,6 +32,7 @@ class EventGroupModel {
       id: entity.id,
       name: entity.name,
       location: entity.location,
+      description: entity.description,
       startAt: entity.startAt,
       endAt: entity.endAt,
       status: entity.status,
@@ -43,6 +46,7 @@ class EventGroupModel {
         id: id,
         name: name,
         location: location,
+        description: description,
         startAt: startAt,
         endAt: endAt,
         status: status,
@@ -54,6 +58,7 @@ class EventGroupModel {
         'id': id,
         'name': name,
         if (location != null) 'location': location,
+        if (description != null) 'description': description,
         'startAt': startAt.toUtc().toIso8601String(),
         if (endAt != null) 'endAt': endAt!.toUtc().toIso8601String(),
         'status': status.name,
@@ -67,6 +72,7 @@ class EventGroupModel {
     final id = json['id'] ?? json['Id'];
     final name = json['name'] ?? json['Name'];
     final location = json['location'] ?? json['Location'];
+    final description = json['description'] ?? json['Description'];
     final photoUrl = json['photoUrl'] ?? json['PhotoUrl'];
     final rawStartAt = json['startAt'] ?? json['StartAt'];
     final rawEndAt = json['endAt'] ?? json['EndAt'];
@@ -90,6 +96,7 @@ class EventGroupModel {
       id: id?.toString() ?? '',
       name: name?.toString() ?? '',
       location: location?.toString(),
+      description: description?.toString(),
       startAt: startAt ?? DateTime.now(),
       endAt: endAt,
       status: _parseStatus(rawStatus?.toString()),

@@ -155,6 +155,8 @@ public sealed class EventGroupRepository : IEventGroupRepository
             return [];
         }
 
+        await DeleteExpiredInvitationsAsync(cancellationToken);
+
         var ownedCards = await _dbContext.Cards
             .Where(card => distinctCardIds.Contains(card.CardId))
             .ToListAsync(cancellationToken);
@@ -201,6 +203,9 @@ public sealed class EventGroupRepository : IEventGroupRepository
         Guid inviteeUserId,
         CancellationToken cancellationToken = default)
     {
+        await DeleteExpiredInvitationsAsync(cancellationToken);
+
+        var now = DateTime.UtcNow;
         return await _dbContext.EventGroupCardInvites
             .AsNoTracking()
             .Include(invite => invite.EventGroup)
@@ -208,7 +213,8 @@ public sealed class EventGroupRepository : IEventGroupRepository
             .Include(invite => invite.Card)
             .Where(invite =>
                 invite.InviteeUserId == inviteeUserId &&
-                invite.Status == EventGroupInvitationStatuses.Pending)
+                invite.Status == EventGroupInvitationStatuses.Pending &&
+                invite.ExpiresAtUtc > now)
             .OrderByDescending(invite => invite.CreatedAtUtc)
             .ToListAsync(cancellationToken);
     }
@@ -218,6 +224,9 @@ public sealed class EventGroupRepository : IEventGroupRepository
         Guid invitationId,
         CancellationToken cancellationToken = default)
     {
+        await DeleteExpiredInvitationsAsync(cancellationToken);
+
+        var now = DateTime.UtcNow;
         return await _dbContext.EventGroupCardInvites
             .Include(invite => invite.EventGroup)
             .Include(invite => invite.InviterUser)
@@ -225,7 +234,8 @@ public sealed class EventGroupRepository : IEventGroupRepository
             .FirstOrDefaultAsync(
                 invite =>
                     invite.Id == invitationId &&
-                    invite.InviteeUserId == inviteeUserId,
+                    invite.InviteeUserId == inviteeUserId &&
+                    invite.ExpiresAtUtc > now,
                 cancellationToken);
     }
 
@@ -233,7 +243,8 @@ public sealed class EventGroupRepository : IEventGroupRepository
         EventGroupCardInvite invitation,
         CancellationToken cancellationToken = default)
     {
-        if (invitation.Status != EventGroupInvitationStatuses.Pending)
+        if (invitation.Status != EventGroupInvitationStatuses.Pending ||
+            EventGroupInvitationPolicy.IsExpired(invitation.ExpiresAtUtc))
         {
             return;
         }
@@ -255,7 +266,8 @@ public sealed class EventGroupRepository : IEventGroupRepository
         EventGroupCardInvite invitation,
         CancellationToken cancellationToken = default)
     {
-        if (invitation.Status != EventGroupInvitationStatuses.Pending)
+        if (invitation.Status != EventGroupInvitationStatuses.Pending ||
+            EventGroupInvitationPolicy.IsExpired(invitation.ExpiresAtUtc))
         {
             return;
         }
@@ -263,6 +275,14 @@ public sealed class EventGroupRepository : IEventGroupRepository
         invitation.Status = EventGroupInvitationStatuses.Rejected;
         invitation.RespondedAtUtc = DateTime.UtcNow;
         await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    public async Task DeleteExpiredInvitationsAsync(CancellationToken cancellationToken = default)
+    {
+        var now = DateTime.UtcNow;
+        await _dbContext.EventGroupCardInvites
+            .Where(invite => invite.ExpiresAtUtc <= now)
+            .ExecuteDeleteAsync(cancellationToken);
     }
 
     private async Task CreatePendingInviteIfNeededAsync(
@@ -279,11 +299,17 @@ public sealed class EventGroupRepository : IEventGroupRepository
             .OrderByDescending(invite => invite.CreatedAtUtc)
             .FirstOrDefaultAsync(cancellationToken);
 
-        if (existingInvite is not null &&
-            (existingInvite.Status == EventGroupInvitationStatuses.Pending ||
-             existingInvite.Status == EventGroupInvitationStatuses.Accepted))
+        if (existingInvite is not null)
         {
-            return;
+            if (EventGroupInvitationPolicy.IsExpired(existingInvite.ExpiresAtUtc, now))
+            {
+                _dbContext.EventGroupCardInvites.Remove(existingInvite);
+            }
+            else if (existingInvite.Status == EventGroupInvitationStatuses.Pending ||
+                     existingInvite.Status == EventGroupInvitationStatuses.Accepted)
+            {
+                return;
+            }
         }
 
         _dbContext.EventGroupCardInvites.Add(new EventGroupCardInvite
@@ -296,6 +322,7 @@ public sealed class EventGroupRepository : IEventGroupRepository
             CardId = ownedCard.CardId,
             Status = EventGroupInvitationStatuses.Pending,
             CreatedAtUtc = now,
+            ExpiresAtUtc = EventGroupInvitationPolicy.ComputeExpiresAtUtc(now),
         });
     }
 

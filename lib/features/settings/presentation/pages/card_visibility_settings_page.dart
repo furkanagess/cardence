@@ -6,6 +6,8 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/atoms/cardence_app_bar.dart';
 import '../../../../core/widgets/atoms/custom_button.dart';
 import '../../../../core/widgets/molecules/card_color_customize_section.dart';
+import '../../../../core/widgets/molecules/card_effect_customize_section.dart';
+import '../../../../core/domain/card_visual_effect.dart';
 import '../../../../core/widgets/organisms/cardence_scaffold.dart';
 import '../../../../core/widgets/organisms/flippable_person_card.dart';
 import '../../../business_cards/domain/usecases/persist_onboarding_card.dart';
@@ -15,6 +17,7 @@ import '../../../onboarding/domain/helpers/card_visibility_helper.dart';
 import '../../../onboarding/domain/usecases/get_onboarding_draft_cards.dart';
 import '../widgets/card_appearance_section_card.dart';
 import '../widgets/card_visibility_toggle_chip.dart';
+import '../../../my_cards/presentation/helpers/card_effect_premium_helper.dart';
 
 /// Kart ön/arka yüz görünümü: renk, metin rengi ve alan seçimi.
 class CardVisibilitySettingsPage extends StatefulWidget {
@@ -102,6 +105,12 @@ class _CardVisibilitySettingsPageState extends State<CardVisibilitySettingsPage>
     );
   }
 
+  void _setCardEffect(CardVisualEffect effect) {
+    final draft = _draft;
+    if (draft == null) return;
+    _updateDraft(draft.copyWith(cardEffect: effect));
+  }
+
   void _toggleFrontField(String key) {
     final draft = _draft;
     if (draft == null) return;
@@ -155,7 +164,16 @@ class _CardVisibilitySettingsPageState extends State<CardVisibilitySettingsPage>
 
     setState(() => _saving = true);
     try {
-      final synced = await widget.persistOnboardingCard(draft);
+      final resolved = await prepareCardDraftForPersist(context, draft);
+      if (!mounted) return;
+      if (resolved == null) {
+        setState(() => _saving = false);
+        return;
+      }
+      if (resolved.cardEffect != draft.cardEffect) {
+        _updateDraft(resolved);
+      }
+      final synced = await widget.persistOnboardingCard(resolved);
       if (!mounted) return;
       widget.onDraftUpdated?.call(synced);
       Navigator.of(context).pop();
@@ -300,11 +318,20 @@ class _CardVisibilitySettingsPageState extends State<CardVisibilitySettingsPage>
                     size: 20,
                     color: colorScheme.onSurfaceVariant,
                   ),
-                  child: CardColorCustomizeSection(
+                  child:                   CardColorCustomizeSection(
                     backgroundColor: draft.backgroundColor,
                     accentColor: draft.accentColor,
                     lastUsedPaletteBackgroundColor:
                         draft.lastUsedPaletteBackgroundColor,
+                    previewBuilder: (bg, accent) =>
+                        MyCardPreviewHelpers.flippableCardWithColors(
+                      draft: draft,
+                      l10n: context.l10n,
+                      backgroundColor: bg,
+                      accentColor: accent,
+                      cardEffect: draft.cardEffect,
+                      emptyMessage: context.l10n.nizleme,
+                    ),
                     showTextSection: false,
                     onBackgroundColorChanged: _setBackgroundColor,
                     onAccentColorChanged: _setAccentColor,
@@ -318,10 +345,33 @@ class _CardVisibilitySettingsPageState extends State<CardVisibilitySettingsPage>
                   child: CardColorCustomizeSection(
                     backgroundColor: draft.backgroundColor,
                     accentColor: draft.accentColor,
+                    previewBuilder: (bg, accent) =>
+                        MyCardPreviewHelpers.flippableCardWithColors(
+                      draft: draft,
+                      l10n: context.l10n,
+                      backgroundColor: bg,
+                      accentColor: accent,
+                      cardEffect: draft.cardEffect,
+                      emptyMessage: context.l10n.nizleme,
+                    ),
                     showBackgroundSection: false,
                     useAutomaticTextPill: true,
                     onBackgroundColorChanged: _setBackgroundColor,
                     onAccentColorChanged: _setAccentColor,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                CardAppearanceSectionCard(
+                  title: context.l10n.kartEfekti,
+                  trailing: Icon(
+                    Icons.auto_awesome_outlined,
+                    size: 20,
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+                  child: CardEffectCustomizeSection(
+                    selectedEffect: draft.cardEffect,
+                    onEffectChanged: _setCardEffect,
+                    compact: true,
                   ),
                 ),
                 const SizedBox(height: 12),

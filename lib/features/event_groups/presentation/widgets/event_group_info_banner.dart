@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/l10n/l10n_extensions.dart';
 
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/widgets/atoms/authenticated_network_image.dart';
 import '../../domain/entities/event_group.dart';
 import '../helpers/event_group_meta_formatter.dart';
 
@@ -52,10 +53,10 @@ class EventGroupInfoBanner extends StatelessWidget {
                   borderRadius: BorderRadius.circular(12),
                   child: AspectRatio(
                     aspectRatio: 16 / 9,
-                    child: Image.network(
-                      group.photoUrl!.trim(),
+                    child: AuthenticatedNetworkImage(
+                      imageUrl: group.photoUrl!.trim(),
                       fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => ColoredBox(
+                      errorBuilder: (_) => ColoredBox(
                         color: colorScheme.surfaceContainerHighest,
                         child: Icon(
                           Icons.broken_image_outlined,

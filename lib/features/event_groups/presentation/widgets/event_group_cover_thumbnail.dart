@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/widgets/atoms/authenticated_network_image.dart';
 
 class EventGroupCoverThumbnail extends StatelessWidget {
   const EventGroupCoverThumbnail({
@@ -34,12 +35,17 @@ class EventGroupCoverThumbnail extends StatelessWidget {
         fit: BoxFit.cover,
       );
     } else if (remoteUrl != null && remoteUrl.isNotEmpty) {
-      child = Image.network(
-        remoteUrl,
+      child = AuthenticatedNetworkImage(
+        imageUrl: remoteUrl,
         width: size,
         height: size,
         fit: BoxFit.cover,
-        errorBuilder: (_, __, ___) => _FallbackIcon(
+        errorBuilder: (_) => _FallbackIcon(
+          size: size,
+          colorScheme: colorScheme,
+          isDark: isDark,
+        ),
+        loadingBuilder: (_) => _FallbackIcon(
           size: size,
           colorScheme: colorScheme,
           isDark: isDark,

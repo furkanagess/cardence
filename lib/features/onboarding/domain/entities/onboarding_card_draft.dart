@@ -1,3 +1,5 @@
+import '../../../../core/domain/card_visual_effect.dart';
+
 /// Onboarding sırasında toplanan kart taslağı (domain entity – framework yok).
 /// [backgroundColor] kart arka plan rengi (hex).
 /// [accentColor] kart üzerindeki metin rengi (hex); null ise arka plana göre otomatik kontrast.
@@ -31,6 +33,7 @@ class OnboardingCardDraft {
     this.accentColor,
     this.backgroundColor,
     this.lastUsedPaletteBackgroundColor,
+    this.cardEffect = CardVisualEffect.none,
     List<String>? linkedEventGroupIds,
     this.cardId,
   })  : visibleFields = visibleFields ?? const [],
@@ -69,6 +72,7 @@ class OnboardingCardDraft {
   final String? accentColor;
   final String? backgroundColor;
   final String? lastUsedPaletteBackgroundColor;
+  final CardVisualEffect cardEffect;
   final List<String> linkedEventGroupIds;
 
   /// QR / paylaşım için benzersiz kart id; yoksa oluşturulur.
@@ -202,6 +206,7 @@ class OnboardingCardDraft {
         backgroundColor == other.backgroundColor &&
         lastUsedPaletteBackgroundColor ==
             other.lastUsedPaletteBackgroundColor &&
+        cardEffect == other.cardEffect &&
         cardId == other.cardId &&
         _listEquals(visibleFields, other.visibleFields) &&
         _listEquals(frontVisibleFields, other.frontVisibleFields) &&
@@ -239,6 +244,7 @@ class OnboardingCardDraft {
     String? backgroundColor,
     bool clearBackgroundColor = false,
     String? lastUsedPaletteBackgroundColor,
+    CardVisualEffect? cardEffect,
     List<String>? linkedEventGroupIds,
     String? cardId,
   }) {
@@ -272,6 +278,7 @@ class OnboardingCardDraft {
           : (backgroundColor ?? this.backgroundColor),
       lastUsedPaletteBackgroundColor:
           lastUsedPaletteBackgroundColor ?? this.lastUsedPaletteBackgroundColor,
+      cardEffect: cardEffect ?? this.cardEffect,
       linkedEventGroupIds: linkedEventGroupIds ?? this.linkedEventGroupIds,
       cardId: cardId ?? this.cardId,
     );

@@ -14,6 +14,7 @@ class EventGroupInvitationModel {
     this.cardDisplayName,
     required this.status,
     required this.createdAt,
+    required this.expiresAt,
   });
 
   final String id;
@@ -28,11 +29,22 @@ class EventGroupInvitationModel {
   final String? cardDisplayName;
   final String status;
   final DateTime createdAt;
+  final DateTime expiresAt;
+
+  static const int _fallbackExpirationDays = 7;
 
   factory EventGroupInvitationModel.fromJson(Map<String, dynamic> json) {
     final rawStartAt = json['startAt'] ?? json['StartAt'];
     final rawEndAt = json['endAt'] ?? json['EndAt'];
     final rawCreatedAt = json['createdAt'] ?? json['CreatedAt'];
+    final rawExpiresAt = json['expiresAt'] ?? json['ExpiresAt'];
+
+    final createdAt = DateTime.tryParse(rawCreatedAt?.toString() ?? '') ??
+        DateTime.now();
+    final expiresAt = rawExpiresAt != null &&
+            rawExpiresAt.toString().isNotEmpty
+        ? DateTime.tryParse(rawExpiresAt.toString())
+        : null;
 
     return EventGroupInvitationModel(
       id: (json['id'] ?? json['Id'])?.toString() ?? '',
@@ -52,8 +64,9 @@ class EventGroupInvitationModel {
       cardDisplayName:
           (json['cardDisplayName'] ?? json['CardDisplayName'])?.toString(),
       status: (json['status'] ?? json['Status'])?.toString() ?? 'pending',
-      createdAt: DateTime.tryParse(rawCreatedAt?.toString() ?? '') ??
-          DateTime.now(),
+      createdAt: createdAt,
+      expiresAt: expiresAt ??
+          createdAt.add(const Duration(days: _fallbackExpirationDays)),
     );
   }
 
@@ -70,5 +83,6 @@ class EventGroupInvitationModel {
         cardDisplayName: cardDisplayName,
         status: status,
         createdAt: createdAt,
+        expiresAt: expiresAt,
       );
 }

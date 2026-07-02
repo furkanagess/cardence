@@ -87,11 +87,14 @@ import '../../features/settings/data/repositories/locale_repository_impl.dart';
 import '../../features/settings/data/repositories/theme_repository_impl.dart';
 import '../../features/settings/domain/entities/locale_preference.dart';
 import '../../features/settings/domain/entities/theme_preference.dart';
+import '../../features/settings/domain/usecases/get_accent_color_id.dart';
 import '../../features/settings/domain/usecases/get_locale_preference.dart';
 import '../../features/settings/domain/usecases/get_theme_preference.dart';
 import '../../features/settings/domain/usecases/request_app_review.dart';
+import '../../features/settings/domain/usecases/set_accent_color_id.dart';
 import '../../features/settings/domain/usecases/set_locale_preference.dart';
 import '../../features/settings/domain/usecases/set_theme_preference.dart';
+import '../theme/app_accent_palette.dart';
 import '../../features/support/data/datasources/support_remote_datasource.dart';
 import '../../features/support/data/repositories/support_repository_impl.dart';
 import '../../features/support/domain/usecases/submit_support_request.dart';
@@ -185,6 +188,8 @@ class AppInit {
     );
     final theme = _initTheme(prefs);
     final initialThemePreference = await theme.getThemePreference();
+    final initialAccentColorId = await theme.getAccentColorId();
+    AppAccentPalette.init(initialAccentColorId);
     final locale = _initLocale(prefs);
     final initialLocalePreference = await locale.getLocalePreference();
     final appReview = _initAppReview();
@@ -242,7 +247,10 @@ class AppInit {
       resolveOnboardingInitialDraft: onboarding.resolveOnboardingInitialDraft,
       getThemePreference: theme.getThemePreference,
       setThemePreference: theme.setThemePreference,
+      getAccentColorId: theme.getAccentColorId,
+      setAccentColorId: theme.setAccentColorId,
       initialThemePreference: initialThemePreference,
+      initialAccentColorId: initialAccentColorId,
       getLocalePreference: locale.getLocalePreference,
       setLocalePreference: locale.setLocalePreference,
       initialLocalePreference: initialLocalePreference,
@@ -514,12 +522,16 @@ class AppInit {
   static ({
     GetThemePreference getThemePreference,
     SetThemePreference setThemePreference,
+    GetAccentColorId getAccentColorId,
+    SetAccentColorId setAccentColorId,
   }) _initTheme(SharedPreferences prefs) {
     final local = ThemeLocalDataSourceImpl(prefs);
     final repo = ThemeRepositoryImpl(local);
     return (
       getThemePreference: GetThemePreference(repo),
       setThemePreference: SetThemePreference(repo),
+      getAccentColorId: GetAccentColorId(repo),
+      setAccentColorId: SetAccentColorId(repo),
     );
   }
 
@@ -576,7 +588,10 @@ class AppInitResult {
     required this.resolveOnboardingInitialDraft,
     required this.getThemePreference,
     required this.setThemePreference,
+    required this.getAccentColorId,
+    required this.setAccentColorId,
     required this.initialThemePreference,
+    required this.initialAccentColorId,
     required this.getLocalePreference,
     required this.setLocalePreference,
     required this.initialLocalePreference,
@@ -631,7 +646,10 @@ class AppInitResult {
   final ResolveOnboardingInitialDraft resolveOnboardingInitialDraft;
   final GetThemePreference getThemePreference;
   final SetThemePreference setThemePreference;
+  final GetAccentColorId getAccentColorId;
+  final SetAccentColorId setAccentColorId;
   final ThemePreference initialThemePreference;
+  final String initialAccentColorId;
   final GetLocalePreference getLocalePreference;
   final SetLocalePreference setLocalePreference;
   final LocalePreference initialLocalePreference;

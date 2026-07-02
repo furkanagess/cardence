@@ -24,6 +24,7 @@ class BusinessCardModel {
     this.photoUrl,
     this.accentColor,
     this.backgroundColor,
+    this.cardEffect,
     this.cardId,
   });
 
@@ -49,6 +50,7 @@ class BusinessCardModel {
   final String? photoUrl;
   final String? accentColor;
   final String? backgroundColor;
+  final String? cardEffect;
   final String? cardId;
 
   factory BusinessCardModel.fromEntity(BusinessCard entity) {
@@ -75,6 +77,7 @@ class BusinessCardModel {
       photoUrl: entity.photoUrl,
       accentColor: entity.accentColor,
       backgroundColor: entity.backgroundColor,
+      cardEffect: entity.cardEffect,
       cardId: entity.cardId,
     );
   }
@@ -102,6 +105,7 @@ class BusinessCardModel {
         photoUrl: photoUrl,
         accentColor: accentColor,
         backgroundColor: backgroundColor,
+        cardEffect: cardEffect,
         cardId: cardId,
       );
 
@@ -129,6 +133,7 @@ class BusinessCardModel {
       'photoUrl': photoUrl,
       'accentColor': accentColor,
       'backgroundColor': backgroundColor,
+      'cardEffect': cardEffect,
       'cardId': cardId,
     };
     json.removeWhere((_, value) => value == null);
@@ -162,6 +167,7 @@ class BusinessCardModel {
       photoUrl: _str(json['photoUrl'] ?? json['PhotoUrl']),
       accentColor: _str(json['accentColor'] ?? json['AccentColor']),
       backgroundColor: _str(json['backgroundColor'] ?? json['BackgroundColor']),
+      cardEffect: _str(json['cardEffect'] ?? json['CardEffect']),
       cardId: _str(json['cardId'] ?? json['CardId']),
     );
   }

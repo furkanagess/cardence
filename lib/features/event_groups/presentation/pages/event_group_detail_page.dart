@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/l10n/app_l10n.dart';
 import '../../../../core/l10n/l10n_extensions.dart';
 import '../../../../core/network/auth_api_exception.dart';
@@ -15,7 +14,6 @@ import '../../../saved_cards/presentation/helpers/saved_card_flip_back_entries.d
 import '../../../saved_cards/domain/usecases/delete_saved_card.dart';
 import '../../../saved_cards/domain/usecases/get_saved_cards.dart';
 import '../../../saved_cards/domain/usecases/save_saved_card.dart';
-import '../../../saved_cards/presentation/cubit/saved_cards_cubit.dart';
 import '../../../saved_cards/presentation/pages/saved_card_detail_page.dart';
 import '../../../network_graph/domain/entities/graph_scope.dart';
 import '../../../network_graph/domain/usecases/get_network_graph.dart';
@@ -28,7 +26,8 @@ import '../../domain/usecases/delete_event_group.dart';
 import '../../domain/usecases/update_event_group.dart';
 import '../../domain/usecases/invite_event_group_cards_by_card_id.dart';
 import '../../../saved_cards/domain/usecases/link_saved_cards_to_event_group.dart';
-import '../widgets/event_group_info_banner.dart';
+import '../widgets/event_group_detail_header.dart';
+import '../widgets/event_group_detail_loading_shimmer.dart';
 import '../widgets/pick_saved_cards_for_group_sheet.dart';
 import '../widgets/edit_event_group_sheet.dart';
 import '../widgets/invite_event_group_cards_sheet.dart';
@@ -48,6 +47,7 @@ class EventGroupDetailPage extends StatefulWidget {
     required this.deleteSavedCard,
     this.getNetworkGraph,
     this.getNetworkGraphPath,
+    this.onSavedCardsChanged,
   });
 
   final EventGroup group;
@@ -61,6 +61,7 @@ class EventGroupDetailPage extends StatefulWidget {
   final DeleteSavedCard deleteSavedCard;
   final GetNetworkGraph? getNetworkGraph;
   final GetNetworkGraphPath? getNetworkGraphPath;
+  final Future<void> Function()? onSavedCardsChanged;
 
   @override
   State<EventGroupDetailPage> createState() => _EventGroupDetailPageState();
@@ -82,10 +83,21 @@ class _EventGroupDetailPageState extends State<EventGroupDetailPage> {
 
   Future<void> _load() async {
     setState(() => _loading = true);
+    final groups = await widget.getEventGroups();
     final cards = await widget.getSavedCards();
     if (!mounted) return;
+    EventGroup? refreshedGroup;
+    for (final group in groups) {
+      if (group.id == _group.id) {
+        refreshedGroup = group;
+        break;
+      }
+    }
     final allCards = cards;
     setState(() {
+      if (refreshedGroup != null) {
+        _group = refreshedGroup;
+      }
       _linkedCards = allCards
           .where((c) => c.linkedEventGroupIds.contains(_group.id))
           .toList();
@@ -145,6 +157,7 @@ class _EventGroupDetailPageState extends State<EventGroupDetailPage> {
           location: result.location,
           startAt: result.startAt,
           endAt: result.endAt,
+          description: result.description,
           photoFilePath: result.photoFilePath,
           clearPhoto: result.clearPhoto,
         ),
@@ -159,54 +172,26 @@ class _EventGroupDetailPageState extends State<EventGroupDetailPage> {
   }
 
   Future<void> _openInviteByCardId() async {
-    final cardIds = await InviteEventGroupCardsSheet.show(context);
-    if (!mounted || cardIds == null || cardIds.isEmpty) return;
-
-    setState(() => _saving = true);
-    try {
-      final updated = await widget.inviteEventGroupCardsByCardId(
+    final result = await InviteEventGroupCardsSheet.show(
+      context,
+      onSendInvites: (cardIds) => widget.inviteEventGroupCardsByCardId(
         groupId: _group.id,
         cardIds: cardIds,
-      );
-      if (!mounted) return;
+      ),
+    );
+    if (!mounted || result == null) return;
 
-      final validCount = cardIds.length - updated.invalidCardIds.length;
-      if (validCount > 0) {
-        await context.read<SavedCardsCubit>().refreshAll();
-        await _load();
-      }
-
-      if (!mounted) return;
-      setState(() => _group = updated);
-
-      final l10n = context.l10n;
-      final messages = <String>[];
-      if (validCount > 0) {
-        messages.add(AppL10n.eventCardsInvitedMessage(l10n, validCount));
-      }
-      if (updated.invalidCardIds.isNotEmpty) {
-        messages.add(
-          AppL10n.eventInvalidCardIdsMessage(
-            l10n,
-            updated.invalidCardIds.length,
-          ),
-        );
-      }
-      if (messages.isEmpty) {
-        messages.add(l10n.invalidCardId);
-      }
-
-          } on AuthApiException {
-      if (!mounted) return;
-      } finally {
-      if (mounted) setState(() => _saving = false);
+    if (result.invitedCount > 0) {
+      await widget.onSavedCardsChanged?.call();
+      await _load();
     }
+
+    setState(() => _group = result.group);
   }
 
   Future<void> _openAddCardsPicker() async {
     if (_availableToAdd.isEmpty) {
-      final l10n = context.l10n;
-            return;
+      return;
     }
 
     final selectedIds = await PickSavedCardsForGroupSheet.show(
@@ -224,7 +209,6 @@ class _EventGroupDetailPageState extends State<EventGroupDetailPage> {
       allCards: allCards,
       cardIdsToAdd: selectedIds.toList(),
     );
-    final addedCount = selectedIds.length;
     await widget.getSavedCards();
 
     if (!mounted) return;
@@ -391,101 +375,122 @@ class _EventGroupDetailPageState extends State<EventGroupDetailPage> {
     );
   }
 
-  Widget _buildBodyContent(
+  Widget _buildScrollBody(
     BuildContext context,
     ColorScheme colorScheme,
     TextTheme textTheme,
   ) {
     final bottomInset = _deleteBarInset(context);
+    final coverHeight = eventGroupDetailCoverHeight(context);
+    final coverSpacerHeight =
+        coverHeight - eventGroupDetailCoverOverlap;
 
-    if (_linkedCards.isEmpty) {
-      return SingleChildScrollView(
-        padding: EdgeInsets.fromLTRB(0, 0, 0, bottomInset),
-        child: Column(
-          children: [
-            EventGroupInfoBanner(group: _group),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(24, 24, 24, 0),
-              child: ConstrainedBox(
-                constraints: BoxConstraints(
-                  minHeight: MediaQuery.sizeOf(context).height -
-                      (MediaQuery.paddingOf(context).top + kToolbarHeight) -
-                      bottomInset -
-                      120,
-                ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.credit_card_off_rounded,
-                      size: 64,
-                      color:
-                          colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      AppL10n.buGruptaKartYok(context.l10n),
-                      style: textTheme.titleMedium?.copyWith(
-                        color: colorScheme.onSurfaceVariant,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      AppL10n.kaydedilenKartlarnzdanSeerekBuGruba(context.l10n),
-                      style: textTheme.bodySmall?.copyWith(
-                        color: colorScheme.onSurfaceVariant,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 24),
-                    CustomButton(
-                      label: AppL10n.kartEkle(context.l10n),
-                      icon: Icons.add_rounded,
-                      onPressed:
-                          _availableToAdd.isEmpty ? null : _openAddCardsPicker,
-                      fullWidth: false,
-                      style: FilledButton.styleFrom(
-                        backgroundColor: AppColors.primary,
-                        foregroundColor: AppColors.textOnPrimary,
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 20, vertical: 14),
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    CustomButton.tonal(
-                      label: context.l10n.eventInviteByCardId,
-                      icon: Icons.badge_outlined,
-                      onPressed: _openInviteByCardId,
-                      fullWidth: false,
-                    ),
-                  ],
-                ),
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        Positioned(
+          top: 0,
+          left: 0,
+          right: 0,
+          height: coverHeight,
+          child: EventGroupDetailCover(group: _group),
+        ),
+        CustomScrollView(
+          slivers: [
+            SliverToBoxAdapter(
+              child: SizedBox(height: coverSpacerHeight),
+            ),
+            SliverToBoxAdapter(
+              child: EventGroupDetailInfoSection(
+                group: _group,
+                linkedCardCount: _linkedCards.length,
               ),
             ),
+            if (_linkedCards.isEmpty)
+              SliverFillRemaining(
+                hasScrollBody: false,
+                child: Padding(
+                  padding: EdgeInsets.fromLTRB(24, 24, 24, bottomInset),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.credit_card_off_rounded,
+                        size: 64,
+                        color: colorScheme.onSurfaceVariant
+                            .withValues(alpha: 0.5),
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        AppL10n.buGruptaKartYok(context.l10n),
+                        style: textTheme.titleMedium?.copyWith(
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        AppL10n.kaydedilenKartlarnzdanSeerekBuGruba(
+                          context.l10n,
+                        ),
+                        style: textTheme.bodySmall?.copyWith(
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 24),
+                      CustomButton(
+                        label: AppL10n.kartEkle(context.l10n),
+                        icon: Icons.add_rounded,
+                        onPressed: _availableToAdd.isEmpty
+                            ? null
+                            : _openAddCardsPicker,
+                        fullWidth: false,
+                        style: FilledButton.styleFrom(
+                          backgroundColor: AppColors.primary,
+                          foregroundColor: AppColors.textOnPrimary,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 20,
+                            vertical: 14,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      CustomButton.tonal(
+                        label: context.l10n.eventInviteByCardId,
+                        icon: Icons.badge_outlined,
+                        onPressed: _openInviteByCardId,
+                        fullWidth: false,
+                      ),
+                    ],
+                  ),
+                ),
+              )
+            else
+              SliverPadding(
+                padding: EdgeInsets.fromLTRB(20, 20, 20, bottomInset),
+                sliver: SliverList(
+                  delegate: SliverChildBuilderDelegate(
+                    (context, index) {
+                      final card = _linkedCards[index];
+                      return Padding(
+                        padding: EdgeInsets.only(
+                          bottom: index == _linkedCards.length - 1 ? 0 : 20,
+                        ),
+                        child: _SavedCardPreviewTile(
+                          card: card,
+                          onTap: () => _openCardDetail(card),
+                          onAddNote: () => _openAddNoteModal(card),
+                        ),
+                      );
+                    },
+                    childCount: _linkedCards.length,
+                  ),
+                ),
+              ),
           ],
         ),
-      );
-    }
-
-    return ListView.builder(
-      padding: EdgeInsets.fromLTRB(0, 0, 0, bottomInset),
-      itemCount: _linkedCards.length + 1,
-      itemBuilder: (context, index) {
-        if (index == 0) {
-          return EventGroupInfoBanner(group: _group);
-        }
-
-        final card = _linkedCards[index - 1];
-        return Padding(
-          padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
-          child: _SavedCardPreviewTile(
-            card: card,
-            onTap: () => _openCardDetail(card),
-            onAddNote: () => _openAddNoteModal(card),
-          ),
-        );
-      },
+      ],
     );
   }
 
@@ -524,20 +529,27 @@ class _EventGroupDetailPageState extends State<EventGroupDetailPage> {
             ),
         ],
       ),
-      body: _loading || _saving
-          ? const Center(child: CircularProgressIndicator())
-          : Stack(
-              fit: StackFit.expand,
-              children: [
-                _buildBodyContent(context, colorScheme, textTheme),
-                Positioned(
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  child: _buildStickyDeleteBar(context),
-                ),
-              ],
+      body: Stack(
+        fit: StackFit.expand,
+        children: [
+          if (_loading)
+            const EventGroupDetailLoadingShimmer()
+          else ...[
+            _buildScrollBody(context, colorScheme, textTheme),
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: 0,
+              child: _buildStickyDeleteBar(context),
             ),
+          ],
+          if (_saving)
+            ColoredBox(
+              color: colorScheme.surface.withValues(alpha: 0.55),
+              child: const Center(child: CircularProgressIndicator()),
+            ),
+        ],
+      ),
     );
   }
 }

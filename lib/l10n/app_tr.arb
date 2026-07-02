@@ -184,6 +184,7 @@
   "kartBilgisiYokDzenleIle": "Kart bilgisi yok — düzenle ile ekleyin",
   "kartBulunamad": "Kart bulunamadı.",
   "kartCzdanaEklenemedi": "Kart cüzdana eklenemedi.",
+  "addCardByIdSending": "Kart cüzdana ekleniyor…",
   "kartCzdandanSil": "Kartı cüzdandan sil",
   "kartCzdannzaEklendi": "Kart cüzdanınıza eklendi",
   "kartEkle": "Kart ekle",
@@ -290,6 +291,7 @@
   "metinOkunamadBilgileriManuelDzenleyerek": "Metin okunamadı. Bilgileri manuel düzenleyerek kaydedebilirsiniz.",
   "metinRengi": "METİN RENGİ",
   "metinRengi2": "Metin rengi",
+  "rastgeleRenk": "Rastgele renk",
   "mobileEngineer": "Mobile Engineer",
   "motionDesigner": "Motion Designer",
   "msg1HizmetinKapsam": "1. Hizmetin kapsamı",
@@ -406,6 +408,7 @@
   "uygula": "Uygula",
   "uygulamaDiliniSein": "Uygulama dilini seçin",
   "uygulamaTemasnSein": "Uygulama temasını seçin",
+  "uygulamaRengi": "Uygulama rengi",
   "webSitesi": "Web sitesi",
   "webSitesiHttps": "Web sitesi (https://...)",
   "webSosyal": "Web & Sosyal",
@@ -425,6 +428,30 @@
   "zelAralk": "Özel aralık",
   "zelKartRengi": "Özel kart rengi",
   "zelMetinRengi": "Özel metin rengi",
+  "kartEfekti": "Kart efekti",
+  "efektYok": "Yok",
+  "efektYildiz": "Yıldız",
+  "efektParlama": "Parlama",
+  "efektShimmer": "Shimmer",
+  "efektNeon": "Neon",
+  "efektIsilti": "Işıltı",
+  "efektAurora": "Aurora",
+  "efektNabiz": "Nabız",
+  "efektHolografik": "Holografik",
+  "efektYagmur": "Yağmur",
+  "efektKar": "Kar",
+  "efektAtes": "Ateş",
+  "efektKonfeti": "Konfeti",
+  "efektKozmik": "Kozmik",
+  "efektDalga": "Dalga",
+  "efektElmas": "Elmas",
+  "efektGunbatimi": "Gün batımı",
+  "efektBuz": "Buz",
+  "efektMatrix": "Matrix",
+  "kartEfektleriDeneyinKayitPro": "Efektleri deneyebilirsiniz; kaydetmek için Pro gerekir.",
+  "seciliKartEfektiProGerekli": "Seçili efekt Pro gerektirir. Kartınızı oluşturmak için efekti kaldırın veya Pro'ya geçin.",
+  "efektKayitProGerekli": "Efekti kaydetmek için Pro gerekir. Kart efektsiz kaydedildi.",
+  "pro": "Pro",
   "zelliknerisi": "Özellik önerisi",
   "sessionNotFoundLogin": "Oturum bulunamadı. Lütfen tekrar giriş yapın.",
   "sessionNotFound": "Oturum bulunamadı.",
@@ -621,6 +648,19 @@
   "eventLocationRegionRequired": "Ülke ve il/ilçe seçimi gereklidir.",
   "eventCreateStartSubtitle": "Başlangıç tarihi ve saatini seçin.",
   "eventCreateScheduleSubtitle": "Başlangıç tarih ve saatini seçin; isterseniz bitiş de ekleyin.",
+  "eventCreateDetailsSubtitle": "Gündem, kıyafet kodu veya diğer detayları paylaşın. Atlayabilirsiniz.",
+  "eventDescription": "Etkinlik hakkında",
+  "eventDescriptionHint": "Gündem, konuşmacılar, kıyafet kodu, park bilgisi…",
+  "eventDescriptionTooLong": "Açıklama en fazla 2000 karakter olabilir.",
+  "eventAboutSection": "Hakkında",
+  "eventLinkedCardsSection": "Bağlı kartlar ({count})",
+  "@eventLinkedCardsSection": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "eventCreateEndSubtitle": "İsterseniz bitiş tarihi ve saatini belirleyin. Atlayabilirsiniz.",
   "eventCreatePhotoSubtitle": "Listede görünecek bir kapak fotoğrafı ekleyin. Atlayabilirsiniz.",
   "eventSkip": "Atla",
@@ -632,9 +672,31 @@
   "eventStart": "Başlangıç",
   "eventEndOptional": "Bitiş (opsiyonel)",
   "eventPickTime": "Saat seç",
+  "eventScheduleStartHelper": "Katılımcılar etkinliğin bu tarih ve saatte başlayacağını görür.",
+  "eventScheduleEndHelper": "Bitiş eklemek zorunlu değildir; etkinlik süresini netleştirmek isterseniz doldurun.",
+  "eventScheduleDateField": "Tarih",
+  "eventScheduleTimeField": "Saat",
+  "eventSchedulePlannedStart": "Planlanan başlangıç",
+  "eventSchedulePlannedRange": "Planlanan süre",
+  "eventScheduleRequired": "Zorunlu",
   "eventInviteByCardId": "Card ID ile davet et",
   "eventActiveSection": "Devam eden / Yaklaşan",
-  "eventInvitationTitle": "Bir etkinliğe davetlisiniz",
+  "eventInvitationTitle": "\"{eventName}\" etkinliğine davetlisiniz",
+  "@eventInvitationTitle": {
+    "placeholders": {
+      "eventName": {
+        "type": "String"
+      }
+    }
+  },
+  "eventInvitationInvitedBy": "{inviterName} sizi davet etti",
+  "@eventInvitationInvitedBy": {
+    "placeholders": {
+      "inviterName": {
+        "type": "String"
+      }
+    }
+  },
   "eventInvitationMessage": "{inviterName} sizi \"{eventName}\" etkinliğine davet etti",
   "@eventInvitationMessage": {
     "placeholders": {
@@ -654,8 +716,19 @@
       }
     }
   },
-  "eventInvitationAccept": "Kabul et",
+  "eventInvitationAccept": "Katıl",
+  "eventInvitationAcceptHint": "Kartınız bu etkinliğe bağlanır",
   "eventInvitationReject": "Reddet",
+  "eventInvitationRejectHint": "Davet listenizden kaldırılır",
+  "eventInvitationResponsePrompt": "Bu davete nasıl yanıt vermek istersiniz?",
+  "eventInvitationDaysRemaining": "{count, plural, =0{Bugün başlıyor} =1{1 gün kaldı} other{{count} gün kaldı}}",
+  "@eventInvitationDaysRemaining": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "eventInvitationAccepted": "Davet kabul edildi",
   "eventInvitationRejected": "Davet reddedildi",
   "eventInvitationsSection": "Davetler",
@@ -675,6 +748,9 @@
   "eventInviteCardsTitle": "Card ID ile kart davet et",
   "eventInviteCardsSubtitle": "Card ID girerek bu etkinliğe kart ekleyin. Geçersiz ID'ler raporlanır.",
   "eventSendInvites": "Davet gönder",
+  "eventSendingInvites": "Davetler gönderiliyor…",
+  "eventInvitesSentSuccess": "Davetler başarıyla gönderildi",
+  "eventInviteSendFailed": "Davetler gönderilemedi. Lütfen tekrar deneyin.",
   "eventCardIdHint": "Örn. 123456",
   "eventInvitedCardIdsCount": "{count} Card ID eklendi",
   "@eventInvitedCardIdsCount": {

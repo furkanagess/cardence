@@ -1,39 +1,40 @@
 import 'package:flutter/material.dart';
 
+import 'app_accent_palette.dart';
+
 /// Cardence kurumsal renk paleti.
-/// Dijital kartvizit ve resmi iletişim bağlamında: lacivert + nötr gri,
-/// sakin kontrast ve okunabilirlik.
+/// Vurgu renkleri [AppAccentPalette] üzerinden dinamik; nötr ve semantik tonlar sabit.
 class AppColors {
   AppColors._();
 
-  // --- Primary (kurumsal lacivert) ---
-  static const Color primary = Color(0xFF1B365D);
-  static const Color primaryDark = Color(0xFF122640);
-  static const Color primaryLight = Color(0xFF2E4A73);
-
-  // --- Primary container (yumuşak mavi-gri ton) ---
-  static const Color primaryContainer = Color(0xFFD6DEE8);
-  static const Color onPrimaryContainer = Color(0xFF1B365D);
-  static const Color primaryContainerDark = Color(0xFF243548);
-  static const Color onPrimaryContainerDark = Color(0xFFD6DEE8);
+  // --- Primary (seçilebilir vurgu) ---
+  static Color get primary => AppAccentPalette.selected.primary;
+  static Color get primaryDark => AppAccentPalette.selected.primaryDark;
+  static Color get primaryLight => AppAccentPalette.selected.primaryLight;
+  static Color get primaryContainer => AppAccentPalette.selected.primaryContainer;
+  static Color get onPrimaryContainer => AppAccentPalette.selected.onPrimaryContainer;
+  static Color get primaryContainerDark =>
+      AppAccentPalette.selected.primaryContainerDark;
+  static Color get onPrimaryContainerDark =>
+      AppAccentPalette.selected.onPrimaryContainerDark;
+  static Color get primaryDarkTheme => AppAccentPalette.selected.primaryDarkTheme;
 
   // --- Secondary (nötr kurumsal gri) ---
   static const Color secondary = Color(0xFF4A5568);
   static const Color secondaryLight = Color(0xFF718096);
 
   // --- Background & Surface (light) ---
-  static const Color backgroundLight = Color(0xFFF4F5F7);
+  static const Color backgroundLight = Color(0xFFF4F6F8);
   static const Color surfaceLight = Color(0xFFFFFFFF);
-  static const Color surfaceVariant = Color(0xFFE8EBF0);
-  static const Color outline = Color(0xFFB8C0CC);
-  static const Color outlineVariant = Color(0xFFDDE2E9);
+  static const Color surfaceVariant = Color(0xFFE6EBF0);
+  static const Color outline = Color(0xFFB5BEC8);
+  static const Color outlineVariant = Color(0xFFD8DEE6);
 
   // --- Dark theme ---
   static const Color backgroundDark = Color(0xFF0F1419);
   static const Color surfaceDark = Color(0xFF1A2028);
   static const Color surfaceVariantDark = Color(0xFF28303A);
   static const Color outlineDark = Color(0xFF4A5568);
-  static const Color primaryDarkTheme = Color(0xFF8FA8C4);
 
   // --- Text (light) ---
   static const Color textPrimary = Color(0xFF1C2430);
@@ -49,25 +50,25 @@ class AppColors {
   static const Color success = Color(0xFF1F6B4F);
   static const Color error = Color(0xFFB42318);
   static const Color warning = Color(0xFFB54708);
-  static const Color info = Color(0xFF1E4A6E);
+  static Color get info => AppAccentPalette.selected.primary;
 
   // --- Onboarding ---
-  static const Color onboardingBackground = Color(0xFFF4F5F7);
-  static const Color onboardingAccent = primary;
+  static const Color onboardingBackground = Color(0xFFF4F6F8);
+  static Color get onboardingAccent => AppAccentPalette.selected.primary;
 
   // --- Marka (sosyal giriş) ---
   static const Color linkedInBrand = Color(0xFF0A66C2);
 
   // --- Network graph kenar (edge) renkleri ---
-  static const Color graphEdgeOwns = Color(0xFF1B365D); // primary - sahiplik
-  static const Color graphEdgeSaved = Color(0xFF2E7D9A); // teal - senin kaydettiğin
-  static const Color graphEdgeSavedBy = Color(0xFF1F6B4F); // yeşil - seni kaydeden
-  static const Color graphEdgeEvent = Color(0xFF7A5AF8); // mor - etkinlik
-  static const Color graphEdgeCompany = Color(0xFF8A93A6); // gri - şirket
-  static const Color graphEdgeNeutral = Color(0xFFB8C0CC); // nötr varsayılan
+  static Color get graphEdgeOwns => AppAccentPalette.selected.primary;
+  static const Color graphEdgeSaved = Color(0xFF2E7D9A);
+  static const Color graphEdgeSavedBy = Color(0xFF1F6B4F);
+  static const Color graphEdgeEvent = Color(0xFF7A5AF8);
+  static const Color graphEdgeCompany = Color(0xFF8A93A6);
+  static const Color graphEdgeNeutral = Color(0xFFB5BEC8);
 
   // --- Network graph düğüm (node) accent renkleri ---
-  static const Color graphCompanyNodeLight = Color(0xFFE8EDF4);
+  static const Color graphCompanyNodeLight = Color(0xFFE6EEF2);
   static const Color graphCompanyNodeDark = Color(0xFF2A3340);
   static const Color graphEventNodeLight = Color(0xFFEAE4FD);
   static const Color graphEventNodeDark = Color(0xFF2E2747);

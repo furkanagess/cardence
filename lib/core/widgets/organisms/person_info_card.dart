@@ -1124,7 +1124,12 @@ class _CompactBusinessCardFace extends StatelessWidget {
     String? jobTitle,
     String? company,
   }) {
-    final hasText = hasTitle || company != null || jobTitle != null;
+    final role = jobTitle?.trim();
+    final org = company?.trim();
+    final hasRole = role != null && role.isNotEmpty;
+    final hasOrg = org != null && org.isNotEmpty;
+    final hasText = hasTitle || hasRole || hasOrg;
+    final hasSubtitle = hasRole || hasOrg;
 
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1134,26 +1139,11 @@ class _CompactBusinessCardFace extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                if (hasTitle || company != null)
-                  _buildNameCompanyLine(textTheme,
-                      hasTitle: hasTitle, company: company),
-                if (jobTitle != null) ...[
-                  const SizedBox(height: 12),
-                  Text(
-                    jobTitle,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: textTheme.bodyMedium?.copyWith(
-                      fontSize: 14,
-                      color: Color.alphaBlend(
-                        onSurface.withValues(alpha: 0.88),
-                        backgroundColor,
-                      ),
-                      fontWeight: FontWeight.w500,
-                      height: 1.25,
-                    ),
-                  ),
-                ],
+                if (hasTitle) _buildNameLine(textTheme),
+                if (hasTitle && hasSubtitle) const SizedBox(height: 5),
+                if (hasRole) _buildJobTitleLine(textTheme, role),
+                if (hasRole && hasOrg) const SizedBox(height: 3),
+                if (hasOrg) _buildCompanyLine(textTheme, org),
               ],
             ),
           ),
@@ -1163,45 +1153,50 @@ class _CompactBusinessCardFace extends StatelessWidget {
     );
   }
 
-  Widget _buildNameCompanyLine(
-    TextTheme textTheme, {
-    required bool hasTitle,
-    String? company,
-  }) {
-    final nameStyle = textTheme.titleLarge?.copyWith(
-      fontSize: 22,
-      fontWeight: FontWeight.w700,
-      color: onSurface,
-      letterSpacing: -0.2,
-      height: 1.15,
-    );
-    final companyStyle = textTheme.labelSmall?.copyWith(
-      fontSize: 12,
-      color: onSurfaceVariant,
-      fontWeight: FontWeight.w600,
-      letterSpacing: 0.65,
-      height: 1.25,
-    );
-    final bulletStyle = nameStyle?.copyWith(
-      fontWeight: FontWeight.w500,
-      color: onSurfaceVariant.withValues(alpha: 0.85),
-    );
-
-    final spans = <InlineSpan>[];
-    if (hasTitle) {
-      spans.add(TextSpan(text: title!, style: nameStyle));
-    }
-    if (company != null) {
-      if (spans.isNotEmpty) {
-        spans.add(TextSpan(text: ' • ', style: bulletStyle));
-      }
-      spans.add(TextSpan(text: company.toUpperCase(), style: companyStyle));
-    }
-
-    return Text.rich(
-      TextSpan(children: spans),
-      maxLines: 2,
+  Widget _buildJobTitleLine(TextTheme textTheme, String jobTitle) {
+    return Text(
+      jobTitle,
+      maxLines: 1,
       overflow: TextOverflow.ellipsis,
+      style: textTheme.bodyMedium?.copyWith(
+        fontSize: 14,
+        color: Color.alphaBlend(
+          onSurface.withValues(alpha: 0.9),
+          backgroundColor,
+        ),
+        fontWeight: FontWeight.w600,
+        height: 1.25,
+      ),
+    );
+  }
+
+  Widget _buildCompanyLine(TextTheme textTheme, String company) {
+    return Text(
+      company.toUpperCase(),
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+      style: textTheme.labelSmall?.copyWith(
+        fontSize: 11,
+        color: onSurfaceVariant,
+        fontWeight: FontWeight.w700,
+        letterSpacing: 0.8,
+        height: 1.15,
+      ),
+    );
+  }
+
+  Widget _buildNameLine(TextTheme textTheme) {
+    return Text(
+      title!,
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+      style: textTheme.titleLarge?.copyWith(
+        fontSize: 22,
+        fontWeight: FontWeight.w700,
+        color: onSurface,
+        letterSpacing: -0.2,
+        height: 1.12,
+      ),
     );
   }
 

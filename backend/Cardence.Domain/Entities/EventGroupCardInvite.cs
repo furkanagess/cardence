@@ -10,6 +10,7 @@ public sealed class EventGroupCardInvite
     public string CardId { get; set; } = string.Empty;
     public string Status { get; set; } = string.Empty;
     public DateTime CreatedAtUtc { get; set; }
+    public DateTime ExpiresAtUtc { get; set; }
     public DateTime? RespondedAtUtc { get; set; }
 
     public EventGroup EventGroup { get; set; } = null!;

@@ -1,5 +1,6 @@
 import '../../../onboarding/domain/entities/onboarding_card_draft.dart';
 import '../entities/business_card.dart';
+import '../../../../core/domain/card_visual_effect.dart';
 
 class OnboardingDraftMapper {
   OnboardingDraftMapper._();
@@ -36,6 +37,7 @@ class OnboardingDraftMapper {
       photoUrl: _trimOrNull(draft.photoUrl),
       accentColor: draft.accentColor,
       backgroundColor: draft.backgroundColor,
+      cardEffect: draft.cardEffect.storageKey,
       cardId: draft.cardId?.trim(),
     );
   }

@@ -5,6 +5,7 @@ class EventGroupCreateInput {
     required this.location,
     required this.startAt,
     this.endAt,
+    this.description,
     this.photoFilePath,
     this.invitedCardIds = const [],
   });
@@ -13,6 +14,7 @@ class EventGroupCreateInput {
   final String location;
   final DateTime startAt;
   final DateTime? endAt;
+  final String? description;
   final String? photoFilePath;
   final List<String> invitedCardIds;
 }

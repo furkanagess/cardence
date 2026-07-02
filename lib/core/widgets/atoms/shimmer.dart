@@ -127,8 +127,9 @@ class ShimmerPlaceholder extends StatelessWidget {
       decoration: BoxDecoration(
         color: fill,
         shape: shape,
-        borderRadius:
-            shape == BoxShape.circle ? null : BorderRadius.circular(borderRadius),
+        borderRadius: shape == BoxShape.circle
+            ? null
+            : BorderRadius.circular(borderRadius),
       ),
     );
   }

@@ -109,6 +109,7 @@ class _MyCardItem extends StatelessWidget {
       draft: draft,
       l10n: context.l10n,
       emptyMessage: context.l10n.kartBilgisiYok,
+      gatePremiumEffects: true,
       onDoubleTap: () {
         Navigator.of(context).push(
           MaterialPageRoute<void>(

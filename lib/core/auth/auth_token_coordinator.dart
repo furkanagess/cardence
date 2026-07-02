@@ -132,17 +132,33 @@ class AuthTokenCoordinator {
     return session;
   }
 
+  Future<bool> hasStoredSession() async {
+    if (_sessionInvalid) return false;
+
+    final session = await _local.getSession();
+    if (session == null) return false;
+
+    final hasAccessToken = session.accessToken.isNotEmpty;
+    final hasRefreshToken = session.refreshToken?.isNotEmpty ?? false;
+    return hasAccessToken || hasRefreshToken;
+  }
+
   Future<void> invalidateSession({bool showDialog = true}) async {
     if (_sessionInvalid && !showDialog) return;
-    _sessionInvalid = true;
-    await _onSessionCleared?.call();
-    if (showDialog) {
+
+    final hadSession = await hasStoredSession();
+
+    if (showDialog && hadSession) {
       SessionExpiredHandler.instance.handleIfNeeded(
         AuthApiException(
           'Oturum süresi doldu. Lütfen tekrar giriş yapın.',
           statusCode: 401,
         ),
+        trustCallerHadSession: true,
       );
     }
+
+    _sessionInvalid = true;
+    await _onSessionCleared?.call();
   }
 }

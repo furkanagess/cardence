@@ -12,7 +12,7 @@ class OnboardingDraftSeeder {
         backVisibleFields: List<String>.from(
           OnboardingCardDraft.defaultBackVisibleFields,
         ),
-        backgroundColor: '#1B365D',
+        backgroundColor: '#0F5C6E',
         accentColor: '#FFFFFF',
       );
 

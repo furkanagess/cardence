@@ -29,6 +29,7 @@ public static class BusinessCardMapper
         PhotoUrl = entity.PhotoUrl,
         AccentColor = entity.AccentColor,
         BackgroundColor = entity.BackgroundColor,
+        CardEffect = entity.CardEffect,
         LinkedEventGroupIds = [],
         CardId = entity.CardId,
         IsOwnerPremium = entity.IsOwnerPremium,
@@ -58,6 +59,7 @@ public static class BusinessCardMapper
         entity.PhotoUrl = dto.PhotoUrl;
         entity.AccentColor = dto.AccentColor;
         entity.BackgroundColor = dto.BackgroundColor;
+        entity.CardEffect = dto.CardEffect;
         entity.UpdatedAt = DateTime.UtcNow;
     }
 

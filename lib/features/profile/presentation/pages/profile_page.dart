@@ -399,6 +399,7 @@ class _ProfileCardsCarousel extends StatelessWidget {
                   emptyMessage: context.l10n.alanlarDoldukaGrnr,
                   normalizeForDisplay: true,
                   showPremiumBadge: showPremiumBadge,
+                  gatePremiumEffects: true,
                 ),
               ),
             ),
@@ -450,6 +451,7 @@ class _ProfileCardsCarousel extends StatelessWidget {
                     emptyMessage: context.l10n.alanlarDoldukaGrnr,
                     normalizeForDisplay: true,
                     showPremiumBadge: showPremiumBadge,
+                    gatePremiumEffects: true,
                   ),
                 ),
               );

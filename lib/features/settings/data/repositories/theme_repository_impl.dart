@@ -1,6 +1,7 @@
 import '../../domain/entities/theme_preference.dart';
 import '../../domain/repositories/theme_repository.dart';
 import '../datasources/theme_local_datasource.dart';
+import '../../../../core/theme/app_accent_palette.dart';
 
 class ThemeRepositoryImpl implements ThemeRepository {
   ThemeRepositoryImpl(this._dataSource);
@@ -38,5 +39,17 @@ class ThemeRepositoryImpl implements ThemeRepository {
   @override
   Future<void> setThemePreference(ThemePreference preference) async {
     await _dataSource.setThemePreference(_toString(preference));
+  }
+
+  @override
+  Future<String> getAccentColorId() async {
+    final id = await _dataSource.getAccentColorId();
+    return AppAccentPalette.byId(id).id;
+  }
+
+  @override
+  Future<void> setAccentColorId(String accentColorId) async {
+    final resolved = AppAccentPalette.byId(accentColorId).id;
+    await _dataSource.setAccentColorId(resolved);
   }
 }

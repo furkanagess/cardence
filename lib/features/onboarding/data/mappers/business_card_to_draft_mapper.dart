@@ -1,6 +1,7 @@
 import '../../../business_cards/domain/entities/business_card.dart';
 import '../../domain/entities/onboarding_card_draft.dart';
 import '../../../my_cards/presentation/card_customize_colors.dart';
+import '../../../../core/domain/card_visual_effect.dart';
 
 class BusinessCardToDraftMapper {
   BusinessCardToDraftMapper._();
@@ -41,6 +42,7 @@ class BusinessCardToDraftMapper {
       photoUrl: card.photoUrl,
       accentColor: card.accentColor,
       backgroundColor: card.backgroundColor,
+      cardEffect: CardVisualEffect.fromStorage(card.cardEffect),
       lastUsedPaletteBackgroundColor:
           _localLastUsedPaletteBackground(card.backgroundColor),
       cardId: card.cardId,

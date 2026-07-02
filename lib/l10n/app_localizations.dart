@@ -1202,6 +1202,12 @@ abstract class AppLocalizations {
   /// **'Kart cüzdana eklenemedi.'**
   String get kartCzdanaEklenemedi;
 
+  /// No description provided for @addCardByIdSending.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kart cüzdana ekleniyor…'**
+  String get addCardByIdSending;
+
   /// No description provided for @kartCzdandanSil.
   ///
   /// In tr, this message translates to:
@@ -1837,6 +1843,12 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Metin rengi'**
   String get metinRengi2;
+
+  /// No description provided for @rastgeleRenk.
+  ///
+  /// In tr, this message translates to:
+  /// **'Rastgele renk'**
+  String get rastgeleRenk;
 
   /// No description provided for @mobileEngineer.
   ///
@@ -2534,6 +2546,12 @@ abstract class AppLocalizations {
   /// **'Uygulama temasını seçin'**
   String get uygulamaTemasnSein;
 
+  /// No description provided for @uygulamaRengi.
+  ///
+  /// In tr, this message translates to:
+  /// **'Uygulama rengi'**
+  String get uygulamaRengi;
+
   /// No description provided for @webSitesi.
   ///
   /// In tr, this message translates to:
@@ -2647,6 +2665,150 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Özel metin rengi'**
   String get zelMetinRengi;
+
+  /// No description provided for @kartEfekti.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kart efekti'**
+  String get kartEfekti;
+
+  /// No description provided for @efektYok.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yok'**
+  String get efektYok;
+
+  /// No description provided for @efektYildiz.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yıldız'**
+  String get efektYildiz;
+
+  /// No description provided for @efektParlama.
+  ///
+  /// In tr, this message translates to:
+  /// **'Parlama'**
+  String get efektParlama;
+
+  /// No description provided for @efektShimmer.
+  ///
+  /// In tr, this message translates to:
+  /// **'Shimmer'**
+  String get efektShimmer;
+
+  /// No description provided for @efektNeon.
+  ///
+  /// In tr, this message translates to:
+  /// **'Neon'**
+  String get efektNeon;
+
+  /// No description provided for @efektIsilti.
+  ///
+  /// In tr, this message translates to:
+  /// **'Işıltı'**
+  String get efektIsilti;
+
+  /// No description provided for @efektAurora.
+  ///
+  /// In tr, this message translates to:
+  /// **'Aurora'**
+  String get efektAurora;
+
+  /// No description provided for @efektNabiz.
+  ///
+  /// In tr, this message translates to:
+  /// **'Nabız'**
+  String get efektNabiz;
+
+  /// No description provided for @efektHolografik.
+  ///
+  /// In tr, this message translates to:
+  /// **'Holografik'**
+  String get efektHolografik;
+
+  /// No description provided for @efektYagmur.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yağmur'**
+  String get efektYagmur;
+
+  /// No description provided for @efektKar.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kar'**
+  String get efektKar;
+
+  /// No description provided for @efektAtes.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ateş'**
+  String get efektAtes;
+
+  /// No description provided for @efektKonfeti.
+  ///
+  /// In tr, this message translates to:
+  /// **'Konfeti'**
+  String get efektKonfeti;
+
+  /// No description provided for @efektKozmik.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kozmik'**
+  String get efektKozmik;
+
+  /// No description provided for @efektDalga.
+  ///
+  /// In tr, this message translates to:
+  /// **'Dalga'**
+  String get efektDalga;
+
+  /// No description provided for @efektElmas.
+  ///
+  /// In tr, this message translates to:
+  /// **'Elmas'**
+  String get efektElmas;
+
+  /// No description provided for @efektGunbatimi.
+  ///
+  /// In tr, this message translates to:
+  /// **'Gün batımı'**
+  String get efektGunbatimi;
+
+  /// No description provided for @efektBuz.
+  ///
+  /// In tr, this message translates to:
+  /// **'Buz'**
+  String get efektBuz;
+
+  /// No description provided for @efektMatrix.
+  ///
+  /// In tr, this message translates to:
+  /// **'Matrix'**
+  String get efektMatrix;
+
+  /// No description provided for @kartEfektleriDeneyinKayitPro.
+  ///
+  /// In tr, this message translates to:
+  /// **'Efektleri deneyebilirsiniz; kaydetmek için Pro gerekir.'**
+  String get kartEfektleriDeneyinKayitPro;
+
+  /// No description provided for @seciliKartEfektiProGerekli.
+  ///
+  /// In tr, this message translates to:
+  /// **'Seçili efekt Pro gerektirir. Kartınızı oluşturmak için efekti kaldırın veya Pro\'ya geçin.'**
+  String get seciliKartEfektiProGerekli;
+
+  /// No description provided for @efektKayitProGerekli.
+  ///
+  /// In tr, this message translates to:
+  /// **'Efekti kaydetmek için Pro gerekir. Kart efektsiz kaydedildi.'**
+  String get efektKayitProGerekli;
+
+  /// No description provided for @pro.
+  ///
+  /// In tr, this message translates to:
+  /// **'Pro'**
+  String get pro;
 
   /// No description provided for @zelliknerisi.
   ///
@@ -3422,6 +3584,42 @@ abstract class AppLocalizations {
   /// **'Başlangıç tarih ve saatini seçin; isterseniz bitiş de ekleyin.'**
   String get eventCreateScheduleSubtitle;
 
+  /// No description provided for @eventCreateDetailsSubtitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Gündem, kıyafet kodu veya diğer detayları paylaşın. Atlayabilirsiniz.'**
+  String get eventCreateDetailsSubtitle;
+
+  /// No description provided for @eventDescription.
+  ///
+  /// In tr, this message translates to:
+  /// **'Etkinlik hakkında'**
+  String get eventDescription;
+
+  /// No description provided for @eventDescriptionHint.
+  ///
+  /// In tr, this message translates to:
+  /// **'Gündem, konuşmacılar, kıyafet kodu, park bilgisi…'**
+  String get eventDescriptionHint;
+
+  /// No description provided for @eventDescriptionTooLong.
+  ///
+  /// In tr, this message translates to:
+  /// **'Açıklama en fazla 2000 karakter olabilir.'**
+  String get eventDescriptionTooLong;
+
+  /// No description provided for @eventAboutSection.
+  ///
+  /// In tr, this message translates to:
+  /// **'Hakkında'**
+  String get eventAboutSection;
+
+  /// No description provided for @eventLinkedCardsSection.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bağlı kartlar ({count})'**
+  String eventLinkedCardsSection(int count);
+
   /// No description provided for @eventCreateEndSubtitle.
   ///
   /// In tr, this message translates to:
@@ -3488,6 +3686,48 @@ abstract class AppLocalizations {
   /// **'Saat seç'**
   String get eventPickTime;
 
+  /// No description provided for @eventScheduleStartHelper.
+  ///
+  /// In tr, this message translates to:
+  /// **'Katılımcılar etkinliğin bu tarih ve saatte başlayacağını görür.'**
+  String get eventScheduleStartHelper;
+
+  /// No description provided for @eventScheduleEndHelper.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bitiş eklemek zorunlu değildir; etkinlik süresini netleştirmek isterseniz doldurun.'**
+  String get eventScheduleEndHelper;
+
+  /// No description provided for @eventScheduleDateField.
+  ///
+  /// In tr, this message translates to:
+  /// **'Tarih'**
+  String get eventScheduleDateField;
+
+  /// No description provided for @eventScheduleTimeField.
+  ///
+  /// In tr, this message translates to:
+  /// **'Saat'**
+  String get eventScheduleTimeField;
+
+  /// No description provided for @eventSchedulePlannedStart.
+  ///
+  /// In tr, this message translates to:
+  /// **'Planlanan başlangıç'**
+  String get eventSchedulePlannedStart;
+
+  /// No description provided for @eventSchedulePlannedRange.
+  ///
+  /// In tr, this message translates to:
+  /// **'Planlanan süre'**
+  String get eventSchedulePlannedRange;
+
+  /// No description provided for @eventScheduleRequired.
+  ///
+  /// In tr, this message translates to:
+  /// **'Zorunlu'**
+  String get eventScheduleRequired;
+
   /// No description provided for @eventInviteByCardId.
   ///
   /// In tr, this message translates to:
@@ -3503,8 +3743,14 @@ abstract class AppLocalizations {
   /// No description provided for @eventInvitationTitle.
   ///
   /// In tr, this message translates to:
-  /// **'Bir etkinliğe davetlisiniz'**
-  String get eventInvitationTitle;
+  /// **'\"{eventName}\" etkinliğine davetlisiniz'**
+  String eventInvitationTitle(String eventName);
+
+  /// No description provided for @eventInvitationInvitedBy.
+  ///
+  /// In tr, this message translates to:
+  /// **'{inviterName} sizi davet etti'**
+  String eventInvitationInvitedBy(String inviterName);
 
   /// No description provided for @eventInvitationMessage.
   ///
@@ -3521,14 +3767,38 @@ abstract class AppLocalizations {
   /// No description provided for @eventInvitationAccept.
   ///
   /// In tr, this message translates to:
-  /// **'Kabul et'**
+  /// **'Katıl'**
   String get eventInvitationAccept;
+
+  /// No description provided for @eventInvitationAcceptHint.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kartınız bu etkinliğe bağlanır'**
+  String get eventInvitationAcceptHint;
 
   /// No description provided for @eventInvitationReject.
   ///
   /// In tr, this message translates to:
   /// **'Reddet'**
   String get eventInvitationReject;
+
+  /// No description provided for @eventInvitationRejectHint.
+  ///
+  /// In tr, this message translates to:
+  /// **'Davet listenizden kaldırılır'**
+  String get eventInvitationRejectHint;
+
+  /// No description provided for @eventInvitationResponsePrompt.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu davete nasıl yanıt vermek istersiniz?'**
+  String get eventInvitationResponsePrompt;
+
+  /// No description provided for @eventInvitationDaysRemaining.
+  ///
+  /// In tr, this message translates to:
+  /// **'{count, plural, =0{Bugün başlıyor} =1{1 gün kaldı} other{{count} gün kaldı}}'**
+  String eventInvitationDaysRemaining(int count);
 
   /// No description provided for @eventInvitationAccepted.
   ///
@@ -3601,6 +3871,24 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Davet gönder'**
   String get eventSendInvites;
+
+  /// No description provided for @eventSendingInvites.
+  ///
+  /// In tr, this message translates to:
+  /// **'Davetler gönderiliyor…'**
+  String get eventSendingInvites;
+
+  /// No description provided for @eventInvitesSentSuccess.
+  ///
+  /// In tr, this message translates to:
+  /// **'Davetler başarıyla gönderildi'**
+  String get eventInvitesSentSuccess;
+
+  /// No description provided for @eventInviteSendFailed.
+  ///
+  /// In tr, this message translates to:
+  /// **'Davetler gönderilemedi. Lütfen tekrar deneyin.'**
+  String get eventInviteSendFailed;
 
   /// No description provided for @eventCardIdHint.
   ///

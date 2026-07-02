@@ -22,6 +22,7 @@ class AddManualCardCubit extends Cubit<AddManualCardState> {
 
   void setPage(int index) {
     if (index < 0 || index >= AddManualCardState.stepCount) return;
+    if (index == state.currentPageIndex) return;
     emit(state.copyWith(currentPageIndex: index, clearError: true));
   }
 

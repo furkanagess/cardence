@@ -5,9 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/constants/app_constants.dart';
+import '../../../../core/l10n/api_error_localizer.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/atoms/cardence_app_bar.dart';
 import '../../../../core/widgets/atoms/custom_button.dart';
+import '../../../../core/widgets/molecules/cardence_error_dialog.dart';
 import '../../../../core/widgets/organisms/cardence_connect_animation.dart';
 import '../../../../core/widgets/organisms/cardence_scaffold.dart';
 import '../../domain/usecases/forgot_password.dart';
@@ -20,6 +22,7 @@ import '../../domain/usecases/reset_password.dart';
 import '../bloc/login_bloc.dart';
 import '../bloc/login_event.dart';
 import '../bloc/login_state.dart';
+import '../widgets/login_accent_color_picker.dart';
 import '../widgets/login_email_form.dart';
 import '../widgets/login_method_selector.dart';
 import '../widgets/login_phone_form.dart';
@@ -38,6 +41,8 @@ class LoginPage extends StatelessWidget {
     required this.getLastLoginCredentials,
     required this.forgotPassword,
     required this.resetPassword,
+    required this.selectedAccentColorId,
+    required this.onAccentColorSelected,
     required this.onLoginSuccess,
   });
 
@@ -48,7 +53,9 @@ class LoginPage extends StatelessWidget {
   final GetLastLoginCredentials getLastLoginCredentials;
   final ForgotPassword forgotPassword;
   final ResetPassword resetPassword;
-  final VoidCallback onLoginSuccess;
+  final String selectedAccentColorId;
+  final ValueChanged<String> onAccentColorSelected;
+  final void Function({bool fromRegistration}) onLoginSuccess;
 
   @override
   Widget build(BuildContext context) {
@@ -63,6 +70,8 @@ class LoginPage extends StatelessWidget {
       child: _AuthView(
         forgotPassword: forgotPassword,
         resetPassword: resetPassword,
+        selectedAccentColorId: selectedAccentColorId,
+        onAccentColorSelected: onAccentColorSelected,
         onAuthSuccess: onLoginSuccess,
       ),
     );
@@ -73,12 +82,16 @@ class _AuthView extends StatefulWidget {
   const _AuthView({
     required this.forgotPassword,
     required this.resetPassword,
+    required this.selectedAccentColorId,
+    required this.onAccentColorSelected,
     required this.onAuthSuccess,
   });
 
   final ForgotPassword forgotPassword;
   final ResetPassword resetPassword;
-  final VoidCallback onAuthSuccess;
+  final String selectedAccentColorId;
+  final ValueChanged<String> onAccentColorSelected;
+  final void Function({bool fromRegistration}) onAuthSuccess;
 
   @override
   State<_AuthView> createState() => _AuthViewState();
@@ -147,17 +160,40 @@ class _AuthViewState extends State<_AuthView>
           }
   }
 
+  void _showRegisterErrorDialog(BuildContext context, String message) {
+    FocusScope.of(context).unfocus();
+    final l10n = context.l10n;
+    CardenceErrorDialog.show(
+      context,
+      title: l10n.operationFailed,
+      message: ApiErrorLocalizer.localize(l10n, message),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
     return BlocListener<LoginBloc, LoginState>(
-      listenWhen: (prev, curr) => prev.status != curr.status,
+      listenWhen: (prev, curr) {
+        if (curr.status == LoginStatus.success &&
+            prev.status != LoginStatus.success) {
+          return true;
+        }
+        return curr.isRegisterMode &&
+            prev.status == LoginStatus.loading &&
+            curr.status == LoginStatus.failure;
+      },
       listener: (context, state) {
         if (state.status == LoginStatus.success) {
-          widget.onAuthSuccess();
+          widget.onAuthSuccess(fromRegistration: state.isRegisterMode);
+          return;
         }
+
+        final errorMessage = state.errorMessage;
+        if (errorMessage == null || errorMessage.isEmpty) return;
+        _showRegisterErrorDialog(context, errorMessage);
       },
       child: BlocBuilder<LoginBloc, LoginState>(
         builder: (context, state) {
@@ -208,6 +244,8 @@ class _AuthViewState extends State<_AuthView>
                             onLinkedInPressed: () => _handleLinkedInLogin(context),
                             onRegisterTap: () =>
                                 _switchMode(context, AuthScreenMode.register),
+                            selectedAccentColorId: widget.selectedAccentColorId,
+                            onAccentColorSelected: widget.onAccentColorSelected,
                           ),
                   );
                 },
@@ -238,8 +276,6 @@ class _RegisterScreenContent extends StatelessWidget {
 
     final registerForm = RegisterForm(
       isLoading: state.isLoading,
-      initialEmail: state.lastEmail,
-      initialPhone: state.lastPhone,
       onSubmit: ({
         required displayName,
         required email,
@@ -308,6 +344,8 @@ class _LoginScreenContent extends StatelessWidget {
     required this.onForgotPassword,
     required this.onLinkedInPressed,
     required this.onRegisterTap,
+    required this.selectedAccentColorId,
+    required this.onAccentColorSelected,
   });
 
   final LoginState state;
@@ -320,6 +358,8 @@ class _LoginScreenContent extends StatelessWidget {
   final VoidCallback onForgotPassword;
   final VoidCallback onLinkedInPressed;
   final VoidCallback onRegisterTap;
+  final String selectedAccentColorId;
+  final ValueChanged<String> onAccentColorSelected;
 
   @override
   Widget build(BuildContext context) {
@@ -374,6 +414,8 @@ class _LoginScreenContent extends StatelessWidget {
             bottomInset: bottomInset,
             onForgotPassword: onForgotPassword,
             onLinkedInPressed: onLinkedInPressed,
+            selectedAccentColorId: selectedAccentColorId,
+            onAccentColorSelected: onAccentColorSelected,
           ),
         ),
         if (!keyboardVisible) ...[
@@ -438,6 +480,8 @@ class _LoginFormContent extends StatefulWidget {
     required this.state,
     required this.onForgotPassword,
     required this.onLinkedInPressed,
+    required this.selectedAccentColorId,
+    required this.onAccentColorSelected,
     this.expandToFill = false,
     this.bottomInset = 0,
   });
@@ -445,6 +489,8 @@ class _LoginFormContent extends StatefulWidget {
   final LoginState state;
   final VoidCallback onForgotPassword;
   final VoidCallback onLinkedInPressed;
+  final String selectedAccentColorId;
+  final ValueChanged<String> onAccentColorSelected;
   final bool expandToFill;
   final double bottomInset;
 
@@ -512,10 +558,18 @@ class _LoginFormContentState extends State<_LoginFormContent> {
     );
   }
 
+  Widget _buildAccentPicker() {
+    return LoginAccentColorPicker(
+      selectedId: widget.selectedAccentColorId,
+      onSelected: widget.onAccentColorSelected,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final fields = _buildFields();
     final submitButton = _buildSubmitButton();
+    final accentPicker = _buildAccentPicker();
     final socialSection = _buildSocialSection();
 
     if (widget.expandToFill) {
@@ -532,6 +586,9 @@ class _LoginFormContentState extends State<_LoginFormContent> {
           const Spacer(),
           const SizedBox(height: 8),
           submitButton,
+          const SizedBox(height: 14),
+          accentPicker,
+          const SizedBox(height: 12),
           socialSection,
         ],
       );
@@ -552,6 +609,9 @@ class _LoginFormContentState extends State<_LoginFormContent> {
           fields,
           const SizedBox(height: 8),
           submitButton,
+          const SizedBox(height: 14),
+          accentPicker,
+          const SizedBox(height: 12),
           socialSection,
         ],
       ),

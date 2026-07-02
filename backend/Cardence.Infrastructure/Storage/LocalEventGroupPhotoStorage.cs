@@ -48,7 +48,7 @@ public sealed class LocalEventGroupPhotoStorage : IEventGroupPhotoStorage
         }
 
         return
-            $"{_publicBaseUrl}/uploads/users/{userId:D}/event-groups/{fileName}";
+            $"{_publicBaseUrl}/uploads/users/{userId:D}/event-groups/{fileName}?v={DateTimeOffset.UtcNow.ToUnixTimeSeconds()}";
     }
 
     public Task DeleteEventGroupPhotoAsync(

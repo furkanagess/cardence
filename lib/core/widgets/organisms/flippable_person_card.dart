@@ -4,6 +4,8 @@ import '../../../core/l10n/l10n_extensions.dart';
 import 'package:flip_card/flip_card.dart';
 
 import '../atoms/custom_button.dart';
+import '../molecules/card_effect_overlay.dart';
+import '../../domain/card_visual_effect.dart';
 import 'person_info_card.dart';
 
 /// Dikdörtgen (kartvizit oranında), çevrilebilir kişi kartı.
@@ -36,6 +38,7 @@ class FlippablePersonCard extends StatefulWidget {
     this.visibleContactFields = const [],
     this.jobTitle,
     this.contactFieldsTappable = true,
+    this.cardEffect = CardVisualEffect.none,
   });
 
   final String? title;
@@ -79,6 +82,7 @@ class FlippablePersonCard extends StatefulWidget {
   final List<String> visibleContactFields;
   final String? jobTitle;
   final bool contactFieldsTappable;
+  final CardVisualEffect cardEffect;
 
   /// Kartvizit oranı: genişlik / yükseklik (ISO 7810 ID-1 ~ 85.6×53.98 mm).
   static const double cardAspectRatio = 1.586;
@@ -183,32 +187,43 @@ class _FlippablePersonCardState extends State<FlippablePersonCard>
     );
   }
 
+  Widget _wrapWithEffect(Widget card) {
+    return CardEffectOverlay(
+      effect: widget.cardEffect,
+      accentColor: widget.accentColor,
+      borderRadius: BorderRadius.circular(PersonInfoCard.compactCardRadius),
+      child: card,
+    );
+  }
+
   Widget _buildFront(BuildContext context) {
     final defaultEmpty = AppL10n.noInfoYet(context.l10n);
     final resolvedEmpty = widget.emptyMessage ?? defaultEmpty;
 
-    return PersonInfoCard(
-      title: widget.title,
-      titleSecondary: widget.titleSecondary,
-      entries: widget.frontEntries
-          .take(FlippablePersonCard.maxVisibleEntriesPerSide)
-          .toList(),
-      emptyMessage: resolvedEmpty,
-      compact: true,
-      fillHeight: true,
-      accentColor: widget.accentColor,
-      backgroundColor: widget.backgroundColor,
-      photoUrl: widget.photoUrl,
-      bottomRightInset: _flipIconTouchSize,
-      showAppLogo: widget.showAppLogo,
-      showPremiumBadge: widget.showPremiumBadge,
-      contactEmail: widget.contactEmail,
-      contactPhone: widget.contactPhone,
-      contactWebsite: widget.contactWebsite,
-      contactLinkedin: widget.contactLinkedin,
-      visibleContactFields: widget.visibleContactFields,
-      jobTitle: widget.jobTitle,
-      contactFieldsTappable: widget.contactFieldsTappable,
+    return _wrapWithEffect(
+      PersonInfoCard(
+        title: widget.title,
+        titleSecondary: widget.titleSecondary,
+        entries: widget.frontEntries
+            .take(FlippablePersonCard.maxVisibleEntriesPerSide)
+            .toList(),
+        emptyMessage: resolvedEmpty,
+        compact: true,
+        fillHeight: true,
+        accentColor: widget.accentColor,
+        backgroundColor: widget.backgroundColor,
+        photoUrl: widget.photoUrl,
+        bottomRightInset: _flipIconTouchSize,
+        showAppLogo: widget.showAppLogo,
+        showPremiumBadge: widget.showPremiumBadge,
+        contactEmail: widget.contactEmail,
+        contactPhone: widget.contactPhone,
+        contactWebsite: widget.contactWebsite,
+        contactLinkedin: widget.contactLinkedin,
+        visibleContactFields: widget.visibleContactFields,
+        jobTitle: widget.jobTitle,
+        contactFieldsTappable: widget.contactFieldsTappable,
+      ),
     );
   }
 
@@ -219,44 +234,46 @@ class _FlippablePersonCardState extends State<FlippablePersonCard>
     final defaultEmpty = AppL10n.noInfoYet(context.l10n);
     final resolvedEmpty = widget.emptyMessage ?? defaultEmpty;
 
-    return showCenteredAddNote
-        ? _buildBackShell(
-            context,
-            Center(
-              child: CustomButton.tonal(
-                label: widget.backEmptyActionLabel ?? context.l10n.notEkle,
-                icon: Icons.add_rounded,
-                onPressed: widget.onBackEmptyActionTap,
-                fullWidth: false,
-                style: FilledButton.styleFrom(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+    return _wrapWithEffect(
+      showCenteredAddNote
+          ? _buildBackShell(
+              context,
+              Center(
+                child: CustomButton.tonal(
+                  label: widget.backEmptyActionLabel ?? context.l10n.notEkle,
+                  icon: Icons.add_rounded,
+                  onPressed: widget.onBackEmptyActionTap,
+                  fullWidth: false,
+                  style: FilledButton.styleFrom(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
                 ),
               ),
+            )
+          : PersonInfoCard(
+              title: widget.title,
+              titleSecondary: widget.titleSecondary,
+              entries: widget.backEntries
+                  .take(FlippablePersonCard.maxVisibleEntriesPerSide)
+                  .toList(),
+              emptyMessage: widget.backEmptyMessage ?? resolvedEmpty,
+              emptyActionLabel: widget.backEmptyActionLabel,
+              onEmptyActionTap: widget.onBackEmptyActionTap,
+              onNoteEditTap: widget.onBackEditTap,
+              compact: true,
+              compactBackFace: _isProfileBackFace,
+              fillHeight: true,
+              cardId: widget.cardId,
+              showCardIdOnBack: true,
+              accentColor: widget.accentColor,
+              backgroundColor: widget.backgroundColor,
+              bottomRightInset: _flipIconTouchSize,
+              showAppLogo: widget.showAppLogo,
+              showPremiumBadge: widget.showPremiumBadge,
             ),
-          )
-        : PersonInfoCard(
-            title: widget.title,
-            titleSecondary: widget.titleSecondary,
-            entries: widget.backEntries
-                .take(FlippablePersonCard.maxVisibleEntriesPerSide)
-                .toList(),
-            emptyMessage: widget.backEmptyMessage ?? resolvedEmpty,
-            emptyActionLabel: widget.backEmptyActionLabel,
-            onEmptyActionTap: widget.onBackEmptyActionTap,
-            onNoteEditTap: widget.onBackEditTap,
-            compact: true,
-            compactBackFace: _isProfileBackFace,
-            fillHeight: true,
-            cardId: widget.cardId,
-            showCardIdOnBack: true,
-            accentColor: widget.accentColor,
-            backgroundColor: widget.backgroundColor,
-            bottomRightInset: _flipIconTouchSize,
-            showAppLogo: widget.showAppLogo,
-            showPremiumBadge: widget.showPremiumBadge,
-          );
+    );
   }
 
   Widget _buildBackShell(BuildContext context, Widget child) {

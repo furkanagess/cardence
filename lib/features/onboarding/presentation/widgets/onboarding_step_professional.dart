@@ -29,6 +29,7 @@ class _OnboardingStepProfessionalState
     extends State<OnboardingStepProfessional> {
   late final TextEditingController _companyController;
   late final TextEditingController _titleController;
+  bool _suppressDraftEmit = false;
 
   @override
   void initState() {
@@ -36,11 +37,14 @@ class _OnboardingStepProfessionalState
     _companyController =
         TextEditingController(text: widget.draft.company ?? '');
     _titleController = TextEditingController(text: widget.draft.title ?? '');
+    _companyController.addListener(_notifyChanged);
+    _titleController.addListener(_notifyChanged);
   }
 
   @override
   void didUpdateWidget(OnboardingStepProfessional oldWidget) {
     super.didUpdateWidget(oldWidget);
+    _suppressDraftEmit = true;
     if (oldWidget.draft.company != widget.draft.company &&
         _companyController.text != (widget.draft.company ?? '')) {
       _companyController.text = widget.draft.company ?? '';
@@ -49,16 +53,22 @@ class _OnboardingStepProfessionalState
         _titleController.text != (widget.draft.title ?? '')) {
       _titleController.text = widget.draft.title ?? '';
     }
+    _suppressDraftEmit = false;
   }
 
   @override
   void dispose() {
-    _companyController.dispose();
-    _titleController.dispose();
+    _companyController
+      ..removeListener(_notifyChanged)
+      ..dispose();
+    _titleController
+      ..removeListener(_notifyChanged)
+      ..dispose();
     super.dispose();
   }
 
   void _notifyChanged() {
+    if (_suppressDraftEmit) return;
     widget.onChanged(
       widget.draft.copyWith(
         company: _companyController.text.trim().isEmpty
@@ -69,13 +79,11 @@ class _OnboardingStepProfessionalState
             : _titleController.text.trim(),
       ),
     );
-    setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
     return OnboardingStepShell(
-      subtitle: context.l10n.kartnznnYzndeGrnecekBilgiler,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -87,7 +95,6 @@ class _OnboardingStepProfessionalState
             textInputAction: TextInputAction.next,
             hintText: context.l10n.irketAdnGiriniz,
             prefixIcon: const Icon(Icons.business_outlined),
-            onChanged: (_) => _notifyChanged(),
           ),
           const SizedBox(height: 16),
           OnboardingFieldLabel(label: context.l10n.pozisyon, required: true),
@@ -97,7 +104,6 @@ class _OnboardingStepProfessionalState
             textInputAction: TextInputAction.done,
             hintText: context.l10n.pozisyonunuzuGiriniz,
             prefixIcon: const Icon(Icons.work_outline_rounded),
-            onChanged: (_) => _notifyChanged(),
           ),
           const SizedBox(height: 24),
           Center(

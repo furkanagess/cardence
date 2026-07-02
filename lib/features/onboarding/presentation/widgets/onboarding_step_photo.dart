@@ -29,7 +29,6 @@ class OnboardingStepPhoto extends StatelessWidget {
     final displayName = draft.displayName?.trim();
 
     return OnboardingStepShell(
-      subtitle: context.l10n.profilFotorafnzKartnzdaGrnrsterseniz,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [

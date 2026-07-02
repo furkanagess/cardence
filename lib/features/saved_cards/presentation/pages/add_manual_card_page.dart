@@ -48,14 +48,21 @@ class _AddManualCardPageState extends State<AddManualCardPage> {
     super.dispose();
   }
 
-  Future<void> _goToPage(BuildContext context, int index) async {
-    FocusManager.instance.primaryFocus?.unfocus();
-    context.read<AddManualCardCubit>().setPage(index);
-    await _pageController.animateToPage(
+  void _syncPageController(int index) {
+    if (!_pageController.hasClients) return;
+    final current = _pageController.page?.round();
+    if (current == index) return;
+
+    _pageController.animateToPage(
       index,
       duration: const Duration(milliseconds: 300),
       curve: Curves.easeInOut,
     );
+  }
+
+  void _goToPage(BuildContext context, int index) {
+    FocusManager.instance.primaryFocus?.unfocus();
+    context.read<AddManualCardCubit>().setPage(index);
   }
 
   Future<void> _handleSubmit(BuildContext context) async {
@@ -83,10 +90,15 @@ class _AddManualCardPageState extends State<AddManualCardPage> {
         imageStore: PhysicalCardImageStore(),
         initialDraft: widget.initialDraft,
       ),
-      child: _AddManualCardContent(
-        pageController: _pageController,
-        onGoToPage: (index) => _goToPage(context, index),
-        onSubmit: () => _handleSubmit(context),
+      child: BlocListener<AddManualCardCubit, AddManualCardState>(
+        listenWhen: (previous, current) =>
+            previous.currentPageIndex != current.currentPageIndex,
+        listener: (context, state) => _syncPageController(state.currentPageIndex),
+        child: _AddManualCardContent(
+          pageController: _pageController,
+          onGoToPage: (index) => _goToPage(context, index),
+          onSubmit: () => _handleSubmit(context),
+        ),
       ),
     );
   }
@@ -100,129 +112,131 @@ class _AddManualCardContent extends StatelessWidget {
   });
 
   final PageController pageController;
-  final Future<void> Function(int index) onGoToPage;
+  final void Function(int index) onGoToPage;
   final Future<void> Function() onSubmit;
 
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<AddManualCardCubit, AddManualCardState>(
-        buildWhen: (a, b) => a.currentPageIndex != b.currentPageIndex,
-        builder: (context, flowState) {
-          return PopScope(
-            canPop: flowState.isFirstPage,
-            onPopInvokedWithResult: (didPop, _) {
-              if (didPop || flowState.isFirstPage) return;
-              onGoToPage(flowState.currentPageIndex - 1);
-            },
-            child: CardenceScaffold(
-              resizeToAvoidBottomInset: false,
-              appBar: CardenceAppBar(
-                title: AddManualCardStepTitles.forIndex(context.l10n, 
-                  flowState.currentPageIndex,
-                ),
-                leading: CardenceAppBar.flowBackButton(
-                  context: context,
-                  onPressed: () {
-                    if (flowState.isFirstPage) {
-                      Navigator.of(context).maybePop();
-                      return;
-                    }
-                    onGoToPage(flowState.currentPageIndex - 1);
-                  },
-                ),
-                automaticallyImplyLeading: false,
-                actions: AddManualCardStepTitles.showsOptionalBadge(
-                  flowState.currentPageIndex,
-                )
-                    ? const [
-                        Padding(
-                          padding: EdgeInsets.only(right: 16),
-                          child: Center(child: OnboardingOptionalBadge()),
-                        ),
-                      ]
-                    : null,
+      buildWhen: (a, b) => a.currentPageIndex != b.currentPageIndex,
+      builder: (context, flowState) {
+        return PopScope(
+          canPop: flowState.isFirstPage,
+          onPopInvokedWithResult: (didPop, _) {
+            if (didPop || flowState.isFirstPage) return;
+            onGoToPage(flowState.currentPageIndex - 1);
+          },
+          child: CardenceScaffold(
+            resizeToAvoidBottomInset: false,
+            appBar: CardenceAppBar(
+              title: AddManualCardStepTitles.forIndex(
+                context.l10n,
+                flowState.currentPageIndex,
               ),
-              body: SafeArea(
-                bottom: false,
-                top: false,
-                child: Column(
-                  children: [
-                    Expanded(
-                      child: BlocBuilder<AddManualCardCubit, AddManualCardState>(
-                        buildWhen: (a, b) =>
-                            a.draft != b.draft ||
-                            a.currentPageIndex != b.currentPageIndex,
-                        builder: (context, state) {
-                          return PageView.builder(
-                            controller: pageController,
-                            physics: const NeverScrollableScrollPhysics(),
-                            onPageChanged: (i) =>
-                                context.read<AddManualCardCubit>().setPage(i),
-                            itemCount: AddManualCardState.stepCount,
-                            itemBuilder: (context, index) =>
-                                _buildStep(context, state, index),
-                          );
-                        },
+              leading: CardenceAppBar.flowBackButton(
+                context: context,
+                onPressed: () {
+                  if (flowState.isFirstPage) {
+                    Navigator.of(context).maybePop();
+                    return;
+                  }
+                  onGoToPage(flowState.currentPageIndex - 1);
+                },
+              ),
+              automaticallyImplyLeading: false,
+              actions: AddManualCardStepTitles.showsOptionalBadge(
+                flowState.currentPageIndex,
+              )
+                  ? const [
+                      Padding(
+                        padding: EdgeInsets.only(right: 16),
+                        child: Center(child: OnboardingOptionalBadge()),
                       ),
+                    ]
+                  : null,
+            ),
+            body: SafeArea(
+              bottom: false,
+              top: false,
+              child: Column(
+                children: [
+                  Expanded(
+                    child: PageView.builder(
+                      controller: pageController,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: AddManualCardState.stepCount,
+                      itemBuilder: (context, index) {
+                        return _AddManualCardStepPage(index: index);
+                      },
                     ),
-                    _AddManualCardBottomActions(
-                      pageController: pageController,
-                      onGoToPage: onGoToPage,
-                      onSubmit: onSubmit,
-                    ),
-                  ],
-                ),
+                  ),
+                  _AddManualCardBottomActions(
+                    onGoToPage: onGoToPage,
+                    onSubmit: onSubmit,
+                  ),
+                ],
               ),
             ),
-          );
-        },
-      );
+          ),
+        );
+      },
+    );
   }
+}
 
-  Widget _buildStep(
-    BuildContext context,
-    AddManualCardState state,
-    int index,
-  ) {
-    final cubit = context.read<AddManualCardCubit>();
-    final onChanged = cubit.updateDraft;
+class _AddManualCardStepPage extends StatelessWidget {
+  const _AddManualCardStepPage({required this.index});
 
-    switch (index) {
-      case 0:
-        return AddManualCardStepName(
-          draft: state.draft,
-          onChanged: onChanged,
-        );
-      case 1:
-        return AddManualCardStepProfessional(
-          draft: state.draft,
-          onChanged: onChanged,
-        );
-      case 2:
-        return AddManualCardStepOptional(
-          draft: state.draft,
-          onChanged: onChanged,
-        );
-      case 3:
-        return AddManualCardStepPreview(
-          draft: state.draft,
-          onChanged: onChanged,
-        );
-      default:
-        return const SizedBox.shrink();
-    }
+  final int index;
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<AddManualCardCubit, AddManualCardState>(
+      buildWhen: (previous, current) {
+        if (previous.draft == current.draft) return false;
+        return previous.currentPageIndex == index ||
+            current.currentPageIndex == index;
+      },
+      builder: (context, state) {
+        final cubit = context.read<AddManualCardCubit>();
+        final onChanged = cubit.updateDraft;
+
+        switch (index) {
+          case 0:
+            return AddManualCardStepName(
+              draft: state.draft,
+              onChanged: onChanged,
+            );
+          case 1:
+            return AddManualCardStepProfessional(
+              draft: state.draft,
+              onChanged: onChanged,
+            );
+          case 2:
+            return AddManualCardStepOptional(
+              draft: state.draft,
+              onChanged: onChanged,
+            );
+          case 3:
+            return AddManualCardStepPreview(
+              draft: state.draft,
+              onChanged: onChanged,
+            );
+          default:
+            return const SizedBox.shrink();
+        }
+      },
+    );
   }
 }
 
 class _AddManualCardBottomActions extends StatelessWidget {
   const _AddManualCardBottomActions({
-    required this.pageController,
     required this.onGoToPage,
     required this.onSubmit,
   });
 
-  final PageController pageController;
-  final Future<void> Function(int index) onGoToPage;
+  final void Function(int index) onGoToPage;
   final Future<void> Function() onSubmit;
 
   @override
@@ -245,6 +259,7 @@ class _AddManualCardBottomActions extends StatelessWidget {
           primaryLabel: primaryLabel,
           isLoading: state.isSubmitting,
           enabled: state.canProceedCurrentStep(context.l10n),
+          showStepIndicator: false,
           onStepSelected:
               state.isFirstPage ? null : (index) => onGoToPage(index),
           onPrimaryPressed: () async {
@@ -262,10 +277,6 @@ class _AddManualCardBottomActions extends StatelessWidget {
             }
 
             context.read<AddManualCardCubit>().nextPage();
-            await pageController.nextPage(
-              duration: const Duration(milliseconds: 300),
-              curve: Curves.easeInOut,
-            );
           },
         );
       },

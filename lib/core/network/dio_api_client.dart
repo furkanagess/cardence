@@ -158,6 +158,8 @@ class DioApiClient {
       token = await coordinator.getValidAccessToken() ?? token;
     }
 
+    final attemptedWithAuth = token != null && token.isNotEmpty;
+
     try {
       return await request(token);
     } on AuthApiException catch (error) {
@@ -184,7 +186,7 @@ class DioApiClient {
     } on DioException catch (error) {
       final parsed = ApiResponseParser.fromDioException(error, 'İşlem başarısız.');
       if (!_canRetryAuth(parsed, accessToken, coordinator)) {
-        if (parsed.isUnauthorized) {
+        if (parsed.isUnauthorized && attemptedWithAuth) {
           SessionExpiredHandler.instance.handleIfNeeded(parsed);
         }
         throw parsed;

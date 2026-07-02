@@ -34,10 +34,16 @@ class LoginPhoneFormState extends State<LoginPhoneForm> {
   String _phoneNumber = '';
   String? _phoneError;
   String? _passwordError;
+  bool _autofillDismissed = false;
 
   @override
   void initState() {
     super.initState();
+    _applyInitialPhone();
+  }
+
+  void _applyInitialPhone() {
+    if (_autofillDismissed) return;
     final phone = widget.initialPhone?.trim();
     if (phone != null && phone.isNotEmpty) {
       _phoneNumber = phone;
@@ -47,11 +53,27 @@ class LoginPhoneFormState extends State<LoginPhoneForm> {
   @override
   void didUpdateWidget(LoginPhoneForm oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (_autofillDismissed) return;
+
     final phone = widget.initialPhone?.trim();
-    if (phone != null &&
-        phone.isNotEmpty &&
-        phone != _phoneNumber.trim()) {
+    if (phone == null || phone.isEmpty) return;
+    if (phone != _phoneNumber.trim()) {
       setState(() => _phoneNumber = phone);
+    }
+  }
+
+  void _handlePhoneChanged(String completeNumber) {
+    _phoneNumber = completeNumber;
+    if (_phoneError != null) {
+      setState(() => _phoneError = null);
+    }
+
+    final initialPhone = widget.initialPhone?.trim();
+    if (!_autofillDismissed &&
+        initialPhone != null &&
+        initialPhone.isNotEmpty &&
+        completeNumber.trim() != initialPhone) {
+      setState(() => _autofillDismissed = true);
     }
   }
 
@@ -98,7 +120,11 @@ class LoginPhoneFormState extends State<LoginPhoneForm> {
       children: [
         OnboardingFieldLabel(label: context.l10n.telefon, required: true),
         IntlPhoneField(
-          key: ValueKey(_phoneNumber),
+          key: ValueKey(
+            _autofillDismissed
+                ? 'login-phone-manual'
+                : 'login-phone-${widget.initialPhone ?? ''}',
+          ),
           decoration: CustomTextField.themedDecoration(
             context,
             hintText: context.l10n.msg5xxXxxXxXx,
@@ -108,10 +134,7 @@ class LoginPhoneFormState extends State<LoginPhoneForm> {
               IntlPhoneFieldHelpers.countryCodeFromPhone(_phoneNumber),
           initialValue: IntlPhoneFieldHelpers.nationalFromPhone(_phoneNumber),
           disableLengthCheck: true,
-          onChanged: (phone) {
-            _phoneNumber = phone.completeNumber;
-            if (_phoneError != null) setState(() => _phoneError = null);
-          },
+          onChanged: (phone) => _handlePhoneChanged(phone.completeNumber),
         ),
         const SizedBox(height: 10),
         AuthPasswordField(

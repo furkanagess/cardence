@@ -5,6 +5,7 @@ import 'dart:async';
 
 import 'l10n/app_localizations.dart';
 
+import 'core/auth/auth_token_coordinator.dart';
 import 'core/auth/session_expired_handler.dart';
 import 'core/constants/app_constants.dart';
 import 'core/theme/app_theme.dart';
@@ -61,11 +62,14 @@ import 'features/ads/domain/usecases/show_post_add_card_monetization.dart';
 import 'core/l10n/locale_preference_material.dart';
 import 'features/settings/domain/entities/locale_preference.dart';
 import 'features/settings/domain/entities/theme_preference.dart';
+import 'features/settings/domain/usecases/get_accent_color_id.dart';
 import 'features/settings/domain/usecases/get_locale_preference.dart';
 import 'features/settings/domain/usecases/get_theme_preference.dart';
 import 'features/settings/domain/usecases/request_app_review.dart';
+import 'features/settings/domain/usecases/set_accent_color_id.dart';
 import 'features/settings/domain/usecases/set_locale_preference.dart';
 import 'features/settings/domain/usecases/set_theme_preference.dart';
+import 'core/theme/app_accent_palette.dart';
 import 'features/profile/domain/usecases/get_profile_stats.dart';
 import 'features/support/domain/usecases/submit_support_request.dart';
 import 'features/shell/presentation/pages/main_shell_page.dart';
@@ -100,7 +104,10 @@ class App extends StatefulWidget {
     required this.resolveOnboardingInitialDraft,
     required this.getThemePreference,
     required this.setThemePreference,
+    required this.getAccentColorId,
+    required this.setAccentColorId,
     required this.initialThemePreference,
+    required this.initialAccentColorId,
     required this.getLocalePreference,
     required this.setLocalePreference,
     required this.initialLocalePreference,
@@ -155,7 +162,10 @@ class App extends StatefulWidget {
   final ResolveOnboardingInitialDraft resolveOnboardingInitialDraft;
   final GetThemePreference getThemePreference;
   final SetThemePreference setThemePreference;
+  final GetAccentColorId getAccentColorId;
+  final SetAccentColorId setAccentColorId;
   final ThemePreference initialThemePreference;
+  final String initialAccentColorId;
   final GetLocalePreference getLocalePreference;
   final SetLocalePreference setLocalePreference;
   final LocalePreference initialLocalePreference;
@@ -193,6 +203,7 @@ class _AppState extends State<App> {
   _AppDestination _destination = _AppDestination.loading;
   late ThemePreference _themePreference;
   late LocalePreference _localePreference;
+  late String _accentColorId;
   bool _showPostOnboardingPaywall = false;
   final AppLinks _appLinks = AppLinks();
   StreamSubscription<Uri>? _passwordResetLinkSub;
@@ -202,9 +213,14 @@ class _AppState extends State<App> {
     super.initState();
     _themePreference = widget.initialThemePreference;
     _localePreference = widget.initialLocalePreference;
+    _accentColorId = widget.initialAccentColorId;
+    AppAccentPalette.init(_accentColorId);
     SessionExpiredHandler.instance.configure(
       navigatorKey: widget.rootNavigatorKey,
       onForceLogout: _onLogout,
+      hasStoredSession: () =>
+          AuthTokenCoordinator.instance?.hasStoredSession() ??
+          Future.value(false),
     );
     _bootstrap();
     _loadTheme();
@@ -269,7 +285,7 @@ class _AppState extends State<App> {
 
     setState(() {
       _destination =
-          onboardingDone ? _AppDestination.main : _AppDestination.login;
+          onboardingDone ? _AppDestination.main : _AppDestination.onboarding;
     });
   }
 
@@ -305,9 +321,19 @@ class _AppState extends State<App> {
     setState(() => _localePreference = pref);
   }
 
-  void _onLoginSuccess() {
+  void _onLoginSuccess({bool fromRegistration = false}) {
     _identifySubscriptionUser();
+    if (fromRegistration) {
+      _goToOnboardingAfterRegistration();
+      return;
+    }
     _resolvePostLoginDestination();
+  }
+
+  Future<void> _goToOnboardingAfterRegistration() async {
+    await widget.syncOnboardingFromServer(completed: false);
+    if (!mounted) return;
+    setState(() => _destination = _AppDestination.onboarding);
   }
 
   Future<void> _identifySubscriptionUser() async {
@@ -342,6 +368,13 @@ class _AppState extends State<App> {
     setState(() => _localePreference = preference);
   }
 
+  Future<void> _onAccentColorChanged(String accentColorId) async {
+    if (accentColorId == _accentColorId) return;
+    AppAccentPalette.selectById(accentColorId);
+    setState(() => _accentColorId = accentColorId);
+    await widget.setAccentColorId(accentColorId);
+  }
+
   ThemeMode get _themeMode {
     switch (_themePreference) {
       case ThemePreference.light:
@@ -366,6 +399,8 @@ class _AppState extends State<App> {
           getLastLoginCredentials: widget.getLastLoginCredentials,
           forgotPassword: widget.forgotPassword,
           resetPassword: widget.resetPassword,
+          selectedAccentColorId: _accentColorId,
+          onAccentColorSelected: _onAccentColorChanged,
           onLoginSuccess: _onLoginSuccess,
         );
       case _AppDestination.onboarding:
@@ -374,6 +409,7 @@ class _AppState extends State<App> {
           resolveInitialDraft: widget.resolveOnboardingInitialDraft,
           persistOnboardingCard: widget.persistOnboardingCard,
           uploadProfilePhoto: widget.uploadProfilePhoto,
+          upgradeWalletPlan: widget.upgradeWalletPlan,
           onFinish: _onOnboardingFinish,
         );
       case _AppDestination.main:
@@ -421,6 +457,7 @@ class _AppState extends State<App> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      key: ValueKey('app-theme-$_accentColorId'),
       navigatorKey: widget.rootNavigatorKey,
       title: 'Cardence',
       theme: AppTheme.lightTheme,
@@ -436,8 +473,14 @@ class _AppState extends State<App> {
       supportedLocales: AppLocalizations.supportedLocales,
       locale: materialLocaleFor(_localePreference),
       builder: (context, child) {
-        return ChuckFabOverlay(
-          child: child ?? const SizedBox.shrink(),
+        final mediaQueryData = MediaQuery.of(context);
+        return MediaQuery(
+          data: mediaQueryData.copyWith(
+            textScaler: TextScaler.noScaling,
+          ),
+          child: ChuckFabOverlay(
+            child: child ?? const SizedBox.shrink(),
+          ),
         );
       },
       home: _buildHome(),

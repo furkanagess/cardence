@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import '../../../../core/l10n/l10n_extensions.dart';
-import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 
 import '../../../../core/utils/card_id_generator.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/atoms/cardence_app_bar.dart';
 import '../../../../core/widgets/atoms/custom_button.dart';
 import '../../../../core/widgets/molecules/cardence_confirm_dialog.dart';
+import '../../../../core/widgets/molecules/card_color_picker_sheet.dart';
 import '../../../../core/widgets/organisms/cardence_scaffold.dart';
 import '../../../../core/widgets/organisms/flippable_person_card.dart';
 import '../widgets/my_card_preview_helpers.dart';
@@ -14,6 +14,7 @@ import '../../../onboarding/domain/entities/onboarding_card_draft.dart';
 import '../../../onboarding/domain/usecases/get_onboarding_draft_cards.dart';
 import '../../../business_cards/domain/usecases/persist_onboarding_card.dart';
 import '../card_customize_colors.dart';
+import '../helpers/card_effect_premium_helper.dart';
 
 /// Kart görünümü: önizleme, renk düzenlemesi ve yeni kart oluşturma.
 class CardViewPage extends StatefulWidget {
@@ -39,10 +40,12 @@ class _CardViewPageState extends State<CardViewPage> {
   bool _loading = true;
   bool _saving = false;
   static const double _carouselViewportFraction = 0.88;
-  late final PageController _pageController = PageController(viewportFraction: _carouselViewportFraction);
+  late final PageController _pageController =
+      PageController(viewportFraction: _carouselViewportFraction);
 
-  OnboardingCardDraft? get _draft =>
-      _cards.isEmpty ? null : _cards[_selectedIndex.clamp(0, _cards.length - 1)];
+  OnboardingCardDraft? get _draft => _cards.isEmpty
+      ? null
+      : _cards[_selectedIndex.clamp(0, _cards.length - 1)];
 
   bool get _hasUnsavedChanges {
     for (final card in _cards) {
@@ -111,16 +114,10 @@ class _CardViewPageState extends State<CardViewPage> {
     return Color(int.parse(hex.substring(1), radix: 16) + 0xFF000000);
   }
 
-  static String _colorToHex(Color c) {
-    final r = (c.r * 255).round().clamp(0, 255);
-    final g = (c.g * 255).round().clamp(0, 255);
-    final b = (c.b * 255).round().clamp(0, 255);
-    return '#${r.toRadixString(16).padLeft(2, '0')}${g.toRadixString(16).padLeft(2, '0')}${b.toRadixString(16).padLeft(2, '0')}';
-  }
-
   void _setBackgroundColor(OnboardingCardDraft d, String? hex) {
-    final updated =
-        hex == null ? d.copyWith(clearBackgroundColor: true) : d.copyWith(backgroundColor: hex);
+    final updated = hex == null
+        ? d.copyWith(clearBackgroundColor: true)
+        : d.copyWith(backgroundColor: hex);
     _updateSelectedCard(updated);
   }
 
@@ -131,8 +128,9 @@ class _CardViewPageState extends State<CardViewPage> {
   }
 
   void _setTextColor(OnboardingCardDraft d, String? hex) {
-    final updated =
-        hex == null ? d.copyWith(clearAccentColor: true) : d.copyWith(accentColor: hex);
+    final updated = hex == null
+        ? d.copyWith(clearAccentColor: true)
+        : d.copyWith(accentColor: hex);
     _updateSelectedCard(updated);
   }
 
@@ -140,8 +138,7 @@ class _CardViewPageState extends State<CardViewPage> {
     return CardenceConfirmDialog.show(
       context,
       title: context.l10n.kaydedilmemiDeiiklikler,
-      message:
-          context.l10n.yaptnzDeiikliklerKaydedilmedikmakIstediinize,
+      message: context.l10n.yaptnzDeiikliklerKaydedilmedikmakIstediinize,
       confirmLabel: context.l10n.k,
       cancelLabel: context.l10n.iptal,
       icon: Icons.warning_amber_rounded,
@@ -170,7 +167,13 @@ class _CardViewPageState extends State<CardViewPage> {
       var nextBaseline = List<OnboardingCardDraft>.from(_savedBaseline);
 
       for (final card in dirtyCards) {
-        final synced = await widget.persistOnboardingCard(card);
+        final resolved = await prepareCardDraftForPersist(context, card);
+        if (!mounted) return;
+        if (resolved == null) {
+          setState(() => _saving = false);
+          return;
+        }
+        final synced = await widget.persistOnboardingCard(resolved);
         if (!mounted) return;
 
         final syncedId = synced.cardId;
@@ -204,46 +207,32 @@ class _CardViewPageState extends State<CardViewPage> {
   Future<void> _openCustomTextColorPicker(OnboardingCardDraft d) async {
     final current = d.accentColor != null ? _parseHex(d.accentColor) : null;
     final bg = _parseHex(d.backgroundColor);
-    Color pickerColor = current ??
+    final initialColor = current ??
         (bg != null
             ? (bg.computeLuminance() > 0.5
-                ? const Color(0xFF1C2430)
-                : const Color(0xFFF5F5F5))
+                ? AppColors.textPrimary
+                : AppColors.surfaceLight)
             : AppColors.textPrimary);
-    await showDialog<void>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(context.l10n.zelMetinRengi),
-        content: SingleChildScrollView(
-          child: ColorPicker(
-            pickerColor: pickerColor,
-            onColorChanged: (c) => pickerColor = c,
-            enableAlpha: false,
-            hexInputBar: true,
-            labelTypes: const [],
-          ),
-        ),
-        actions: [
-          CustomButton.text(
-            label: context.l10n.iptal,
-            onPressed: () => Navigator.of(context).pop(),
-          ),
-          CustomButton(
-            label: context.l10n.uygula,
-            onPressed: () {
-              Navigator.of(context).pop();
-              final r = (pickerColor.r * 255).round().clamp(0, 255);
-              final g = (pickerColor.g * 255).round().clamp(0, 255);
-              final b = (pickerColor.b * 255).round().clamp(0, 255);
-              final hex =
-                  '#${r.toRadixString(16).padLeft(2, '0')}${g.toRadixString(16).padLeft(2, '0')}${b.toRadixString(16).padLeft(2, '0')}';
-              _setTextColor(d, hex);
-            },
-            fullWidth: false,
-          ),
-        ],
+
+    final applied = await CardColorPickerSheet.show(
+      context,
+      title: context.l10n.zelMetinRengi,
+      initialColor: initialColor,
+      editingBackground: false,
+      previewBackgroundColor: d.backgroundColor,
+      previewAccentColor: d.accentColor,
+      previewBuilder: (previewBg, previewAccent) =>
+          MyCardPreviewHelpers.flippableCardWithColors(
+        draft: d,
+        l10n: context.l10n,
+        backgroundColor: previewBg,
+        accentColor: previewAccent,
+        cardEffect: d.cardEffect,
       ),
     );
+    if (applied == null) return;
+
+    _setTextColor(d, CardColorPickerSheet.colorToHex(applied));
   }
 
   Future<void> _createNewCard() async {
@@ -271,37 +260,30 @@ class _CardViewPageState extends State<CardViewPage> {
     final d = _draft;
     if (d == null) return;
     final currentBg = _parseHex(d.backgroundColor);
-    final lastUsed = d.lastUsedPaletteBackgroundColor != null ? _parseHex(d.lastUsedPaletteBackgroundColor!) : null;
-    Color pickerColor = currentBg ?? lastUsed ?? const Color(0xFFF5F5F5);
-    await showDialog<void>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(context.l10n.zelKartRengi),
-        content: SingleChildScrollView(
-          child: ColorPicker(
-            pickerColor: pickerColor,
-            onColorChanged: (c) => pickerColor = c,
-            enableAlpha: false,
-            hexInputBar: true,
-            labelTypes: const [],
-          ),
-        ),
-        actions: [
-          CustomButton.text(
-            label: context.l10n.iptal,
-            onPressed: () => Navigator.of(ctx).pop(),
-          ),
-          CustomButton(
-            label: context.l10n.uygula,
-            onPressed: () {
-              Navigator.of(ctx).pop();
-              _setBackgroundColorFromPalette(d, _colorToHex(pickerColor));
-            },
-            fullWidth: false,
-          ),
-        ],
+    final lastUsed = d.lastUsedPaletteBackgroundColor != null
+        ? _parseHex(d.lastUsedPaletteBackgroundColor!)
+        : null;
+    final initialColor = currentBg ?? lastUsed ?? AppColors.surfaceLight;
+
+    final applied = await CardColorPickerSheet.show(
+      context,
+      title: context.l10n.zelKartRengi,
+      initialColor: initialColor,
+      editingBackground: true,
+      previewBackgroundColor: d.backgroundColor,
+      previewAccentColor: d.accentColor,
+      previewBuilder: (previewBg, previewAccent) =>
+          MyCardPreviewHelpers.flippableCardWithColors(
+        draft: d,
+        l10n: context.l10n,
+        backgroundColor: previewBg,
+        accentColor: previewAccent,
+        cardEffect: d.cardEffect,
       ),
     );
+    if (applied == null) return;
+
+    _setBackgroundColorFromPalette(d, CardColorPickerSheet.colorToHex(applied));
   }
 
   @override
@@ -326,17 +308,22 @@ class _CardViewPageState extends State<CardViewPage> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.credit_card_off_rounded, size: 64, color: colorScheme.outline.withValues(alpha: 0.6)),
+                Icon(Icons.credit_card_off_rounded,
+                    size: 64,
+                    color: colorScheme.outline.withValues(alpha: 0.6)),
                 const SizedBox(height: 16),
                 Text(
                   context.l10n.henzKartYok,
-                  style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600, color: colorScheme.onSurface),
+                  style: textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: colorScheme.onSurface),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 8),
                 Text(
                   context.l10n.profilBilgileriniziDoldurupIlkKartnz,
-                  style: textTheme.bodyMedium?.copyWith(color: colorScheme.onSurfaceVariant),
+                  style: textTheme.bodyMedium
+                      ?.copyWith(color: colorScheme.onSurfaceVariant),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 24),
@@ -347,7 +334,8 @@ class _CardViewPageState extends State<CardViewPage> {
                   style: FilledButton.styleFrom(
                     backgroundColor: AppColors.primary,
                     foregroundColor: AppColors.textOnPrimary,
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 20, vertical: 14),
                   ),
                 ),
               ],
@@ -385,7 +373,8 @@ class _CardViewPageState extends State<CardViewPage> {
                   Expanded(
                     child: Center(
                       child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: cardHorizontalPadding),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: cardHorizontalPadding),
                         child: AspectRatio(
                           aspectRatio: FlippablePersonCard.cardAspectRatio,
                           child: isCarousel
@@ -402,15 +391,20 @@ class _CardViewPageState extends State<CardViewPage> {
                                       animation: _pageController,
                                       builder: (context, child) {
                                         double t = 0;
-                                        if (_pageController.position.haveDimensions) {
+                                        if (_pageController
+                                            .position.haveDimensions) {
                                           final page = _pageController.page ??
-                                              _pageController.initialPage.toDouble();
-                                          t = (page - index).abs().clamp(0.0, 1.0);
+                                              _pageController.initialPage
+                                                  .toDouble();
+                                          t = (page - index)
+                                              .abs()
+                                              .clamp(0.0, 1.0);
                                         }
                                         const maxScaleDelta = 0.06;
                                         const maxFadeDelta = 0.2;
                                         final scale = 1.0 - (t * maxScaleDelta);
-                                        final opacity = 1.0 - (t * maxFadeDelta);
+                                        final opacity =
+                                            1.0 - (t * maxFadeDelta);
 
                                         return Opacity(
                                           opacity: opacity,
@@ -423,7 +417,8 @@ class _CardViewPageState extends State<CardViewPage> {
                                       child: MyCardPreviewHelpers.flippableCard(
                                         draft: draft,
                                         l10n: context.l10n,
-                                        emptyMessage: context.l10n.kartBilgisiYok,
+                                        emptyMessage:
+                                            context.l10n.kartBilgisiYok,
                                       ),
                                     );
                                   },
@@ -480,8 +475,10 @@ class _CardViewPageState extends State<CardViewPage> {
                     runSpacing: 12,
                     children: [
                       _buildColorChip(d, null),
-                      ...cardBackgroundColorOptions.map((hex) => _buildColorChip(d, hex)),
-                      if (hasLastUsed && d.lastUsedPaletteBackgroundColor != null)
+                      ...cardBackgroundColorOptions
+                          .map((hex) => _buildColorChip(d, hex)),
+                      if (hasLastUsed &&
+                          d.lastUsedPaletteBackgroundColor != null)
                         _buildColorChip(d, d.lastUsedPaletteBackgroundColor!),
                       _buildPaletteButton(),
                     ],
@@ -500,7 +497,8 @@ class _CardViewPageState extends State<CardViewPage> {
                     runSpacing: 12,
                     children: [
                       _buildTextColorChip(d, null),
-                      ...cardTextColorOptions.map((hex) => _buildTextColorChip(d, hex)),
+                      ...cardTextColorOptions
+                          .map((hex) => _buildTextColorChip(d, hex)),
                       _buildTextPaletteButton(d),
                     ],
                   ),
@@ -527,7 +525,8 @@ class _CardViewPageState extends State<CardViewPage> {
   Widget _buildColorChip(OnboardingCardDraft d, String? hex) {
     final colorScheme = Theme.of(context).colorScheme;
     final isDefault = hex == null;
-    final isSelected = isDefault ? d.backgroundColor == null : d.backgroundColor == hex;
+    final isSelected =
+        isDefault ? d.backgroundColor == null : d.backgroundColor == hex;
     final color = hex != null ? _parseHex(hex) : colorScheme.surface;
 
     return GestureDetector(
@@ -539,14 +538,21 @@ class _CardViewPageState extends State<CardViewPage> {
           color: color,
           shape: BoxShape.circle,
           border: Border.all(
-            color: isSelected ? AppColors.primary : colorScheme.outline.withValues(alpha: 0.4),
+            color: isSelected
+                ? AppColors.primary
+                : colorScheme.outline.withValues(alpha: 0.4),
             width: isSelected ? 3 : 1.5,
           ),
         ),
         child: isDefault
-            ? Icon(isSelected ? Icons.check_rounded : Icons.palette_outlined, color: isSelected ? AppColors.primary : colorScheme.onSurfaceVariant, size: 22)
+            ? Icon(isSelected ? Icons.check_rounded : Icons.palette_outlined,
+                color: isSelected
+                    ? AppColors.primary
+                    : colorScheme.onSurfaceVariant,
+                size: 22)
             : (isSelected && color != null && color.computeLuminance() > 0.5)
-                ? Icon(Icons.check_rounded, color: AppColors.textPrimary, size: 22)
+                ? Icon(Icons.check_rounded,
+                    color: AppColors.textPrimary, size: 22)
                 : null,
       ),
     );
@@ -560,10 +566,14 @@ class _CardViewPageState extends State<CardViewPage> {
       child: InkWell(
         borderRadius: BorderRadius.circular(24),
         onTap: _openColorPalette,
-        child: const SizedBox(
+        child: SizedBox(
           width: 48,
           height: 48,
-          child: Icon(Icons.palette_outlined, color: AppColors.primary, size: 22),
+          child: Icon(
+            Icons.palette_outlined,
+            color: AppColors.primary,
+            size: 22,
+          ),
         ),
       ),
     );
@@ -572,9 +582,9 @@ class _CardViewPageState extends State<CardViewPage> {
   Widget _buildTextColorChip(OnboardingCardDraft d, String? hex) {
     final colorScheme = Theme.of(context).colorScheme;
     final isDefault = hex == null;
-    final isSelected =
-        isDefault ? d.accentColor == null : d.accentColor == hex;
-    final color = hex != null ? _parseHex(hex) : colorScheme.surfaceContainerHighest;
+    final isSelected = isDefault ? d.accentColor == null : d.accentColor == hex;
+    final color =
+        hex != null ? _parseHex(hex) : colorScheme.surfaceContainerHighest;
 
     return GestureDetector(
       onTap: () => _setTextColor(d, hex),
@@ -594,7 +604,9 @@ class _CardViewPageState extends State<CardViewPage> {
         child: isDefault
             ? Icon(
                 isSelected ? Icons.check_rounded : Icons.title_outlined,
-                color: isSelected ? AppColors.primary : colorScheme.onSurfaceVariant,
+                color: isSelected
+                    ? AppColors.primary
+                    : colorScheme.onSurfaceVariant,
                 size: 22,
               )
             : Center(
@@ -621,10 +633,11 @@ class _CardViewPageState extends State<CardViewPage> {
       child: InkWell(
         borderRadius: BorderRadius.circular(24),
         onTap: () => _openCustomTextColorPicker(d),
-        child: const SizedBox(
+        child: SizedBox(
           width: 48,
           height: 48,
-          child: Icon(Icons.palette_outlined, color: AppColors.primary, size: 22),
+          child:
+              Icon(Icons.palette_outlined, color: AppColors.primary, size: 22),
         ),
       ),
     );

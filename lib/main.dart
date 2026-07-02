@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 
 import 'app.dart';
@@ -19,6 +20,11 @@ void main() {
 Future<void> _bootstrap() async {
   final widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
+
+  await SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+  ]);
 
   FlutterError.onError = (details) {
     FlutterError.presentError(details);
@@ -66,7 +72,10 @@ void _runApp(AppInitResult result) {
     resolveOnboardingInitialDraft: result.resolveOnboardingInitialDraft,
     getThemePreference: result.getThemePreference,
     setThemePreference: result.setThemePreference,
+    getAccentColorId: result.getAccentColorId,
+    setAccentColorId: result.setAccentColorId,
     initialThemePreference: result.initialThemePreference,
+    initialAccentColorId: result.initialAccentColorId,
     getLocalePreference: result.getLocalePreference,
     setLocalePreference: result.setLocalePreference,
     initialLocalePreference: result.initialLocalePreference,
