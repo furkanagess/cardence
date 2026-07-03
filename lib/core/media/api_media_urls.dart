@@ -1,4 +1,5 @@
 import '../network/api_config.dart';
+import 'media_image_size.dart';
 
 /// API üzerinden servis edilen medya URL yardımcıları.
 class ApiMediaUrls {
@@ -8,6 +9,12 @@ class ApiMediaUrls {
     r'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$',
   );
   static final RegExp _guidCompactPattern = RegExp(r'^[0-9a-fA-F]{32}$');
+  static final RegExp _profileSizedPattern =
+      RegExp(r'profile-\d+\.[a-zA-Z0-9]+$');
+  static final RegExp _eventGroupSizedPattern = RegExp(
+    r'[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}'
+    r'-\d+\.[a-zA-Z0-9]+$',
+  );
 
   /// Göreli veya mutlak medya URL'sini tam API adresine çevirir.
   static String? resolve(String? url) {
@@ -44,8 +51,23 @@ class ApiMediaUrls {
     return parsed.host == baseHost;
   }
 
-  /// Kartvizit profil fotoğrafları paylaşımda herkese açıktır:
-  /// `/uploads/users/{userId}/profile.{ext}`
+  /// Ekran boyutuna uygun varyant URL'si üretir; harici URL'ler olduğu gibi kalır.
+  static String? variantUrl(String? url, MediaImageSize size) {
+    final resolved = resolve(url);
+    if (resolved == null) return null;
+    if (!isApiUploadUrl(url)) return resolved;
+
+    final uri = Uri.parse(resolved);
+    final variantPath = _applyVariantToPath(uri.path, size.width);
+    if (variantPath == uri.path) return resolved;
+
+    return uri.replace(path: variantPath).toString();
+  }
+
+  /// Kartvizit profil fotoğrafları paylaşımda herkese açıktır.
+  static bool isPublicProfilePhotoUrl(String? url) =>
+      isPublicProfilePhotoPath(normalizedPath(url));
+
   static bool isPublicProfilePhotoPath(String path) {
     final segments =
         path.split('/').where((segment) => segment.isNotEmpty).toList();
@@ -54,11 +76,30 @@ class ApiMediaUrls {
     if (!_isUserIdSegment(segments[2])) return false;
 
     final fileName = segments[3].toLowerCase();
-    return fileName.startsWith('profile.');
+    return fileName.startsWith('profile-') && fileName.endsWith('.jpg') ||
+        fileName.startsWith('profile.');
   }
 
-  static bool isPublicProfilePhotoUrl(String? url) =>
-      isPublicProfilePhotoPath(normalizedPath(url));
+  static String _applyVariantToPath(String path, int width) {
+    if (path.contains('/event-groups/')) {
+      final fileName = path.split('/').last;
+      if (!_eventGroupSizedPattern.hasMatch(fileName)) {
+        return path;
+      }
+      final groupId = fileName.split('-').take(5).join('-');
+      return path.replaceFirst(fileName, '$groupId-$width.jpg');
+    }
+
+    if (path.contains('/users/') && path.contains('profile')) {
+      final fileName = path.split('/').last;
+      if (!_profileSizedPattern.hasMatch(fileName)) {
+        return path;
+      }
+      return path.replaceFirst(fileName, 'profile-$width.jpg');
+    }
+
+    return path;
+  }
 
   static bool _isUserIdSegment(String segment) {
     return _guidPattern.hasMatch(segment) ||

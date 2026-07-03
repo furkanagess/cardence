@@ -1,3 +1,4 @@
+using Cardence.Application.Common;
 using Cardence.Application.Interfaces;
 using Cardence.Application.Options;
 using Microsoft.Extensions.Hosting;
@@ -24,33 +25,16 @@ public sealed class LocalProfilePhotoStorage : IProfilePhotoStorage
         string contentType,
         CancellationToken cancellationToken = default)
     {
-        var extension = ResolveExtension(contentType);
+        _ = contentType;
+
         var userDir = Path.Combine(_uploadRoot, "users", userId.ToString("D"));
-        Directory.CreateDirectory(userDir);
+        await MediaImageProcessor.SaveProfileVariantsAsync(content, userDir, cancellationToken);
 
-        var fileName = $"profile{extension}";
-        var absolutePath = Path.Combine(userDir, fileName);
-
-        await using (var fileStream = new FileStream(
-            absolutePath,
-            FileMode.Create,
-            FileAccess.Write,
-            FileShare.None))
-        {
-            await content.CopyToAsync(fileStream, cancellationToken);
-        }
-
-        return $"{_publicBaseUrl}/uploads/users/{userId:D}/{fileName}";
-    }
-
-    private static string ResolveExtension(string contentType)
-    {
-        return contentType.ToLowerInvariant() switch
-        {
-            "image/png" => ".png",
-            "image/webp" => ".webp",
-            "image/jpeg" or "image/jpg" => ".jpg",
-            _ => ".jpg",
-        };
+        var version = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+        return MediaUrlBuilder.ProfilePhotoUrl(
+            _publicBaseUrl,
+            userId,
+            MediaVariantWidths.DefaultCard,
+            version);
     }
 }

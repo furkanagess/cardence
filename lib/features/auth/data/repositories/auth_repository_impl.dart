@@ -316,7 +316,7 @@ class AuthRepositoryImpl implements AuthRepository {
     );
     final entity = profile.toEntity();
     if (entity.photoUrl != null && entity.photoUrl!.trim().isNotEmpty) {
-      AuthenticatedImageLoader.evict(entity.photoUrl!.trim());
+      AuthenticatedImageLoader.evictAllVariants(entity.photoUrl!.trim());
     }
     final enriched = _mergeProfile(
       AuthSessionModel.fromEntity(session),

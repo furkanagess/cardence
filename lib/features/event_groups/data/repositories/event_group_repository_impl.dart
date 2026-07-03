@@ -1,4 +1,5 @@
 import '../../../../core/auth/auth_token_provider.dart';
+import '../../../../core/media/authenticated_image_loader.dart';
 import '../../../../core/network/auth_api_exception.dart';
 import '../../domain/entities/event_group.dart';
 import '../../domain/entities/event_group_create_input.dart';
@@ -103,6 +104,7 @@ class EventGroupRepositoryImpl implements EventGroupRepository {
         filePath: photoFilePath,
         accessToken: token,
       );
+      AuthenticatedImageLoader.evictAllVariants(created.photoUrl);
     }
 
     final localGroups = await _local.getEventGroups();
@@ -145,6 +147,9 @@ class EventGroupRepositoryImpl implements EventGroupRepository {
         filePath: photoFilePath,
         accessToken: token,
       );
+      AuthenticatedImageLoader.evictAllVariants(updated.photoUrl);
+    } else if (input.clearPhoto) {
+      AuthenticatedImageLoader.evictAllVariants(updated.photoUrl);
     }
 
     await _upsertLocalGroup(updated);

@@ -2,8 +2,9 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 
-import '../../media/authenticated_image_loader.dart';
 import '../../media/api_media_urls.dart';
+import '../../media/authenticated_image_loader.dart';
+import '../../media/media_image_size.dart';
 
 /// Cardence API `/uploads` ve harici görselleri yükler.
 class AuthenticatedNetworkImage extends StatefulWidget {
@@ -13,6 +14,7 @@ class AuthenticatedNetworkImage extends StatefulWidget {
     this.width,
     this.height,
     this.fit = BoxFit.cover,
+    this.displaySize,
     this.errorBuilder,
     this.loadingBuilder,
   });
@@ -21,6 +23,7 @@ class AuthenticatedNetworkImage extends StatefulWidget {
   final double? width;
   final double? height;
   final BoxFit fit;
+  final MediaImageSize? displaySize;
   final Widget Function(BuildContext context)? errorBuilder;
   final Widget Function(BuildContext context)? loadingBuilder;
 
@@ -34,16 +37,34 @@ class _AuthenticatedNetworkImageState extends State<AuthenticatedNetworkImage> {
   bool _failed = false;
   bool _usePlainNetwork = false;
 
-  String? get _resolvedUrl => ApiMediaUrls.resolve(widget.imageUrl);
+  String? get _sourceUrl => widget.imageUrl.trim().isEmpty
+      ? null
+      : widget.imageUrl.trim();
 
-  bool get _isApiUpload => ApiMediaUrls.isApiUploadUrl(widget.imageUrl);
+  MediaImageSize get _resolvedDisplaySize =>
+      widget.displaySize ?? _sizeForLayout(widget.width ?? widget.height ?? 128);
+
+  String? get _requestUrl {
+    final source = _sourceUrl;
+    if (source == null) return null;
+    return ApiMediaUrls.variantUrl(source, _resolvedDisplaySize) ??
+        ApiMediaUrls.resolve(source);
+  }
+
+  static MediaImageSize _sizeForLayout(double layoutPx) {
+    if (layoutPx <= 56) return MediaImageSize.thumb;
+    if (layoutPx <= 120) return MediaImageSize.small;
+    if (layoutPx <= 280) return MediaImageSize.medium;
+    return MediaImageSize.large;
+  }
 
   @override
   void initState() {
     super.initState();
-    final cached = AuthenticatedImageLoader.cachedBytes(widget.imageUrl);
-    if (cached != null) {
-      _bytes = cached;
+    final requestUrl = _requestUrl;
+    if (requestUrl != null) {
+      final cached = AuthenticatedImageLoader.cachedBytes(requestUrl);
+      if (cached != null) _bytes = cached;
     }
     _load();
   }
@@ -51,15 +72,19 @@ class _AuthenticatedNetworkImageState extends State<AuthenticatedNetworkImage> {
   @override
   void didUpdateWidget(covariant AuthenticatedNetworkImage oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (ApiMediaUrls.resolve(oldWidget.imageUrl) !=
-        ApiMediaUrls.resolve(widget.imageUrl)) {
+    if (_requestUrl != ApiMediaUrls.variantUrl(
+          oldWidget.imageUrl,
+          oldWidget.displaySize ??
+              _sizeForLayout(oldWidget.width ?? oldWidget.height ?? 128),
+        )) {
       _load();
     }
   }
 
   Future<void> _load() async {
-    final url = _resolvedUrl;
-    if (url == null || url.isEmpty) {
+    final source = _sourceUrl;
+    final requestUrl = _requestUrl;
+    if (source == null || requestUrl == null) {
       if (!mounted) return;
       setState(() {
         _bytes = null;
@@ -69,7 +94,7 @@ class _AuthenticatedNetworkImageState extends State<AuthenticatedNetworkImage> {
       return;
     }
 
-    if (!_isApiUpload) {
+    if (!ApiMediaUrls.isApiUploadUrl(source)) {
       if (!mounted) return;
       setState(() {
         _bytes = null;
@@ -79,7 +104,7 @@ class _AuthenticatedNetworkImageState extends State<AuthenticatedNetworkImage> {
       return;
     }
 
-    final cached = AuthenticatedImageLoader.cachedBytes(widget.imageUrl);
+    final cached = AuthenticatedImageLoader.cachedBytes(requestUrl);
     if (cached != null) {
       if (!mounted) return;
       setState(() {
@@ -97,7 +122,7 @@ class _AuthenticatedNetworkImageState extends State<AuthenticatedNetworkImage> {
       _usePlainNetwork = false;
     });
 
-    final bytes = await AuthenticatedImageLoader.loadBytes(widget.imageUrl);
+    final bytes = await AuthenticatedImageLoader.loadBytes(requestUrl);
     if (!mounted) return;
     setState(() {
       _bytes = bytes;
@@ -106,10 +131,18 @@ class _AuthenticatedNetworkImageState extends State<AuthenticatedNetworkImage> {
     });
   }
 
+  int? get _cacheSizePx {
+    final layout = widget.width ?? widget.height;
+    if (layout == null) return _resolvedDisplaySize.width;
+    final ratio = MediaQuery.maybeDevicePixelRatioOf(context) ?? 1.0;
+    return (layout * ratio).ceil().clamp(1, _resolvedDisplaySize.width);
+  }
+
   @override
   Widget build(BuildContext context) {
-    final url = _resolvedUrl;
-    if (url == null || url.isEmpty || _failed) {
+    final source = _sourceUrl;
+    final requestUrl = _requestUrl;
+    if (source == null || requestUrl == null || _failed) {
       return _sized(
         widget.errorBuilder?.call(context) ??
             const ColoredBox(color: Colors.transparent),
@@ -119,9 +152,10 @@ class _AuthenticatedNetworkImageState extends State<AuthenticatedNetworkImage> {
     if (_usePlainNetwork) {
       return _sized(
         Image.network(
-          url,
+          ApiMediaUrls.resolve(source) ?? source,
           fit: widget.fit,
           gaplessPlayback: true,
+          cacheWidth: _cacheSizePx,
           errorBuilder: (_, __, ___) =>
               widget.errorBuilder?.call(context) ??
               const ColoredBox(color: Colors.transparent),
@@ -147,6 +181,7 @@ class _AuthenticatedNetworkImageState extends State<AuthenticatedNetworkImage> {
         _bytes!,
         fit: widget.fit,
         gaplessPlayback: true,
+        cacheWidth: _cacheSizePx,
         errorBuilder: (_, __, ___) =>
             widget.errorBuilder?.call(context) ??
             const ColoredBox(color: Colors.transparent),

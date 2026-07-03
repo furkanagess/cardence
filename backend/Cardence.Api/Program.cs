@@ -2,8 +2,8 @@ using System.Text;
 using Cardence.Api.Health;
 using Cardence.Api.Middleware;
 using Cardence.Api.Swagger;
-using Cardence.Application;
 using Cardence.Application.Common;
+using Cardence.Application;
 using Cardence.Application.Options;
 using Cardence.Infrastructure;
 using Cardence.Infrastructure.Persistence;
@@ -367,6 +367,18 @@ app.UseStaticFiles(new StaticFileOptions
     FileProvider = new PhysicalFileProvider(uploadsPath),
     RequestPath = "/uploads",
     ContentTypeProvider = uploadContentTypes,
+    OnPrepareResponse = static ctx =>
+    {
+        if (!ctx.Context.Request.Path.StartsWithSegments("/uploads"))
+        {
+            return;
+        }
+
+        var cacheValue = ctx.Context.Request.Query.ContainsKey("v")
+            ? "public,max-age=31536000,immutable"
+            : "private,max-age=3600";
+        ctx.Context.Response.Headers.CacheControl = cacheValue;
+    },
 });
 
 app.UseAuthorization();
@@ -405,7 +417,7 @@ static bool IsPublicProfilePhotoUpload(PathString path)
         return false;
     }
 
-    return segments[3].StartsWith("profile.", StringComparison.OrdinalIgnoreCase);
+    return MediaUrlBuilder.IsProfilePhotoFile(segments[3]);
 }
 
 static bool IsUserIdSegment(string segment)

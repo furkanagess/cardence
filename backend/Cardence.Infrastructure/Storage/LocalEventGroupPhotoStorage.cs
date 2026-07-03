@@ -1,3 +1,4 @@
+using Cardence.Application.Common;
 using Cardence.Application.Interfaces;
 using Cardence.Application.Options;
 using Microsoft.Extensions.Hosting;
@@ -25,30 +26,26 @@ public sealed class LocalEventGroupPhotoStorage : IEventGroupPhotoStorage
         string contentType,
         CancellationToken cancellationToken = default)
     {
-        var extension = ResolveExtension(contentType);
+        _ = contentType;
+
         var groupDir = Path.Combine(
             _uploadRoot,
             "users",
             userId.ToString("D"),
             "event-groups");
-        Directory.CreateDirectory(groupDir);
+        await MediaImageProcessor.SaveEventGroupVariantsAsync(
+            content,
+            groupDir,
+            groupId,
+            cancellationToken);
 
-        await DeleteExistingFilesAsync(groupDir, groupId);
-
-        var fileName = $"{groupId:D}{extension}";
-        var absolutePath = Path.Combine(groupDir, fileName);
-
-        await using (var fileStream = new FileStream(
-            absolutePath,
-            FileMode.Create,
-            FileAccess.Write,
-            FileShare.None))
-        {
-            await content.CopyToAsync(fileStream, cancellationToken);
-        }
-
-        return
-            $"{_publicBaseUrl}/uploads/users/{userId:D}/event-groups/{fileName}?v={DateTimeOffset.UtcNow.ToUnixTimeSeconds()}";
+        var version = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+        return MediaUrlBuilder.EventGroupPhotoUrl(
+            _publicBaseUrl,
+            userId,
+            groupId,
+            MediaVariantWidths.DefaultEventCover,
+            version);
     }
 
     public Task DeleteEventGroupPhotoAsync(
@@ -56,38 +53,24 @@ public sealed class LocalEventGroupPhotoStorage : IEventGroupPhotoStorage
         Guid groupId,
         CancellationToken cancellationToken = default)
     {
+        _ = cancellationToken;
+
         var groupDir = Path.Combine(
             _uploadRoot,
             "users",
             userId.ToString("D"),
             "event-groups");
-        return DeleteExistingFilesAsync(groupDir, groupId);
-    }
-
-    private static Task DeleteExistingFilesAsync(string groupDir, Guid groupId)
-    {
         if (!Directory.Exists(groupDir))
         {
             return Task.CompletedTask;
         }
 
         var prefix = $"{groupId:D}";
-        foreach (var file in Directory.EnumerateFiles(groupDir, $"{prefix}.*"))
+        foreach (var file in Directory.EnumerateFiles(groupDir, $"{prefix}*"))
         {
             File.Delete(file);
         }
 
         return Task.CompletedTask;
-    }
-
-    private static string ResolveExtension(string contentType)
-    {
-        return contentType.ToLowerInvariant() switch
-        {
-            "image/png" => ".png",
-            "image/webp" => ".webp",
-            "image/jpeg" or "image/jpg" => ".jpg",
-            _ => ".jpg",
-        };
     }
 }

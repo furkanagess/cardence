@@ -51,7 +51,7 @@ class OnboardingPhotoPicker extends StatelessWidget {
 
       final uploadedPhotoUrl = profile.photoUrl?.trim();
       if (uploadedPhotoUrl != null && uploadedPhotoUrl.isNotEmpty) {
-        AuthenticatedImageLoader.evict(uploadedPhotoUrl);
+        AuthenticatedImageLoader.evictAllVariants(uploadedPhotoUrl);
       }
 
       onPhotoUrlChanged(profile.photoUrl);

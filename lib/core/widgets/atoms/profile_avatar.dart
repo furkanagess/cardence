@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../theme/app_colors.dart';
+import '../../media/media_image_size.dart';
 import 'authenticated_network_image.dart';
 
 /// Profil veya kart fotoğrafı; URL yoksa baş harf gösterir.
@@ -13,6 +14,7 @@ class ProfileAvatar extends StatelessWidget {
     this.onTap,
     this.showEditBadge = false,
     this.circular = false,
+    this.displaySize,
   });
 
   final String? photoUrl;
@@ -21,6 +23,17 @@ class ProfileAvatar extends StatelessWidget {
   final VoidCallback? onTap;
   final bool showEditBadge;
   final bool circular;
+  final MediaImageSize? displaySize;
+
+  MediaImageSize _resolveDisplaySize() =>
+      displaySize ??
+      (size <= 56
+          ? MediaImageSize.thumb
+          : size <= 120
+              ? MediaImageSize.small
+              : size <= 280
+                  ? MediaImageSize.medium
+                  : MediaImageSize.large);
 
   String get _initial {
     final name = displayName?.trim();
@@ -55,6 +68,7 @@ class ProfileAvatar extends StatelessWidget {
       width: size,
       height: size,
       fit: BoxFit.cover,
+      displaySize: _resolveDisplaySize(),
       errorBuilder: (_) => _buildInitial(colorScheme),
       loadingBuilder: (_) => Center(
         child: SizedBox(
