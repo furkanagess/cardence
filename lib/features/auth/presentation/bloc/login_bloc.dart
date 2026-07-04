@@ -171,3 +171,9 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     }
   }
 }
+
+// --- OTP handlers (geçici kapalı) ---
+// on<LoginPhoneOtpRequested>(_onPhoneOtpRequested);
+// on<LoginPhoneOtpVerified>(_onPhoneOtpVerified);
+// on<LoginPhoneOtpResendRequested>(_onPhoneOtpResendRequested);
+// on<LoginPhoneStepBack>(_onPhoneStepBack);

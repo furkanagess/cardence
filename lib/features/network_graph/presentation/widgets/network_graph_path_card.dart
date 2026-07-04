@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/l10n/app_l10n.dart';
 import '../../../../core/l10n/l10n_extensions.dart';
+import '../../../../core/theme/app_colors.dart';
 import '../../domain/entities/network_graph_path.dart';
 import 'network_graph_node_list.dart';
 
@@ -28,9 +29,10 @@ class NetworkGraphPathCard extends StatelessWidget {
     return Card(
       elevation: 0,
       margin: EdgeInsets.zero,
+      color: AppColors.graphNodeLabelBackground,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(18),
-        side: BorderSide(color: colorScheme.outlineVariant),
+        side: const BorderSide(color: AppColors.graphNodeLabelBorder),
       ),
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -46,6 +48,7 @@ class NetworkGraphPathCard extends StatelessWidget {
                     AppL10n.connectionPath(l10n),
                     style: theme.textTheme.titleSmall?.copyWith(
                       fontWeight: FontWeight.w800,
+                      color: AppColors.textPrimaryDark,
                     ),
                   ),
                 ),
@@ -67,7 +70,7 @@ class NetworkGraphPathCard extends StatelessWidget {
               Text(
                 AppL10n.selectDestinationCard(l10n, pathSourceLabel!),
                 style: theme.textTheme.bodyMedium?.copyWith(
-                  color: colorScheme.onSurfaceVariant,
+                  color: AppColors.textSecondaryDark,
                   height: 1.35,
                 ),
               )
@@ -75,7 +78,7 @@ class NetworkGraphPathCard extends StatelessWidget {
               Text(
                 AppL10n.noPathFoundBetweenCards(l10n),
                 style: theme.textTheme.bodyMedium?.copyWith(
-                  color: colorScheme.onSurfaceVariant,
+                  color: AppColors.textSecondaryDark,
                   height: 1.35,
                 ),
               )
@@ -87,7 +90,7 @@ class NetworkGraphPathCard extends StatelessWidget {
                   path!.pathNodeIds.length,
                 ),
                 style: theme.textTheme.bodyMedium?.copyWith(
-                  color: colorScheme.onSurfaceVariant,
+                  color: AppColors.textSecondaryDark,
                 ),
               ),
               const SizedBox(height: 12),
@@ -97,7 +100,7 @@ class NetworkGraphPathCard extends StatelessWidget {
               Text(
                 AppL10n.tapTwoNodesToFindPath(l10n),
                 style: theme.textTheme.bodyMedium?.copyWith(
-                  color: colorScheme.onSurfaceVariant,
+                  color: AppColors.textSecondaryDark,
                   height: 1.35,
                 ),
               ),

@@ -84,3 +84,25 @@ class LoginPhoneSubmitted extends LoginEvent {
   @override
   List<Object?> get props => [phone, password];
 }
+
+// --- OTP (geçici kapalı) ---
+// enum PhoneLoginStep { enterPhone, enterOtp }
+//
+// class LoginPhoneOtpRequested extends LoginEvent {
+//   const LoginPhoneOtpRequested({required this.phone});
+//   final String phone;
+// }
+//
+// class LoginPhoneOtpVerified extends LoginEvent {
+//   const LoginPhoneOtpVerified({required this.phone, required this.otpCode});
+//   final String phone;
+//   final String otpCode;
+// }
+//
+// class LoginPhoneOtpResendRequested extends LoginEvent {
+//   const LoginPhoneOtpResendRequested();
+// }
+//
+// class LoginPhoneStepBack extends LoginEvent {
+//   const LoginPhoneStepBack();
+// }

@@ -26,7 +26,6 @@ class SavedCardProfileActionBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
     final buttons = <Widget>[];
 
     void addButton(Widget button) {
@@ -38,6 +37,7 @@ class SavedCardProfileActionBar extends StatelessWidget {
       addButton(
         _ProfileActionButton(
           label: context.l10n.ePosta,
+          icon: Icons.email_outlined,
           filled: true,
           onTap: onEmail,
         ),
@@ -46,6 +46,7 @@ class SavedCardProfileActionBar extends StatelessWidget {
       addButton(
         _ProfileActionButton(
           label: context.l10n.telefon,
+          icon: Icons.phone_outlined,
           filled: true,
           onTap: onPhone,
         ),
@@ -54,6 +55,7 @@ class SavedCardProfileActionBar extends StatelessWidget {
       addButton(
         _ProfileActionButton(
           label: context.l10n.linkedin,
+          icon: Icons.link_rounded,
           filled: true,
           onTap: onLinkedIn,
         ),
@@ -64,6 +66,7 @@ class SavedCardProfileActionBar extends StatelessWidget {
       addButton(
         _ProfileActionButton(
           label: context.l10n.telefon,
+          icon: Icons.phone_outlined,
           filled: false,
           onTap: onPhone,
         ),
@@ -74,6 +77,7 @@ class SavedCardProfileActionBar extends StatelessWidget {
       addButton(
         _ProfileActionButton(
           label: context.l10n.linkedin,
+          icon: Icons.link_rounded,
           filled: false,
           onTap: onLinkedIn,
         ),
@@ -92,7 +96,7 @@ class SavedCardProfileActionBar extends StatelessWidget {
     }
 
     return ColoredBox(
-      color: colorScheme.surface,
+      color: AppColors.profileDetailSurface,
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
         child: Row(
@@ -106,17 +110,41 @@ class SavedCardProfileActionBar extends StatelessWidget {
 class _ProfileActionButton extends StatelessWidget {
   const _ProfileActionButton({
     required this.label,
+    required this.icon,
     required this.filled,
     this.onTap,
   });
 
   final String label;
+  final IconData icon;
   final bool filled;
   final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
+    final labelStyle = textTheme.labelLarge?.copyWith(
+      fontWeight: FontWeight.w700,
+      letterSpacing: 0.1,
+    );
+
+    final content = Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 18),
+        const SizedBox(width: 6),
+        Flexible(
+          child: Text(
+            label,
+            maxLines: 1,
+            softWrap: false,
+            overflow: TextOverflow.visible,
+            style: labelStyle,
+          ),
+        ),
+      ],
+    );
 
     if (filled) {
       return FilledButton(
@@ -125,19 +153,12 @@ class _ProfileActionButton extends StatelessWidget {
           backgroundColor: AppColors.linkedInBrand,
           foregroundColor: AppColors.textOnPrimary,
           elevation: 0,
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(24),
           ),
-          textStyle: textTheme.labelLarge?.copyWith(
-            fontWeight: FontWeight.w700,
-          ),
         ),
-        child: Text(
-          label,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        ),
+        child: content,
       );
     }
 
@@ -148,19 +169,12 @@ class _ProfileActionButton extends StatelessWidget {
         side: BorderSide(
           color: AppColors.linkedInBrand.withValues(alpha: 0.85),
         ),
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(24),
         ),
-        textStyle: textTheme.labelLarge?.copyWith(
-          fontWeight: FontWeight.w700,
-        ),
       ),
-      child: Text(
-        label,
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-      ),
+      child: content,
     );
   }
 }
@@ -172,18 +186,14 @@ class _ProfileMoreButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-
     return SizedBox(
       width: 48,
-      height: 40,
+      height: 44,
       child: OutlinedButton(
         onPressed: onTap,
         style: OutlinedButton.styleFrom(
-          foregroundColor: colorScheme.onSurfaceVariant,
-          side: BorderSide(
-            color: colorScheme.outline.withValues(alpha: 0.75),
-          ),
+          foregroundColor: AppColors.textSecondaryDark,
+          side: const BorderSide(color: AppColors.profileDetailBorder),
           padding: EdgeInsets.zero,
           shape: const CircleBorder(),
         ),

@@ -3,6 +3,7 @@ import '../../../../core/l10n/l10n_extensions.dart';
 
 import '../../../../core/location/country_location_data_cache.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/widgets/atoms/cardence_app_bar.dart';
 import '../../../../core/widgets/atoms/custom_button.dart';
 import '../../../../core/widgets/atoms/custom_text_field.dart';
 import '../../../../core/widgets/molecules/new_event_group_name_dialog.dart';
@@ -10,7 +11,9 @@ import '../../../../core/widgets/organisms/cardence_scaffold.dart';
 import '../../../onboarding/presentation/widgets/onboarding_flow_ui.dart';
 import '../../../saved_cards/domain/entities/saved_card.dart';
 import '../../../saved_cards/domain/usecases/get_saved_cards.dart';
+import '../../../saved_cards/presentation/widgets/add_card_flow_status_views.dart';
 import '../../../saved_cards/presentation/widgets/saved_card_selectable_list.dart';
+import '../helpers/create_event_group_submit_result.dart';
 import '../helpers/create_event_group_step_meta.dart';
 import '../helpers/event_group_location_composer.dart';
 import '../helpers/event_group_meta_formatter.dart';
@@ -54,31 +57,43 @@ enum _CreateEventStep {
   cards,
 }
 
+enum _SubmitPhase { idle, submitting, success, failure }
+
 /// Her bilgi ayrı adımda: ad · konum · tarih/saat · detay · fotoğraf · kartlar.
 class CreateEventGroupPage extends StatefulWidget {
   const CreateEventGroupPage({
     super.key,
     required this.existingNames,
     required this.getSavedCards,
+    required this.onSubmit,
     this.initialPickableCards,
   });
 
   final List<String> existingNames;
   final GetSavedCards getSavedCards;
+  final Future<CreateEventGroupSubmitResult> Function(CreateEventGroupResult)
+      onSubmit;
   final List<SavedCard>? initialPickableCards;
 
-  static Future<CreateEventGroupResult?> push(
+  static const Duration statusDisplayDuration = Duration(milliseconds: 2400);
+
+  static Future<CreateEventGroupPageOutcome?> push(
     BuildContext context, {
     required List<String> existingNames,
     required GetSavedCards getSavedCards,
+    required Future<CreateEventGroupSubmitResult> Function(
+      CreateEventGroupResult,
+    )
+        onSubmit,
     List<SavedCard>? initialPickableCards,
   }) {
     CountryLocationDataCache.warmUp();
-    return Navigator.of(context).push<CreateEventGroupResult>(
+    return Navigator.of(context).push<CreateEventGroupPageOutcome>(
       MaterialPageRoute(
         builder: (context) => CreateEventGroupPage(
           existingNames: existingNames,
           getSavedCards: getSavedCards,
+          onSubmit: onSubmit,
           initialPickableCards: initialPickableCards,
         ),
       ),
@@ -110,6 +125,12 @@ class _CreateEventGroupPageState extends State<CreateEventGroupPage> {
   late final Set<String> _invitedCardIds;
   List<SavedCard> _pickableCards = [];
   bool _loadingCards = false;
+  _SubmitPhase _submitPhase = _SubmitPhase.idle;
+  String? _failureTitle;
+  String? _failureMessage;
+  bool _paywallRequiredAfterDismiss = false;
+  String? _successTitle;
+  String? _successMessage;
 
   @override
   void initState() {
@@ -295,28 +316,96 @@ class _CreateEventGroupPageState extends State<CreateEventGroupPage> {
     });
   }
 
-  void _submit() {
+  Future<void> _submit() async {
     final location = _composedLocation.trim();
     final startAt = _startAt;
     if (location.isEmpty || startAt == null) {
       setState(() => _step = _CreateEventStep.name);
       return;
     }
-    Navigator.of(context).pop(
-      CreateEventGroupResult(
-        name: _groupName,
-        location: location,
-        startAt: startAt,
-        endAt: _endAt,
-        description: _descriptionController.text.trim().isEmpty
-            ? null
-            : _descriptionController.text.trim(),
-        photoFilePath: _photoFilePath,
-        selectedCardIds: Set<String>.from(_selectedCardIds),
-        invitedCardIds: _invitedCardIds.toList(),
-      ),
+    if (_submitPhase == _SubmitPhase.submitting) return;
+
+    final draft = CreateEventGroupResult(
+      name: _groupName,
+      location: location,
+      startAt: startAt,
+      endAt: _endAt,
+      description: _descriptionController.text.trim().isEmpty
+          ? null
+          : _descriptionController.text.trim(),
+      photoFilePath: _photoFilePath,
+      selectedCardIds: Set<String>.from(_selectedCardIds),
+      invitedCardIds: _invitedCardIds.toList(),
     );
+
+    setState(() {
+      _submitPhase = _SubmitPhase.submitting;
+      _failureTitle = null;
+      _failureMessage = null;
+    });
+
+    final outcome = await widget.onSubmit(draft);
+    if (!mounted) return;
+
+    switch (outcome) {
+      case CreateEventGroupSubmitSuccess(
+          :final successTitle,
+          :final successMessage,
+        ):
+        setState(() {
+          _submitPhase = _SubmitPhase.success;
+          _successTitle = successTitle;
+          _successMessage = successMessage;
+        });
+        await Future<void>.delayed(CreateEventGroupPage.statusDisplayDuration);
+        if (!mounted) return;
+        Navigator.of(context).pop(CreateEventGroupPageOutcome.created);
+      case CreateEventGroupSubmitPaywallRequired():
+        setState(() {
+          _submitPhase = _SubmitPhase.failure;
+          _failureTitle = context.l10n.eventGroupCreateFailed;
+          _failureMessage = context.l10n.groupLimitReached;
+          _paywallRequiredAfterDismiss = true;
+        });
+      case CreateEventGroupSubmitFailure(:final title, :final message):
+        setState(() {
+          _submitPhase = _SubmitPhase.failure;
+          _failureTitle = title;
+          _failureMessage = message;
+        });
+    }
   }
+
+  void _dismissFailure() {
+    if (_paywallRequiredAfterDismiss) {
+      _paywallRequiredAfterDismiss = false;
+      Navigator.of(context).pop(CreateEventGroupPageOutcome.paywallRequired);
+      return;
+    }
+    setState(() {
+      _submitPhase = _SubmitPhase.idle;
+      _failureTitle = null;
+      _failureMessage = null;
+    });
+  }
+
+  void _handleAppBarBack() {
+    if (_submitPhase == _SubmitPhase.failure) {
+      _dismissFailure();
+      return;
+    }
+    if (_submitPhase != _SubmitPhase.idle) return;
+
+    if (_step == _CreateEventStep.name) {
+      Navigator.of(context).maybePop();
+      return;
+    }
+    _goBack();
+  }
+
+  bool get _isSubmittingFlow =>
+      _submitPhase == _SubmitPhase.submitting ||
+      _submitPhase == _SubmitPhase.success;
 
   void _toggleCard(String cardId) {
     setState(() {
@@ -452,73 +541,133 @@ class _CreateEventGroupPageState extends State<CreateEventGroupPage> {
     final isCardsStep = _step == _CreateEventStep.cards;
     final selectedCount =
         _selectedCardIds.length + _invitedCardIds.length;
+    final isForm = _submitPhase == _SubmitPhase.idle;
+    final isFailure = _submitPhase == _SubmitPhase.failure;
+    final l10n = context.l10n;
 
     return PopScope(
-      canPop: isFirstStep,
+      canPop: isForm && isFirstStep,
       onPopInvokedWithResult: (didPop, _) {
-        if (didPop || isFirstStep) return;
+        if (didPop) return;
+        if (isFailure) {
+          _dismissFailure();
+          return;
+        }
+        if (!isForm || isFirstStep) return;
         _goBack();
       },
       child: CardenceScaffold(
         resizeToAvoidBottomInset: false,
+        appBar: CardenceAppBar(
+          title: l10n.etkinlikOlutur,
+          leading: CardenceAppBar.flowBackButton(
+            context: context,
+            onPressed: _isSubmittingFlow ? null : _handleAppBarBack,
+          ),
+          automaticallyImplyLeading: false,
+          actions: isForm &&
+                  CreateEventGroupStepMeta.showsOptionalBadge(_step.index)
+              ? const [
+                  Padding(
+                    padding: EdgeInsets.only(right: 16),
+                    child: Center(child: OnboardingOptionalBadge()),
+                  ),
+                ]
+              : null,
+        ),
         body: SafeArea(
           bottom: false,
+          top: false,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              CreateEventGroupStepHeader(currentIndex: _step.index),
+              if (isForm) CreateEventGroupStepHeader(currentIndex: _step.index),
               Expanded(
-                child: IndexedStack(
-                  index: _step.index,
-                  sizing: StackFit.expand,
-                  children: [
-                    _buildNameStep(),
-                    _buildLocationStep(),
-                    _buildScheduleStep(),
-                    _buildDetailsStep(),
-                    _buildPhotoStep(),
-                    _buildCardsStep(),
-                  ],
+                child: AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 320),
+                  switchInCurve: Curves.easeOutCubic,
+                  switchOutCurve: Curves.easeInCubic,
+                  child: switch (_submitPhase) {
+                    _SubmitPhase.submitting => AddCardFlowSendingView(
+                        key: const ValueKey('create-event-sending'),
+                        message: l10n.eventGroupCreating,
+                      ),
+                    _SubmitPhase.success => AddCardFlowSuccessView(
+                        key: const ValueKey('create-event-success'),
+                        title: _successTitle ?? l10n.eventGroupCreatedSuccess,
+                        message: _successMessage ??
+                            l10n.eventGroupCreatedMessage(_groupName),
+                      ),
+                    _SubmitPhase.failure => AddCardFlowFailureView(
+                        key: const ValueKey('create-event-failure'),
+                        title: _failureTitle ?? l10n.eventGroupCreateFailed,
+                        message: _failureMessage ?? l10n.operationFailed,
+                      ),
+                    _SubmitPhase.idle => IndexedStack(
+                        key: const ValueKey('create-event-form'),
+                        index: _step.index,
+                        sizing: StackFit.expand,
+                        children: [
+                          _buildNameStep(),
+                          _buildLocationStep(),
+                          _buildScheduleStep(),
+                          _buildDetailsStep(),
+                          _buildPhotoStep(),
+                          _buildCardsStep(),
+                        ],
+                      ),
+                  },
                 ),
               ),
-              _CreateEventGroupKeyboardAwareBottom(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    if (_canSkipCurrentStep)
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(20, 0, 20, 4),
-                        child: Align(
-                          alignment: Alignment.centerRight,
-                          child: CustomButton.text(
-                            label: context.l10n.eventSkip,
-                            onPressed:
-                                _loadingCards ? null : _skipCurrentStep,
+              if (isForm)
+                _CreateEventGroupKeyboardAwareBottom(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (_canSkipCurrentStep)
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(20, 0, 20, 4),
+                          child: Align(
+                            alignment: Alignment.centerRight,
+                            child: CustomButton.text(
+                              label: l10n.eventSkip,
+                              onPressed:
+                                  _loadingCards ? null : _skipCurrentStep,
+                            ),
                           ),
                         ),
+                      OnboardingBottomBar(
+                        stepCount: CreateEventGroupStepMeta.stepCount,
+                        currentIndex: _step.index,
+                        showStepIndicator: false,
+                        backLabel: l10n.geri,
+                        onBackPressed:
+                            isFirstStep || _loadingCards ? null : _goBack,
+                        primaryLabel: isCardsStep
+                            ? (selectedCount == 0
+                                ? l10n.createGroup
+                                : l10n.createGroupWithCards(
+                                    selectedCount,
+                                  ))
+                            : l10n.devam,
+                        onPrimaryPressed:
+                            _loadingCards ? null : (isCardsStep ? _submit : _goToNext),
+                        isLoading: _loadingCards,
+                        enabled: !_loadingCards,
                       ),
-                    OnboardingBottomBar(
-                      stepCount: CreateEventGroupStepMeta.stepCount,
-                      currentIndex: _step.index,
-                      showStepIndicator: false,
-                      backLabel: context.l10n.geri,
-                      onBackPressed:
-                          isFirstStep || _loadingCards ? null : _goBack,
-                      primaryLabel: isCardsStep
-                          ? (selectedCount == 0
-                              ? context.l10n.createGroup
-                              : context.l10n.createGroupWithCards(
-                                  selectedCount,
-                                ))
-                          : context.l10n.devam,
-                      onPrimaryPressed:
-                          _loadingCards ? null : (isCardsStep ? _submit : _goToNext),
-                      isLoading: _loadingCards,
-                      enabled: !_loadingCards,
-                    ),
-                  ],
+                    ],
+                  ),
+                )
+              else if (isFailure)
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 12, 20, 16),
+                  child: CustomButton(
+                    label: _paywallRequiredAfterDismiss
+                        ? l10n.tamam
+                        : l10n.retry,
+                    onPressed: _dismissFailure,
+                  ),
                 ),
-              ),
             ],
           ),
         ),

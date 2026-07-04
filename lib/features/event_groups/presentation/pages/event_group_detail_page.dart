@@ -1,26 +1,22 @@
 import 'package:flutter/material.dart';
 import '../../../../core/l10n/app_l10n.dart';
 import '../../../../core/l10n/l10n_extensions.dart';
-import '../../../../core/network/auth_api_exception.dart';
-
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/atoms/cardence_app_bar.dart';
 import '../../../../core/widgets/atoms/custom_button.dart';
 import '../../../../core/widgets/organisms/cardence_scaffold.dart';
-import '../../../../core/widgets/organisms/flippable_person_card.dart';
 import '../../../saved_cards/domain/entities/saved_card.dart';
-import '../../../saved_cards/domain/extensions/saved_card_preview_colors.dart';
-import '../../../saved_cards/presentation/helpers/saved_card_flip_back_entries.dart';
 import '../../../saved_cards/domain/usecases/delete_saved_card.dart';
 import '../../../saved_cards/domain/usecases/get_saved_cards.dart';
 import '../../../saved_cards/domain/usecases/save_saved_card.dart';
 import '../../../saved_cards/presentation/pages/saved_card_detail_page.dart';
+import '../../../saved_cards/presentation/widgets/saved_cards_focus_arrow_track.dart';
+import '../../../saved_cards/presentation/widgets/saved_cards_horizontal_stack_view.dart';
 import '../../../network_graph/domain/entities/graph_scope.dart';
 import '../../../network_graph/domain/usecases/get_network_graph.dart';
 import '../../../network_graph/domain/usecases/get_network_graph_path.dart';
 import '../../../network_graph/presentation/helpers/network_graph_launcher.dart';
 import '../../domain/entities/event_group.dart';
-import '../../domain/entities/event_group_update_input.dart';
 import '../../domain/usecases/get_event_groups.dart';
 import '../../domain/usecases/delete_event_group.dart';
 import '../../domain/usecases/update_event_group.dart';
@@ -29,7 +25,6 @@ import '../../../saved_cards/domain/usecases/link_saved_cards_to_event_group.dar
 import '../widgets/event_group_detail_header.dart';
 import '../widgets/event_group_detail_loading_shimmer.dart';
 import '../widgets/pick_saved_cards_for_group_sheet.dart';
-import '../widgets/edit_event_group_sheet.dart';
 import '../widgets/invite_event_group_cards_sheet.dart';
 
 /// Bir etkinlik grubunun detayı: bu gruba bağlı kayıtlı kartlar listelenir.
@@ -72,13 +67,26 @@ class _EventGroupDetailPageState extends State<EventGroupDetailPage> {
   List<SavedCard> _linkedCards = [];
   List<SavedCard> _availableToAdd = [];
   bool _loading = true;
-  bool _saving = false;
+  bool _aboutExpanded = false;
+  int _focusedCardIndex = 0;
+  double _cardWidth = 280;
+  bool _isProgrammaticScroll = false;
+  late final ScrollController _cardsScrollController;
+
+  static const double _cardsHorizontalPadding = 20;
 
   @override
   void initState() {
     super.initState();
     _group = widget.group;
+    _cardsScrollController = ScrollController();
     _load();
+  }
+
+  @override
+  void dispose() {
+    _cardsScrollController.dispose();
+    super.dispose();
   }
 
   Future<void> _load() async {
@@ -104,8 +112,89 @@ class _EventGroupDetailPageState extends State<EventGroupDetailPage> {
       _availableToAdd = allCards
           .where((c) => !c.linkedEventGroupIds.contains(_group.id))
           .toList();
+      if (_linkedCards.isEmpty) {
+        _focusedCardIndex = 0;
+      } else if (_focusedCardIndex >= _linkedCards.length) {
+        _focusedCardIndex = _linkedCards.length - 1;
+      }
       _loading = false;
     });
+    if (_linkedCards.isNotEmpty) {
+      _scheduleCenterFocusedCard();
+    }
+  }
+
+  void _setFocusedCardIndex(int index, {bool animateScroll = true}) {
+    if (_linkedCards.isEmpty) return;
+    final next = index.clamp(0, _linkedCards.length - 1);
+    if (next == _focusedCardIndex) {
+      if (animateScroll) _scheduleCenterFocusedCard();
+      return;
+    }
+    setState(() => _focusedCardIndex = next);
+    if (animateScroll) _scheduleCenterFocusedCard();
+  }
+
+  /// Viewport ortasına en yakın kartın index'ini bulur.
+  int _nearestCardIndexToViewportCenter() {
+    if (!_cardsScrollController.hasClients || _linkedCards.isEmpty) {
+      return _focusedCardIndex;
+    }
+
+    final position = _cardsScrollController.position;
+    final viewportCenter =
+        position.pixels + position.viewportDimension / 2;
+    var bestIndex = 0;
+    var bestDistance = double.infinity;
+
+    for (var i = 0; i < _linkedCards.length; i++) {
+      final left = _cardsHorizontalPadding +
+          SavedCardsHorizontalStackView.cardLeftForIndex(
+            i,
+            _focusedCardIndex,
+            _cardWidth,
+          );
+      final cardCenter = left + (_cardWidth / 2);
+      final distance = (cardCenter - viewportCenter).abs();
+      if (distance < bestDistance) {
+        bestDistance = distance;
+        bestIndex = i;
+      }
+    }
+    return bestIndex;
+  }
+
+  void _syncFocusedIndexFromScroll() {
+    final nearest = _nearestCardIndexToViewportCenter();
+    if (nearest == _focusedCardIndex) return;
+    _setFocusedCardIndex(nearest, animateScroll: false);
+  }
+
+  void _scheduleCenterFocusedCard() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      _centerFocusedCard();
+    });
+  }
+
+  Future<void> _centerFocusedCard() async {
+    if (!_cardsScrollController.hasClients || _linkedCards.isEmpty) return;
+    final target = SavedCardsHorizontalStackView.cardLeftForIndex(
+      _focusedCardIndex,
+      _focusedCardIndex,
+      _cardWidth,
+    );
+    final max = _cardsScrollController.position.maxScrollExtent;
+    _isProgrammaticScroll = true;
+    try {
+      await _cardsScrollController.animateTo(
+        target.clamp(0.0, max),
+        duration: SavedCardsHorizontalStackView.stackAnimDuration,
+        curve: SavedCardsHorizontalStackView.stackAnimCurve,
+      );
+    } finally {
+      if (mounted) _isProgrammaticScroll = false;
+    }
   }
 
   Future<void> _persistCardUpdate(SavedCard updated) async {
@@ -113,11 +202,12 @@ class _EventGroupDetailPageState extends State<EventGroupDetailPage> {
     await _load();
   }
 
-  Future<void> _openCardDetail(SavedCard card) async {
+  Future<void> _openCardDetail(SavedCard card, {String? heroTag}) async {
     await Navigator.of(context).push<void>(
       MaterialPageRoute<void>(
         builder: (context) => SavedCardDetailPage(
           card: card,
+          heroTag: heroTag,
           getEventGroups: widget.getEventGroups,
           getSavedCards: widget.getSavedCards,
           updateEventGroup: widget.updateEventGroup,
@@ -131,44 +221,6 @@ class _EventGroupDetailPageState extends State<EventGroupDetailPage> {
       ),
     );
     await _load();
-  }
-
-  Future<void> _openEditGroup() async {
-    final groups = await widget.getEventGroups();
-    final existingNames = groups
-        .where((group) => group.id != _group.id)
-        .map((group) => group.name)
-        .toList();
-    if (!mounted) return;
-
-    final result = await EditEventGroupSheet.show(
-      context,
-      group: _group,
-      existingNames: existingNames,
-    );
-    if (!mounted || result == null) return;
-
-    setState(() => _saving = true);
-    try {
-      final updated = await widget.updateEventGroup(
-        EventGroupUpdateInput(
-          id: _group.id,
-          name: result.name,
-          location: result.location,
-          startAt: result.startAt,
-          endAt: result.endAt,
-          description: result.description,
-          photoFilePath: result.photoFilePath,
-          clearPhoto: result.clearPhoto,
-        ),
-      );
-      if (!mounted) return;
-      setState(() => _group = updated);
-          } on AuthApiException {
-      if (!mounted) return;
-      } finally {
-      if (mounted) setState(() => _saving = false);
-    }
   }
 
   Future<void> _openInviteByCardId() async {
@@ -214,7 +266,7 @@ class _EventGroupDetailPageState extends State<EventGroupDetailPage> {
     if (!mounted) return;
     await _load();
     if (!mounted) return;
-      }
+  }
 
   Future<void> _openNetworkGraph() async {
     final getNetworkGraph = widget.getNetworkGraph;
@@ -269,226 +321,157 @@ class _EventGroupDetailPageState extends State<EventGroupDetailPage> {
 
     if (!mounted) return;
     Navigator.of(context).pop();
-      }
-
-  Future<void> _openAddNoteModal(SavedCard card) async {
-    var draftNote = card.note ?? '';
-    final note = await showModalBottomSheet<String>(
-      context: context,
-      isScrollControlled: true,
-      showDragHandle: true,
-      builder: (context) {
-        return SafeArea(
-          child: SingleChildScrollView(
-            padding: EdgeInsets.fromLTRB(
-              16,
-              8,
-              16,
-              MediaQuery.of(context).viewInsets.bottom + 16,
-            ),
-            child: StatefulBuilder(
-              builder: (context, setModalState) {
-                final l10n = context.l10n;
-                return Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Text(
-                      AppL10n.kiiNotu(l10n),
-                      style: Theme.of(context).textTheme.titleMedium,
-                    ),
-                    const SizedBox(height: 10),
-                    TextFormField(
-                      initialValue: draftNote,
-                      minLines: 3,
-                      maxLines: 6,
-                      maxLength: 240,
-                      onChanged: (value) =>
-                          setModalState(() => draftNote = value),
-                      decoration: InputDecoration(
-                        hintText: AppL10n.buKiiHakkndaNotYazn(l10n),
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    CustomButton(
-                      label: AppL10n.kaydet(l10n),
-                      onPressed: () =>
-                          Navigator.of(context).pop(draftNote.trim()),
-                      fullWidth: false,
-                    ),
-                  ],
-                );
-              },
-            ),
-          ),
-        );
-      },
-    );
-
-    if (!mounted || note == null) return;
-    await _persistCardUpdate(
-      card.copyWith(
-        note: note.isEmpty ? null : note,
-        clearNote: note.isEmpty,
-      ),
-    );
   }
 
-  static const double _deleteBarContentHeight = 48;
-  static const double _deleteBarVerticalPadding = 16;
-
-  double _deleteBarInset(BuildContext context) {
-    return MediaQuery.paddingOf(context).bottom +
-        _deleteBarVerticalPadding +
-        _deleteBarContentHeight +
-        _deleteBarVerticalPadding;
+  void _onAddCardPressed() {
+    if (_availableToAdd.isNotEmpty) {
+      _openAddCardsPicker();
+      return;
+    }
+    _openInviteByCardId();
   }
 
-  Widget _buildStickyDeleteBar(BuildContext context) {
-    return SafeArea(
-      top: false,
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(
-          20,
-          0,
-          20,
-          _deleteBarVerticalPadding,
-        ),
-        child: Material(
-          color: Colors.transparent,
-          child: CustomButton(
-            label: AppL10n.buGrubuSil(context.l10n),
-            icon: Icons.delete_outline_rounded,
-            onPressed: _confirmDeleteGroup,
-            style: FilledButton.styleFrom(
-              backgroundColor: AppColors.error,
-              foregroundColor: AppColors.textOnPrimary,
-              elevation: 8,
-              shadowColor: AppColors.error.withValues(alpha: 0.45),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildScrollBody(
+  Widget _buildBody(
     BuildContext context,
     ColorScheme colorScheme,
     TextTheme textTheme,
   ) {
-    final bottomInset = _deleteBarInset(context);
     final coverHeight = eventGroupDetailCoverHeight(context);
-    final coverSpacerHeight =
-        coverHeight - eventGroupDetailCoverOverlap;
+    final bottomInset = MediaQuery.paddingOf(context).bottom;
 
-    return Stack(
-      fit: StackFit.expand,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Positioned(
-          top: 0,
-          left: 0,
-          right: 0,
-          height: coverHeight,
-          child: EventGroupDetailCover(group: _group),
+        Stack(
+          children: [
+            Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              height: coverHeight,
+              child: EventGroupDetailCover(group: _group),
+            ),
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                SizedBox(
+                  height: coverHeight - eventGroupDetailCoverOverlap,
+                ),
+                EventGroupDetailPinnedInfoSection(
+                  group: _group,
+                  aboutMaxLines: 2,
+                  aboutExpanded: _aboutExpanded,
+                  onAboutExpandedChanged: (expanded) {
+                    setState(() => _aboutExpanded = expanded);
+                  },
+                ),
+              ],
+            ),
+          ],
         ),
-        CustomScrollView(
-          slivers: [
-            SliverToBoxAdapter(
-              child: SizedBox(height: coverSpacerHeight),
+        Expanded(
+          child: Padding(
+            padding: EdgeInsets.only(bottom: bottomInset),
+            child: _linkedCards.isEmpty
+                ? _buildEmptyCardsState(context)
+                : _buildLinkedCardsCarousel(context),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildEmptyCardsState(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 32),
+        child: CustomButton(
+          label: AppL10n.kartEkle(context.l10n),
+          icon: Icons.person_add_alt_1_rounded,
+          onPressed: _onAddCardPressed,
+          fullWidth: false,
+          style: FilledButton.styleFrom(
+            backgroundColor: AppColors.primary,
+            foregroundColor: AppColors.textOnPrimary,
+            elevation: 0,
+            padding: const EdgeInsets.symmetric(
+              horizontal: 28,
+              vertical: 16,
             ),
-            SliverToBoxAdapter(
-              child: EventGroupDetailInfoSection(
-                group: _group,
-                linkedCardCount: _linkedCards.length,
-              ),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(14),
             ),
-            if (_linkedCards.isEmpty)
-              SliverFillRemaining(
-                hasScrollBody: false,
-                child: Padding(
-                  padding: EdgeInsets.fromLTRB(24, 24, 24, bottomInset),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.credit_card_off_rounded,
-                        size: 64,
-                        color: colorScheme.onSurfaceVariant
-                            .withValues(alpha: 0.5),
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        AppL10n.buGruptaKartYok(context.l10n),
-                        style: textTheme.titleMedium?.copyWith(
-                          color: colorScheme.onSurfaceVariant,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLinkedCardsCarousel(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        EventGroupDetailLinkedCardsHeader(
+          linkedCardCount: _linkedCards.length,
+        ),
+        const SizedBox(height: 4),
+        Expanded(
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final cardWidth =
+                  (constraints.maxWidth - 40).clamp(240.0, 420.0);
+              if ((_cardWidth - cardWidth).abs() > 0.5) {
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  if (!mounted) return;
+                  setState(() => _cardWidth = cardWidth);
+                });
+              }
+              return Column(
+                children: [
+                  Expanded(
+                    child: NotificationListener<ScrollNotification>(
+                      onNotification: (notification) {
+                        if (_isProgrammaticScroll) return false;
+                        if (notification is ScrollUpdateNotification) {
+                          _syncFocusedIndexFromScroll();
+                        } else if (notification is ScrollEndNotification) {
+                          _syncFocusedIndexFromScroll();
+                          _scheduleCenterFocusedCard();
+                        }
+                        return false;
+                      },
+                      child: SingleChildScrollView(
+                        controller: _cardsScrollController,
+                        scrollDirection: Axis.horizontal,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: _cardsHorizontalPadding,
                         ),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        AppL10n.kaydedilenKartlarnzdanSeerekBuGruba(
-                          context.l10n,
-                        ),
-                        style: textTheme.bodySmall?.copyWith(
-                          color: colorScheme.onSurfaceVariant,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 24),
-                      CustomButton(
-                        label: AppL10n.kartEkle(context.l10n),
-                        icon: Icons.add_rounded,
-                        onPressed: _availableToAdd.isEmpty
-                            ? null
-                            : _openAddCardsPicker,
-                        fullWidth: false,
-                        style: FilledButton.styleFrom(
-                          backgroundColor: AppColors.primary,
-                          foregroundColor: AppColors.textOnPrimary,
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 20,
-                            vertical: 14,
+                        physics: const BouncingScrollPhysics(),
+                        child: SavedCardsHorizontalStackView(
+                          displayCards: _linkedCards,
+                          focusedIndex: _focusedCardIndex,
+                          cardWidth: _cardWidth,
+                          onFocusedIndexChanged: _setFocusedCardIndex,
+                          onOpenCard: (card, {heroTag}) => _openCardDetail(
+                            card,
+                            heroTag: heroTag,
                           ),
                         ),
                       ),
-                      const SizedBox(height: 12),
-                      CustomButton.tonal(
-                        label: context.l10n.eventInviteByCardId,
-                        icon: Icons.badge_outlined,
-                        onPressed: _openInviteByCardId,
-                        fullWidth: false,
-                      ),
-                    ],
+                    ),
                   ),
-                ),
-              )
-            else
-              SliverPadding(
-                padding: EdgeInsets.fromLTRB(20, 20, 20, bottomInset),
-                sliver: SliverList(
-                  delegate: SliverChildBuilderDelegate(
-                    (context, index) {
-                      final card = _linkedCards[index];
-                      return Padding(
-                        padding: EdgeInsets.only(
-                          bottom: index == _linkedCards.length - 1 ? 0 : 20,
-                        ),
-                        child: _SavedCardPreviewTile(
-                          card: card,
-                          onTap: () => _openCardDetail(card),
-                          onAddNote: () => _openAddNoteModal(card),
-                        ),
-                      );
-                    },
-                    childCount: _linkedCards.length,
+                  SavedCardsFocusArrowTrack(
+                    axis: Axis.horizontal,
+                    focusedIndex: _focusedCardIndex,
+                    cardCount: _linkedCards.length,
+                    onFocusedIndexChanged: _setFocusedCardIndex,
                   ),
-                ),
-              ),
-          ],
+                  const SizedBox(height: 4),
+                ],
+              );
+            },
+          ),
         ),
       ],
     );
@@ -504,16 +487,6 @@ class _EventGroupDetailPageState extends State<EventGroupDetailPage> {
       appBar: CardenceAppBar(
         title: _group.name,
         actions: [
-          CardenceAppBar.iconAction(
-            icon: Icons.edit_outlined,
-            tooltip: context.l10n.duzenle,
-            onPressed: _saving ? null : _openEditGroup,
-          ),
-          CardenceAppBar.iconAction(
-            icon: Icons.badge_outlined,
-            tooltip: context.l10n.eventInviteByCardId,
-            onPressed: _saving ? null : _openInviteByCardId,
-          ),
           if (widget.getNetworkGraph != null &&
               widget.getNetworkGraphPath != null)
             CardenceAppBar.iconAction(
@@ -521,84 +494,16 @@ class _EventGroupDetailPageState extends State<EventGroupDetailPage> {
               tooltip: AppL10n.viewEventNetwork(context.l10n),
               onPressed: _openNetworkGraph,
             ),
-          if (!_loading && _availableToAdd.isNotEmpty)
-            CardenceAppBar.iconAction(
-              icon: Icons.person_add_alt_1_rounded,
-              tooltip: AppL10n.kartEkle(context.l10n),
-              onPressed: _openAddCardsPicker,
-            ),
+          CardenceAppBar.iconAction(
+            icon: Icons.delete_outline_rounded,
+            tooltip: AppL10n.buGrubuSil(context.l10n),
+            onPressed: _confirmDeleteGroup,
+          ),
         ],
       ),
-      body: Stack(
-        fit: StackFit.expand,
-        children: [
-          if (_loading)
-            const EventGroupDetailLoadingShimmer()
-          else ...[
-            _buildScrollBody(context, colorScheme, textTheme),
-            Positioned(
-              left: 0,
-              right: 0,
-              bottom: 0,
-              child: _buildStickyDeleteBar(context),
-            ),
-          ],
-          if (_saving)
-            ColoredBox(
-              color: colorScheme.surface.withValues(alpha: 0.55),
-              child: const Center(child: CircularProgressIndicator()),
-            ),
-        ],
-      ),
-    );
-  }
-}
-
-class _SavedCardPreviewTile extends StatelessWidget {
-  const _SavedCardPreviewTile({
-    required this.card,
-    required this.onTap,
-    this.onAddNote,
-  });
-
-  final SavedCard card;
-  final VoidCallback onTap;
-  final VoidCallback? onAddNote;
-
-  @override
-  Widget build(BuildContext context) {
-    final displayName = card.displayName?.trim().isEmpty ?? true
-        ? 'Kart ${card.cardId}'
-        : card.displayName!;
-    final companyName = card.company?.trim();
-
-    final visibleContacts = <String>[
-      if (card.email != null && card.email!.trim().isNotEmpty) 'email',
-      if (card.phone != null && card.phone!.trim().isNotEmpty) 'phone',
-      if (card.linkedin != null && card.linkedin!.trim().isNotEmpty) 'linkedin',
-      if (card.website != null && card.website!.trim().isNotEmpty) 'website',
-    ];
-
-    return GestureDetector(
-      onTap: onTap,
-      child: FlippablePersonCard(
-        title: displayName,
-        titleSecondary: companyName,
-        jobTitle: card.title?.trim(),
-        photoUrl: card.photoUrl,
-        accentColor: card.previewAccentColor,
-        backgroundColor: card.previewBackgroundColor,
-        frontEntries: const [],
-        backEntries: savedCardFlipBackEntries(card, context.l10n),
-        emptyMessage: AppL10n.kartBilgisiYok(context.l10n),
-        cardId: card.cardId,
-        onTap: onTap,
-        contactEmail: card.email,
-        contactPhone: card.phone,
-        contactWebsite: card.website,
-        contactLinkedin: card.linkedin,
-        visibleContactFields: visibleContacts,
-      ),
+      body: _loading
+          ? const EventGroupDetailLoadingShimmer()
+          : _buildBody(context, colorScheme, textTheme),
     );
   }
 }

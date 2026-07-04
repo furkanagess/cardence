@@ -4,7 +4,8 @@ import '../../../core/l10n/l10n_extensions.dart';
 import '../../constants/app_constants.dart';
 import '../../theme/app_colors.dart';
 import '../atoms/custom_button.dart';
-import '../organisms/cardence_connect_animation.dart';
+import '../../theme/splash_theme.dart';
+import '../organisms/cardence_logo_merge_animation.dart';
 
 /// Oturum süresi dolduğunda gösterilen zorunlu çıkış diyaloğu.
 class SessionExpiredDialog extends StatelessWidget {
@@ -78,9 +79,12 @@ class SessionExpiredDialog extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(24, 28, 24, 12),
               child: Column(
                 children: [
-                  const CardenceConnectAnimation(
+                  CardenceLogoMergeAnimation(
                     size: 112,
                     repeat: true,
+                    logoAssetPath: SplashTheme.logoAsset(
+                      theme.brightness,
+                    ),
                   ),
                   const SizedBox(height: 12),
                   Text(

@@ -1,7 +1,8 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:app_links/app_links.dart';
-import 'dart:async';
 
 import 'l10n/app_localizations.dart';
 
@@ -11,7 +12,7 @@ import 'core/constants/app_constants.dart';
 import 'core/theme/app_theme.dart';
 import 'core/theme/splash_theme.dart';
 import 'core/widgets/molecules/chuck_fab_overlay.dart';
-import 'core/widgets/organisms/cardence_connect_animation.dart';
+import 'core/widgets/organisms/cardence_logo_merge_animation.dart';
 import 'core/widgets/organisms/cardence_scaffold.dart';
 import 'features/auth/domain/usecases/get_auth_session.dart';
 import 'features/auth/domain/usecases/forgot_password.dart';
@@ -267,6 +268,13 @@ class _AppState extends State<App> {
   }
 
   Future<void> _bootstrap() async {
+    await Future.wait([
+      _resolveInitialDestination(),
+      Future<void>.delayed(CardenceLogoMergeAnimation.minSplashVisibleDuration),
+    ]);
+  }
+
+  Future<void> _resolveInitialDestination() async {
     final restored = await widget.restoreAuthSession();
     if (!mounted) return;
 
@@ -289,19 +297,18 @@ class _AppState extends State<App> {
     });
   }
 
-  Future<void> _syncOnboardingFromProfile() async {
-    try {
-      final profile = await widget.getCurrentUser();
-      await widget.syncOnboardingFromServer(
-        completed: profile.onboardingCompleted,
-      );
-    } catch (_) {}
-  }
-
   Future<void> _resolvePostLoginDestination() async {
-    await _syncOnboardingFromProfile();
-
-    final completed = await widget.getOnboardingCompleted();
+    // Profil /Me login sırasında çekildi (onProfileSynced). Tekrar API çağırma.
+    // Yerel okuma takılırsa login ekranında kalmamak için timeout + ana sayfa.
+    var completed = true;
+    try {
+      completed = await widget.getOnboardingCompleted().timeout(
+            const Duration(seconds: 2),
+            onTimeout: () => true,
+          );
+    } catch (_) {
+      completed = true;
+    }
     if (!mounted) return;
     setState(() {
       _destination =
@@ -322,16 +329,40 @@ class _AppState extends State<App> {
   }
 
   void _onLoginSuccess({bool fromRegistration = false}) {
-    _identifySubscriptionUser();
-    if (fromRegistration) {
-      _goToOnboardingAfterRegistration();
-      return;
+    unawaited(_handleAuthSuccess(fromRegistration: fromRegistration));
+  }
+
+  Future<void> _handleAuthSuccess({required bool fromRegistration}) async {
+    unawaited(_identifySubscriptionUser());
+    try {
+      if (fromRegistration) {
+        await _goToOnboardingAfterRegistration().timeout(
+          const Duration(seconds: 3),
+        );
+        return;
+      }
+      await _resolvePostLoginDestination().timeout(
+        const Duration(seconds: 3),
+      );
+    } catch (error, stackTrace) {
+      debugPrint('[App] Auth success navigation failed: $error');
+      debugPrintStack(stackTrace: stackTrace);
+      if (!mounted) return;
+      // Login başarılıysa asla login ekranında bırakma.
+      setState(() {
+        _destination = fromRegistration
+            ? _AppDestination.onboarding
+            : _AppDestination.main;
+      });
     }
-    _resolvePostLoginDestination();
   }
 
   Future<void> _goToOnboardingAfterRegistration() async {
-    await widget.syncOnboardingFromServer(completed: false);
+    try {
+      await widget.syncOnboardingFromServer(completed: false).timeout(
+            const Duration(seconds: 2),
+          );
+    } catch (_) {}
     if (!mounted) return;
     setState(() => _destination = _AppDestination.onboarding);
   }
@@ -504,10 +535,10 @@ class _SplashContent extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            CardenceConnectAnimation(
-              size: 220,
-              repeat: true,
-              logoAssetPath: SplashTheme.darkLogoAsset,
+            CardenceLogoMergeAnimation(
+              size: CardenceLogoMergeAnimation.splashSize,
+              repeat: false,
+              logoAssetPath: SplashTheme.logoAsset(theme.brightness),
             ),
             const SizedBox(height: 24),
             Text(

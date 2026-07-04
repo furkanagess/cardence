@@ -64,6 +64,7 @@ class ProfileAvatar extends StatelessWidget {
     }
 
     return AuthenticatedNetworkImage(
+      key: ValueKey('profile-avatar-$url-${_resolveDisplaySize().name}'),
       imageUrl: url,
       width: size,
       height: size,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/l10n/l10n_extensions.dart';
 
 import '../../../../core/utils/card_id_generator.dart';
@@ -7,12 +8,16 @@ import '../../../../core/widgets/atoms/cardence_app_bar.dart';
 import '../../../../core/widgets/atoms/custom_button.dart';
 import '../../../../core/widgets/molecules/cardence_confirm_dialog.dart';
 import '../../../../core/widgets/molecules/card_color_picker_sheet.dart';
+import '../../../../core/widgets/molecules/card_index_circle_selector.dart';
 import '../../../../core/widgets/organisms/cardence_scaffold.dart';
 import '../../../../core/widgets/organisms/flippable_person_card.dart';
 import '../widgets/my_card_preview_helpers.dart';
 import '../../../onboarding/domain/entities/onboarding_card_draft.dart';
 import '../../../onboarding/domain/usecases/get_onboarding_draft_cards.dart';
 import '../../../business_cards/domain/usecases/persist_onboarding_card.dart';
+import '../../../plans/presentation/cubit/plan_cubit.dart';
+import '../../../saved_cards/presentation/cubit/saved_cards_cubit.dart';
+import '../../../saved_cards/presentation/wallet_paywall_flow.dart';
 import '../card_customize_colors.dart';
 import '../helpers/card_effect_premium_helper.dart';
 
@@ -256,6 +261,30 @@ class _CardViewPageState extends State<CardViewPage> {
     widget.onDraftUpdated?.call(synced);
   }
 
+  Future<void> _openPaywallForLockedSlot() async {
+    try {
+      final cubit = context.read<SavedCardsCubit>();
+      await WalletPaywallFlow.show(context, cubit: cubit);
+      if (!mounted) return;
+      await context.read<PlanCubit>().refresh();
+    } catch (_) {
+      // Paywall sağlayıcıları bu rotada yoksa sessizce çık.
+    }
+    if (mounted) await _loadCards();
+  }
+
+  void _selectCardIndex(int index) {
+    if (index < 0 || index >= _cards.length) return;
+    setState(() => _selectedIndex = index);
+    if (_pageController.hasClients && _cards.length > 1) {
+      _pageController.animateToPage(
+        index,
+        duration: const Duration(milliseconds: 280),
+        curve: Curves.easeOutCubic,
+      );
+    }
+  }
+
   Future<void> _openColorPalette() async {
     final d = _draft;
     if (d == null) return;
@@ -352,7 +381,6 @@ class _CardViewPageState extends State<CardViewPage> {
         !cardBackgroundColorOptions.contains(d.lastUsedPaletteBackgroundColor);
     const cardHorizontalPadding = 16.0;
     final isCarousel = _cards.length > 1;
-    const dotRowHeight = 24.0;
 
     return PopScope(
       canPop: !_hasUnsavedChanges,
@@ -371,88 +399,92 @@ class _CardViewPageState extends State<CardViewPage> {
               child: Column(
                 children: [
                   Expanded(
-                    child: Center(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: cardHorizontalPadding),
-                        child: AspectRatio(
-                          aspectRatio: FlippablePersonCard.cardAspectRatio,
-                          child: isCarousel
-                              ? PageView.builder(
-                                  controller: _pageController,
-                                  itemCount: _cards.length,
-                                  onPageChanged: (index) =>
-                                      setState(() => _selectedIndex = index),
-                                  padEnds: false,
-                                  itemBuilder: (context, index) {
-                                    final draft = _cards[index];
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(
+                        cardHorizontalPadding,
+                        0,
+                        8,
+                        0,
+                      ),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Expanded(
+                            child: Center(
+                              child: AspectRatio(
+                                aspectRatio: FlippablePersonCard.cardAspectRatio,
+                                child: isCarousel
+                                    ? PageView.builder(
+                                        controller: _pageController,
+                                        itemCount: _cards.length,
+                                        onPageChanged: (index) => setState(
+                                          () => _selectedIndex = index,
+                                        ),
+                                        padEnds: false,
+                                        itemBuilder: (context, index) {
+                                          final draft = _cards[index];
 
-                                    return AnimatedBuilder(
-                                      animation: _pageController,
-                                      builder: (context, child) {
-                                        double t = 0;
-                                        if (_pageController
-                                            .position.haveDimensions) {
-                                          final page = _pageController.page ??
-                                              _pageController.initialPage
-                                                  .toDouble();
-                                          t = (page - index)
-                                              .abs()
-                                              .clamp(0.0, 1.0);
-                                        }
-                                        const maxScaleDelta = 0.06;
-                                        const maxFadeDelta = 0.2;
-                                        final scale = 1.0 - (t * maxScaleDelta);
-                                        final opacity =
-                                            1.0 - (t * maxFadeDelta);
+                                          return AnimatedBuilder(
+                                            animation: _pageController,
+                                            builder: (context, child) {
+                                              double t = 0;
+                                              if (_pageController
+                                                  .position.haveDimensions) {
+                                                final page =
+                                                    _pageController.page ??
+                                                        _pageController
+                                                            .initialPage
+                                                            .toDouble();
+                                                t = (page - index)
+                                                    .abs()
+                                                    .clamp(0.0, 1.0);
+                                              }
+                                              const maxScaleDelta = 0.06;
+                                              const maxFadeDelta = 0.2;
+                                              final scale =
+                                                  1.0 - (t * maxScaleDelta);
+                                              final opacity =
+                                                  1.0 - (t * maxFadeDelta);
 
-                                        return Opacity(
-                                          opacity: opacity,
-                                          child: Transform.scale(
-                                            scale: scale,
-                                            child: child,
-                                          ),
-                                        );
-                                      },
-                                      child: MyCardPreviewHelpers.flippableCard(
-                                        draft: draft,
+                                              return Opacity(
+                                                opacity: opacity,
+                                                child: Transform.scale(
+                                                  scale: scale,
+                                                  child: child,
+                                                ),
+                                              );
+                                            },
+                                            child: MyCardPreviewHelpers
+                                                .flippableCard(
+                                              draft: draft,
+                                              l10n: context.l10n,
+                                              emptyMessage:
+                                                  context.l10n.kartBilgisiYok,
+                                            ),
+                                          );
+                                        },
+                                      )
+                                    : MyCardPreviewHelpers.flippableCard(
+                                        draft: d,
                                         l10n: context.l10n,
                                         emptyMessage:
                                             context.l10n.kartBilgisiYok,
                                       ),
-                                    );
-                                  },
-                                )
-                              : MyCardPreviewHelpers.flippableCard(
-                                  draft: d,
-                                  l10n: context.l10n,
-                                  emptyMessage: context.l10n.kartBilgisiYok,
-                                ),
-                        ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          CardIndexCircleSelector(
+                            unlockedCount: _cards.length,
+                            selectedIndex: _selectedIndex,
+                            onSelected: _selectCardIndex,
+                            onLockedTap: _openPaywallForLockedSlot,
+                          ),
+                          const SizedBox(width: 4),
+                        ],
                       ),
                     ),
                   ),
-                  if (isCarousel)
-                    SizedBox(
-                      height: dotRowHeight,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: List.generate(_cards.length, (i) {
-                          final isActive = i == _selectedIndex;
-                          return Container(
-                            margin: const EdgeInsets.symmetric(horizontal: 3),
-                            width: isActive ? 20 : 8,
-                            height: 8,
-                            decoration: BoxDecoration(
-                              color: isActive
-                                  ? AppColors.primary
-                                  : colorScheme.outline.withValues(alpha: 0.4),
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                          );
-                        }),
-                      ),
-                    ),
                 ],
               ),
             ),

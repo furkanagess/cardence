@@ -56,21 +56,8 @@ class CardVisibilityHelper {
   static List<({String label, String value})> backEntries(
     OnboardingCardDraft draft,
   ) {
-    final items = <({String label, String value})>[];
-    final about = draft.about?.trim();
-    items.add((
-      label: 'Hakkımda',
-      value: (about != null && about.isNotEmpty) ? about : '',
-    ));
-
-    if (draft.showSkillsOnBack) {
-      final skills = draft.skills?.trim();
-      if (skills != null && skills.isNotEmpty) {
-        items.add((label: 'Yetenekler', value: skills));
-      }
-    }
-
-    return items;
+    final about = draft.about?.trim() ?? '';
+    return [(label: 'Hakkımda', value: about)];
   }
 
   static List<String> normalizeFrontContactFields(List<String> fields) {

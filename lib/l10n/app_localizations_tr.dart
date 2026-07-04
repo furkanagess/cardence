@@ -424,6 +424,9 @@ class AppLocalizationsTr extends AppLocalizations {
   String get hakkmda => 'Hakkımda';
 
   @override
+  String get hakkimdaBilgisiYok => 'Hakkımda bilgisi yok';
+
+  @override
   String get hakkmdaHerZamanGsterilir => 'Hakkımda her zaman gösterilir.';
 
   @override
@@ -461,6 +464,27 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get hesabnzaGiriYapn => 'Hesabınıza giriş yapın';
+
+  @override
+  String get loginWelcomeTitle => 'Cardence\'e Hoş Geldin !';
+
+  @override
+  String get loginWithPhone => 'Telefon ile giriş yap';
+
+  @override
+  String get loginOtpSentHint => 'Doğrulama kodu telefonunuza gönderildi.';
+
+  @override
+  String get loginChangePhone => 'Numarayı değiştir';
+
+  @override
+  String get loginResendOtp => 'Kodu tekrar gönder';
+
+  @override
+  String get loginOtpRequired => '6 haneli kodu girin';
+
+  @override
+  String get loginWithEmail => 'E-posta ile giriş yap';
 
   @override
   String get hesapVeGiri => 'Hesap ve giriş';
@@ -1316,6 +1340,10 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uygulamaRengi => 'Uygulama rengi';
 
   @override
+  String get uygulamaRengiPaletteHint =>
+      'Dokununca renk seçici açılır; istediğiniz rengi seçebilirsiniz';
+
+  @override
   String get webSitesi => 'Web sitesi';
 
   @override
@@ -1339,6 +1367,9 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get yeniEtkinlikGrubu => 'Yeni etkinlik grubu';
+
+  @override
+  String get etkinlikOlutur => 'Etkinlik oluştur';
 
   @override
   String get yeniKart => 'Yeni kart';
@@ -1975,6 +2006,12 @@ class AppLocalizationsTr extends AppLocalizations {
   String get eventActiveSection => 'Devam eden / Yaklaşan';
 
   @override
+  String get eventOngoingSection => 'Devam eden etkinlikler';
+
+  @override
+  String get eventUpcomingSection => 'Gelecek etkinlikler';
+
+  @override
   String eventInvitationTitle(String eventName) {
     return '\"$eventName\" etkinliğine davetlisiniz';
   }
@@ -2063,6 +2100,12 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get eventSendingInvites => 'Davetler gönderiliyor…';
+
+  @override
+  String get eventGroupCreating => 'Etkinlik oluşturuluyor…';
+
+  @override
+  String get eventGroupCreatedSuccess => 'Etkinlik oluşturuldu';
 
   @override
   String get eventInvitesSentSuccess => 'Davetler başarıyla gönderildi';

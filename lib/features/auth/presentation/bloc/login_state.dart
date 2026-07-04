@@ -58,3 +58,6 @@ class LoginState extends Equatable {
         errorMessage,
       ];
 }
+
+// --- OTP state alanları (geçici kapalı) ---
+// phoneLoginStep, pendingPhone, otpResendAvailableAt, isPhoneOtpStep, canResendOtp

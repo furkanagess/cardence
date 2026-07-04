@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../core/l10n/app_l10n.dart';
+import '../../../../core/l10n/api_error_localizer.dart';
 import '../../../../core/l10n/l10n_extensions.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/network/auth_api_exception.dart';
@@ -14,9 +15,10 @@ import '../../../network_graph/domain/usecases/get_network_graph_path.dart';
 import '../../domain/entities/event_group.dart';
 import '../../domain/entities/event_group_invitation.dart';
 import '../pages/create_event_group_page.dart';
+import '../helpers/create_event_group_submit_result.dart';
 import '../../../../core/location/country_location_data_cache.dart';
-import '../widgets/event_group_list_card.dart';
 import '../widgets/event_group_invitation_card.dart';
+import '../widgets/event_groups_horizontal_section.dart';
 import '../widgets/event_groups_loading_shimmer.dart';
 import '../widgets/event_groups_draggable_fab.dart';
 import '../../domain/entities/event_group_create_input.dart';
@@ -80,7 +82,6 @@ class _EventGroupsPageState extends State<EventGroupsPage> {
   List<EventGroup> _groups = [];
   List<EventGroupInvitation> _invitations = [];
   bool _loading = true;
-  bool _creatingGroup = false;
   String? _respondingInvitationId;
 
   static const double _contentBottomInset = 128;
@@ -151,9 +152,72 @@ class _EventGroupsPageState extends State<EventGroupsPage> {
     return maxEventGroups == null || _groups.length < maxEventGroups;
   }
 
-  Future<void> _createNewEventGroup() async {
-    if (_creatingGroup) return;
+  Future<CreateEventGroupSubmitResult> _submitNewEventGroup(
+    CreateEventGroupResult draft,
+  ) async {
+    final l10n = context.l10n;
+    final savedCardsCubit = context.read<SavedCardsCubit>();
 
+    try {
+      final newGroup = await widget.createEventGroup(
+        EventGroupCreateInput(
+          name: draft.name,
+          location: draft.location,
+          startAt: draft.startAt,
+          endAt: draft.endAt,
+          description: draft.description,
+          photoFilePath: draft.photoFilePath,
+          invitedCardIds: draft.invitedCardIds,
+        ),
+      );
+
+      if (draft.selectedCardIds.isNotEmpty) {
+        final allCards = savedCardsCubit.state.cards;
+        await widget.linkSavedCardsToEventGroup(
+          groupId: newGroup.id,
+          allCards: allCards,
+          cardIdsToAdd: draft.selectedCardIds.toList(),
+        );
+      }
+
+      final validInvitedCount =
+          draft.invitedCardIds.length - newGroup.invalidCardIds.length;
+      if (draft.selectedCardIds.isNotEmpty || validInvitedCount > 0) {
+        if (mounted) {
+          await savedCardsCubit.refreshAll();
+        }
+      }
+
+      final successMessage = draft.selectedCardIds.isNotEmpty
+          ? AppL10n.eventGroupCreatedWithCardsMessage(
+              l10n,
+              draft.name,
+              draft.selectedCardIds.length,
+            )
+          : AppL10n.eventGroupCreatedMessage(l10n, draft.name);
+
+      return CreateEventGroupSubmitSuccess(
+        successTitle: l10n.eventGroupCreatedSuccess,
+        successMessage: successMessage,
+      );
+    } on AuthApiException catch (e) {
+      if (e.errorCode == 'PREMIUM_REQUIRED' ||
+          e.errorCode == 'PLAN_LIMIT_REACHED') {
+        return const CreateEventGroupSubmitPaywallRequired();
+      }
+      return CreateEventGroupSubmitFailure(
+        title: l10n.eventGroupCreateFailed,
+        message: ApiErrorLocalizer.localizeException(l10n, e),
+      );
+    } catch (_) {
+      return CreateEventGroupSubmitFailure(
+        title: l10n.eventGroupCreateFailed,
+        message: l10n.operationFailed,
+      );
+    }
+  }
+
+  Future<void> _createNewEventGroup() async {
     final savedCardsCubit = context.read<SavedCardsCubit>();
     final planCubit = context.read<PlanCubit>();
     final planAllowsGroup = _canAddGroupFromPlan(planCubit.state);
@@ -169,68 +233,27 @@ class _EventGroupsPageState extends State<EventGroupsPage> {
       return;
     }
 
-    final result = await CreateEventGroupPage.push(
+    final outcome = await CreateEventGroupPage.push(
       context,
       existingNames: _groups.map((g) => g.name).toList(),
       getSavedCards: widget.getSavedCards,
       initialPickableCards: savedCardsCubit.state.cards,
+      onSubmit: _submitNewEventGroup,
     );
-    if (!mounted || result == null) return;
+    if (!mounted || outcome == null) return;
 
-    setState(() => _creatingGroup = true);
-    try {
-      EventGroup newGroup;
-      try {
-        newGroup = await widget.createEventGroup(
-          EventGroupCreateInput(
-            name: result.name,
-            location: result.location,
-            startAt: result.startAt,
-            endAt: result.endAt,
-            description: result.description,
-            photoFilePath: result.photoFilePath,
-            invitedCardIds: result.invitedCardIds,
-          ),
-        );
-      } on AuthApiException catch (e) {
-        if (!mounted) return;
-        if (e.errorCode == 'PREMIUM_REQUIRED' ||
-            e.errorCode == 'PLAN_LIMIT_REACHED') {
-          await WalletPaywallFlow.show(
-            context,
-            cubit: savedCardsCubit,
-          );
-          if (mounted) {
-            await context.read<PlanCubit>().refresh();
-          }
-          return;
-        }
-        return;
+    if (outcome == CreateEventGroupPageOutcome.paywallRequired) {
+      await WalletPaywallFlow.show(
+        context,
+        cubit: savedCardsCubit,
+      );
+      if (mounted) {
+        await context.read<PlanCubit>().refresh();
       }
-
-      if (result.selectedCardIds.isNotEmpty) {
-        final allCards = savedCardsCubit.state.cards;
-        await widget.linkSavedCardsToEventGroup(
-          groupId: newGroup.id,
-          allCards: allCards,
-          cardIdsToAdd: result.selectedCardIds.toList(),
-        );
-      }
-
-      final validInvitedCount =
-          result.invitedCardIds.length - newGroup.invalidCardIds.length;
-      if (result.selectedCardIds.isNotEmpty || validInvitedCount > 0) {
-        if (mounted) {
-          await savedCardsCubit.refreshAll();
-        }
-      }
-
-      if (!mounted) return;
-      await _loadGroups();
-      if (!mounted) return;
-} finally {
-      if (mounted) setState(() => _creatingGroup = false);
+      return;
     }
+
+    await _loadGroups();
   }
 
   @override
@@ -305,39 +328,65 @@ class _EventGroupsPageState extends State<EventGroupsPage> {
       );
     }
 
-    final activeGroups = _groups
-        .where((group) => group.status != EventGroupStatus.ended)
-        .toList();
-    final endedGroups = _groups
-        .where((group) => group.status == EventGroupStatus.ended)
-        .toList();
+    final ongoingGroups = _groupsForStatus(EventGroupStatus.ongoing);
+    final upcomingGroups = _groupsForStatus(EventGroupStatus.upcoming);
+    final endedGroups = _groupsForStatus(EventGroupStatus.ended);
+    final hasGroupSections = ongoingGroups.isNotEmpty ||
+        upcomingGroups.isNotEmpty ||
+        endedGroups.isNotEmpty;
 
     return ListView(
       padding: const EdgeInsets.fromLTRB(20, 16, 20, _contentBottomInset),
       children: [
         if (_invitations.isNotEmpty) ...[
           _buildInvitationsSection(context),
-          if (activeGroups.isNotEmpty || endedGroups.isNotEmpty)
-            const SizedBox(height: 16),
+          if (hasGroupSections) const SizedBox(height: 20),
         ],
-        if (activeGroups.isNotEmpty)
-          _buildSection(
-            context,
-            title: context.l10n.eventActiveSection,
-            groups: activeGroups,
-            savedCards: savedCards,
+        if (ongoingGroups.isNotEmpty)
+          EventGroupsHorizontalSection(
+            title: context.l10n.eventOngoingSection,
+            groups: ongoingGroups,
+            linkedCardCountFor: (group) =>
+                _savedCardCountForGroup(group.id, savedCards),
+            onGroupTap: _openDetail,
           ),
+        if (upcomingGroups.isNotEmpty) ...[
+          if (ongoingGroups.isNotEmpty) const SizedBox(height: 20),
+          EventGroupsHorizontalSection(
+            title: context.l10n.eventUpcomingSection,
+            groups: upcomingGroups,
+            linkedCardCountFor: (group) =>
+                _savedCardCountForGroup(group.id, savedCards),
+            onGroupTap: _openDetail,
+          ),
+        ],
         if (endedGroups.isNotEmpty) ...[
-          if (activeGroups.isNotEmpty) const SizedBox(height: 12),
-          _buildSection(
-            context,
+          if (ongoingGroups.isNotEmpty || upcomingGroups.isNotEmpty)
+            const SizedBox(height: 20),
+          EventGroupsHorizontalSection(
             title: context.l10n.eventEndedSection,
             groups: endedGroups,
-            savedCards: savedCards,
+            linkedCardCountFor: (group) =>
+                _savedCardCountForGroup(group.id, savedCards),
+            onGroupTap: _openDetail,
           ),
         ],
       ],
     );
+  }
+
+  List<EventGroup> _groupsForStatus(EventGroupStatus status) {
+    final groups =
+        _groups.where((group) => group.status == status).toList(growable: false);
+    return switch (status) {
+      EventGroupStatus.ongoing || EventGroupStatus.upcoming =>
+        List<EventGroup>.of(groups)
+          ..sort((a, b) => a.startAt.compareTo(b.startAt)),
+      EventGroupStatus.ended => List<EventGroup>.of(groups)
+        ..sort(
+          (a, b) => (b.endAt ?? b.startAt).compareTo(a.endAt ?? a.startAt),
+        ),
+    };
   }
 
   Widget _buildInvitationsSection(BuildContext context) {
@@ -387,41 +436,6 @@ class _EventGroupsPageState extends State<EventGroupsPage> {
                 ),
               ],
             ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildSection(
-    BuildContext context, {
-    required String title,
-    required List<EventGroup> groups,
-    required List<SavedCard> savedCards,
-  }) {
-    final textTheme = Theme.of(context).textTheme;
-    final colorScheme = Theme.of(context).colorScheme;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(bottom: 10),
-          child: Text(
-            title,
-            style: textTheme.titleSmall?.copyWith(
-              color: colorScheme.onSurface,
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-        ),
-        ...groups.map(
-          (group) => Padding(
-            padding: const EdgeInsets.only(bottom: 14),
-            child: EventGroupListCard(
-              group: group,
-              linkedCardCount: _savedCardCountForGroup(group.id, savedCards),
-              onTap: () => _openDetail(group),
-            ),
           ),
         ),
       ],

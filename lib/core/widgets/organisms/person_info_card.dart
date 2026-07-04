@@ -812,9 +812,20 @@ class _CompactBusinessCardFace extends StatelessWidget {
 
   String? get _phone => _valueForLabels(['Telefon', 'Phone']);
 
-  String? get _aboutText => _valueForLabels(['Hakkımda', 'About']);
-
-  String? get _skillsText => _valueForLabels(['Yetenekler', 'Skills']);
+  String? get _aboutText {
+    for (final entry in entries) {
+      final label = entry.label.trim().toLowerCase();
+      if (label == 'hakkımda' ||
+          label == 'hakkimda' ||
+          label == 'about' ||
+          label == 'about me') {
+        return entry.value;
+      }
+    }
+    // Arka yüzde tek içerik hakkımda ise ilk kaydı kullan.
+    if (entries.length == 1) return entries.first.value;
+    return null;
+  }
 
   bool _hasContactValue(String key) {
     switch (key) {
@@ -995,94 +1006,40 @@ class _CompactBusinessCardFace extends StatelessWidget {
 
   Widget _buildBackAboutContent(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
-    final about = _aboutText?.trim();
-    final hasAbout = about != null && about.isNotEmpty;
-    final skills = _skillsText?.trim();
-    final hasSkills = skills != null && skills.isNotEmpty;
-
-    if (!hasAbout && !hasSkills) {
-      return _buildEmptyState(context);
-    }
-
-    if (!hasAbout && hasSkills) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            context.l10n.yetenekler,
-            style: textTheme.titleSmall?.copyWith(
-              fontWeight: FontWeight.w800,
-              color: onSurface,
-              letterSpacing: 0.2,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Expanded(
-            child: Text(
-              skills,
-              style: textTheme.bodySmall?.copyWith(
-                color: onSurface,
-                fontWeight: FontWeight.w500,
-                height: 1.35,
-              ),
-              maxLines: 14,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
-        ],
-      );
-    }
+    final about = _aboutText?.trim() ?? '';
+    final hasAbout = about.isNotEmpty;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          context.l10n.hakkmda,
-          style: textTheme.titleSmall?.copyWith(
-            fontWeight: FontWeight.w800,
-            color: onSurface,
-            letterSpacing: 0.2,
-          ),
-        ),
-        const SizedBox(height: 10),
-        Expanded(
-          flex: hasSkills ? 3 : 1,
+        // Kart ID rozeti sağ üstte; solda başlık için boşluk.
+        Padding(
+          padding: EdgeInsets.only(right: showCardIdOnBack ? 72 : 0),
           child: Text(
-            about!,
-            style: textTheme.bodySmall?.copyWith(
-              color: onSurface,
-              fontWeight: FontWeight.w500,
-              height: 1.4,
-            ),
-            maxLines: hasSkills ? 6 : 14,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ),
-        if (hasSkills) ...[
-          const SizedBox(height: 14),
-          Text(
-            context.l10n.yetenekler,
+            context.l10n.hakkmda,
             style: textTheme.titleSmall?.copyWith(
               fontWeight: FontWeight.w800,
               color: onSurface,
               letterSpacing: 0.2,
             ),
           ),
-          const SizedBox(height: 8),
-          Expanded(
-            flex: 2,
-            child: Text(
-              skills,
-              style: textTheme.bodySmall?.copyWith(
-                color: onSurface,
-                fontWeight: FontWeight.w500,
-                height: 1.35,
-              ),
-              maxLines: 5,
-              overflow: TextOverflow.ellipsis,
+        ),
+        const SizedBox(height: 10),
+        Expanded(
+          child: Text(
+            hasAbout ? about : context.l10n.hakkimdaBilgisiYok,
+            style: textTheme.bodySmall?.copyWith(
+              color: hasAbout
+                  ? onSurface
+                  : onSurfaceVariant.withValues(alpha: 0.85),
+              fontWeight: FontWeight.w500,
+              height: 1.4,
+              fontStyle: hasAbout ? FontStyle.normal : FontStyle.italic,
             ),
+            maxLines: 14,
+            overflow: TextOverflow.ellipsis,
           ),
-        ],
+        ),
       ],
     );
   }

@@ -4,13 +4,12 @@ import '../../../../core/l10n/l10n_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../../core/constants/app_constants.dart';
 import '../../../../core/l10n/api_error_localizer.dart';
-import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/splash_theme.dart';
 import '../../../../core/widgets/atoms/cardence_app_bar.dart';
 import '../../../../core/widgets/atoms/custom_button.dart';
 import '../../../../core/widgets/molecules/cardence_error_dialog.dart';
-import '../../../../core/widgets/organisms/cardence_connect_animation.dart';
+import '../../../../core/widgets/organisms/cardence_logo_merge_animation.dart';
 import '../../../../core/widgets/organisms/cardence_scaffold.dart';
 import '../../domain/usecases/forgot_password.dart';
 import '../../domain/usecases/get_last_login_credentials.dart';
@@ -24,7 +23,6 @@ import '../bloc/login_event.dart';
 import '../bloc/login_state.dart';
 import '../widgets/login_accent_color_picker.dart';
 import '../widgets/login_email_form.dart';
-import '../widgets/login_method_selector.dart';
 import '../widgets/login_phone_form.dart';
 import '../oauth/linkedin_auth_flow.dart';
 import '../widgets/login_social_section.dart';
@@ -99,6 +97,7 @@ class _AuthView extends StatefulWidget {
 
 class _AuthViewState extends State<_AuthView>
     with SingleTickerProviderStateMixin {
+  bool _authSuccessHandled = false;
   late final AnimationController _introController;
   late final Animation<double> _introFade;
 
@@ -160,7 +159,7 @@ class _AuthViewState extends State<_AuthView>
           }
   }
 
-  void _showRegisterErrorDialog(BuildContext context, String message) {
+  void _showAuthErrorDialog(BuildContext context, String message) {
     FocusScope.of(context).unfocus();
     final l10n = context.l10n;
     CardenceErrorDialog.show(
@@ -177,23 +176,38 @@ class _AuthViewState extends State<_AuthView>
 
     return BlocListener<LoginBloc, LoginState>(
       listenWhen: (prev, curr) {
+        if (curr.status == LoginStatus.loading &&
+            prev.status != LoginStatus.loading) {
+          return true;
+        }
         if (curr.status == LoginStatus.success &&
             prev.status != LoginStatus.success) {
           return true;
         }
-        return curr.isRegisterMode &&
-            prev.status == LoginStatus.loading &&
+        return prev.status == LoginStatus.loading &&
             curr.status == LoginStatus.failure;
       },
       listener: (context, state) {
+        if (state.status == LoginStatus.loading) {
+          _authSuccessHandled = false;
+          return;
+        }
+
         if (state.status == LoginStatus.success) {
-          widget.onAuthSuccess(fromRegistration: state.isRegisterMode);
+          if (_authSuccessHandled) return;
+          _authSuccessHandled = true;
+          final fromRegistration = state.isRegisterMode;
+          // Frame sonrasında çağır: parent setState ile listener yarışmasın.
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (!mounted) return;
+            widget.onAuthSuccess(fromRegistration: fromRegistration);
+          });
           return;
         }
 
         final errorMessage = state.errorMessage;
         if (errorMessage == null || errorMessage.isEmpty) return;
-        _showRegisterErrorDialog(context, errorMessage);
+        _showAuthErrorDialog(context, errorMessage);
       },
       child: BlocBuilder<LoginBloc, LoginState>(
         builder: (context, state) {
@@ -215,13 +229,13 @@ class _AuthViewState extends State<_AuthView>
                   final bottomInset = MediaQuery.viewInsetsOf(context).bottom;
                   final keyboardVisible = bottomInset > 0;
                   final logoSize = keyboardVisible
-                      ? 72.0
+                      ? 84.0
                       : math
                           .min(
-                            constraints.maxWidth * 0.58,
-                            constraints.maxHeight * 0.26,
+                            constraints.maxWidth * 0.64,
+                            constraints.maxHeight * 0.32,
                           )
-                          .clamp(112.0, 132.0);
+                          .clamp(148.0, 196.0);
 
                   return Padding(
                     padding: const EdgeInsets.fromLTRB(24, 4, 24, 0),
@@ -375,34 +389,27 @@ class _LoginScreenContent extends StatelessWidget {
                 curve: Curves.easeOutCubic,
                 height: logoSize + (keyboardVisible ? 0 : 8),
                 child: Center(
-                  child: CardenceConnectAnimation(
+                  child: CardenceLogoMergeAnimation(
                     size: logoSize,
+                    repeat: true,
+                    logoAssetPath: SplashTheme.logoAsset(
+                      Theme.of(context).brightness,
+                    ),
                   ),
                 ),
               ),
               if (!keyboardVisible) ...[
-                const SizedBox(height: 8),
+                const SizedBox(height: 12),
                 Text(
-                  AppConstants.appName,
+                  context.l10n.loginWelcomeTitle,
                   textAlign: TextAlign.center,
                   style: textTheme.headlineSmall?.copyWith(
                     fontWeight: FontWeight.w800,
-                    letterSpacing: -0.4,
+                    letterSpacing: -0.3,
+                    color: colorScheme.onSurface,
                   ),
                 ),
               ],
-              SizedBox(height: keyboardVisible ? 8 : 4),
-              Text(
-                context.l10n.hesabnzaGiriYapn,
-                textAlign: TextAlign.center,
-                style: (keyboardVisible
-                        ? textTheme.titleSmall
-                        : textTheme.bodyLarge)
-                    ?.copyWith(
-                  color: AppColors.textSecondary,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
             ],
           ),
         ),
@@ -565,10 +572,31 @@ class _LoginFormContentState extends State<_LoginFormContent> {
     );
   }
 
+  Widget _buildMethodSwitchButton() {
+    final isEmail = state.method == LoginMethod.email;
+    return CustomButton.outlined(
+      label: isEmail ? context.l10n.loginWithPhone : context.l10n.loginWithEmail,
+      icon: isEmail ? Icons.phone_android_rounded : Icons.mail_outline_rounded,
+      height: 48,
+      isLoading: state.isLoading,
+      onPressed: state.isLoading
+          ? null
+          : () => context.read<LoginBloc>().add(
+                LoginMethodChanged(
+                  isEmail ? LoginMethod.phone : LoginMethod.email,
+                ),
+              ),
+      labelStyle: Theme.of(context).textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.w600,
+          ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final fields = _buildFields();
     final submitButton = _buildSubmitButton();
+    final methodSwitchButton = _buildMethodSwitchButton();
     final accentPicker = _buildAccentPicker();
     final socialSection = _buildSocialSection();
 
@@ -576,16 +604,12 @@ class _LoginFormContentState extends State<_LoginFormContent> {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          LoginMethodSelector(
-            selected: state.method,
-            onChanged: (method) =>
-                context.read<LoginBloc>().add(LoginMethodChanged(method)),
-          ),
-          const SizedBox(height: 14),
           fields,
           const Spacer(),
           const SizedBox(height: 8),
           submitButton,
+          const SizedBox(height: 10),
+          methodSwitchButton,
           const SizedBox(height: 14),
           accentPicker,
           const SizedBox(height: 12),
@@ -600,15 +624,11 @@ class _LoginFormContentState extends State<_LoginFormContent> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          LoginMethodSelector(
-            selected: state.method,
-            onChanged: (method) =>
-                context.read<LoginBloc>().add(LoginMethodChanged(method)),
-          ),
-          const SizedBox(height: 14),
           fields,
           const SizedBox(height: 8),
           submitButton,
+          const SizedBox(height: 10),
+          methodSwitchButton,
           const SizedBox(height: 14),
           accentPicker,
           const SizedBox(height: 12),

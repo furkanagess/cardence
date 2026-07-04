@@ -44,12 +44,13 @@ class ThemeRepositoryImpl implements ThemeRepository {
   @override
   Future<String> getAccentColorId() async {
     final id = await _dataSource.getAccentColorId();
-    return AppAccentPalette.byId(id).id;
+    return AppAccentPalette.normalizeId(id);
   }
 
   @override
   Future<void> setAccentColorId(String accentColorId) async {
-    final resolved = AppAccentPalette.byId(accentColorId).id;
-    await _dataSource.setAccentColorId(resolved);
+    await _dataSource.setAccentColorId(
+      AppAccentPalette.normalizeId(accentColorId),
+    );
   }
 }

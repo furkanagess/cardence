@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/media/media_image_size.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/atoms/premium_owner_badge.dart';
 import '../../../../core/widgets/atoms/profile_avatar.dart';
@@ -107,6 +108,8 @@ class SavedCardListTile extends StatelessWidget {
                         displayName: title,
                         size: 52,
                         circular: true,
+                        // Kart yığını ile aynı varyant — önbellek paylaşılır.
+                        displaySize: MediaImageSize.small,
                       ),
                     ),
                   ),

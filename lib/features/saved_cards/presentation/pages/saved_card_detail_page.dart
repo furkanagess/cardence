@@ -29,6 +29,7 @@ import '../../domain/usecases/get_saved_cards.dart';
 import '../../domain/usecases/save_saved_card.dart';
 import '../../domain/usecases/track_saved_card_contact_click.dart';
 import '../../domain/helpers/saved_card_field_catalog.dart';
+import '../helpers/saved_card_field_l10n.dart';
 import '../widgets/saved_card_profile_header.dart';
 import '../widgets/saved_card_profile_action_bar.dart';
 import '../widgets/saved_card_profile_section.dart';
@@ -285,7 +286,7 @@ class _SavedCardDetailPageState extends State<SavedCardDetailPage> {
     }
 
     return _ContactFieldData(
-      label: def.label,
+      label: SavedCardFieldL10n.label(context.l10n, def.key),
       value: value,
       icon: SavedCardFieldIcons.iconFor(def.iconName),
       trailing: trailing,
@@ -551,7 +552,6 @@ class _SavedCardDetailPageState extends State<SavedCardDetailPage> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
     final textTheme = theme.textTheme;
     final hasLinkedIn = _has(_card.linkedin);
     final hasEmail = _has(_card.email);
@@ -561,14 +561,13 @@ class _SavedCardDetailPageState extends State<SavedCardDetailPage> {
     final locationText = savedCardProfileLocationText(_card);
     final metaText = savedCardProfileMetaText(context, _card);
 
-    final isLight = theme.brightness == Brightness.light;
-
     return CardenceScaffold(
-      backgroundColor:
-          isLight ? AppColors.backgroundLight : AppColors.backgroundDark,
+      backgroundColor: AppColors.profileDetailBackground,
+      showWatermark: false,
       appBar: CardenceAppBar(
         titleWidget: const SizedBox.shrink(),
-        backgroundColor: colorScheme.surface,
+        backgroundColor: AppColors.pureBlack,
+        foregroundColor: AppColors.textPrimaryDark,
       ),
       body: ListView(
         padding: EdgeInsets.only(bottom: 24 + MediaQuery.paddingOf(context).bottom),
@@ -600,7 +599,6 @@ class _SavedCardDetailPageState extends State<SavedCardDetailPage> {
                   child: SavedCardsSavedCardPreview(
                     card: _card,
                     heroTag: widget.heroTag,
-                    wrapHero: widget.heroTag != null,
                   ),
                 ),
               ),
@@ -623,7 +621,7 @@ class _SavedCardDetailPageState extends State<SavedCardDetailPage> {
                 about,
                 style: textTheme.bodyMedium?.copyWith(
                   height: 1.45,
-                  color: colorScheme.onSurface.withValues(alpha: 0.9),
+                  color: AppColors.textPrimaryDark.withValues(alpha: 0.92),
                 ),
               ),
             ),
@@ -645,10 +643,9 @@ class _SavedCardDetailPageState extends State<SavedCardDetailPage> {
                     children: [
                       for (var i = 0; i < _contactFields.length; i++) ...[
                         if (i > 0)
-                          Divider(
+                          const Divider(
                             height: 1,
-                            color: colorScheme.outlineVariant
-                                .withValues(alpha: 0.5),
+                            color: AppColors.profileDetailBorder,
                           ),
                         _ContactFieldRow(
                           field: _contactFields[i],
@@ -702,7 +699,7 @@ class _SavedCardDetailPageState extends State<SavedCardDetailPage> {
                 school,
                 style: textTheme.bodyMedium?.copyWith(
                   fontWeight: FontWeight.w600,
-                  color: colorScheme.onSurface,
+                  color: AppColors.textPrimaryDark,
                 ),
               ),
             ),
@@ -735,13 +732,18 @@ class _SavedCardDetailPageState extends State<SavedCardDetailPage> {
               onAddOrEdit: _openNoteEditor,
             ),
           ),
-          const SizedBox(height: 16),
-          Center(
-            child: Text(
-              _savedAtDescription(_card.savedAt),
-              textAlign: TextAlign.center,
-              style: textTheme.labelSmall?.copyWith(
-                color: colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
+          ColoredBox(
+            color: AppColors.pureBlack,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
+              child: Center(
+                child: Text(
+                  _savedAtDescription(_card.savedAt),
+                  textAlign: TextAlign.center,
+                  style: textTheme.labelSmall?.copyWith(
+                    color: AppColors.textSecondaryDark.withValues(alpha: 0.85),
+                  ),
+                ),
               ),
             ),
           ),
@@ -778,22 +780,11 @@ class _GroupedInfoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: colorScheme.surface,
+        color: AppColors.profileDetailSurfaceElevated,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: colorScheme.outlineVariant.withValues(alpha: 0.45),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: colorScheme.shadow.withValues(alpha: 0.04),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        border: Border.all(color: AppColors.profileDetailBorder),
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(16),
@@ -814,7 +805,6 @@ class _ContactFieldRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final canOpen = field.onTap != null;
     final canEdit = field.onEdit != null;
@@ -835,14 +825,14 @@ class _ContactFieldRow extends StatelessWidget {
               Container(
                 width: 36,
                 height: 36,
-                decoration: BoxDecoration(
-                  color: colorScheme.surfaceContainerHighest,
+                decoration: const BoxDecoration(
+                  color: AppColors.profileDetailSurface,
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
                   field.icon,
                   size: 18,
-                  color: colorScheme.onSurfaceVariant,
+                  color: AppColors.textSecondaryDark,
                 ),
               ),
               const SizedBox(width: 12),
@@ -852,9 +842,10 @@ class _ContactFieldRow extends StatelessWidget {
                   children: [
                     Text(
                       field.label,
-                      style: textTheme.labelMedium?.copyWith(
-                        color: colorScheme.onSurfaceVariant,
-                        fontWeight: FontWeight.w500,
+                      style: textTheme.labelLarge?.copyWith(
+                        color: AppColors.textPrimaryDark,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 0.1,
                       ),
                     ),
                     const SizedBox(height: 2),
@@ -863,6 +854,7 @@ class _ContactFieldRow extends StatelessWidget {
                       style: textTheme.bodyMedium?.copyWith(
                         fontWeight: FontWeight.w600,
                         height: 1.3,
+                        color: AppColors.textPrimaryDark,
                       ),
                     ),
                   ],
@@ -873,10 +865,10 @@ class _ContactFieldRow extends StatelessWidget {
                   tooltip: context.l10n.dzenle,
                   visualDensity: VisualDensity.compact,
                   onPressed: field.onEdit,
-                  icon: Icon(
+                  icon: const Icon(
                     Icons.edit_outlined,
                     size: 20,
-                    color: colorScheme.onSurfaceVariant,
+                    color: AppColors.textSecondaryDark,
                   ),
                 ),
               if (canOpen || !canEdit)
@@ -887,7 +879,7 @@ class _ContactFieldRow extends StatelessWidget {
                   icon: Icon(
                     trailingIcon,
                     size: 20,
-                    color: colorScheme.onSurfaceVariant,
+                    color: AppColors.textSecondaryDark,
                   ),
                 ),
             ],
@@ -909,18 +901,15 @@ class _NotesContainer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final trimmed = note?.trim();
     final hasNote = trimmed != null && trimmed.isNotEmpty;
 
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.45),
+        color: AppColors.profileDetailSurfaceElevated,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(
-          color: colorScheme.outlineVariant.withValues(alpha: 0.55),
-        ),
+        border: Border.all(color: AppColors.profileDetailBorder),
       ),
       child: Material(
         color: Colors.transparent,
@@ -935,7 +924,7 @@ class _NotesContainer extends StatelessWidget {
                     style: textTheme.bodyMedium?.copyWith(
                       height: 1.45,
                       fontStyle: FontStyle.italic,
-                      color: colorScheme.onSurface.withValues(alpha: 0.88),
+                      color: AppColors.textPrimaryDark.withValues(alpha: 0.9),
                     ),
                   )
                 : Center(
@@ -976,7 +965,6 @@ class _EventGroupsChipRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
     return Wrap(
@@ -987,16 +975,14 @@ class _EventGroupsChipRow extends StatelessWidget {
           ActionChip(
             label: Text(group.name),
             onPressed: canOpenDetail ? () => onGroupTap(group) : null,
-            backgroundColor: colorScheme.surfaceContainerHighest,
+            backgroundColor: AppColors.profileDetailSurfaceElevated,
             labelStyle: textTheme.labelLarge?.copyWith(
               fontWeight: FontWeight.w600,
-              color: colorScheme.onSurface,
+              color: AppColors.textPrimaryDark,
             ),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(20),
-              side: BorderSide(
-                color: colorScheme.outlineVariant.withValues(alpha: 0.5),
-              ),
+              side: const BorderSide(color: AppColors.profileDetailBorder),
             ),
           ),
         if (canAddMore)
@@ -1004,19 +990,18 @@ class _EventGroupsChipRow extends StatelessWidget {
             avatar: Icon(
               Icons.add_rounded,
               size: 18,
-              color: colorScheme.primary,
+              color: AppColors.primary,
             ),
             label: Text(
               context.l10n.grubaEkle,
-              style: TextStyle(color: colorScheme.primary),
+              style: TextStyle(color: AppColors.primary),
             ),
             onPressed: onAdd,
-            backgroundColor:
-                colorScheme.primaryContainer.withValues(alpha: 0.35),
+            backgroundColor: AppColors.primaryContainerDark,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(20),
               side: BorderSide(
-                color: colorScheme.primary.withValues(alpha: 0.25),
+                color: AppColors.primary.withValues(alpha: 0.35),
               ),
             ),
           ),
@@ -1030,23 +1015,19 @@ class _EventGroupsLoadingSkeleton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: colorScheme.surface,
+        color: AppColors.profileDetailSurfaceElevated,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: colorScheme.outlineVariant.withValues(alpha: 0.45),
-        ),
+        border: Border.all(color: AppColors.profileDetailBorder),
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
+      child: const Padding(
+        padding: EdgeInsets.all(16),
         child: Column(
           children: [
-            _SkeletonBar(colorScheme: colorScheme),
-            const SizedBox(height: 12),
-            _SkeletonBar(colorScheme: colorScheme, widthFactor: 0.72),
+            _SkeletonBar(),
+            SizedBox(height: 12),
+            _SkeletonBar(widthFactor: 0.72),
           ],
         ),
       ),
@@ -1056,11 +1037,9 @@ class _EventGroupsLoadingSkeleton extends StatelessWidget {
 
 class _SkeletonBar extends StatelessWidget {
   const _SkeletonBar({
-    required this.colorScheme,
     this.widthFactor = 1,
   });
 
-  final ColorScheme colorScheme;
   final double widthFactor;
 
   @override
@@ -1071,7 +1050,7 @@ class _SkeletonBar extends StatelessWidget {
       child: Container(
         height: 14,
         decoration: BoxDecoration(
-          color: colorScheme.surfaceContainerHighest,
+          color: AppColors.profileDetailSurface,
           borderRadius: BorderRadius.circular(8),
         ),
       ),
@@ -1094,8 +1073,6 @@ class _EmptyStateCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-
     return _GroupedInfoCard(
       children: [
         Padding(
@@ -1105,14 +1082,14 @@ class _EmptyStateCard extends StatelessWidget {
               Icon(
                 icon,
                 size: 32,
-                color: colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
+                color: AppColors.textSecondaryDark.withValues(alpha: 0.65),
               ),
               const SizedBox(height: 10),
               Text(
                 message,
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: colorScheme.onSurfaceVariant,
+                      color: AppColors.textSecondaryDark,
                     ),
               ),
               if (actionLabel != null && onAction != null) ...[

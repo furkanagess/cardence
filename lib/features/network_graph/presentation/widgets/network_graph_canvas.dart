@@ -10,6 +10,7 @@ import '../../domain/entities/graph_edge.dart';
 import '../../domain/entities/graph_edge_type.dart';
 import '../../domain/entities/graph_node.dart';
 import '../../domain/entities/graph_node_type.dart';
+import '../helpers/network_graph_canvas_theme.dart';
 import '../helpers/network_graph_display.dart';
 import '../helpers/network_graph_layout.dart';
 import '../helpers/network_graph_node_style.dart';
@@ -39,9 +40,10 @@ class NetworkGraphCanvas extends StatelessWidget {
     return Card(
       elevation: 0,
       margin: EdgeInsets.zero,
+      color: NetworkGraphCanvasTheme.background,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20),
-        side: BorderSide(color: colorScheme.outlineVariant),
+        side: const BorderSide(color: AppColors.graphNodeLabelBorder),
       ),
       clipBehavior: Clip.antiAlias,
       child: SizedBox(
@@ -50,38 +52,29 @@ class NetworkGraphCanvas extends StatelessWidget {
         child: Stack(
           children: [
             Positioned.fill(
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      colorScheme.surface,
-                      colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
-                    ],
-                  ),
+              child: NetworkGraphCanvasBackground(
+                child: NetworkGraphArea(
+                  nodes: nodes,
+                  edges: edges,
+                  highlightedNodeIds: highlightedNodeIds,
+                  pathNodeIds: pathNodeIds,
+                  onCardNodeTap: onCardNodeTap,
                 ),
-              ),
-            ),
-            Positioned.fill(
-              child: NetworkGraphArea(
-                nodes: nodes,
-                edges: edges,
-                highlightedNodeIds: highlightedNodeIds,
-                pathNodeIds: pathNodeIds,
-                onCardNodeTap: onCardNodeTap,
               ),
             ),
             Positioned(
               top: 10,
               right: 10,
-              child: Material(
-                color: colorScheme.surface.withValues(alpha: 0.85),
-                shape: const CircleBorder(),
-                elevation: 1,
+              child: DecoratedBox(
+                decoration: NetworkGraphCanvasTheme.fullscreenButtonDecoration(
+                  colorScheme.primary,
+                ),
                 child: IconButton(
                   tooltip: 'Tam ekran',
-                  icon: const Icon(Icons.fullscreen_rounded),
+                  icon: Icon(
+                    Icons.fullscreen_rounded,
+                    color: colorScheme.primary,
+                  ),
                   onPressed: () => _openFullscreen(context),
                 ),
               ),
@@ -128,7 +121,8 @@ class NetworkGraphArea extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
+    // Grafik her zaman siyah zemin üzerinde çizilir.
+    const isDark = true;
     final pathEndpoints = _pathEndpointIds();
 
     return LayoutBuilder(
@@ -254,18 +248,20 @@ class _NetworkGraphFullscreenView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-
     return Scaffold(
+      backgroundColor: NetworkGraphCanvasTheme.background,
       appBar: AppBar(
+        backgroundColor: NetworkGraphCanvasTheme.background,
+        foregroundColor: AppColors.textPrimaryDark,
+        elevation: 0,
+        scrolledUnderElevation: 0,
         title: Text(context.l10n.networkGraph),
         leading: IconButton(
           icon: const Icon(Icons.close_rounded),
           onPressed: () => Navigator.of(context).pop(),
         ),
       ),
-      body: ColoredBox(
-        color: colorScheme.surface,
+      body: NetworkGraphCanvasBackground(
         child: NetworkGraphInteractiveArea(
           nodes: nodes,
           edges: edges,
@@ -322,8 +318,8 @@ class _GraphNodeBubble extends StatelessWidget {
             ),
             boxShadow: [
               BoxShadow(
-                color: AppColors.primaryDark.withValues(alpha: 0.12),
-                blurRadius: 8,
+                color: AppColors.primary.withValues(alpha: 0.28),
+                blurRadius: 12,
                 offset: const Offset(0, 3),
               ),
             ],
@@ -352,8 +348,8 @@ class _GraphNodeBubble extends StatelessWidget {
           ),
           boxShadow: [
             BoxShadow(
-              color: AppColors.primaryDark.withValues(alpha: 0.12),
-              blurRadius: 8,
+              color: AppColors.primary.withValues(alpha: 0.28),
+              blurRadius: 12,
               offset: const Offset(0, 3),
             ),
           ],
@@ -378,8 +374,8 @@ class _GraphNodeBubble extends StatelessWidget {
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: AppColors.primaryDark.withValues(alpha: 0.18),
-                    blurRadius: 10,
+                    color: AppColors.primary.withValues(alpha: 0.35),
+                    blurRadius: 14,
                     offset: const Offset(0, 4),
                   ),
                 ],
@@ -405,8 +401,8 @@ class _GraphNodeBubble extends StatelessWidget {
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: AppColors.primaryDark.withValues(alpha: 0.12),
-                    blurRadius: 8,
+                    color: AppColors.primary.withValues(alpha: 0.22),
+                    blurRadius: 10,
                     offset: const Offset(0, 3),
                   ),
                 ],
@@ -425,22 +421,21 @@ class _GraphNodeBubble extends StatelessWidget {
         visual,
         const SizedBox(height: 4),
         SizedBox(
-          width: style.size + 36,
+          width: style.size + 40,
           child: DecoratedBox(
             decoration: BoxDecoration(
-              color: theme.colorScheme.surface.withValues(alpha: 0.7),
-              borderRadius: BorderRadius.circular(6),
+              color: AppColors.graphNodeLabelBackground,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: AppColors.graphNodeLabelBorder),
             ),
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
               child: Text(
                 NetworkGraphDisplay.nodeLabel(node),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 textAlign: TextAlign.center,
-                style: theme.textTheme.labelSmall?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
+                style: NetworkGraphCanvasTheme.nodeLabelStyle(theme.textTheme),
               ),
             ),
           ),
@@ -488,43 +483,65 @@ class _NetworkGraphEdgePainter extends CustomPainter {
       final onPath = _edgeOnPath(edge);
       final color = onPath ? highlightColor : _colorFor(edge.type);
       final width = onPath
-          ? 2.8
-          : (1.1 + (edge.weight.clamp(1, 6) * 0.35));
+          ? 3.2
+          : (1.4 + (edge.weight.clamp(1, 6) * 0.4));
+
+      if (onPath) {
+        final glow = Paint()
+          ..color = color.withValues(alpha: 0.22)
+          ..strokeWidth = width + 5
+          ..strokeCap = StrokeCap.round
+          ..style = PaintingStyle.stroke
+          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 6);
+        _drawCurvedEdge(canvas, source, target, glow);
+      }
 
       final paint = Paint()
-        ..color = color.withValues(alpha: onPath ? 0.95 : 0.55)
+        ..color = color.withValues(alpha: onPath ? 1 : 0.72)
         ..strokeWidth = width
         ..strokeCap = StrokeCap.round
         ..style = PaintingStyle.stroke;
 
-      // Hafif eğri (quadratic bezier) — daha okunabilir bağlantılar.
-      final mid = Offset(
-        (source.dx + target.dx) / 2,
-        (source.dy + target.dy) / 2,
-      );
-      final dx = target.dx - source.dx;
-      final dy = target.dy - source.dy;
-      final distance = math.sqrt(dx * dx + dy * dy);
-      final curve = (distance * 0.12).clamp(0.0, 26.0);
-      final normal = distance == 0
-          ? Offset.zero
-          : Offset(-dy / distance, dx / distance) * curve;
-      final control = mid + normal;
-
-      final path = Path()
-        ..moveTo(source.dx, source.dy)
-        ..quadraticBezierTo(control.dx, control.dy, target.dx, target.dy);
-      canvas.drawPath(path, paint);
+      _drawCurvedEdge(canvas, source, target, paint);
 
       if (_isDirectional(edge.type)) {
+        final control = _curveControl(source, target);
         _drawArrowHead(
           canvas,
           from: control,
           to: target,
-          color: color.withValues(alpha: onPath ? 0.95 : 0.7),
+          color: color.withValues(alpha: onPath ? 1 : 0.85),
         );
       }
     }
+  }
+
+  void _drawCurvedEdge(
+    Canvas canvas,
+    Offset source,
+    Offset target,
+    Paint paint,
+  ) {
+    final control = _curveControl(source, target);
+    final path = Path()
+      ..moveTo(source.dx, source.dy)
+      ..quadraticBezierTo(control.dx, control.dy, target.dx, target.dy);
+    canvas.drawPath(path, paint);
+  }
+
+  Offset _curveControl(Offset source, Offset target) {
+    final mid = Offset(
+      (source.dx + target.dx) / 2,
+      (source.dy + target.dy) / 2,
+    );
+    final dx = target.dx - source.dx;
+    final dy = target.dy - source.dy;
+    final distance = math.sqrt(dx * dx + dy * dy);
+    final curve = (distance * 0.12).clamp(0.0, 26.0);
+    final normal = distance == 0
+        ? Offset.zero
+        : Offset(-dy / distance, dx / distance) * curve;
+    return mid + normal;
   }
 
   void _drawArrowHead(

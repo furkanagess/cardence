@@ -24,7 +24,7 @@ class CreateEventGroupStepHeader extends StatelessWidget {
     final subtitle = CreateEventGroupStepMeta.subtitle(l10n, currentIndex);
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 24, 20, 12),
+      padding: const EdgeInsets.fromLTRB(20, 8, 20, 12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [

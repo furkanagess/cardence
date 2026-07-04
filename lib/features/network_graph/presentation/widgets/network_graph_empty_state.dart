@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/theme/app_colors.dart';
 import '../../../../core/l10n/l10n_extensions.dart';
 import '../../../../core/widgets/atoms/custom_button.dart';
 
@@ -33,6 +34,7 @@ class NetworkGraphEmptyState extends StatelessWidget {
               textAlign: TextAlign.center,
               style: theme.textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.w700,
+                color: AppColors.textPrimaryDark,
               ),
             ),
             const SizedBox(height: 8),
@@ -40,7 +42,7 @@ class NetworkGraphEmptyState extends StatelessWidget {
               context.l10n.networkGraphEmptySubtitle,
               textAlign: TextAlign.center,
               style: theme.textTheme.bodyMedium?.copyWith(
-                color: colorScheme.onSurfaceVariant,
+                color: AppColors.textSecondaryDark,
                 height: 1.35,
               ),
             ),

@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/atoms/custom_button.dart';
 
-/// LinkedIn tarzı beyaz bölüm kartı.
+/// Kart detay bölüm kartı — siyah zemin üzerinde daha açık panel.
 class SavedCardProfileSection extends StatelessWidget {
   const SavedCardProfileSection({
     super.key,
@@ -21,21 +22,16 @@ class SavedCardProfileSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(0, 8, 0, 0),
       child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: colorScheme.surface,
+        decoration: const BoxDecoration(
+          color: AppColors.profileDetailSurface,
           border: Border(
-            top: BorderSide(
-              color: colorScheme.outlineVariant.withValues(alpha: 0.45),
-            ),
-            bottom: BorderSide(
-              color: colorScheme.outlineVariant.withValues(alpha: 0.45),
-            ),
+            top: BorderSide(color: AppColors.profileDetailBorder),
+            bottom: BorderSide(color: AppColors.profileDetailBorder),
           ),
         ),
         child: Padding(
@@ -50,7 +46,7 @@ class SavedCardProfileSection extends StatelessWidget {
                       title,
                       style: textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.w700,
-                        color: colorScheme.onSurface,
+                        color: AppColors.textPrimaryDark,
                       ),
                     ),
                   ),
@@ -63,7 +59,7 @@ class SavedCardProfileSection extends StatelessWidget {
                         padding: const EdgeInsets.symmetric(horizontal: 8),
                         minimumSize: Size.zero,
                         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                        foregroundColor: colorScheme.onSurfaceVariant,
+                        foregroundColor: AppColors.textSecondaryDark,
                       ),
                     ),
                 ],

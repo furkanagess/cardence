@@ -118,6 +118,9 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     return _parseSession(json);
   }
 
+  // OTP (geçici kapalı):
+  // otpCode yoksa requireData: false ile OTP gönderimi
+
   @override
   Future<AuthSessionModel> loginWithLinkedIn({
     required String authorizationCode,

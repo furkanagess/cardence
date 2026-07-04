@@ -16,11 +16,15 @@ class EventGroupListCard extends StatelessWidget {
     required this.group,
     required this.linkedCardCount,
     required this.onTap,
+    this.compact = false,
   });
 
   final EventGroup group;
   final int linkedCardCount;
   final VoidCallback onTap;
+
+  /// Yatay listelerde daha dar kapak ve tek satır açıklama.
+  final bool compact;
 
   @override
   Widget build(BuildContext context) {
@@ -37,6 +41,9 @@ class EventGroupListCard extends StatelessWidget {
     final cardCountLabel = linkedCardCount == 0
         ? AppL10n.noCardsInGroup(context.l10n)
         : AppL10n.savedCardsCount(context.l10n, linkedCardCount);
+    final contentPadding = compact
+        ? const EdgeInsets.fromLTRB(14, 12, 14, 14)
+        : const EdgeInsets.fromLTRB(16, 14, 16, 16);
 
     return Material(
       color: colorScheme.surface,
@@ -56,15 +63,17 @@ class EventGroupListCard extends StatelessWidget {
           opacity: isEnded ? 0.88 : 1,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
+            mainAxisSize: MainAxisSize.min,
             children: [
               _CoverStrip(
                 photoUrl: group.photoUrl,
                 status: group.status,
                 isDark: isDark,
                 colorScheme: colorScheme,
+                height: compact ? 108 : _CoverStrip.defaultHeight,
               ),
               Padding(
-                padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
+                padding: contentPadding,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
@@ -74,16 +83,19 @@ class EventGroupListCard extends StatelessWidget {
                         fontWeight: FontWeight.w800,
                         color: colorScheme.onSurface,
                         height: 1.2,
+                        fontSize: compact ? 16 : null,
                       ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
                     if (dateText.isNotEmpty ||
                         (location != null && location.isNotEmpty)) ...[
-                      const SizedBox(height: 12),
+                      SizedBox(height: compact ? 10 : 12),
                       Wrap(
                         spacing: 8,
                         runSpacing: 8,
+                        alignment: WrapAlignment.start,
+                        crossAxisAlignment: WrapCrossAlignment.start,
                         children: [
                           if (dateText.isNotEmpty)
                             EventGroupMetaChip(
@@ -100,7 +112,9 @@ class EventGroupListCard extends StatelessWidget {
                         ],
                       ),
                     ],
-                    if (description != null && description.isNotEmpty) ...[
+                    if (!compact &&
+                        description != null &&
+                        description.isNotEmpty) ...[
                       const SizedBox(height: 12),
                       Text(
                         description,
@@ -112,7 +126,7 @@ class EventGroupListCard extends StatelessWidget {
                         ),
                       ),
                     ],
-                    const SizedBox(height: 14),
+                    SizedBox(height: compact ? 12 : 14),
                     Row(
                       children: [
                         Icon(
@@ -154,21 +168,23 @@ class _CoverStrip extends StatelessWidget {
     required this.status,
     required this.isDark,
     required this.colorScheme,
+    this.height = defaultHeight,
   });
 
   final String? photoUrl;
   final EventGroupStatus status;
   final bool isDark;
   final ColorScheme colorScheme;
+  final double height;
 
-  static const double _height = 132;
+  static const double defaultHeight = 132;
 
   @override
   Widget build(BuildContext context) {
     final hasPhoto = photoUrl?.trim().isNotEmpty == true;
 
     return SizedBox(
-      height: _height,
+      height: height,
       width: double.infinity,
       child: Stack(
         fit: StackFit.expand,

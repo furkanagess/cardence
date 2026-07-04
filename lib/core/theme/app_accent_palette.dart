@@ -51,6 +51,16 @@ class AppAccentOption {
       primaryDarkTheme: Color.lerp(primary, Colors.white, 0.58)!,
     );
   }
+
+  /// Kullanıcının seçtiği tek renkten tam vurgu paleti üretir.
+  static AppAccentOption fromPrimaryColor(Color primary) {
+    return fromSeed(
+      id: AppAccentPalette.customIdFromColor(primary),
+      primary: primary,
+      primaryDark: Color.lerp(primary, Colors.black, 0.28)!,
+      primaryLight: Color.lerp(primary, Colors.white, 0.18)!,
+    );
+  }
 }
 
 /// Seçilebilir vurgu renkleri ve aktif seçim.
@@ -58,6 +68,7 @@ class AppAccentPalette {
   AppAccentPalette._();
 
   static const String defaultId = 'petrol_sapphire';
+  static const String customIdPrefix = 'custom_';
 
   static final List<AppAccentOption> options = [
     AppAccentOption.fromSeed(
@@ -84,41 +95,50 @@ class AppAccentPalette {
       primaryDark: Color(0xFF2A3578),
       primaryLight: Color(0xFF5568C4),
     ),
-    AppAccentOption.fromSeed(
-      id: 'deep_teal',
-      primary: Color(0xFF0D6E6E),
-      primaryDark: Color(0xFF084A4A),
-      primaryLight: Color(0xFF1A9191),
-    ),
-    AppAccentOption.fromSeed(
-      id: 'slate_steel',
-      primary: Color(0xFF475569),
-      primaryDark: Color(0xFF2F3A47),
-      primaryLight: Color(0xFF64748B),
-    ),
-    AppAccentOption.fromSeed(
-      id: 'wine_burgundy',
-      primary: Color(0xFF7B2D4A),
-      primaryDark: Color(0xFF551E33),
-      primaryLight: Color(0xFF9A4562),
-    ),
-    AppAccentOption.fromSeed(
-      id: 'midnight_blue',
-      primary: Color(0xFF2A3F6B),
-      primaryDark: Color(0xFF1A2847),
-      primaryLight: Color(0xFF3F5A8F),
-    ),
   ];
 
   static AppAccentOption _selected = options.first;
 
   static AppAccentOption get selected => _selected;
 
+  static bool isCustomId(String id) => id.startsWith(customIdPrefix);
+
+  static String customIdFromColor(Color color) {
+    final r = (color.r * 255).round().clamp(0, 255);
+    final g = (color.g * 255).round().clamp(0, 255);
+    final b = (color.b * 255).round().clamp(0, 255);
+    final hex =
+        '${r.toRadixString(16).padLeft(2, '0')}${g.toRadixString(16).padLeft(2, '0')}${b.toRadixString(16).padLeft(2, '0')}';
+    return '$customIdPrefix$hex';
+  }
+
+  static Color? colorFromCustomId(String id) {
+    if (!isCustomId(id)) return null;
+    final hex = id.substring(customIdPrefix.length).trim();
+    if (hex.length != 6) return null;
+    final value = int.tryParse(hex, radix: 16);
+    if (value == null) return null;
+    return Color(0xFF000000 | value);
+  }
+
+  /// Geçerli bir accent id döndürür; bilinmeyen değerlerde varsayılana düşer.
+  static String normalizeId(String? id) {
+    if (id == null || id.isEmpty) return defaultId;
+    if (isCustomId(id)) {
+      return colorFromCustomId(id) != null ? id.toLowerCase() : defaultId;
+    }
+    for (final option in options) {
+      if (option.id == id) return id;
+    }
+    return defaultId;
+  }
+
   static void selectById(String id) {
-    _selected = options.firstWhere(
-      (option) => option.id == id,
-      orElse: () => options.first,
-    );
+    _selected = byId(id);
+  }
+
+  static void selectCustomColor(Color color) {
+    _selected = AppAccentOption.fromPrimaryColor(color);
   }
 
   static void init(String? storedId) {
@@ -126,8 +146,13 @@ class AppAccentPalette {
   }
 
   static AppAccentOption byId(String id) {
+    final normalized = normalizeId(id);
+    if (isCustomId(normalized)) {
+      final color = colorFromCustomId(normalized)!;
+      return AppAccentOption.fromPrimaryColor(color);
+    }
     return options.firstWhere(
-      (option) => option.id == id,
+      (option) => option.id == normalized,
       orElse: () => options.first,
     );
   }

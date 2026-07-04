@@ -12,6 +12,9 @@ enum CardWatermarkVariant {
 
   /// Uygulama ekranı arka planı.
   screen,
+
+  /// Ağ grafiği siyah zemin.
+  graphCanvas,
 }
 
 /// Cardence logosu — merkezi filigran.
@@ -35,6 +38,8 @@ class CardWatermark extends StatelessWidget {
         return 168;
       case CardWatermarkVariant.screen:
         return 240;
+      case CardWatermarkVariant.graphCanvas:
+        return 300;
     }
   }
 
@@ -46,6 +51,8 @@ class CardWatermark extends StatelessWidget {
         return isDark ? 0.14 : 0.1;
       case CardWatermarkVariant.screen:
         return isDark ? 0.07 : 0.05;
+      case CardWatermarkVariant.graphCanvas:
+        return isDark ? 0.11 : 0.08;
     }
   }
 

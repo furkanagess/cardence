@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/utils/card_id_generator.dart';
 import '../../../../core/widgets/atoms/custom_button.dart';
+import '../../../../core/widgets/molecules/card_index_circle_selector.dart';
 import '../../../my_cards/presentation/pages/my_card_edit_page.dart';
 import '../../../settings/presentation/pages/card_visibility_settings_page.dart';
 import '../../../network_graph/domain/usecases/get_network_graph.dart';
@@ -185,6 +186,17 @@ class _ProfilePageState extends State<ProfilePage> {
     await _openCardEditor(newCard, isNew: true);
   }
 
+  Future<void> _openLockedSlotPaywall() async {
+    if (!mounted) return;
+    await WalletPaywallFlow.show(
+      context,
+      cubit: context.read<SavedCardsCubit>(),
+    );
+    if (!mounted) return;
+    await context.read<PlanCubit>().refresh();
+    await _loadPageData();
+  }
+
   Future<void> _openNetworkGraph() async {
     await NetworkGraphLauncher.open(
       context,
@@ -245,6 +257,7 @@ class _ProfilePageState extends State<ProfilePage> {
               showPremiumBadge: _isPremium,
               onPageChanged: (index) => setState(() => _selectedIndex = index),
               onCardTap: _openCardEditor,
+              onLockedSlotTap: _openLockedSlotPaywall,
             ),
           ],
           Padding(
@@ -362,6 +375,7 @@ class _ProfileCardsCarousel extends StatelessWidget {
     required this.showPremiumBadge,
     required this.onPageChanged,
     required this.onCardTap,
+    required this.onLockedSlotTap,
   });
 
   final List<OnboardingCardDraft> cards;
@@ -370,6 +384,7 @@ class _ProfileCardsCarousel extends StatelessWidget {
   final bool showPremiumBadge;
   final ValueChanged<int> onPageChanged;
   final void Function(OnboardingCardDraft card) onCardTap;
+  final VoidCallback onLockedSlotTap;
 
   @override
   Widget build(BuildContext context) {
@@ -383,79 +398,98 @@ class _ProfileCardsCarousel extends StatelessWidget {
             OnboardingCardPreviewFrame.heightForWidth(cardWidth) +
                 _profileCarouselVerticalPadding * 2;
 
-        if (cards.length == 1) {
-          return Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: SizedBox(
-              height: carouselHeight,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  vertical: _profileCarouselVerticalPadding,
+        return Padding(
+          padding: const EdgeInsets.only(left: 8, right: 12),
+          child: SizedBox(
+            height: carouselHeight,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Expanded(
+                  child: cards.length == 1
+                      ? Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: _profileCarouselHorizontalPadding,
+                            vertical: _profileCarouselVerticalPadding,
+                          ),
+                          child: OnboardingCardPreviewFrame(
+                            draft: cards.first,
+                            onTap: () => onCardTap(cards.first),
+                            contactFieldsTappable: false,
+                            emptyMessage: context.l10n.alanlarDoldukaGrnr,
+                            normalizeForDisplay: true,
+                            showPremiumBadge: showPremiumBadge,
+                            gatePremiumEffects: true,
+                          ),
+                        )
+                      : PageView.builder(
+                          controller: pageController,
+                          itemCount: cards.length,
+                          onPageChanged: onPageChanged,
+                          padEnds: false,
+                          itemBuilder: (context, index) {
+                            final card = cards[index];
+                            return AnimatedBuilder(
+                              animation: pageController,
+                              builder: (context, child) {
+                                double t = 0;
+                                if (pageController.position.haveDimensions) {
+                                  final page = pageController.page ??
+                                      pageController.initialPage.toDouble();
+                                  t = (page - index).abs().clamp(0.0, 1.0);
+                                }
+                                const maxScaleDelta = 0.06;
+                                const maxFadeDelta = 0.18;
+                                final scale = 1.0 - (t * maxScaleDelta);
+                                final opacity = 1.0 - (t * maxFadeDelta);
+
+                                return Opacity(
+                                  opacity: opacity,
+                                  child: Transform.scale(
+                                    scale: scale,
+                                    alignment: Alignment.center,
+                                    child: child,
+                                  ),
+                                );
+                              },
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: _profileCarouselHorizontalPadding,
+                                  vertical: _profileCarouselVerticalPadding,
+                                ),
+                                child: OnboardingCardPreviewFrame(
+                                  key: ValueKey(card.cardId),
+                                  draft: card,
+                                  onTap: () => onCardTap(card),
+                                  contactFieldsTappable: false,
+                                  emptyMessage: context.l10n.alanlarDoldukaGrnr,
+                                  normalizeForDisplay: true,
+                                  showPremiumBadge: showPremiumBadge,
+                                  gatePremiumEffects: true,
+                                ),
+                              ),
+                            );
+                          },
+                        ),
                 ),
-                child: OnboardingCardPreviewFrame(
-                  draft: cards.first,
-                  onTap: () => onCardTap(cards.first),
-                  contactFieldsTappable: false,
-                  emptyMessage: context.l10n.alanlarDoldukaGrnr,
-                  normalizeForDisplay: true,
-                  showPremiumBadge: showPremiumBadge,
-                  gatePremiumEffects: true,
+                const SizedBox(width: 8),
+                CardIndexCircleSelector(
+                  unlockedCount: cards.length,
+                  selectedIndex: selectedIndex,
+                  onSelected: (index) {
+                    onPageChanged(index);
+                    if (pageController.hasClients && cards.length > 1) {
+                      pageController.animateToPage(
+                        index,
+                        duration: const Duration(milliseconds: 280),
+                        curve: Curves.easeOutCubic,
+                      );
+                    }
+                  },
+                  onLockedTap: onLockedSlotTap,
                 ),
-              ),
+              ],
             ),
-          );
-        }
-
-        return SizedBox(
-          height: carouselHeight,
-          child: PageView.builder(
-            controller: pageController,
-            itemCount: cards.length,
-            onPageChanged: onPageChanged,
-            padEnds: false,
-            itemBuilder: (context, index) {
-              final card = cards[index];
-              return AnimatedBuilder(
-                animation: pageController,
-                builder: (context, child) {
-                  double t = 0;
-                  if (pageController.position.haveDimensions) {
-                    final page = pageController.page ??
-                        pageController.initialPage.toDouble();
-                    t = (page - index).abs().clamp(0.0, 1.0);
-                  }
-                  const maxScaleDelta = 0.06;
-                  const maxFadeDelta = 0.18;
-                  final scale = 1.0 - (t * maxScaleDelta);
-                  final opacity = 1.0 - (t * maxFadeDelta);
-
-                  return Opacity(
-                    opacity: opacity,
-                    child: Transform.scale(
-                      scale: scale,
-                      alignment: Alignment.center,
-                      child: child,
-                    ),
-                  );
-                },
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: _profileCarouselHorizontalPadding,
-                    vertical: _profileCarouselVerticalPadding,
-                  ),
-                  child: OnboardingCardPreviewFrame(
-                    key: ValueKey(card.cardId),
-                    draft: card,
-                    onTap: () => onCardTap(card),
-                    contactFieldsTappable: false,
-                    emptyMessage: context.l10n.alanlarDoldukaGrnr,
-                    normalizeForDisplay: true,
-                    showPremiumBadge: showPremiumBadge,
-                    gatePremiumEffects: true,
-                  ),
-                ),
-              );
-            },
           ),
         );
       },

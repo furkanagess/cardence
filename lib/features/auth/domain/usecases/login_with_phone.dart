@@ -15,3 +15,6 @@ class LoginWithPhone {
         password: password,
       );
 }
+
+// OTP (geçici kapalı):
+// Future<PhoneLoginResult> call({required String phone, String? otpCode})

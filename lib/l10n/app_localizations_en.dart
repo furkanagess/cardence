@@ -423,6 +423,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get hakkmda => 'About me';
 
   @override
+  String get hakkimdaBilgisiYok => 'No about me information';
+
+  @override
   String get hakkmdaHerZamanGsterilir => 'About me is always shown.';
 
   @override
@@ -460,6 +463,27 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get hesabnzaGiriYapn => 'Sign in to your account';
+
+  @override
+  String get loginWelcomeTitle => 'Welcome to Cardence!';
+
+  @override
+  String get loginWithPhone => 'Sign in with phone';
+
+  @override
+  String get loginOtpSentHint => 'A verification code was sent to your phone.';
+
+  @override
+  String get loginChangePhone => 'Change number';
+
+  @override
+  String get loginResendOtp => 'Resend code';
+
+  @override
+  String get loginOtpRequired => 'Enter the 6-digit code';
+
+  @override
+  String get loginWithEmail => 'Sign in with email';
 
   @override
   String get hesapVeGiri => 'Account & sign-in';
@@ -1313,6 +1337,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get uygulamaRengi => 'App accent color';
 
   @override
+  String get uygulamaRengiPaletteHint =>
+      'Tap to open the color picker and choose any color you like';
+
+  @override
   String get webSitesi => 'Website';
 
   @override
@@ -1336,6 +1364,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get yeniEtkinlikGrubu => 'New event group';
+
+  @override
+  String get etkinlikOlutur => 'Create event';
 
   @override
   String get yeniKart => 'New card';
@@ -1969,6 +2000,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get eventActiveSection => 'Ongoing / Upcoming';
 
   @override
+  String get eventOngoingSection => 'Ongoing events';
+
+  @override
+  String get eventUpcomingSection => 'Upcoming events';
+
+  @override
   String eventInvitationTitle(String eventName) {
     return 'You\'re invited to \"$eventName\"';
   }
@@ -2058,6 +2095,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get eventSendingInvites => 'Sending invites…';
+
+  @override
+  String get eventGroupCreating => 'Creating event…';
+
+  @override
+  String get eventGroupCreatedSuccess => 'Event created';
 
   @override
   String get eventInvitesSentSuccess => 'Invites sent successfully';

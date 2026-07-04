@@ -163,3 +163,7 @@ class LoginPhoneFormState extends State<LoginPhoneForm> {
     );
   }
 }
+
+// OTP akışı (Netgsm hazır olunca yeniden açılacak):
+// lib/features/auth/presentation/widgets/login_phone_form_otp.dart.backup
+// veya git geçmişindeki OTP sürümü.

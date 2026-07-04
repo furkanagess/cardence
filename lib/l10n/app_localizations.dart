@@ -884,6 +884,12 @@ abstract class AppLocalizations {
   /// **'Hakkımda'**
   String get hakkmda;
 
+  /// No description provided for @hakkimdaBilgisiYok.
+  ///
+  /// In tr, this message translates to:
+  /// **'Hakkımda bilgisi yok'**
+  String get hakkimdaBilgisiYok;
+
   /// No description provided for @hakkmdaHerZamanGsterilir.
   ///
   /// In tr, this message translates to:
@@ -955,6 +961,48 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Hesabınıza giriş yapın'**
   String get hesabnzaGiriYapn;
+
+  /// No description provided for @loginWelcomeTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Cardence\'e Hoş Geldin !'**
+  String get loginWelcomeTitle;
+
+  /// No description provided for @loginWithPhone.
+  ///
+  /// In tr, this message translates to:
+  /// **'Telefon ile giriş yap'**
+  String get loginWithPhone;
+
+  /// No description provided for @loginOtpSentHint.
+  ///
+  /// In tr, this message translates to:
+  /// **'Doğrulama kodu telefonunuza gönderildi.'**
+  String get loginOtpSentHint;
+
+  /// No description provided for @loginChangePhone.
+  ///
+  /// In tr, this message translates to:
+  /// **'Numarayı değiştir'**
+  String get loginChangePhone;
+
+  /// No description provided for @loginResendOtp.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kodu tekrar gönder'**
+  String get loginResendOtp;
+
+  /// No description provided for @loginOtpRequired.
+  ///
+  /// In tr, this message translates to:
+  /// **'6 haneli kodu girin'**
+  String get loginOtpRequired;
+
+  /// No description provided for @loginWithEmail.
+  ///
+  /// In tr, this message translates to:
+  /// **'E-posta ile giriş yap'**
+  String get loginWithEmail;
 
   /// No description provided for @hesapVeGiri.
   ///
@@ -2552,6 +2600,12 @@ abstract class AppLocalizations {
   /// **'Uygulama rengi'**
   String get uygulamaRengi;
 
+  /// No description provided for @uygulamaRengiPaletteHint.
+  ///
+  /// In tr, this message translates to:
+  /// **'Dokununca renk seçici açılır; istediğiniz rengi seçebilirsiniz'**
+  String get uygulamaRengiPaletteHint;
+
   /// No description provided for @webSitesi.
   ///
   /// In tr, this message translates to:
@@ -2599,6 +2653,12 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Yeni etkinlik grubu'**
   String get yeniEtkinlikGrubu;
+
+  /// No description provided for @etkinlikOlutur.
+  ///
+  /// In tr, this message translates to:
+  /// **'Etkinlik oluştur'**
+  String get etkinlikOlutur;
 
   /// No description provided for @yeniKart.
   ///
@@ -3740,6 +3800,18 @@ abstract class AppLocalizations {
   /// **'Devam eden / Yaklaşan'**
   String get eventActiveSection;
 
+  /// No description provided for @eventOngoingSection.
+  ///
+  /// In tr, this message translates to:
+  /// **'Devam eden etkinlikler'**
+  String get eventOngoingSection;
+
+  /// No description provided for @eventUpcomingSection.
+  ///
+  /// In tr, this message translates to:
+  /// **'Gelecek etkinlikler'**
+  String get eventUpcomingSection;
+
   /// No description provided for @eventInvitationTitle.
   ///
   /// In tr, this message translates to:
@@ -3877,6 +3949,18 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Davetler gönderiliyor…'**
   String get eventSendingInvites;
+
+  /// No description provided for @eventGroupCreating.
+  ///
+  /// In tr, this message translates to:
+  /// **'Etkinlik oluşturuluyor…'**
+  String get eventGroupCreating;
+
+  /// No description provided for @eventGroupCreatedSuccess.
+  ///
+  /// In tr, this message translates to:
+  /// **'Etkinlik oluşturuldu'**
+  String get eventGroupCreatedSuccess;
 
   /// No description provided for @eventInvitesSentSuccess.
   ///

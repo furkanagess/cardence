@@ -269,8 +269,13 @@ class _SavedCardsPageState extends State<SavedCardsPage>
                                 onClearFilters: cubit.clearFilters,
                                 onClearSearch: cubit.clearSearch,
                               )
-                            : _showFlippableView
-                                ? Stack(
+                            : IndexedStack(
+                                // Kart ↔ liste geçişinde State korunur; fotoğraflar
+                                // dispose edilip yeniden yüklenmez.
+                                index: _showFlippableView ? 0 : 1,
+                                sizing: StackFit.expand,
+                                children: [
+                                  Stack(
                                     key: const ValueKey('saved-cards-stack'),
                                     clipBehavior: Clip.none,
                                     children: [
@@ -333,8 +338,8 @@ class _SavedCardsPageState extends State<SavedCardsPage>
                                         ),
                                       ),
                                     ],
-                                  )
-                                : SavedCardsListView(
+                                  ),
+                                  SavedCardsListView(
                                     key: const ValueKey('saved-cards-list'),
                                     displayCards: displayCards,
                                     onCardTap: (card) => openSavedCardDetail(
@@ -357,6 +362,8 @@ class _SavedCardsPageState extends State<SavedCardsPage>
                                     topPadding: topPadding,
                                     contentBottomInset: contentBottomInset,
                                   ),
+                                ],
+                              ),
                   ),
                 ],
               ),

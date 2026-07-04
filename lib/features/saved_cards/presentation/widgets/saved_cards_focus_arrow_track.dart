@@ -3,32 +3,37 @@ import 'package:flutter/services.dart';
 
 import '../../../../core/theme/app_colors.dart';
 
-/// Ekranın sol ortasında sabit: yukarı ok · konum · aşağı ok (ayrı konteynerler).
+/// Odak index'ini değiştiren ok kontrolü.
+///
+/// [Axis.vertical]: yukarı / aşağı (kaydedilen kartlar yığını).
+/// [Axis.horizontal]: sola / sağa (yatay kart şeridi).
 class SavedCardsFocusArrowTrack extends StatelessWidget {
   const SavedCardsFocusArrowTrack({
     super.key,
     required this.focusedIndex,
     required this.cardCount,
     required this.onFocusedIndexChanged,
+    this.axis = Axis.vertical,
   });
 
   final int focusedIndex;
   final int cardCount;
   final ValueChanged<int> onFocusedIndexChanged;
+  final Axis axis;
 
   static const double width = 40;
 
-  bool get _canGoUp => focusedIndex > 0;
-  bool get _canGoDown => cardCount > 0 && focusedIndex < cardCount - 1;
+  bool get _canGoPrev => focusedIndex > 0;
+  bool get _canGoNext => cardCount > 0 && focusedIndex < cardCount - 1;
 
-  void _goUp() {
-    if (!_canGoUp) return;
+  void _goPrev() {
+    if (!_canGoPrev) return;
     HapticFeedback.selectionClick();
     onFocusedIndexChanged(focusedIndex - 1);
   }
 
-  void _goDown() {
-    if (!_canGoDown) return;
+  void _goNext() {
+    if (!_canGoNext) return;
     HapticFeedback.selectionClick();
     onFocusedIndexChanged(focusedIndex + 1);
   }
@@ -50,36 +55,62 @@ class SavedCardsFocusArrowTrack extends StatelessWidget {
         ? AppColors.surfaceDark.withValues(alpha: 0.55)
         : AppColors.surfaceLight.withValues(alpha: 0.72);
 
+    final prevIcon = axis == Axis.vertical
+        ? Icons.keyboard_arrow_up_rounded
+        : Icons.keyboard_arrow_left_rounded;
+    final nextIcon = axis == Axis.vertical
+        ? Icons.keyboard_arrow_down_rounded
+        : Icons.keyboard_arrow_right_rounded;
+
+    final label = Text(
+      '${focusedIndex + 1}/$cardCount',
+      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+            color: labelColor,
+            fontWeight: FontWeight.w500,
+            fontSize: 11,
+          ),
+    );
+
+    final prev = _ArrowChip(
+      icon: prevIcon,
+      enabled: _canGoPrev,
+      iconColor: iconColor,
+      disabledColor: disabledColor,
+      containerColor: containerColor,
+      onPressed: _goPrev,
+    );
+    final next = _ArrowChip(
+      icon: nextIcon,
+      enabled: _canGoNext,
+      iconColor: iconColor,
+      disabledColor: disabledColor,
+      containerColor: containerColor,
+      onPressed: _goNext,
+    );
+
+    if (axis == Axis.horizontal) {
+      return Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          prev,
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 10),
+            child: label,
+          ),
+          next,
+        ],
+      );
+    }
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        _ArrowChip(
-          icon: Icons.keyboard_arrow_up_rounded,
-          enabled: _canGoUp,
-          iconColor: iconColor,
-          disabledColor: disabledColor,
-          containerColor: containerColor,
-          onPressed: _goUp,
-        ),
+        prev,
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 6),
-          child: Text(
-            '${focusedIndex + 1}/$cardCount',
-            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: labelColor,
-                  fontWeight: FontWeight.w500,
-                  fontSize: 11,
-                ),
-          ),
+          child: label,
         ),
-        _ArrowChip(
-          icon: Icons.keyboard_arrow_down_rounded,
-          enabled: _canGoDown,
-          iconColor: iconColor,
-          disabledColor: disabledColor,
-          containerColor: containerColor,
-          onPressed: _goDown,
-        ),
+        next,
       ],
     );
   }

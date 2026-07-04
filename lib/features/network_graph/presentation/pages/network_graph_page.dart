@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../core/theme/app_colors.dart';
 import '../../../../core/l10n/l10n_extensions.dart';
 import '../../../../core/l10n/api_error_localizer.dart';
 import '../../../event_groups/domain/usecases/get_event_groups.dart';
@@ -14,6 +15,7 @@ import '../../domain/usecases/get_network_graph_path.dart';
 import '../cubit/network_graph_cubit.dart';
 import '../cubit/network_graph_state.dart';
 import '../pages/network_graph_stats_page.dart';
+import '../helpers/network_graph_canvas_theme.dart';
 import '../widgets/network_graph_canvas.dart' show NetworkGraphInteractiveArea;
 import '../widgets/network_graph_empty_state.dart';
 import '../widgets/network_graph_legend.dart';
@@ -76,6 +78,7 @@ class NetworkGraphView extends StatelessWidget {
         final cubit = context.read<NetworkGraphCubit>();
 
         return CardenceScaffold(
+          backgroundColor: NetworkGraphCanvasTheme.background,
           appBar: CardenceAppBar(
             title: context.l10n.networkGraph,
             variant: CardenceAppBarVariant.primary,
@@ -127,7 +130,6 @@ class NetworkGraphView extends StatelessWidget {
       );
     }
 
-    final colorScheme = Theme.of(context).colorScheme;
     final bottomInset = MediaQuery.paddingOf(context).bottom;
     final showPathPanel = state.isPathLoading ||
         state.path != null ||
@@ -135,28 +137,19 @@ class NetworkGraphView extends StatelessWidget {
 
     return Stack(
       children: [
+        const Positioned.fill(
+          child: NetworkGraphCanvasBackground(),
+        ),
         Positioned.fill(
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  colorScheme.surface,
-                  colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
-                ],
-              ),
-            ),
-            child: state.isLoading
-                ? const Center(child: CircularProgressIndicator())
-                : NetworkGraphInteractiveArea(
-                    nodes: NetworkGraphDisplay.visibleNodes(graph.nodes),
-                    edges: graph.edges,
-                    highlightedNodeIds: state.highlightedNodeIds,
-                    pathNodeIds: state.path?.pathNodeIds ?? const [],
-                    onCardNodeTap: cubit.tapCardNode,
-                  ),
-          ),
+          child: state.isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : NetworkGraphInteractiveArea(
+                  nodes: NetworkGraphDisplay.visibleNodes(graph.nodes),
+                  edges: graph.edges,
+                  highlightedNodeIds: state.highlightedNodeIds,
+                  pathNodeIds: state.path?.pathNodeIds ?? const [],
+                  onCardNodeTap: cubit.tapCardNode,
+                ),
         ),
         if (showPathPanel)
           Positioned(
@@ -278,7 +271,7 @@ class NetworkGraphErrorState extends StatelessWidget {
               message,
               textAlign: TextAlign.center,
               style: theme.textTheme.bodyMedium?.copyWith(
-                color: colorScheme.onSurfaceVariant,
+                color: AppColors.textSecondaryDark,
                 height: 1.35,
               ),
             ),

@@ -57,23 +57,20 @@ class SavedCardProfileHeader extends StatelessWidget {
       circular: true,
     );
 
-    final bordered = Container(
+    return Container(
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         border: Border.all(
-          color: Theme.of(context).colorScheme.surface,
+          color: AppColors.profileDetailSurface,
           width: 4,
         ),
       ),
       child: avatar,
     );
-
-    return bordered;
   }
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final bannerColor = _bannerColor(context);
     final title = card.title?.trim();
@@ -84,7 +81,7 @@ class SavedCardProfileHeader extends StatelessWidget {
     final hasLinkedIn = linkedin != null && linkedin.isNotEmpty;
 
     return ColoredBox(
-      color: colorScheme.surface,
+      color: AppColors.profileDetailSurface,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -129,7 +126,7 @@ class SavedCardProfileHeader extends StatelessWidget {
                   displayName,
                   style: textTheme.headlineSmall?.copyWith(
                     fontWeight: FontWeight.w700,
-                    color: colorScheme.onSurface,
+                    color: AppColors.textPrimaryDark,
                     height: 1.2,
                   ),
                 ),
@@ -138,7 +135,7 @@ class SavedCardProfileHeader extends StatelessWidget {
                   Text(
                     title,
                     style: textTheme.bodyLarge?.copyWith(
-                      color: colorScheme.onSurface,
+                      color: AppColors.textPrimaryDark,
                       height: 1.35,
                     ),
                   ),
@@ -148,7 +145,7 @@ class SavedCardProfileHeader extends StatelessWidget {
                   Text(
                     company,
                     style: textTheme.bodyMedium?.copyWith(
-                      color: colorScheme.onSurfaceVariant,
+                      color: AppColors.textSecondaryDark,
                       height: 1.35,
                     ),
                   ),
@@ -158,7 +155,7 @@ class SavedCardProfileHeader extends StatelessWidget {
                   Text(
                     locationText!,
                     style: textTheme.bodyMedium?.copyWith(
-                      color: colorScheme.onSurfaceVariant,
+                      color: AppColors.textSecondaryDark,
                     ),
                   ),
                 ],
@@ -194,10 +191,10 @@ class SavedCardProfileHeader extends StatelessWidget {
               ],
             ),
           ),
-          Divider(
+          const Divider(
             height: 1,
             thickness: 1,
-            color: colorScheme.outlineVariant.withValues(alpha: 0.55),
+            color: AppColors.profileDetailBorder,
           ),
         ],
       ),
@@ -247,7 +244,7 @@ class _ProfileLinkChip extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 4),
-            Icon(
+            const Icon(
               Icons.open_in_new_rounded,
               size: 16,
               color: AppColors.linkedInBrand,

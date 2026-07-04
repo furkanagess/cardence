@@ -177,16 +177,6 @@ class _FlippablePersonCardState extends State<FlippablePersonCard>
   static const double _flipIconPadding = 6;
   static const double _flipIconTouchSize = _flipIconPadding * 2 + _flipIconSize;
 
-  bool get _isProfileBackFace {
-    final entries = widget.backEntries;
-    if (entries.isEmpty) return false;
-    return entries.every(
-      (e) =>
-          e.label == AppL10n.hakkmda(context.l10n) ||
-          e.label == context.l10n.yetenekler,
-    );
-  }
-
   Widget _wrapWithEffect(Widget card) {
     return CardEffectOverlay(
       effect: widget.cardEffect,
@@ -253,8 +243,7 @@ class _FlippablePersonCardState extends State<FlippablePersonCard>
               ),
             )
           : PersonInfoCard(
-              title: widget.title,
-              titleSecondary: widget.titleSecondary,
+              // Arka yüz: yalnızca kart ID + hakkımda (isim/şirket/ünvan yok).
               entries: widget.backEntries
                   .take(FlippablePersonCard.maxVisibleEntriesPerSide)
                   .toList(),
@@ -263,7 +252,7 @@ class _FlippablePersonCardState extends State<FlippablePersonCard>
               onEmptyActionTap: widget.onBackEmptyActionTap,
               onNoteEditTap: widget.onBackEditTap,
               compact: true,
-              compactBackFace: _isProfileBackFace,
+              compactBackFace: true,
               fillHeight: true,
               cardId: widget.cardId,
               showCardIdOnBack: true,

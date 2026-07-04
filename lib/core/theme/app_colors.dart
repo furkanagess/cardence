@@ -36,6 +36,15 @@ class AppColors {
   static const Color surfaceVariantDark = Color(0xFF28303A);
   static const Color outlineDark = Color(0xFF4A5568);
 
+  /// Bilinçli tam siyah yüzeyler (kart detay panelleri vb.).
+  static const Color pureBlack = Color(0xFF000000);
+
+  // --- Kart detay (açık zemin + siyah iç kartlar) ---
+  static const Color profileDetailBackground = Color(0xFF141A22);
+  static const Color profileDetailSurface = pureBlack;
+  static const Color profileDetailSurfaceElevated = Color(0xFF0A0E14);
+  static const Color profileDetailBorder = Color(0xFF2A3340);
+
   // --- Text (light) ---
   static const Color textPrimary = Color(0xFF1C2430);
   static const Color textSecondary = Color(0xFF5A6578);
@@ -53,11 +62,19 @@ class AppColors {
   static Color get info => AppAccentPalette.selected.primary;
 
   // --- Onboarding ---
-  static const Color onboardingBackground = Color(0xFFF4F6F8);
+  static const Color onboardingBackground = backgroundLight;
   static Color get onboardingAccent => AppAccentPalette.selected.primary;
 
   // --- Marka (sosyal giriş) ---
   static const Color linkedInBrand = Color(0xFF0A66C2);
+
+  // --- Network graph canvas (koyu zemin) ---
+  static const Color graphCanvasBackground = Color(0xFF000000);
+  static const Color graphCanvasGrid = Color(0xFF1A1F26);
+  static const Color graphCanvasGridAccent = Color(0xFF252B34);
+  static const Color graphNodeLabelBackground = Color(0xE614181E);
+  static const Color graphNodeLabelBorder = Color(0xFF2E3640);
+  static const Color graphOwnCardAccent = Color(0xFFE8B84A);
 
   // --- Network graph kenar (edge) renkleri ---
   static Color get graphEdgeOwns => AppAccentPalette.selected.primary;

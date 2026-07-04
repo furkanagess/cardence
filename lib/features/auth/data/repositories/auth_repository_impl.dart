@@ -61,6 +61,8 @@ class AuthRepositoryImpl implements AuthRepository {
     );
   }
 
+  static const _profileSyncTimeout = Duration(seconds: 10);
+
   Future<UserProfile> _fetchAndPersistProfile(AuthSessionModel session) async {
     final token = await _coordinator?.getValidAccessToken() ?? session.accessToken;
     final profile = await _remote.getMe(token);
@@ -70,6 +72,14 @@ class AuthRepositoryImpl implements AuthRepository {
     await _local.saveCachedProfile(profile);
     await _onProfileSynced?.call(entity);
     return entity;
+  }
+
+  /// Login sonrası profil senkronu; takılırsa login akışını bloklamaz.
+  Future<void> _syncProfileAfterLogin(AuthSessionModel session) async {
+    try {
+      await _fetchAndPersistProfile(session.withComputedExpiry())
+          .timeout(_profileSyncTimeout);
+    } catch (_) {}
   }
 
   UserProfile _profileFromSession(AuthSession session) {
@@ -185,9 +195,7 @@ class AuthRepositoryImpl implements AuthRepository {
       password: password,
     );
     final session = await _persist(model);
-    try {
-      await _fetchAndPersistProfile(model.withComputedExpiry());
-    } catch (_) {}
+    await _syncProfileAfterLogin(model);
     await _rememberLogin(
       email: email,
       method: LastLoginMethod.email,
@@ -205,15 +213,15 @@ class AuthRepositoryImpl implements AuthRepository {
       password: password,
     );
     final session = await _persist(model);
-    try {
-      await _fetchAndPersistProfile(model.withComputedExpiry());
-    } catch (_) {}
+    await _syncProfileAfterLogin(model);
     await _rememberLogin(
       phone: phone,
       method: LastLoginMethod.phone,
     );
     return session;
   }
+
+  // OTP (geçici kapalı): PhoneLoginResult / otpCode yolu
 
   @override
   Future<AuthSession> loginWithLinkedIn({
@@ -225,9 +233,7 @@ class AuthRepositoryImpl implements AuthRepository {
       redirectUri: redirectUri,
     );
     final session = await _persist(model);
-    try {
-      await _fetchAndPersistProfile(model.withComputedExpiry());
-    } catch (_) {}
+    await _syncProfileAfterLogin(model);
     await _rememberLogin(method: LastLoginMethod.linkedin);
     return session;
   }
@@ -246,9 +252,7 @@ class AuthRepositoryImpl implements AuthRepository {
       phone: phone,
     );
     final session = await _persist(model);
-    try {
-      await _fetchAndPersistProfile(model.withComputedExpiry());
-    } catch (_) {}
+    await _syncProfileAfterLogin(model);
     await _rememberLogin(
       email: email,
       phone: phone,

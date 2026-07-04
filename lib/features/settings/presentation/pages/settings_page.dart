@@ -102,8 +102,6 @@ class _SettingsPageState extends State<SettingsPage> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
     final displayName = widget.userDisplayName?.trim();
     final email = widget.userEmail?.trim();
 
@@ -112,7 +110,7 @@ class _SettingsPageState extends State<SettingsPage> {
         title: context.l10n.ayarlar,
       ),
       body: ColoredBox(
-        color: isDark ? AppColors.backgroundDark : AppColors.backgroundLight,
+        color: Theme.of(context).scaffoldBackgroundColor,
         child: Column(
           children: [
             Expanded(

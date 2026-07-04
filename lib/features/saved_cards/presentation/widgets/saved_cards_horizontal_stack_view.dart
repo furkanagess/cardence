@@ -4,65 +4,73 @@ import '../../../../core/widgets/organisms/flippable_person_card.dart';
 import '../../domain/entities/saved_card.dart';
 import 'saved_cards_saved_card_preview.dart';
 
-class SavedCardsCardStackView extends StatefulWidget {
-  const SavedCardsCardStackView({
+/// Kaydedilen kartlar yığınının yatay karşılığı: odaklı index öne çıkar,
+/// komşular hafif kaydırılmış ve küçültülmüş görünür.
+class SavedCardsHorizontalStackView extends StatefulWidget {
+  const SavedCardsHorizontalStackView({
     super.key,
     required this.displayCards,
     required this.focusedIndex,
     required this.onFocusedIndexChanged,
     required this.onOpenCard,
+    required this.cardWidth,
   });
 
   static const Duration stackAnimDuration = Duration(milliseconds: 360);
   static const Curve stackAnimCurve = Curves.easeOutCubic;
-  static const double cardVerticalStep = 64;
+  static const double cardHorizontalStep = 48;
+  static const double focusLeftGap = 16;
+  static const double focusRightGap = 16;
 
-  /// Odaklı kartın üstündeki ve altındaki yığından ayrılma boşluğu.
-  static const double focusTopGap = 16;
-  static const double focusBottomGap = 16;
+  static double revealGap(double cardWidth) =>
+      focusLeftGap + (cardWidth - cardHorizontalStep) + focusRightGap;
 
-  /// Odaklı kartın tamamen görünmesi için alttaki kartların itildiği mesafe.
-  static double get revealGap =>
-      focusTopGap +
-      (FlippablePersonCard.fixedHeight - cardVerticalStep) +
-      focusBottomGap;
-
-  /// Kartın yığın içindeki üst konumu (scroll ortalama için).
-  static double cardTopForIndex(int index, int focusedIndex) {
-    final base = index * cardVerticalStep;
+  static double cardLeftForIndex(
+    int index,
+    int focusedIndex,
+    double cardWidth,
+  ) {
+    final base = index * cardHorizontalStep;
     if (index < focusedIndex) return base;
-    if (index == focusedIndex) return base + focusTopGap;
-    return base + revealGap;
+    if (index == focusedIndex) return base + focusLeftGap;
+    return base + revealGap(cardWidth);
   }
 
-  /// Yığın içeriğinin toplam yüksekliği.
-  static double stackContentHeight(int length, int focusedIndex) {
+  static double stackContentWidth(
+    int length,
+    int focusedIndex,
+    double cardWidth,
+  ) {
     if (length == 0) return 0;
-    const extraBottomPadding = 24.0;
-    var height = 0.0;
+    const extraEndPadding = 24.0;
+    var width = 0.0;
     for (var i = 0; i < length; i++) {
-      final bottom =
-          cardTopForIndex(i, focusedIndex) + FlippablePersonCard.fixedHeight;
-      if (bottom > height) height = bottom;
+      final right =
+          cardLeftForIndex(i, focusedIndex, cardWidth) + cardWidth;
+      if (right > width) width = right;
     }
-    return height + extraBottomPadding;
+    return width + extraEndPadding;
   }
+
+  static double get stackHeight => FlippablePersonCard.fixedHeight + 20;
 
   final List<SavedCard> displayCards;
   final int focusedIndex;
   final ValueChanged<int> onFocusedIndexChanged;
   final void Function(SavedCard card, {String? heroTag}) onOpenCard;
+  final double cardWidth;
 
   @override
-  State<SavedCardsCardStackView> createState() =>
-      _SavedCardsCardStackViewState();
+  State<SavedCardsHorizontalStackView> createState() =>
+      _SavedCardsHorizontalStackViewState();
 }
 
-class _SavedCardsCardStackViewState extends State<SavedCardsCardStackView> {
+class _SavedCardsHorizontalStackViewState
+    extends State<SavedCardsHorizontalStackView> {
   int get _focusedIndex => widget.focusedIndex;
 
   @override
-  void didUpdateWidget(covariant SavedCardsCardStackView oldWidget) {
+  void didUpdateWidget(covariant SavedCardsHorizontalStackView oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (_focusedIndex >= widget.displayCards.length &&
         widget.displayCards.isNotEmpty) {
@@ -82,31 +90,36 @@ class _SavedCardsCardStackViewState extends State<SavedCardsCardStackView> {
     return order;
   }
 
-  /// Kartın dikey konumu: odaklı kart ve sonrası, onu açığa çıkarmak için itilir.
-  double _cardTopFor(int index, int focused) =>
-      SavedCardsCardStackView.cardTopForIndex(index, focused);
-
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final length = widget.displayCards.length;
-    final cardsHeight =
-        SavedCardsCardStackView.stackContentHeight(length, _focusedIndex);
+    final cardWidth = widget.cardWidth;
+    final contentWidth = SavedCardsHorizontalStackView.stackContentWidth(
+      length,
+      _focusedIndex,
+      cardWidth,
+    );
 
     return SizedBox(
-      height: cardsHeight,
+      width: contentWidth,
+      height: SavedCardsHorizontalStackView.stackHeight,
       child: Stack(
         clipBehavior: Clip.none,
         children: [
           for (final i in _paintOrder(length, _focusedIndex))
             AnimatedPositioned(
-              key: ValueKey('stack-slot-${widget.displayCards[i].cardId}'),
-              duration: SavedCardsCardStackView.stackAnimDuration,
-              curve: SavedCardsCardStackView.stackAnimCurve,
-              top: _cardTopFor(i, _focusedIndex),
-              left: 0,
-              right: 0,
-              child: _StackCardSlot(
+              key: ValueKey('h-stack-slot-${widget.displayCards[i].cardId}'),
+              duration: SavedCardsHorizontalStackView.stackAnimDuration,
+              curve: SavedCardsHorizontalStackView.stackAnimCurve,
+              left: SavedCardsHorizontalStackView.cardLeftForIndex(
+                i,
+                _focusedIndex,
+                cardWidth,
+              ),
+              top: 0,
+              width: cardWidth,
+              child: _HorizontalStackCardSlot(
                 card: widget.displayCards[i],
                 isFocused: i == _focusedIndex,
                 colorScheme: colorScheme,
@@ -119,8 +132,8 @@ class _SavedCardsCardStackViewState extends State<SavedCardsCardStackView> {
   }
 }
 
-class _StackCardSlot extends StatelessWidget {
-  const _StackCardSlot({
+class _HorizontalStackCardSlot extends StatelessWidget {
+  const _HorizontalStackCardSlot({
     required this.card,
     required this.isFocused,
     required this.colorScheme,
@@ -134,16 +147,16 @@ class _StackCardSlot extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final heroTag = 'saved-card-${card.cardId}';
+    final heroTag = 'event-group-card-${card.cardId}';
 
     return AnimatedScale(
-      duration: SavedCardsCardStackView.stackAnimDuration,
-      curve: SavedCardsCardStackView.stackAnimCurve,
-      alignment: Alignment.topCenter,
+      duration: SavedCardsHorizontalStackView.stackAnimDuration,
+      curve: SavedCardsHorizontalStackView.stackAnimCurve,
+      alignment: Alignment.centerLeft,
       scale: isFocused ? 1.0 : 0.93,
       child: AnimatedContainer(
-        duration: SavedCardsCardStackView.stackAnimDuration,
-        curve: SavedCardsCardStackView.stackAnimCurve,
+        duration: SavedCardsHorizontalStackView.stackAnimDuration,
+        curve: SavedCardsHorizontalStackView.stackAnimCurve,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
           boxShadow: isFocused

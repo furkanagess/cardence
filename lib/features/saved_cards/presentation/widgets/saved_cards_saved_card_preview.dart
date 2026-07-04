@@ -12,13 +12,11 @@ class SavedCardsSavedCardPreview extends StatelessWidget {
     required this.card,
     this.onTap,
     this.heroTag,
-    this.wrapHero = false,
   });
 
   final SavedCard card;
   final VoidCallback? onTap;
   final String? heroTag;
-  final bool wrapHero;
 
   @override
   Widget build(BuildContext context) {
@@ -34,7 +32,10 @@ class SavedCardsSavedCardPreview extends StatelessWidget {
       if (card.website != null && card.website!.trim().isNotEmpty) 'website',
     ];
 
+    // cardId anahtarı odak/Hero değişiminde State'i korur; foto yeniden
+    // yüklenmez.
     final cardWidget = FlippablePersonCard(
+      key: ValueKey('saved-card-preview-${card.cardId}'),
       title: displayName,
       titleSecondary: companyName,
       jobTitle: card.title?.trim(),
@@ -55,7 +56,9 @@ class SavedCardsSavedCardPreview extends StatelessWidget {
       showPremiumBadge: card.isOwnerPremium,
     );
 
-    if (!wrapHero || heroTag == null) return cardWidget;
+    // heroTag varsa Hero her zaman aynı ağaçta kalsın; odak değişiminde
+    // sökülüp takılması State'i yıkıp fotoğrafı yeniden yükletiyordu.
+    if (heroTag == null) return cardWidget;
 
     return Hero(
       tag: heroTag!,
