@@ -4,6 +4,7 @@ import '../../../../core/l10n/l10n_extensions.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/constants/app_constants.dart';
+import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/atoms/cardence_app_bar.dart';
 import '../../../../core/widgets/organisms/cardence_scaffold.dart';
 import '../../../event_groups/domain/usecases/get_event_groups.dart';
@@ -166,9 +167,20 @@ class _MainShellPageState extends State<MainShellPage> {
   PreferredSizeWidget? _buildAppBar(BuildContext context) {
     if (_currentIndex == 0) return null;
 
+    final textTheme = Theme.of(context).textTheme;
+
     return CardenceAppBar(
-      variant: CardenceAppBarVariant.root,
-      title: _appBarTitle,
+      variant: CardenceAppBarVariant.primary,
+      titleWidget: Text(
+        _appBarTitle,
+        style: textTheme.titleLarge?.copyWith(
+          color: AppColors.primary,
+          fontWeight: FontWeight.w700,
+          fontSize: 22,
+        ),
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+      ),
       actions: [
         CardenceAppBar.iconAction(
           icon: Icons.settings_outlined,
@@ -205,7 +217,9 @@ class _MainShellPageState extends State<MainShellPage> {
           body: IndexedStack(
             index: _currentIndex,
             children: [
-              SavedCardsPage(
+              HeroMode(
+                enabled: _currentIndex == 0,
+                child: SavedCardsPage(
                 getEventGroups: widget.getEventGroups,
                 getSavedCards: widget.getSavedCards,
                 updateEventGroup: widget.updateEventGroup,
@@ -223,7 +237,10 @@ class _MainShellPageState extends State<MainShellPage> {
                 filterTrigger: _savedCardsFilterTrigger,
                 addCardTrigger: _savedCardsAddCardTrigger,
               ),
-              EventGroupsPage(
+              ),
+              HeroMode(
+                enabled: _currentIndex == 1,
+                child: EventGroupsPage(
                 getEventGroups: widget.getEventGroups,
                 getEventGroupInvitations: widget.getEventGroupInvitations,
                 acceptEventGroupInvitation: widget.acceptEventGroupInvitation,
@@ -241,7 +258,10 @@ class _MainShellPageState extends State<MainShellPage> {
                 getNetworkGraph: widget.getNetworkGraph,
                 getNetworkGraphPath: widget.getNetworkGraphPath,
               ),
-              ProfilePage(
+              ),
+              HeroMode(
+                enabled: _currentIndex == 2,
+                child: ProfilePage(
                 draft: _myCardDraft,
                 getOnboardingDraftCards: widget.getOnboardingDraftCards,
                 persistOnboardingCard: widget.persistOnboardingCard,
@@ -249,8 +269,11 @@ class _MainShellPageState extends State<MainShellPage> {
                 getNetworkGraph: widget.getNetworkGraph,
                 getNetworkGraphPath: widget.getNetworkGraphPath,
                 getEventGroups: widget.getEventGroups,
+                uploadProfilePhoto: widget.uploadProfilePhoto,
+                upgradeWalletPlan: widget.upgradeWalletPlan,
                 onDraftUpdated: (updated) =>
                     setState(() => _myCardDraft = updated),
+              ),
               ),
             ],
           ),

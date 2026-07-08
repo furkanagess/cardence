@@ -19,8 +19,6 @@ class AddManualCardStepPreview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
-    final colorScheme = Theme.of(context).colorScheme;
     final previewDraft = ManualSavedCardPreviewHelper.toPreviewDraft(draft);
 
     return OnboardingStepShell(
@@ -30,16 +28,7 @@ class AddManualCardStepPreview extends StatelessWidget {
         children: [
           OnboardingCardPreviewFrame(
             draft: previewDraft,
-            flipOnTouch: true,
-          ),
-          const SizedBox(height: 8),
-          Center(
-            child: Text(
-              context.l10n.kartevirmekIinSaAlttaki,
-              style: textTheme.labelMedium?.copyWith(
-                color: colorScheme.onSurfaceVariant,
-              ),
-            ),
+            showActionStrip: false,
           ),
           const SizedBox(height: 24),
           CardColorCustomizeSection(
@@ -54,7 +43,7 @@ class AddManualCardStepPreview extends StatelessWidget {
                   clearAccentColor: accent == null,
                 ),
               ),
-              flipOnTouch: false,
+              showActionStrip: false,
             ),
             onBackgroundColorChanged: (hex) {
               onChanged(

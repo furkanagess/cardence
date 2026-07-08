@@ -3,55 +3,78 @@ import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/atoms/card_watermark.dart';
 
-/// Ağ grafiği çizim alanı — siyah zemin ve ızgara.
+/// Ağ grafiği çizim alanı — tema uyumlu zemin ve ızgara.
 abstract final class NetworkGraphCanvasTheme {
-  static const Color background = AppColors.graphCanvasBackground;
+  static Brightness brightnessOf(BuildContext context) =>
+      Theme.of(context).brightness;
 
-  static BoxDecoration get backgroundDecoration => const BoxDecoration(
-        color: background,
-      );
+  static bool isDark(BuildContext context) =>
+      brightnessOf(context) == Brightness.dark;
 
-  static BoxDecoration fullscreenButtonDecoration(Color accent) => BoxDecoration(
-        color: AppColors.graphNodeLabelBackground,
-        shape: BoxShape.circle,
-        border: Border.all(color: AppColors.graphNodeLabelBorder),
-        boxShadow: [
-          BoxShadow(
-            color: accent.withValues(alpha: 0.2),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      );
+  static Color background(BuildContext context) =>
+      AppColors.graphCanvasBackgroundFor(brightnessOf(context));
 
-  static TextStyle nodeLabelStyle(TextTheme textTheme) =>
+  static BoxDecoration backgroundDecoration(BuildContext context) =>
+      BoxDecoration(color: background(context));
+
+  static BoxDecoration fullscreenButtonDecoration(
+    BuildContext context,
+    Color accent,
+  ) {
+    final brightness = brightnessOf(context);
+    return BoxDecoration(
+      color: AppColors.graphNodeLabelBackgroundFor(brightness),
+      shape: BoxShape.circle,
+      border: Border.all(
+        color: AppColors.graphNodeLabelBorderFor(brightness),
+      ),
+      boxShadow: [
+        BoxShadow(
+          color: accent.withValues(alpha: isDark(context) ? 0.2 : 0.12),
+          blurRadius: 12,
+          offset: const Offset(0, 4),
+        ),
+      ],
+    );
+  }
+
+  static TextStyle nodeLabelStyle(TextTheme textTheme, Brightness brightness) =>
       textTheme.labelSmall?.copyWith(
-        color: AppColors.textPrimaryDark,
+        color: AppColors.graphCanvasPrimaryTextFor(brightness),
         fontWeight: FontWeight.w600,
         letterSpacing: 0.1,
         height: 1.2,
       ) ??
-      const TextStyle(
-        color: AppColors.textPrimaryDark,
+      TextStyle(
+        color: AppColors.graphCanvasPrimaryTextFor(brightness),
         fontWeight: FontWeight.w600,
         fontSize: 11,
       );
+
+  static Color nodeLabelBackground(Brightness brightness) =>
+      AppColors.graphNodeLabelBackgroundFor(brightness);
+
+  static Color nodeLabelBorder(Brightness brightness) =>
+      AppColors.graphNodeLabelBorderFor(brightness);
 }
 
-/// Hafif nokta ızgarası — düğüm ve kenarları siyah zeminde okunaklı kılar.
+/// Hafif nokta ızgarası — düğüm ve kenarları zeminde okunaklı kılar.
 class NetworkGraphGridPainter extends CustomPainter {
   const NetworkGraphGridPainter({
     this.spacing = 28,
     this.dotRadius = 0.85,
+    this.brightness = Brightness.dark,
   });
 
   final double spacing;
   final double dotRadius;
+  final Brightness brightness;
 
   @override
   void paint(Canvas canvas, Size size) {
-    final dotPaint = Paint()..color = AppColors.graphCanvasGrid;
-    final accentPaint = Paint()..color = AppColors.graphCanvasGridAccent;
+    final dotPaint = Paint()..color = AppColors.graphCanvasGridFor(brightness);
+    final accentPaint = Paint()
+      ..color = AppColors.graphCanvasGridAccentFor(brightness);
 
     for (var x = spacing; x < size.width; x += spacing) {
       for (var y = spacing; y < size.height; y += spacing) {
@@ -67,10 +90,13 @@ class NetworkGraphGridPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant NetworkGraphGridPainter oldDelegate) => false;
+  bool shouldRepaint(covariant NetworkGraphGridPainter oldDelegate) =>
+      oldDelegate.brightness != brightness ||
+      oldDelegate.spacing != spacing ||
+      oldDelegate.dotRadius != dotRadius;
 }
 
-/// Siyah zemin, ızgara ve Cardence filigranı — grafik çizim alanı arka planı.
+/// Zemin, ızgara ve Cardence filigranı — grafik çizim alanı arka planı.
 class NetworkGraphCanvasBackground extends StatelessWidget {
   const NetworkGraphCanvasBackground({super.key, this.child});
 
@@ -78,13 +104,18 @@ class NetworkGraphCanvasBackground extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final brightness = NetworkGraphCanvasTheme.brightnessOf(context);
+    final background = NetworkGraphCanvasTheme.background(context);
+
     return Stack(
       fit: StackFit.expand,
       children: [
-        const ColoredBox(color: NetworkGraphCanvasTheme.background),
-        const CustomPaint(painter: NetworkGraphGridPainter()),
-        const CardWatermark(
-          surfaceColor: NetworkGraphCanvasTheme.background,
+        ColoredBox(color: background),
+        CustomPaint(
+          painter: NetworkGraphGridPainter(brightness: brightness),
+        ),
+        CardWatermark(
+          surfaceColor: background,
           variant: CardWatermarkVariant.graphCanvas,
         ),
         if (child != null) child!,

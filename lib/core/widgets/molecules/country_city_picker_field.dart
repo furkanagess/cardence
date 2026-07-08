@@ -1,9 +1,15 @@
 import '../../../core/l10n/l10n_extensions.dart';
 import '../../../core/location/country_location_data_cache.dart';
+import 'location_picker_field_row.dart';
 
 import 'package:csc_picker/dropdown_with_search.dart';
 import 'package:csc_picker/model/select_status_model.dart';
 import 'package:flutter/material.dart';
+
+enum CountryCityPickerLayout {
+  standard,
+  eventGroup,
+}
 
 /// Ülke, il ve ilçe seçimi; formdaki diğer alanlarla aynı görünümde.
 class CountryCityPickerField extends StatefulWidget {
@@ -16,6 +22,9 @@ class CountryCityPickerField extends StatefulWidget {
     this.city,
     required this.onCountryChanged,
     required this.onCityChanged,
+    this.layout = CountryCityPickerLayout.standard,
+    this.combinedStateDistrictLabel,
+    this.combinedStateDistrictHint,
   });
 
   final String countryLabel;
@@ -25,6 +34,9 @@ class CountryCityPickerField extends StatefulWidget {
   final String? city;
   final ValueChanged<String?> onCountryChanged;
   final ValueChanged<String?> onCityChanged;
+  final CountryCityPickerLayout layout;
+  final String? combinedStateDistrictLabel;
+  final String? combinedStateDistrictHint;
 
   @override
   State<CountryCityPickerField> createState() => _CountryCityPickerFieldState();
@@ -52,7 +64,7 @@ class _CountryCityPickerFieldState extends State<CountryCityPickerField> {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.country != widget.country ||
         oldWidget.city != widget.city) {
-      _syncFromWidget();
+      setState(_syncFromWidget);
     }
   }
 
@@ -267,6 +279,83 @@ class _CountryCityPickerFieldState extends State<CountryCityPickerField> {
     widget.onCityChanged(_composeCityValue());
   }
 
+  String? _provinceDistrictDisplay() {
+    if (_selectedState != null &&
+        _selectedDistrict != null &&
+        _selectedDistrict != _selectedState) {
+      return '${_selectedState!.trim()} · ${_selectedDistrict!.trim()}';
+    }
+    if (_selectedDistrict != null && _selectedDistrict!.isNotEmpty) {
+      return _selectedDistrict!.trim();
+    }
+    if (_selectedState != null && _selectedState!.isNotEmpty) {
+      return _selectedState!.trim();
+    }
+    return null;
+  }
+
+  Future<void> _openProvinceDistrictPicker() async {
+    if (_selectedCountryLabel == null || _stateOptions.isEmpty) return;
+
+    await _openPicker(
+      title: widget.stateLabel,
+      placeholder: context.l10n.ilAra,
+      items: _stateOptions,
+      onSelected: _onStatePicked,
+    );
+
+    if (!mounted || _districtOptions.isEmpty) return;
+    await _openPicker(
+      title: widget.districtLabel,
+      placeholder: context.l10n.ileAra,
+      items: _districtOptions,
+      onSelected: _onDistrictPicked,
+    );
+  }
+
+  Widget _buildEventGroupLayout({
+    required ColorScheme colorScheme,
+    required TextTheme textTheme,
+    required bool countryEnabled,
+    required bool stateEnabled,
+    required bool districtEnabled,
+  }) {
+    final combinedLabel = widget.combinedStateDistrictLabel ??
+        '${widget.stateLabel} · ${widget.districtLabel}';
+    final combinedHint =
+        widget.combinedStateDistrictHint ?? combinedLabel;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        LocationPickerFieldRow(
+          label: widget.countryLabel,
+          leadingIcon: Icons.public_rounded,
+          value: _cleanCountryName(_selectedCountryLabel),
+          placeholder: widget.countryLabel,
+          trailingIcon: Icons.keyboard_arrow_down_rounded,
+          enabled: countryEnabled,
+          onTap: () => _openPicker(
+            title: widget.countryLabel,
+            placeholder: context.l10n.lkeAra,
+            items: _countryOptions,
+            onSelected: _onCountryPicked,
+          ),
+        ),
+        const SizedBox(height: 14),
+        LocationPickerFieldRow(
+          label: combinedLabel,
+          leadingIcon: Icons.location_city_outlined,
+          value: _provinceDistrictDisplay(),
+          placeholder: combinedHint,
+          trailingIcon: Icons.my_location_outlined,
+          enabled: stateEnabled,
+          onTap: stateEnabled ? _openProvinceDistrictPicker : null,
+        ),
+      ],
+    );
+  }
+
   Widget _buildPickerField({
     required ColorScheme colorScheme,
     required TextTheme textTheme,
@@ -322,6 +411,16 @@ class _CountryCityPickerFieldState extends State<CountryCityPickerField> {
     final stateEnabled =
         _selectedCountryLabel != null && _stateOptions.isNotEmpty;
     final districtEnabled = _selectedState != null && _districtOptions.isNotEmpty;
+
+    if (widget.layout == CountryCityPickerLayout.eventGroup) {
+      return _buildEventGroupLayout(
+        colorScheme: colorScheme,
+        textTheme: textTheme,
+        countryEnabled: countryEnabled,
+        stateEnabled: stateEnabled,
+        districtEnabled: districtEnabled,
+      );
+    }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,

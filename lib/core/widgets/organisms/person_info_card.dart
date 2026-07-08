@@ -33,6 +33,8 @@ class PersonInfoCard extends StatelessWidget {
     this.showPremiumBadge = false,
     this.titleRightInset = 0,
     this.bottomRightInset = 0,
+    this.bottomInset = 0,
+    this.hideContactFooter = false,
     this.compactBackFace = false,
     this.cardId,
     this.showCardIdOnBack = false,
@@ -87,6 +89,12 @@ class PersonInfoCard extends StatelessWidget {
 
   /// Flip butonu gibi alt sağ öğeler için ek iç boşluk.
   final double bottomRightInset;
+
+  /// Alt aksiyon şeridi vb. için ek alt iç boşluk.
+  final double bottomInset;
+
+  /// true: ön yüzdeki iletişim satırları gizlenir (aksiyon şeridi kullanılır).
+  final bool hideContactFooter;
 
   /// Kompakt kartın arka yüzü: yalnızca Hakkımda içeriği.
   final bool compactBackFace;
@@ -251,6 +259,8 @@ class PersonInfoCard extends StatelessWidget {
         showPremiumBadge: showPremiumBadge,
         titleRightInset: titleRightInset,
         bottomRightInset: bottomRightInset,
+        bottomInset: bottomInset,
+        hideContactFooter: hideContactFooter,
         onSurface: onSurface,
         onSurfaceVariant: onSurfaceVariant,
       );
@@ -746,6 +756,8 @@ class _CompactBusinessCardFace extends StatelessWidget {
     this.showPremiumBadge = false,
     required this.titleRightInset,
     this.bottomRightInset = 0,
+    this.bottomInset = 0,
+    this.hideContactFooter = false,
     required this.onSurface,
     required this.onSurfaceVariant,
     this.title,
@@ -798,6 +810,8 @@ class _CompactBusinessCardFace extends StatelessWidget {
   final bool showPremiumBadge;
   final double titleRightInset;
   final double bottomRightInset;
+  final double bottomInset;
+  final bool hideContactFooter;
   final Color onSurface;
   final Color onSurfaceVariant;
 
@@ -910,10 +924,11 @@ class _CompactBusinessCardFace extends StatelessWidget {
                   company: company,
                 ),
                 if (fillHeight) const Spacer(),
-                if (email != null ||
-                    phone != null ||
-                    website != null ||
-                    linkedin != null)
+                if (!hideContactFooter &&
+                    (email != null ||
+                        phone != null ||
+                        website != null ||
+                        linkedin != null))
                   Padding(
                     padding: EdgeInsets.only(
                       right: bottomRightInset > 0 ? bottomRightInset * 0.65 : 0,
@@ -983,7 +998,10 @@ class _CompactBusinessCardFace extends StatelessWidget {
                   14,
                   14,
                   14 + titleRightInset,
-                  14 + (bottomRightInset * 0.35),
+                  14 +
+                      (bottomInset > 0
+                          ? bottomInset
+                          : bottomRightInset * 0.35),
                 ),
                 child: child,
               ),
@@ -1160,13 +1178,11 @@ class _CompactBusinessCardFace extends StatelessWidget {
   Widget _buildPhotoSlot() {
     final url = photoUrl?.trim();
     if (url != null && url.isNotEmpty) {
-      return ClipRRect(
+      return ProfileAvatar(
+        photoUrl: photoUrl,
+        displayName: title,
+        size: _photoSize,
         borderRadius: BorderRadius.circular(_photoRadius),
-        child: ProfileAvatar(
-          photoUrl: photoUrl,
-          displayName: title,
-          size: _photoSize,
-        ),
       );
     }
 

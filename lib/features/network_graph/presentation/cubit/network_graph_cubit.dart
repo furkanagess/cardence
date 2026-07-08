@@ -6,6 +6,7 @@ import '../../domain/entities/graph_node_type.dart';
 import '../../domain/entities/graph_scope.dart';
 import '../../domain/usecases/get_network_graph.dart';
 import '../../domain/utils/find_network_graph_path.dart';
+import '../helpers/network_graph_display.dart';
 import 'network_graph_state.dart';
 
 class NetworkGraphCubit extends Cubit<NetworkGraphState> {
@@ -94,6 +95,7 @@ class NetworkGraphCubit extends Cubit<NetworkGraphState> {
         centerCardId: centerCardId ?? state.centerCardId,
         clearPath: true,
         clearPathSource: true,
+        clearSelectedNode: true,
         clearError: true,
         isPathLoading: false,
         clearEventGroupId: scope != GraphScope.event,
@@ -137,6 +139,29 @@ class NetworkGraphCubit extends Cubit<NetworkGraphState> {
     loadEvent(eventGroupId: eventGroupId);
   }
 
+  void tapNode(GraphNode node) {
+    if (!NetworkGraphDisplay.isTappable(node)) return;
+
+    if (node.type == GraphNodeType.card) {
+      tapCardNode(node);
+      return;
+    }
+
+    if (state.selectedNodeId == node.id) {
+      clearNodeSelection();
+      return;
+    }
+
+    emit(
+      state.copyWith(
+        selectedNodeId: node.id,
+        clearPath: true,
+        clearPathSource: true,
+        isPathLoading: false,
+      ),
+    );
+  }
+
   void tapCardNode(GraphNode node) {
     if (node.type != GraphNodeType.card) return;
     final cardId = _cardIdFromNode(node);
@@ -148,6 +173,7 @@ class NetworkGraphCubit extends Cubit<NetworkGraphState> {
         state.copyWith(
           pathSourceCardId: cardId,
           clearPath: true,
+          clearSelectedNode: true,
           isPathLoading: false,
         ),
       );
@@ -174,6 +200,7 @@ class NetworkGraphCubit extends Cubit<NetworkGraphState> {
         isPathLoading: true,
         pathSourceCardId: fromCardId,
         clearPath: true,
+        clearSelectedNode: true,
         clearError: true,
       ),
     );
@@ -199,6 +226,21 @@ class NetworkGraphCubit extends Cubit<NetworkGraphState> {
       state.copyWith(
         clearPath: true,
         clearPathSource: true,
+        isPathLoading: false,
+      ),
+    );
+  }
+
+  void clearNodeSelection() {
+    emit(state.copyWith(clearSelectedNode: true));
+  }
+
+  void clearAllSelections() {
+    emit(
+      state.copyWith(
+        clearPath: true,
+        clearPathSource: true,
+        clearSelectedNode: true,
         isPathLoading: false,
       ),
     );

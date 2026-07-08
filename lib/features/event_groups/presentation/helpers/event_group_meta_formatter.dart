@@ -1,3 +1,5 @@
+import 'package:intl/intl.dart';
+
 import '../../domain/entities/event_group.dart';
 
 class EventGroupMetaFormatter {
@@ -43,4 +45,20 @@ class EventGroupMetaFormatter {
   }
 
   static String _twoDigits(int value) => value.toString().padLeft(2, '0');
+
+  static String formatHeroDateTime(
+    DateTime startAt, {
+    DateTime? endAt,
+    required String locale,
+  }) {
+    final localStart = startAt.toLocal();
+    final datePart =
+        DateFormat('d MMM yyyy', locale).format(localStart);
+    final startTime = DateFormat('HH:mm', locale).format(localStart);
+    if (endAt == null) {
+      return '$datePart · $startTime';
+    }
+    final endTime = DateFormat('HH:mm', locale).format(endAt.toLocal());
+    return '$datePart · $startTime – $endTime';
+  }
 }

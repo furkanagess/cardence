@@ -7,6 +7,7 @@ import '../../../event_groups/domain/usecases/get_event_groups.dart';
 import '../../../event_groups/domain/usecases/delete_event_group.dart';
 import '../../../event_groups/domain/usecases/update_event_group.dart';
 import '../../../event_groups/domain/usecases/invite_event_group_cards_by_card_id.dart';
+import '../../domain/entities/saved_card.dart';
 import '../../domain/usecases/link_saved_cards_to_event_group.dart';
 import '../../domain/usecases/add_saved_card.dart';
 import '../../domain/usecases/delete_saved_card.dart';
@@ -23,10 +24,9 @@ import '../widgets/saved_cards_add_card_fab.dart';
 import '../widgets/saved_cards_card_stack_view.dart';
 import '../widgets/saved_cards_empty_results_view.dart';
 import '../widgets/saved_cards_focus_arrow_track.dart';
-import '../widgets/saved_cards_list_view.dart';
 import '../widgets/saved_cards_loading_shimmer.dart';
+import '../widgets/saved_cards_page_header.dart';
 import '../widgets/saved_cards_screen_toolbar.dart';
-import '../widgets/saved_cards_wallet_strip.dart';
 
 /// Kaydettiği kişilerin kartları listesi (yalnızca görünüm katmanı).
 class SavedCardsPage extends StatefulWidget {
@@ -71,7 +71,6 @@ class SavedCardsPage extends StatefulWidget {
 
 class _SavedCardsPageState extends State<SavedCardsPage>
     with SavedCardsPageEffectsMixin {
-  bool _showFlippableView = true;
   int _stackFocusedIndex = 0;
   int _lastStackCardCount = 0;
   late final ScrollController _stackScrollController;
@@ -114,7 +113,7 @@ class _SavedCardsPageState extends State<SavedCardsPage>
     required int cardCount,
   }) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted || !_showFlippableView) return;
+      if (!mounted) return;
       _centerFocusedStackCard(topPadding: topPadding, cardCount: cardCount);
     });
   }
@@ -192,6 +191,27 @@ class _SavedCardsPageState extends State<SavedCardsPage>
     }
   }
 
+  void _openCardDetail(
+    BuildContext context,
+    SavedCard card, {
+    String? heroTag,
+  }) {
+    openSavedCardDetail(
+      context,
+      card: card,
+      heroTag: heroTag,
+      getEventGroups: widget.getEventGroups,
+      getSavedCards: widget.getSavedCards,
+      updateEventGroup: widget.updateEventGroup,
+      inviteEventGroupCardsByCardId: widget.inviteEventGroupCardsByCardId,
+      deleteEventGroup: widget.deleteEventGroup,
+      linkSavedCardsToEventGroup: widget.linkSavedCardsToEventGroup,
+      saveSavedCard: widget.saveSavedCard,
+      deleteSavedCard: widget.deleteSavedCard,
+      trackSavedCardContactClick: widget.trackSavedCardContactClick,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<SavedCardsCubit, SavedCardsState>(
@@ -212,13 +232,13 @@ class _SavedCardsPageState extends State<SavedCardsPage>
         final displayCards = cubit.displayCardsFor(cubit.sourceCards);
         const horizontalPadding = 20.0;
         const topPadding = 4.0;
-        const contentBottomInset = 128.0;
+        const contentBottomInset = 160.0;
         final quota = state.quota;
         final canAddMore = quota.canAddMore;
+
         _syncStackFocus(displayCards.length, topPadding: topPadding);
 
-        if (_showFlippableView &&
-            displayCards.isNotEmpty &&
+        if (displayCards.isNotEmpty &&
             (_lastCenteredFocusIndex != _stackFocusedIndex ||
                 _lastCenteredCardCount != displayCards.length)) {
           _scheduleCenterFocusedStackCard(
@@ -228,152 +248,91 @@ class _SavedCardsPageState extends State<SavedCardsPage>
         }
 
         return CardenceScaffold(
-          body: Stack(
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  SafeArea(
-                    bottom: false,
-                    child: SavedCardsWalletStrip(
-                            quota: quota,
-                            onUpgradeTap: cubit.requestUpgradeSheet,
-                          ),
-                  ),
-                  SavedCardsScreenToolbar(
-                    showFlippableView: _showFlippableView,
-                    onViewModeChanged: (flippable) {
-                      if (flippable == _showFlippableView) return;
-                      setState(() => _showFlippableView = flippable);
-                      if (flippable) {
-                        _scheduleCenterFocusedStackCard(
-                          topPadding: topPadding,
-                          cardCount: displayCards.length,
-                        );
-                      }
-                    },
-                    searchQuery: state.searchQuery,
-                    onSearchQueryChanged: cubit.setSearchQuery,
-                    hasActiveFilters: state.hasActiveFilters,
-                    hasActiveSearch: state.hasActiveSearch,
-                    activeFilterCount: state.activeFilterCount,
-                    onOpenFilters: cubit.requestOpenFilters,
-                  ),
-                  Expanded(
-                    child: state.isLoadingCards
-                        ? const SavedCardsLoadingShimmer()
-                        : displayCards.isEmpty
-                            ? SavedCardsEmptyResultsView(
-                                hasFilters: state.hasActiveFilters,
-                                hasSearch: state.hasActiveSearch,
-                                onClearFilters: cubit.clearFilters,
-                                onClearSearch: cubit.clearSearch,
-                              )
-                            : IndexedStack(
-                                // Kart ↔ liste geçişinde State korunur; fotoğraflar
-                                // dispose edilip yeniden yüklenmez.
-                                index: _showFlippableView ? 0 : 1,
-                                sizing: StackFit.expand,
-                                children: [
-                                  Stack(
-                                    key: const ValueKey('saved-cards-stack'),
-                                    clipBehavior: Clip.none,
-                                    children: [
-                                      SingleChildScrollView(
-                                        controller: _stackScrollController,
-                                        padding: const EdgeInsets.fromLTRB(
-                                          horizontalPadding,
-                                          topPadding,
-                                          horizontalPadding,
-                                          contentBottomInset,
+          body: ColoredBox(
+            color: Theme.of(context).scaffoldBackgroundColor,
+            child: Stack(
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    SavedCardsPageHeader(
+                      quota: quota,
+                      onUpgradeTap: cubit.requestUpgradeSheet,
+                    ),
+                    SavedCardsScreenToolbar(
+                      searchQuery: state.searchQuery,
+                      onSearchQueryChanged: cubit.setSearchQuery,
+                      hasActiveFilters: state.hasActiveFilters,
+                      hasActiveSearch: state.hasActiveSearch,
+                      activeFilterCount: state.activeFilterCount,
+                      onOpenFilters: cubit.requestOpenFilters,
+                    ),
+                    Expanded(
+                      child: state.isLoadingCards
+                          ? const SavedCardsLoadingShimmer()
+                          : displayCards.isEmpty
+                              ? SavedCardsEmptyResultsView(
+                                  hasFilters: state.hasActiveFilters,
+                                  hasSearch: state.hasActiveSearch,
+                                  onClearFilters: cubit.clearFilters,
+                                  onClearSearch: cubit.clearSearch,
+                                )
+                              : Stack(
+                                  clipBehavior: Clip.none,
+                                  children: [
+                                    SingleChildScrollView(
+                                      controller: _stackScrollController,
+                                      padding: const EdgeInsets.fromLTRB(
+                                        horizontalPadding,
+                                        topPadding,
+                                        horizontalPadding,
+                                        contentBottomInset,
+                                      ),
+                                      child: SavedCardsCardStackView(
+                                        displayCards: displayCards,
+                                        focusedIndex: _stackFocusedIndex,
+                                        onFocusedIndexChanged: (index) =>
+                                            _setStackFocusedIndex(
+                                          index,
+                                          topPadding: topPadding,
+                                          cardCount: displayCards.length,
                                         ),
-                                        child: SavedCardsCardStackView(
-                                          displayCards: displayCards,
+                                        onOpenCard: (card, {heroTag}) =>
+                                            _openCardDetail(
+                                          context,
+                                          card,
+                                          heroTag: heroTag,
+                                        ),
+                                      ),
+                                    ),
+                                    Positioned(
+                                      left: 2,
+                                      top: 0,
+                                      bottom: 0,
+                                      child: Center(
+                                        child: SavedCardsFocusArrowTrack(
                                           focusedIndex: _stackFocusedIndex,
+                                          cardCount: displayCards.length,
                                           onFocusedIndexChanged: (index) =>
                                               _setStackFocusedIndex(
                                             index,
                                             topPadding: topPadding,
                                             cardCount: displayCards.length,
                                           ),
-                                          onOpenCard: (card, {heroTag}) =>
-                                              openSavedCardDetail(
-                                            context,
-                                            card: card,
-                                            heroTag: heroTag,
-                                            getEventGroups:
-                                                widget.getEventGroups,
-                                            getSavedCards: widget.getSavedCards,
-                                            updateEventGroup:
-                                                widget.updateEventGroup,
-                                            inviteEventGroupCardsByCardId: widget
-                                                .inviteEventGroupCardsByCardId,
-                                            deleteEventGroup:
-                                                widget.deleteEventGroup,
-                                            linkSavedCardsToEventGroup: widget
-                                                .linkSavedCardsToEventGroup,
-                                            saveSavedCard: widget.saveSavedCard,
-                                            deleteSavedCard:
-                                                widget.deleteSavedCard,
-                                            trackSavedCardContactClick: widget
-                                                .trackSavedCardContactClick,
-                                          ),
                                         ),
                                       ),
-                                      Positioned(
-                                        left: 2,
-                                        top: 0,
-                                        bottom: 0,
-                                        child: Center(
-                                          child: SavedCardsFocusArrowTrack(
-                                            focusedIndex: _stackFocusedIndex,
-                                            cardCount: displayCards.length,
-                                            onFocusedIndexChanged: (index) =>
-                                                _setStackFocusedIndex(
-                                              index,
-                                              topPadding: topPadding,
-                                              cardCount: displayCards.length,
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  SavedCardsListView(
-                                    key: const ValueKey('saved-cards-list'),
-                                    displayCards: displayCards,
-                                    onCardTap: (card) => openSavedCardDetail(
-                                      context,
-                                      card: card,
-                                      getEventGroups: widget.getEventGroups,
-                                      getSavedCards: widget.getSavedCards,
-                                      updateEventGroup: widget.updateEventGroup,
-                                      inviteEventGroupCardsByCardId:
-                                          widget.inviteEventGroupCardsByCardId,
-                                      deleteEventGroup: widget.deleteEventGroup,
-                                      linkSavedCardsToEventGroup:
-                                          widget.linkSavedCardsToEventGroup,
-                                      saveSavedCard: widget.saveSavedCard,
-                                      deleteSavedCard: widget.deleteSavedCard,
-                                      trackSavedCardContactClick:
-                                          widget.trackSavedCardContactClick,
                                     ),
-                                    horizontalPadding: horizontalPadding,
-                                    topPadding: topPadding,
-                                    contentBottomInset: contentBottomInset,
-                                  ),
-                                ],
-                              ),
-                  ),
-                ],
-              ),
-              Positioned.fill(
-                child: SavedCardsDraggableFab(
+                                  ],
+                                ),
+                    ),
+                  ],
+                ),
+                SavedCardsAddCardFab(
                   canAddMore: canAddMore,
                   onPressed: cubit.handleAddCardTap,
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         );
       },

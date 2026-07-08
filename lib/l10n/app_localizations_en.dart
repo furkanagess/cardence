@@ -417,7 +417,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get gvenliinizIinHesabnzaTekrarGiri =>
-      'For your security, you need to sign in to your account again.';
+      'For your security, please sign in again.';
 
   @override
   String get hakkmda => 'About me';
@@ -463,6 +463,49 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get hesabnzaGiriYapn => 'Sign in to your account';
+
+  @override
+  String get authOrDivider => 'or';
+
+  @override
+  String get authJoinCardenceTitle => 'Join Cardence';
+
+  @override
+  String get authNoAccountPrompt => 'Don\'t have an account? ';
+
+  @override
+  String get authAlreadyHaveAccountPrompt => 'Already have an account? ';
+
+  @override
+  String get linkedinIleDevamEt => 'Continue with LinkedIn';
+
+  @override
+  String get ad => 'First name';
+
+  @override
+  String get sifre => 'Password';
+
+  @override
+  String authPasswordMinHint(int minLength) {
+    return 'At least $minLength characters';
+  }
+
+  @override
+  String sifreEnAzKarakter(int minLength) {
+    return 'Password must be at least $minLength characters.';
+  }
+
+  @override
+  String get sifrelerEslesmiyor => 'Passwords do not match.';
+
+  @override
+  String get registerLegalPrefix => 'By signing up, you agree to the ';
+
+  @override
+  String get registerLegalAnd => ' and ';
+
+  @override
+  String get registerLegalSuffix => '.';
 
   @override
   String get loginWelcomeTitle => 'Welcome to Cardence!';
@@ -551,6 +594,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get isimirketEPosta => 'Name, company, email...';
+
+  @override
+  String get savedCardsSearchHint => 'Search by name, company, or email...';
+
+  @override
+  String get listeGorunumu => 'List View';
+
+  @override
+  String get yeniKartEkle => 'Add New Card';
 
   @override
   String get isimsizKart => 'Unnamed card';
@@ -665,6 +717,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get kartIdKopyalandId => 'Card ID copied: \$id';
+
+  @override
+  String get clipboardCopySuccess => 'Successfully copied to clipboard';
 
   @override
   String get kartIdOluturulamadLtfenTekrar =>
@@ -1061,6 +1116,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get notlar => 'Notes';
 
   @override
+  String get savedCardContactInfoTitle => 'Contact information';
+
+  @override
+  String get savedCardEducationTitle => 'Education';
+
+  @override
+  String get savedCardPrivateNotesTitle => 'Private notes';
+
+  @override
   String get notunuzuBurayaYazn => 'Write your note here...';
 
   @override
@@ -1331,7 +1395,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get uygulamaDiliniSein => 'Choose app language';
 
   @override
+  String get uygulamaDili => 'App language';
+
+  @override
   String get uygulamaTemasnSein => 'Choose app theme';
+
+  @override
+  String get temaModu => 'Theme mode';
 
   @override
   String get uygulamaRengi => 'App accent color';
@@ -1373,6 +1443,19 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get yeniKartOlutur => 'Create new card';
+
+  @override
+  String profileActiveCardStatus(int current, int total) {
+    return 'ACTIVE CARD: $current / $total';
+  }
+
+  @override
+  String get agGrafigi => 'Network graph';
+
+  @override
+  String profileCardsSavedByOthersInfo(int count) {
+    return 'Your cards have been saved by others $count times in total.';
+  }
 
   @override
   String get yenidenek => 'Retake';
@@ -1486,7 +1569,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get sessionNotFound => 'Session not found.';
 
   @override
-  String get sessionExpired => 'Session expired. Please sign in again.';
+  String get sessionExpired => 'For your security, please sign in again.';
 
   @override
   String get operationFailed => 'Operation failed.';
@@ -1897,6 +1980,31 @@ class AppLocalizationsEn extends AppLocalizations {
   String get eventLocationVenueLabel => 'Venue name';
 
   @override
+  String get eventLocationProvinceDistrictLabel => 'Province · District';
+
+  @override
+  String get eventLocationProvinceDistrictHint =>
+      'Select province and district';
+
+  @override
+  String get eventShowOnMap => 'Show on map';
+
+  @override
+  String get eventMapTapToSelect => 'Tap the map to pick a location';
+
+  @override
+  String get eventMapDragToSelect => 'Drag the map to pick a location';
+
+  @override
+  String get eventMapUseMyLocation => 'My location';
+
+  @override
+  String get eventMapSelectLocation => 'Select location';
+
+  @override
+  String get eventMapOpenFullscreen => 'Full screen map';
+
+  @override
   String get eventLocationVenueHint => 'e.g. Istanbul Congress Center';
 
   @override
@@ -1929,6 +2037,31 @@ class AppLocalizationsEn extends AppLocalizations {
   String get eventAboutSection => 'About';
 
   @override
+  String get eventAboutSectionLabel => 'About this event';
+
+  @override
+  String get eventGroupCardsSectionTitle => 'Cards in group';
+
+  @override
+  String get eventShowMore => 'Show more';
+
+  @override
+  String eventDetailCardsChip(int count) {
+    return '$count cards';
+  }
+
+  @override
+  String eventDetailInvitesChip(int count) {
+    return '$count invites';
+  }
+
+  @override
+  String get eventDetailNetworkingChip => 'Networking';
+
+  @override
+  String get eventAddCardPlus => '+ Add card';
+
+  @override
   String eventLinkedCardsSection(int count) {
     return 'Linked cards ($count)';
   }
@@ -1940,6 +2073,21 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get eventCreatePhotoSubtitle =>
       'Add a cover photo for the event list. You can skip this step.';
+
+  @override
+  String get eventPhotoUpload => 'Upload photo';
+
+  @override
+  String get eventPhotoFormatHint => 'PNG, JPG or WEBP (Max. 5MB)';
+
+  @override
+  String get eventPhotoAdd => 'Add photo';
+
+  @override
+  String get eventPhotoChange => 'Change photo';
+
+  @override
+  String get eventCreateNoSavedCards => 'No saved cards yet.';
 
   @override
   String get eventSkip => 'Skip';
@@ -1994,16 +2142,31 @@ class AppLocalizationsEn extends AppLocalizations {
   String get eventScheduleRequired => 'Required';
 
   @override
+  String get eventStartDateLabel => 'Start date';
+
+  @override
+  String get eventStartTimeLabel => 'Start time';
+
+  @override
+  String get eventEndDateLabel => 'End date';
+
+  @override
+  String get eventEndTimeLabel => 'End time';
+
+  @override
+  String get eventAddEnd => 'Add end';
+
+  @override
   String get eventInviteByCardId => 'Invite by Card ID';
 
   @override
   String get eventActiveSection => 'Ongoing / Upcoming';
 
   @override
-  String get eventOngoingSection => 'Ongoing events';
+  String get eventOngoingSection => 'Ongoing';
 
   @override
-  String get eventUpcomingSection => 'Upcoming events';
+  String get eventUpcomingSection => 'Upcoming';
 
   @override
   String eventInvitationTitle(String eventName) {
@@ -2026,7 +2189,10 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get eventInvitationAccept => 'Join';
+  String get eventInvitationAccept => 'Confirm';
+
+  @override
+  String get eventInvitationInvitedSubtitle => 'You\'re invited';
 
   @override
   String get eventInvitationAcceptHint =>
@@ -2064,7 +2230,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get eventInvitationsSection => 'Invitations';
 
   @override
-  String get eventEndedSection => 'Ended events';
+  String get eventEndedSection => 'Ended';
+
+  @override
+  String eventGroupLinkedCardCount(int count) {
+    return '$count cards';
+  }
+
+  @override
+  String get eventGroupToday => 'Today';
+
+  @override
+  String get eventGroupEndedLastMonth => 'Ended last month';
+
+  @override
+  String get eventGroupEndedThisMonth => 'Ended this month';
 
   @override
   String get eventStatusUpcoming => 'Upcoming';
@@ -2260,6 +2440,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get networkGraph => 'Network Graph';
 
   @override
+  String get networkGraphLegendMe => 'Me';
+
+  @override
+  String get networkGraphLegendConnection => 'Connection';
+
+  @override
   String get networkStatistics => 'Network Statistics';
 
   @override
@@ -2375,6 +2561,18 @@ class AppLocalizationsEn extends AppLocalizations {
       'Tap two card nodes to find the shortest path between them.';
 
   @override
+  String networkGraphConnectedNodes(int count) {
+    return 'Connected nodes ($count)';
+  }
+
+  @override
+  String get networkGraphNoConnectedNodes =>
+      'No connected nodes in this graph.';
+
+  @override
+  String get networkGraphConnectionTypes => 'Connection types';
+
+  @override
   String get createMyCard => 'Create my card';
 
   @override
@@ -2382,10 +2580,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get swipeHorizontalToSwitchCards =>
-      'Swipe horizontally to switch cards; tap a card to edit.';
+      'Swipe horizontally to switch cards.';
 
   @override
-  String get tapCardToEdit => 'Tap card to edit.';
+  String get tapCardToEdit => 'Use the detail button on the card to view more.';
+
+  @override
+  String get kartDetay => 'Details';
 
   @override
   String get cardLimitReachedPremiumUpgrade =>

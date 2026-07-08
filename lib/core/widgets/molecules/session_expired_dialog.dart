@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../core/l10n/l10n_extensions.dart';
 
-import '../../constants/app_constants.dart';
 import '../../theme/app_colors.dart';
 import '../atoms/custom_button.dart';
 import '../../theme/splash_theme.dart';
@@ -16,12 +15,14 @@ class SessionExpiredDialog extends StatelessWidget {
   });
 
   final String message;
-  final VoidCallback onLoginPressed;
+  final Future<void> Function() onLoginPressed;
+
+  static const double _logoSize = 152;
 
   static Future<void> show(
     BuildContext context, {
     required String message,
-    required VoidCallback onLoginPressed,
+    required Future<void> Function() onLoginPressed,
   }) {
     return showDialog<void>(
       context: context,
@@ -32,9 +33,9 @@ class SessionExpiredDialog extends StatelessWidget {
           canPop: false,
           child: SessionExpiredDialog(
             message: message,
-            onLoginPressed: () {
+            onLoginPressed: () async {
               Navigator.of(dialogContext).pop();
-              onLoginPressed();
+              await onLoginPressed();
             },
           ),
         );
@@ -47,9 +48,7 @@ class SessionExpiredDialog extends StatelessWidget {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final isDark = theme.brightness == Brightness.dark;
-    final displayMessage = message.trim().isNotEmpty
-        ? message
-        : 'Oturum süresi doldu. Lütfen tekrar giriş yapın.';
+    final subtitle = context.l10n.sessionExpired;
 
     return Dialog(
       insetPadding: const EdgeInsets.symmetric(horizontal: 28),
@@ -76,31 +75,18 @@ class SessionExpiredDialog extends StatelessWidget {
               ),
             ),
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(24, 28, 24, 12),
-              child: Column(
-                children: [
-                  CardenceLogoMergeAnimation(
-                    size: 112,
-                    repeat: true,
-                    logoAssetPath: SplashTheme.logoAsset(
-                      theme.brightness,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    AppConstants.appName,
-                    style: theme.textTheme.labelLarge?.copyWith(
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: 0.4,
-                      color: colorScheme.primary,
-                    ),
-                  ),
-                ],
+              padding: const EdgeInsets.fromLTRB(24, 32, 24, 8),
+              child: CardenceLogoMergeAnimation(
+                size: _logoSize,
+                repeat: true,
+                logoAssetPath: SplashTheme.logoAsset(
+                  theme.brightness,
+                ),
               ),
             ),
           ),
           Padding(
-            padding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
+            padding: const EdgeInsets.fromLTRB(24, 12, 24, 24),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
@@ -116,50 +102,11 @@ class SessionExpiredDialog extends StatelessWidget {
                 ),
                 const SizedBox(height: 10),
                 Text(
-                  displayMessage,
+                  subtitle,
                   textAlign: TextAlign.center,
                   style: theme.textTheme.bodyMedium?.copyWith(
                     color: colorScheme.onSurfaceVariant,
                     height: 1.45,
-                  ),
-                ),
-                const SizedBox(height: 14),
-                DecoratedBox(
-                  decoration: BoxDecoration(
-                    color: colorScheme.surfaceContainerHighest.withValues(
-                      alpha: isDark ? 0.45 : 0.65,
-                    ),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: isDark
-                          ? AppColors.outlineDark
-                          : AppColors.outlineVariant,
-                    ),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 14,
-                      vertical: 12,
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.info_outline_rounded,
-                          size: 18,
-                          color: colorScheme.primary,
-                        ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: Text(
-                            context.l10n.gvenliinizIinHesabnzaTekrarGiri,
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: colorScheme.onSurfaceVariant,
-                              height: 1.4,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
                   ),
                 ),
                 const SizedBox(height: 24),

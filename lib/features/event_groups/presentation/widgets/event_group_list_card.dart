@@ -1,236 +1,241 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/l10n/app_l10n.dart';
 import '../../../../core/l10n/l10n_extensions.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/atoms/authenticated_network_image.dart';
 import '../../domain/entities/event_group.dart';
-import '../helpers/event_group_meta_formatter.dart';
-import 'event_group_meta_chip.dart';
-import 'event_group_status_badge.dart';
+import '../helpers/event_group_list_display_formatter.dart';
 
-/// Etkinlik grupları listesinde detay ekranına uyumlu kart.
+/// Liste kartı üst kapak yüksekliği.
+const double eventGroupListCardCoverHeight = 100;
+
+/// Kapak ile içerik paneli arasındaki bindirme.
+const double eventGroupListCardCoverOverlap = 14;
+
+/// İçerik paneli üst köşe yarıçapı.
+const double eventGroupListCardContentTopRadius = 20;
+
+/// Etkinlik grupları liste ekranında dikey bölüm kartı.
 class EventGroupListCard extends StatelessWidget {
   const EventGroupListCard({
     super.key,
     required this.group,
     required this.linkedCardCount,
     required this.onTap,
-    this.compact = false,
   });
 
   final EventGroup group;
   final int linkedCardCount;
   final VoidCallback onTap;
 
-  /// Yatay listelerde daha dar kapak ve tek satır açıklama.
-  final bool compact;
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final textTheme = theme.textTheme;
     final colorScheme = theme.colorScheme;
     final isDark = theme.brightness == Brightness.dark;
-    final isEnded = group.status == EventGroupStatus.ended;
-    final dateText = EventGroupMetaFormatter.formatRange(
-      group.startAt,
-      group.endAt,
+    final l10n = context.l10n;
+    final city = EventGroupListDisplayFormatter.primaryCityFromLocation(
+      group.location,
     );
-    final location = group.location?.trim();
-    final description = group.description?.trim();
-    final cardCountLabel = linkedCardCount == 0
-        ? AppL10n.noCardsInGroup(context.l10n)
-        : AppL10n.savedCardsCount(context.l10n, linkedCardCount);
-    final contentPadding = compact
-        ? const EdgeInsets.fromLTRB(14, 12, 14, 14)
-        : const EdgeInsets.fromLTRB(16, 14, 16, 16);
+    final cardCountLabel =
+        EventGroupListDisplayFormatter.linkedCardCountLabel(l10n, linkedCardCount);
+    final highlightBadge = group.status == EventGroupStatus.ongoing;
 
     return Material(
       color: colorScheme.surface,
       elevation: 0,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(14),
         side: BorderSide(
           color: isDark
               ? AppColors.outlineDark.withValues(alpha: 0.35)
-              : AppColors.outlineVariant.withValues(alpha: 0.75),
+              : AppColors.outlineVariant.withValues(alpha: 0.85),
         ),
       ),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: onTap,
-        child: Opacity(
-          opacity: isEnded ? 0.88 : 1,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              _CoverStrip(
-                photoUrl: group.photoUrl,
-                status: group.status,
-                isDark: isDark,
-                colorScheme: colorScheme,
-                height: compact ? 108 : _CoverStrip.defaultHeight,
-              ),
-              Padding(
-                padding: contentPadding,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Text(
-                      group.name,
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w800,
-                        color: colorScheme.onSurface,
-                        height: 1.2,
-                        fontSize: compact ? 16 : null,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _EventGroupListCardCover(group: group),
+            Transform.translate(
+              offset: const Offset(0, -eventGroupListCardCoverOverlap),
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  color: colorScheme.surface,
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(eventGroupListCardContentTopRadius),
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.primary.withValues(
+                        alpha: isDark ? 0.08 : 0.05,
                       ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    if (dateText.isNotEmpty ||
-                        (location != null && location.isNotEmpty)) ...[
-                      SizedBox(height: compact ? 10 : 12),
-                      Wrap(
-                        spacing: 8,
-                        runSpacing: 8,
-                        alignment: WrapAlignment.start,
-                        crossAxisAlignment: WrapCrossAlignment.start,
-                        children: [
-                          if (dateText.isNotEmpty)
-                            EventGroupMetaChip(
-                              icon: Icons.calendar_month_outlined,
-                              label: dateText,
-                              compact: true,
-                            ),
-                          if (location != null && location.isNotEmpty)
-                            EventGroupMetaChip(
-                              icon: Icons.location_on_outlined,
-                              label: location,
-                              compact: true,
-                            ),
-                        ],
-                      ),
-                    ],
-                    if (!compact &&
-                        description != null &&
-                        description.isNotEmpty) ...[
-                      const SizedBox(height: 12),
-                      Text(
-                        description,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: colorScheme.onSurfaceVariant,
-                          height: 1.45,
-                        ),
-                      ),
-                    ],
-                    SizedBox(height: compact ? 12 : 14),
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.people_outline_rounded,
-                          size: 18,
-                          color: colorScheme.primary,
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            cardCountLabel,
-                            style: theme.textTheme.labelLarge?.copyWith(
-                              color: colorScheme.onSurfaceVariant,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ),
-                        Icon(
-                          Icons.arrow_forward_ios_rounded,
-                          size: 14,
-                          color: colorScheme.onSurfaceVariant,
-                        ),
-                      ],
+                      blurRadius: 16,
+                      offset: const Offset(0, -4),
                     ),
                   ],
                 ),
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            child: Text(
+                              group.name,
+                              style: textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.w800,
+                                color: colorScheme.onSurface,
+                                height: 1.2,
+                              ),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          _CardCountBadge(
+                            label: cardCountLabel,
+                            highlighted: highlightBadge,
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 10),
+                      ..._buildMetaRows(
+                        context,
+                        city: city,
+                      ),
+                    ],
+                  ),
+                ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
   }
-}
 
-class _CoverStrip extends StatelessWidget {
-  const _CoverStrip({
-    required this.photoUrl,
-    required this.status,
-    required this.isDark,
-    required this.colorScheme,
-    this.height = defaultHeight,
-  });
+  List<Widget> _buildMetaRows(
+    BuildContext context, {
+    required String? city,
+  }) {
+    final l10n = context.l10n;
+    final textTheme = Theme.of(context).textTheme;
+    final mutedColor = Theme.of(context).colorScheme.onSurfaceVariant;
 
-  final String? photoUrl;
-  final EventGroupStatus status;
-  final bool isDark;
-  final ColorScheme colorScheme;
-  final double height;
-
-  static const double defaultHeight = 132;
-
-  @override
-  Widget build(BuildContext context) {
-    final hasPhoto = photoUrl?.trim().isNotEmpty == true;
-
-    return SizedBox(
-      height: height,
-      width: double.infinity,
-      child: Stack(
-        fit: StackFit.expand,
-        children: [
-          if (hasPhoto)
-            AuthenticatedNetworkImage(
-              imageUrl: photoUrl!.trim(),
-              fit: BoxFit.cover,
-              errorBuilder: (_) => _GradientCover(
-                isDark: isDark,
-                colorScheme: colorScheme,
+    return switch (group.status) {
+      EventGroupStatus.ongoing => [
+          if (city != null)
+            _MetaRow(
+              icon: Icons.location_on_outlined,
+              child: Text.rich(
+                TextSpan(
+                  children: [
+                    TextSpan(
+                      text: city,
+                      style: textTheme.bodyMedium?.copyWith(
+                        color: mutedColor,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    TextSpan(
+                      text: '  •  ${EventGroupListDisplayFormatter.ongoingTimingLabel(l10n)}',
+                      style: textTheme.bodyMedium?.copyWith(
+                        color: mutedColor,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             )
           else
-            _GradientCover(isDark: isDark, colorScheme: colorScheme),
-          DecoratedBox(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [
-                  AppColors.textPrimary.withValues(alpha: isDark ? 0.18 : 0.08),
-                  AppColors.textPrimary.withValues(alpha: isDark ? 0.55 : 0.35),
-                ],
-              ),
+            _MetaRow(
+              icon: Icons.calendar_today_outlined,
+              label: EventGroupListDisplayFormatter.ongoingTimingLabel(l10n),
+              color: mutedColor,
             ),
-          ),
-          Positioned(
-            top: 12,
-            left: 12,
-            child: EventGroupStatusBadge(status: status),
-          ),
         ],
-      ),
+      EventGroupStatus.upcoming => [
+          _MetaRow(
+            icon: Icons.calendar_today_outlined,
+            label: EventGroupListDisplayFormatter.formatUpcomingDateRange(
+              l10n,
+              group.startAt,
+              group.endAt,
+            ),
+            color: mutedColor,
+          ),
+          if (city != null) ...[
+            const SizedBox(height: 6),
+            _MetaRow(
+              icon: Icons.map_outlined,
+              label: city,
+              color: mutedColor,
+            ),
+          ],
+        ],
+      EventGroupStatus.ended => [
+          _MetaRow(
+            icon: Icons.calendar_today_outlined,
+            label: EventGroupListDisplayFormatter.endedSummaryLabel(
+              l10n,
+              group.endAt ?? group.startAt,
+            ),
+            color: mutedColor,
+          ),
+          if (city != null) ...[
+            const SizedBox(height: 6),
+            _MetaRow(
+              icon: Icons.location_on_outlined,
+              label: city,
+              color: mutedColor,
+            ),
+          ],
+        ],
+    };
+  }
+}
+
+class _EventGroupListCardCover extends StatelessWidget {
+  const _EventGroupListCardCover({required this.group});
+
+  final EventGroup group;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final photoUrl = group.photoUrl?.trim();
+    final hasPhoto = photoUrl != null && photoUrl.isNotEmpty;
+
+    return SizedBox(
+      height: eventGroupListCardCoverHeight,
+      width: double.infinity,
+      child: hasPhoto
+          ? AuthenticatedNetworkImage(
+              imageUrl: photoUrl,
+              fit: BoxFit.cover,
+              width: double.infinity,
+              height: eventGroupListCardCoverHeight,
+              errorBuilder: (_) => _PlaceholderCover(isDark: isDark),
+              loadingBuilder: (_) => _PlaceholderCover(isDark: isDark),
+            )
+          : _PlaceholderCover(isDark: isDark),
     );
   }
 }
 
-class _GradientCover extends StatelessWidget {
-  const _GradientCover({
-    required this.isDark,
-    required this.colorScheme,
-  });
+class _PlaceholderCover extends StatelessWidget {
+  const _PlaceholderCover({required this.isDark});
 
   final bool isDark;
-  final ColorScheme colorScheme;
 
   @override
   Widget build(BuildContext context) {
@@ -241,22 +246,100 @@ class _GradientCover extends StatelessWidget {
           end: Alignment.bottomRight,
           colors: isDark
               ? [
-                  AppColors.primary.withValues(alpha: 0.25),
-                  AppColors.surfaceVariantDark,
+                  AppColors.primary.withValues(alpha: 0.45),
+                  AppColors.textPrimary.withValues(alpha: 0.85),
                 ]
               : [
-                  AppColors.primary.withValues(alpha: 0.12),
-                  AppColors.surfaceVariant,
+                  AppColors.primary.withValues(alpha: 0.55),
+                  AppColors.textPrimary.withValues(alpha: 0.78),
                 ],
         ),
       ),
       child: Center(
         child: Icon(
           Icons.event_rounded,
-          size: 44,
-          color: colorScheme.primary.withValues(alpha: 0.45),
+          size: 28,
+          color: AppColors.textOnPrimary.withValues(alpha: 0.35),
         ),
       ),
+    );
+  }
+}
+
+class _CardCountBadge extends StatelessWidget {
+  const _CardCountBadge({
+    required this.label,
+    required this.highlighted,
+  });
+
+  final String label;
+  final bool highlighted;
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final background = highlighted
+        ? AppColors.primaryContainer.withValues(alpha: isDark ? 0.55 : 1)
+        : (isDark ? AppColors.surfaceVariantDark : AppColors.surfaceVariant);
+    final foreground = highlighted
+        ? AppColors.primary
+        : Theme.of(context).colorScheme.onSurfaceVariant;
+
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: background,
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+        child: Text(
+          label,
+          style: textTheme.labelMedium?.copyWith(
+            color: foreground,
+            fontWeight: FontWeight.w700,
+            height: 1,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _MetaRow extends StatelessWidget {
+  const _MetaRow({
+    required this.icon,
+    this.label,
+    this.child,
+    this.color,
+  });
+
+  final IconData icon;
+  final String? label;
+  final Widget? child;
+  final Color? color;
+
+  @override
+  Widget build(BuildContext context) {
+    final resolvedColor =
+        color ?? Theme.of(context).colorScheme.onSurfaceVariant;
+
+    return Row(
+      children: [
+        Icon(icon, size: 16, color: resolvedColor.withValues(alpha: 0.85)),
+        const SizedBox(width: 8),
+        Expanded(
+          child: child ??
+              Text(
+                label ?? '',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: resolvedColor,
+                      fontWeight: FontWeight.w500,
+                      height: 1.25,
+                    ),
+              ),
+        ),
+      ],
     );
   }
 }

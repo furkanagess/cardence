@@ -4,19 +4,22 @@ import '../../../../core/l10n/l10n_extensions.dart';
 import '../../../../core/widgets/organisms/flippable_person_card.dart';
 import '../../domain/entities/saved_card.dart';
 import '../../domain/extensions/saved_card_preview_colors.dart';
-import '../helpers/saved_card_flip_back_entries.dart';
 
 class SavedCardsSavedCardPreview extends StatelessWidget {
   const SavedCardsSavedCardPreview({
     super.key,
     required this.card,
+    this.onDetailTap,
     this.onTap,
     this.heroTag,
+    this.showActionStrip = true,
   });
 
   final SavedCard card;
+  final VoidCallback? onDetailTap;
   final VoidCallback? onTap;
   final String? heroTag;
+  final bool showActionStrip;
 
   @override
   Widget build(BuildContext context) {
@@ -43,29 +46,20 @@ class SavedCardsSavedCardPreview extends StatelessWidget {
       accentColor: card.previewAccentColor,
       backgroundColor: card.previewBackgroundColor,
       frontEntries: const [],
-      backEntries: savedCardFlipBackEntries(card, context.l10n),
       emptyMessage: context.l10n.kartBilgisiYok,
       cardId: card.cardId,
-      onTap: onTap,
-      contactFieldsTappable: false,
+      onDetailTap: onDetailTap ?? onTap,
+      showActionStrip: showActionStrip,
+      contactFieldsTappable: true,
       contactEmail: card.email,
       contactPhone: card.phone,
       contactWebsite: card.website,
       contactLinkedin: card.linkedin,
       visibleContactFields: visibleContacts,
       showPremiumBadge: card.isOwnerPremium,
+      heroTag: heroTag,
     );
 
-    // heroTag varsa Hero her zaman aynı ağaçta kalsın; odak değişiminde
-    // sökülüp takılması State'i yıkıp fotoğrafı yeniden yükletiyordu.
-    if (heroTag == null) return cardWidget;
-
-    return Hero(
-      tag: heroTag!,
-      child: Material(
-        color: Colors.transparent,
-        child: cardWidget,
-      ),
-    );
+    return cardWidget;
   }
 }

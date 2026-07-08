@@ -13,12 +13,14 @@ class SavedCardListTile extends StatelessWidget {
     super.key,
     required this.card,
     this.onTap,
+    this.onDetailTap,
     this.selected,
     this.selectable = false,
   });
 
   final SavedCard card;
   final VoidCallback? onTap;
+  final VoidCallback? onDetailTap;
   final bool? selected;
   final bool selectable;
 
@@ -93,7 +95,7 @@ class SavedCardListTile extends StatelessWidget {
         ),
         clipBehavior: Clip.antiAlias,
         child: InkWell(
-          onTap: onTap,
+          onTap: selectable ? onTap : null,
           child: IntrinsicHeight(
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -193,19 +195,25 @@ class SavedCardListTile extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(width: 4),
-                        Icon(
-                          selectable
-                              ? (isSelected
-                                  ? Icons.check_circle_rounded
-                                  : Icons.radio_button_unchecked_rounded)
-                              : Icons.chevron_right_rounded,
-                          color: selectable
-                              ? (isSelected
-                                  ? selectedIconColor
-                                  : colorScheme.onSurfaceVariant)
-                              : colorScheme.onSurfaceVariant,
-                          size: selectable ? 24 : null,
-                        ),
+                        if (selectable)
+                          Icon(
+                            isSelected
+                                ? Icons.check_circle_rounded
+                                : Icons.radio_button_unchecked_rounded,
+                            color: isSelected
+                                ? selectedIconColor
+                                : colorScheme.onSurfaceVariant,
+                            size: 24,
+                          )
+                        else if (onDetailTap != null)
+                          IconButton(
+                            tooltip: 'Detay',
+                            onPressed: onDetailTap,
+                            icon: Icon(
+                              Icons.chevron_right_rounded,
+                              color: colorScheme.onSurfaceVariant,
+                            ),
+                          ),
                       ],
                     ),
                   ),

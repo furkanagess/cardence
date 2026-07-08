@@ -17,9 +17,11 @@ class CardIndexCircleSelector extends StatelessWidget {
     this.totalSlots = defaultTotalSlots,
     this.axis = Axis.vertical,
     this.size = 32,
+    this.selectedSize,
   });
 
   static const int defaultTotalSlots = 5;
+  static const double _defaultSelectedScale = 1.25;
 
   /// Sahip olunan / açılmış kart sayısı.
   final int unlockedCount;
@@ -39,6 +41,12 @@ class CardIndexCircleSelector extends StatelessWidget {
   final Axis axis;
   final double size;
 
+  /// Seçili dairenin çapı; verilmezse [size] × 1.25 kullanılır.
+  final double? selectedSize;
+
+  double get _resolvedSelectedSize =>
+      selectedSize ?? (size * _defaultSelectedScale);
+
   @override
   Widget build(BuildContext context) {
     if (totalSlots <= 0) return const SizedBox.shrink();
@@ -47,14 +55,15 @@ class CardIndexCircleSelector extends StatelessWidget {
       for (var i = 0; i < totalSlots; i++) ...[
         if (i > 0)
           SizedBox(
-            width: axis == Axis.horizontal ? 8 : 0,
-            height: axis == Axis.vertical ? 8 : 0,
+            width: axis == Axis.horizontal ? 12 : 0,
+            height: axis == Axis.vertical ? 12 : 0,
           ),
         _IndexCircle(
           label: '${i + 1}',
           selected: i < unlockedCount && i == selectedIndex,
           locked: i >= unlockedCount,
           size: size,
+          selectedSize: _resolvedSelectedSize,
           onTap: () {
             HapticFeedback.selectionClick();
             if (i >= unlockedCount) {
@@ -71,12 +80,14 @@ class CardIndexCircleSelector extends StatelessWidget {
     if (axis == Axis.horizontal) {
       return Row(
         mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: children,
       );
     }
 
     return Column(
       mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: children,
     );
   }
@@ -88,6 +99,7 @@ class _IndexCircle extends StatelessWidget {
     required this.selected,
     required this.locked,
     required this.size,
+    required this.selectedSize,
     required this.onTap,
   });
 
@@ -95,11 +107,13 @@ class _IndexCircle extends StatelessWidget {
   final bool selected;
   final bool locked;
   final double size;
+  final double selectedSize;
   final VoidCallback onTap;
+
+  double get _circleSize => selected && !locked ? selectedSize : size;
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     final Color background;
@@ -108,26 +122,26 @@ class _IndexCircle extends StatelessWidget {
 
     if (locked) {
       background = isDark
-          ? AppColors.surfaceVariantDark.withValues(alpha: 0.55)
-          : colorScheme.surfaceContainerHighest.withValues(alpha: 0.65);
+          ? AppColors.surfaceVariantDark.withValues(alpha: 0.35)
+          : AppColors.primaryContainer.withValues(alpha: 0.2);
       foreground = isDark
-          ? AppColors.textSecondaryDark.withValues(alpha: 0.75)
-          : colorScheme.onSurfaceVariant.withValues(alpha: 0.7);
+          ? AppColors.textSecondaryDark.withValues(alpha: 0.55)
+          : AppColors.textSecondary.withValues(alpha: 0.45);
       borderColor = isDark
-          ? AppColors.outlineDark.withValues(alpha: 0.4)
-          : colorScheme.outlineVariant.withValues(alpha: 0.8);
+          ? AppColors.outlineDark.withValues(alpha: 0.35)
+          : AppColors.outlineVariant.withValues(alpha: 0.55);
     } else if (selected) {
       background = AppColors.primary;
       foreground = AppColors.textOnPrimary;
-      borderColor = AppColors.primary;
+      borderColor = AppColors.primaryLight.withValues(alpha: 0.85);
     } else {
       background = isDark
-          ? AppColors.surfaceDark.withValues(alpha: 0.9)
-          : colorScheme.surface;
-      foreground = colorScheme.onSurface;
+          ? AppColors.primaryContainerDark.withValues(alpha: 0.45)
+          : AppColors.primaryContainer.withValues(alpha: 0.55);
+      foreground = isDark ? AppColors.textPrimaryDark : AppColors.textSecondary;
       borderColor = isDark
-          ? AppColors.outlineDark.withValues(alpha: 0.55)
-          : colorScheme.outlineVariant;
+          ? AppColors.outlineDark.withValues(alpha: 0.35)
+          : AppColors.primary.withValues(alpha: 0.08);
     }
 
     return Material(
@@ -138,55 +152,57 @@ class _IndexCircle extends StatelessWidget {
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
           curve: Curves.easeOutCubic,
-          width: size,
-          height: size,
-          alignment: Alignment.center,
+          width: _circleSize,
+          height: _circleSize,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             color: background,
             border: Border.all(
               color: borderColor,
-              width: selected && !locked ? 0 : 1.5,
+              width: selected && !locked ? 2.5 : 1,
             ),
             boxShadow: selected && !locked
                 ? [
                     BoxShadow(
-                      color: AppColors.primary.withValues(alpha: 0.28),
+                      color: AppColors.primaryLight.withValues(alpha: 0.45),
+                      blurRadius: 0,
+                      spreadRadius: 2,
+                    ),
+                    BoxShadow(
+                      color: AppColors.primary.withValues(alpha: 0.22),
                       blurRadius: 8,
                       offset: const Offset(0, 2),
                     ),
                   ]
                 : null,
           ),
-          child: locked
-              ? Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    Text(
-                      label,
-                      style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                            color: foreground.withValues(alpha: 0.45),
-                            fontWeight: FontWeight.w800,
-                            fontSize: size * 0.34,
-                            height: 1,
-                          ),
-                    ),
-                    Icon(
-                      Icons.lock_rounded,
-                      size: size * 0.42,
+          child: Stack(
+            clipBehavior: Clip.none,
+            alignment: Alignment.center,
+            children: [
+              Text(
+                label,
+                style: Theme.of(context).textTheme.labelLarge?.copyWith(
                       color: foreground,
+                      fontWeight: FontWeight.w800,
+                      fontSize: _circleSize * 0.38,
+                      height: 1,
                     ),
-                  ],
-                )
-              : Text(
-                  label,
-                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                        color: foreground,
-                        fontWeight: FontWeight.w800,
-                        fontSize: size * 0.38,
-                        height: 1,
-                      ),
+              ),
+              if (locked)
+                Positioned(
+                  top: -1,
+                  right: -1,
+                  child: Icon(
+                    Icons.lock_rounded,
+                    size: _circleSize * 0.34,
+                    color: isDark
+                        ? AppColors.textSecondaryDark.withValues(alpha: 0.7)
+                        : AppColors.textDisabled,
+                  ),
                 ),
+            ],
+          ),
         ),
       ),
     );

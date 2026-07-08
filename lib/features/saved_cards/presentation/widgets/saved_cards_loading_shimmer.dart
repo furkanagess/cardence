@@ -14,7 +14,7 @@ class SavedCardsLoadingShimmer extends StatelessWidget {
   Widget build(BuildContext context) {
     return Shimmer(
       child: ListView.separated(
-        padding: const EdgeInsets.fromLTRB(20, 4, 20, 128),
+        padding: const EdgeInsets.fromLTRB(20, 4, 20, 160),
         itemCount: _itemCount,
         separatorBuilder: (_, __) => const SizedBox(height: _cardGap),
         itemBuilder: (context, index) => _SavedCardShimmer(index: index),

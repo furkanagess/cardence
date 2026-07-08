@@ -35,14 +35,16 @@ class AppTheme {
       ),
       appBarTheme: AppBarTheme(
         centerTitle: true,
-        elevation: 0,
-        scrolledUnderElevation: 0,
-        backgroundColor:
-            isLight ? AppColors.backgroundLight : AppColors.backgroundDark,
-        foregroundColor:
-            isLight ? AppColors.textPrimary : AppColors.textPrimaryDark,
+        elevation: AppColors.appBarElevation,
+        scrolledUnderElevation: AppColors.appBarElevation,
+        backgroundColor: AppColors.appBarBackgroundFor(brightness),
+        foregroundColor: AppColors.appBarForegroundFor(brightness),
         surfaceTintColor: Colors.transparent,
-        titleTextStyle: textTheme.titleLarge,
+        shadowColor: AppColors.appBarShadowColor(brightness),
+        titleTextStyle: textTheme.titleLarge?.copyWith(
+          fontWeight: FontWeight.w600,
+          color: AppColors.appBarForegroundFor(brightness),
+        ),
       ),
       iconButtonTheme: const IconButtonThemeData(
         style: ButtonStyle(

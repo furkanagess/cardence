@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../core/l10n/l10n_extensions.dart';
 
+import '../../../../core/widgets/atoms/cardence_app_bar.dart';
 import '../../../../core/widgets/atoms/custom_button.dart';
 
 /// Üst ilerleme çubuğu ve adım etiketi.
@@ -100,6 +101,7 @@ class OnboardingBottomBar extends StatelessWidget {
     this.onStepSelected,
     this.onBackPressed,
     this.backLabel,
+    this.embedded = false,
   });
 
   final int stepCount;
@@ -112,6 +114,7 @@ class OnboardingBottomBar extends StatelessWidget {
   final ValueChanged<int>? onStepSelected;
   final VoidCallback? onBackPressed;
   final String? backLabel;
+  final bool embedded;
 
   /// İçeriğin alt bar arkasından kayması için alt boşluk.
   static double contentBottomInset(
@@ -135,75 +138,56 @@ class OnboardingBottomBar extends StatelessWidget {
       height: 1,
     );
 
-    return Material(
-      color: Theme.of(context).scaffoldBackgroundColor,
-      child: SafeArea(
-        top: false,
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(20, 12, 20, 16),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (showStepIndicator) ...[
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: List.generate(
-                    stepCount,
-                    (i) {
-                      final isActive = currentIndex == i;
-                      final canNavigateBack =
-                          onStepSelected != null && i < currentIndex;
+    final content = Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (showStepIndicator) ...[
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: List.generate(
+              stepCount,
+              (i) {
+                final isActive = currentIndex == i;
+                final canNavigateBack =
+                    onStepSelected != null && i < currentIndex;
 
-                      return GestureDetector(
-                        onTap:
-                            canNavigateBack ? () => onStepSelected!(i) : null,
-                        child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 200),
-                          margin: const EdgeInsets.symmetric(horizontal: 3),
-                          width: isActive ? 18 : 6,
-                          height: 6,
-                          decoration: BoxDecoration(
-                            color: isActive
-                                ? colorScheme.primary
-                                : colorScheme.onSurface.withValues(alpha: 0.2),
-                            borderRadius: BorderRadius.circular(3),
-                          ),
-                        ),
-                      );
-                    },
+                return GestureDetector(
+                  onTap: canNavigateBack ? () => onStepSelected!(i) : null,
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    margin: const EdgeInsets.symmetric(horizontal: 3),
+                    width: isActive ? 18 : 6,
+                    height: 6,
+                    decoration: BoxDecoration(
+                      color: isActive
+                          ? colorScheme.primary
+                          : colorScheme.onSurface.withValues(alpha: 0.2),
+                      borderRadius: BorderRadius.circular(3),
+                    ),
                   ),
+                );
+              },
+            ),
+          ),
+          const SizedBox(height: 14),
+        ],
+        if (onBackPressed != null && backLabel != null)
+          Row(
+            children: [
+              Expanded(
+                flex: 2,
+                child: CustomButton.outlined(
+                  label: backLabel!,
+                  labelStyle: actionLabelStyle,
+                  height: actionButtonHeight,
+                  onPressed: isLoading ? null : onBackPressed,
+                  enabled: !isLoading,
                 ),
-                const SizedBox(height: 14),
-              ],
-              if (onBackPressed != null && backLabel != null)
-                Row(
-                  children: [
-                    Expanded(
-                      flex: 2,
-                      child: CustomButton.outlined(
-                        label: backLabel!,
-                        labelStyle: actionLabelStyle,
-                        height: actionButtonHeight,
-                        onPressed: isLoading ? null : onBackPressed,
-                        enabled: !isLoading,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      flex: 3,
-                      child: CustomButton(
-                        label: primaryLabel,
-                        labelStyle: actionLabelStyle,
-                        height: actionButtonHeight,
-                        onPressed: onPrimaryPressed,
-                        enabled: enabled,
-                        isLoading: isLoading,
-                      ),
-                    ),
-                  ],
-                )
-              else
-                CustomButton(
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                flex: 3,
+                child: CustomButton(
                   label: primaryLabel,
                   labelStyle: actionLabelStyle,
                   height: actionButtonHeight,
@@ -211,10 +195,23 @@ class OnboardingBottomBar extends StatelessWidget {
                   enabled: enabled,
                   isLoading: isLoading,
                 ),
+              ),
             ],
+          )
+        else
+          CustomButton(
+            label: primaryLabel,
+            labelStyle: actionLabelStyle,
+            height: actionButtonHeight,
+            onPressed: onPrimaryPressed,
+            enabled: enabled,
+            isLoading: isLoading,
           ),
-        ),
-      ),
+      ],
     );
+
+    return embedded
+        ? content
+        : CardenceFlowBottomBarRegion(child: content);
   }
 }

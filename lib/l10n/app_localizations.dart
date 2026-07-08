@@ -875,7 +875,7 @@ abstract class AppLocalizations {
   /// No description provided for @gvenliinizIinHesabnzaTekrarGiri.
   ///
   /// In tr, this message translates to:
-  /// **'Güvenliğiniz için hesabınıza tekrar giriş yapmanız gerekiyor.'**
+  /// **'Güvenliğiniz için lütfen tekrar giriş yapın.'**
   String get gvenliinizIinHesabnzaTekrarGiri;
 
   /// No description provided for @hakkmda.
@@ -961,6 +961,84 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Hesabınıza giriş yapın'**
   String get hesabnzaGiriYapn;
+
+  /// No description provided for @authOrDivider.
+  ///
+  /// In tr, this message translates to:
+  /// **'veya'**
+  String get authOrDivider;
+
+  /// No description provided for @authJoinCardenceTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Cardence\'a Katılın'**
+  String get authJoinCardenceTitle;
+
+  /// No description provided for @authNoAccountPrompt.
+  ///
+  /// In tr, this message translates to:
+  /// **'Hesabınız yok mu? '**
+  String get authNoAccountPrompt;
+
+  /// No description provided for @authAlreadyHaveAccountPrompt.
+  ///
+  /// In tr, this message translates to:
+  /// **'Zaten hesabınız var mı? '**
+  String get authAlreadyHaveAccountPrompt;
+
+  /// No description provided for @linkedinIleDevamEt.
+  ///
+  /// In tr, this message translates to:
+  /// **'LinkedIn ile devam et'**
+  String get linkedinIleDevamEt;
+
+  /// No description provided for @ad.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ad'**
+  String get ad;
+
+  /// No description provided for @sifre.
+  ///
+  /// In tr, this message translates to:
+  /// **'Şifre'**
+  String get sifre;
+
+  /// No description provided for @authPasswordMinHint.
+  ///
+  /// In tr, this message translates to:
+  /// **'En az {minLength} karakter'**
+  String authPasswordMinHint(int minLength);
+
+  /// No description provided for @sifreEnAzKarakter.
+  ///
+  /// In tr, this message translates to:
+  /// **'Şifre en az {minLength} karakter olmalıdır.'**
+  String sifreEnAzKarakter(int minLength);
+
+  /// No description provided for @sifrelerEslesmiyor.
+  ///
+  /// In tr, this message translates to:
+  /// **'Şifreler eşleşmiyor.'**
+  String get sifrelerEslesmiyor;
+
+  /// No description provided for @registerLegalPrefix.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kayıt olarak '**
+  String get registerLegalPrefix;
+
+  /// No description provided for @registerLegalAnd.
+  ///
+  /// In tr, this message translates to:
+  /// **' ve '**
+  String get registerLegalAnd;
+
+  /// No description provided for @registerLegalSuffix.
+  ///
+  /// In tr, this message translates to:
+  /// **'\'nı kabul etmiş sayılırsınız.'**
+  String get registerLegalSuffix;
 
   /// No description provided for @loginWelcomeTitle.
   ///
@@ -1129,6 +1207,24 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'İsim, şirket, e-posta…'**
   String get isimirketEPosta;
+
+  /// No description provided for @savedCardsSearchHint.
+  ///
+  /// In tr, this message translates to:
+  /// **'İsim, şirket veya e-posta ile ara...'**
+  String get savedCardsSearchHint;
+
+  /// No description provided for @listeGorunumu.
+  ///
+  /// In tr, this message translates to:
+  /// **'Liste Görünümü'**
+  String get listeGorunumu;
+
+  /// No description provided for @yeniKartEkle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yeni Kart Ekle'**
+  String get yeniKartEkle;
 
   /// No description provided for @isimsizKart.
   ///
@@ -1351,6 +1447,12 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Kart ID kopyalandı: \$id'**
   String get kartIdKopyalandId;
+
+  /// No description provided for @clipboardCopySuccess.
+  ///
+  /// In tr, this message translates to:
+  /// **'Başarıyla panoya kopyalandı'**
+  String get clipboardCopySuccess;
 
   /// No description provided for @kartIdOluturulamadLtfenTekrar.
   ///
@@ -2090,6 +2192,24 @@ abstract class AppLocalizations {
   /// **'Notlar'**
   String get notlar;
 
+  /// No description provided for @savedCardContactInfoTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'İletişim Bilgileri'**
+  String get savedCardContactInfoTitle;
+
+  /// No description provided for @savedCardEducationTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Eğitim'**
+  String get savedCardEducationTitle;
+
+  /// No description provided for @savedCardPrivateNotesTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Özel Notlar'**
+  String get savedCardPrivateNotesTitle;
+
   /// No description provided for @notunuzuBurayaYazn.
   ///
   /// In tr, this message translates to:
@@ -2588,11 +2708,23 @@ abstract class AppLocalizations {
   /// **'Uygulama dilini seçin'**
   String get uygulamaDiliniSein;
 
+  /// No description provided for @uygulamaDili.
+  ///
+  /// In tr, this message translates to:
+  /// **'Uygulama Dili'**
+  String get uygulamaDili;
+
   /// No description provided for @uygulamaTemasnSein.
   ///
   /// In tr, this message translates to:
   /// **'Uygulama temasını seçin'**
   String get uygulamaTemasnSein;
+
+  /// No description provided for @temaModu.
+  ///
+  /// In tr, this message translates to:
+  /// **'Tema Modu'**
+  String get temaModu;
 
   /// No description provided for @uygulamaRengi.
   ///
@@ -2671,6 +2803,24 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Yeni kart oluştur'**
   String get yeniKartOlutur;
+
+  /// No description provided for @profileActiveCardStatus.
+  ///
+  /// In tr, this message translates to:
+  /// **'AKTİF KART: {current} / {total}'**
+  String profileActiveCardStatus(int current, int total);
+
+  /// No description provided for @agGrafigi.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ağ Grafiği'**
+  String get agGrafigi;
+
+  /// No description provided for @profileCardsSavedByOthersInfo.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kartlarınız toplam {count} kez başkaları tarafından kaydedildi.'**
+  String profileCardsSavedByOthersInfo(int count);
 
   /// No description provided for @yenidenek.
   ///
@@ -2891,7 +3041,7 @@ abstract class AppLocalizations {
   /// No description provided for @sessionExpired.
   ///
   /// In tr, this message translates to:
-  /// **'Oturum süresi doldu. Lütfen tekrar giriş yapın.'**
+  /// **'Güvenliğiniz için lütfen tekrar giriş yapın.'**
   String get sessionExpired;
 
   /// No description provided for @operationFailed.
@@ -3149,7 +3299,7 @@ abstract class AppLocalizations {
   /// No description provided for @rateOnAppStore.
   ///
   /// In tr, this message translates to:
-  /// **'App Store veya Play Store\'da puan verin'**
+  /// **'App Store üzerinden geri bildirim verin'**
   String get rateOnAppStore;
 
   /// No description provided for @selectCards.
@@ -3620,6 +3770,54 @@ abstract class AppLocalizations {
   /// **'Mekan adı'**
   String get eventLocationVenueLabel;
 
+  /// No description provided for @eventLocationProvinceDistrictLabel.
+  ///
+  /// In tr, this message translates to:
+  /// **'İl · İlçe'**
+  String get eventLocationProvinceDistrictLabel;
+
+  /// No description provided for @eventLocationProvinceDistrictHint.
+  ///
+  /// In tr, this message translates to:
+  /// **'İl ve ilçe seçin'**
+  String get eventLocationProvinceDistrictHint;
+
+  /// No description provided for @eventShowOnMap.
+  ///
+  /// In tr, this message translates to:
+  /// **'Haritada Göster'**
+  String get eventShowOnMap;
+
+  /// No description provided for @eventMapTapToSelect.
+  ///
+  /// In tr, this message translates to:
+  /// **'Haritaya dokunarak konum seçin'**
+  String get eventMapTapToSelect;
+
+  /// No description provided for @eventMapDragToSelect.
+  ///
+  /// In tr, this message translates to:
+  /// **'Haritayı kaydırarak konum seçin'**
+  String get eventMapDragToSelect;
+
+  /// No description provided for @eventMapUseMyLocation.
+  ///
+  /// In tr, this message translates to:
+  /// **'Konumum'**
+  String get eventMapUseMyLocation;
+
+  /// No description provided for @eventMapSelectLocation.
+  ///
+  /// In tr, this message translates to:
+  /// **'Konum seç'**
+  String get eventMapSelectLocation;
+
+  /// No description provided for @eventMapOpenFullscreen.
+  ///
+  /// In tr, this message translates to:
+  /// **'Tam ekran harita'**
+  String get eventMapOpenFullscreen;
+
   /// No description provided for @eventLocationVenueHint.
   ///
   /// In tr, this message translates to:
@@ -3674,6 +3872,48 @@ abstract class AppLocalizations {
   /// **'Hakkında'**
   String get eventAboutSection;
 
+  /// No description provided for @eventAboutSectionLabel.
+  ///
+  /// In tr, this message translates to:
+  /// **'Etkinlik hakkında'**
+  String get eventAboutSectionLabel;
+
+  /// No description provided for @eventGroupCardsSectionTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Gruptaki kartlar'**
+  String get eventGroupCardsSectionTitle;
+
+  /// No description provided for @eventShowMore.
+  ///
+  /// In tr, this message translates to:
+  /// **'Daha fazla göster'**
+  String get eventShowMore;
+
+  /// No description provided for @eventDetailCardsChip.
+  ///
+  /// In tr, this message translates to:
+  /// **'{count} kart'**
+  String eventDetailCardsChip(int count);
+
+  /// No description provided for @eventDetailInvitesChip.
+  ///
+  /// In tr, this message translates to:
+  /// **'{count} davet'**
+  String eventDetailInvitesChip(int count);
+
+  /// No description provided for @eventDetailNetworkingChip.
+  ///
+  /// In tr, this message translates to:
+  /// **'Networking'**
+  String get eventDetailNetworkingChip;
+
+  /// No description provided for @eventAddCardPlus.
+  ///
+  /// In tr, this message translates to:
+  /// **'+ Kart ekle'**
+  String get eventAddCardPlus;
+
   /// No description provided for @eventLinkedCardsSection.
   ///
   /// In tr, this message translates to:
@@ -3691,6 +3931,36 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Listede görünecek bir kapak fotoğrafı ekleyin. Atlayabilirsiniz.'**
   String get eventCreatePhotoSubtitle;
+
+  /// No description provided for @eventPhotoUpload.
+  ///
+  /// In tr, this message translates to:
+  /// **'Fotoğraf Yükle'**
+  String get eventPhotoUpload;
+
+  /// No description provided for @eventPhotoFormatHint.
+  ///
+  /// In tr, this message translates to:
+  /// **'PNG, JPG veya WEBP (Max. 5MB)'**
+  String get eventPhotoFormatHint;
+
+  /// No description provided for @eventPhotoAdd.
+  ///
+  /// In tr, this message translates to:
+  /// **'Fotoğraf ekle'**
+  String get eventPhotoAdd;
+
+  /// No description provided for @eventPhotoChange.
+  ///
+  /// In tr, this message translates to:
+  /// **'Fotoğrafı değiştir'**
+  String get eventPhotoChange;
+
+  /// No description provided for @eventCreateNoSavedCards.
+  ///
+  /// In tr, this message translates to:
+  /// **'Henüz kaydedilmiş kart yok.'**
+  String get eventCreateNoSavedCards;
 
   /// No description provided for @eventSkip.
   ///
@@ -3788,6 +4058,36 @@ abstract class AppLocalizations {
   /// **'Zorunlu'**
   String get eventScheduleRequired;
 
+  /// No description provided for @eventStartDateLabel.
+  ///
+  /// In tr, this message translates to:
+  /// **'Başlangıç tarihi'**
+  String get eventStartDateLabel;
+
+  /// No description provided for @eventStartTimeLabel.
+  ///
+  /// In tr, this message translates to:
+  /// **'Başlangıç saati'**
+  String get eventStartTimeLabel;
+
+  /// No description provided for @eventEndDateLabel.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bitiş tarihi'**
+  String get eventEndDateLabel;
+
+  /// No description provided for @eventEndTimeLabel.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bitiş saati'**
+  String get eventEndTimeLabel;
+
+  /// No description provided for @eventAddEnd.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bitiş ekle'**
+  String get eventAddEnd;
+
   /// No description provided for @eventInviteByCardId.
   ///
   /// In tr, this message translates to:
@@ -3803,13 +4103,13 @@ abstract class AppLocalizations {
   /// No description provided for @eventOngoingSection.
   ///
   /// In tr, this message translates to:
-  /// **'Devam eden etkinlikler'**
+  /// **'Devam eden'**
   String get eventOngoingSection;
 
   /// No description provided for @eventUpcomingSection.
   ///
   /// In tr, this message translates to:
-  /// **'Gelecek etkinlikler'**
+  /// **'Yaklaşan'**
   String get eventUpcomingSection;
 
   /// No description provided for @eventInvitationTitle.
@@ -3839,8 +4139,14 @@ abstract class AppLocalizations {
   /// No description provided for @eventInvitationAccept.
   ///
   /// In tr, this message translates to:
-  /// **'Katıl'**
+  /// **'Onayla'**
   String get eventInvitationAccept;
+
+  /// No description provided for @eventInvitationInvitedSubtitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Davet edildiniz'**
+  String get eventInvitationInvitedSubtitle;
 
   /// No description provided for @eventInvitationAcceptHint.
   ///
@@ -3893,8 +4199,32 @@ abstract class AppLocalizations {
   /// No description provided for @eventEndedSection.
   ///
   /// In tr, this message translates to:
-  /// **'Biten etkinlikler'**
+  /// **'Sona eren'**
   String get eventEndedSection;
+
+  /// No description provided for @eventGroupLinkedCardCount.
+  ///
+  /// In tr, this message translates to:
+  /// **'{count} kart'**
+  String eventGroupLinkedCardCount(int count);
+
+  /// No description provided for @eventGroupToday.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bugün'**
+  String get eventGroupToday;
+
+  /// No description provided for @eventGroupEndedLastMonth.
+  ///
+  /// In tr, this message translates to:
+  /// **'Geçen ay sona erdi'**
+  String get eventGroupEndedLastMonth;
+
+  /// No description provided for @eventGroupEndedThisMonth.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu ay sona erdi'**
+  String get eventGroupEndedThisMonth;
 
   /// No description provided for @eventStatusUpcoming.
   ///
@@ -4214,6 +4544,18 @@ abstract class AppLocalizations {
   /// **'Ağ Grafiği'**
   String get networkGraph;
 
+  /// No description provided for @networkGraphLegendMe.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ben'**
+  String get networkGraphLegendMe;
+
+  /// No description provided for @networkGraphLegendConnection.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bağlantı'**
+  String get networkGraphLegendConnection;
+
   /// No description provided for @networkStatistics.
   ///
   /// In tr, this message translates to:
@@ -4424,6 +4766,24 @@ abstract class AppLocalizations {
   /// **'İki kart düğümüne dokunarak aralarındaki en kısa yolu bulun.'**
   String get tapTwoNodesToFindPath;
 
+  /// No description provided for @networkGraphConnectedNodes.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bağlı düğümler ({count})'**
+  String networkGraphConnectedNodes(int count);
+
+  /// No description provided for @networkGraphNoConnectedNodes.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu grafikte bağlı düğüm yok.'**
+  String get networkGraphNoConnectedNodes;
+
+  /// No description provided for @networkGraphConnectionTypes.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bağlantı türleri'**
+  String get networkGraphConnectionTypes;
+
   /// No description provided for @createMyCard.
   ///
   /// In tr, this message translates to:
@@ -4439,14 +4799,20 @@ abstract class AppLocalizations {
   /// No description provided for @swipeHorizontalToSwitchCards.
   ///
   /// In tr, this message translates to:
-  /// **'Yatay kaydırarak kartlar arasında geçin; düzenlemek için karta dokunun.'**
+  /// **'Yatay kaydırarak kartlar arasında geçin.'**
   String get swipeHorizontalToSwitchCards;
 
   /// No description provided for @tapCardToEdit.
   ///
   /// In tr, this message translates to:
-  /// **'Düzenlemek için karta dokunun.'**
+  /// **'Detay için karttaki detay düğmesini kullanın.'**
   String get tapCardToEdit;
+
+  /// No description provided for @kartDetay.
+  ///
+  /// In tr, this message translates to:
+  /// **'Detay'**
+  String get kartDetay;
 
   /// No description provided for @cardLimitReachedPremiumUpgrade.
   ///

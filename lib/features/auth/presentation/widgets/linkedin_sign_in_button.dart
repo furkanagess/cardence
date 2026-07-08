@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/l10n/l10n_extensions.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/atoms/linked_in_brand_icon.dart';
 
@@ -9,12 +10,12 @@ class LinkedInSignInButton extends StatelessWidget {
     super.key,
     required this.onPressed,
     this.isLoading = false,
-    this.label = 'LinkedIn ile devam et',
+    this.label,
   });
 
   final VoidCallback? onPressed;
   final bool isLoading;
-  final String label;
+  final String? label;
 
   static const double _height = 48;
   static const double _radius = 10;
@@ -24,6 +25,7 @@ class LinkedInSignInButton extends StatelessWidget {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     final isInteractive = !isLoading && onPressed != null;
+    final resolvedLabel = label ?? context.l10n.linkedinIleDevamEt;
 
     final backgroundColor =
         isDark ? AppColors.surfaceDark : AppColors.surfaceLight;
@@ -68,7 +70,7 @@ class LinkedInSignInButton extends StatelessWidget {
                       const SizedBox(width: 12),
                       Flexible(
                         child: Text(
-                          label,
+                          resolvedLabel,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: theme.textTheme.titleSmall?.copyWith(

@@ -31,9 +31,6 @@ class OnboardingStepPreview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
-    final colorScheme = Theme.of(context).colorScheme;
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       mainAxisSize: MainAxisSize.min,
@@ -43,15 +40,9 @@ class OnboardingStepPreview extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              OnboardingCardPreviewFrame(draft: draft),
-              const SizedBox(height: 4),
-              Center(
-                child: Text(
-                  context.l10n.kartevirmekIinSaAlttaki,
-                  style: textTheme.labelSmall?.copyWith(
-                    color: colorScheme.onSurfaceVariant,
-                  ),
-                ),
+              OnboardingCardPreviewFrame(
+                draft: draft,
+                showActionStrip: false,
               ),
               const SizedBox(height: 8),
               CardAppearanceCustomizeSection(
@@ -79,6 +70,7 @@ class OnboardingStepPreview extends StatelessWidget {
                     clearBackgroundColor: bg == null,
                     clearAccentColor: accent == null,
                   ),
+                  showActionStrip: false,
                 ),
                 onBackgroundColorChanged: (hex) {
                   _applyDraft(

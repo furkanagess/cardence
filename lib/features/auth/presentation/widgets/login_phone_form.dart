@@ -3,7 +3,7 @@ import '../../../../core/l10n/l10n_extensions.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
 
 import '../../../../core/utils/intl_phone_field_helpers.dart';
-import '../../../../core/validation/app_validators.dart';
+import '../helpers/auth_form_validation.dart';
 import '../../../../core/widgets/atoms/custom_button.dart';
 import '../../../../core/widgets/atoms/custom_text_field.dart';
 import '../../../onboarding/presentation/widgets/onboarding_step_shell.dart';
@@ -92,13 +92,8 @@ class LoginPhoneFormState extends State<LoginPhoneForm> {
     String? phoneError;
     String? passwordError;
 
-    if (phone.length < 8) {
-      phoneError = context.l10n.geerliBirTelefonNumarasGirin;
-    }
-    if (!AppValidators.isValidPassword(password)) {
-      passwordError =
-          'Şifre en az ${AppValidators.minPasswordLength} karakter olmalıdır.';
-    }
+    phoneError = AuthFormValidation.phoneLoginError(context.l10n, phone);
+    passwordError = AuthFormValidation.passwordError(context.l10n, password);
 
     setState(() {
       _phoneError = phoneError;
@@ -156,6 +151,10 @@ class LoginPhoneFormState extends State<LoginPhoneForm> {
             onPressed: _submit,
             labelStyle: textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.w700,
+              color: Theme.of(context).scaffoldBackgroundColor,
+            ),
+            style: FilledButton.styleFrom(
+              foregroundColor: Theme.of(context).scaffoldBackgroundColor,
             ),
           ),
         ],

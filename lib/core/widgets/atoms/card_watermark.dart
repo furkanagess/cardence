@@ -84,12 +84,14 @@ class CardenceCardCornerWatermark extends StatelessWidget {
     super.key,
     required this.surfaceColor,
     this.compact = false,
+    this.size,
   });
 
   final Color surfaceColor;
   final bool compact;
+  final double? size;
 
-  double get _size => compact ? 52 : 112;
+  double get _size => size ?? (compact ? 52 : 112);
 
   double get _opacity {
     final isDark = surfaceColor.computeLuminance() < 0.35;

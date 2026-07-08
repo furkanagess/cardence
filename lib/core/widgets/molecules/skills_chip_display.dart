@@ -9,11 +9,15 @@ class SkillsChipDisplay extends StatelessWidget {
     this.skillsRaw,
     this.skills,
     this.onSkillTap,
+    this.chipBackgroundColor,
+    this.chipLabelColor,
   }) : assert(skillsRaw != null || skills != null);
 
   final String? skillsRaw;
   final List<String>? skills;
   final ValueChanged<String>? onSkillTap;
+  final Color? chipBackgroundColor;
+  final Color? chipLabelColor;
 
   List<String> get _items => skills ?? SkillsFormat.parse(skillsRaw);
 
@@ -25,6 +29,10 @@ class SkillsChipDisplay extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
+    final chipBg =
+        chipBackgroundColor ?? colorScheme.surfaceContainerHighest;
+    final chipFg = chipLabelColor ?? colorScheme.onSurface;
+
     return Wrap(
       spacing: 8,
       runSpacing: 8,
@@ -34,15 +42,15 @@ class SkillsChipDisplay extends StatelessWidget {
             label: Text(skill),
             onPressed:
                 onSkillTap == null ? null : () => onSkillTap!(skill),
-            backgroundColor: colorScheme.surfaceContainerHighest,
+            backgroundColor: chipBg,
             labelStyle: textTheme.labelLarge?.copyWith(
               fontWeight: FontWeight.w600,
-              color: colorScheme.onSurface,
+              color: chipFg,
             ),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(20),
               side: BorderSide(
-                color: colorScheme.outlineVariant.withValues(alpha: 0.5),
+                color: colorScheme.outlineVariant.withValues(alpha: 0.35),
               ),
             ),
           ),

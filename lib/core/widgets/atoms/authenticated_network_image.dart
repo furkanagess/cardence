@@ -217,9 +217,11 @@ class _AuthenticatedNetworkImageState extends State<AuthenticatedNetworkImage> {
     }
 
     if (_usePlainNetwork) {
-      return _sized(
+      return _wrapImage(
         Image.network(
           ApiMediaUrls.resolve(source) ?? source,
+          width: widget.width,
+          height: widget.height,
           fit: widget.fit,
           gaplessPlayback: true,
           cacheWidth: _cacheSizePx,
@@ -246,9 +248,11 @@ class _AuthenticatedNetworkImageState extends State<AuthenticatedNetworkImage> {
       );
     }
 
-    return _sized(
+    return _wrapImage(
       Image.memory(
         _bytes!,
+        width: widget.width,
+        height: widget.height,
         fit: widget.fit,
         gaplessPlayback: true,
         cacheWidth: _cacheSizePx,
@@ -257,6 +261,22 @@ class _AuthenticatedNetworkImageState extends State<AuthenticatedNetworkImage> {
             const ColoredBox(color: Colors.transparent),
       ),
     );
+  }
+
+  Widget _wrapImage(Widget child) {
+    final width = widget.width;
+    final height = widget.height;
+    if (width != null && height != null) {
+      return SizedBox(
+        width: width,
+        height: height,
+        child: ClipRect(
+          clipBehavior: Clip.hardEdge,
+          child: child,
+        ),
+      );
+    }
+    return _sized(child);
   }
 
   Widget _sized(Widget child) {

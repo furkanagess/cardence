@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../../core/theme/app_colors.dart';
 import '../../../../core/l10n/l10n_extensions.dart';
 import '../../../../core/l10n/api_error_localizer.dart';
 import '../../../event_groups/domain/usecases/get_event_groups.dart';
 import '../../../../core/widgets/atoms/cardence_app_bar.dart';
 import '../../../../core/widgets/atoms/custom_button.dart';
 import '../../../../core/widgets/organisms/cardence_scaffold.dart';
+import '../../domain/entities/graph_edge.dart';
+import '../../domain/entities/graph_node.dart';
 import '../../domain/entities/graph_scope.dart';
 import '../../domain/entities/network_graph.dart';
 import '../../domain/usecases/get_network_graph.dart';
@@ -17,10 +18,11 @@ import '../cubit/network_graph_state.dart';
 import '../pages/network_graph_stats_page.dart';
 import '../helpers/network_graph_canvas_theme.dart';
 import '../widgets/network_graph_canvas.dart' show NetworkGraphInteractiveArea;
+import '../widgets/network_graph_canvas_legend.dart';
 import '../widgets/network_graph_empty_state.dart';
-import '../widgets/network_graph_legend.dart';
 import '../helpers/network_graph_display.dart';
 import '../widgets/network_graph_path_card.dart';
+import '../widgets/network_graph_node_detail_card.dart';
 
 class NetworkGraphPage extends StatelessWidget {
   const NetworkGraphPage({
@@ -78,18 +80,12 @@ class NetworkGraphView extends StatelessWidget {
         final cubit = context.read<NetworkGraphCubit>();
 
         return CardenceScaffold(
-          backgroundColor: NetworkGraphCanvasTheme.background,
+          backgroundColor: NetworkGraphCanvasTheme.background(context),
           appBar: CardenceAppBar(
             title: context.l10n.networkGraph,
             variant: CardenceAppBarVariant.primary,
             actions: graph != null
                 ? [
-                    IconButton(
-                      icon: const Icon(Icons.info_outline_rounded),
-                      tooltip: context.l10n.hakknda,
-                      onPressed: () =>
-                          _showGraphInfoDialog(context, state.scope),
-                    ),
                     IconButton(
                       icon: const Icon(Icons.analytics_outlined),
                       tooltip: context.l10n.networkStatistics,
@@ -131,25 +127,38 @@ class NetworkGraphView extends StatelessWidget {
     }
 
     final bottomInset = MediaQuery.paddingOf(context).bottom;
+    final visibleNodes = NetworkGraphDisplay.visibleNodes(graph.nodes);
+    final visibleEdges = NetworkGraphDisplay.visibleEdges(
+      nodes: visibleNodes,
+      edges: graph.edges,
+    );
     final showPathPanel = state.isPathLoading ||
         state.path != null ||
         state.pathSourceCardId != null;
+    final selectedNode = _selectedNode(state, visibleNodes);
+    final showDetailPanel = !showPathPanel && selectedNode != null;
 
     return Stack(
       children: [
-        const Positioned.fill(
+        Positioned.fill(
           child: NetworkGraphCanvasBackground(),
         ),
         Positioned.fill(
           child: state.isLoading
               ? const Center(child: CircularProgressIndicator())
               : NetworkGraphInteractiveArea(
-                  nodes: NetworkGraphDisplay.visibleNodes(graph.nodes),
-                  edges: graph.edges,
+                  nodes: visibleNodes,
+                  edges: visibleEdges,
                   highlightedNodeIds: state.highlightedNodeIds,
                   pathNodeIds: state.path?.pathNodeIds ?? const [],
-                  onCardNodeTap: cubit.tapCardNode,
+                  focusNodeIds: state.focusNodeIds,
+                  onNodeTap: cubit.tapNode,
                 ),
+        ),
+        const Positioned(
+          top: 12,
+          left: 12,
+          child: NetworkGraphCanvasLegend(),
         ),
         if (showPathPanel)
           Positioned(
@@ -170,60 +179,55 @@ class NetworkGraphView extends StatelessWidget {
               ),
             ),
           ),
+        if (showDetailPanel)
+          Positioned(
+            left: 16,
+            right: 16,
+            bottom: 16 + bottomInset,
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                maxHeight: MediaQuery.sizeOf(context).height * 0.45,
+              ),
+              child: SingleChildScrollView(
+                child: NetworkGraphNodeDetailCard(
+                  node: selectedNode,
+                  connectedNodes: NetworkGraphDisplay.connectedNodes(
+                    nodeId: selectedNode.id,
+                    nodes: visibleNodes,
+                    edges: visibleEdges,
+                  ),
+                  relatedEdges: _relatedEdges(
+                    nodeId: selectedNode.id,
+                    edges: visibleEdges,
+                  ),
+                  onClear: cubit.clearNodeSelection,
+                ),
+              ),
+            ),
+          ),
       ],
     );
   }
 
-  void _showGraphInfoDialog(BuildContext context, GraphScope scope) {
-    final theme = Theme.of(context);
-    showDialog<void>(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          icon: Icon(
-            Icons.info_outline_rounded,
-            color: theme.colorScheme.primary,
-            size: 32,
-          ),
-          title: Text(
-            context.l10n.networkGraph,
-            style: theme.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-          content: SizedBox(
-            width: double.maxFinite,
-            child: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    scope == GraphScope.event
-                        ? context.l10n.networkGraphEventDescription
-                        : context.l10n.networkGraphPersonalDescription,
-                    textAlign: TextAlign.center,
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      height: 1.4,
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  const Divider(),
-                  const SizedBox(height: 16),
-                  const NetworkGraphLegend(),
-                ],
-              ),
-            ),
-          ),
-          actions: [
-            CustomButton.text(
-              label: context.l10n.close,
-              onPressed: () => Navigator.pop(context),
-            ),
-          ],
-        );
-      },
-    );
+  GraphNode? _selectedNode(
+    NetworkGraphState state,
+    List<GraphNode> visibleNodes,
+  ) {
+    final selectedNodeId = state.selectedNodeId;
+    if (selectedNodeId == null) return null;
+    for (final node in visibleNodes) {
+      if (node.id == selectedNodeId) return node;
+    }
+    return null;
+  }
+
+  List<GraphEdge> _relatedEdges({
+    required String nodeId,
+    required List<GraphEdge> edges,
+  }) {
+    return edges
+        .where((edge) => edge.source == nodeId || edge.target == nodeId)
+        .toList();
   }
 
   String? _getPathSourceLabel(NetworkGraphState state, BuildContext context) {
@@ -271,7 +275,7 @@ class NetworkGraphErrorState extends StatelessWidget {
               message,
               textAlign: TextAlign.center,
               style: theme.textTheme.bodyMedium?.copyWith(
-                color: AppColors.textSecondaryDark,
+                color: colorScheme.onSurfaceVariant,
                 height: 1.35,
               ),
             ),

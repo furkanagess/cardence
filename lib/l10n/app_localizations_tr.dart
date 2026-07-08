@@ -418,7 +418,7 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get gvenliinizIinHesabnzaTekrarGiri =>
-      'Güvenliğiniz için hesabınıza tekrar giriş yapmanız gerekiyor.';
+      'Güvenliğiniz için lütfen tekrar giriş yapın.';
 
   @override
   String get hakkmda => 'Hakkımda';
@@ -464,6 +464,49 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get hesabnzaGiriYapn => 'Hesabınıza giriş yapın';
+
+  @override
+  String get authOrDivider => 'veya';
+
+  @override
+  String get authJoinCardenceTitle => 'Cardence\'a Katılın';
+
+  @override
+  String get authNoAccountPrompt => 'Hesabınız yok mu? ';
+
+  @override
+  String get authAlreadyHaveAccountPrompt => 'Zaten hesabınız var mı? ';
+
+  @override
+  String get linkedinIleDevamEt => 'LinkedIn ile devam et';
+
+  @override
+  String get ad => 'Ad';
+
+  @override
+  String get sifre => 'Şifre';
+
+  @override
+  String authPasswordMinHint(int minLength) {
+    return 'En az $minLength karakter';
+  }
+
+  @override
+  String sifreEnAzKarakter(int minLength) {
+    return 'Şifre en az $minLength karakter olmalıdır.';
+  }
+
+  @override
+  String get sifrelerEslesmiyor => 'Şifreler eşleşmiyor.';
+
+  @override
+  String get registerLegalPrefix => 'Kayıt olarak ';
+
+  @override
+  String get registerLegalAnd => ' ve ';
+
+  @override
+  String get registerLegalSuffix => '\'nı kabul etmiş sayılırsınız.';
 
   @override
   String get loginWelcomeTitle => 'Cardence\'e Hoş Geldin !';
@@ -552,6 +595,15 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get isimirketEPosta => 'İsim, şirket, e-posta…';
+
+  @override
+  String get savedCardsSearchHint => 'İsim, şirket veya e-posta ile ara...';
+
+  @override
+  String get listeGorunumu => 'Liste Görünümü';
+
+  @override
+  String get yeniKartEkle => 'Yeni Kart Ekle';
 
   @override
   String get isimsizKart => 'İsimsiz kart';
@@ -668,6 +720,9 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get kartIdKopyalandId => 'Kart ID kopyalandı: \$id';
+
+  @override
+  String get clipboardCopySuccess => 'Başarıyla panoya kopyalandı';
 
   @override
   String get kartIdOluturulamadLtfenTekrar =>
@@ -1065,6 +1120,15 @@ class AppLocalizationsTr extends AppLocalizations {
   String get notlar => 'Notlar';
 
   @override
+  String get savedCardContactInfoTitle => 'İletişim Bilgileri';
+
+  @override
+  String get savedCardEducationTitle => 'Eğitim';
+
+  @override
+  String get savedCardPrivateNotesTitle => 'Özel Notlar';
+
+  @override
   String get notunuzuBurayaYazn => 'Notunuzu buraya yazın…';
 
   @override
@@ -1334,7 +1398,13 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uygulamaDiliniSein => 'Uygulama dilini seçin';
 
   @override
+  String get uygulamaDili => 'Uygulama Dili';
+
+  @override
   String get uygulamaTemasnSein => 'Uygulama temasını seçin';
+
+  @override
+  String get temaModu => 'Tema Modu';
 
   @override
   String get uygulamaRengi => 'Uygulama rengi';
@@ -1376,6 +1446,19 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get yeniKartOlutur => 'Yeni kart oluştur';
+
+  @override
+  String profileActiveCardStatus(int current, int total) {
+    return 'AKTİF KART: $current / $total';
+  }
+
+  @override
+  String get agGrafigi => 'Ağ Grafiği';
+
+  @override
+  String profileCardsSavedByOthersInfo(int count) {
+    return 'Kartlarınız toplam $count kez başkaları tarafından kaydedildi.';
+  }
 
   @override
   String get yenidenek => 'Yeniden çek';
@@ -1490,8 +1573,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get sessionNotFound => 'Oturum bulunamadı.';
 
   @override
-  String get sessionExpired =>
-      'Oturum süresi doldu. Lütfen tekrar giriş yapın.';
+  String get sessionExpired => 'Güvenliğiniz için lütfen tekrar giriş yapın.';
 
   @override
   String get operationFailed => 'İşlem başarısız.';
@@ -1627,7 +1709,7 @@ class AppLocalizationsTr extends AppLocalizations {
       'Kart ID\'nizi gönderin; karşı taraf Cardence\'te kartınızı ekleyebilir.';
 
   @override
-  String get rateOnAppStore => 'App Store veya Play Store\'da puan verin';
+  String get rateOnAppStore => 'App Store üzerinden geri bildirim verin';
 
   @override
   String get selectCards => 'Kartları seç';
@@ -1903,6 +1985,30 @@ class AppLocalizationsTr extends AppLocalizations {
   String get eventLocationVenueLabel => 'Mekan adı';
 
   @override
+  String get eventLocationProvinceDistrictLabel => 'İl · İlçe';
+
+  @override
+  String get eventLocationProvinceDistrictHint => 'İl ve ilçe seçin';
+
+  @override
+  String get eventShowOnMap => 'Haritada Göster';
+
+  @override
+  String get eventMapTapToSelect => 'Haritaya dokunarak konum seçin';
+
+  @override
+  String get eventMapDragToSelect => 'Haritayı kaydırarak konum seçin';
+
+  @override
+  String get eventMapUseMyLocation => 'Konumum';
+
+  @override
+  String get eventMapSelectLocation => 'Konum seç';
+
+  @override
+  String get eventMapOpenFullscreen => 'Tam ekran harita';
+
+  @override
   String get eventLocationVenueHint => 'Örn. İstanbul Kongre Merkezi';
 
   @override
@@ -1935,6 +2041,31 @@ class AppLocalizationsTr extends AppLocalizations {
   String get eventAboutSection => 'Hakkında';
 
   @override
+  String get eventAboutSectionLabel => 'Etkinlik hakkında';
+
+  @override
+  String get eventGroupCardsSectionTitle => 'Gruptaki kartlar';
+
+  @override
+  String get eventShowMore => 'Daha fazla göster';
+
+  @override
+  String eventDetailCardsChip(int count) {
+    return '$count kart';
+  }
+
+  @override
+  String eventDetailInvitesChip(int count) {
+    return '$count davet';
+  }
+
+  @override
+  String get eventDetailNetworkingChip => 'Networking';
+
+  @override
+  String get eventAddCardPlus => '+ Kart ekle';
+
+  @override
   String eventLinkedCardsSection(int count) {
     return 'Bağlı kartlar ($count)';
   }
@@ -1946,6 +2077,21 @@ class AppLocalizationsTr extends AppLocalizations {
   @override
   String get eventCreatePhotoSubtitle =>
       'Listede görünecek bir kapak fotoğrafı ekleyin. Atlayabilirsiniz.';
+
+  @override
+  String get eventPhotoUpload => 'Fotoğraf Yükle';
+
+  @override
+  String get eventPhotoFormatHint => 'PNG, JPG veya WEBP (Max. 5MB)';
+
+  @override
+  String get eventPhotoAdd => 'Fotoğraf ekle';
+
+  @override
+  String get eventPhotoChange => 'Fotoğrafı değiştir';
+
+  @override
+  String get eventCreateNoSavedCards => 'Henüz kaydedilmiş kart yok.';
 
   @override
   String get eventSkip => 'Atla';
@@ -2000,16 +2146,31 @@ class AppLocalizationsTr extends AppLocalizations {
   String get eventScheduleRequired => 'Zorunlu';
 
   @override
+  String get eventStartDateLabel => 'Başlangıç tarihi';
+
+  @override
+  String get eventStartTimeLabel => 'Başlangıç saati';
+
+  @override
+  String get eventEndDateLabel => 'Bitiş tarihi';
+
+  @override
+  String get eventEndTimeLabel => 'Bitiş saati';
+
+  @override
+  String get eventAddEnd => 'Bitiş ekle';
+
+  @override
   String get eventInviteByCardId => 'Card ID ile davet et';
 
   @override
   String get eventActiveSection => 'Devam eden / Yaklaşan';
 
   @override
-  String get eventOngoingSection => 'Devam eden etkinlikler';
+  String get eventOngoingSection => 'Devam eden';
 
   @override
-  String get eventUpcomingSection => 'Gelecek etkinlikler';
+  String get eventUpcomingSection => 'Yaklaşan';
 
   @override
   String eventInvitationTitle(String eventName) {
@@ -2032,7 +2193,10 @@ class AppLocalizationsTr extends AppLocalizations {
   }
 
   @override
-  String get eventInvitationAccept => 'Katıl';
+  String get eventInvitationAccept => 'Onayla';
+
+  @override
+  String get eventInvitationInvitedSubtitle => 'Davet edildiniz';
 
   @override
   String get eventInvitationAcceptHint => 'Kartınız bu etkinliğe bağlanır';
@@ -2069,7 +2233,21 @@ class AppLocalizationsTr extends AppLocalizations {
   String get eventInvitationsSection => 'Davetler';
 
   @override
-  String get eventEndedSection => 'Biten etkinlikler';
+  String get eventEndedSection => 'Sona eren';
+
+  @override
+  String eventGroupLinkedCardCount(int count) {
+    return '$count kart';
+  }
+
+  @override
+  String get eventGroupToday => 'Bugün';
+
+  @override
+  String get eventGroupEndedLastMonth => 'Geçen ay sona erdi';
+
+  @override
+  String get eventGroupEndedThisMonth => 'Bu ay sona erdi';
 
   @override
   String get eventStatusUpcoming => 'Yaklaşıyor';
@@ -2265,6 +2443,12 @@ class AppLocalizationsTr extends AppLocalizations {
   String get networkGraph => 'Ağ Grafiği';
 
   @override
+  String get networkGraphLegendMe => 'Ben';
+
+  @override
+  String get networkGraphLegendConnection => 'Bağlantı';
+
+  @override
   String get networkStatistics => 'Ağ İstatistikleri';
 
   @override
@@ -2380,6 +2564,17 @@ class AppLocalizationsTr extends AppLocalizations {
       'İki kart düğümüne dokunarak aralarındaki en kısa yolu bulun.';
 
   @override
+  String networkGraphConnectedNodes(int count) {
+    return 'Bağlı düğümler ($count)';
+  }
+
+  @override
+  String get networkGraphNoConnectedNodes => 'Bu grafikte bağlı düğüm yok.';
+
+  @override
+  String get networkGraphConnectionTypes => 'Bağlantı türleri';
+
+  @override
   String get createMyCard => 'Kartımı oluştur';
 
   @override
@@ -2387,10 +2582,13 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get swipeHorizontalToSwitchCards =>
-      'Yatay kaydırarak kartlar arasında geçin; düzenlemek için karta dokunun.';
+      'Yatay kaydırarak kartlar arasında geçin.';
 
   @override
-  String get tapCardToEdit => 'Düzenlemek için karta dokunun.';
+  String get tapCardToEdit => 'Detay için karttaki detay düğmesini kullanın.';
+
+  @override
+  String get kartDetay => 'Detay';
 
   @override
   String get cardLimitReachedPremiumUpgrade =>

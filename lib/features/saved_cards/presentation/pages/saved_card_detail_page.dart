@@ -9,9 +9,9 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/contact_launcher.dart';
 import '../../../../core/utils/skills_format.dart';
+import '../../../../core/widgets/molecules/copy_feedback_icon_button.dart';
 import '../../../../core/widgets/molecules/skills_chip_display.dart';
 import '../../../../core/widgets/atoms/custom_button.dart';
-import '../../../../core/widgets/atoms/cardence_app_bar.dart';
 import '../../../../core/widgets/organisms/cardence_scaffold.dart';
 import '../../../../core/widgets/organisms/flippable_person_card.dart';
 import '../../../event_groups/domain/entities/event_group.dart';
@@ -30,6 +30,8 @@ import '../../domain/usecases/save_saved_card.dart';
 import '../../domain/usecases/track_saved_card_contact_click.dart';
 import '../../domain/helpers/saved_card_field_catalog.dart';
 import '../helpers/saved_card_field_l10n.dart';
+import '../../../event_groups/presentation/widgets/event_group_detail_header.dart';
+import '../helpers/saved_card_detail_theme.dart';
 import '../widgets/saved_card_profile_header.dart';
 import '../widgets/saved_card_profile_action_bar.dart';
 import '../widgets/saved_card_profile_section.dart';
@@ -52,6 +54,8 @@ class SavedCardDetailPage extends StatefulWidget {
     this.deleteSavedCard,
     this.trackSavedCardContactClick,
     this.heroTag,
+    this.readOnly = false,
+    this.onEdit,
   });
 
   final SavedCard card;
@@ -66,6 +70,8 @@ class SavedCardDetailPage extends StatefulWidget {
   final DeleteSavedCard? deleteSavedCard;
   final TrackSavedCardContactClick? trackSavedCardContactClick;
   final String? heroTag;
+  final bool readOnly;
+  final Future<SavedCard?> Function()? onEdit;
 
   @override
   State<SavedCardDetailPage> createState() => _SavedCardDetailPageState();
@@ -234,11 +240,25 @@ class _SavedCardDetailPageState extends State<SavedCardDetailPage> {
   }
 
   bool get _canAddFields =>
-      !_isDemoCard && SavedCardFieldCatalog.addableFields(_card).isNotEmpty;
+      !widget.readOnly &&
+      !_isDemoCard &&
+      SavedCardFieldCatalog.addableFields(_card).isNotEmpty;
+
+  bool get _canEditFields => !widget.readOnly;
+
+  bool get _canOpenAppBarEdit {
+    if (widget.onEdit != null) return true;
+    if (!_canEditFields || _isDemoCard) return false;
+    return SavedCardFieldCatalog.editableFields(_card).isNotEmpty;
+  }
 
   List<SavedCardFieldDefinition> get _infoFields {
     return SavedCardFieldCatalog.filledFields(_card)
-        .where((def) => def.key != SavedCardFieldKey.skills)
+        .where(
+          (def) =>
+              def.key != SavedCardFieldKey.skills &&
+              def.key != SavedCardFieldKey.about,
+        )
         .toList();
   }
 
@@ -291,7 +311,9 @@ class _SavedCardDetailPageState extends State<SavedCardDetailPage> {
       icon: SavedCardFieldIcons.iconFor(def.iconName),
       trailing: trailing,
       onTap: onTap,
-      onEdit: def.isEditable(_card) ? () => _openEditField(def) : null,
+      onEdit: _canEditFields && def.isEditable(_card)
+          ? () => _openEditField(def)
+          : null,
     );
   }
 
@@ -341,6 +363,12 @@ class _SavedCardDetailPageState extends State<SavedCardDetailPage> {
       contactType: 'linkedin',
       errorMessage: context.l10n.linkedinAlamad,
     );
+  }
+
+  Future<void> _launchCardWebsite() async {
+    final website = _card.website?.trim();
+    if (website == null || website.isEmpty) return;
+    await _launchWebsite(website, contactType: 'website');
   }
 
   Future<void> _launchEmail() async {
@@ -481,13 +509,28 @@ class _SavedCardDetailPageState extends State<SavedCardDetailPage> {
     if (!mounted) return;
       }
 
-  Future<void> _launchWebsiteField() async {
-    final website = _card.website?.trim();
-    if (website == null || website.isEmpty) return;
-    await _launchWebsite(
-      website,
-      contactType: 'website',
+  Future<void> _handleEdit() async {
+    final onEdit = widget.onEdit;
+    if (onEdit == null) return;
+    final updated = await onEdit();
+    if (!mounted || updated == null) return;
+    setState(() => _card = updated);
+  }
+
+  Future<void> _handleAppBarEdit() async {
+    if (widget.onEdit != null) {
+      await _handleEdit();
+      return;
+    }
+
+    final key = await SavedCardAddFieldSheet.pickFieldToEdit(
+      context,
+      card: _card,
     );
+    if (!mounted || key == null) return;
+    final def = SavedCardFieldCatalog.byKey(key);
+    if (def == null) return;
+    await _openEditField(def);
   }
 
   Future<void> _showMoreMenu() async {
@@ -554,65 +597,61 @@ class _SavedCardDetailPageState extends State<SavedCardDetailPage> {
     final theme = Theme.of(context);
     final textTheme = theme.textTheme;
     final hasLinkedIn = _has(_card.linkedin);
+    final hasWebsite = _has(_card.website);
     final hasEmail = _has(_card.email);
     final hasPhone = _has(_card.phone);
     final about = _card.about?.trim();
     final school = _card.school?.trim();
     final locationText = savedCardProfileLocationText(_card);
-    final metaText = savedCardProfileMetaText(context, _card);
 
     return CardenceScaffold(
-      backgroundColor: AppColors.profileDetailBackground,
+      backgroundColor: SavedCardDetailTheme.background(context),
       showWatermark: false,
-      appBar: CardenceAppBar(
-        titleWidget: const SizedBox.shrink(),
-        backgroundColor: AppColors.pureBlack,
-        foregroundColor: AppColors.textPrimaryDark,
-      ),
-      body: ListView(
-        padding: EdgeInsets.only(bottom: 24 + MediaQuery.paddingOf(context).bottom),
+      body: Stack(
         children: [
-          SavedCardProfileHeader(
-            card: _card,
-            displayName: _displayName,
-            locationText: locationText,
-            metaText: metaText,
-            onWebsiteTap: _has(_card.website) ? _launchWebsiteField : null,
-            onLinkedInTap: hasLinkedIn ? _launchLinkedIn : null,
-          ),
-          SavedCardProfileActionBar(
-            hasEmail: hasEmail,
-            hasPhone: hasPhone,
-            hasLinkedIn: hasLinkedIn,
-            onEmail: hasEmail ? _launchEmail : null,
-            onPhone: hasPhone ? _launchPhone : null,
-            onLinkedIn: hasLinkedIn ? _launchLinkedIn : null,
-            onMore: _showMoreMenu,
-          ),
-          SavedCardProfileSection(
-            title: context.l10n.kartGrnm2,
-            child: Center(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 420),
+          ListView(
+            padding: EdgeInsets.only(
+              bottom: 24 + MediaQuery.paddingOf(context).bottom,
+            ),
+            children: [
+              SavedCardProfileHeader(
+                card: _card,
+                displayName: _displayName,
+                locationText: locationText,
+              ),
+              SavedCardProfileActionBar(
+                hasEmail: hasEmail,
+                hasPhone: hasPhone,
+                hasLinkedIn: hasLinkedIn,
+                hasWebsite: hasWebsite,
+                onEmail: hasEmail ? _launchEmail : null,
+                onPhone: hasPhone ? _launchPhone : null,
+                onLinkedIn: hasLinkedIn ? _launchLinkedIn : null,
+                onWebsite: hasWebsite ? _launchCardWebsite : null,
+                onMore: _showMoreMenu,
+              ),
+              SavedCardProfileSection(
+                title: context.l10n.kartGrnm2,
                 child: AspectRatio(
                   aspectRatio: FlippablePersonCard.cardAspectRatio,
                   child: SavedCardsSavedCardPreview(
                     card: _card,
                     heroTag: widget.heroTag,
+                    showActionStrip: false,
                   ),
                 ),
               ),
-            ),
-          ),
           if (about != null && about.isNotEmpty)
             SavedCardProfileSection(
               title: context.l10n.hakknda,
-              actionLabel: SavedCardFieldCatalog.byKey(SavedCardFieldKey.about)!
-                      .isEditable(_card)
+              actionLabel: _canEditFields &&
+                      SavedCardFieldCatalog.byKey(SavedCardFieldKey.about)!
+                          .isEditable(_card)
                   ? context.l10n.dzenle
                   : null,
-              onAction: SavedCardFieldCatalog.byKey(SavedCardFieldKey.about)!
-                      .isEditable(_card)
+              onAction: _canEditFields &&
+                      SavedCardFieldCatalog.byKey(SavedCardFieldKey.about)!
+                          .isEditable(_card)
                   ? () => _openEditField(
                         SavedCardFieldCatalog.byKey(SavedCardFieldKey.about)!,
                       )
@@ -620,13 +659,13 @@ class _SavedCardDetailPageState extends State<SavedCardDetailPage> {
               child: Text(
                 about,
                 style: textTheme.bodyMedium?.copyWith(
-                  height: 1.45,
-                  color: AppColors.textPrimaryDark.withValues(alpha: 0.92),
+                  height: 1.5,
+                  color: SavedCardDetailTheme.textPrimary(context),
                 ),
               ),
             ),
           SavedCardProfileSection(
-            title: context.l10n.bilgiler,
+            title: context.l10n.savedCardContactInfoTitle,
             actionLabel: _canAddFields ? context.l10n.bilgiEkle : null,
             onAction: _canAddFields ? _openAddFieldFlow : null,
             child: _contactFields.isEmpty
@@ -643,16 +682,13 @@ class _SavedCardDetailPageState extends State<SavedCardDetailPage> {
                     children: [
                       for (var i = 0; i < _contactFields.length; i++) ...[
                         if (i > 0)
-                          const Divider(
+                          Divider(
                             height: 1,
-                            color: AppColors.profileDetailBorder,
+                            color: SavedCardDetailTheme.outline(context)
+                                .withValues(alpha: 0.7),
                           ),
                         _ContactFieldRow(
                           field: _contactFields[i],
-                          onCopy: () => _copyToClipboard(
-                            _contactFields[i].label,
-                            _contactFields[i].value,
-                          ),
                         ),
                       ],
                     ],
@@ -661,89 +697,115 @@ class _SavedCardDetailPageState extends State<SavedCardDetailPage> {
           if (_skills.isNotEmpty)
             SavedCardProfileSection(
               title: context.l10n.yetenekler,
-              actionLabel:
-                  SavedCardFieldCatalog.byKey(SavedCardFieldKey.skills)!
+              actionLabel: _canEditFields &&
+                      SavedCardFieldCatalog.byKey(SavedCardFieldKey.skills)!
                           .isEditable(_card)
-                      ? context.l10n.dzenle
-                      : null,
-              onAction:
-                  SavedCardFieldCatalog.byKey(SavedCardFieldKey.skills)!
+                  ? context.l10n.dzenle
+                  : null,
+              onAction: _canEditFields &&
+                      SavedCardFieldCatalog.byKey(SavedCardFieldKey.skills)!
                           .isEditable(_card)
-                      ? () => _openEditField(
+                  ? () => _openEditField(
                             SavedCardFieldCatalog.byKey(
                                 SavedCardFieldKey.skills)!,
                           )
-                      : null,
+                  : null,
               child: SkillsChipDisplay(
                 skills: _skills,
                 onSkillTap: (skill) => _copyToClipboard(
                   AppL10n.nodeTypeSkill(context.l10n),
                   skill,
                 ),
+                chipBackgroundColor: SavedCardDetailTheme.chipSurface(context),
+                chipLabelColor: AppColors.primary,
               ),
             ),
           if (school != null && school.isNotEmpty)
             SavedCardProfileSection(
-              title: context.l10n.okul,
-              actionLabel: SavedCardFieldCatalog.byKey(SavedCardFieldKey.school)!
-                      .isEditable(_card)
+              title: context.l10n.savedCardEducationTitle,
+              actionLabel: _canEditFields &&
+                      SavedCardFieldCatalog.byKey(SavedCardFieldKey.school)!
+                          .isEditable(_card)
                   ? context.l10n.dzenle
                   : null,
-              onAction: SavedCardFieldCatalog.byKey(SavedCardFieldKey.school)!
-                      .isEditable(_card)
+              onAction: _canEditFields &&
+                      SavedCardFieldCatalog.byKey(SavedCardFieldKey.school)!
+                          .isEditable(_card)
                   ? () => _openEditField(
                         SavedCardFieldCatalog.byKey(SavedCardFieldKey.school)!,
                       )
                   : null,
-              child: Text(
-                school,
-                style: textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.textPrimaryDark,
-                ),
+              child: _EducationTile(
+                school: school,
+                department: _card.department?.trim(),
               ),
             ),
-          SavedCardProfileSection(
-            title: context.l10n.katldEtkinlikler,
-            child: AnimatedSwitcher(
-              duration: const Duration(milliseconds: 220),
-              switchInCurve: Curves.easeOut,
-              switchOutCurve: Curves.easeIn,
-              child: _loadingGroups
-                  ? const _EventGroupsLoadingSkeleton(
-                      key: ValueKey('event_groups_loading'),
-                    )
-                  : _EventGroupsChipRow(
-                      key: ValueKey(
-                        'event_groups_chips_${_linkedGroups.length}',
+          if (!widget.readOnly) ...[
+            SavedCardProfileSection(
+              title: context.l10n.katldEtkinlikler,
+              titleColor: AppColors.primary,
+              child: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 220),
+                switchInCurve: Curves.easeOut,
+                switchOutCurve: Curves.easeIn,
+                child: _loadingGroups
+                    ? const _EventGroupsLoadingSkeleton(
+                        key: ValueKey('event_groups_loading'),
+                      )
+                    : _EventGroupsChipRow(
+                        key: ValueKey(
+                          'event_groups_chips_${_linkedGroups.length}',
+                        ),
+                        groups: _linkedGroups,
+                        canOpenDetail: _canOpenGroupDetail,
+                        canAddMore: _canAddToMoreGroups || !_hasLinkedGroups,
+                        onGroupTap: _openEventGroupDetail,
+                        onAdd: _openAddToEventGroupsSheet,
                       ),
-                      groups: _linkedGroups,
-                      canOpenDetail: _canOpenGroupDetail,
-                      canAddMore: _canAddToMoreGroups || !_hasLinkedGroups,
-                      onGroupTap: _openEventGroupDetail,
-                      onAdd: _openAddToEventGroupsSheet,
-                    ),
+              ),
             ),
-          ),
-          SavedCardProfileSection(
-            title: context.l10n.notlar,
-            child: _NotesContainer(
-              note: _card.note,
-              onAddOrEdit: _openNoteEditor,
+            SavedCardProfileSection(
+              title: context.l10n.savedCardPrivateNotesTitle,
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+              child: _NotesContainer(
+                note: _card.note,
+                onAddOrEdit: _openNoteEditor,
+              ),
             ),
-          ),
-          ColoredBox(
-            color: AppColors.pureBlack,
-            child: Padding(
+            Padding(
               padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
               child: Center(
                 child: Text(
                   _savedAtDescription(_card.savedAt),
                   textAlign: TextAlign.center,
                   style: textTheme.labelSmall?.copyWith(
-                    color: AppColors.textSecondaryDark.withValues(alpha: 0.85),
+                    color: SavedCardDetailTheme.textSecondary(context),
                   ),
                 ),
+              ),
+            ),
+          ],
+            ],
+          ),
+          SafeArea(
+            bottom: false,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+              child: Row(
+                children: [
+                  EventGroupDetailOverlayIconButton(
+                    icon: Icons.arrow_back_rounded,
+                    tooltip: context.l10n.geri,
+                    onPressed: () => Navigator.of(context).pop(),
+                  ),
+                  const Spacer(),
+                  if (_canOpenAppBarEdit)
+                    EventGroupDetailOverlayIconButton(
+                      icon: Icons.edit_outlined,
+                      tooltip: context.l10n.duzenle,
+                      onPressed: _handleAppBarEdit,
+                    ),
+                ],
               ),
             ),
           ),
@@ -780,11 +842,22 @@ class _GroupedInfoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final surface = SavedCardDetailTheme.surface(context);
+    final outline = SavedCardDetailTheme.outline(context);
+    final shadow = SavedCardDetailTheme.cardShadow(context);
+
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: AppColors.profileDetailSurfaceElevated,
+        color: surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.profileDetailBorder),
+        border: Border.all(color: outline),
+        boxShadow: [
+          BoxShadow(
+            color: shadow,
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(16),
@@ -797,20 +870,21 @@ class _GroupedInfoCard extends StatelessWidget {
 class _ContactFieldRow extends StatelessWidget {
   const _ContactFieldRow({
     required this.field,
-    required this.onCopy,
   });
 
   final _ContactFieldData field;
-  final VoidCallback onCopy;
 
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
-    final canOpen = field.onTap != null;
+    final accentSurface = SavedCardDetailTheme.accentSurface(context);
+    final textPrimary = SavedCardDetailTheme.textPrimary(context);
+    final textSecondary = SavedCardDetailTheme.textSecondary(context);
+    final canLaunch = field.onTap != null;
     final canEdit = field.onEdit != null;
-    final trailingIcon = field.trailing == _ContactTrailingAction.openLink
-        ? Icons.open_in_new_rounded
-        : Icons.copy_all_rounded;
+    final showCopyTrailing = field.trailing == _ContactTrailingAction.copy;
+    final showOpenTrailing =
+        field.trailing == _ContactTrailingAction.openLink && canLaunch;
 
     return Material(
       color: Colors.transparent,
@@ -818,21 +892,21 @@ class _ContactFieldRow extends StatelessWidget {
         onTap: canEdit ? field.onEdit : field.onTap,
         onLongPress: canEdit ? field.onEdit : null,
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(14, 14, 10, 14),
+          padding: const EdgeInsets.fromLTRB(14, 14, 8, 14),
           child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Container(
-                width: 36,
-                height: 36,
-                decoration: const BoxDecoration(
-                  color: AppColors.profileDetailSurface,
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: accentSurface,
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
                   field.icon,
                   size: 18,
-                  color: AppColors.textSecondaryDark,
+                  color: AppColors.primary,
                 ),
               ),
               const SizedBox(width: 12),
@@ -842,19 +916,18 @@ class _ContactFieldRow extends StatelessWidget {
                   children: [
                     Text(
                       field.label,
-                      style: textTheme.labelLarge?.copyWith(
-                        color: AppColors.textPrimaryDark,
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: 0.1,
+                      style: textTheme.labelSmall?.copyWith(
+                        color: textSecondary,
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
                     const SizedBox(height: 2),
                     Text(
                       field.value,
                       style: textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
+                        fontWeight: FontWeight.w700,
                         height: 1.3,
-                        color: AppColors.textPrimaryDark,
+                        color: textPrimary,
                       ),
                     ),
                   ],
@@ -865,22 +938,27 @@ class _ContactFieldRow extends StatelessWidget {
                   tooltip: context.l10n.dzenle,
                   visualDensity: VisualDensity.compact,
                   onPressed: field.onEdit,
-                  icon: const Icon(
+                  icon: Icon(
                     Icons.edit_outlined,
                     size: 20,
-                    color: AppColors.textSecondaryDark,
+                    color: textSecondary,
                   ),
                 ),
-              if (canOpen || !canEdit)
+              if (showOpenTrailing)
                 IconButton(
-                  tooltip: canOpen ? AppL10n.open(context.l10n) : context.l10n.kopyala,
+                  tooltip: AppL10n.open(context.l10n),
                   visualDensity: VisualDensity.compact,
-                  onPressed: canOpen ? field.onTap : onCopy,
+                  onPressed: field.onTap,
                   icon: Icon(
-                    trailingIcon,
+                    Icons.open_in_new_rounded,
                     size: 20,
-                    color: AppColors.textSecondaryDark,
+                    color: textSecondary,
                   ),
+                )
+              else if (showCopyTrailing)
+                CopyFeedbackIconButton(
+                  value: field.value,
+                  tooltip: context.l10n.kopyala,
                 ),
             ],
           ),
@@ -902,47 +980,151 @@ class _NotesContainer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
+    final accentSurface = SavedCardDetailTheme.accentSurface(context);
+    final textPrimary = SavedCardDetailTheme.textPrimary(context);
     final trimmed = note?.trim();
     final hasNote = trimmed != null && trimmed.isNotEmpty;
 
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: AppColors.profileDetailSurfaceElevated,
+        color: accentSurface,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.profileDetailBorder),
+        border: Border.all(
+          color: AppColors.primary.withValues(alpha: 0.12),
+        ),
       ),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
           onTap: hasNote ? onAddOrEdit : null,
           borderRadius: BorderRadius.circular(14),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: hasNote
-                ? Text(
-                    '"$trimmed"',
-                    style: textTheme.bodyMedium?.copyWith(
-                      height: 1.45,
-                      fontStyle: FontStyle.italic,
-                      color: AppColors.textPrimaryDark.withValues(alpha: 0.9),
-                    ),
-                  )
-                : Center(
-                    child: CustomButton.tonal(
-                      label: context.l10n.notEkle,
-                      icon: Icons.add_rounded,
-                      onPressed: onAddOrEdit,
-                      fullWidth: false,
-                      style: FilledButton.styleFrom(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
+          child: IntrinsicHeight(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Container(
+                  width: 4,
+                  decoration: BoxDecoration(
+                    color: AppColors.primary,
+                    borderRadius: const BorderRadius.horizontal(
+                      left: Radius.circular(14),
                     ),
                   ),
+                ),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(14, 16, 16, 16),
+                    child: hasNote
+                        ? Text(
+                            '"$trimmed"',
+                            style: textTheme.bodyMedium?.copyWith(
+                              height: 1.45,
+                              fontStyle: FontStyle.italic,
+                              color: textPrimary,
+                            ),
+                          )
+                        : Center(
+                            child: CustomButton.tonal(
+                              label: context.l10n.notEkle,
+                              icon: Icons.add_rounded,
+                              onPressed: onAddOrEdit,
+                              fullWidth: false,
+                              style: FilledButton.styleFrom(
+                                backgroundColor: AppColors.primary,
+                                foregroundColor: AppColors.textOnPrimary,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                            ),
+                          ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
+    );
+  }
+}
+
+class _EducationTile extends StatelessWidget {
+  const _EducationTile({
+    required this.school,
+    this.department,
+  });
+
+  final String school;
+  final String? department;
+
+  String get _initials {
+    final words =
+        school.trim().split(RegExp(r'\s+')).where((w) => w.isNotEmpty).toList();
+    if (words.isEmpty) return '?';
+    if (words.length == 1) {
+      final word = words.first;
+      return word.length >= 3
+          ? word.substring(0, 3).toUpperCase()
+          : word.toUpperCase();
+    }
+    return '${words[0][0]}${words[1][0]}'.toUpperCase();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    final accentSurface = SavedCardDetailTheme.accentSurface(context);
+    final outline = SavedCardDetailTheme.outline(context);
+    final textPrimary = SavedCardDetailTheme.textPrimary(context);
+    final textSecondary = SavedCardDetailTheme.textSecondary(context);
+    final hasDepartment = department != null && department!.isNotEmpty;
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          width: 48,
+          height: 48,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: accentSurface,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: outline),
+          ),
+          child: Text(
+            _initials,
+            style: textTheme.labelLarge?.copyWith(
+              color: AppColors.primary,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                school,
+                style: textTheme.bodyLarge?.copyWith(
+                  fontWeight: FontWeight.w700,
+                  color: textPrimary,
+                ),
+              ),
+              if (hasDepartment) ...[
+                const SizedBox(height: 2),
+                Text(
+                  department!,
+                  style: textTheme.bodyMedium?.copyWith(
+                    color: textSecondary,
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+      ],
     );
   }
 }
@@ -966,23 +1148,40 @@ class _EventGroupsChipRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
+    final accentSurface = SavedCardDetailTheme.accentSurface(context);
 
     return Wrap(
-      spacing: 8,
-      runSpacing: 8,
+      spacing: 10,
+      runSpacing: 10,
       children: [
         for (final group in groups)
-          ActionChip(
-            label: Text(group.name),
-            onPressed: canOpenDetail ? () => onGroupTap(group) : null,
-            backgroundColor: AppColors.profileDetailSurfaceElevated,
-            labelStyle: textTheme.labelLarge?.copyWith(
-              fontWeight: FontWeight.w600,
-              color: AppColors.textPrimaryDark,
-            ),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
-              side: const BorderSide(color: AppColors.profileDetailBorder),
+          Material(
+            color: accentSurface,
+            borderRadius: BorderRadius.circular(12),
+            child: InkWell(
+              onTap: canOpenDetail ? () => onGroupTap(group) : null,
+              borderRadius: BorderRadius.circular(12),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.event_rounded,
+                      size: 18,
+                      color: AppColors.primary,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      group.name,
+                      style: textTheme.labelLarge?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.primary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
           ),
         if (canAddMore)
@@ -997,11 +1196,11 @@ class _EventGroupsChipRow extends StatelessWidget {
               style: TextStyle(color: AppColors.primary),
             ),
             onPressed: onAdd,
-            backgroundColor: AppColors.primaryContainerDark,
+            backgroundColor: accentSurface,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
+              borderRadius: BorderRadius.circular(12),
               side: BorderSide(
-                color: AppColors.primary.withValues(alpha: 0.35),
+                color: AppColors.primary.withValues(alpha: 0.2),
               ),
             ),
           ),
@@ -1015,11 +1214,14 @@ class _EventGroupsLoadingSkeleton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final surface = SavedCardDetailTheme.surface(context);
+    final outline = SavedCardDetailTheme.outline(context);
+
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: AppColors.profileDetailSurfaceElevated,
+        color: surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.profileDetailBorder),
+        border: Border.all(color: outline),
       ),
       child: const Padding(
         padding: EdgeInsets.all(16),
@@ -1044,13 +1246,15 @@ class _SkeletonBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final outline = SavedCardDetailTheme.outline(context);
+
     return FractionallySizedBox(
       widthFactor: widthFactor,
       alignment: Alignment.centerLeft,
       child: Container(
         height: 14,
         decoration: BoxDecoration(
-          color: AppColors.profileDetailSurface,
+          color: outline.withValues(alpha: 0.45),
           borderRadius: BorderRadius.circular(8),
         ),
       ),
@@ -1073,6 +1277,8 @@ class _EmptyStateCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final textSecondary = SavedCardDetailTheme.textSecondary(context);
+
     return _GroupedInfoCard(
       children: [
         Padding(
@@ -1082,14 +1288,14 @@ class _EmptyStateCard extends StatelessWidget {
               Icon(
                 icon,
                 size: 32,
-                color: AppColors.textSecondaryDark.withValues(alpha: 0.65),
+                color: textSecondary.withValues(alpha: 0.65),
               ),
               const SizedBox(height: 10),
               Text(
                 message,
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: AppColors.textSecondaryDark,
+                      color: textSecondary,
                     ),
               ),
               if (actionLabel != null && onAction != null) ...[

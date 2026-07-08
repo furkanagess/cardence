@@ -1,14 +1,27 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 import '../../../../core/l10n/l10n_extensions.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/atoms/custom_button.dart';
+import '../../../../core/widgets/molecules/location_picker_field_row.dart';
 import '../helpers/event_group_meta_formatter.dart';
+
+enum EventGroupSchedulePickerStyle {
+  standard,
+  createFlow,
+}
 
 String? formatEventGroupDate(DateTime? value) {
   if (value == null) return null;
   return '${value.day.toString().padLeft(2, '0')}.'
       '${value.month.toString().padLeft(2, '0')}.${value.year}';
+}
+
+String? formatEventGroupDisplayDate(BuildContext context, DateTime? value) {
+  if (value == null) return null;
+  final locale = Localizations.localeOf(context).toLanguageTag();
+  return DateFormat('d MMM yyyy', locale).format(value);
 }
 
 String? formatEventGroupTime(TimeOfDay? value) {
@@ -123,6 +136,139 @@ class EventGroupScheduleFieldTile extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _AddEndScheduleButton extends StatelessWidget {
+  const _AddEndScheduleButton({required this.onPressed});
+
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: TextButton.icon(
+        onPressed: onPressed,
+        style: TextButton.styleFrom(
+          foregroundColor: colorScheme.primary,
+          padding: EdgeInsets.zero,
+          minimumSize: Size.zero,
+          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        ),
+        icon: Icon(
+          Icons.add_circle_outline_rounded,
+          size: 20,
+          color: colorScheme.primary,
+        ),
+        label: Text(
+          context.l10n.eventAddEnd,
+          style: theme.textTheme.titleSmall?.copyWith(
+            color: colorScheme.primary,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _CreateFlowScheduleFields extends StatelessWidget {
+  const _CreateFlowScheduleFields({
+    required this.startDate,
+    required this.startTime,
+    required this.endDate,
+    required this.endTime,
+    required this.showEndSection,
+    required this.onPickStartDate,
+    required this.onPickStartTime,
+    required this.onPickEndDate,
+    required this.onPickEndTime,
+    required this.onRevealEnd,
+    required this.onClearEnd,
+    this.endSectionKey,
+  });
+
+  final DateTime? startDate;
+  final TimeOfDay? startTime;
+  final DateTime? endDate;
+  final TimeOfDay? endTime;
+  final bool showEndSection;
+  final VoidCallback onPickStartDate;
+  final VoidCallback onPickStartTime;
+  final VoidCallback onPickEndDate;
+  final VoidCallback onPickEndTime;
+  final VoidCallback onRevealEnd;
+  final VoidCallback onClearEnd;
+  final GlobalKey? endSectionKey;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final colorScheme = Theme.of(context).colorScheme;
+    final hasEndValues = endDate != null || endTime != null;
+
+    return Column(
+      key: endSectionKey,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        LocationPickerFieldRow(
+          label: l10n.eventStartDateLabel.toUpperCase(),
+          leadingIcon: Icons.calendar_today_outlined,
+          leadingIconColor: colorScheme.primary,
+          value: formatEventGroupDisplayDate(context, startDate),
+          placeholder: l10n.tarihSein,
+          onTap: onPickStartDate,
+        ),
+        const SizedBox(height: 16),
+        LocationPickerFieldRow(
+          label: l10n.eventStartTimeLabel.toUpperCase(),
+          leadingIcon: Icons.schedule_rounded,
+          leadingIconColor: colorScheme.primary,
+          value: formatEventGroupTime(startTime),
+          placeholder: l10n.eventPickTime,
+          onTap: onPickStartTime,
+        ),
+        if (!showEndSection) ...[
+          const SizedBox(height: 16),
+          _AddEndScheduleButton(onPressed: onRevealEnd),
+        ],
+        if (showEndSection) ...[
+          const SizedBox(height: 20),
+          LocationPickerFieldRow(
+            label: l10n.eventEndDateLabel.toUpperCase(),
+            leadingIcon: Icons.event_outlined,
+            leadingIconColor: colorScheme.primary,
+            value: formatEventGroupDisplayDate(context, endDate),
+            placeholder: l10n.tarihSein,
+            onTap: onPickEndDate,
+          ),
+          const SizedBox(height: 16),
+          LocationPickerFieldRow(
+            label: l10n.eventEndTimeLabel.toUpperCase(),
+            leadingIcon: Icons.more_time_rounded,
+            leadingIconColor: colorScheme.primary,
+            value: formatEventGroupTime(endTime),
+            placeholder: l10n.eventPickTime,
+            onTap: onPickEndTime,
+          ),
+          if (hasEndValues) ...[
+            const SizedBox(height: 8),
+            Align(
+              alignment: Alignment.centerRight,
+              child: CustomButton.text(
+                label: l10n.temizle,
+                onPressed: onClearEnd,
+                height: 32,
+              ),
+            ),
+          ],
+        ],
+      ],
     );
   }
 }
@@ -423,9 +569,12 @@ class EventGroupSchedulePickerSection extends StatelessWidget {
     required this.onPickEndDate,
     required this.onPickEndTime,
     required this.onClearEnd,
+    this.style = EventGroupSchedulePickerStyle.standard,
     this.showInlineSummary = true,
     this.endSectionKey,
     this.revealEndWhenStartComplete = false,
+    this.showEndSection = true,
+    this.onRevealEnd,
   });
 
   final DateTime? startDate;
@@ -438,11 +587,17 @@ class EventGroupSchedulePickerSection extends StatelessWidget {
   final VoidCallback onPickEndDate;
   final VoidCallback onPickEndTime;
   final VoidCallback onClearEnd;
+  final EventGroupSchedulePickerStyle style;
   final bool showInlineSummary;
   final GlobalKey? endSectionKey;
   final bool revealEndWhenStartComplete;
+  final bool showEndSection;
+  final VoidCallback? onRevealEnd;
 
   bool _shouldShowEndSection() {
+    if (style == EventGroupSchedulePickerStyle.createFlow) {
+      return showEndSection;
+    }
     if (!revealEndWhenStartComplete) return true;
     if (endDate != null || endTime != null) return true;
     return startDate != null && startTime != null;
@@ -466,36 +621,53 @@ class EventGroupSchedulePickerSection extends StatelessWidget {
     final error = errorText;
     final summary = _buildSummary(context);
     final hasEnd = endDate != null && endTime != null;
-    final showEndSection = _shouldShowEndSection();
+    final showEnd = _shouldShowEndSection();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        if (showInlineSummary && summary != null) ...[
-          _ScheduleSummaryBanner(
-            title: hasEnd
-                ? l10n.eventSchedulePlannedRange
-                : l10n.eventSchedulePlannedStart,
-            summary: summary,
-          ),
-          const SizedBox(height: 16),
-        ],
-        EventGroupStartScheduleSection(
-          startDate: startDate,
-          startTime: startTime,
-          onPickStartDate: onPickStartDate,
-          onPickStartTime: onPickStartTime,
-        ),
-        if (showEndSection) ...[
-          const SizedBox(height: 20),
-          EventGroupEndScheduleSection(
-            key: endSectionKey,
+        if (style == EventGroupSchedulePickerStyle.createFlow)
+          _CreateFlowScheduleFields(
+            startDate: startDate,
+            startTime: startTime,
             endDate: endDate,
             endTime: endTime,
+            showEndSection: showEnd,
+            onPickStartDate: onPickStartDate,
+            onPickStartTime: onPickStartTime,
             onPickEndDate: onPickEndDate,
             onPickEndTime: onPickEndTime,
+            onRevealEnd: onRevealEnd ?? () {},
             onClearEnd: onClearEnd,
+            endSectionKey: endSectionKey,
+          )
+        else ...[
+          if (showInlineSummary && summary != null) ...[
+            _ScheduleSummaryBanner(
+              title: hasEnd
+                  ? l10n.eventSchedulePlannedRange
+                  : l10n.eventSchedulePlannedStart,
+              summary: summary,
+            ),
+            const SizedBox(height: 16),
+          ],
+          EventGroupStartScheduleSection(
+            startDate: startDate,
+            startTime: startTime,
+            onPickStartDate: onPickStartDate,
+            onPickStartTime: onPickStartTime,
           ),
+          if (showEnd) ...[
+            const SizedBox(height: 20),
+            EventGroupEndScheduleSection(
+              key: endSectionKey,
+              endDate: endDate,
+              endTime: endTime,
+              onPickEndDate: onPickEndDate,
+              onPickEndTime: onPickEndTime,
+              onClearEnd: onClearEnd,
+            ),
+          ],
         ],
         if (error != null) ...[
           const SizedBox(height: 14),

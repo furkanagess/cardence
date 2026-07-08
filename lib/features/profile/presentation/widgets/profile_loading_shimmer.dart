@@ -18,15 +18,13 @@ class ProfileLoadingShimmer extends StatelessWidget {
         padding: EdgeInsets.fromLTRB(0, 8, 0, 32 + bottomInset),
         physics: const AlwaysScrollableScrollPhysics(),
         children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: FractionallySizedBox(
-              widthFactor: 0.88,
-              alignment: Alignment.centerLeft,
-              child: const ShimmerPlaceholder(height: 14, borderRadius: 8),
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 20),
+            child: Center(
+              child: ShimmerPlaceholder(width: 180, height: 32, borderRadius: 999),
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 12),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: ShimmerPlaceholder(
@@ -34,39 +32,36 @@ class ProfileLoadingShimmer extends StatelessWidget {
               borderRadius: 16,
             ),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 16),
           const Padding(
             padding: EdgeInsets.symmetric(horizontal: 20),
-            child: ShimmerPlaceholder(height: 52, borderRadius: 12),
-          ),
-          const SizedBox(height: 28),
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 20),
-            child: ShimmerPlaceholder(
-              width: 140,
-              height: 14,
-              borderRadius: 8,
-            ),
-          ),
-          const SizedBox(height: 12),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Row(
-              children: const [
-                Expanded(
-                  child: ShimmerPlaceholder(height: 92, borderRadius: 16),
-                ),
-                SizedBox(width: 12),
-                Expanded(
-                  child: ShimmerPlaceholder(height: 92, borderRadius: 16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                ShimmerPlaceholder(height: 54, borderRadius: 14),
+                SizedBox(height: 12),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: ShimmerPlaceholder(height: 104, borderRadius: 14),
+                    ),
+                    SizedBox(width: 12),
+                    Expanded(
+                      child: ShimmerPlaceholder(height: 104, borderRadius: 14),
+                    ),
+                  ],
                 ),
               ],
             ),
           ),
-          const SizedBox(height: 12),
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 20),
-            child: ShimmerPlaceholder(height: 76, borderRadius: 16),
+          const SizedBox(height: 20),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: ShimmerPlaceholder(
+              height: 220,
+              borderRadius: 20,
+            ),
           ),
         ],
       ),

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../core/l10n/l10n_extensions.dart';
 
-import '../../../../core/validation/app_validators.dart';
+import '../helpers/auth_form_validation.dart';
 import '../../../../core/widgets/atoms/custom_button.dart';
 import '../../../../core/widgets/atoms/custom_text_field.dart';
 import '../../../onboarding/presentation/widgets/onboarding_step_shell.dart';
@@ -51,8 +51,9 @@ class _ForgotPasswordFormState extends State<ForgotPasswordForm> {
 
   void _requestLink() {
     final email = _emailController.text.trim();
-    if (!AppValidators.matches(AppValidators.email, email)) {
-      setState(() => _emailError = 'Geçerli bir e-posta girin.');
+    final emailError = AuthFormValidation.emailError(context.l10n, email);
+    if (emailError != null) {
+      setState(() => _emailError = emailError);
       return;
     }
     setState(() => _emailError = null);

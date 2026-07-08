@@ -25,6 +25,8 @@ class EventGroupCardIdInviteField extends StatefulWidget {
 }
 
 class _EventGroupCardIdInviteFieldState extends State<EventGroupCardIdInviteField> {
+  static const double _rowHeight = 48;
+
   String? _errorText;
 
   void _clearErrorOnEdit() {
@@ -73,40 +75,62 @@ class _EventGroupCardIdInviteFieldState extends State<EventGroupCardIdInviteFiel
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Expanded(
-              child: TextField(
-                controller: widget.controller,
-                keyboardType: TextInputType.number,
-                maxLength: CardIdGenerator.length,
-                autocorrect: false,
-                inputFormatters: [
-                  FilteringTextInputFormatter.digitsOnly,
-                  LengthLimitingTextInputFormatter(CardIdGenerator.length),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  SizedBox(
+                    height: _rowHeight,
+                    child: TextField(
+                      controller: widget.controller,
+                      keyboardType: TextInputType.number,
+                      maxLength: CardIdGenerator.length,
+                      autocorrect: false,
+                      textAlignVertical: TextAlignVertical.center,
+                      inputFormatters: [
+                        FilteringTextInputFormatter.digitsOnly,
+                        LengthLimitingTextInputFormatter(CardIdGenerator.length),
+                      ],
+                      decoration: CustomTextField.themedDecoration(
+                        context,
+                        hintText: '000000',
+                        prefixIcon: const Icon(Icons.perm_identity_outlined),
+                        maxLength: CardIdGenerator.length,
+                      ).copyWith(
+                        isDense: true,
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 0,
+                        ),
+                      ),
+                      textInputAction: TextInputAction.done,
+                      style: textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: 2,
+                      ),
+                      onChanged: (_) => _clearErrorOnEdit(),
+                      onSubmitted: (_) => _tryAdd(),
+                    ),
+                  ),
+                  if (_errorText != null) ...[
+                    const SizedBox(height: 6),
+                    Text(
+                      _errorText!,
+                      style: textTheme.bodySmall?.copyWith(
+                        color: colorScheme.error,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
                 ],
-                decoration: CustomTextField.themedDecoration(
-                  context,
-                  hintText: '000000',
-                  errorText: _errorText,
-                  prefixIcon: const Icon(Icons.perm_identity_outlined),
-                  maxLength: CardIdGenerator.length,
-                ),
-                textInputAction: TextInputAction.done,
-                style: textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  letterSpacing: 2,
-                ),
-                onChanged: (_) => _clearErrorOnEdit(),
-                onSubmitted: (_) => _tryAdd(),
               ),
             ),
             const SizedBox(width: 10),
-            Padding(
-              padding: const EdgeInsets.only(top: 4),
-              child: CustomButton.tonal(
-                label: context.l10n.ekle,
-                icon: Icons.add_rounded,
-                onPressed: _tryAdd,
-                fullWidth: false,
-              ),
+            CustomButton.tonal(
+              label: context.l10n.ekle,
+              icon: Icons.add_rounded,
+              onPressed: _tryAdd,
+              fullWidth: false,
+              height: _rowHeight,
             ),
           ],
         ),

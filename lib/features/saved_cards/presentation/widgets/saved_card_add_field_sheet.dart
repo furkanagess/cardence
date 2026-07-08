@@ -94,6 +94,95 @@ class SavedCardAddFieldSheet {
     );
   }
 
+  /// Düzenlenebilir alanları listeler; seçilen alan için düzenleme sheet'i açar.
+  static Future<SavedCardFieldKey?> pickFieldToEdit(
+    BuildContext context, {
+    required SavedCard card,
+  }) {
+    final options = SavedCardFieldCatalog.editableFields(card);
+    if (options.isEmpty) return Future.value(null);
+
+    return showModalBottomSheet<SavedCardFieldKey>(
+      context: context,
+      showDragHandle: true,
+      backgroundColor: Theme.of(context).colorScheme.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        final colorScheme = Theme.of(context).colorScheme;
+        final textTheme = Theme.of(context).textTheme;
+
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 4, 20, 20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  context.l10n.bilgileriDzenle,
+                  style: textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  context.l10n.kartaEklemekIstediinizAlanSein,
+                  style: textTheme.bodyMedium?.copyWith(
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Flexible(
+                  child: ListView.separated(
+                    shrinkWrap: true,
+                    itemCount: options.length,
+                    separatorBuilder: (_, __) => const SizedBox(height: 6),
+                    itemBuilder: (context, index) {
+                      final def = options[index];
+                      final value = def.readValue(card)?.trim();
+                      final hasValue =
+                          value != null && value.isNotEmpty;
+
+                      return ListTile(
+                        leading: Icon(
+                          SavedCardFieldIcons.iconFor(def.iconName),
+                          color: colorScheme.primary,
+                        ),
+                        title: Text(
+                          SavedCardFieldL10n.label(context.l10n, def.key),
+                          style: textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        subtitle: Text(
+                          hasValue
+                              ? value
+                              : SavedCardFieldL10n.hint(context.l10n, def.key),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          side: BorderSide(
+                            color: colorScheme.outlineVariant
+                                .withValues(alpha: 0.5),
+                          ),
+                        ),
+                        onTap: () => Navigator.of(context).pop(def.key),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   /// Seçilen alanın değerini düzenler; kaydedilen metni döner (null = iptal).
   static Future<String?> editFieldValue(
     BuildContext context, {

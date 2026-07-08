@@ -262,6 +262,7 @@ class _EditEventGroupSheetState extends State<EditEventGroupSheet> {
                           city: _locationCity,
                           venueController: _venueController,
                           errorText: _locationErrorText,
+                          showMapPreview: false,
                           onCountryChanged: (value) => setState(() {
                             _locationCountry = value;
                             _locationErrorText = null;

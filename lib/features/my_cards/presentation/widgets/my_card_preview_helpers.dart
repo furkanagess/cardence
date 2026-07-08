@@ -39,19 +39,27 @@ class MyCardPreviewHelpers {
     required OnboardingCardDraft draft,
     required AppLocalizations l10n,
     VoidCallback? onTap,
+    VoidCallback? onDetailTap,
     VoidCallback? onDoubleTap,
     String? emptyMessage,
     bool gatePremiumEffects = false,
+    bool showActionStrip = true,
+    bool contactFieldsTappable = true,
+    String? heroTag,
     Key? key,
   }) {
     return OnboardingCardPreviewFrame(
       key: key,
       draft: draft,
       onTap: onTap,
+      onDetailTap: onDetailTap,
       onDoubleTap: onDoubleTap,
       emptyMessage: emptyMessage ?? l10n.alanlarDoldukaGrnr,
       normalizeForDisplay: true,
       gatePremiumEffects: gatePremiumEffects,
+      showActionStrip: showActionStrip,
+      contactFieldsTappable: contactFieldsTappable,
+      heroTag: heroTag,
     );
   }
 
@@ -62,6 +70,7 @@ class MyCardPreviewHelpers {
     String? accentColor,
     CardVisualEffect? cardEffect,
     String? emptyMessage,
+    bool showActionStrip = true,
   }) {
     return flippableCard(
       draft: draft.copyWith(
@@ -73,6 +82,7 @@ class MyCardPreviewHelpers {
       ),
       l10n: l10n,
       emptyMessage: emptyMessage,
+      showActionStrip: showActionStrip,
     );
   }
 }

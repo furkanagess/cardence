@@ -12,15 +12,12 @@ import '../../../onboarding/presentation/widgets/onboarding_flow_ui.dart';
 import '../../../saved_cards/domain/entities/saved_card.dart';
 import '../../../saved_cards/domain/usecases/get_saved_cards.dart';
 import '../../../saved_cards/presentation/widgets/add_card_flow_status_views.dart';
-import '../../../saved_cards/presentation/widgets/saved_card_selectable_list.dart';
+import '../../../saved_cards/presentation/widgets/saved_card_list_tile.dart';
 import '../helpers/create_event_group_submit_result.dart';
 import '../helpers/create_event_group_step_meta.dart';
 import '../helpers/event_group_location_composer.dart';
-import '../helpers/event_group_meta_formatter.dart';
-import '../widgets/create_event_group_filled_summary.dart';
 import '../widgets/create_event_group_step_header.dart';
 import '../widgets/event_group_card_id_invite_field.dart';
-import '../widgets/event_group_cover_thumbnail.dart';
 import '../widgets/event_group_location_picker_field.dart';
 import '../widgets/event_group_photo_picker_field.dart';
 import '../widgets/event_group_schedule_picker_section.dart';
@@ -139,7 +136,8 @@ class _CreateEventGroupPageState extends State<CreateEventGroupPage> {
     _venueController = TextEditingController();
     _cardIdController = TextEditingController();
     _descriptionController = TextEditingController();
-    _nameController.addListener(_clearNameErrorOnEdit);
+    _nameController.addListener(_onNameFieldChanged);
+    _descriptionController.addListener(_onDescriptionFieldChanged);
     _selectedCardIds = {};
     _invitedCardIds = {};
     final initialCards = widget.initialPickableCards;
@@ -150,7 +148,8 @@ class _CreateEventGroupPageState extends State<CreateEventGroupPage> {
 
   @override
   void dispose() {
-    _nameController.removeListener(_clearNameErrorOnEdit);
+    _nameController.removeListener(_onNameFieldChanged);
+    _descriptionController.removeListener(_onDescriptionFieldChanged);
     _nameController.dispose();
     _venueController.dispose();
     _cardIdController.dispose();
@@ -160,9 +159,16 @@ class _CreateEventGroupPageState extends State<CreateEventGroupPage> {
 
   String get _groupName => _nameController.text.trim();
 
-  void _clearNameErrorOnEdit() {
-    if (_nameErrorText == null) return;
-    setState(() => _nameErrorText = null);
+  void _onNameFieldChanged() {
+    setState(() {
+      if (_nameErrorText != null) _nameErrorText = null;
+    });
+  }
+
+  void _onDescriptionFieldChanged() {
+    setState(() {
+      if (_descriptionErrorText != null) _descriptionErrorText = null;
+    });
   }
 
   void _clearLocationErrorOnEdit() {
@@ -176,17 +182,52 @@ class _CreateEventGroupPageState extends State<CreateEventGroupPage> {
         city: _locationCity,
       );
 
-  String? get _locationSummary {
-    final location = _composedLocation.trim();
-    return location.isEmpty ? null : location;
-  }
-
   DateTime? get _startAt => _combineDateAndTime(_startDate, _startTime);
 
   DateTime? get _endAt => _combineDateAndTime(_endDate, _endTime);
 
   bool get _canSkipCurrentStep =>
       _step == _CreateEventStep.details || _step == _CreateEventStep.photo;
+
+  bool get _isCurrentStepReady {
+    switch (_step) {
+      case _CreateEventStep.name:
+        final name = _groupName;
+        return name.isNotEmpty &&
+            !NewEventGroupNameDialog.isDuplicateName(
+              name,
+              widget.existingNames,
+            );
+      case _CreateEventStep.location:
+        return EventGroupLocationComposer.isRegionComplete(
+          _locationCountry,
+          _locationCity,
+        );
+      case _CreateEventStep.schedule:
+        return _isScheduleStepReady;
+      case _CreateEventStep.details:
+        return _descriptionController.text.trim().length <= 2000;
+      case _CreateEventStep.photo:
+      case _CreateEventStep.cards:
+        return true;
+    }
+  }
+
+  bool get _isScheduleStepReady {
+    final startAt = _startAt;
+    if (startAt == null) return false;
+
+    final hasEndDate = _endDate != null;
+    final hasEndTime = _endTime != null;
+    if (!hasEndDate && !hasEndTime) return true;
+    if (hasEndDate != hasEndTime) return false;
+
+    final endAt = _endAt;
+    if (endAt == null) return false;
+    return !endAt.isBefore(startAt);
+  }
+
+  bool get _isPrimaryActionEnabled => !_loadingCards && _isCurrentStepReady;
 
   bool _validateCurrentStep() {
     switch (_step) {
@@ -581,7 +622,8 @@ class _CreateEventGroupPageState extends State<CreateEventGroupPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              if (isForm) CreateEventGroupStepHeader(currentIndex: _step.index),
+              if (isForm)
+                CreateEventGroupStepProgress(currentIndex: _step.index),
               Expanded(
                 child: AnimatedSwitcher(
                   duration: const Duration(milliseconds: 320),
@@ -621,46 +663,49 @@ class _CreateEventGroupPageState extends State<CreateEventGroupPage> {
               ),
               if (isForm)
                 _CreateEventGroupKeyboardAwareBottom(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      if (_canSkipCurrentStep)
-                        Padding(
-                          padding: const EdgeInsets.fromLTRB(20, 0, 20, 4),
-                          child: Align(
-                            alignment: Alignment.centerRight,
-                            child: CustomButton.text(
-                              label: l10n.eventSkip,
-                              onPressed:
-                                  _loadingCards ? null : _skipCurrentStep,
+                  child: CardenceFlowBottomBarRegion(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (_canSkipCurrentStep)
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 4),
+                            child: Align(
+                              alignment: Alignment.centerRight,
+                              child: CustomButton.text(
+                                label: l10n.eventSkip,
+                                onPressed:
+                                    _loadingCards ? null : _skipCurrentStep,
+                              ),
                             ),
                           ),
+                        OnboardingBottomBar(
+                          embedded: true,
+                          stepCount: CreateEventGroupStepMeta.stepCount,
+                          currentIndex: _step.index,
+                          showStepIndicator: false,
+                          backLabel: l10n.geri,
+                          onBackPressed:
+                              isFirstStep || _loadingCards ? null : _goBack,
+                          primaryLabel: isCardsStep
+                              ? (selectedCount == 0
+                                  ? l10n.createGroup
+                                  : l10n.createGroupWithCards(
+                                      selectedCount,
+                                    ))
+                              : l10n.devam,
+                          onPrimaryPressed: _isPrimaryActionEnabled
+                              ? (isCardsStep ? _submit : _goToNext)
+                              : null,
+                          isLoading: _loadingCards,
+                          enabled: _isPrimaryActionEnabled,
                         ),
-                      OnboardingBottomBar(
-                        stepCount: CreateEventGroupStepMeta.stepCount,
-                        currentIndex: _step.index,
-                        showStepIndicator: false,
-                        backLabel: l10n.geri,
-                        onBackPressed:
-                            isFirstStep || _loadingCards ? null : _goBack,
-                        primaryLabel: isCardsStep
-                            ? (selectedCount == 0
-                                ? l10n.createGroup
-                                : l10n.createGroupWithCards(
-                                    selectedCount,
-                                  ))
-                            : l10n.devam,
-                        onPrimaryPressed:
-                            _loadingCards ? null : (isCardsStep ? _submit : _goToNext),
-                        isLoading: _loadingCards,
-                        enabled: !_loadingCards,
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 )
               else if (isFailure)
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 12, 20, 16),
+                CardenceFlowBottomBarRegion(
                   child: CustomButton(
                     label: _paywallRequiredAfterDismiss
                         ? l10n.tamam
@@ -675,18 +720,10 @@ class _CreateEventGroupPageState extends State<CreateEventGroupPage> {
     );
   }
 
-  Widget _buildFilledSummaryHeader() {
-    return CreateEventGroupFilledSummary(
-      name: _groupName,
-      location: _locationSummary,
-      startAt: _startAt,
-      endAt: _endAt,
-      photoFilePath: _photoFilePath,
-    );
-  }
-
   Widget _buildNameStep() {
-    return _CreateEventStepLayer(
+    return _CreateEventScrollableStep(
+      stepIndex: _CreateEventStep.name.index,
+      compactHeader: true,
       child: _CreateEventNameStep(
         nameController: _nameController,
         nameErrorText: _nameErrorText,
@@ -696,9 +733,9 @@ class _CreateEventGroupPageState extends State<CreateEventGroupPage> {
   }
 
   Widget _buildLocationStep() {
-    return _CreateEventStepLayer(
+    return _CreateEventScrollableStep(
+      stepIndex: _CreateEventStep.location.index,
       child: _CreateEventLocationStep(
-        summaryHeader: _buildFilledSummaryHeader(),
         country: _locationCountry,
         city: _locationCity,
         venueController: _venueController,
@@ -712,32 +749,37 @@ class _CreateEventGroupPageState extends State<CreateEventGroupPage> {
           _clearLocationErrorOnEdit();
         }),
         onVenueChanged: _clearLocationErrorOnEdit,
+        onMapLocationResolved: ({country, city, venue}) => setState(() {
+          if (country != null) _locationCountry = country;
+          if (city != null) _locationCity = city;
+          if (venue != null && venue.trim().isNotEmpty) {
+            _venueController.text = venue.trim();
+          }
+          _clearLocationErrorOnEdit();
+        }),
       ),
     );
   }
 
   Widget _buildScheduleStep() {
-    return _CreateEventStepLayer(
-      child: _CreateEventScheduleStep(
-        summaryHeader: _buildFilledSummaryHeader(),
-        startDate: _startDate,
-        startTime: _startTime,
-        endDate: _endDate,
-        endTime: _endTime,
-        scheduleErrorText: _scheduleErrorText,
-        onPickStartDate: _pickStartDate,
-        onPickStartTime: _pickStartTime,
-        onPickEndDate: _pickEndDate,
-        onPickEndTime: _pickEndTime,
-        onClearEnd: _clearEnd,
-      ),
+    return _CreateEventScheduleStep(
+      startDate: _startDate,
+      startTime: _startTime,
+      endDate: _endDate,
+      endTime: _endTime,
+      scheduleErrorText: _scheduleErrorText,
+      onPickStartDate: _pickStartDate,
+      onPickStartTime: _pickStartTime,
+      onPickEndDate: _pickEndDate,
+      onPickEndTime: _pickEndTime,
+      onClearEnd: _clearEnd,
     );
   }
 
   Widget _buildDetailsStep() {
-    return _CreateEventStepLayer(
+    return _CreateEventScrollableStep(
+      stepIndex: _CreateEventStep.details.index,
       child: _CreateEventDetailsStep(
-        summaryHeader: _buildFilledSummaryHeader(),
         descriptionController: _descriptionController,
         descriptionErrorText: _descriptionErrorText,
       ),
@@ -745,9 +787,9 @@ class _CreateEventGroupPageState extends State<CreateEventGroupPage> {
   }
 
   Widget _buildPhotoStep() {
-    return _CreateEventStepLayer(
+    return _CreateEventScrollableStep(
+      stepIndex: _CreateEventStep.photo.index,
       child: _CreateEventPhotoStep(
-        summaryHeader: _buildFilledSummaryHeader(),
         photoFilePath: _photoFilePath,
         onPhotoChanged: (value) => setState(() => _photoFilePath = value),
       ),
@@ -761,11 +803,6 @@ class _CreateEventGroupPageState extends State<CreateEventGroupPage> {
     }
 
     return _CreateEventGroupPickCardsStep(
-      groupName: _groupName,
-      location: _locationSummary,
-      startAt: startAt,
-      endAt: _endAt,
-      photoFilePath: _photoFilePath,
       cardIdController: _cardIdController,
       loadingCards: _loadingCards,
       pickableCards: _pickableCards,
@@ -778,18 +815,40 @@ class _CreateEventGroupPageState extends State<CreateEventGroupPage> {
   }
 }
 
-class _CreateEventStepLayer extends StatelessWidget {
-  const _CreateEventStepLayer({required this.child});
+class _CreateEventScrollableStep extends StatelessWidget {
+  const _CreateEventScrollableStep({
+    required this.stepIndex,
+    required this.child,
+    this.compactHeader = false,
+    this.scrollController,
+  });
 
+  final int stepIndex;
   final Widget child;
+  final bool compactHeader;
+  final ScrollController? scrollController;
 
   @override
   Widget build(BuildContext context) {
-    return Align(
-      alignment: Alignment.topCenter,
-      widthFactor: 1,
-      heightFactor: 1,
-      child: child,
+    final bottomInset = OnboardingBottomBar.contentBottomInset(
+      context,
+      showStepIndicator: false,
+    );
+
+    return SingleChildScrollView(
+      controller: scrollController,
+      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+      padding: EdgeInsets.only(bottom: bottomInset),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          CreateEventGroupStepTitleHeader(
+            currentIndex: stepIndex,
+            compact: compactHeader,
+          ),
+          child,
+        ],
+      ),
     );
   }
 }
@@ -811,56 +870,6 @@ class _CreateEventGroupKeyboardAwareBottom extends StatelessWidget {
   }
 }
 
-class _CreateEventStepCard extends StatelessWidget {
-  const _CreateEventStepCard({
-    required this.child,
-    this.scrollController,
-    this.header,
-  });
-
-  final Widget child;
-  final ScrollController? scrollController;
-  final Widget? header;
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    return SingleChildScrollView(
-      controller: scrollController,
-      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-      padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          if (header != null) header!,
-          Align(
-            alignment: Alignment.topCenter,
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                color: colorScheme.surfaceContainerLowest.withValues(
-                  alpha: isDark ? 0.55 : 0.85,
-                ),
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(
-                  color: isDark
-                      ? AppColors.outlineDark.withValues(alpha: 0.35)
-                      : AppColors.outlineVariant.withValues(alpha: 0.75),
-                ),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 18, 16, 18),
-                child: child,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 class _CreateEventNameStep extends StatelessWidget {
   const _CreateEventNameStep({
     super.key,
@@ -875,10 +884,10 @@ class _CreateEventNameStep extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return _CreateEventStepCard(
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
       child: CustomTextField(
         controller: nameController,
-        labelText: context.l10n.etkinlikAd,
         hintText: context.l10n.rnWebSummit2026,
         errorText: nameErrorText,
         autofocus: true,
@@ -891,7 +900,6 @@ class _CreateEventNameStep extends StatelessWidget {
 
 class _CreateEventLocationStep extends StatelessWidget {
   const _CreateEventLocationStep({
-    required this.summaryHeader,
     required this.country,
     required this.city,
     required this.venueController,
@@ -899,9 +907,9 @@ class _CreateEventLocationStep extends StatelessWidget {
     required this.onCountryChanged,
     required this.onCityChanged,
     required this.onVenueChanged,
+    this.onMapLocationResolved,
   });
 
-  final Widget summaryHeader;
   final String? country;
   final String? city;
   final TextEditingController venueController;
@@ -909,11 +917,16 @@ class _CreateEventLocationStep extends StatelessWidget {
   final ValueChanged<String?> onCountryChanged;
   final ValueChanged<String?> onCityChanged;
   final VoidCallback onVenueChanged;
+  final void Function({
+    String? country,
+    String? city,
+    String? venue,
+  })? onMapLocationResolved;
 
   @override
   Widget build(BuildContext context) {
-    return _CreateEventStepCard(
-      header: summaryHeader,
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
       child: EventGroupLocationPickerField(
         country: country,
         city: city,
@@ -922,6 +935,7 @@ class _CreateEventLocationStep extends StatelessWidget {
         onCountryChanged: onCountryChanged,
         onCityChanged: onCityChanged,
         onVenueChanged: onVenueChanged,
+        onMapLocationResolved: onMapLocationResolved,
         showComposedPreview: false,
       ),
     );
@@ -930,7 +944,6 @@ class _CreateEventLocationStep extends StatelessWidget {
 
 class _CreateEventScheduleStep extends StatefulWidget {
   const _CreateEventScheduleStep({
-    required this.summaryHeader,
     required this.startDate,
     required this.startTime,
     required this.endDate,
@@ -943,7 +956,6 @@ class _CreateEventScheduleStep extends StatefulWidget {
     required this.onClearEnd,
   });
 
-  final Widget summaryHeader;
   final DateTime? startDate;
   final TimeOfDay? startTime;
   final DateTime? endDate;
@@ -963,12 +975,18 @@ class _CreateEventScheduleStep extends StatefulWidget {
 class _CreateEventScheduleStepState extends State<_CreateEventScheduleStep> {
   final ScrollController _scrollController = ScrollController();
   final GlobalKey _endSectionKey = GlobalKey();
+  late bool _endSectionVisible;
   bool _wasEndSectionVisible = false;
 
   @override
   void initState() {
     super.initState();
-    _wasEndSectionVisible = _isEndSectionVisible(widget);
+    _endSectionVisible = _hasEndValues(widget);
+    _wasEndSectionVisible = _endSectionVisible;
+  }
+
+  bool _hasEndValues(_CreateEventScheduleStep step) {
+    return step.endDate != null || step.endTime != null;
   }
 
   @override
@@ -977,20 +995,23 @@ class _CreateEventScheduleStepState extends State<_CreateEventScheduleStep> {
     super.dispose();
   }
 
-  bool _isEndSectionVisible(_CreateEventScheduleStep step) {
-    if (step.endDate != null || step.endTime != null) return true;
-    return step.startDate != null && step.startTime != null;
-  }
-
   @override
   void didUpdateWidget(covariant _CreateEventScheduleStep oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (_hasEndValues(widget)) {
+      _endSectionVisible = true;
+    }
     final wasVisible = _wasEndSectionVisible;
-    final isVisible = _isEndSectionVisible(widget);
+    final isVisible = _endSectionVisible;
     _wasEndSectionVisible = isVisible;
     if (!wasVisible && isVisible) {
       _scrollToEndSection();
     }
+  }
+
+  void _revealEndSection() {
+    setState(() => _endSectionVisible = true);
+    _scrollToEndSection();
   }
 
   void _scrollToEndSection() {
@@ -1011,23 +1032,27 @@ class _CreateEventScheduleStepState extends State<_CreateEventScheduleStep> {
 
   @override
   Widget build(BuildContext context) {
-    return _CreateEventStepCard(
+    return _CreateEventScrollableStep(
+      stepIndex: _CreateEventStep.schedule.index,
       scrollController: _scrollController,
-      header: widget.summaryHeader,
-      child: EventGroupSchedulePickerSection(
-        startDate: widget.startDate,
-        startTime: widget.startTime,
-        endDate: widget.endDate,
-        endTime: widget.endTime,
-        errorText: widget.scheduleErrorText,
-        onPickStartDate: widget.onPickStartDate,
-        onPickStartTime: widget.onPickStartTime,
-        onPickEndDate: widget.onPickEndDate,
-        onPickEndTime: widget.onPickEndTime,
-        onClearEnd: widget.onClearEnd,
-        showInlineSummary: false,
-        revealEndWhenStartComplete: true,
-        endSectionKey: _endSectionKey,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
+        child: EventGroupSchedulePickerSection(
+          style: EventGroupSchedulePickerStyle.createFlow,
+          startDate: widget.startDate,
+          startTime: widget.startTime,
+          endDate: widget.endDate,
+          endTime: widget.endTime,
+          errorText: widget.scheduleErrorText,
+          onPickStartDate: widget.onPickStartDate,
+          onPickStartTime: widget.onPickStartTime,
+          onPickEndDate: widget.onPickEndDate,
+          onPickEndTime: widget.onPickEndTime,
+          onClearEnd: widget.onClearEnd,
+          showEndSection: _endSectionVisible,
+          onRevealEnd: _revealEndSection,
+          endSectionKey: _endSectionKey,
+        ),
       ),
     );
   }
@@ -1035,22 +1060,19 @@ class _CreateEventScheduleStepState extends State<_CreateEventScheduleStep> {
 
 class _CreateEventDetailsStep extends StatelessWidget {
   const _CreateEventDetailsStep({
-    required this.summaryHeader,
     required this.descriptionController,
     required this.descriptionErrorText,
   });
 
-  final Widget summaryHeader;
   final TextEditingController descriptionController;
   final String? descriptionErrorText;
 
   @override
   Widget build(BuildContext context) {
-    return _CreateEventStepCard(
-      header: summaryHeader,
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
       child: CustomTextField(
         controller: descriptionController,
-        labelText: context.l10n.eventDescription,
         hintText: context.l10n.eventDescriptionHint,
         errorText: descriptionErrorText,
         minLines: 4,
@@ -1064,22 +1086,21 @@ class _CreateEventDetailsStep extends StatelessWidget {
 
 class _CreateEventPhotoStep extends StatelessWidget {
   const _CreateEventPhotoStep({
-    required this.summaryHeader,
     required this.photoFilePath,
     required this.onPhotoChanged,
   });
 
-  final Widget summaryHeader;
   final String? photoFilePath;
   final ValueChanged<String?> onPhotoChanged;
 
   @override
   Widget build(BuildContext context) {
-    return _CreateEventStepCard(
-      header: summaryHeader,
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
       child: EventGroupPhotoPickerField(
         value: photoFilePath,
         onChanged: onPhotoChanged,
+        style: EventGroupPhotoPickerStyle.createFlow,
       ),
     );
   }
@@ -1088,11 +1109,6 @@ class _CreateEventPhotoStep extends StatelessWidget {
 class _CreateEventGroupPickCardsStep extends StatelessWidget {
   const _CreateEventGroupPickCardsStep({
     super.key,
-    required this.groupName,
-    required this.location,
-    required this.startAt,
-    required this.endAt,
-    required this.photoFilePath,
     required this.cardIdController,
     required this.loadingCards,
     required this.pickableCards,
@@ -1103,11 +1119,6 @@ class _CreateEventGroupPickCardsStep extends StatelessWidget {
     required this.onRemoveInvitedCardId,
   });
 
-  final String groupName;
-  final String? location;
-  final DateTime startAt;
-  final DateTime? endAt;
-  final String? photoFilePath;
   final TextEditingController cardIdController;
   final bool loadingCards;
   final List<SavedCard> pickableCards;
@@ -1121,106 +1132,87 @@ class _CreateEventGroupPickCardsStep extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final meta = EventGroupMetaFormatter.summary(
-      location: location,
-      eventDate: startAt,
+    final bottomInset = OnboardingBottomBar.contentBottomInset(
+      context,
+      showStepIndicator: false,
     );
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              color: colorScheme.surfaceContainerLowest.withValues(
-                alpha: isDark ? 0.55 : 0.85,
-              ),
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(
-                color: isDark
-                    ? AppColors.outlineDark.withValues(alpha: 0.35)
-                    : AppColors.outlineVariant.withValues(alpha: 0.75),
-              ),
-            ),
+    return CustomScrollView(
+      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+      slivers: [
+        SliverToBoxAdapter(
+          child: CreateEventGroupStepTitleHeader(
+            currentIndex: _CreateEventStep.cards.index,
+          ),
+        ),
+        if (!loadingCards)
+          SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-              child: Row(
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  EventGroupCoverThumbnail(
-                    localFilePath: photoFilePath,
-                    size: 40,
+                  EventGroupCardIdInviteField(
+                    controller: cardIdController,
+                    invitedCardIds: invitedCardIds,
+                    onAdd: onAddInvitedCardId,
+                    onRemove: onRemoveInvitedCardId,
                   ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          groupName,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: textTheme.titleSmall?.copyWith(
-                            fontWeight: FontWeight.w700,
-                            color: colorScheme.onSurface,
+                  const SizedBox(height: 12),
+                  Text(
+                    selectedCardIds.isEmpty
+                        ? context.l10n.noCardsSelectedYet
+                        : context.l10n.cardsSelectedCount(
+                            selectedCardIds.length,
                           ),
-                        ),
-                        if (meta != null) ...[
-                          const SizedBox(height: 2),
-                          Text(
-                            meta,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: textTheme.bodySmall?.copyWith(
-                              color: colorScheme.onSurfaceVariant,
-                            ),
-                          ),
-                        ],
-                      ],
+                    style: textTheme.labelLarge?.copyWith(
+                      color: selectedCardIds.isEmpty
+                          ? colorScheme.onSurfaceVariant
+                          : colorScheme.primary,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                 ],
               ),
             ),
           ),
-        ),
-        if (!loadingCards)
-          Padding(
-            padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                EventGroupCardIdInviteField(
-                  controller: cardIdController,
-                  invitedCardIds: invitedCardIds,
-                  onAdd: onAddInvitedCardId,
-                  onRemove: onRemoveInvitedCardId,
+        if (loadingCards)
+          const SliverFillRemaining(
+            hasScrollBody: false,
+            child: Center(child: CircularProgressIndicator()),
+          )
+        else if (pickableCards.isEmpty)
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 20),
+              child: Text(
+                context.l10n.eventCreateNoSavedCards,
+                textAlign: TextAlign.center,
+                style: textTheme.bodyMedium?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
                 ),
-                const SizedBox(height: 12),
-                Text(
-                  selectedCardIds.isEmpty
-                      ? context.l10n.noCardsSelectedYet
-                      : context.l10n.cardsSelectedCount(selectedCardIds.length),
-                  style: textTheme.labelLarge?.copyWith(
-                    color: selectedCardIds.isEmpty
-                        ? colorScheme.onSurfaceVariant
-                        : colorScheme.primary,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
+              ),
+            ),
+          )
+        else
+          SliverPadding(
+            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 20),
+            sliver: SliverList(
+              delegate: SliverChildBuilderDelegate(
+                (context, index) {
+                  final card = pickableCards[index];
+                  return SavedCardListTile(
+                    card: card,
+                    selectable: true,
+                    selected: selectedCardIds.contains(card.cardId),
+                    onTap: () => onToggleCard(card.cardId),
+                  );
+                },
+                childCount: pickableCards.length,
+              ),
             ),
           ),
-        Expanded(
-          child: loadingCards
-              ? const Center(child: CircularProgressIndicator())
-              : SavedCardSelectableList(
-                  cards: pickableCards,
-                  selectedIds: selectedCardIds,
-                  onToggle: onToggleCard,
-                ),
-        ),
+        SliverPadding(padding: EdgeInsets.only(bottom: bottomInset)),
       ],
     );
   }

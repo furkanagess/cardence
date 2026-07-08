@@ -57,9 +57,6 @@ class CardenceScaffold extends StatelessWidget {
     return Theme(
       data: theme.copyWith(
         scaffoldBackgroundColor: pageColor,
-        appBarTheme: theme.appBarTheme.copyWith(
-          backgroundColor: pageColor,
-        ),
       ),
       child: scaffold,
     );

@@ -19,20 +19,22 @@ class SettingsSectionLabel extends StatelessWidget {
     final isDark = theme.brightness == Brightness.dark;
 
     return Padding(
-      padding: const EdgeInsets.only(left: 2, bottom: 12),
+      padding: const EdgeInsets.only(left: 4, bottom: 10),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            label,
-            style: theme.textTheme.titleSmall?.copyWith(
-              fontWeight: FontWeight.w600,
-              letterSpacing: -0.2,
-              color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
+            label.toUpperCase(),
+            style: theme.textTheme.labelMedium?.copyWith(
+              fontWeight: FontWeight.w700,
+              letterSpacing: 0.8,
+              color: isDark
+                  ? AppColors.textSecondaryDark
+                  : AppColors.textSecondary,
             ),
           ),
           if (subtitle != null) ...[
-            const SizedBox(height: 4),
+            const SizedBox(height: 5),
             Text(
               subtitle!,
               style: theme.textTheme.bodySmall?.copyWith(

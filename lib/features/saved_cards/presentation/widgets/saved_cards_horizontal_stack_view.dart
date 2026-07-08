@@ -147,7 +147,7 @@ class _HorizontalStackCardSlot extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final heroTag = 'event-group-card-${card.cardId}';
+    final heroTag = FlippablePersonCard.heroTagForCardId(card.cardId);
 
     return AnimatedScale(
       duration: SavedCardsHorizontalStackView.stackAnimDuration,
@@ -184,7 +184,7 @@ class _HorizontalStackCardSlot extends StatelessWidget {
         child: SavedCardsSavedCardPreview(
           card: card,
           heroTag: heroTag,
-          onTap: () => onOpenCard(card, heroTag: heroTag),
+          onDetailTap: () => onOpenCard(card, heroTag: heroTag),
         ),
       ),
     );

@@ -75,10 +75,10 @@ class SessionExpiredHandler {
       await SessionExpiredDialog.show(
         context,
         message: message,
-        onLoginPressed: () {
+        onLoginPressed: () async {
           final logout = _onForceLogout;
           if (logout != null) {
-            unawaited(logout());
+            await logout();
           }
         },
       );

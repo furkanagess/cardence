@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../../domain/entities/graph_edge.dart';
 import '../../domain/entities/graph_node.dart';
+import '../../domain/entities/graph_node_type.dart';
 
 class NetworkGraphLayoutPosition {
   const NetworkGraphLayoutPosition({
@@ -20,6 +21,8 @@ class NetworkGraphLayoutPosition {
 class NetworkGraphLayout {
   const NetworkGraphLayout._();
 
+  static const List<double> _ringRadiusFactors = [0, 0.2, 0.33, 0.46, 0.56];
+
   static List<NetworkGraphLayoutPosition> compute({
     required List<GraphNode> nodes,
     required List<GraphEdge> edges,
@@ -28,50 +31,48 @@ class NetworkGraphLayout {
     if (nodes.isEmpty) return [];
 
     final center = Offset(canvasSize.width / 2, canvasSize.height / 2);
-    final centerNode = nodes.firstWhere(
-      (node) => node.isCenter,
-      orElse: () => nodes.firstWhere(
-        (node) => node.isOwnCard,
-        orElse: () => nodes.reduce(
-          (best, node) => node.degree >= best.degree ? node : best,
-        ),
-      ),
-    );
+    final minSide = math.min(canvasSize.width, canvasSize.height);
+    final centerNode = _resolveCenterNode(nodes);
 
     final positions = <String, Offset>{};
     final sizes = <String, double>{};
     positions[centerNode.id] = center;
     sizes[centerNode.id] = _sizeFor(centerNode);
 
-    final neighbors = _neighborIds(centerNode.id, edges);
-    final ringOne = nodes
-        .where((node) => node.id != centerNode.id && neighbors.contains(node.id))
-        .toList()
-      ..sort((a, b) => b.degree.compareTo(a.degree));
-
     final placed = <String>{centerNode.id};
-    _placeOnRing(
-      nodes: ringOne,
-      center: center,
-      radius: math.min(canvasSize.width, canvasSize.height) * 0.24,
-      positions: positions,
-      sizes: sizes,
-      placed: placed,
-    );
+    final grouped = <int, List<GraphNode>>{};
 
-    final ringTwo = nodes
-        .where((node) => !placed.contains(node.id))
-        .toList()
-      ..sort((a, b) => b.degree.compareTo(a.degree));
+    for (final node in nodes) {
+      if (node.id == centerNode.id) continue;
+      grouped.putIfAbsent(_ringIndex(node), () => []).add(node);
+    }
 
-    _placeOnRing(
-      nodes: ringTwo,
-      center: center,
-      radius: math.min(canvasSize.width, canvasSize.height) * 0.38,
-      positions: positions,
-      sizes: sizes,
-      placed: placed,
-    );
+    for (final ringIndex in [1, 2, 3, 4]) {
+      final ringNodes = grouped[ringIndex];
+      if (ringNodes == null || ringNodes.isEmpty) continue;
+
+      ringNodes.sort((a, b) {
+        final centerNeighborCompare = (_isDirectNeighbor(b.id, centerNode.id, edges)
+                ? 1
+                : 0)
+            .compareTo(
+              _isDirectNeighbor(a.id, centerNode.id, edges) ? 1 : 0,
+            );
+        if (centerNeighborCompare != 0) return centerNeighborCompare;
+        final degreeCompare = b.degree.compareTo(a.degree);
+        if (degreeCompare != 0) return degreeCompare;
+        return a.label.compareTo(b.label);
+      });
+
+      _placeOnRing(
+        nodes: ringNodes,
+        center: center,
+        radius: minSide * _ringRadiusFactors[ringIndex],
+        positions: positions,
+        sizes: sizes,
+        placed: placed,
+      );
+    }
 
     return nodes
         .where((node) => positions.containsKey(node.id))
@@ -85,13 +86,38 @@ class NetworkGraphLayout {
         .toList();
   }
 
-  static Set<String> _neighborIds(String nodeId, List<GraphEdge> edges) {
-    final ids = <String>{};
+  static GraphNode _resolveCenterNode(List<GraphNode> nodes) {
+    return nodes.firstWhere(
+      (node) => node.isCenter,
+      orElse: () => nodes.firstWhere(
+        (node) => node.isOwnCard,
+        orElse: () => nodes.reduce(
+          (best, node) => node.degree >= best.degree ? node : best,
+        ),
+      ),
+    );
+  }
+
+  static int _ringIndex(GraphNode node) {
+    if (node.isCenter || node.isOwnCard) return 0;
+    return switch (node.type) {
+      GraphNodeType.card => 1,
+      GraphNodeType.company || GraphNodeType.organization => 2,
+      GraphNodeType.event || GraphNodeType.organizationEvent => 3,
+      _ => 4,
+    };
+  }
+
+  static bool _isDirectNeighbor(
+    String nodeId,
+    String centerNodeId,
+    List<GraphEdge> edges,
+  ) {
     for (final edge in edges) {
-      if (edge.source == nodeId) ids.add(edge.target);
-      if (edge.target == nodeId) ids.add(edge.source);
+      if (edge.source == centerNodeId && edge.target == nodeId) return true;
+      if (edge.target == centerNodeId && edge.source == nodeId) return true;
     }
-    return ids;
+    return false;
   }
 
   static void _placeOnRing({
@@ -116,6 +142,19 @@ class NetworkGraphLayout {
     }
   }
 
-  static double _sizeFor(GraphNode node) =>
-      (44 + (node.degree.clamp(0, 8) * 3)).toDouble().clamp(44, 68);
+  static double _sizeFor(GraphNode node) {
+    if (node.isOwnCard) return 58;
+    if (node.isCenter) return 54;
+
+    final base = switch (node.type) {
+      GraphNodeType.card => 44 + (node.degree.clamp(0, 8) * 3),
+      GraphNodeType.company || GraphNodeType.organization =>
+        36 + (node.degree.clamp(0, 6) * 2),
+      GraphNodeType.event || GraphNodeType.organizationEvent =>
+        38 + (node.degree.clamp(0, 6) * 2),
+      _ => 34 + node.degree.clamp(0, 4),
+    };
+
+    return base.toDouble().clamp(34, 68);
+  }
 }

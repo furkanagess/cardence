@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 /// Ekran içinde sürüklenebilir konumlandırılmış FAB alanı.
+///
+/// [Stack] içinde [Positioned.fill] ile kullanılmalıdır.
 class DraggableFab extends StatefulWidget {
   const DraggableFab({
     super.key,
@@ -20,20 +22,40 @@ class DraggableFab extends StatefulWidget {
 }
 
 class _DraggableFabState extends State<DraggableFab> {
-  static const double _fabSize = 56;
+  static const double _fallbackWidth = 56;
+  static const double _fallbackHeight = 56;
   static const double _dragThreshold = 8;
+
+  final GlobalKey _childKey = GlobalKey();
 
   Offset? _offset;
   Offset _dragAccumulated = Offset.zero;
   bool _isDragging = false;
+  Size _childSize = const Size(_fallbackWidth, _fallbackHeight);
 
   void _handlePressed() {
     if (_isDragging) return;
     widget.onPressed();
   }
 
+  void _measureChild() {
+    final context = _childKey.currentContext;
+    if (context == null) return;
+    final box = context.findRenderObject();
+    if (box is! RenderBox || !box.hasSize) return;
+
+    final nextSize = box.size;
+    if (nextSize == _childSize) return;
+    setState(() => _childSize = nextSize);
+  }
+
   @override
   Widget build(BuildContext context) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      _measureChild();
+    });
+
     return LayoutBuilder(
       builder: (context, constraints) {
         final topInset = MediaQuery.paddingOf(context).top;
@@ -42,9 +64,13 @@ class _DraggableFabState extends State<DraggableFab> {
 
         final minX = widget.margin;
         final minY = widget.margin + topInset;
-        final maxX = constraints.maxWidth - _fabSize - widget.margin;
+        final maxX =
+            (constraints.maxWidth - _childSize.width - widget.margin)
+                .clamp(minX, double.infinity);
         final maxY =
-            constraints.maxHeight - _fabSize - bottomInset - widget.margin;
+            (constraints.maxHeight - _childSize.height - bottomInset -
+                    widget.margin)
+                .clamp(minY, double.infinity);
 
         final defaultOffset = Offset(maxX, maxY);
         final position = _offset ?? defaultOffset;
@@ -54,6 +80,13 @@ class _DraggableFabState extends State<DraggableFab> {
           position.dy.clamp(minY, maxY),
         );
 
+        if (_offset != null && _offset != clamped) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (!mounted) return;
+            setState(() => _offset = clamped);
+          });
+        }
+
         return Stack(
           clipBehavior: Clip.none,
           children: [
@@ -61,6 +94,7 @@ class _DraggableFabState extends State<DraggableFab> {
               left: clamped.dx,
               top: clamped.dy,
               child: Listener(
+                behavior: HitTestBehavior.translucent,
                 onPointerDown: (_) {
                   _dragAccumulated = Offset.zero;
                   _isDragging = false;
@@ -91,7 +125,10 @@ class _DraggableFabState extends State<DraggableFab> {
                   _isDragging = false;
                   _dragAccumulated = Offset.zero;
                 },
-                child: widget.builder(_isDragging ? null : _handlePressed),
+                child: KeyedSubtree(
+                  key: _childKey,
+                  child: widget.builder(_isDragging ? null : _handlePressed),
+                ),
               ),
             ),
           ],

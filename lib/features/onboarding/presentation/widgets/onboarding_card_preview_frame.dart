@@ -14,6 +14,7 @@ class OnboardingCardPreviewFrame extends StatelessWidget {
     super.key,
     required this.draft,
     this.onTap,
+    this.onDetailTap,
     this.onDoubleTap,
     this.flipOnTouch = false,
     this.emptyMessage = 'Alanlar doldukça görünür',
@@ -22,10 +23,13 @@ class OnboardingCardPreviewFrame extends StatelessWidget {
     this.showPremiumBadge = false,
     this.contactFieldsTappable = true,
     this.gatePremiumEffects = false,
+    this.showActionStrip = true,
+    this.heroTag,
   });
 
   final OnboardingCardDraft draft;
   final VoidCallback? onTap;
+  final VoidCallback? onDetailTap;
   final VoidCallback? onDoubleTap;
   final bool flipOnTouch;
   final String emptyMessage;
@@ -42,6 +46,12 @@ class OnboardingCardPreviewFrame extends StatelessWidget {
 
   /// true: Pro olmayan kullanıcıda kayıtlı efekt profil/liste görünümünde gizlenir.
   final bool gatePremiumEffects;
+
+  /// false: düzenleme/önizleme akışlarında aksiyon şeridi gizlenir.
+  final bool showActionStrip;
+
+  /// Detay geçişinde kart yüzü Hero animasyonu.
+  final String? heroTag;
 
   static double heightForWidth(double width) {
     return width / FlippablePersonCard.cardAspectRatio;
@@ -72,12 +82,14 @@ class OnboardingCardPreviewFrame extends StatelessWidget {
             child: OnboardingPreviewHelpers.preview(
               context.l10n,
               effectiveDraft,
-              flipOnTouch: flipOnTouch,
               onTap: onTap,
+              onDetailTap: onDetailTap,
               onDoubleTap: onDoubleTap,
               emptyMessage: emptyMessage,
               showPremiumBadge: showPremiumBadge,
               contactFieldsTappable: contactFieldsTappable,
+              showActionStrip: showActionStrip,
+              heroTag: heroTag,
             ),
           ),
         );

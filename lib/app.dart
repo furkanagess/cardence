@@ -381,10 +381,10 @@ class _AppState extends State<App> {
   }
 
   Future<void> _onLogout() async {
-    await widget.logout();
-    if (!mounted) return;
     widget.rootNavigatorKey.currentState?.popUntil((route) => route.isFirst);
+    if (!mounted) return;
     setState(() => _destination = _AppDestination.login);
+    await widget.logout();
   }
 
   void _onThemeChanged(ThemePreference preference) async {
@@ -397,13 +397,6 @@ class _AppState extends State<App> {
     await widget.setLocalePreference(preference);
     if (!mounted) return;
     setState(() => _localePreference = preference);
-  }
-
-  Future<void> _onAccentColorChanged(String accentColorId) async {
-    if (accentColorId == _accentColorId) return;
-    AppAccentPalette.selectById(accentColorId);
-    setState(() => _accentColorId = accentColorId);
-    await widget.setAccentColorId(accentColorId);
   }
 
   ThemeMode get _themeMode {
@@ -430,8 +423,6 @@ class _AppState extends State<App> {
           getLastLoginCredentials: widget.getLastLoginCredentials,
           forgotPassword: widget.forgotPassword,
           resetPassword: widget.resetPassword,
-          selectedAccentColorId: _accentColorId,
-          onAccentColorSelected: _onAccentColorChanged,
           onLoginSuccess: _onLoginSuccess,
         );
       case _AppDestination.onboarding:
@@ -441,7 +432,7 @@ class _AppState extends State<App> {
           persistOnboardingCard: widget.persistOnboardingCard,
           uploadProfilePhoto: widget.uploadProfilePhoto,
           upgradeWalletPlan: widget.upgradeWalletPlan,
-          onFinish: _onOnboardingFinish,
+          onFinish: (_) => _onOnboardingFinish(),
         );
       case _AppDestination.main:
         return MainShellPage(

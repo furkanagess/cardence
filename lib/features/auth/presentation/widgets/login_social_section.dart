@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/l10n/l10n_extensions.dart';
+import '../../../../core/widgets/molecules/auth_or_divider.dart';
 import 'linkedin_sign_in_button.dart';
 
 class LoginSocialSection extends StatelessWidget {
@@ -14,30 +16,11 @@ class LoginSocialSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
-    final dividerColor = Theme.of(context).colorScheme.outlineVariant;
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         const SizedBox(height: 20),
-        Row(
-          children: [
-            Expanded(child: Divider(color: dividerColor, height: 1)),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 14),
-              child: Text(
-                'veya',
-                style: textTheme.labelMedium?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  fontWeight: FontWeight.w600,
-                  letterSpacing: 0.2,
-                ),
-              ),
-            ),
-            Expanded(child: Divider(color: dividerColor, height: 1)),
-          ],
-        ),
+        AuthOrDivider(label: context.l10n.authOrDivider),
         const SizedBox(height: 20),
         LinkedInSignInButton(
           isLoading: isLoading,

@@ -4,6 +4,7 @@ import '../../../../core/l10n/l10n_extensions.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/widgets/atoms/cardence_app_bar.dart';
 import '../../../../core/widgets/atoms/custom_button.dart';
 
 /// Kart ekleme alt ekranlarında altta sabit birincil aksiyon.
@@ -27,33 +28,22 @@ class AddCardStickyAction extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
 
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: colorScheme.surface,
-        border: Border(
-          top: BorderSide(color: colorScheme.outlineVariant.withValues(alpha: 0.7)),
-        ),
-      ),
-      child: SafeArea(
-        top: false,
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
-          child: CustomButton(
-            label: label,
-            icon: icon,
-            onPressed: enabled ? onPressed : null,
-            enabled: enabled,
-            isLoading: isLoading,
-            height: 52,
-            style: FilledButton.styleFrom(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(14),
-              ),
-              disabledBackgroundColor: colorScheme.surfaceContainerHighest,
-              disabledForegroundColor:
-                  colorScheme.onSurface.withValues(alpha: 0.38),
-            ),
+    return CardenceFlowBottomBarRegion(
+      padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
+      child: CustomButton(
+        label: label,
+        icon: icon,
+        onPressed: enabled ? onPressed : null,
+        enabled: enabled,
+        isLoading: isLoading,
+        height: 52,
+        style: FilledButton.styleFrom(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(14),
           ),
+          disabledBackgroundColor: colorScheme.surfaceContainerHighest,
+          disabledForegroundColor:
+              colorScheme.onSurface.withValues(alpha: 0.38),
         ),
       ),
     );

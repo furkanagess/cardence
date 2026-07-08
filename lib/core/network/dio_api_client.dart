@@ -112,13 +112,9 @@ class DioApiClient {
               if (token != null && token.isNotEmpty)
                 'Authorization': 'Bearer $token',
             },
-            contentType: 'multipart/form-data',
           ),
         );
-        final data = response.data;
-        if (data is Map<String, dynamic>) return data;
-        if (data is Map) return Map<String, dynamic>.from(data);
-        throw AuthApiException(fallbackError);
+        return ApiResponseParser.parseEnvelope(response, fallbackError);
       },
       accessToken: accessToken,
     );

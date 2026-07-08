@@ -1,35 +1,31 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
-import '../../../../core/l10n/app_l10n.dart';
-import '../../../../core/l10n/l10n_extensions.dart';
+import '../../../../core/utils/clipboard_feedback.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../helpers/saved_card_detail_theme.dart';
 import '../../../../core/widgets/atoms/premium_owner_badge.dart';
 import '../../../../core/widgets/atoms/profile_avatar.dart';
 import '../../domain/entities/saved_card.dart';
 import '../../domain/extensions/saved_card_preview_colors.dart';
 
-/// LinkedIn tarzı profil başlığı: kapak, avatar, isim ve özet bilgiler.
+/// Profil başlığı: gradient kapak, sol avatar, sağda kart ID.
 class SavedCardProfileHeader extends StatelessWidget {
   const SavedCardProfileHeader({
     super.key,
     required this.card,
     required this.displayName,
     this.locationText,
-    this.metaText,
-    this.onWebsiteTap,
-    this.onLinkedInTap,
   });
 
   final SavedCard card;
   final String displayName;
   final String? locationText;
-  final String? metaText;
-  final VoidCallback? onWebsiteTap;
-  final VoidCallback? onLinkedInTap;
 
-  static const double bannerHeight = 132;
-  static const double avatarSize = 96;
-  static const double avatarOverlap = 48;
+  static const double bannerHeight = 120;
+  static const double avatarSize = 88;
+  static const double avatarOverlap = 44;
 
   Color _bannerColor(BuildContext context) {
     final custom = card.previewBackgroundColor;
@@ -37,7 +33,7 @@ class SavedCardProfileHeader extends StatelessWidget {
 
     final scheme = Theme.of(context).colorScheme;
     return Color.alphaBlend(
-      scheme.primary.withValues(alpha: 0.82),
+      scheme.primary.withValues(alpha: 0.88),
       AppColors.secondary,
     );
   }
@@ -46,42 +42,28 @@ class SavedCardProfileHeader extends StatelessWidget {
     final custom = card.previewAccentColor;
     if (custom != null) return custom.withValues(alpha: 0.35);
 
-    return AppColors.textOnPrimary.withValues(alpha: 0.12);
-  }
-
-  Widget _buildAvatar(BuildContext context) {
-    final avatar = ProfileAvatar(
-      photoUrl: card.photoUrl,
-      displayName: displayName,
-      size: avatarSize,
-      circular: true,
-    );
-
-    return Container(
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        border: Border.all(
-          color: AppColors.profileDetailSurface,
-          width: 4,
-        ),
-      ),
-      child: avatar,
-    );
+    return AppColors.textOnPrimary.withValues(alpha: 0.14);
   }
 
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
     final bannerColor = _bannerColor(context);
+    final topInset = MediaQuery.paddingOf(context).top;
     final title = card.title?.trim();
     final company = card.company?.trim();
-    final website = card.website?.trim();
-    final linkedin = card.linkedin?.trim();
-    final hasWebsite = website != null && website.isNotEmpty;
-    final hasLinkedIn = linkedin != null && linkedin.isNotEmpty;
+    final hasCompany = company != null && company.isNotEmpty;
+    final hasTitle = title != null && title.isNotEmpty;
+    final hasRole = hasCompany || hasTitle;
+    final hasLocation = locationText != null && locationText!.isNotEmpty;
+    final hasCardId = card.cardId.isNotEmpty;
+    final surfaceColor = SavedCardDetailTheme.surface(context);
+    final textPrimary = SavedCardDetailTheme.textPrimary(context);
+    final textSecondary = SavedCardDetailTheme.textSecondary(context);
+    final chipSurface = SavedCardDetailTheme.chipSurface(context);
 
     return ColoredBox(
-      color: AppColors.profileDetailSurface,
+      color: surfaceColor,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -89,13 +71,13 @@ class SavedCardProfileHeader extends StatelessWidget {
             clipBehavior: Clip.none,
             children: [
               SizedBox(
-                height: bannerHeight,
+                height: bannerHeight + topInset,
                 width: double.infinity,
                 child: DecoratedBox(
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
+                      begin: Alignment.centerLeft,
+                      end: Alignment.centerRight,
                       colors: [
                         bannerColor,
                         Color.alphaBlend(_bannerAccent(context), bannerColor),
@@ -105,153 +87,238 @@ class SavedCardProfileHeader extends StatelessWidget {
                 ),
               ),
               if (card.isOwnerPremium)
-                const Positioned(
-                  top: 12,
+                Positioned(
+                  top: topInset + 12,
                   right: 12,
-                  child: PremiumOwnerBadge(size: 28),
+                  child: const PremiumOwnerBadge(size: 28),
                 ),
               Positioned(
-                left: 16,
+                left: 20,
                 bottom: -avatarOverlap,
-                child: _buildAvatar(context),
+                child: Container(
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: surfaceColor,
+                      width: 4,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: SavedCardDetailTheme.cardShadow(context),
+                        blurRadius: 12,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: ProfileAvatar(
+                    photoUrl: card.photoUrl,
+                    displayName: displayName,
+                    size: avatarSize,
+                    circular: true,
+                  ),
+                ),
               ),
+              if (hasCardId)
+                Positioned(
+                  right: 20,
+                  bottom: -avatarOverlap,
+                  height: avatarSize,
+                  child: Align(
+                    alignment: Alignment.centerRight,
+                    child: _CopyableCardIdPill(
+                      cardId: card.cardId,
+                      chipSurface: chipSurface,
+                    ),
+                  ),
+                ),
             ],
           ),
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, avatarOverlap + 12, 16, 16),
+            padding: const EdgeInsets.fromLTRB(20, avatarOverlap + 16, 20, 0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   displayName,
                   style: textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.textPrimaryDark,
-                    height: 1.2,
+                    fontWeight: FontWeight.w800,
+                    color: textPrimary,
+                    height: 1.15,
+                    letterSpacing: -0.2,
                   ),
                 ),
-                if (title != null && title.isNotEmpty) ...[
+                if (hasRole) ...[
                   const SizedBox(height: 4),
-                  Text(
-                    title,
-                    style: textTheme.bodyLarge?.copyWith(
-                      color: AppColors.textPrimaryDark,
-                      height: 1.35,
-                    ),
+                  _ProfileRoleLine(
+                    company: hasCompany ? company : null,
+                    title: hasTitle ? title : null,
+                    textSecondary: textSecondary,
                   ),
                 ],
-                if (company != null && company.isNotEmpty) ...[
-                  const SizedBox(height: 4),
-                  Text(
-                    company,
-                    style: textTheme.bodyMedium?.copyWith(
-                      color: AppColors.textSecondaryDark,
-                      height: 1.35,
-                    ),
-                  ),
-                ],
-                if (locationText != null && locationText!.isNotEmpty) ...[
-                  const SizedBox(height: 4),
-                  Text(
-                    locationText!,
-                    style: textTheme.bodyMedium?.copyWith(
-                      color: AppColors.textSecondaryDark,
-                    ),
-                  ),
-                ],
-                if (hasWebsite || hasLinkedIn) ...[
-                  const SizedBox(height: 8),
-                  Wrap(
-                    spacing: 12,
-                    runSpacing: 4,
-                    children: [
-                      if (hasWebsite)
-                        _ProfileLinkChip(
-                          label: _linkLabel(website),
-                          onTap: onWebsiteTap,
-                        ),
-                      if (hasLinkedIn)
-                        _ProfileLinkChip(
-                          label: context.l10n.linkedin,
-                          onTap: onLinkedInTap,
-                        ),
-                    ],
-                  ),
-                ],
-                if (metaText != null && metaText!.isNotEmpty) ...[
+                if (hasLocation) ...[
                   const SizedBox(height: 10),
-                  Text(
-                    metaText!,
-                    style: textTheme.bodySmall?.copyWith(
-                      color: AppColors.linkedInBrand,
-                      fontWeight: FontWeight.w600,
-                    ),
+                  _LocationPill(
+                    location: locationText!,
+                    textSecondary: textSecondary,
                   ),
                 ],
               ],
             ),
           ),
-          const Divider(
-            height: 1,
-            thickness: 1,
-            color: AppColors.profileDetailBorder,
-          ),
         ],
       ),
     );
   }
+}
 
-  static String _linkLabel(String url) {
-    var label = url.trim();
-    if (label.startsWith('https://')) label = label.substring(8);
-    if (label.startsWith('http://')) label = label.substring(7);
-    if (label.startsWith('www.')) label = label.substring(4);
-    final slash = label.indexOf('/');
-    if (slash > 0) label = label.substring(0, slash);
-    if (label.length > 28) {
-      return '${label.substring(0, 25)}...';
-    }
-    return label;
+class _ProfileRoleLine extends StatelessWidget {
+  const _ProfileRoleLine({
+    required this.company,
+    required this.title,
+    required this.textSecondary,
+  });
+
+  final String? company;
+  final String? title;
+  final Color textSecondary;
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    final style = textTheme.bodyMedium?.copyWith(
+      color: textSecondary,
+      height: 1.35,
+    );
+
+    final parts = <String>[
+      if (company != null) company!,
+      if (title != null) title!,
+    ];
+
+    return Text(
+      parts.join(' • '),
+      style: style,
+      maxLines: 2,
+      overflow: TextOverflow.ellipsis,
+    );
   }
 }
 
-class _ProfileLinkChip extends StatelessWidget {
-  const _ProfileLinkChip({
-    required this.label,
-    this.onTap,
+class _CopyableCardIdPill extends StatefulWidget {
+  const _CopyableCardIdPill({
+    required this.cardId,
+    required this.chipSurface,
   });
 
-  final String label;
-  final VoidCallback? onTap;
+  final String cardId;
+  final Color chipSurface;
+
+  @override
+  State<_CopyableCardIdPill> createState() => _CopyableCardIdPillState();
+}
+
+class _CopyableCardIdPillState extends State<_CopyableCardIdPill> {
+  bool _copied = false;
+  Timer? _resetTimer;
+
+  @override
+  void dispose() {
+    _resetTimer?.cancel();
+    super.dispose();
+  }
+
+  Future<void> _copy() async {
+    await copyTextWithClipboardFeedback(context, value: widget.cardId);
+    if (!mounted) return;
+    _resetTimer?.cancel();
+    setState(() => _copied = true);
+    _resetTimer = Timer(kClipboardCopyIconDuration, () {
+      if (!mounted) return;
+      setState(() => _copied = false);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
 
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(6),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 2),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              label,
-              style: textTheme.bodyMedium?.copyWith(
-                color: AppColors.linkedInBrand,
-                fontWeight: FontWeight.w600,
+    return Semantics(
+      button: true,
+      label: widget.cardId,
+      child: Material(
+        color: widget.chipSurface,
+        borderRadius: BorderRadius.circular(999),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: _copy,
+          borderRadius: BorderRadius.circular(999),
+          splashColor: AppColors.primary.withValues(alpha: 0.14),
+          highlightColor: AppColors.primary.withValues(alpha: 0.08),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(minHeight: 40),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    widget.cardId,
+                    style: textTheme.labelMedium?.copyWith(
+                      color: AppColors.primary,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 0.6,
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 180),
+                    child: Icon(
+                      _copied ? Icons.check_rounded : Icons.copy_rounded,
+                      key: ValueKey(_copied),
+                      size: 14,
+                      color: AppColors.primary.withValues(alpha: 0.85),
+                    ),
+                  ),
+                ],
               ),
             ),
-            const SizedBox(width: 4),
-            const Icon(
-              Icons.open_in_new_rounded,
-              size: 16,
-              color: AppColors.linkedInBrand,
-            ),
-          ],
+          ),
         ),
       ),
+    );
+  }
+}
+
+class _LocationPill extends StatelessWidget {
+  const _LocationPill({
+    required this.location,
+    required this.textSecondary,
+  });
+
+  final String location;
+  final Color textSecondary;
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(
+          Icons.location_on_outlined,
+          size: 16,
+          color: textSecondary.withValues(alpha: 0.9),
+        ),
+        const SizedBox(width: 4),
+        Text(
+          location,
+          style: textTheme.bodySmall?.copyWith(
+            color: textSecondary,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+      ],
     );
   }
 }
@@ -266,29 +333,4 @@ String? savedCardProfileLocationText(SavedCard card) {
   final address = card.address?.trim();
   if (address != null && address.isNotEmpty) return address;
   return null;
-}
-
-String savedCardProfileMetaText(BuildContext context, SavedCard card) {
-  final savedAt = card.savedAt;
-  if (savedAt == null) {
-    return '${AppL10n.kart(context.l10n)} · ${card.cardId}';
-  }
-
-  final dt = DateTime.fromMillisecondsSinceEpoch(savedAt);
-  const months = [
-    'Oca',
-    'Şub',
-    'Mar',
-    'Nis',
-    'May',
-    'Haz',
-    'Tem',
-    'Ağu',
-    'Eyl',
-    'Eki',
-    'Kas',
-    'Ara',
-  ];
-  final dateLabel = '${dt.day} ${months[dt.month - 1]} ${dt.year}';
-  return '${AppL10n.savedAtLabel(context.l10n, dateLabel)} · ${card.cardId}';
 }

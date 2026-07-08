@@ -15,6 +15,7 @@ class ProfileAvatar extends StatelessWidget {
     this.showEditBadge = false,
     this.circular = false,
     this.displaySize,
+    this.borderRadius,
   });
 
   final String? photoUrl;
@@ -24,6 +25,7 @@ class ProfileAvatar extends StatelessWidget {
   final bool showEditBadge;
   final bool circular;
   final MediaImageSize? displaySize;
+  final BorderRadius? borderRadius;
 
   MediaImageSize _resolveDisplaySize() =>
       displaySize ??
@@ -42,7 +44,9 @@ class ProfileAvatar extends StatelessWidget {
   }
 
   BorderRadius get _borderRadius =>
-      BorderRadius.circular(circular ? size / 2 : size * 0.28);
+      borderRadius ?? BorderRadius.circular(circular ? size / 2 : size * 0.28);
+
+  bool get _hasPhoto => photoUrl?.trim().isNotEmpty == true;
 
   Widget _buildInitial(ColorScheme colorScheme) {
     return Center(
@@ -92,14 +96,18 @@ class ProfileAvatar extends StatelessWidget {
       width: size,
       height: size,
       decoration: BoxDecoration(
-        color: colorScheme.primaryContainer,
+        color: _hasPhoto ? Colors.transparent : colorScheme.primaryContainer,
         borderRadius: _borderRadius,
-        border: Border.all(
-          color: colorScheme.outline.withValues(alpha: 0.25),
-        ),
+        border: _hasPhoto
+            ? null
+            : Border.all(
+                color: colorScheme.outline.withValues(alpha: 0.25),
+              ),
       ),
       clipBehavior: Clip.antiAlias,
-      child: _buildPhoto(colorScheme),
+      child: _hasPhoto
+          ? SizedBox.expand(child: _buildPhoto(colorScheme))
+          : _buildPhoto(colorScheme),
     );
 
     if (onTap != null) {

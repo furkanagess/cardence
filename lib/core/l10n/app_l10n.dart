@@ -28,6 +28,12 @@ abstract final class AppL10n {
   static String noPathFoundBetweenCards(AppLocalizations l10n) => l10n.noPathFoundBetweenCards;
   static String pathStepsAndNodes(AppLocalizations l10n, int steps, int nodes) => l10n.pathStepsAndNodes(steps, nodes);
   static String tapTwoNodesToFindPath(AppLocalizations l10n) => l10n.tapTwoNodesToFindPath;
+  static String networkGraphConnectedNodes(AppLocalizations l10n, int count) =>
+      l10n.networkGraphConnectedNodes(count);
+  static String networkGraphNoConnectedNodes(AppLocalizations l10n) =>
+      l10n.networkGraphNoConnectedNodes;
+  static String networkGraphConnectionTypes(AppLocalizations l10n) =>
+      l10n.networkGraphConnectionTypes;
   static String networkStatistics(AppLocalizations l10n) => l10n.networkStatistics;
 
   // --- Saved Cards ---

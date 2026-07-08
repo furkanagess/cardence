@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_colors.dart';
+import 'settings_surface_card.dart';
 
-/// Ayarlar menü grubu — yumuşak yüzey içinde satırlar.
+/// Ayarlar menü grubu — tutarlı kart içinde satırlar.
 class SettingsMenuGroup extends StatelessWidget {
   const SettingsMenuGroup({
     super.key,
@@ -13,21 +14,13 @@ class SettingsMenuGroup extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final dividerColor = isDark
+        ? AppColors.outlineDark.withValues(alpha: 0.35)
+        : AppColors.outlineVariant.withValues(alpha: 0.85);
 
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: colorScheme.surfaceContainerLowest.withValues(
-          alpha: isDark ? 0.55 : 0.85,
-        ),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: isDark
-              ? AppColors.outlineDark.withValues(alpha: 0.35)
-              : AppColors.outlineVariant.withValues(alpha: 0.65),
-        ),
-      ),
+    return SettingsSurfaceCard(
+      padding: EdgeInsets.zero,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -36,13 +29,13 @@ class SettingsMenuGroup extends StatelessWidget {
               Divider(
                 height: 1,
                 thickness: 1,
-                indent: 68,
-                endIndent: 16,
-                color: isDark
-                    ? AppColors.outlineDark.withValues(alpha: 0.35)
-                    : AppColors.outlineVariant.withValues(alpha: 0.8),
+                color: dividerColor,
               ),
-            _SettingsMenuRow(item: items[i]),
+            _SettingsMenuRow(
+              item: items[i],
+              isFirst: i == 0,
+              isLast: i == items.length - 1,
+            ),
           ],
         ],
       ),
@@ -56,51 +49,51 @@ class SettingsMenuGroupItem {
     required this.title,
     required this.onTap,
     this.subtitle,
-    this.iconTint,
   });
 
   final IconData icon;
   final String title;
   final String? subtitle;
-  final Color? iconTint;
   final VoidCallback onTap;
 }
 
 class _SettingsMenuRow extends StatelessWidget {
-  const _SettingsMenuRow({required this.item});
+  const _SettingsMenuRow({
+    required this.item,
+    required this.isFirst,
+    required this.isLast,
+  });
 
   final SettingsMenuGroupItem item;
+  final bool isFirst;
+  final bool isLast;
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final iconColor = item.iconTint ?? AppColors.primary;
+    final iconColor =
+        isDark ? AppColors.textSecondaryDark : AppColors.textSecondary;
+
+    final borderRadius = BorderRadius.vertical(
+      top: isFirst ? const Radius.circular(16) : Radius.zero,
+      bottom: isLast ? const Radius.circular(16) : Radius.zero,
+    );
 
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: borderRadius,
         onTap: item.onTap,
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
+          padding: const EdgeInsets.fromLTRB(16, 14, 14, 14),
           child: Row(
             children: [
-              DecoratedBox(
-                decoration: BoxDecoration(
-                  color: iconColor.withValues(alpha: isDark ? 0.18 : 0.1),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: SizedBox(
-                  width: 40,
-                  height: 40,
-                  child: Icon(
-                    item.icon,
-                    size: 21,
-                    color: iconColor,
-                  ),
-                ),
+              Icon(
+                item.icon,
+                size: 22,
+                color: iconColor,
               ),
               const SizedBox(width: 14),
               Expanded(
@@ -110,13 +103,13 @@ class _SettingsMenuRow extends StatelessWidget {
                     Text(
                       item.title,
                       style: textTheme.bodyLarge?.copyWith(
-                        fontWeight: FontWeight.w500,
-                        letterSpacing: -0.15,
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: -0.2,
                         color: colorScheme.onSurface,
                       ),
                     ),
                     if (item.subtitle != null) ...[
-                      const SizedBox(height: 2),
+                      const SizedBox(height: 3),
                       Text(
                         item.subtitle!,
                         style: textTheme.bodySmall?.copyWith(
@@ -131,7 +124,7 @@ class _SettingsMenuRow extends StatelessWidget {
               Icon(
                 Icons.chevron_right_rounded,
                 size: 22,
-                color: colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
+                color: colorScheme.onSurfaceVariant.withValues(alpha: 0.65),
               ),
             ],
           ),

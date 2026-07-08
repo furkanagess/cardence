@@ -99,18 +99,47 @@ class EventGroupRepositoryImpl implements EventGroupRepository {
 
     final photoFilePath = input.photoFilePath?.trim();
     if (photoFilePath != null && photoFilePath.isNotEmpty) {
-      created = await _remote.uploadEventGroupPhoto(
-        groupId: created.id,
-        filePath: photoFilePath,
-        accessToken: token,
-      );
-      AuthenticatedImageLoader.evictAllVariants(created.photoUrl);
+      try {
+        created = await _uploadAndValidateEventGroupPhoto(
+          groupId: created.id,
+          filePath: photoFilePath,
+          accessToken: token,
+        );
+      } catch (error) {
+        await _tryDeleteEventGroup(created.id, token);
+        rethrow;
+      }
     }
 
     final localGroups = await _local.getEventGroups();
     final updated = [...localGroups, created];
     await _cacheGroups(updated);
     return created.toEntity();
+  }
+
+  Future<EventGroupModel> _uploadAndValidateEventGroupPhoto({
+    required String groupId,
+    required String filePath,
+    required String accessToken,
+  }) async {
+    final updated = await _remote.uploadEventGroupPhoto(
+      groupId: groupId,
+      filePath: filePath,
+      accessToken: accessToken,
+    );
+    if (updated.photoUrl == null || updated.photoUrl!.trim().isEmpty) {
+      throw AuthApiException('Etkinlik fotoğrafı kaydedilemedi.');
+    }
+    AuthenticatedImageLoader.evictAllVariants(updated.photoUrl);
+    return updated;
+  }
+
+  Future<void> _tryDeleteEventGroup(String groupId, String accessToken) async {
+    try {
+      await _remote.deleteEventGroup(groupId: groupId, accessToken: accessToken);
+    } catch (_) {
+      // Fotoğraf yüklemesi başarısız oldu; grubu silmek için en iyi çaba.
+    }
   }
 
   Future<EventGroupModel> _upsertLocalGroup(EventGroupModel updated) async {
@@ -142,12 +171,11 @@ class EventGroupRepositoryImpl implements EventGroupRepository {
 
     final photoFilePath = input.photoFilePath?.trim();
     if (photoFilePath != null && photoFilePath.isNotEmpty) {
-      updated = await _remote.uploadEventGroupPhoto(
+      updated = await _uploadAndValidateEventGroupPhoto(
         groupId: updated.id,
         filePath: photoFilePath,
         accessToken: token,
       );
-      AuthenticatedImageLoader.evictAllVariants(updated.photoUrl);
     } else if (input.clearPhoto) {
       AuthenticatedImageLoader.evictAllVariants(updated.photoUrl);
     }

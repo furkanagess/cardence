@@ -4,9 +4,14 @@ import '../../../../core/l10n/l10n_extensions.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/utils/card_id_generator.dart';
-import '../../../../core/widgets/atoms/custom_button.dart';
 import '../../../../core/widgets/molecules/card_index_circle_selector.dart';
+import '../widgets/profile_quick_actions.dart';
 import '../../../my_cards/presentation/pages/my_card_edit_page.dart';
+import '../../../auth/domain/usecases/upload_profile_photo.dart';
+import '../../../onboarding/presentation/helpers/additional_card_onboarding_launcher.dart';
+import '../../../saved_cards/domain/usecases/upgrade_wallet_plan.dart';
+import '../../../saved_cards/presentation/pages/saved_card_detail_page.dart';
+import '../helpers/profile_own_card_preview_mapper.dart';
 import '../../../settings/presentation/pages/card_visibility_settings_page.dart';
 import '../../../network_graph/domain/usecases/get_network_graph.dart';
 import '../../../network_graph/domain/usecases/get_network_graph_path.dart';
@@ -15,6 +20,7 @@ import '../../../event_groups/domain/usecases/get_event_groups.dart';
 import '../../../onboarding/domain/entities/onboarding_card_draft.dart';
 import '../../../onboarding/domain/usecases/get_onboarding_draft_cards.dart';
 import '../../../onboarding/presentation/widgets/onboarding_card_preview_frame.dart';
+import '../../../../core/widgets/organisms/flippable_person_card.dart';
 import '../../../business_cards/domain/usecases/persist_onboarding_card.dart';
 import '../../domain/entities/profile_stats.dart';
 import '../../../plans/presentation/cubit/plan_cubit.dart';
@@ -39,6 +45,8 @@ class ProfilePage extends StatefulWidget {
     required this.getNetworkGraph,
     required this.getNetworkGraphPath,
     required this.getEventGroups,
+    required this.uploadProfilePhoto,
+    required this.upgradeWalletPlan,
     this.onDraftUpdated,
   });
 
@@ -49,6 +57,8 @@ class ProfilePage extends StatefulWidget {
   final GetNetworkGraph getNetworkGraph;
   final GetNetworkGraphPath getNetworkGraphPath;
   final GetEventGroups getEventGroups;
+  final UploadProfilePhoto uploadProfilePhoto;
+  final UpgradeWalletPlan upgradeWalletPlan;
   final ValueChanged<OnboardingCardDraft>? onDraftUpdated;
 
   @override
@@ -128,8 +138,10 @@ class _ProfilePageState extends State<ProfilePage> {
     }
   }
 
-  Future<void> _openCardEditor(OnboardingCardDraft card,
-      {bool isNew = false}) async {
+  Future<OnboardingCardDraft?> _openCardEditor(
+    OnboardingCardDraft card, {
+    bool isNew = false,
+  }) async {
     final result = await Navigator.of(context).push<OnboardingCardDraft>(
       MaterialPageRoute(
         builder: (context) => MyCardEditPage(
@@ -140,7 +152,7 @@ class _ProfilePageState extends State<ProfilePage> {
         ),
       ),
     );
-    if (!mounted) return;
+    if (!mounted) return result;
     await _loadPageData();
     if (result != null) {
       widget.onDraftUpdated?.call(result);
@@ -156,6 +168,37 @@ class _ProfilePageState extends State<ProfilePage> {
         }
       }
     }
+    return result;
+  }
+
+  Future<void> _openCardDetail(
+    OnboardingCardDraft card, {
+    String? heroTag,
+  }) async {
+    await Navigator.of(context).push<void>(
+      MaterialPageRoute<void>(
+        builder: (context) => SavedCardDetailPage(
+          card: profileOwnCardPreviewFromDraft(
+            card,
+            isOwnerPremium: _isPremium,
+          ),
+          heroTag: heroTag,
+          readOnly: true,
+          getEventGroups: widget.getEventGroups,
+          onSave: (_) async {},
+          onEdit: () async {
+            final updated = await _openCardEditor(card);
+            if (updated == null) return null;
+            return profileOwnCardPreviewFromDraft(
+              updated,
+              isOwnerPremium: _isPremium,
+            );
+          },
+        ),
+      ),
+    );
+    if (!mounted) return;
+    await _loadPageData();
   }
 
   Future<void> _createNewCard() async {
@@ -183,7 +226,33 @@ class _ProfilePageState extends State<ProfilePage> {
           ? List<String>.from(OnboardingCardDraft.defaultBackVisibleFields)
           : List.from(base.backVisibleFields),
     );
-    await _openCardEditor(newCard, isNew: true);
+    await _openAdditionalCardOnboarding(newCard);
+  }
+
+  Future<void> _openAdditionalCardOnboarding(OnboardingCardDraft card) async {
+    final result = await AdditionalCardOnboardingLauncher.open(
+      context,
+      initialDraft: card,
+      persistOnboardingCard: widget.persistOnboardingCard,
+      uploadProfilePhoto: widget.uploadProfilePhoto,
+      upgradeWalletPlan: widget.upgradeWalletPlan,
+    );
+    if (!mounted) return;
+    await _loadPageData();
+    if (result != null) {
+      widget.onDraftUpdated?.call(result);
+      final idx = _cards.indexWhere((c) => c.cardId == result.cardId);
+      if (idx >= 0) {
+        setState(() => _selectedIndex = idx);
+        if (_pageController.hasClients && _cards.length > 1) {
+          _pageController.animateToPage(
+            idx,
+            duration: const Duration(milliseconds: 280),
+            curve: Curves.easeOutCubic,
+          );
+        }
+      }
+    }
   }
 
   Future<void> _openLockedSlotPaywall() async {
@@ -231,19 +300,6 @@ class _ProfilePageState extends State<ProfilePage> {
         physics: const AlwaysScrollableScrollPhysics(),
         padding: EdgeInsets.fromLTRB(0, 8, 0, 32 + bottomInset),
         children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
-            child: Text(
-              _cards.length > 1
-                  ? AppL10n.swipeHorizontalToSwitchCards(context.l10n)
-                  : AppL10n.tapCardToEdit(context.l10n),
-              style: textTheme.bodyMedium?.copyWith(
-                color: colorScheme.onSurfaceVariant,
-                height: 1.4,
-              ),
-            ),
-          ),
-          const SizedBox(height: 16),
           if (_cards.isEmpty)
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -256,66 +312,45 @@ class _ProfilePageState extends State<ProfilePage> {
               selectedIndex: _selectedIndex,
               showPremiumBadge: _isPremium,
               onPageChanged: (index) => setState(() => _selectedIndex = index),
-              onCardTap: _openCardEditor,
+              onCardTap: (card, {heroTag}) => _openCardDetail(card, heroTag: heroTag),
               onLockedSlotTap: _openLockedSlotPaywall,
             ),
           ],
           Padding(
-            padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
-            child: CustomButton(
-              label: context.l10n.yeniKart,
-              icon: Icons.add_rounded,
-              onPressed: _createNewCard,
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
+            child: ProfileQuickActions(
+              addCardLabel: context.l10n.yeniKartOlutur,
+              onAddCard: _createNewCard,
+              limitHint: !_canAddBusinessCard
+                  ? AppL10n.cardLimitReachedPremiumUpgrade(context.l10n)
+                  : null,
+              cardLayoutLabel: _cards.isNotEmpty
+                  ? context.l10n.kartGrnm
+                  : null,
+              onCardLayout: _cards.isNotEmpty
+                  ? () {
+                      Navigator.of(context)
+                          .push(
+                            MaterialPageRoute<void>(
+                              builder: (context) => CardVisibilitySettingsPage(
+                                getOnboardingDraftCards:
+                                    widget.getOnboardingDraftCards,
+                                persistOnboardingCard:
+                                    widget.persistOnboardingCard,
+                                onDraftUpdated: widget.onDraftUpdated,
+                              ),
+                            ),
+                          )
+                          .then((_) => _loadPageData());
+                    }
+                  : null,
+              networkGraphLabel:
+                  _cards.isNotEmpty ? context.l10n.agGrafigi : null,
+              onNetworkGraph: _cards.isNotEmpty ? _openNetworkGraph : null,
             ),
           ),
-          if (!_canAddBusinessCard) ...[
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
-              child: Text(
-                AppL10n.cardLimitReachedPremiumUpgrade(context.l10n),
-                style: textTheme.bodySmall?.copyWith(
-                  color: colorScheme.onSurfaceVariant,
-                  height: 1.35,
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ),
-          ],
-          if (_cards.isNotEmpty) ...[
-            const SizedBox(height: 12),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: CustomButton.tonal(
-                label: context.l10n.kartYzVeAlanDzeni,
-                icon: Icons.view_carousel_outlined,
-                onPressed: () {
-                  Navigator.of(context)
-                      .push(
-                        MaterialPageRoute<void>(
-                          builder: (context) => CardVisibilitySettingsPage(
-                            getOnboardingDraftCards:
-                                widget.getOnboardingDraftCards,
-                            persistOnboardingCard: widget.persistOnboardingCard,
-                            onDraftUpdated: widget.onDraftUpdated,
-                          ),
-                        ),
-                      )
-                      .then((_) => _loadPageData());
-                },
-              ),
-            ),
-            const SizedBox(height: 12),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: CustomButton.tonal(
-                label: AppL10n.viewNetworkGraph(context.l10n),
-                icon: Icons.hub_outlined,
-                onPressed: _openNetworkGraph,
-              ),
-            ),
-          ],
           Padding(
-            padding: const EdgeInsets.fromLTRB(20, 28, 20, 0),
+            padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
             child: ProfileInteractionStats(
               eventGroupCount: stats.eventGroupCount,
               totalWalletSaveCount: stats.totalWalletSaveCount,
@@ -383,7 +418,7 @@ class _ProfileCardsCarousel extends StatelessWidget {
   final int selectedIndex;
   final bool showPremiumBadge;
   final ValueChanged<int> onPageChanged;
-  final void Function(OnboardingCardDraft card) onCardTap;
+  final void Function(OnboardingCardDraft card, {String? heroTag}) onCardTap;
   final VoidCallback onLockedSlotTap;
 
   @override
@@ -397,83 +432,16 @@ class _ProfileCardsCarousel extends StatelessWidget {
         final carouselHeight =
             OnboardingCardPreviewFrame.heightForWidth(cardWidth) +
                 _profileCarouselVerticalPadding * 2;
+        const selectorSpacing = 12.0;
 
         return Padding(
-          padding: const EdgeInsets.only(left: 8, right: 12),
-          child: SizedBox(
-            height: carouselHeight,
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Expanded(
-                  child: cards.length == 1
-                      ? Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: _profileCarouselHorizontalPadding,
-                            vertical: _profileCarouselVerticalPadding,
-                          ),
-                          child: OnboardingCardPreviewFrame(
-                            draft: cards.first,
-                            onTap: () => onCardTap(cards.first),
-                            contactFieldsTappable: false,
-                            emptyMessage: context.l10n.alanlarDoldukaGrnr,
-                            normalizeForDisplay: true,
-                            showPremiumBadge: showPremiumBadge,
-                            gatePremiumEffects: true,
-                          ),
-                        )
-                      : PageView.builder(
-                          controller: pageController,
-                          itemCount: cards.length,
-                          onPageChanged: onPageChanged,
-                          padEnds: false,
-                          itemBuilder: (context, index) {
-                            final card = cards[index];
-                            return AnimatedBuilder(
-                              animation: pageController,
-                              builder: (context, child) {
-                                double t = 0;
-                                if (pageController.position.haveDimensions) {
-                                  final page = pageController.page ??
-                                      pageController.initialPage.toDouble();
-                                  t = (page - index).abs().clamp(0.0, 1.0);
-                                }
-                                const maxScaleDelta = 0.06;
-                                const maxFadeDelta = 0.18;
-                                final scale = 1.0 - (t * maxScaleDelta);
-                                final opacity = 1.0 - (t * maxFadeDelta);
-
-                                return Opacity(
-                                  opacity: opacity,
-                                  child: Transform.scale(
-                                    scale: scale,
-                                    alignment: Alignment.center,
-                                    child: child,
-                                  ),
-                                );
-                              },
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: _profileCarouselHorizontalPadding,
-                                  vertical: _profileCarouselVerticalPadding,
-                                ),
-                                child: OnboardingCardPreviewFrame(
-                                  key: ValueKey(card.cardId),
-                                  draft: card,
-                                  onTap: () => onCardTap(card),
-                                  contactFieldsTappable: false,
-                                  emptyMessage: context.l10n.alanlarDoldukaGrnr,
-                                  normalizeForDisplay: true,
-                                  showPremiumBadge: showPremiumBadge,
-                                  gatePremiumEffects: true,
-                                ),
-                              ),
-                            );
-                          },
-                        ),
-                ),
-                const SizedBox(width: 8),
-                CardIndexCircleSelector(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Center(
+                child: CardIndexCircleSelector(
+                  axis: Axis.horizontal,
                   unlockedCount: cards.length,
                   selectedIndex: selectedIndex,
                   onSelected: (index) {
@@ -488,8 +456,96 @@ class _ProfileCardsCarousel extends StatelessWidget {
                   },
                   onLockedTap: onLockedSlotTap,
                 ),
-              ],
-            ),
+              ),
+              const SizedBox(height: selectorSpacing),
+              SizedBox(
+                height: carouselHeight,
+                child: cards.length == 1
+                    ? Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: _profileCarouselHorizontalPadding,
+                          vertical: _profileCarouselVerticalPadding,
+                        ),
+                        child: OnboardingCardPreviewFrame(
+                          draft: cards.first,
+                          heroTag: FlippablePersonCard.heroTagForCardId(
+                            cards.first.cardId,
+                            scope: FlippablePersonCard.heroScopeProfile,
+                          ),
+                          onDetailTap: () => onCardTap(
+                            cards.first,
+                            heroTag: FlippablePersonCard.heroTagForCardId(
+                              cards.first.cardId,
+                              scope: FlippablePersonCard.heroScopeProfile,
+                            ),
+                          ),
+                          contactFieldsTappable: true,
+                          emptyMessage: context.l10n.alanlarDoldukaGrnr,
+                          normalizeForDisplay: true,
+                          showPremiumBadge: showPremiumBadge,
+                          gatePremiumEffects: true,
+                        ),
+                      )
+                    : PageView.builder(
+                        controller: pageController,
+                        itemCount: cards.length,
+                        onPageChanged: onPageChanged,
+                        padEnds: false,
+                        itemBuilder: (context, index) {
+                          final card = cards[index];
+                          final heroTag =
+                              FlippablePersonCard.heroTagForCardId(
+                            card.cardId,
+                            scope: FlippablePersonCard.heroScopeProfile,
+                          );
+                          return AnimatedBuilder(
+                            animation: pageController,
+                            builder: (context, child) {
+                              double t = 0;
+                              if (pageController.position.haveDimensions) {
+                                final page = pageController.page ??
+                                    pageController.initialPage.toDouble();
+                                t = (page - index).abs().clamp(0.0, 1.0);
+                              }
+                              const maxScaleDelta = 0.06;
+                              const maxFadeDelta = 0.18;
+                              final scale = 1.0 - (t * maxScaleDelta);
+                              final opacity = 1.0 - (t * maxFadeDelta);
+
+                              return Opacity(
+                                opacity: opacity,
+                                child: Transform.scale(
+                                  scale: scale,
+                                  alignment: Alignment.center,
+                                  child: child,
+                                ),
+                              );
+                            },
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: _profileCarouselHorizontalPadding,
+                                vertical: _profileCarouselVerticalPadding,
+                              ),
+                              child: OnboardingCardPreviewFrame(
+                                key: ValueKey(card.cardId),
+                                draft: card,
+                                heroTag: heroTag,
+                                onDetailTap: () => onCardTap(
+                                  card,
+                                  heroTag: heroTag,
+                                ),
+                                contactFieldsTappable: true,
+                                emptyMessage: context.l10n.alanlarDoldukaGrnr,
+                                normalizeForDisplay: true,
+                                showPremiumBadge: showPremiumBadge,
+                                gatePremiumEffects: true,
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+              ),
+            ],
           ),
         );
       },

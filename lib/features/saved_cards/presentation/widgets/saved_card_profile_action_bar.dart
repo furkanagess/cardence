@@ -2,84 +2,84 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/l10n/l10n_extensions.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../helpers/saved_card_detail_theme.dart';
 
-/// LinkedIn tarzı yatay aksiyon butonları.
+/// Profil hızlı aksiyonları: e-posta, telefon, LinkedIn, web sitesi.
 class SavedCardProfileActionBar extends StatelessWidget {
   const SavedCardProfileActionBar({
     super.key,
     required this.hasEmail,
     required this.hasPhone,
     required this.hasLinkedIn,
+    this.hasWebsite = false,
     this.onEmail,
     this.onPhone,
     this.onLinkedIn,
+    this.onWebsite,
     this.onMore,
   });
 
   final bool hasEmail;
   final bool hasPhone;
   final bool hasLinkedIn;
+  final bool hasWebsite;
   final VoidCallback? onEmail;
   final VoidCallback? onPhone;
   final VoidCallback? onLinkedIn;
+  final VoidCallback? onWebsite;
   final VoidCallback? onMore;
 
   @override
   Widget build(BuildContext context) {
     final buttons = <Widget>[];
 
-    void addButton(Widget button) {
-      if (buttons.isNotEmpty) buttons.add(const SizedBox(width: 8));
-      buttons.add(Expanded(child: button));
-    }
+    final contactCount = [
+      hasEmail,
+      hasPhone,
+      hasLinkedIn,
+      hasWebsite,
+    ].where((visible) => visible).length;
 
     if (hasEmail) {
-      addButton(
+      buttons.add(
         _ProfileActionButton(
           label: context.l10n.ePosta,
-          icon: Icons.email_outlined,
-          filled: true,
+          icon: Icons.mail_outline_rounded,
+          filled: contactCount == 1,
           onTap: onEmail,
         ),
       );
-    } else if (hasPhone) {
-      addButton(
-        _ProfileActionButton(
-          label: context.l10n.telefon,
-          icon: Icons.phone_outlined,
-          filled: true,
-          onTap: onPhone,
-        ),
-      );
-    } else if (hasLinkedIn) {
-      addButton(
-        _ProfileActionButton(
-          label: context.l10n.linkedin,
-          icon: Icons.link_rounded,
-          filled: true,
-          onTap: onLinkedIn,
-        ),
-      );
     }
 
-    if (hasPhone && hasEmail) {
-      addButton(
+    if (hasPhone) {
+      buttons.add(
         _ProfileActionButton(
           label: context.l10n.telefon,
           icon: Icons.phone_outlined,
-          filled: false,
+          filled: contactCount == 1,
           onTap: onPhone,
         ),
       );
     }
 
-    if (hasLinkedIn && (hasEmail || hasPhone)) {
-      addButton(
+    if (hasLinkedIn) {
+      buttons.add(
         _ProfileActionButton(
           label: context.l10n.linkedin,
           icon: Icons.link_rounded,
-          filled: false,
+          filled: contactCount == 1,
           onTap: onLinkedIn,
+        ),
+      );
+    }
+
+    if (hasWebsite) {
+      buttons.add(
+        _ProfileActionButton(
+          label: context.l10n.webSitesi,
+          icon: Icons.language_rounded,
+          filled: contactCount == 1,
+          onTap: onWebsite,
         ),
       );
     }
@@ -88,20 +88,16 @@ class SavedCardProfileActionBar extends StatelessWidget {
       return const SizedBox.shrink();
     }
 
-    if (onMore != null) {
-      buttons.add(const SizedBox(width: 8));
-      buttons.add(
-        _ProfileMoreButton(onTap: onMore),
-      );
-    }
-
-    return ColoredBox(
-      color: AppColors.profileDetailSurface,
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
-        child: Row(
-          children: buttons,
-        ),
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
+      child: Wrap(
+        spacing: 10,
+        runSpacing: 10,
+        crossAxisAlignment: WrapCrossAlignment.center,
+        children: [
+          ...buttons,
+          if (onMore != null) _ProfileMoreButton(onTap: onMore),
+        ],
       ),
     );
   }
@@ -123,6 +119,8 @@ class _ProfileActionButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
+    final surface = SavedCardDetailTheme.surface(context);
+    final outline = SavedCardDetailTheme.outline(context);
     final labelStyle = textTheme.labelLarge?.copyWith(
       fontWeight: FontWeight.w700,
       letterSpacing: 0.1,
@@ -138,8 +136,7 @@ class _ProfileActionButton extends StatelessWidget {
           child: Text(
             label,
             maxLines: 1,
-            softWrap: false,
-            overflow: TextOverflow.visible,
+            overflow: TextOverflow.ellipsis,
             style: labelStyle,
           ),
         ),
@@ -150,12 +147,12 @@ class _ProfileActionButton extends StatelessWidget {
       return FilledButton(
         onPressed: onTap,
         style: FilledButton.styleFrom(
-          backgroundColor: AppColors.linkedInBrand,
+          backgroundColor: AppColors.primary,
           foregroundColor: AppColors.textOnPrimary,
           elevation: 0,
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(24),
+            borderRadius: BorderRadius.circular(12),
           ),
         ),
         child: content,
@@ -165,13 +162,12 @@ class _ProfileActionButton extends StatelessWidget {
     return OutlinedButton(
       onPressed: onTap,
       style: OutlinedButton.styleFrom(
-        foregroundColor: AppColors.linkedInBrand,
-        side: BorderSide(
-          color: AppColors.linkedInBrand.withValues(alpha: 0.85),
-        ),
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
+        foregroundColor: AppColors.primary,
+        backgroundColor: surface,
+        side: BorderSide(color: outline),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(24),
+          borderRadius: BorderRadius.circular(12),
         ),
       ),
       child: content,
@@ -186,16 +182,23 @@ class _ProfileMoreButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final surface = SavedCardDetailTheme.surface(context);
+    final outline = SavedCardDetailTheme.outline(context);
+    final textSecondary = SavedCardDetailTheme.textSecondary(context);
+
     return SizedBox(
       width: 48,
       height: 44,
       child: OutlinedButton(
         onPressed: onTap,
         style: OutlinedButton.styleFrom(
-          foregroundColor: AppColors.textSecondaryDark,
-          side: const BorderSide(color: AppColors.profileDetailBorder),
+          foregroundColor: textSecondary,
+          backgroundColor: surface,
+          side: BorderSide(color: outline),
           padding: EdgeInsets.zero,
-          shape: const CircleBorder(),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
         ),
         child: const Icon(Icons.more_horiz_rounded, size: 22),
       ),

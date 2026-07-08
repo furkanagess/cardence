@@ -21,24 +21,29 @@ import '../widgets/onboarding_step_preview.dart';
 import '../widgets/onboarding_step_professional.dart';
 import '../../../my_cards/presentation/helpers/card_effect_premium_helper.dart';
 
-/// İlk açılışta adım adım kart oluşturma ile gösterilen onboarding ekranı.
+/// İlk açılışta veya ek kart oluştururken adım adım kart onboarding ekranı.
 class OnboardingPageView extends StatefulWidget {
   const OnboardingPageView({
     super.key,
-    required this.completeOnboarding,
-    required this.resolveInitialDraft,
+    this.completeOnboarding,
+    this.resolveInitialDraft,
+    this.initialDraft,
     required this.persistOnboardingCard,
     required this.uploadProfilePhoto,
     required this.upgradeWalletPlan,
     required this.onFinish,
-  });
+  }) : assert(
+          initialDraft != null || resolveInitialDraft != null,
+          'initialDraft veya resolveInitialDraft gerekli',
+        );
 
-  final Future<void> Function() completeOnboarding;
-  final ResolveOnboardingInitialDraft resolveInitialDraft;
+  final Future<void> Function()? completeOnboarding;
+  final ResolveOnboardingInitialDraft? resolveInitialDraft;
+  final OnboardingCardDraft? initialDraft;
   final PersistOnboardingCard persistOnboardingCard;
   final UploadProfilePhoto uploadProfilePhoto;
   final UpgradeWalletPlan upgradeWalletPlan;
-  final VoidCallback onFinish;
+  final ValueChanged<OnboardingCardDraft> onFinish;
 
   @override
   State<OnboardingPageView> createState() => _OnboardingPageViewState();
@@ -50,7 +55,10 @@ class _OnboardingPageViewState extends State<OnboardingPageView> {
   @override
   void initState() {
     super.initState();
-    _initialDraftFuture = widget.resolveInitialDraft();
+    final seedDraft = widget.initialDraft;
+    _initialDraftFuture = seedDraft != null
+        ? Future.value(seedDraft)
+        : widget.resolveInitialDraft!();
   }
 
   @override
@@ -88,7 +96,7 @@ class _OnboardingContent extends StatefulWidget {
     required this.upgradeWalletPlan,
   });
 
-  final VoidCallback onFinish;
+  final ValueChanged<OnboardingCardDraft> onFinish;
   final UploadProfilePhoto uploadProfilePhoto;
   final UpgradeWalletPlan upgradeWalletPlan;
 
@@ -303,7 +311,7 @@ class _OnboardingBottomActions extends StatelessWidget {
     required this.onGoToPage,
   });
 
-  final VoidCallback onFinish;
+  final ValueChanged<OnboardingCardDraft> onFinish;
   final UpgradeWalletPlan upgradeWalletPlan;
   final void Function(int index) onGoToPage;
 
@@ -359,8 +367,8 @@ class _OnboardingBottomActions extends StatelessWidget {
                   if (resolved.cardEffect != cubit.state.draft.cardEffect) {
                     cubit.updateDraft(resolved);
                   }
-                  final completed = await cubit.finishOnboarding();
-                  if (context.mounted && completed) onFinish();
+                  final synced = await cubit.finishOnboarding();
+                  if (context.mounted && synced != null) onFinish(synced);
                   return;
                 }
 

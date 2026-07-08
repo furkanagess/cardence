@@ -129,7 +129,7 @@
   "grubuSil": "Grubu sil",
   "grupsuz": "Grupsuz",
   "gvenliPaylam": "Güvenli Paylaşım",
-  "gvenliinizIinHesabnzaTekrarGiri": "Güvenliğiniz için hesabınıza tekrar giriş yapmanız gerekiyor.",
+  "gvenliinizIinHesabnzaTekrarGiri": "Güvenliğiniz için lütfen tekrar giriş yapın.",
   "hakkmda": "Hakkımda",
   "hakkimdaBilgisiYok": "Hakkımda bilgisi yok",
   "hakkmdaHerZamanGsterilir": "Hakkımda her zaman gösterilir.",
@@ -144,6 +144,33 @@
   "henzKaydedilmiKartYokKaydedilen": "Henüz kaydedilmiş kart yok. Kaydedilen Kartlar sekmesinden QR ile kart ekleyebilirsiniz.",
   "henzKaytlKartYok": "Henüz kayıtlı kart yok",
   "hesabnzaGiriYapn": "Hesabınıza giriş yapın",
+  "authOrDivider": "veya",
+  "authJoinCardenceTitle": "Cardence'a Katılın",
+  "authNoAccountPrompt": "Hesabınız yok mu? ",
+  "authAlreadyHaveAccountPrompt": "Zaten hesabınız var mı? ",
+  "linkedinIleDevamEt": "LinkedIn ile devam et",
+  "ad": "Ad",
+  "sifre": "Şifre",
+  "authPasswordMinHint": "En az {minLength} karakter",
+  "@authPasswordMinHint": {
+    "placeholders": {
+      "minLength": {
+        "type": "int"
+      }
+    }
+  },
+  "sifreEnAzKarakter": "Şifre en az {minLength} karakter olmalıdır.",
+  "@sifreEnAzKarakter": {
+    "placeholders": {
+      "minLength": {
+        "type": "int"
+      }
+    }
+  },
+  "sifrelerEslesmiyor": "Şifreler eşleşmiyor.",
+  "registerLegalPrefix": "Kayıt olarak ",
+  "registerLegalAnd": " ve ",
+  "registerLegalSuffix": "'nı kabul etmiş sayılırsınız.",
   "loginWelcomeTitle": "Cardence'e Hoş Geldin !",
   "loginWithPhone": "Telefon ile giriş yap",
   "loginOtpSentHint": "Doğrulama kodu telefonunuza gönderildi.",
@@ -172,6 +199,9 @@
   "irketZorunludur": "Şirket zorunludur",
   "isimSirketCom": "isim@sirket.com",
   "isimirketEPosta": "İsim, şirket, e-posta…",
+  "savedCardsSearchHint": "İsim, şirket veya e-posta ile ara...",
+  "listeGorunumu": "Liste Görünümü",
+  "yeniKartEkle": "Yeni Kart Ekle",
   "isimsizKart": "İsimsiz kart",
   "isteeBalEtkinliiListedeGrsel": "İsteğe bağlı — etkinliği listede görsel olarak ayırt edin.",
   "istersenWebSiteniVeLinkedin": "İstersen web siteni ve LinkedIn profilini ekle.",
@@ -209,6 +239,7 @@
   "kartIdIleEkle": "Kart ID ile ekle",
   "kartIdKopyaland": "Kart ID kopyalandı",
   "kartIdKopyalandId": "Kart ID kopyalandı: $id",
+  "clipboardCopySuccess": "Başarıyla panoya kopyalandı",
   "kartIdOluturulamadLtfenTekrar": "Kart ID oluşturulamadı. Lütfen tekrar deneyin.",
   "kartIdTam6Haneli": "Kart ID tam 6 haneli sayı olmalıdır",
   "kartKaydedildi": "Kart kaydedildi",
@@ -332,6 +363,9 @@
   "notEkle": "Not ekle",
   "notKaydedildi": "Not kaydedildi",
   "notlar": "Notlar",
+  "savedCardContactInfoTitle": "İletişim Bilgileri",
+  "savedCardEducationTitle": "Eğitim",
+  "savedCardPrivateNotesTitle": "Özel Notlar",
   "notunuzuBurayaYazn": "Notunuzu buraya yazın…",
   "okul": "Okul",
   "onboarding": "Onboarding\\",
@@ -415,7 +449,9 @@
   "uxResearcher": "UX Researcher",
   "uygula": "Uygula",
   "uygulamaDiliniSein": "Uygulama dilini seçin",
+  "uygulamaDili": "Uygulama Dili",
   "uygulamaTemasnSein": "Uygulama temasını seçin",
+  "temaModu": "Tema Modu",
   "uygulamaRengi": "Uygulama rengi",
   "uygulamaRengiPaletteHint": "Dokununca renk seçici açılır; istediğiniz rengi seçebilirsiniz",
   "webSitesi": "Web sitesi",
@@ -429,6 +465,20 @@
   "etkinlikOlutur": "Etkinlik oluştur",
   "yeniKart": "Yeni kart",
   "yeniKartOlutur": "Yeni kart oluştur",
+  "profileActiveCardStatus": "AKTİF KART: {current} / {total}",
+  "@profileActiveCardStatus": {
+    "placeholders": {
+      "current": { "type": "int" },
+      "total": { "type": "int" }
+    }
+  },
+  "agGrafigi": "Ağ Grafiği",
+  "profileCardsSavedByOthersInfo": "Kartlarınız toplam {count} kez başkaları tarafından kaydedildi.",
+  "@profileCardsSavedByOthersInfo": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
   "yenidenek": "Yeniden çek",
   "yeniifre": "Yeni şifre",
   "yeniifreTekrar": "Yeni şifre tekrar",
@@ -465,7 +515,7 @@
   "zelliknerisi": "Özellik önerisi",
   "sessionNotFoundLogin": "Oturum bulunamadı. Lütfen tekrar giriş yapın.",
   "sessionNotFound": "Oturum bulunamadı.",
-  "sessionExpired": "Oturum süresi doldu. Lütfen tekrar giriş yapın.",
+  "sessionExpired": "Güvenliğiniz için lütfen tekrar giriş yapın.",
   "operationFailed": "İşlem başarısız.",
   "sessionInfoUnavailable": "Oturum bilgisi alınamadı.",
   "invalidSessionResponse": "Geçersiz oturum yanıtı.",
@@ -508,7 +558,7 @@
   "newCard": "Yeni kart",
   "scanQrToSaveCard": "Diğer kişi bu QR'ı Cardence ile okutarak kartınızı kaydedebilir.",
   "shareCardIdSubtitle": "Kart ID'nizi gönderin; karşı taraf Cardence'te kartınızı ekleyebilir.",
-  "rateOnAppStore": "App Store veya Play Store'da puan verin",
+  "rateOnAppStore": "App Store üzerinden geri bildirim verin",
   "selectCards": "Kartları seç",
   "upgradeToPremium": "Premium'a geç",
   "signUp": "Kayıt ol",
@@ -654,6 +704,14 @@
   "eventCreateNameSubtitle": "Etkinliğinize bir ad verin.",
   "eventCreateLocationSubtitle": "Ülke, il ve ilçe seçin; isteğe bağlı mekan adı ekleyin.",
   "eventLocationVenueLabel": "Mekan adı",
+  "eventLocationProvinceDistrictLabel": "İl · İlçe",
+  "eventLocationProvinceDistrictHint": "İl ve ilçe seçin",
+  "eventShowOnMap": "Haritada Göster",
+  "eventMapTapToSelect": "Haritaya dokunarak konum seçin",
+  "eventMapDragToSelect": "Haritayı kaydırarak konum seçin",
+  "eventMapUseMyLocation": "Konumum",
+  "eventMapSelectLocation": "Konum seç",
+  "eventMapOpenFullscreen": "Tam ekran harita",
   "eventLocationVenueHint": "Örn. İstanbul Kongre Merkezi",
   "eventLocationRegionRequired": "Ülke ve il/ilçe seçimi gereklidir.",
   "eventCreateStartSubtitle": "Başlangıç tarihi ve saatini seçin.",
@@ -663,6 +721,27 @@
   "eventDescriptionHint": "Gündem, konuşmacılar, kıyafet kodu, park bilgisi…",
   "eventDescriptionTooLong": "Açıklama en fazla 2000 karakter olabilir.",
   "eventAboutSection": "Hakkında",
+  "eventAboutSectionLabel": "Etkinlik hakkında",
+  "eventGroupCardsSectionTitle": "Gruptaki kartlar",
+  "eventShowMore": "Daha fazla göster",
+  "eventDetailCardsChip": "{count} kart",
+  "@eventDetailCardsChip": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "eventDetailInvitesChip": "{count} davet",
+  "@eventDetailInvitesChip": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "eventDetailNetworkingChip": "Networking",
+  "eventAddCardPlus": "+ Kart ekle",
   "eventLinkedCardsSection": "Bağlı kartlar ({count})",
   "@eventLinkedCardsSection": {
     "placeholders": {
@@ -673,6 +752,11 @@
   },
   "eventCreateEndSubtitle": "İsterseniz bitiş tarihi ve saatini belirleyin. Atlayabilirsiniz.",
   "eventCreatePhotoSubtitle": "Listede görünecek bir kapak fotoğrafı ekleyin. Atlayabilirsiniz.",
+  "eventPhotoUpload": "Fotoğraf Yükle",
+  "eventPhotoFormatHint": "PNG, JPG veya WEBP (Max. 5MB)",
+  "eventPhotoAdd": "Fotoğraf ekle",
+  "eventPhotoChange": "Fotoğrafı değiştir",
+  "eventCreateNoSavedCards": "Henüz kaydedilmiş kart yok.",
   "eventSkip": "Atla",
   "eventGroupCardsStepSubtitle": "Kayıtlı kart seçin veya Card ID ile davet edin. İsterseniz kart seçmeden de etkinliği oluşturabilirsiniz.",
   "eventStartRequired": "Başlangıç tarihi ve saati seçin.",
@@ -689,10 +773,15 @@
   "eventSchedulePlannedStart": "Planlanan başlangıç",
   "eventSchedulePlannedRange": "Planlanan süre",
   "eventScheduleRequired": "Zorunlu",
+  "eventStartDateLabel": "Başlangıç tarihi",
+  "eventStartTimeLabel": "Başlangıç saati",
+  "eventEndDateLabel": "Bitiş tarihi",
+  "eventEndTimeLabel": "Bitiş saati",
+  "eventAddEnd": "Bitiş ekle",
   "eventInviteByCardId": "Card ID ile davet et",
   "eventActiveSection": "Devam eden / Yaklaşan",
-  "eventOngoingSection": "Devam eden etkinlikler",
-  "eventUpcomingSection": "Gelecek etkinlikler",
+  "eventOngoingSection": "Devam eden",
+  "eventUpcomingSection": "Yaklaşan",
   "eventInvitationTitle": "\"{eventName}\" etkinliğine davetlisiniz",
   "@eventInvitationTitle": {
     "placeholders": {
@@ -728,7 +817,8 @@
       }
     }
   },
-  "eventInvitationAccept": "Katıl",
+  "eventInvitationAccept": "Onayla",
+  "eventInvitationInvitedSubtitle": "Davet edildiniz",
   "eventInvitationAcceptHint": "Kartınız bu etkinliğe bağlanır",
   "eventInvitationReject": "Reddet",
   "eventInvitationRejectHint": "Davet listenizden kaldırılır",
@@ -744,7 +834,18 @@
   "eventInvitationAccepted": "Davet kabul edildi",
   "eventInvitationRejected": "Davet reddedildi",
   "eventInvitationsSection": "Davetler",
-  "eventEndedSection": "Biten etkinlikler",
+  "eventEndedSection": "Sona eren",
+  "eventGroupLinkedCardCount": "{count} kart",
+  "@eventGroupLinkedCardCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "eventGroupToday": "Bugün",
+  "eventGroupEndedLastMonth": "Geçen ay sona erdi",
+  "eventGroupEndedThisMonth": "Bu ay sona erdi",
   "eventStatusUpcoming": "Yaklaşıyor",
   "eventStatusOngoing": "Devam ediyor",
   "eventStatusEnded": "Bitti",
@@ -906,6 +1007,8 @@
     }
   },
   "networkGraph": "Ağ Grafiği",
+  "networkGraphLegendMe": "Ben",
+  "networkGraphLegendConnection": "Bağlantı",
   "networkStatistics": "Ağ İstatistikleri",
   "networkGraphLoadFailed": "Ağ grafiği alınamadı.",
   "networkGraphEventDescription": "Bu etkinlikteki kartlar, şirketler ve bağlantılar görsel olarak gösterilir.",
@@ -958,10 +1061,21 @@
     }
   },
   "tapTwoNodesToFindPath": "İki kart düğümüne dokunarak aralarındaki en kısa yolu bulun.",
+  "networkGraphConnectedNodes": "Bağlı düğümler ({count})",
+  "@networkGraphConnectedNodes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "networkGraphNoConnectedNodes": "Bu grafikte bağlı düğüm yok.",
+  "networkGraphConnectionTypes": "Bağlantı türleri",
   "createMyCard": "Kartımı oluştur",
   "continueWithArrow": "Devam →",
-  "swipeHorizontalToSwitchCards": "Yatay kaydırarak kartlar arasında geçin; düzenlemek için karta dokunun.",
-  "tapCardToEdit": "Düzenlemek için karta dokunun.",
+  "swipeHorizontalToSwitchCards": "Yatay kaydırarak kartlar arasında geçin.",
+  "tapCardToEdit": "Detay için karttaki detay düğmesini kullanın.",
+  "kartDetay": "Detay",
   "cardLimitReachedPremiumUpgrade": "Kart limitine ulaştınız. Yeni kart oluşturmak için Premium'a geçebilirsiniz.",
   "viewNetworkGraph": "Ağ grafiğini görüntüle",
   "cardsNotYetSaved": "Kartlarınız henüz kaydedilmedi.",

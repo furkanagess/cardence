@@ -105,7 +105,7 @@ class _NodeLegendShape extends StatelessWidget {
     if (isOwnCard) {
       background = isDark ? AppColors.primaryContainerDark : AppColors.primaryContainer;
       foreground = isDark ? AppColors.onPrimaryContainerDark : AppColors.onPrimaryContainer;
-      border = Colors.amber;
+      border = AppColors.graphOwnCardAccent;
       icon = Icons.person_pin_rounded;
     } else {
       icon = NetworkGraphNodeIcon.iconFor(type);

@@ -87,19 +87,19 @@ class _RegisterLegalNoticeState extends State<RegisterLegalNotice> {
             TextSpan(
               style: baseStyle,
               children: [
-                const TextSpan(text: 'Kayıt olarak '),
+                TextSpan(text: context.l10n.registerLegalPrefix),
                 TextSpan(
                   text: context.l10n.kullanmKoullar,
                   style: linkStyle,
                   recognizer: _termsRecognizer,
                 ),
-                const TextSpan(text: ' ve '),
+                TextSpan(text: context.l10n.registerLegalAnd),
                 TextSpan(
                   text: context.l10n.gizlilikPolitikas,
                   style: linkStyle,
                   recognizer: _privacyRecognizer,
                 ),
-                const TextSpan(text: '\'nı kabul etmiş sayılırsınız.'),
+                TextSpan(text: context.l10n.registerLegalSuffix),
               ],
             ),
           ),

@@ -9,13 +9,13 @@ import 'onboarding_state.dart';
 
 class OnboardingCubit extends Cubit<OnboardingState> {
   OnboardingCubit({
-    required Future<void> Function() completeOnboarding,
+    Future<void> Function()? completeOnboarding,
     required this.persistOnboardingCard,
     OnboardingCardDraft? initialDraft,
   })  : _completeOnboarding = completeOnboarding,
         super(OnboardingState(draft: initialDraft));
 
-  final Future<void> Function() _completeOnboarding;
+  final Future<void> Function()? _completeOnboarding;
   final PersistOnboardingCard persistOnboardingCard;
   OnboardingCardDraft? _pendingDraft;
   bool _draftEmitScheduled = false;
@@ -84,29 +84,34 @@ class OnboardingCubit extends Cubit<OnboardingState> {
     }
   }
 
-  /// Taslağı kaydeder, sunucuda kart oluşturur, onboarding'i tamamlar.
-  Future<bool> finishOnboarding() async {
+  /// Taslağı kaydeder; ilk onboarding'de ayrıca tamamlama bayrağını işaretler.
+  Future<OnboardingCardDraft?> finishOnboarding() async {
     if (!OnboardingValidation.fieldsAreValid(
       displayName: state.draft.displayName,
       company: state.draft.company,
       title: state.draft.title,
       email: state.draft.email,
-    )) return false;
+    )) {
+      return null;
+    }
     emit(state.copyWith(isSaving: true, clearError: true));
     try {
       final syncedDraft = await persistOnboardingCard(state.draft);
       emit(state.copyWith(draft: syncedDraft));
-      await _completeOnboarding();
-      return true;
+      final completeOnboarding = _completeOnboarding;
+      if (completeOnboarding != null) {
+        await completeOnboarding();
+      }
+      return syncedDraft;
     } on AuthApiException catch (e) {
       emit(state.copyWith(isSaving: false, errorMessage: e.message));
-      return false;
+      return null;
     } catch (_) {
       emit(state.copyWith(
         isSaving: false,
         errorMessage: 'Kart kaydedilemedi. Lütfen tekrar deneyin.',
       ));
-      return false;
+      return null;
     } finally {
       if (!isClosed && state.isSaving) {
         emit(state.copyWith(isSaving: false));
@@ -114,11 +119,13 @@ class OnboardingCubit extends Cubit<OnboardingState> {
     }
   }
 
-  /// Skip ile atla – taslak kaydetmeden sadece onboarding tamamlanır.
+  /// Skip ile atla – yalnızca ilk onboarding akışında kullanılır.
   Future<bool> skipOnboarding() async {
+    final completeOnboarding = _completeOnboarding;
+    if (completeOnboarding == null) return false;
     emit(state.copyWith(isSaving: true, clearError: true));
     try {
-      await _completeOnboarding();
+      await completeOnboarding();
       return true;
     } on AuthApiException catch (e) {
       emit(state.copyWith(isSaving: false, errorMessage: e.message));

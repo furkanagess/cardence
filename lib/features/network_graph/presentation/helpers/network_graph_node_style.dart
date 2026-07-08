@@ -36,8 +36,11 @@ class NetworkGraphNodeStyle {
     }
     if (node.isOwnCard) {
       return NetworkGraphNodeStyle(
-        background: AppColors.primaryContainerDark,
-        foreground: AppColors.onPrimaryContainerDark,
+        background:
+            isDark ? AppColors.primaryContainerDark : AppColors.primaryContainer,
+        foreground: isDark
+            ? AppColors.onPrimaryContainerDark
+            : AppColors.onPrimaryContainer,
         border: AppColors.graphOwnCardAccent,
         icon: Icons.person_pin_rounded,
         size: 58,
@@ -57,35 +60,43 @@ class NetworkGraphNodeStyle {
   }
 
   static NetworkGraphNodeStyle _baseForType(GraphNodeType type, bool isDark) {
-    // Grafik siyah zemin üzerinde; koyu palet her zaman kullanılır.
     switch (type) {
       case GraphNodeType.user:
         return NetworkGraphNodeStyle(
-          background: AppColors.surfaceVariantDark,
-          foreground: AppColors.textPrimaryDark,
-          border: AppColors.outlineDark,
+          background:
+              isDark ? AppColors.surfaceVariantDark : AppColors.primaryContainer,
+          foreground: isDark
+              ? AppColors.textPrimaryDark
+              : AppColors.onPrimaryContainer,
+          border: isDark ? AppColors.outlineDark : AppColors.outlineVariant,
           icon: Icons.person_outline_rounded,
           size: 52,
         );
       case GraphNodeType.card:
         return NetworkGraphNodeStyle(
-          background: AppColors.surfaceDark,
-          foreground: AppColors.textPrimaryDark,
-          border: AppColors.primaryLight,
+          background: isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
+          foreground:
+              isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
+          border: isDark ? AppColors.primaryDarkTheme : AppColors.primaryLight,
           icon: Icons.badge_outlined,
           size: 56,
         );
       case GraphNodeType.company:
         return NetworkGraphNodeStyle(
-          background: AppColors.graphCompanyNodeDark,
-          foreground: AppColors.textPrimaryDark,
-          border: AppColors.outlineDark,
+          background: isDark
+              ? AppColors.graphCompanyNodeDark
+              : AppColors.graphCompanyNodeLight,
+          foreground:
+              isDark ? AppColors.textPrimaryDark : AppColors.secondary,
+          border: isDark ? AppColors.outlineDark : AppColors.outline,
           icon: Icons.business_outlined,
           size: 48,
         );
       case GraphNodeType.event:
         return NetworkGraphNodeStyle(
-          background: AppColors.graphEventNodeDark,
+          background: isDark
+              ? AppColors.graphEventNodeDark
+              : AppColors.graphEventNodeLight,
           foreground: AppColors.graphEventAccent,
           border: AppColors.graphEventAccent,
           icon: Icons.event_outlined,
@@ -94,25 +105,33 @@ class NetworkGraphNodeStyle {
       case GraphNodeType.organization:
       case GraphNodeType.organizationEvent:
         return NetworkGraphNodeStyle(
-          background: AppColors.surfaceVariantDark,
-          foreground: AppColors.textPrimaryDark,
-          border: AppColors.outlineDark,
+          background:
+              isDark ? AppColors.surfaceVariantDark : AppColors.surfaceVariant,
+          foreground:
+              isDark ? AppColors.textPrimaryDark : AppColors.textSecondary,
+          border: isDark ? AppColors.outlineDark : AppColors.outlineVariant,
           icon: Icons.apartment_outlined,
           size: 46,
         );
       case GraphNodeType.skill:
         return NetworkGraphNodeStyle(
-          background: AppColors.surfaceVariantDark,
-          foreground: AppColors.textSecondaryDark,
-          border: AppColors.outlineDark,
+          background:
+              isDark ? AppColors.surfaceVariantDark : AppColors.surfaceVariant,
+          foreground: isDark
+              ? AppColors.textSecondaryDark
+              : AppColors.textSecondary,
+          border: isDark ? AppColors.outlineDark : AppColors.outlineVariant,
           icon: Icons.auto_awesome_outlined,
           size: 44,
         );
       case GraphNodeType.location:
         return NetworkGraphNodeStyle(
-          background: AppColors.surfaceVariantDark,
-          foreground: AppColors.textSecondaryDark,
-          border: AppColors.outlineDark,
+          background:
+              isDark ? AppColors.surfaceVariantDark : AppColors.surfaceVariant,
+          foreground: isDark
+              ? AppColors.textSecondaryDark
+              : AppColors.textSecondary,
+          border: isDark ? AppColors.outlineDark : AppColors.outlineVariant,
           icon: Icons.place_outlined,
           size: 44,
         );

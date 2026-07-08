@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/l10n/app_l10n.dart';
+import '../../../../core/l10n/l10n_extensions.dart';
 import '../../../../core/media/profile_photo_image_picker.dart';
-import '../../../../core/permissions/media_permission_datasource.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/atoms/profile_avatar.dart';
 import '../../../auth/domain/usecases/upload_profile_photo.dart';
 
-/// Ayarlar profil kartı — fotoğraf kendi kart(lar)ı ile senkronize edilir.
+/// Ayarlar profil başlığı — ortalanmış avatar, ad ve e-posta.
 class SettingsProfileHeader extends StatefulWidget {
   const SettingsProfileHeader({
     super.key,
@@ -29,7 +30,7 @@ class SettingsProfileHeader extends StatefulWidget {
 
 class _SettingsProfileHeaderState extends State<SettingsProfileHeader> {
   final _photoPicker = ProfilePhotoImagePicker();
-  static const _mediaPermission = MediaPermissionDataSource();
+  static const double _avatarSize = 96;
 
   String? _photoUrl;
   bool _busy = false;
@@ -74,95 +75,91 @@ class _SettingsProfileHeaderState extends State<SettingsProfileHeader> {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final displayName = widget.displayName.trim().isEmpty
+        ? AppL10n.cardenceUser(context.l10n)
+        : widget.displayName.trim();
 
-    final gradientStart = isDark
-        ? AppColors.primaryContainerDark.withValues(alpha: 0.45)
-        : AppColors.primaryContainer.withValues(alpha: 0.55);
-    final gradientEnd = colorScheme.surfaceContainerLowest.withValues(
-      alpha: isDark ? 0.35 : 0.9,
-    );
-
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(24),
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [gradientStart, gradientEnd],
-        ),
-        border: Border.all(
-          color: isDark
-              ? AppColors.outlineDark.withValues(alpha: 0.3)
-              : AppColors.outlineVariant.withValues(alpha: 0.55),
-        ),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 26, 20, 22),
-        child: Column(
-          children: [
-            Stack(
-              alignment: Alignment.center,
-              children: [
-                DecoratedBox(
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 8, 20, 8),
+      child: Column(
+        children: [
+          Stack(
+            clipBehavior: Clip.none,
+            alignment: Alignment.center,
+            children: [
+              ProfileAvatar(
+                photoUrl: _photoUrl,
+                displayName: displayName,
+                size: _avatarSize,
+                circular: true,
+                onTap: _busy ? null : _pickAndUploadPhoto,
+              ),
+              if (_busy)
+                Container(
+                  width: _avatarSize,
+                  height: _avatarSize,
                   decoration: BoxDecoration(
+                    color: colorScheme.surface.withValues(alpha: 0.55),
                     shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: AppColors.primary.withValues(alpha: 0.12),
-                        blurRadius: 20,
-                        offset: const Offset(0, 8),
+                  ),
+                  child: const Padding(
+                    padding: EdgeInsets.all(30),
+                    child: CircularProgressIndicator(strokeWidth: 2.5),
+                  ),
+                )
+              else
+                Positioned(
+                  right: 0,
+                  bottom: 0,
+                  child: Material(
+                    color: AppColors.primary,
+                    shape: const CircleBorder(),
+                    elevation: 2,
+                    shadowColor: AppColors.primary.withValues(alpha: 0.35),
+                    child: InkWell(
+                      customBorder: const CircleBorder(),
+                      onTap: _pickAndUploadPhoto,
+                      child: const SizedBox(
+                        width: 30,
+                        height: 30,
+                        child: Icon(
+                          Icons.edit_rounded,
+                          size: 16,
+                          color: AppColors.textOnPrimary,
+                        ),
                       ),
-                    ],
-                  ),
-                  child: ProfileAvatar(
-                    photoUrl: _photoUrl,
-                    displayName: widget.displayName,
-                    size: 88,
-                    circular: true,
-                    onTap: _busy ? null : _pickAndUploadPhoto,
-                    showEditBadge: !_busy,
-                  ),
-                ),
-                if (_busy)
-                  Container(
-                    width: 88,
-                    height: 88,
-                    decoration: BoxDecoration(
-                      color: colorScheme.surface.withValues(alpha: 0.55),
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Padding(
-                      padding: EdgeInsets.all(26),
-                      child: CircularProgressIndicator(strokeWidth: 2.5),
                     ),
                   ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            Text(
-              widget.displayName,
-              textAlign: TextAlign.center,
-              style: textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.w600,
-                letterSpacing: -0.3,
-                color: isDark
-                    ? AppColors.textPrimaryDark
-                    : AppColors.textPrimary,
-              ),
-            ),
-            if (widget.email != null && widget.email!.trim().isNotEmpty) ...[
-              const SizedBox(height: 4),
-              Text(
-                widget.email!.trim(),
-                textAlign: TextAlign.center,
-                style: textTheme.bodyMedium?.copyWith(
-                  color: colorScheme.onSurfaceVariant,
-                  height: 1.35,
                 ),
-              ),
             ],
+          ),
+          const SizedBox(height: 14),
+          Text(
+            displayName,
+            textAlign: TextAlign.center,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: textTheme.titleLarge?.copyWith(
+              fontWeight: FontWeight.w800,
+              letterSpacing: -0.35,
+              height: 1.15,
+              color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
+            ),
+          ),
+          if (widget.email != null && widget.email!.trim().isNotEmpty) ...[
+            const SizedBox(height: 4),
+            Text(
+              widget.email!.trim(),
+              textAlign: TextAlign.center,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: textTheme.bodyMedium?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+                height: 1.35,
+              ),
+            ),
           ],
-        ),
+        ],
       ),
     );
   }

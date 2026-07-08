@@ -1,16 +1,13 @@
 import 'package:flutter/material.dart';
-import '../../../../core/l10n/app_l10n.dart';
 import '../../../../core/l10n/l10n_extensions.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/atoms/custom_text_field.dart';
 
-/// Görünüm modu, genişleyen arama ve filtre erişimi.
+/// Arama ve filtre araç çubuğu.
 class SavedCardsScreenToolbar extends StatefulWidget {
   const SavedCardsScreenToolbar({
     super.key,
-    required this.showFlippableView,
-    required this.onViewModeChanged,
     required this.searchQuery,
     required this.onSearchQueryChanged,
     required this.hasActiveFilters,
@@ -19,8 +16,6 @@ class SavedCardsScreenToolbar extends StatefulWidget {
     required this.onOpenFilters,
   });
 
-  final bool showFlippableView;
-  final ValueChanged<bool> onViewModeChanged;
   final String searchQuery;
   final ValueChanged<String> onSearchQueryChanged;
   final bool hasActiveFilters;
@@ -34,15 +29,15 @@ class SavedCardsScreenToolbar extends StatefulWidget {
 }
 
 class _SavedCardsScreenToolbarState extends State<SavedCardsScreenToolbar> {
-  bool _searchExpanded = false;
+  static const double _fieldHeight = 48;
+  static const double _fieldRadius = 10;
+
   late final TextEditingController _searchController;
-  late final FocusNode _searchFocusNode;
 
   @override
   void initState() {
     super.initState();
     _searchController = TextEditingController(text: widget.searchQuery);
-    _searchFocusNode = FocusNode();
   }
 
   @override
@@ -56,121 +51,97 @@ class _SavedCardsScreenToolbarState extends State<SavedCardsScreenToolbar> {
   @override
   void dispose() {
     _searchController.dispose();
-    _searchFocusNode.dispose();
     super.dispose();
-  }
-
-  void _expandSearch() {
-    setState(() => _searchExpanded = true);
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      _searchFocusNode.requestFocus();
-    });
-  }
-
-  void _collapseSearch({bool clearQuery = false}) {
-    _searchFocusNode.unfocus();
-    if (clearQuery && _searchController.text.isNotEmpty) {
-      _searchController.clear();
-      widget.onSearchQueryChanged('');
-    }
-    setState(() => _searchExpanded = false);
   }
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-
-    final l10n = context.l10n;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final fieldFillColor =
+        isDark ? AppColors.surfaceVariantDark : AppColors.surfaceLight;
+    final fieldBorderColor = isDark ? AppColors.outlineDark : AppColors.outline;
+    final iconColor =
+        isDark ? AppColors.textSecondaryDark : AppColors.textSecondary;
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
-      child: AnimatedSize(
-        duration: const Duration(milliseconds: 220),
-        curve: Curves.easeOutCubic,
-        alignment: Alignment.topCenter,
-        child: Row(
-          children: [
-            Expanded(
-              child: _searchExpanded
-                  ? CustomTextField(
-                      controller: _searchController,
-                      focusNode: _searchFocusNode,
-                      hintText: AppL10n.isimirketEPosta(l10n),
-                      prefixIcon: const Icon(Icons.search_rounded, size: 22),
-                      suffixIcon: IconButton(
-                        tooltip: AppL10n.aramayKapat(l10n),
-                        onPressed: () => _collapseSearch(clearQuery: true),
-                        icon: const Icon(Icons.close_rounded, size: 20),
-                        visualDensity: VisualDensity.compact,
-                      ),
-                      textInputAction: TextInputAction.search,
-                      onChanged: widget.onSearchQueryChanged,
-                      onSubmitted: widget.onSearchQueryChanged,
-                    )
-                  : SegmentedButton<int>(
-                      segments: [
-                        ButtonSegment(
-                          value: 0,
-                          label: Text(AppL10n.kart(l10n)),
-                          icon: Icon(Icons.style_rounded, size: 18),
-                        ),
-                        ButtonSegment(
-                          value: 1,
-                          label: Text(AppL10n.liste(l10n)),
-                          icon: Icon(Icons.view_list_rounded, size: 18),
-                        ),
-                      ],
-                      selected: {widget.showFlippableView ? 0 : 1},
-                      showSelectedIcon: false,
-                      onSelectionChanged: (set) =>
-                          widget.onViewModeChanged(set.first == 0),
+      padding: const EdgeInsets.fromLTRB(20, 12, 20, 8),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Expanded(
+            child: SizedBox(
+              height: _fieldHeight,
+              child: CustomTextField(
+                controller: _searchController,
+                textInputAction: TextInputAction.search,
+                onChanged: widget.onSearchQueryChanged,
+                onSubmitted: widget.onSearchQueryChanged,
+                decoration: CustomTextField.themedDecoration(
+                  context,
+                  hintText: context.l10n.search,
+                  prefixIcon: const Icon(Icons.search_rounded, size: 22),
+                  suffixIcon: widget.hasActiveSearch
+                      ? IconButton(
+                          tooltip: context.l10n.aramayKapat,
+                          onPressed: () => widget.onSearchQueryChanged(''),
+                          icon: const Icon(Icons.close_rounded, size: 20),
+                          visualDensity: VisualDensity.compact,
+                        )
+                      : null,
+                ).copyWith(
+                  filled: true,
+                  fillColor: fieldFillColor,
+                  isDense: true,
+                  contentPadding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(_fieldRadius),
+                    borderSide: BorderSide(color: fieldBorderColor),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(_fieldRadius),
+                    borderSide: BorderSide(
+                      color: isDark
+                          ? AppColors.primaryDarkTheme
+                          : AppColors.primary,
+                      width: 2,
                     ),
-            ),
-            if (!_searchExpanded) ...[
-              IconButton(
-                tooltip: widget.hasActiveSearch
-                    ? AppL10n.searchActive(l10n)
-                    : AppL10n.search(l10n),
-                onPressed: _expandSearch,
-                icon: Badge(
-                  isLabelVisible: widget.hasActiveSearch,
-                  backgroundColor: AppColors.primary,
-                  child: Icon(
-                    Icons.search_rounded,
-                    color: widget.hasActiveSearch
-                        ? AppColors.primary
-                        : colorScheme.onSurfaceVariant,
                   ),
                 ),
-                style: IconButton.styleFrom(
-                  visualDensity: VisualDensity.compact,
-                ),
-              ),
-            ],
-            IconButton(
-              tooltip: widget.hasActiveFilters
-                  ? AppL10n.filterActive(l10n, widget.activeFilterCount)
-                  : AppL10n.filter(l10n),
-              onPressed: widget.onOpenFilters,
-              icon: Badge(
-                isLabelVisible: widget.hasActiveFilters,
-                label: Text('${widget.activeFilterCount}'),
-                backgroundColor: AppColors.primary,
-                textColor: AppColors.textOnPrimary,
-                child: Icon(
-                  Icons.tune_rounded,
-                  color: widget.hasActiveFilters
-                      ? AppColors.primary
-                      : colorScheme.onSurfaceVariant,
-                ),
-              ),
-              style: IconButton.styleFrom(
-                visualDensity: VisualDensity.compact,
               ),
             ),
-          ],
-        ),
+          ),
+          const SizedBox(width: 10),
+          Material(
+            color: fieldFillColor,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(_fieldRadius),
+              side: BorderSide(color: fieldBorderColor),
+            ),
+            child: InkWell(
+              onTap: widget.onOpenFilters,
+              borderRadius: BorderRadius.circular(_fieldRadius),
+              child: SizedBox(
+                width: _fieldHeight,
+                height: _fieldHeight,
+                child: Center(
+                  child: Badge(
+                    isLabelVisible: widget.hasActiveFilters,
+                    label: Text('${widget.activeFilterCount}'),
+                    backgroundColor: AppColors.primary,
+                    textColor: AppColors.textOnPrimary,
+                    child: Icon(
+                      Icons.tune_rounded,
+                      color: widget.hasActiveFilters
+                          ? AppColors.primary
+                          : iconColor,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

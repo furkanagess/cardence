@@ -1,16 +1,15 @@
 import 'package:flutter/material.dart';
 import '../../../core/l10n/app_l10n.dart';
 import '../../../core/l10n/l10n_extensions.dart';
-import 'package:flip_card/flip_card.dart';
 
-import '../atoms/custom_button.dart';
 import '../molecules/card_effect_overlay.dart';
+import '../molecules/card_preview_action_strip.dart';
 import '../../domain/card_visual_effect.dart';
 import 'person_info_card.dart';
 
-/// Dikdörtgen (kartvizit oranında), çevrilebilir kişi kartı.
-/// [flip_card] paketi ile; ön yüz [frontEntries], arka yüz [backEntries]. Sağ altta flip ikonu.
-class FlippablePersonCard extends StatefulWidget {
+/// Dikdörtgen (kartvizit oranında) kişi kartı önizlemesi.
+/// Alt sağda detay ve iletişim kısayolları; çevrilebilir değil.
+class FlippablePersonCard extends StatelessWidget {
   const FlippablePersonCard({
     super.key,
     this.title,
@@ -27,6 +26,7 @@ class FlippablePersonCard extends StatefulWidget {
     this.photoUrl,
     this.cardId,
     this.onTap,
+    this.onDetailTap,
     this.onDoubleTap,
     this.showAppLogo = true,
     this.showPremiumBadge = false,
@@ -39,6 +39,8 @@ class FlippablePersonCard extends StatefulWidget {
     this.jobTitle,
     this.contactFieldsTappable = true,
     this.cardEffect = CardVisualEffect.none,
+    this.showActionStrip = true,
+    this.heroTag,
   });
 
   final String? title;
@@ -47,7 +49,7 @@ class FlippablePersonCard extends StatefulWidget {
   /// Ön yüzde gösterilecek alanlar (örn. şirket, ünvan, e-posta).
   final List<({String label, String value})> frontEntries;
 
-  /// Arka yüzde gösterilecek alanlar (örn. iletişim, linkler).
+  /// Eski flip arka yüzü; artık önizlemede kullanılmaz.
   final List<({String label, String value})> backEntries;
   final String? emptyMessage;
   final String? backEmptyMessage;
@@ -55,14 +57,19 @@ class FlippablePersonCard extends StatefulWidget {
   final String? backEmptyActionLabel;
   final VoidCallback? onBackEditTap;
 
-  /// Kart vurgu rengi (ikonlar, flip butonu). null ise tema primary.
+  /// Kart vurgu rengi (ikonlar vb.). null ise tema primary.
   final Color? accentColor;
 
   /// Kart arka plan rengi. null ise tema surface.
   final Color? backgroundColor;
   final String? photoUrl;
   final String? cardId;
+
+  /// @deprecated Kart gövdesine dokunma kaldırıldı; [onDetailTap] kullanın.
   final VoidCallback? onTap;
+
+  /// Detay ekranına gitme.
+  final VoidCallback? onDetailTap;
   final VoidCallback? onDoubleTap;
 
   /// false: Cardence köşe logosu gizlenir (elle girilen kartlar).
@@ -71,7 +78,7 @@ class FlippablePersonCard extends StatefulWidget {
   /// true: premium kart sahibi rozeti gösterilir.
   final bool showPremiumBadge;
 
-  /// true: karta dokunarak çevirme.
+  /// Artık kullanılmaz; geriye dönük uyumluluk için tutulur.
   final bool flipOnTouch;
 
   /// Alt iletişim (e-posta / telefon, ikonlu liste).
@@ -84,6 +91,26 @@ class FlippablePersonCard extends StatefulWidget {
   final bool contactFieldsTappable;
   final CardVisualEffect cardEffect;
 
+  /// true: alt sağda detay + iletişim ikonları; kart içi iletişim satırları gizlenir.
+  final bool showActionStrip;
+
+  /// Detay geçişinde kart yüzünün Hero animasyonu için etiket.
+  final String? heroTag;
+
+  /// Hero etiketi kapsamları — IndexedStack sekmeleri arasında çakışmayı önler.
+  static const String heroScopeWallet = 'wallet';
+  static const String heroScopeProfile = 'profile';
+
+  /// Kayıtlı / profil kartı detay geçişi için standart Hero etiketi.
+  static String? heroTagForCardId(
+    String? cardId, {
+    String scope = heroScopeWallet,
+  }) {
+    final trimmed = cardId?.trim();
+    if (trimmed == null || trimmed.isEmpty) return null;
+    return 'saved-card-$scope-$trimmed';
+  }
+
   /// Kartvizit oranı: genişlik / yükseklik (ISO 7810 ID-1 ~ 85.6×53.98 mm).
   static const double cardAspectRatio = 1.586;
 
@@ -92,27 +119,25 @@ class FlippablePersonCard extends StatefulWidget {
 
   static const int maxVisibleEntriesPerSide = 3;
 
-  @override
-  State<FlippablePersonCard> createState() => _FlippablePersonCardState();
-}
+  VoidCallback? get _resolvedDetailTap => onDetailTap ?? onTap;
 
-class _FlippablePersonCardState extends State<FlippablePersonCard>
-    with SingleTickerProviderStateMixin {
-  final GlobalKey<FlipCardState> _cardKey = GlobalKey<FlipCardState>();
-  bool _isFlipping = false;
-
-  /// Kart arka planına göre metin/ikon rengi (kart içeriği ile aynı).
-  static Color _flipIconColor(Color cardSurface) {
-    return cardSurface.computeLuminance() > 0.5
-        ? const Color(0xFF1C1C1C)
-        : const Color(0xFFF5F5F5);
+  bool get _shouldShowActionStrip {
+    if (!showActionStrip) return false;
+    return _resolvedDetailTap != null ||
+        contactEmail?.trim().isNotEmpty == true ||
+        contactPhone?.trim().isNotEmpty == true ||
+        contactLinkedin?.trim().isNotEmpty == true;
   }
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final cardSurface = widget.backgroundColor ?? colorScheme.surface;
-    final flipIconColor = widget.accentColor ?? _flipIconColor(cardSurface);
+    final cardSurface = backgroundColor ?? colorScheme.surface;
+    final cardFace = _wrapWithEffect(_buildFront(context));
+    final heroChild = Material(
+      color: Colors.transparent,
+      child: cardFace,
+    );
 
     return AspectRatio(
       aspectRatio: FlippablePersonCard.cardAspectRatio,
@@ -124,45 +149,27 @@ class _FlippablePersonCardState extends State<FlippablePersonCard>
             Positioned.fill(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(2, 0, 2, 8),
-                child: GestureDetector(
-                  onTap: widget.onTap,
-                  onDoubleTap: widget.onDoubleTap,
-                  child: FlipCard(
-                    key: _cardKey,
-                    side: CardSide.FRONT,
-                    direction: FlipDirection.HORIZONTAL,
-                    speed: 400,
-                    flipOnTouch: widget.flipOnTouch,
-                    onFlip: () {
-                      setState(() => _isFlipping = true);
-                    },
-                    onFlipDone: (isFront) {
-                      setState(() => _isFlipping = false);
-                    },
-                    front: _buildFront(context),
-                    back: _buildBack(context),
-                  ),
-                ),
+                child: heroTag == null
+                    ? heroChild
+                    : Hero(
+                        tag: heroTag!,
+                        child: heroChild,
+                      ),
               ),
             ),
-            if (!_isFlipping)
+            if (_shouldShowActionStrip)
               Positioned(
-                right: _flipButtonRight,
-                bottom: _flipButtonBottom,
-                child: Material(
-                  color: Colors.transparent,
-                  child: InkWell(
-                    borderRadius: BorderRadius.circular(20),
-                    onTap: () => _cardKey.currentState?.toggleCard(),
-                    child: Padding(
-                      padding: const EdgeInsets.all(_flipIconPadding),
-                      child: Icon(
-                        Icons.replay_circle_filled_outlined,
-                        color: flipIconColor,
-                        size: _flipIconSize,
-                      ),
-                    ),
-                  ),
+                left: 2,
+                right: 2,
+                bottom: 24,
+                child: CardPreviewActionStrip(
+                  cardSurfaceColor: cardSurface,
+                  accentColor: accentColor,
+                  onDetailTap: _resolvedDetailTap,
+                  email: contactEmail,
+                  phone: contactPhone,
+                  linkedin: contactLinkedin,
+                  contactFieldsTappable: contactFieldsTappable,
                 ),
               ),
           ],
@@ -171,16 +178,10 @@ class _FlippablePersonCardState extends State<FlippablePersonCard>
     );
   }
 
-  static const double _flipButtonBottom = 16;
-  static const double _flipButtonRight = 6;
-  static const double _flipIconSize = 26;
-  static const double _flipIconPadding = 6;
-  static const double _flipIconTouchSize = _flipIconPadding * 2 + _flipIconSize;
-
   Widget _wrapWithEffect(Widget card) {
     return CardEffectOverlay(
-      effect: widget.cardEffect,
-      accentColor: widget.accentColor,
+      effect: cardEffect,
+      accentColor: accentColor,
       borderRadius: BorderRadius.circular(PersonInfoCard.compactCardRadius),
       child: card,
     );
@@ -188,118 +189,33 @@ class _FlippablePersonCardState extends State<FlippablePersonCard>
 
   Widget _buildFront(BuildContext context) {
     final defaultEmpty = AppL10n.noInfoYet(context.l10n);
-    final resolvedEmpty = widget.emptyMessage ?? defaultEmpty;
+    final resolvedEmpty = emptyMessage ?? defaultEmpty;
 
-    return _wrapWithEffect(
-      PersonInfoCard(
-        title: widget.title,
-        titleSecondary: widget.titleSecondary,
-        entries: widget.frontEntries
-            .take(FlippablePersonCard.maxVisibleEntriesPerSide)
-            .toList(),
-        emptyMessage: resolvedEmpty,
-        compact: true,
-        fillHeight: true,
-        accentColor: widget.accentColor,
-        backgroundColor: widget.backgroundColor,
-        photoUrl: widget.photoUrl,
-        bottomRightInset: _flipIconTouchSize,
-        showAppLogo: widget.showAppLogo,
-        showPremiumBadge: widget.showPremiumBadge,
-        contactEmail: widget.contactEmail,
-        contactPhone: widget.contactPhone,
-        contactWebsite: widget.contactWebsite,
-        contactLinkedin: widget.contactLinkedin,
-        visibleContactFields: widget.visibleContactFields,
-        jobTitle: widget.jobTitle,
-        contactFieldsTappable: widget.contactFieldsTappable,
-      ),
-    );
-  }
-
-  Widget _buildBack(BuildContext context) {
-    final hasBackContent = widget.backEntries.isNotEmpty;
-    final showCenteredAddNote =
-        !hasBackContent && widget.onBackEmptyActionTap != null;
-    final defaultEmpty = AppL10n.noInfoYet(context.l10n);
-    final resolvedEmpty = widget.emptyMessage ?? defaultEmpty;
-
-    return _wrapWithEffect(
-      showCenteredAddNote
-          ? _buildBackShell(
-              context,
-              Center(
-                child: CustomButton.tonal(
-                  label: widget.backEmptyActionLabel ?? context.l10n.notEkle,
-                  icon: Icons.add_rounded,
-                  onPressed: widget.onBackEmptyActionTap,
-                  fullWidth: false,
-                  style: FilledButton.styleFrom(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                ),
-              ),
-            )
-          : PersonInfoCard(
-              // Arka yüz: yalnızca kart ID + hakkımda (isim/şirket/ünvan yok).
-              entries: widget.backEntries
-                  .take(FlippablePersonCard.maxVisibleEntriesPerSide)
-                  .toList(),
-              emptyMessage: widget.backEmptyMessage ?? resolvedEmpty,
-              emptyActionLabel: widget.backEmptyActionLabel,
-              onEmptyActionTap: widget.onBackEmptyActionTap,
-              onNoteEditTap: widget.onBackEditTap,
-              compact: true,
-              compactBackFace: true,
-              fillHeight: true,
-              cardId: widget.cardId,
-              showCardIdOnBack: true,
-              accentColor: widget.accentColor,
-              backgroundColor: widget.backgroundColor,
-              bottomRightInset: _flipIconTouchSize,
-              showAppLogo: widget.showAppLogo,
-              showPremiumBadge: widget.showPremiumBadge,
-            ),
-    );
-  }
-
-  Widget _buildBackShell(BuildContext context, Widget child) {
-    final surface =
-        widget.backgroundColor ?? Theme.of(context).colorScheme.surface;
-    final isSurfaceDark = surface.computeLuminance() < 0.35;
-    final shadowOpacity = isSurfaceDark ? 0.52 : 0.24;
-    const depth = 12.0;
-    const blurMain = 30.0;
-    const radius = PersonInfoCard.compactCardRadius;
-
-    return Container(
-      width: double.infinity,
-      height: double.infinity,
-      decoration: BoxDecoration(
-        color: surface,
-        borderRadius: BorderRadius.circular(radius),
-        border: Border.all(
-          color: (widget.accentColor ?? surface).withValues(alpha: 0.22),
-        ),
-        boxShadow: PersonInfoCard.compactCardShadows(
-          isSurfaceDark: isSurfaceDark,
-          shadowOpacity: shadowOpacity,
-          depth: depth,
-          blurMain: blurMain,
-        ),
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(radius - 1),
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            PersonInfoCard.compactCardTopHighlight(isSurfaceDark),
-            child,
-          ],
-        ),
-      ),
+    return PersonInfoCard(
+      title: title,
+      titleSecondary: titleSecondary,
+      entries: frontEntries
+          .take(FlippablePersonCard.maxVisibleEntriesPerSide)
+          .toList(),
+      emptyMessage: resolvedEmpty,
+      compact: true,
+      fillHeight: true,
+      accentColor: accentColor,
+      backgroundColor: backgroundColor,
+      photoUrl: photoUrl,
+      bottomInset:
+          _shouldShowActionStrip ? CardPreviewActionStrip.chipSize + 10 : 0,
+      hideContactFooter: _shouldShowActionStrip,
+      showAppLogo: showAppLogo,
+      showPremiumBadge: showPremiumBadge,
+      contactEmail: contactEmail,
+      contactPhone: contactPhone,
+      contactWebsite: contactWebsite,
+      contactLinkedin: contactLinkedin,
+      visibleContactFields:
+          _shouldShowActionStrip ? const [] : visibleContactFields,
+      jobTitle: jobTitle,
+      contactFieldsTappable: contactFieldsTappable,
     );
   }
 }

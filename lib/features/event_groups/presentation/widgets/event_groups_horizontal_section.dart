@@ -3,23 +3,24 @@ import 'package:flutter/material.dart';
 import '../../domain/entities/event_group.dart';
 import 'event_group_list_card.dart';
 
-/// Başlıklı yatay etkinlik grubu listesi.
-class EventGroupsHorizontalSection extends StatelessWidget {
-  const EventGroupsHorizontalSection({
+/// Başlıklı dikey etkinlik grubu listesi.
+class EventGroupsSection extends StatelessWidget {
+  const EventGroupsSection({
     super.key,
     required this.title,
     required this.groups,
     required this.linkedCardCountFor,
     required this.onGroupTap,
+    this.uppercaseTitle = false,
   });
 
   final String title;
   final List<EventGroup> groups;
   final int Function(EventGroup group) linkedCardCountFor;
   final ValueChanged<EventGroup> onGroupTap;
+  final bool uppercaseTitle;
 
-  static const double cardWidth = 280;
-  static const double cardSpacing = 12;
+  static const double cardSpacing = 10;
 
   @override
   Widget build(BuildContext context) {
@@ -34,34 +35,27 @@ class EventGroupsHorizontalSection extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.only(bottom: 10),
           child: Text(
-            title,
-            style: textTheme.titleSmall?.copyWith(
-              color: colorScheme.onSurface,
-              fontWeight: FontWeight.w800,
+            uppercaseTitle ? title.toUpperCase() : title,
+            style: (uppercaseTitle
+                    ? textTheme.labelLarge
+                    : textTheme.titleSmall)
+                ?.copyWith(
+              color: uppercaseTitle
+                  ? colorScheme.onSurfaceVariant
+                  : colorScheme.onSurface,
+              fontWeight: uppercaseTitle ? FontWeight.w700 : FontWeight.w800,
+              letterSpacing: uppercaseTitle ? 0.8 : -0.2,
             ),
           ),
         ),
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          clipBehavior: Clip.none,
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              for (var index = 0; index < groups.length; index++) ...[
-                if (index > 0) const SizedBox(width: cardSpacing),
-                SizedBox(
-                  width: cardWidth,
-                  child: EventGroupListCard(
-                    group: groups[index],
-                    linkedCardCount: linkedCardCountFor(groups[index]),
-                    onTap: () => onGroupTap(groups[index]),
-                    compact: true,
-                  ),
-                ),
-              ],
-            ],
+        for (var index = 0; index < groups.length; index++) ...[
+          if (index > 0) const SizedBox(height: cardSpacing),
+          EventGroupListCard(
+            group: groups[index],
+            linkedCardCount: linkedCardCountFor(groups[index]),
+            onTap: () => onGroupTap(groups[index]),
           ),
-        ),
+        ],
       ],
     );
   }

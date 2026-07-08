@@ -6,6 +6,7 @@ Etkinlik grupları sekmesi, detay ekranı ve ilişkili sheet'ler.
 |-------|-------|
 | Liste | `lib/features/event_groups/presentation/pages/event_groups_page.dart` |
 | Detay | `lib/features/event_groups/presentation/pages/event_group_detail_page.dart` |
+| Detay (Stitch) | `docs/stitch-ui/19-event-group-detail.md` |
 | Grup oluştur | `lib/features/event_groups/presentation/widgets/create_event_group_sheet.dart` |
 | Gruba kart ekle | `lib/features/event_groups/presentation/widgets/pick_saved_cards_for_group_sheet.dart` |
 | Karta grup bağla | `lib/features/event_groups/presentation/widgets/pick_event_groups_for_card_sheet.dart` |

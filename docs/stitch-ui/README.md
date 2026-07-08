@@ -22,8 +22,8 @@ Bu klasör, Cardence mobil uygulamasının her ekranı için **Google Stitch** (
 | Dosya | Ekran |
 |-------|-------|
 | [01-splash.md](./01-splash.md) | Splash / Yükleme |
-| [02-login.md](./02-login.md) | Giriş |
-| [03-register.md](./03-register.md) | Kayıt ol |
+| [02-login.md](./02-login.md) | Giriş (hero + form panel, e-posta/telefon, LinkedIn) |
+| [03-register.md](./03-register.md) | Kayıt ol (ad/soyad, yasal onay, login ile görsel aile) |
 | [04-forgot-password.md](./04-forgot-password.md) | Şifremi unuttum |
 
 ### Onboarding (5 adım)
@@ -46,7 +46,8 @@ Bu klasör, Cardence mobil uygulamasının her ekranı için **Google Stitch** (
 
 | Dosya | Ekran |
 |-------|-------|
-| [18-event-groups.md](./18-event-groups.md) | Etkinlik grupları (liste, detay, sheet'ler) |
+| [18-event-groups.md](./18-event-groups.md) | Etkinlik grupları (liste, sheet'ler) |
+| [19-event-group-detail.md](./19-event-group-detail.md) | Etkinlik detay |
 
 ### Profil / Kendi kartlarım
 
@@ -60,6 +61,17 @@ Bu klasör, Cardence mobil uygulamasının her ekranı için **Google Stitch** (
 |-------|-------|
 | [25-settings.md](./25-settings.md) | Ayarlar |
 | [26-support.md](./26-support.md) | Destek |
+
+### App Store
+
+| Dosya | Ekran |
+|-------|-------|
+| [30-app-store-screenshots.md](./30-app-store-screenshots.md) | App Store vitrin indeks |
+| [30-app-store-screenshot-01-hero.md](./30-app-store-screenshot-01-hero.md) | Screenshot 1 — Dijital kimlik |
+| [31-app-store-screenshot-02-wallet.md](./31-app-store-screenshot-02-wallet.md) | Screenshot 2 — Cüzdan |
+| [32-app-store-screenshot-03-events.md](./32-app-store-screenshot-03-events.md) | Screenshot 3 — Etkinlik grupları |
+| [33-app-store-screenshot-04-network-graph.md](./33-app-store-screenshot-04-network-graph.md) | Screenshot 4 — Ağ grafiği |
+| [34-app-store-screenshot-05-card-detail.md](./34-app-store-screenshot-05-card-detail.md) | Screenshot 5 — Kart detay |
 
 ### Ortak bileşenler
 

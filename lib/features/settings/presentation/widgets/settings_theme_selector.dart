@@ -16,50 +16,38 @@ class SettingsThemeSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textTheme = Theme.of(context).textTheme;
 
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: colorScheme.surfaceContainerLowest.withValues(
-          alpha: isDark ? 0.55 : 0.85,
-        ),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: isDark
-              ? AppColors.outlineDark.withValues(alpha: 0.35)
-              : AppColors.outlineVariant.withValues(alpha: 0.65),
-        ),
+        color: AppColors.primaryContainer.withValues(alpha: isDark ? 0.28 : 0.42),
+        borderRadius: BorderRadius.circular(12),
       ),
       child: Padding(
-        padding: const EdgeInsets.all(6),
+        padding: const EdgeInsets.all(4),
         child: Row(
           children: [
-            Expanded(
-              child: _ThemeOptionChip(
-                label: context.l10n.ak,
-                icon: Icons.wb_sunny_outlined,
-                selected: current == ThemePreference.light,
-                onTap: () => onChanged(ThemePreference.light),
-              ),
+            _Segment(
+              label: context.l10n.sistem,
+              selected: current == ThemePreference.system,
+              onTap: () => onChanged(ThemePreference.system),
+              textTheme: textTheme,
+              isDark: isDark,
             ),
-            const SizedBox(width: 6),
-            Expanded(
-              child: _ThemeOptionChip(
-                label: context.l10n.koyu,
-                icon: Icons.dark_mode_outlined,
-                selected: current == ThemePreference.dark,
-                onTap: () => onChanged(ThemePreference.dark),
-              ),
+            _Segment(
+              label: context.l10n.ak,
+              selected: current == ThemePreference.light,
+              onTap: () => onChanged(ThemePreference.light),
+              textTheme: textTheme,
+              isDark: isDark,
             ),
-            const SizedBox(width: 6),
-            Expanded(
-              child: _ThemeOptionChip(
-                label: context.l10n.sistem,
-                icon: Icons.smartphone_outlined,
-                selected: current == ThemePreference.system,
-                onTap: () => onChanged(ThemePreference.system),
-              ),
+            _Segment(
+              label: context.l10n.koyu,
+              selected: current == ThemePreference.dark,
+              onTap: () => onChanged(ThemePreference.dark),
+              textTheme: textTheme,
+              isDark: isDark,
             ),
           ],
         ),
@@ -68,66 +56,60 @@ class SettingsThemeSelector extends StatelessWidget {
   }
 }
 
-class _ThemeOptionChip extends StatelessWidget {
-  const _ThemeOptionChip({
+class _Segment extends StatelessWidget {
+  const _Segment({
     required this.label,
-    required this.icon,
     required this.selected,
     required this.onTap,
+    required this.textTheme,
+    required this.isDark,
   });
 
   final String label;
-  final IconData icon;
   final bool selected;
   final VoidCallback onTap;
+  final TextTheme textTheme;
+  final bool isDark;
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    final selectedFill = isDark
-        ? AppColors.primaryDarkTheme.withValues(alpha: 0.22)
-        : AppColors.primaryContainer.withValues(alpha: 0.75);
-    final selectedForeground =
-        isDark ? AppColors.primaryDarkTheme : AppColors.primary;
-
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(14),
-        onTap: onTap,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          curve: Curves.easeOutCubic,
-          padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 6),
-          decoration: BoxDecoration(
-            color: selected ? selectedFill : Colors.transparent,
-            borderRadius: BorderRadius.circular(14),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                icon,
-                size: 22,
+    return Expanded(
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(10),
+          onTap: onTap,
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            curve: Curves.easeOutCubic,
+            padding: const EdgeInsets.symmetric(vertical: 10),
+            decoration: BoxDecoration(
+              color: selected
+                  ? (isDark ? AppColors.surfaceDark : AppColors.surfaceLight)
+                  : Colors.transparent,
+              borderRadius: BorderRadius.circular(10),
+              boxShadow: selected && !isDark
+                  ? [
+                      BoxShadow(
+                        color: AppColors.textPrimary.withValues(alpha: 0.08),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ]
+                  : null,
+            ),
+            alignment: Alignment.center,
+            child: Text(
+              label,
+              style: textTheme.labelLarge?.copyWith(
+                fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
                 color: selected
-                    ? selectedForeground
-                    : colorScheme.onSurfaceVariant,
+                    ? (isDark
+                        ? AppColors.textPrimaryDark
+                        : AppColors.textPrimary)
+                    : Theme.of(context).colorScheme.onSurfaceVariant,
               ),
-              const SizedBox(height: 8),
-              Text(
-                label,
-                style: textTheme.labelLarge?.copyWith(
-                  fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
-                  letterSpacing: -0.1,
-                  color: selected
-                      ? selectedForeground
-                      : colorScheme.onSurfaceVariant,
-                ),
-              ),
-            ],
+            ),
           ),
         ),
       ),

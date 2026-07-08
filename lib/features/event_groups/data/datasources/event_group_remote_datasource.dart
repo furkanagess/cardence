@@ -1,7 +1,10 @@
+import 'dart:io';
+
+import 'package:dio/dio.dart';
+
 import '../../../../core/network/api_response_parser.dart';
 import '../../../../core/network/auth_api_exception.dart';
 import '../../../../core/network/dio_api_client.dart';
-import 'package:dio/dio.dart';
 import '../models/event_group_model.dart';
 import '../models/event_group_invitation_model.dart';
 
@@ -197,8 +200,23 @@ class EventGroupRemoteDataSourceImpl implements EventGroupRemoteDataSource {
     required String filePath,
     required String accessToken,
   }) async {
+    final trimmedPath = filePath.trim();
+    if (trimmedPath.isEmpty) {
+      throw AuthApiException('Etkinlik fotoğrafı seçilmedi.');
+    }
+
+    final file = File(trimmedPath);
+    if (!await file.exists()) {
+      throw AuthApiException(
+        'Etkinlik fotoğrafı bulunamadı. Lütfen fotoğrafı tekrar seçin.',
+      );
+    }
+
     final formData = FormData.fromMap({
-      'photo': await MultipartFile.fromFile(filePath),
+      'photo': await MultipartFile.fromFile(
+        trimmedPath,
+        filename: 'event-photo.jpg',
+      ),
     });
     final json = await _client.postMultipart(
       '/UploadEventGroupPhoto?id=${Uri.encodeQueryComponent(groupId)}',

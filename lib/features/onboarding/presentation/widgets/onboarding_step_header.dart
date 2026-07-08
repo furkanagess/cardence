@@ -34,20 +34,6 @@ class OnboardingStepHeader extends StatelessWidget {
             stepCount: OnboardingState.stepCount,
             currentIndex: currentIndex,
           ),
-          const SizedBox(height: 10),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: Text(
-              l10n.eventCreateStepProgress(
-                currentIndex + 1,
-                OnboardingState.stepCount,
-              ),
-              style: theme.textTheme.labelSmall?.copyWith(
-                color: colorScheme.onSurfaceVariant,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
           const SizedBox(height: 18),
           Row(
             crossAxisAlignment: CrossAxisAlignment.center,

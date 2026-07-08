@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../../../../core/l10n/l10n_extensions.dart';
-
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/molecules/draggable_fab.dart';
 
@@ -10,8 +9,8 @@ class EventGroupsDraggableFab extends StatelessWidget {
     super.key,
     required this.canAddGroup,
     required this.onPressed,
-    this.bottomClearance = 72,
-    this.margin = 16,
+    this.bottomClearance = 88,
+    this.margin = 20,
   });
 
   final bool canAddGroup;
@@ -23,32 +22,50 @@ class EventGroupsDraggableFab extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
 
-    return DraggableFab(
-      onPressed: onPressed,
-      bottomClearance: bottomClearance,
-      margin: margin,
-      builder: (effectiveOnPressed) => canAddGroup
-          ? FloatingActionButton(
-              heroTag: 'event_groups_add_fab',
-              onPressed: effectiveOnPressed,
-              tooltip: context.l10n.etkinlikGrubuEkle,
-              backgroundColor: AppColors.primary,
-              foregroundColor: AppColors.textOnPrimary,
-              elevation: 4,
-              child: const Icon(Icons.event_available_rounded),
-            )
-          : FloatingActionButton(
-              heroTag: 'event_groups_upgrade_fab',
-              onPressed: effectiveOnPressed,
-              tooltip: context.l10n.kapasiteyiArtr,
-              backgroundColor: colorScheme.surface,
-              foregroundColor: colorScheme.primary,
-              elevation: 3,
-              child: Icon(
-                Icons.workspace_premium_outlined,
-                color: colorScheme.primary,
+    return Positioned.fill(
+      child: DraggableFab(
+        bottomClearance: bottomClearance,
+        margin: margin,
+        onPressed: onPressed,
+        builder: (onTap) => canAddGroup
+            ? FloatingActionButton.extended(
+                heroTag: 'event_groups_add_fab',
+                onPressed: onTap,
+                tooltip: context.l10n.yeniEtkinlikGrubu,
+                backgroundColor: AppColors.primary,
+                foregroundColor: AppColors.textOnPrimary,
+                elevation: 4,
+                shape: const StadiumBorder(),
+                icon: const Icon(Icons.add_rounded),
+                label: Text(
+                  context.l10n.yeniEtkinlikGrubu,
+                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.textOnPrimary,
+                      ),
+                ),
+              )
+            : FloatingActionButton.extended(
+                heroTag: 'event_groups_upgrade_fab',
+                onPressed: onTap,
+                tooltip: context.l10n.kapasiteyiArtr,
+                backgroundColor: colorScheme.surface,
+                foregroundColor: colorScheme.primary,
+                elevation: 3,
+                shape: const StadiumBorder(),
+                icon: Icon(
+                  Icons.workspace_premium_outlined,
+                  color: colorScheme.primary,
+                ),
+                label: Text(
+                  context.l10n.kapasiteyiArtr,
+                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                        fontWeight: FontWeight.w700,
+                        color: colorScheme.primary,
+                      ),
+                ),
               ),
-            ),
+      ),
     );
   }
 }

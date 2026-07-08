@@ -10,16 +10,18 @@ import '../domain/helpers/card_visibility_helper.dart';
 class OnboardingPreviewHelpers {
   OnboardingPreviewHelpers._();
 
-  /// Canlı kart önizlemesi; çevrilebilir.
+  /// Canlı kart önizlemesi.
   static Widget preview(
     AppLocalizations l10n,
     OnboardingCardDraft draft, {
-    bool flipOnTouch = false,
     bool showPremiumBadge = false,
     VoidCallback? onTap,
+    VoidCallback? onDetailTap,
     VoidCallback? onDoubleTap,
     String? emptyMessage,
     bool contactFieldsTappable = true,
+    bool showActionStrip = true,
+    String? heroTag,
   }) {
     final name = draft.displayName?.trim();
     return FlippablePersonCard(
@@ -29,8 +31,8 @@ class OnboardingPreviewHelpers {
       frontEntries: const [],
       backEntries: CardVisibilityHelper.backEntries(draft),
       emptyMessage: emptyMessage ?? l10n.alanlarDoldukaGrnr,
-      flipOnTouch: flipOnTouch,
       onTap: onTap,
+      onDetailTap: onDetailTap,
       onDoubleTap: onDoubleTap,
       showPremiumBadge: showPremiumBadge,
       accentColor: MyCardPreviewHelpers.parseHexColor(draft.accentColor),
@@ -45,6 +47,8 @@ class OnboardingPreviewHelpers {
       visibleContactFields: CardVisibilityHelper.visibleFrontContactKeys(draft),
       contactFieldsTappable: contactFieldsTappable,
       cardEffect: draft.cardEffect,
+      showActionStrip: showActionStrip,
+      heroTag: heroTag,
     );
   }
 }

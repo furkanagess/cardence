@@ -14,11 +14,10 @@ import '../../domain/entities/locale_preference.dart';
 import '../../domain/entities/theme_preference.dart';
 import '../../domain/usecases/request_app_review.dart';
 import '../pages/settings_about_page.dart';
-import '../widgets/settings_locale_selector.dart';
+import '../widgets/settings_appearance_panel.dart';
 import '../widgets/settings_menu_group.dart';
 import '../widgets/settings_profile_header.dart';
 import '../widgets/settings_section_label.dart';
-import '../widgets/settings_theme_selector.dart';
 
 /// Ayarlar sayfası – profil, tema, yardım ve çıkış.
 class SettingsPage extends StatefulWidget {
@@ -104,20 +103,23 @@ class _SettingsPageState extends State<SettingsPage> {
   Widget build(BuildContext context) {
     final displayName = widget.userDisplayName?.trim();
     final email = widget.userEmail?.trim();
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return CardenceScaffold(
       appBar: CardenceAppBar(
         title: context.l10n.ayarlar,
       ),
       body: ColoredBox(
-        color: Theme.of(context).scaffoldBackgroundColor,
+        color: isDark
+            ? AppColors.settingsScreenBackgroundDark
+            : AppColors.settingsScreenBackgroundLight,
         child: Column(
           children: [
             Expanded(
               child: SafeArea(
                 bottom: false,
                 child: SingleChildScrollView(
-                  padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
+                  padding: const EdgeInsets.fromLTRB(20, 4, 20, 24),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
@@ -130,25 +132,15 @@ class _SettingsPageState extends State<SettingsPage> {
                         uploadProfilePhoto: widget.uploadProfilePhoto,
                         onPhotoUpdated: widget.onPhotoUpdated,
                       ),
-                      const SizedBox(height: 32),
-                      SettingsSectionLabel(
-                        label: context.l10n.grnm,
-                        subtitle: context.l10n.uygulamaTemasnSein,
+                      const SizedBox(height: 20),
+                      SettingsSectionLabel(label: context.l10n.grnm),
+                      SettingsAppearancePanel(
+                        currentTheme: widget.currentTheme,
+                        onThemeChanged: widget.onThemeChanged,
+                        currentLocale: widget.currentLocale,
+                        onLocaleChanged: widget.onLocaleChanged,
                       ),
-                      SettingsThemeSelector(
-                        current: widget.currentTheme,
-                        onChanged: widget.onThemeChanged,
-                      ),
-                      const SizedBox(height: 28),
-                      SettingsSectionLabel(
-                        label: context.l10n.dil,
-                        subtitle: context.l10n.uygulamaDiliniSein,
-                      ),
-                      SettingsLocaleSelector(
-                        current: widget.currentLocale,
-                        onChanged: widget.onLocaleChanged,
-                      ),
-                      const SizedBox(height: 28),
+                      const SizedBox(height: 24),
                       SettingsSectionLabel(
                         label: context.l10n.genel,
                         subtitle: context.l10n.destekGizlilikVeUygulamaBilgileri,
@@ -159,13 +151,11 @@ class _SettingsPageState extends State<SettingsPage> {
                             icon: Icons.star_outline_rounded,
                             title: context.l10n.biziDeerlendirin,
                             subtitle: context.l10n.rateOnAppStore,
-                            iconTint: AppColors.warning,
                             onTap: _rateApp,
                           ),
                           SettingsMenuGroupItem(
                             icon: Icons.help_outline_rounded,
                             title: context.l10n.destekVeYardm,
-                            subtitle: context.l10n.sorularnzIinBizeUlan,
                             onTap: widget.onOpenSupport,
                           ),
                           SettingsMenuGroupItem(
@@ -217,22 +207,15 @@ class _SettingsLogoutBar extends StatelessWidget {
         border: Border(
           top: BorderSide(
             color: isDark
-                ? AppColors.outlineDark.withValues(alpha: 0.45)
+                ? AppColors.outlineDark.withValues(alpha: 0.4)
                 : AppColors.outlineVariant.withValues(alpha: 0.9),
           ),
         ),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.primary.withValues(alpha: isDark ? 0.08 : 0.04),
-            blurRadius: 16,
-            offset: const Offset(0, -4),
-          ),
-        ],
       ),
       child: SafeArea(
         top: false,
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(20, 14, 20, 16),
+          padding: const EdgeInsets.fromLTRB(20, 12, 20, 14),
           child: CustomButton(
             label: context.l10n.kYap,
             icon: Icons.logout_rounded,

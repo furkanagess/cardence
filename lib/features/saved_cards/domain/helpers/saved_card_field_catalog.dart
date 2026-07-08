@@ -299,4 +299,9 @@ class SavedCardFieldCatalog {
       return !hasValue(card, def);
     }).toList();
   }
+
+  /// Düzenlenebilir tüm alanlar (dolu veya boş).
+  static List<SavedCardFieldDefinition> editableFields(SavedCard card) {
+    return all.where((def) => def.isEditable(card)).toList();
+  }
 }

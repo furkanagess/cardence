@@ -5,12 +5,14 @@ import 'package:flutter/material.dart';
 import '../../../../core/l10n/l10n_extensions.dart';
 
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/widgets/atoms/cardence_app_bar.dart';
 import '../../../../core/widgets/atoms/profile_avatar.dart';
 import '../../domain/entities/graph_edge.dart';
 import '../../domain/entities/graph_edge_type.dart';
 import '../../domain/entities/graph_node.dart';
 import '../../domain/entities/graph_node_type.dart';
 import '../helpers/network_graph_canvas_theme.dart';
+import '../widgets/network_graph_canvas_legend.dart';
 import '../helpers/network_graph_display.dart';
 import '../helpers/network_graph_layout.dart';
 import '../helpers/network_graph_node_style.dart';
@@ -22,28 +24,33 @@ class NetworkGraphCanvas extends StatelessWidget {
     required this.edges,
     this.highlightedNodeIds = const {},
     this.pathNodeIds = const [],
-    this.onCardNodeTap,
+    this.focusNodeIds = const {},
+    this.onNodeTap,
   });
 
   final List<GraphNode> nodes;
   final List<GraphEdge> edges;
   final Set<String> highlightedNodeIds;
   final List<String> pathNodeIds;
-  final ValueChanged<GraphNode>? onCardNodeTap;
+  final Set<String> focusNodeIds;
+  final ValueChanged<GraphNode>? onNodeTap;
 
   static const double height = 420;
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final brightness = Theme.of(context).brightness;
+    final canvasBackground = NetworkGraphCanvasTheme.background(context);
+    final labelBorder = NetworkGraphCanvasTheme.nodeLabelBorder(brightness);
 
     return Card(
       elevation: 0,
       margin: EdgeInsets.zero,
-      color: NetworkGraphCanvasTheme.background,
+      color: canvasBackground,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20),
-        side: const BorderSide(color: AppColors.graphNodeLabelBorder),
+        side: BorderSide(color: labelBorder),
       ),
       clipBehavior: Clip.antiAlias,
       child: SizedBox(
@@ -58,15 +65,22 @@ class NetworkGraphCanvas extends StatelessWidget {
                   edges: edges,
                   highlightedNodeIds: highlightedNodeIds,
                   pathNodeIds: pathNodeIds,
-                  onCardNodeTap: onCardNodeTap,
+                  focusNodeIds: focusNodeIds,
+                  onNodeTap: onNodeTap,
                 ),
               ),
+            ),
+            Positioned(
+              top: 10,
+              left: 10,
+              child: const NetworkGraphCanvasLegend(),
             ),
             Positioned(
               top: 10,
               right: 10,
               child: DecoratedBox(
                 decoration: NetworkGraphCanvasTheme.fullscreenButtonDecoration(
+                  context,
                   colorScheme.primary,
                 ),
                 child: IconButton(
@@ -94,7 +108,8 @@ class NetworkGraphCanvas extends StatelessWidget {
           edges: edges,
           highlightedNodeIds: highlightedNodeIds,
           pathNodeIds: pathNodeIds,
-          onCardNodeTap: onCardNodeTap,
+          focusNodeIds: focusNodeIds,
+          onNodeTap: onNodeTap,
         ),
       ),
     );
@@ -109,20 +124,22 @@ class NetworkGraphArea extends StatelessWidget {
     required this.edges,
     this.highlightedNodeIds = const {},
     this.pathNodeIds = const [],
-    this.onCardNodeTap,
+    this.focusNodeIds = const {},
+    this.onNodeTap,
   });
 
   final List<GraphNode> nodes;
   final List<GraphEdge> edges;
   final Set<String> highlightedNodeIds;
   final List<String> pathNodeIds;
-  final ValueChanged<GraphNode>? onCardNodeTap;
+  final Set<String> focusNodeIds;
+  final ValueChanged<GraphNode>? onNodeTap;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    // Grafik her zaman siyah zemin üzerinde çizilir.
-    const isDark = true;
+    final brightness = theme.brightness;
+    final isDark = brightness == Brightness.dark;
     final pathEndpoints = _pathEndpointIds();
 
     return LayoutBuilder(
@@ -142,6 +159,7 @@ class NetworkGraphArea extends StatelessWidget {
                   layout: layout,
                   edges: edges,
                   pathNodeIds: pathNodeIds,
+                  focusNodeIds: focusNodeIds,
                   highlightColor: theme.colorScheme.primary,
                 ),
               ),
@@ -151,6 +169,9 @@ class NetworkGraphArea extends StatelessWidget {
                   highlightedNodeIds.contains(item.node.id) ||
                       pathNodeIds.contains(item.node.id);
               final isEndpoint = pathEndpoints.contains(item.node.id);
+              final isDimmed = focusNodeIds.isNotEmpty &&
+                  !focusNodeIds.contains(item.node.id) &&
+                  !pathNodeIds.contains(item.node.id);
               final style = NetworkGraphNodeStyle.forNode(
                 item.node,
                 isDark: isDark,
@@ -163,12 +184,15 @@ class NetworkGraphArea extends StatelessWidget {
               return Positioned(
                 left: left.clamp(8, size.width - style.size - 8),
                 top: top.clamp(8, size.height - style.size - 8),
-                child: _GraphNodeBubble(
-                  node: item.node,
-                  style: style,
-                  onTap: item.node.type == GraphNodeType.card
-                      ? onCardNodeTap
-                      : null,
+                child: Opacity(
+                  opacity: isDimmed ? 0.35 : 1,
+                  child: _GraphNodeBubble(
+                    node: item.node,
+                    style: style,
+                    onTap: NetworkGraphDisplay.isTappable(item.node)
+                        ? onNodeTap
+                        : null,
+                  ),
                 ),
               );
             }),
@@ -193,14 +217,16 @@ class NetworkGraphInteractiveArea extends StatelessWidget {
     required this.edges,
     this.highlightedNodeIds = const {},
     this.pathNodeIds = const [],
-    this.onCardNodeTap,
+    this.focusNodeIds = const {},
+    this.onNodeTap,
   });
 
   final List<GraphNode> nodes;
   final List<GraphEdge> edges;
   final Set<String> highlightedNodeIds;
   final List<String> pathNodeIds;
-  final ValueChanged<GraphNode>? onCardNodeTap;
+  final Set<String> focusNodeIds;
+  final ValueChanged<GraphNode>? onNodeTap;
 
   @override
   Widget build(BuildContext context) {
@@ -222,7 +248,8 @@ class NetworkGraphInteractiveArea extends StatelessWidget {
               edges: edges,
               highlightedNodeIds: highlightedNodeIds,
               pathNodeIds: pathNodeIds,
-              onCardNodeTap: onCardNodeTap,
+              focusNodeIds: focusNodeIds,
+              onNodeTap: onNodeTap,
             ),
           ),
         );
@@ -237,38 +264,48 @@ class _NetworkGraphFullscreenView extends StatelessWidget {
     required this.edges,
     required this.highlightedNodeIds,
     required this.pathNodeIds,
-    this.onCardNodeTap,
+    this.focusNodeIds = const {},
+    this.onNodeTap,
   });
 
   final List<GraphNode> nodes;
   final List<GraphEdge> edges;
   final Set<String> highlightedNodeIds;
   final List<String> pathNodeIds;
-  final ValueChanged<GraphNode>? onCardNodeTap;
+  final Set<String> focusNodeIds;
+  final ValueChanged<GraphNode>? onNodeTap;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: NetworkGraphCanvasTheme.background,
-      appBar: AppBar(
-        backgroundColor: NetworkGraphCanvasTheme.background,
-        foregroundColor: AppColors.textPrimaryDark,
-        elevation: 0,
-        scrolledUnderElevation: 0,
-        title: Text(context.l10n.networkGraph),
-        leading: IconButton(
-          icon: const Icon(Icons.close_rounded),
+      backgroundColor: NetworkGraphCanvasTheme.background(context),
+      appBar: CardenceAppBar(
+        title: context.l10n.networkGraph,
+        leading: CardenceAppBar.iconAction(
+          icon: Icons.close_rounded,
+          tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
           onPressed: () => Navigator.of(context).pop(),
         ),
       ),
-      body: NetworkGraphCanvasBackground(
-        child: NetworkGraphInteractiveArea(
-          nodes: nodes,
-          edges: edges,
-          highlightedNodeIds: highlightedNodeIds,
-          pathNodeIds: pathNodeIds,
-          onCardNodeTap: onCardNodeTap,
-        ),
+      body: Stack(
+        fit: StackFit.expand,
+        children: [
+          NetworkGraphCanvasBackground(
+            child: NetworkGraphInteractiveArea(
+              nodes: nodes,
+              edges: edges,
+              highlightedNodeIds: highlightedNodeIds,
+              pathNodeIds: pathNodeIds,
+              focusNodeIds: focusNodeIds,
+              onNodeTap: onNodeTap,
+            ),
+          ),
+          const Positioned(
+            top: 12,
+            left: 12,
+            child: NetworkGraphCanvasLegend(),
+          ),
+        ],
       ),
     );
   }
@@ -294,6 +331,7 @@ class _GraphNodeBubble extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final brightness = theme.brightness;
 
     final isCompany = node.type == GraphNodeType.company ||
         node.type == GraphNodeType.organization;
@@ -424,9 +462,11 @@ class _GraphNodeBubble extends StatelessWidget {
           width: style.size + 40,
           child: DecoratedBox(
             decoration: BoxDecoration(
-              color: AppColors.graphNodeLabelBackground,
+              color: NetworkGraphCanvasTheme.nodeLabelBackground(brightness),
               borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: AppColors.graphNodeLabelBorder),
+              border: Border.all(
+                color: NetworkGraphCanvasTheme.nodeLabelBorder(brightness),
+              ),
             ),
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
@@ -435,7 +475,10 @@ class _GraphNodeBubble extends StatelessWidget {
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 textAlign: TextAlign.center,
-                style: NetworkGraphCanvasTheme.nodeLabelStyle(theme.textTheme),
+                style: NetworkGraphCanvasTheme.nodeLabelStyle(
+                  theme.textTheme,
+                  brightness,
+                ),
               ),
             ),
           ),
@@ -461,12 +504,14 @@ class _NetworkGraphEdgePainter extends CustomPainter {
     required this.layout,
     required this.edges,
     required this.pathNodeIds,
+    this.focusNodeIds = const {},
     required this.highlightColor,
   });
 
   final List<NetworkGraphLayoutPosition> layout;
   final List<GraphEdge> edges;
   final List<String> pathNodeIds;
+  final Set<String> focusNodeIds;
   final Color highlightColor;
 
   @override
@@ -481,10 +526,18 @@ class _NetworkGraphEdgePainter extends CustomPainter {
       if (source == null || target == null) continue;
 
       final onPath = _edgeOnPath(edge);
+      final inFocus = focusNodeIds.isEmpty ||
+          (focusNodeIds.contains(edge.source) &&
+              focusNodeIds.contains(edge.target));
       final color = onPath ? highlightColor : _colorFor(edge.type);
       final width = onPath
           ? 3.2
           : (1.4 + (edge.weight.clamp(1, 6) * 0.4));
+      final alpha = onPath
+          ? 1.0
+          : inFocus
+              ? 0.72
+              : 0.18;
 
       if (onPath) {
         final glow = Paint()
@@ -497,7 +550,7 @@ class _NetworkGraphEdgePainter extends CustomPainter {
       }
 
       final paint = Paint()
-        ..color = color.withValues(alpha: onPath ? 1 : 0.72)
+        ..color = color.withValues(alpha: alpha)
         ..strokeWidth = width
         ..strokeCap = StrokeCap.round
         ..style = PaintingStyle.stroke;
@@ -510,7 +563,7 @@ class _NetworkGraphEdgePainter extends CustomPainter {
           canvas,
           from: control,
           to: target,
-          color: color.withValues(alpha: onPath ? 1 : 0.85),
+          color: color.withValues(alpha: onPath ? 1 : (inFocus ? 0.85 : 0.25)),
         );
       }
     }

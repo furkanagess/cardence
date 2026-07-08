@@ -1,21 +1,22 @@
 import 'package:flutter/material.dart';
+
 import '../../../../core/l10n/l10n_extensions.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/atoms/authenticated_network_image.dart';
 import '../../domain/entities/event_group.dart';
 import '../helpers/event_group_meta_formatter.dart';
-import 'event_group_meta_chip.dart';
-import 'event_group_status_badge.dart';
+import 'event_group_detail_loading_shimmer.dart';
 
-/// Detay ekranı kapak yüksekliği (daha kısa, ~5:16).
+/// Detay ekranı kapak yüksekliği.
 double eventGroupDetailCoverHeight(BuildContext context) {
-  return MediaQuery.sizeOf(context).width * 5 / 16;
+  final height = MediaQuery.sizeOf(context).height;
+  return (height * 0.36).clamp(260.0, 340.0);
 }
 
 /// Bilgi paneli ile kapak arasındaki bindirme.
-const double eventGroupDetailCoverOverlap = 16;
+const double eventGroupDetailCoverOverlap = 24;
 
-/// Etkinlik detay kapak görseli; scroll sırasında arka planda sabit kalır.
+/// Etkinlik detay kapak görseli.
 class EventGroupDetailCover extends StatelessWidget {
   const EventGroupDetailCover({
     super.key,
@@ -43,151 +44,56 @@ class EventGroupDetailCover extends StatelessWidget {
   }
 }
 
-/// Kapak altındaki sabitlenen bilgi paneli (durum, tarih, konum, açıklama).
-class EventGroupDetailPinnedInfoSection extends StatefulWidget {
-  const EventGroupDetailPinnedInfoSection({
+/// Kapak üzerindeki başlık ve meta bilgiler.
+class EventGroupDetailHeroOverlay extends StatelessWidget {
+  const EventGroupDetailHeroOverlay({
     super.key,
     required this.group,
-    this.aboutMaxLines = 4,
-    this.aboutExpanded = false,
-    this.onAboutExpandedChanged,
   });
 
   final EventGroup group;
-  final int aboutMaxLines;
-  final bool aboutExpanded;
-  final ValueChanged<bool>? onAboutExpandedChanged;
-
-  @override
-  State<EventGroupDetailPinnedInfoSection> createState() =>
-      _EventGroupDetailPinnedInfoSectionState();
-}
-
-class _EventGroupDetailPinnedInfoSectionState
-    extends State<EventGroupDetailPinnedInfoSection> {
-  bool _aboutExpanded = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _aboutExpanded = widget.aboutExpanded;
-  }
-
-  @override
-  void didUpdateWidget(covariant EventGroupDetailPinnedInfoSection oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.aboutExpanded != widget.aboutExpanded) {
-      _aboutExpanded = widget.aboutExpanded;
-    }
-    if (oldWidget.group.id != widget.group.id ||
-        oldWidget.group.description != widget.group.description) {
-      _aboutExpanded = widget.aboutExpanded;
-    }
-  }
-
-  void _toggleAboutExpanded() {
-    final next = !_aboutExpanded;
-    setState(() => _aboutExpanded = next);
-    widget.onAboutExpandedChanged?.call(next);
-  }
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final dateText = EventGroupMetaFormatter.formatRange(
-      widget.group.startAt,
-      widget.group.endAt,
+    final textTheme = Theme.of(context).textTheme;
+    final locale = Localizations.localeOf(context).toLanguageTag();
+    final dateText = EventGroupMetaFormatter.formatHeroDateTime(
+      group.startAt,
+      endAt: group.endAt,
+      locale: locale,
     );
-    final location = widget.group.location?.trim();
-    final description = widget.group.description?.trim();
-    final showExpandAction = description != null &&
-        description.isNotEmpty &&
-        !_aboutExpanded &&
-        description.length > 120;
+    final location = group.location?.trim();
 
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: colorScheme.surface,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.primary.withValues(alpha: isDark ? 0.06 : 0.04),
-            blurRadius: 20,
-            offset: const Offset(0, -4),
-          ),
-        ],
-      ),
+    return Align(
+      alignment: Alignment.bottomLeft,
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
+        padding: const EdgeInsets.fromLTRB(20, 0, 20, 56),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+          crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
-            EventGroupStatusBadge(status: widget.group.status),
-            const SizedBox(height: 16),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                if (dateText.isNotEmpty)
-                  EventGroupMetaChip(
-                    icon: Icons.calendar_month_outlined,
-                    label: dateText,
-                  ),
-                if (location != null && location.isNotEmpty)
-                  EventGroupMetaChip(
-                    icon: Icons.location_on_outlined,
-                    label: location,
-                  ),
-              ],
+            Text(
+              group.name,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: textTheme.headlineSmall?.copyWith(
+                fontWeight: FontWeight.w800,
+                color: AppColors.textOnPrimary,
+                height: 1.15,
+              ),
             ),
-            if (description != null && description.isNotEmpty) ...[
-              const SizedBox(height: 20),
-              Text(
-                context.l10n.eventAboutSection,
-                style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.w700,
-                      color: colorScheme.onSurface,
-                    ),
+            const SizedBox(height: 10),
+            if (dateText.isNotEmpty)
+              _HeroMetaRow(
+                icon: Icons.calendar_today_outlined,
+                label: dateText,
               ),
-              const SizedBox(height: 8),
-              Text(
-                description,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: colorScheme.onSurfaceVariant,
-                      height: 1.5,
-                    ),
-                maxLines: _aboutExpanded ? null : widget.aboutMaxLines,
-                overflow: _aboutExpanded ? null : TextOverflow.ellipsis,
+            if (location != null && location.isNotEmpty) ...[
+              const SizedBox(height: 6),
+              _HeroMetaRow(
+                icon: Icons.location_on_outlined,
+                label: location,
               ),
-              if (showExpandAction)
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: TextButton(
-                    style: TextButton.styleFrom(
-                      padding: const EdgeInsets.fromLTRB(0, 4, 0, 0),
-                      minimumSize: Size.zero,
-                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    ),
-                    onPressed: _toggleAboutExpanded,
-                    child: Text(context.l10n.devam),
-                  ),
-                )
-              else if (_aboutExpanded &&
-                  widget.onAboutExpandedChanged != null)
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: TextButton(
-                    style: TextButton.styleFrom(
-                      padding: const EdgeInsets.fromLTRB(0, 4, 0, 0),
-                      minimumSize: Size.zero,
-                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    ),
-                    onPressed: _toggleAboutExpanded,
-                    child: Text(context.l10n.kapat),
-                  ),
-                ),
             ],
           ],
         ),
@@ -196,154 +102,325 @@ class _EventGroupDetailPinnedInfoSectionState
   }
 }
 
-/// Kaydırılabilir kart listesinin üst başlığı.
-class EventGroupDetailLinkedCardsHeader extends StatelessWidget {
-  const EventGroupDetailLinkedCardsHeader({
-    super.key,
-    required this.linkedCardCount,
+class _HeroMetaRow extends StatelessWidget {
+  const _HeroMetaRow({
+    required this.icon,
+    required this.label,
   });
 
+  final IconData icon;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(
+          icon,
+          size: 16,
+          color: AppColors.textOnPrimary.withValues(alpha: 0.92),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text(
+            label,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: AppColors.textOnPrimary.withValues(alpha: 0.92),
+                  fontWeight: FontWeight.w500,
+                  height: 1.35,
+                ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// Kapak altı kaydırılabilir içerik gövdesi.
+class EventGroupDetailScrollContent extends StatefulWidget {
+  const EventGroupDetailScrollContent({
+    super.key,
+    required this.group,
+    required this.linkedCardCount,
+    this.inviteCount = 0,
+    this.aboutMaxLines = 2,
+    this.loadingLinkedCards = false,
+    this.onAddCard,
+    this.cardsSection,
+  });
+
+  final EventGroup group;
   final int linkedCardCount;
+  final int inviteCount;
+  final int aboutMaxLines;
+  final bool loadingLinkedCards;
+  final VoidCallback? onAddCard;
+  final Widget? cardsSection;
+
+  @override
+  State<EventGroupDetailScrollContent> createState() =>
+      _EventGroupDetailScrollContentState();
+}
+
+class _EventGroupDetailScrollContentState
+    extends State<EventGroupDetailScrollContent> {
+  bool _aboutExpanded = false;
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final description = widget.group.description?.trim();
+    final hasDescription = description != null && description.isNotEmpty;
+    final showExpandAction =
+        hasDescription && !_aboutExpanded && description.length > 100;
 
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 12, 20, 8),
-      child: Row(
-        children: [
-          Icon(
-            Icons.people_outline_rounded,
-            size: 20,
-            color: colorScheme.primary,
-          ),
-          const SizedBox(width: 8),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        if (hasDescription) ...[
           Text(
-            context.l10n.eventLinkedCardsSection(linkedCardCount),
-            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+            context.l10n.eventAboutSectionLabel.toUpperCase(),
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
                   fontWeight: FontWeight.w700,
-                  color: colorScheme.onSurface,
+                  letterSpacing: 0.8,
                 ),
           ),
+          const SizedBox(height: 8),
+          Text(
+            description,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: colorScheme.onSurface,
+                  height: 1.5,
+                ),
+            maxLines: _aboutExpanded ? null : widget.aboutMaxLines,
+            overflow: _aboutExpanded ? null : TextOverflow.ellipsis,
+          ),
+          if (showExpandAction)
+            Align(
+              alignment: Alignment.centerLeft,
+              child: TextButton(
+                style: TextButton.styleFrom(
+                  padding: const EdgeInsets.fromLTRB(0, 4, 0, 0),
+                  minimumSize: Size.zero,
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  foregroundColor: colorScheme.primary,
+                ),
+                onPressed: () => setState(() => _aboutExpanded = true),
+                child: Text(
+                  context.l10n.eventShowMore,
+                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                        color: colorScheme.primary,
+                        fontWeight: FontWeight.w600,
+                      ),
+                ),
+              ),
+            )
+          else if (_aboutExpanded)
+            Align(
+              alignment: Alignment.centerLeft,
+              child: TextButton(
+                style: TextButton.styleFrom(
+                  padding: const EdgeInsets.fromLTRB(0, 4, 0, 0),
+                  minimumSize: Size.zero,
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+                onPressed: () => setState(() => _aboutExpanded = false),
+                child: Text(context.l10n.kapat),
+              ),
+            ),
+          const SizedBox(height: 22),
+        ],
+        if (widget.loadingLinkedCards)
+          const EventGroupDetailStatChipRowShimmer()
+        else
+          EventGroupDetailStatChipRow(
+            linkedCardCount: widget.linkedCardCount,
+            inviteCount: widget.inviteCount,
+          ),
+        const SizedBox(height: 22),
+        Row(
+          children: [
+            Expanded(
+              child: Text(
+                context.l10n.eventGroupCardsSectionTitle,
+                style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.w700,
+                      color: colorScheme.onSurface,
+                    ),
+              ),
+            ),
+            if (widget.onAddCard != null)
+              TextButton(
+                style: TextButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                  minimumSize: Size.zero,
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  foregroundColor: colorScheme.primary,
+                ),
+                onPressed: widget.onAddCard,
+                child: Text(
+                  context.l10n.eventAddCardPlus,
+                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                        color: colorScheme.primary,
+                        fontWeight: FontWeight.w700,
+                      ),
+                ),
+              ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        if (widget.cardsSection != null) widget.cardsSection!,
+      ],
+    );
+  }
+}
+
+/// Yuvarlatılmış üst köşeli kaydırılabilir panel sarmalayıcısı.
+class EventGroupDetailScrollPanel extends StatelessWidget {
+  const EventGroupDetailScrollPanel({
+    super.key,
+    required this.child,
+    this.bottomPadding = 0,
+  });
+
+  final Widget child;
+  final double bottomPadding;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: colorScheme.surface,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.primary.withValues(alpha: isDark ? 0.08 : 0.05),
+            blurRadius: 24,
+            offset: const Offset(0, -6),
+          ),
+        ],
+      ),
+      child: SingleChildScrollView(
+        padding: EdgeInsets.fromLTRB(20, 22, 20, bottomPadding),
+        child: child,
+      ),
+    );
+  }
+}
+
+class EventGroupDetailStatChipRow extends StatelessWidget {
+  const EventGroupDetailStatChipRow({
+    super.key,
+    required this.linkedCardCount,
+    required this.inviteCount,
+  });
+
+  final int linkedCardCount;
+  final int inviteCount;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children: [
+          _StatChip(
+            icon: Icons.people_outline_rounded,
+            label: context.l10n.eventDetailCardsChip(linkedCardCount),
+            colorScheme: colorScheme,
+            isDark: isDark,
+          ),
+          if (inviteCount > 0) ...[
+            const SizedBox(width: 10),
+            _StatChip(
+              icon: Icons.mail_outline_rounded,
+              label: context.l10n.eventDetailInvitesChip(inviteCount),
+              colorScheme: colorScheme,
+              isDark: isDark,
+            ),
+          ],
         ],
       ),
     );
   }
 }
 
-/// [EventGroupDetailPinnedInfoSection] yüksekliğini bildirir.
-class EventGroupDetailSizeReporter extends StatefulWidget {
-  const EventGroupDetailSizeReporter({
-    super.key,
-    required this.onHeightChanged,
-    required this.child,
+class _StatChip extends StatelessWidget {
+  const _StatChip({
+    required this.icon,
+    required this.label,
+    required this.colorScheme,
+    required this.isDark,
   });
 
-  final ValueChanged<double> onHeightChanged;
-  final Widget child;
-
-  @override
-  State<EventGroupDetailSizeReporter> createState() =>
-      _EventGroupDetailSizeReporterState();
-}
-
-class _EventGroupDetailSizeReporterState
-    extends State<EventGroupDetailSizeReporter> {
-  Size? _lastSize;
-
-  void _reportSize() {
-    if (!mounted) return;
-    final size = context.size;
-    if (size == null || size == _lastSize) return;
-    _lastSize = size;
-    widget.onHeightChanged(size.height);
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _reportSize());
-  }
-
-  @override
-  void didUpdateWidget(covariant EventGroupDetailSizeReporter oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    WidgetsBinding.instance.addPostFrameCallback((_) => _reportSize());
-  }
+  final IconData icon;
+  final String label;
+  final ColorScheme colorScheme;
+  final bool isDark;
 
   @override
   Widget build(BuildContext context) {
-    WidgetsBinding.instance.addPostFrameCallback((_) => _reportSize());
-    return widget.child;
-  }
-}
-
-/// Detay ekranında sabitlenen bilgi paneli için sliver delegate.
-class EventGroupDetailPinnedInfoDelegate
-    extends SliverPersistentHeaderDelegate {
-  EventGroupDetailPinnedInfoDelegate({
-    required this.height,
-    required this.child,
-  });
-
-  final double height;
-  final Widget child;
-
-  @override
-  double get minExtent => height;
-
-  @override
-  double get maxExtent => height;
-
-  @override
-  Widget build(
-    BuildContext context,
-    double shrinkOffset,
-    bool overlapsContent,
-  ) {
-    return SizedBox(
-      height: height,
-      child: ClipRect(
-        child: Material(
-          color: Colors.transparent,
-          elevation: overlapsContent ? 1 : 0,
-          shadowColor: AppColors.textPrimary.withValues(alpha: 0.08),
-          child: Align(
-            alignment: Alignment.topCenter,
-            child: child,
-          ),
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: colorScheme.primaryContainer.withValues(
+          alpha: isDark ? 0.35 : 0.45,
+        ),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 16, color: colorScheme.primary),
+            const SizedBox(width: 8),
+            Text(
+              label,
+              style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                    color: colorScheme.onSurface,
+                    fontWeight: FontWeight.w600,
+                  ),
+            ),
+          ],
         ),
       ),
     );
   }
-
-  @override
-  bool shouldRebuild(covariant EventGroupDetailPinnedInfoDelegate oldDelegate) {
-    return oldDelegate.height != height;
-  }
 }
 
-/// Kapak altındaki bilgi paneli (durum, tarih, konum, açıklama).
-class EventGroupDetailInfoSection extends StatelessWidget {
-  const EventGroupDetailInfoSection({
+/// Üstte yarı saydam daire içinde geri / menü butonu.
+class EventGroupDetailOverlayIconButton extends StatelessWidget {
+  const EventGroupDetailOverlayIconButton({
     super.key,
-    required this.group,
-    this.linkedCardCount,
+    required this.icon,
+    required this.onPressed,
+    this.tooltip,
   });
 
-  final EventGroup group;
-  final int? linkedCardCount;
+  final IconData icon;
+  final VoidCallback onPressed;
+  final String? tooltip;
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        EventGroupDetailPinnedInfoSection(group: group),
-        if (linkedCardCount != null)
-          EventGroupDetailLinkedCardsHeader(linkedCardCount: linkedCardCount!),
-      ],
+    return Material(
+      color: AppColors.textPrimary.withValues(alpha: 0.28),
+      shape: const CircleBorder(),
+      clipBehavior: Clip.antiAlias,
+      child: IconButton(
+        tooltip: tooltip,
+        onPressed: onPressed,
+        icon: Icon(icon, color: AppColors.textOnPrimary),
+        visualDensity: VisualDensity.compact,
+      ),
     );
   }
 }
@@ -378,9 +455,10 @@ class _CoverSection extends StatelessWidget {
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
                 colors: [
-                  Colors.transparent,
-                  AppColors.textPrimary.withValues(alpha: isDark ? 0.55 : 0.35),
+                  AppColors.textPrimary.withValues(alpha: 0.12),
+                  AppColors.textPrimary.withValues(alpha: isDark ? 0.72 : 0.62),
                 ],
+                stops: const [0.35, 1.0],
               ),
             ),
           ),
@@ -395,12 +473,12 @@ class _CoverSection extends StatelessWidget {
           end: Alignment.bottomRight,
           colors: isDark
               ? [
-                  AppColors.primary.withValues(alpha: 0.25),
-                  AppColors.surfaceVariantDark,
+                  AppColors.primary.withValues(alpha: 0.45),
+                  AppColors.textPrimary.withValues(alpha: 0.85),
                 ]
               : [
-                  AppColors.primary.withValues(alpha: 0.12),
-                  AppColors.surfaceVariant,
+                  AppColors.primary.withValues(alpha: 0.55),
+                  AppColors.textPrimary.withValues(alpha: 0.78),
                 ],
         ),
       ),
@@ -408,7 +486,7 @@ class _CoverSection extends StatelessWidget {
         child: Icon(
           Icons.event_rounded,
           size: 56,
-          color: colorScheme.primary.withValues(alpha: 0.45),
+          color: AppColors.textOnPrimary.withValues(alpha: 0.35),
         ),
       ),
     );

@@ -66,7 +66,7 @@ public sealed class EventGroupsController : ControllerBase
     [ProducesResponseType(typeof(ApiResponse<EventGroupDto>), StatusCodes.Status200OK)]
     public async Task<ActionResult<ApiResponse<EventGroupDto>>> UploadEventGroupPhoto(
         [FromQuery] string id,
-        IFormFile photo,
+        [FromForm] IFormFile photo,
         CancellationToken cancellationToken)
     {
         if (photo is null || photo.Length == 0)

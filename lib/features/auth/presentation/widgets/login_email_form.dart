@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../core/l10n/l10n_extensions.dart';
 
-import '../../../../core/validation/app_validators.dart';
+import '../helpers/auth_form_validation.dart';
 import '../../../../core/widgets/atoms/custom_button.dart';
 import '../../../../core/widgets/atoms/custom_text_field.dart';
 import '../../../onboarding/presentation/widgets/onboarding_step_shell.dart';
@@ -93,13 +93,8 @@ class LoginEmailFormState extends State<LoginEmailForm> {
     String? emailError;
     String? passwordError;
 
-    if (!AppValidators.matches(AppValidators.email, email)) {
-      emailError = 'Geçerli bir e-posta girin.';
-    }
-    if (!AppValidators.isValidPassword(password)) {
-      passwordError =
-          'Şifre en az ${AppValidators.minPasswordLength} karakter olmalıdır.';
-    }
+    emailError = AuthFormValidation.emailError(context.l10n, email);
+    passwordError = AuthFormValidation.passwordError(context.l10n, password);
 
     setState(() {
       _emailError = emailError;
@@ -169,7 +164,11 @@ class LoginEmailFormState extends State<LoginEmailForm> {
             onPressed: _submit,
             labelStyle: Theme.of(context).textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.w700,
+                  color: Theme.of(context).scaffoldBackgroundColor,
                 ),
+            style: FilledButton.styleFrom(
+              foregroundColor: Theme.of(context).scaffoldBackgroundColor,
+            ),
           ),
         ],
       ],

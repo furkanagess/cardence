@@ -1,5 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../core/l10n/app_error_keys.dart';
 import '../../data/datasources/auth_remote_datasource.dart';
 import '../../domain/usecases/forgot_password.dart';
 import 'forgot_password_event.dart';
@@ -37,7 +38,7 @@ class ForgotPasswordBloc
     } catch (_) {
       emit(state.copyWith(
         status: ForgotPasswordStatus.failure,
-        errorMessage: 'Bağlantı hatası. Lütfen tekrar deneyin.',
+        errorMessage: AppErrorKeys.connectionError,
       ));
     }
   }

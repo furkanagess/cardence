@@ -9,6 +9,7 @@ import '../../../../core/widgets/atoms/custom_text_field.dart';
 import '../../../onboarding/presentation/onboarding_name_helper.dart';
 import '../../../onboarding/presentation/onboarding_validation.dart';
 import '../../../onboarding/presentation/widgets/onboarding_step_shell.dart';
+import '../helpers/auth_form_validation.dart';
 import 'auth_password_field.dart';
 import 'register_legal_notice.dart';
 
@@ -17,6 +18,8 @@ class RegisterForm extends StatefulWidget {
     super.key,
     required this.isLoading,
     required this.onSubmit,
+    this.showSubmitButton = true,
+    this.onCanSubmitChanged,
   });
 
   final bool isLoading;
@@ -26,12 +29,14 @@ class RegisterForm extends StatefulWidget {
     required String password,
     String? phone,
   }) onSubmit;
+  final bool showSubmitButton;
+  final ValueChanged<bool>? onCanSubmitChanged;
 
   @override
-  State<RegisterForm> createState() => _RegisterFormState();
+  State<RegisterForm> createState() => RegisterFormState();
 }
 
-class _RegisterFormState extends State<RegisterForm> {
+class RegisterFormState extends State<RegisterForm> {
   final _firstNameController = TextEditingController();
   final _lastNameController = TextEditingController();
   final _emailController = TextEditingController();
@@ -43,6 +48,35 @@ class _RegisterFormState extends State<RegisterForm> {
   String? _phoneError;
   String? _passwordError;
   bool _termsAccepted = false;
+
+  bool get canSubmit => _termsAccepted && !widget.isLoading;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      widget.onCanSubmitChanged?.call(canSubmit);
+    });
+  }
+
+  @override
+  void didUpdateWidget(covariant RegisterForm oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.isLoading != widget.isLoading) {
+      _notifyCanSubmit();
+    }
+  }
+
+  void submit() => _submit();
+
+  void _notifyCanSubmit() {
+    widget.onCanSubmitChanged?.call(canSubmit);
+  }
+
+  void _setTermsAccepted(bool accepted) {
+    setState(() => _termsAccepted = accepted);
+    _notifyCanSubmit();
+  }
 
   @override
   void dispose() {
@@ -69,13 +103,10 @@ class _RegisterFormState extends State<RegisterForm> {
     String? phoneError;
     String? passwordError;
     if (!AppValidators.matches(AppValidators.email, email)) {
-      emailError = 'Geçerli bir e-posta girin.';
+      emailError = context.l10n.geerliBirEPostaAdresi;
     }
-    phoneError = AppValidators.optionalPhoneError(phone);
-    if (!AppValidators.isValidPassword(password)) {
-      passwordError =
-          'Şifre en az ${AppValidators.minPasswordLength} karakter olmalıdır.';
-    }
+    phoneError = AuthFormValidation.optionalPhoneError(context.l10n, phone);
+    passwordError = AuthFormValidation.passwordError(context.l10n, password);
 
     setState(() {
       _firstNameError = firstNameError;
@@ -109,7 +140,7 @@ class _RegisterFormState extends State<RegisterForm> {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        OnboardingFieldLabel(label: 'Ad', required: true),
+        OnboardingFieldLabel(label: context.l10n.ad, required: true),
         CustomTextField(
           controller: _firstNameController,
           hintText: context.l10n.rnMehmet,
@@ -195,15 +226,17 @@ class _RegisterFormState extends State<RegisterForm> {
         const SizedBox(height: 14),
         RegisterLegalNotice(
           value: _termsAccepted,
-          onChanged: (accepted) => setState(() => _termsAccepted = accepted),
+          onChanged: _setTermsAccepted,
         ),
-        const SizedBox(height: 14),
-        CustomButton(
-          label: context.l10n.kaytOl,
-          height: 48,
-          isLoading: widget.isLoading,
-          onPressed: _termsAccepted ? _submit : null,
-        ),
+        if (widget.showSubmitButton) ...[
+          const SizedBox(height: 14),
+          CustomButton(
+            label: context.l10n.kaytOl,
+            height: 48,
+            isLoading: widget.isLoading,
+            onPressed: canSubmit ? _submit : null,
+          ),
+        ],
       ],
     );
   }

@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import '../../../../core/l10n/api_error_localizer.dart';
+import '../../../../core/l10n/app_error_keys.dart';
 import '../../../../core/l10n/l10n_extensions.dart';
-import '../../../../core/validation/app_validators.dart';
 import '../../../../core/widgets/atoms/cardence_app_bar.dart';
 import '../../../../core/widgets/atoms/custom_button.dart';
 import '../../../../core/widgets/organisms/cardence_scaffold.dart';
 import '../../data/datasources/auth_remote_datasource.dart';
 import '../../domain/usecases/reset_password.dart';
+import '../helpers/auth_form_validation.dart';
 import '../widgets/auth_password_field.dart';
 
 class ResetPasswordFromLinkPage extends StatefulWidget {
@@ -50,12 +51,9 @@ class _ResetPasswordFromLinkPageState extends State<ResetPasswordFromLinkPage> {
     String? passwordError;
     String? confirmError;
 
-    if (!AppValidators.isValidPassword(password)) {
-      passwordError =
-          'Şifre en az ${AppValidators.minPasswordLength} karakter olmalıdır.';
-    }
+    passwordError = AuthFormValidation.passwordError(context.l10n, password);
     if (password != confirm) {
-      confirmError = 'Şifreler eşleşmiyor.';
+      confirmError = context.l10n.sifrelerEslesmiyor;
     }
 
     setState(() {
@@ -87,7 +85,10 @@ class _ResetPasswordFromLinkPageState extends State<ResetPasswordFromLinkPage> {
     } catch (_) {
       if (!mounted) return;
       setState(() {
-        _generalError = 'Bağlantı hatası. Lütfen tekrar deneyin.';
+        _generalError = ApiErrorLocalizer.localize(
+          context.l10n,
+          AppErrorKeys.connectionError,
+        );
       });
     } finally {
       if (mounted) {

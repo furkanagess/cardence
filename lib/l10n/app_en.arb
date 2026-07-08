@@ -129,7 +129,7 @@
   "grubuSil": "Delete group",
   "grupsuz": "Unassigned",
   "gvenliPaylam": "Secure Sharing",
-  "gvenliinizIinHesabnzaTekrarGiri": "For your security, you need to sign in to your account again.",
+  "gvenliinizIinHesabnzaTekrarGiri": "For your security, please sign in again.",
   "hakkmda": "About me",
   "hakkimdaBilgisiYok": "No about me information",
   "hakkmdaHerZamanGsterilir": "About me is always shown.",
@@ -144,6 +144,33 @@
   "henzKaydedilmiKartYokKaydedilen": "No saved cards yet. You can add cards via QR code from the Saved Cards tab.",
   "henzKaytlKartYok": "No saved cards yet",
   "hesabnzaGiriYapn": "Sign in to your account",
+  "authOrDivider": "or",
+  "authJoinCardenceTitle": "Join Cardence",
+  "authNoAccountPrompt": "Don't have an account? ",
+  "authAlreadyHaveAccountPrompt": "Already have an account? ",
+  "linkedinIleDevamEt": "Continue with LinkedIn",
+  "ad": "First name",
+  "sifre": "Password",
+  "authPasswordMinHint": "At least {minLength} characters",
+  "@authPasswordMinHint": {
+    "placeholders": {
+      "minLength": {
+        "type": "int"
+      }
+    }
+  },
+  "sifreEnAzKarakter": "Password must be at least {minLength} characters.",
+  "@sifreEnAzKarakter": {
+    "placeholders": {
+      "minLength": {
+        "type": "int"
+      }
+    }
+  },
+  "sifrelerEslesmiyor": "Passwords do not match.",
+  "registerLegalPrefix": "By signing up, you agree to the ",
+  "registerLegalAnd": " and ",
+  "registerLegalSuffix": ".",
   "loginWelcomeTitle": "Welcome to Cardence!",
   "loginWithPhone": "Sign in with phone",
   "loginOtpSentHint": "A verification code was sent to your phone.",
@@ -172,6 +199,9 @@
   "irketZorunludur": "Company is required",
   "isimSirketCom": "name@company.com",
   "isimirketEPosta": "Name, company, email...",
+  "savedCardsSearchHint": "Search by name, company, or email...",
+  "listeGorunumu": "List View",
+  "yeniKartEkle": "Add New Card",
   "isimsizKart": "Unnamed card",
   "isteeBalEtkinliiListedeGrsel": "Optional — visually distinguish the event in the list.",
   "istersenWebSiteniVeLinkedin": "You can add your website and LinkedIn profile if you wish.",
@@ -209,6 +239,7 @@
   "kartIdIleEkle": "Add with Card ID",
   "kartIdKopyaland": "Card ID copied",
   "kartIdKopyalandId": "Card ID copied: $id",
+  "clipboardCopySuccess": "Successfully copied to clipboard",
   "kartIdOluturulamadLtfenTekrar": "Could not create Card ID. Please try again.",
   "kartIdTam6Haneli": "Card ID must be exactly a 6-digit number",
   "kartKaydedildi": "Card saved",
@@ -332,6 +363,9 @@
   "notEkle": "Add note",
   "notKaydedildi": "Note saved",
   "notlar": "Notes",
+  "savedCardContactInfoTitle": "Contact information",
+  "savedCardEducationTitle": "Education",
+  "savedCardPrivateNotesTitle": "Private notes",
   "notunuzuBurayaYazn": "Write your note here...",
   "okul": "School",
   "onboarding": "Onboarding",
@@ -415,7 +449,9 @@
   "uxResearcher": "UX Researcher",
   "uygula": "Apply",
   "uygulamaDiliniSein": "Choose app language",
+  "uygulamaDili": "App language",
   "uygulamaTemasnSein": "Choose app theme",
+  "temaModu": "Theme mode",
   "uygulamaRengi": "App accent color",
   "uygulamaRengiPaletteHint": "Tap to open the color picker and choose any color you like",
   "webSitesi": "Website",
@@ -429,6 +465,20 @@
   "etkinlikOlutur": "Create event",
   "yeniKart": "New card",
   "yeniKartOlutur": "Create new card",
+  "profileActiveCardStatus": "ACTIVE CARD: {current} / {total}",
+  "@profileActiveCardStatus": {
+    "placeholders": {
+      "current": { "type": "int" },
+      "total": { "type": "int" }
+    }
+  },
+  "agGrafigi": "Network graph",
+  "profileCardsSavedByOthersInfo": "Your cards have been saved by others {count} times in total.",
+  "@profileCardsSavedByOthersInfo": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
   "yenidenek": "Retake",
   "yeniifre": "New password",
   "yeniifreTekrar": "Repeat new password",
@@ -465,7 +515,7 @@
   "zelliknerisi": "Feature request",
   "sessionNotFoundLogin": "Session not found. Please sign in again.",
   "sessionNotFound": "Session not found.",
-  "sessionExpired": "Session expired. Please sign in again.",
+  "sessionExpired": "For your security, please sign in again.",
   "operationFailed": "Operation failed.",
   "sessionInfoUnavailable": "Could not retrieve session info.",
   "invalidSessionResponse": "Invalid session response.",
@@ -654,6 +704,14 @@
   "eventCreateNameSubtitle": "Give your event a name.",
   "eventCreateLocationSubtitle": "Select country, province and district; optionally add a venue name.",
   "eventLocationVenueLabel": "Venue name",
+  "eventLocationProvinceDistrictLabel": "Province · District",
+  "eventLocationProvinceDistrictHint": "Select province and district",
+  "eventShowOnMap": "Show on map",
+  "eventMapTapToSelect": "Tap the map to pick a location",
+  "eventMapDragToSelect": "Drag the map to pick a location",
+  "eventMapUseMyLocation": "My location",
+  "eventMapSelectLocation": "Select location",
+  "eventMapOpenFullscreen": "Full screen map",
   "eventLocationVenueHint": "e.g. Istanbul Congress Center",
   "eventLocationRegionRequired": "Country and province/district are required.",
   "eventCreateStartSubtitle": "Select the start date and time.",
@@ -663,6 +721,27 @@
   "eventDescriptionHint": "Agenda, speakers, dress code, parking info…",
   "eventDescriptionTooLong": "Description can be at most 2000 characters.",
   "eventAboutSection": "About",
+  "eventAboutSectionLabel": "About this event",
+  "eventGroupCardsSectionTitle": "Cards in group",
+  "eventShowMore": "Show more",
+  "eventDetailCardsChip": "{count} cards",
+  "@eventDetailCardsChip": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "eventDetailInvitesChip": "{count} invites",
+  "@eventDetailInvitesChip": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "eventDetailNetworkingChip": "Networking",
+  "eventAddCardPlus": "+ Add card",
   "eventLinkedCardsSection": "Linked cards ({count})",
   "@eventLinkedCardsSection": {
     "placeholders": {
@@ -673,6 +752,11 @@
   },
   "eventCreateEndSubtitle": "Optionally set an end date and time. You can skip this step.",
   "eventCreatePhotoSubtitle": "Add a cover photo for the event list. You can skip this step.",
+  "eventPhotoUpload": "Upload photo",
+  "eventPhotoFormatHint": "PNG, JPG or WEBP (Max. 5MB)",
+  "eventPhotoAdd": "Add photo",
+  "eventPhotoChange": "Change photo",
+  "eventCreateNoSavedCards": "No saved cards yet.",
   "eventSkip": "Skip",
   "eventGroupCardsStepSubtitle": "Select saved cards or invite by Card ID. You can create the event without cards.",
   "eventStartRequired": "Select a start date and time.",
@@ -689,10 +773,15 @@
   "eventSchedulePlannedStart": "Planned start",
   "eventSchedulePlannedRange": "Planned duration",
   "eventScheduleRequired": "Required",
+  "eventStartDateLabel": "Start date",
+  "eventStartTimeLabel": "Start time",
+  "eventEndDateLabel": "End date",
+  "eventEndTimeLabel": "End time",
+  "eventAddEnd": "Add end",
   "eventInviteByCardId": "Invite by Card ID",
   "eventActiveSection": "Ongoing / Upcoming",
-  "eventOngoingSection": "Ongoing events",
-  "eventUpcomingSection": "Upcoming events",
+  "eventOngoingSection": "Ongoing",
+  "eventUpcomingSection": "Upcoming",
   "eventInvitationTitle": "You're invited to \"{eventName}\"",
   "@eventInvitationTitle": {
     "placeholders": {
@@ -728,7 +817,8 @@
       }
     }
   },
-  "eventInvitationAccept": "Join",
+  "eventInvitationAccept": "Confirm",
+  "eventInvitationInvitedSubtitle": "You're invited",
   "eventInvitationAcceptHint": "Your card will be linked to this event",
   "eventInvitationReject": "Decline",
   "eventInvitationRejectHint": "Remove this invitation from your list",
@@ -744,7 +834,18 @@
   "eventInvitationAccepted": "Invitation accepted",
   "eventInvitationRejected": "Invitation declined",
   "eventInvitationsSection": "Invitations",
-  "eventEndedSection": "Ended events",
+  "eventEndedSection": "Ended",
+  "eventGroupLinkedCardCount": "{count} cards",
+  "@eventGroupLinkedCardCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "eventGroupToday": "Today",
+  "eventGroupEndedLastMonth": "Ended last month",
+  "eventGroupEndedThisMonth": "Ended this month",
   "eventStatusUpcoming": "Upcoming",
   "eventStatusOngoing": "Ongoing",
   "eventStatusEnded": "Ended",
@@ -906,6 +1007,8 @@
     }
   },
   "networkGraph": "Network Graph",
+  "networkGraphLegendMe": "Me",
+  "networkGraphLegendConnection": "Connection",
   "networkStatistics": "Network Statistics",
   "networkGraphLoadFailed": "Failed to load network graph.",
   "networkGraphEventDescription": "Cards, companies, and connections in this event are displayed visually.",
@@ -958,10 +1061,21 @@
     }
   },
   "tapTwoNodesToFindPath": "Tap two card nodes to find the shortest path between them.",
+  "networkGraphConnectedNodes": "Connected nodes ({count})",
+  "@networkGraphConnectedNodes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "networkGraphNoConnectedNodes": "No connected nodes in this graph.",
+  "networkGraphConnectionTypes": "Connection types",
   "createMyCard": "Create my card",
   "continueWithArrow": "Continue →",
-  "swipeHorizontalToSwitchCards": "Swipe horizontally to switch cards; tap a card to edit.",
-  "tapCardToEdit": "Tap card to edit.",
+  "swipeHorizontalToSwitchCards": "Swipe horizontally to switch cards.",
+  "tapCardToEdit": "Use the detail button on the card to view more.",
+  "kartDetay": "Details",
   "cardLimitReachedPremiumUpgrade": "You have reached your card limit. You can upgrade to Premium to create new cards.",
   "viewNetworkGraph": "View network graph",
   "cardsNotYetSaved": "Your cards have not been saved yet.",

@@ -271,11 +271,9 @@ class _EventGroupsPageState extends State<EventGroupsPage> {
                 Positioned.fill(
                   child: _buildContent(context, savedCards),
                 ),
-                Positioned.fill(
-                  child: EventGroupsDraggableFab(
-                    canAddGroup: canAddGroup,
-                    onPressed: _createNewEventGroup,
-                  ),
+                EventGroupsDraggableFab(
+                  canAddGroup: canAddGroup,
+                  onPressed: _createNewEventGroup,
                 ),
               ],
             );
@@ -343,7 +341,7 @@ class _EventGroupsPageState extends State<EventGroupsPage> {
           if (hasGroupSections) const SizedBox(height: 20),
         ],
         if (ongoingGroups.isNotEmpty)
-          EventGroupsHorizontalSection(
+          EventGroupsSection(
             title: context.l10n.eventOngoingSection,
             groups: ongoingGroups,
             linkedCardCountFor: (group) =>
@@ -352,7 +350,7 @@ class _EventGroupsPageState extends State<EventGroupsPage> {
           ),
         if (upcomingGroups.isNotEmpty) ...[
           if (ongoingGroups.isNotEmpty) const SizedBox(height: 20),
-          EventGroupsHorizontalSection(
+          EventGroupsSection(
             title: context.l10n.eventUpcomingSection,
             groups: upcomingGroups,
             linkedCardCountFor: (group) =>
@@ -363,7 +361,7 @@ class _EventGroupsPageState extends State<EventGroupsPage> {
         if (endedGroups.isNotEmpty) ...[
           if (ongoingGroups.isNotEmpty || upcomingGroups.isNotEmpty)
             const SizedBox(height: 20),
-          EventGroupsHorizontalSection(
+          EventGroupsSection(
             title: context.l10n.eventEndedSection,
             groups: endedGroups,
             linkedCardCountFor: (group) =>
@@ -392,10 +390,7 @@ class _EventGroupsPageState extends State<EventGroupsPage> {
   Widget _buildInvitationsSection(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
     final colorScheme = Theme.of(context).colorScheme;
-    final screenWidth = MediaQuery.sizeOf(context).width;
-    const horizontalPeek = 24.0;
-    const listHorizontalPadding = 20.0;
-    final cardWidth = screenWidth - (listHorizontalPadding * 2) - horizontalPeek;
+    final title = context.l10n.eventInvitationsSection.toUpperCase();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -403,41 +398,29 @@ class _EventGroupsPageState extends State<EventGroupsPage> {
         Padding(
           padding: const EdgeInsets.only(bottom: 10),
           child: Text(
-            context.l10n.eventInvitationsSection,
-            style: textTheme.titleSmall?.copyWith(
-              color: colorScheme.onSurface,
-              fontWeight: FontWeight.w800,
+            title,
+            style: textTheme.labelLarge?.copyWith(
+              color: colorScheme.onSurfaceVariant,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 0.8,
             ),
           ),
         ),
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          clipBehavior: Clip.none,
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              for (var index = 0; index < _invitations.length; index++) ...[
-                if (index > 0) const SizedBox(width: 12),
-                SizedBox(
-                  width: cardWidth,
-                  child: EventGroupInvitationCard(
-                    invitation: _invitations[index],
-                    isResponding:
-                        _respondingInvitationId == _invitations[index].id,
-                    onAccept: () => _respondToInvitation(
-                      invitation: _invitations[index],
-                      accept: true,
-                    ),
-                    onReject: () => _respondToInvitation(
-                      invitation: _invitations[index],
-                      accept: false,
-                    ),
-                  ),
-                ),
-              ],
-            ],
+        for (var index = 0; index < _invitations.length; index++) ...[
+          if (index > 0) const SizedBox(height: EventGroupsSection.cardSpacing),
+          EventGroupInvitationCard(
+            invitation: _invitations[index],
+            isResponding: _respondingInvitationId == _invitations[index].id,
+            onAccept: () => _respondToInvitation(
+              invitation: _invitations[index],
+              accept: true,
+            ),
+            onReject: () => _respondToInvitation(
+              invitation: _invitations[index],
+              accept: false,
+            ),
           ),
-        ),
+        ],
       ],
     );
   }

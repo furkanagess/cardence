@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 
+import '../helpers/network_graph_display.dart';
 import '../../domain/entities/graph_scope.dart';
 import '../../domain/entities/network_graph.dart';
 import '../../domain/entities/network_graph_path.dart';
@@ -15,6 +16,7 @@ class NetworkGraphState extends Equatable {
     this.graph,
     this.path,
     this.pathSourceCardId,
+    this.selectedNodeId,
     this.isPathLoading = false,
     this.errorMessage,
   });
@@ -26,6 +28,7 @@ class NetworkGraphState extends Equatable {
   final NetworkGraph? graph;
   final NetworkGraphPath? path;
   final String? pathSourceCardId;
+  final String? selectedNodeId;
   final bool isPathLoading;
   final String? errorMessage;
 
@@ -38,7 +41,30 @@ class NetworkGraphState extends Equatable {
       if (sourceNodeId != null) ids.add(sourceNodeId);
     }
     ids.addAll(path?.pathNodeIds ?? const []);
+
+    final graph = this.graph;
+    final selectedNodeId = this.selectedNodeId;
+    if (graph != null && selectedNodeId != null) {
+      ids.add(selectedNodeId);
+      ids.addAll(
+        NetworkGraphDisplay.neighborIds(selectedNodeId, graph.edges),
+      );
+    }
+
     return ids;
+  }
+
+  Set<String> get focusNodeIds {
+    final graph = this.graph;
+    if (graph == null) return {};
+    return NetworkGraphDisplay.focusNodeIds(
+      selectedNodeId: selectedNodeId,
+      nodes: NetworkGraphDisplay.visibleNodes(graph.nodes),
+      edges: NetworkGraphDisplay.visibleEdges(
+        nodes: NetworkGraphDisplay.visibleNodes(graph.nodes),
+        edges: graph.edges,
+      ),
+    );
   }
 
   String? _nodeIdForCard(String cardId) {
@@ -60,10 +86,12 @@ class NetworkGraphState extends Equatable {
     NetworkGraph? graph,
     NetworkGraphPath? path,
     String? pathSourceCardId,
+    String? selectedNodeId,
     bool? isPathLoading,
     String? errorMessage,
     bool clearPath = false,
     bool clearPathSource = false,
+    bool clearSelectedNode = false,
     bool clearError = false,
     bool clearEventGroupId = false,
   }) {
@@ -77,6 +105,8 @@ class NetworkGraphState extends Equatable {
       path: clearPath ? null : (path ?? this.path),
       pathSourceCardId:
           clearPathSource ? null : (pathSourceCardId ?? this.pathSourceCardId),
+      selectedNodeId:
+          clearSelectedNode ? null : (selectedNodeId ?? this.selectedNodeId),
       isPathLoading: isPathLoading ?? this.isPathLoading,
       errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
     );
@@ -91,6 +121,7 @@ class NetworkGraphState extends Equatable {
         graph,
         path,
         pathSourceCardId,
+        selectedNodeId,
         isPathLoading,
         errorMessage,
       ];

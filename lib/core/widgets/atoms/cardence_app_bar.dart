@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../theme/app_colors.dart';
 import 'custom_button.dart';
 
 /// AppBar başlık ve ikon hiyerarşisi.
@@ -13,6 +14,88 @@ enum CardenceAppBarVariant {
   primary,
   editor,
   flow,
+}
+
+/// Özel üst şeritler (ör. kaydedilen kartlar başlığı) için AppBar ile aynı yüzey.
+class CardenceAppBarRegion extends StatelessWidget {
+  const CardenceAppBarRegion({
+    super.key,
+    required this.child,
+    this.padding = const EdgeInsets.fromLTRB(20, 8, 20, 12),
+  });
+
+  final Widget child;
+  final EdgeInsets padding;
+
+  @override
+  Widget build(BuildContext context) {
+    final brightness = Theme.of(context).brightness;
+    final background = AppColors.appBarBackgroundFor(brightness);
+
+    return Material(
+      color: background,
+      elevation: AppColors.appBarElevation,
+      shadowColor: AppColors.appBarShadowColor(brightness),
+      surfaceTintColor: Colors.transparent,
+      child: SafeArea(
+        bottom: false,
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            border: Border(
+              bottom: BorderSide(
+                color: AppColors.appBarBorderColorFor(brightness),
+              ),
+            ),
+          ),
+          child: Padding(
+            padding: padding,
+            child: child,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Adım akışı ve oluşturma ekranlarında alt aksiyon alanı — AppBar ile aynı yüzey.
+class CardenceFlowBottomBarRegion extends StatelessWidget {
+  const CardenceFlowBottomBarRegion({
+    super.key,
+    required this.child,
+    this.padding = const EdgeInsets.fromLTRB(20, 12, 20, 16),
+  });
+
+  final Widget child;
+  final EdgeInsets padding;
+
+  @override
+  Widget build(BuildContext context) {
+    final brightness = Theme.of(context).brightness;
+    final background = AppColors.appBarBackgroundFor(brightness);
+
+    return Material(
+      color: background,
+      elevation: AppColors.appBarElevation,
+      shadowColor: AppColors.appBarShadowColor(brightness),
+      surfaceTintColor: Colors.transparent,
+      child: SafeArea(
+        top: false,
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            border: Border(
+              top: BorderSide(
+                color: AppColors.appBarBorderColorFor(brightness),
+              ),
+            ),
+          ),
+          child: Padding(
+            padding: padding,
+            child: child,
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 /// Cardence uygulamasının tek AppBar bileşeni.
@@ -33,7 +116,9 @@ class CardenceAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.elevation,
     this.scrolledUnderElevation,
   }) : assert(
-          title != null || titleWidget != null || variant == CardenceAppBarVariant.flow,
+          title != null ||
+              titleWidget != null ||
+              variant == CardenceAppBarVariant.flow,
           'title, titleWidget veya flow variant gerekli',
         );
 
@@ -49,7 +134,14 @@ class CardenceAppBar extends StatelessWidget implements PreferredSizeWidget {
   final double? scrolledUnderElevation;
 
   static const double _actionIconSize = 24;
+  static const double _bottomBorderHeight = 1;
   static const IconData _backIcon = Icons.arrow_back_rounded;
+
+  static Color resolveBackground(BuildContext context) =>
+      AppColors.appBarBackgroundFor(Theme.of(context).brightness);
+
+  static Color resolveForeground(BuildContext context) =>
+      AppColors.appBarForegroundFor(Theme.of(context).brightness);
 
   /// Tüm AppBar geri butonlarında kullanılan standart ikon.
   static Widget backButton({
@@ -92,8 +184,8 @@ class CardenceAppBar extends StatelessWidget implements PreferredSizeWidget {
   }
 
   static ButtonStyle _flowButtonStyle(BuildContext context) {
-    final background = Theme.of(context).scaffoldBackgroundColor;
-    final onSurface = Theme.of(context).colorScheme.onSurface;
+    final background = resolveBackground(context);
+    final onSurface = resolveForeground(context);
     return ButtonStyle(
       backgroundColor: WidgetStatePropertyAll(background),
       overlayColor: const WidgetStatePropertyAll(Colors.transparent),
@@ -142,24 +234,22 @@ class CardenceAppBar extends StatelessWidget implements PreferredSizeWidget {
     return false;
   }
 
-  TextStyle? _titleStyle(BuildContext context) {
-    final theme = Theme.of(context);
-    final textTheme = theme.textTheme;
-    final onSurface = foregroundColor ?? theme.colorScheme.onSurface;
+  TextStyle? _titleStyle(BuildContext context, Color foreground) {
+    final textTheme = Theme.of(context).textTheme;
 
     return textTheme.titleLarge?.copyWith(
       fontWeight: FontWeight.w600,
-      color: onSurface,
+      color: foreground,
     );
   }
 
-  Widget? _buildTitle(BuildContext context) {
+  Widget? _buildTitle(BuildContext context, Color foreground) {
     if (titleWidget != null) return titleWidget;
     if (title == null) return null;
 
     return Text(
       title!,
-      style: _titleStyle(context),
+      style: _titleStyle(context, foreground),
       maxLines: 1,
       overflow: TextOverflow.ellipsis,
     );
@@ -175,35 +265,47 @@ class CardenceAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-    final appBarTheme = theme.appBarTheme;
-
-    final pageBackground = theme.scaffoldBackgroundColor;
+    final appBarTheme = Theme.of(context).appBarTheme;
+    final resolvedBackground = backgroundColor ?? resolveBackground(context);
+    final resolvedForeground = foregroundColor ?? resolveForeground(context);
+    final resolvedElevation =
+        elevation ?? appBarTheme.elevation ?? AppColors.appBarElevation;
 
     return AppBar(
-      title: _buildTitle(context),
+      title: _buildTitle(context, resolvedForeground),
       centerTitle: _centerTitle,
       automaticallyImplyLeading: false,
       leading: _resolveLeading(context),
       actions: actions,
-      backgroundColor: backgroundColor ?? pageBackground,
-      foregroundColor: foregroundColor ?? appBarTheme.foregroundColor,
-      elevation: elevation ?? appBarTheme.elevation ?? 0,
-      scrolledUnderElevation:
-          scrolledUnderElevation ?? appBarTheme.scrolledUnderElevation ?? 0,
+      backgroundColor: resolvedBackground,
+      foregroundColor: resolvedForeground,
+      elevation: resolvedElevation,
+      scrolledUnderElevation: 0,
+      shadowColor: appBarTheme.shadowColor ??
+          AppColors.appBarShadowColor(Theme.of(context).brightness),
       surfaceTintColor: Colors.transparent,
       iconTheme: IconThemeData(
-        color: foregroundColor ?? colorScheme.onSurface,
+        color: resolvedForeground,
         size: _actionIconSize,
       ),
       actionsIconTheme: IconThemeData(
-        color: foregroundColor ?? colorScheme.onSurface,
+        color: resolvedForeground,
         size: _actionIconSize,
+      ),
+      bottom: PreferredSize(
+        preferredSize: const Size.fromHeight(_bottomBorderHeight),
+        child: Divider(
+          height: _bottomBorderHeight,
+          thickness: _bottomBorderHeight,
+          color: AppColors.appBarBorderColorFor(
+            Theme.of(context).brightness,
+          ),
+        ),
       ),
     );
   }
 
   @override
-  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
+  Size get preferredSize =>
+      const Size.fromHeight(kToolbarHeight + _bottomBorderHeight);
 }

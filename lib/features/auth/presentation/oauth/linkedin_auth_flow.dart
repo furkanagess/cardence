@@ -9,6 +9,7 @@ import 'package:webview_flutter/webview_flutter.dart';
 
 import '../../../../core/config/linkedin_auth_config.dart';
 import '../../../../core/l10n/l10n_extensions.dart';
+import '../../../../core/widgets/atoms/cardence_app_bar.dart';
 import 'linkedin_oauth_scopes.dart';
 
 /// LinkedIn OAuth authorization code.
@@ -171,10 +172,11 @@ class _LinkedInAuthCodePageState extends State<_LinkedInAuthCodePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(context.l10n.linkedinIleGiri),
-        leading: IconButton(
-          icon: const Icon(Icons.close),
+      appBar: CardenceAppBar(
+        title: context.l10n.linkedinIleGiri,
+        leading: CardenceAppBar.iconAction(
+          icon: Icons.close_rounded,
+          tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
           onPressed: () => Navigator.of(context).pop(),
         ),
       ),

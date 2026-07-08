@@ -21,12 +21,12 @@ import '../../domain/usecases/reset_password.dart';
 import '../bloc/login_bloc.dart';
 import '../bloc/login_event.dart';
 import '../bloc/login_state.dart';
-import '../widgets/login_accent_color_picker.dart';
 import '../widgets/login_email_form.dart';
 import '../widgets/login_phone_form.dart';
 import '../oauth/linkedin_auth_flow.dart';
 import '../widgets/login_social_section.dart';
 import '../widgets/register_form.dart';
+import '../../../onboarding/presentation/widgets/onboarding_flow_ui.dart';
 import 'forgot_password_page.dart';
 
 class LoginPage extends StatelessWidget {
@@ -39,8 +39,6 @@ class LoginPage extends StatelessWidget {
     required this.getLastLoginCredentials,
     required this.forgotPassword,
     required this.resetPassword,
-    required this.selectedAccentColorId,
-    required this.onAccentColorSelected,
     required this.onLoginSuccess,
   });
 
@@ -51,8 +49,6 @@ class LoginPage extends StatelessWidget {
   final GetLastLoginCredentials getLastLoginCredentials;
   final ForgotPassword forgotPassword;
   final ResetPassword resetPassword;
-  final String selectedAccentColorId;
-  final ValueChanged<String> onAccentColorSelected;
   final void Function({bool fromRegistration}) onLoginSuccess;
 
   @override
@@ -68,8 +64,6 @@ class LoginPage extends StatelessWidget {
       child: _AuthView(
         forgotPassword: forgotPassword,
         resetPassword: resetPassword,
-        selectedAccentColorId: selectedAccentColorId,
-        onAccentColorSelected: onAccentColorSelected,
         onAuthSuccess: onLoginSuccess,
       ),
     );
@@ -80,15 +74,11 @@ class _AuthView extends StatefulWidget {
   const _AuthView({
     required this.forgotPassword,
     required this.resetPassword,
-    required this.selectedAccentColorId,
-    required this.onAccentColorSelected,
     required this.onAuthSuccess,
   });
 
   final ForgotPassword forgotPassword;
   final ResetPassword resetPassword;
-  final String selectedAccentColorId;
-  final ValueChanged<String> onAccentColorSelected;
   final void Function({bool fromRegistration}) onAuthSuccess;
 
   @override
@@ -223,7 +213,13 @@ class _AuthViewState extends State<_AuthView>
                     ),
                   )
                 : null,
-            body: SafeArea(
+            body: Padding(
+              padding: EdgeInsets.fromLTRB(
+                24,
+                math.max(MediaQuery.paddingOf(context).top - 12, 0),
+                24,
+                MediaQuery.paddingOf(context).bottom,
+              ),
               child: LayoutBuilder(
                 builder: (context, constraints) {
                   final bottomInset = MediaQuery.viewInsetsOf(context).bottom;
@@ -237,31 +233,26 @@ class _AuthViewState extends State<_AuthView>
                           )
                           .clamp(148.0, 196.0);
 
-                  return Padding(
-                    padding: const EdgeInsets.fromLTRB(24, 4, 24, 0),
-                    child: state.isRegisterMode
-                        ? _RegisterScreenContent(
-                            state: state,
-                            keyboardVisible: keyboardVisible,
-                            bottomInset: bottomInset,
-                          )
-                        : _LoginScreenContent(
-                            state: state,
-                            keyboardVisible: keyboardVisible,
-                            bottomInset: bottomInset,
-                            logoSize: logoSize,
-                            introFade: _introFade,
-                            colorScheme: colorScheme,
-                            textTheme: textTheme,
-                            onForgotPassword: () =>
-                                _openForgotPassword(context),
-                            onLinkedInPressed: () => _handleLinkedInLogin(context),
-                            onRegisterTap: () =>
-                                _switchMode(context, AuthScreenMode.register),
-                            selectedAccentColorId: widget.selectedAccentColorId,
-                            onAccentColorSelected: widget.onAccentColorSelected,
-                          ),
-                  );
+                  return state.isRegisterMode
+                      ? _RegisterScreenContent(
+                          state: state,
+                          bottomInset: bottomInset,
+                        )
+                      : _LoginScreenContent(
+                          state: state,
+                          keyboardVisible: keyboardVisible,
+                          bottomInset: bottomInset,
+                          logoSize: logoSize,
+                          introFade: _introFade,
+                          colorScheme: colorScheme,
+                          textTheme: textTheme,
+                          onForgotPassword: () =>
+                              _openForgotPassword(context),
+                          onLinkedInPressed: () =>
+                              _handleLinkedInLogin(context),
+                          onRegisterTap: () =>
+                              _switchMode(context, AuthScreenMode.register),
+                        );
                 },
               ),
             ),
@@ -272,73 +263,89 @@ class _AuthViewState extends State<_AuthView>
   }
 }
 
-class _RegisterScreenContent extends StatelessWidget {
+class _RegisterScreenContent extends StatefulWidget {
   const _RegisterScreenContent({
     required this.state,
-    required this.keyboardVisible,
     required this.bottomInset,
   });
 
   final LoginState state;
-  final bool keyboardVisible;
   final double bottomInset;
+
+  @override
+  State<_RegisterScreenContent> createState() => _RegisterScreenContentState();
+}
+
+class _RegisterScreenContentState extends State<_RegisterScreenContent> {
+  final _registerFormKey = GlobalKey<RegisterFormState>();
+  bool _canSubmit = false;
 
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
     final colorScheme = Theme.of(context).colorScheme;
-
-    final registerForm = RegisterForm(
-      isLoading: state.isLoading,
-      onSubmit: ({
-        required displayName,
-        required email,
-        required password,
-        phone,
-      }) =>
-          context.read<LoginBloc>().add(
-                RegisterSubmitted(
-                  displayName: displayName,
-                  email: email,
-                  password: password,
-                  phone: phone,
-                ),
-              ),
+    final bottomBarInset = OnboardingBottomBar.contentBottomInset(
+      context,
+      showStepIndicator: false,
     );
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        Text(
+          context.l10n.authJoinCardenceTitle,
+          style: textTheme.headlineSmall?.copyWith(
+            fontWeight: FontWeight.w800,
+            color: colorScheme.primary,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          context.l10n.profesyonelKimliiniziYnetmekIinYeni,
+          style: textTheme.bodyMedium?.copyWith(
+            color: colorScheme.onSurfaceVariant,
+          ),
+        ),
+        const SizedBox(height: 18),
         Expanded(
           child: SingleChildScrollView(
             keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
             padding: EdgeInsets.only(
-              top: keyboardVisible ? 0 : 6,
-              bottom: bottomInset + 16,
+              bottom: widget.bottomInset + bottomBarInset,
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                if (!keyboardVisible) ...[
-                  Text(
-                    "Cardence'a Katılın",
-                    style: textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.w800,
-                      color: colorScheme.primary,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    context.l10n.profesyonelKimliiniziYnetmekIinYeni,
-                    style: textTheme.bodyMedium?.copyWith(
-                      color: colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                  const SizedBox(height: 18),
-                ],
-                registerForm,
-              ],
+            child: RegisterForm(
+              key: _registerFormKey,
+              isLoading: widget.state.isLoading,
+              showSubmitButton: false,
+              onCanSubmitChanged: (canSubmit) {
+                if (_canSubmit == canSubmit) return;
+                setState(() => _canSubmit = canSubmit);
+              },
+              onSubmit: ({
+                required displayName,
+                required email,
+                required password,
+                phone,
+              }) =>
+                  context.read<LoginBloc>().add(
+                        RegisterSubmitted(
+                          displayName: displayName,
+                          email: email,
+                          password: password,
+                          phone: phone,
+                        ),
+                      ),
             ),
+          ),
+        ),
+        CardenceFlowBottomBarRegion(
+          child: CustomButton(
+            label: context.l10n.kaytOl,
+            height: 48,
+            isLoading: widget.state.isLoading,
+            onPressed: _canSubmit
+                ? () => _registerFormKey.currentState?.submit()
+                : null,
           ),
         ),
       ],
@@ -358,8 +365,6 @@ class _LoginScreenContent extends StatelessWidget {
     required this.onForgotPassword,
     required this.onLinkedInPressed,
     required this.onRegisterTap,
-    required this.selectedAccentColorId,
-    required this.onAccentColorSelected,
   });
 
   final LoginState state;
@@ -372,8 +377,6 @@ class _LoginScreenContent extends StatelessWidget {
   final VoidCallback onForgotPassword;
   final VoidCallback onLinkedInPressed;
   final VoidCallback onRegisterTap;
-  final String selectedAccentColorId;
-  final ValueChanged<String> onAccentColorSelected;
 
   @override
   Widget build(BuildContext context) {
@@ -399,21 +402,21 @@ class _LoginScreenContent extends StatelessWidget {
                 ),
               ),
               if (!keyboardVisible) ...[
-                const SizedBox(height: 12),
+                const SizedBox(height: 6),
                 Text(
                   context.l10n.loginWelcomeTitle,
                   textAlign: TextAlign.center,
                   style: textTheme.headlineSmall?.copyWith(
                     fontWeight: FontWeight.w800,
                     letterSpacing: -0.3,
-                    color: colorScheme.onSurface,
+                    color: colorScheme.primary,
                   ),
                 ),
               ],
             ],
           ),
         ),
-        SizedBox(height: keyboardVisible ? 12 : 16),
+        SizedBox(height: keyboardVisible ? 8 : 10),
         Expanded(
           child: _LoginFormContent(
             state: state,
@@ -421,8 +424,6 @@ class _LoginScreenContent extends StatelessWidget {
             bottomInset: bottomInset,
             onForgotPassword: onForgotPassword,
             onLinkedInPressed: onLinkedInPressed,
-            selectedAccentColorId: selectedAccentColorId,
-            onAccentColorSelected: onAccentColorSelected,
           ),
         ),
         if (!keyboardVisible) ...[
@@ -463,8 +464,8 @@ class _AuthModeLink extends StatelessWidget {
             children: [
               TextSpan(
                 text: isRegister
-                    ? 'Zaten hesabınız var mı? '
-                    : 'Hesabınız yok mu? ',
+                    ? context.l10n.authAlreadyHaveAccountPrompt
+                    : context.l10n.authNoAccountPrompt,
               ),
               TextSpan(
                 text: isRegister ? context.l10n.giriYap : context.l10n.signUp,
@@ -487,8 +488,6 @@ class _LoginFormContent extends StatefulWidget {
     required this.state,
     required this.onForgotPassword,
     required this.onLinkedInPressed,
-    required this.selectedAccentColorId,
-    required this.onAccentColorSelected,
     this.expandToFill = false,
     this.bottomInset = 0,
   });
@@ -496,8 +495,6 @@ class _LoginFormContent extends StatefulWidget {
   final LoginState state;
   final VoidCallback onForgotPassword;
   final VoidCallback onLinkedInPressed;
-  final String selectedAccentColorId;
-  final ValueChanged<String> onAccentColorSelected;
   final bool expandToFill;
   final double bottomInset;
 
@@ -547,6 +544,8 @@ class _LoginFormContentState extends State<_LoginFormContent> {
   }
 
   Widget _buildSubmitButton() {
+    final signInLabelColor = Theme.of(context).scaffoldBackgroundColor;
+
     return CustomButton(
       label: context.l10n.giriYap,
       height: 48,
@@ -554,7 +553,11 @@ class _LoginFormContentState extends State<_LoginFormContent> {
       onPressed: _submit,
       labelStyle: Theme.of(context).textTheme.titleMedium?.copyWith(
             fontWeight: FontWeight.w700,
+            color: signInLabelColor,
           ),
+      style: FilledButton.styleFrom(
+        foregroundColor: signInLabelColor,
+      ),
     );
   }
 
@@ -562,13 +565,6 @@ class _LoginFormContentState extends State<_LoginFormContent> {
     return LoginSocialSection(
       isLoading: state.isLoading,
       onLinkedInPressed: state.isLoading ? null : widget.onLinkedInPressed,
-    );
-  }
-
-  Widget _buildAccentPicker() {
-    return LoginAccentColorPicker(
-      selectedId: widget.selectedAccentColorId,
-      onSelected: widget.onAccentColorSelected,
     );
   }
 
@@ -597,7 +593,6 @@ class _LoginFormContentState extends State<_LoginFormContent> {
     final fields = _buildFields();
     final submitButton = _buildSubmitButton();
     final methodSwitchButton = _buildMethodSwitchButton();
-    final accentPicker = _buildAccentPicker();
     final socialSection = _buildSocialSection();
 
     if (widget.expandToFill) {
@@ -611,8 +606,6 @@ class _LoginFormContentState extends State<_LoginFormContent> {
           const SizedBox(height: 10),
           methodSwitchButton,
           const SizedBox(height: 14),
-          accentPicker,
-          const SizedBox(height: 12),
           socialSection,
         ],
       );
@@ -630,8 +623,6 @@ class _LoginFormContentState extends State<_LoginFormContent> {
           const SizedBox(height: 10),
           methodSwitchButton,
           const SizedBox(height: 14),
-          accentPicker,
-          const SizedBox(height: 12),
           socialSection,
         ],
       ),
