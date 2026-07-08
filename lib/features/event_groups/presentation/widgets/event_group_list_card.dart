@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/l10n/l10n_extensions.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/media/media_image_size.dart';
 import '../../../../core/widgets/atoms/authenticated_network_image.dart';
 import '../../domain/entities/event_group.dart';
 import '../helpers/event_group_list_display_formatter.dart';
@@ -222,8 +223,8 @@ class _EventGroupListCardCover extends StatelessWidget {
           ? AuthenticatedNetworkImage(
               imageUrl: photoUrl,
               fit: BoxFit.cover,
-              width: double.infinity,
               height: eventGroupListCardCoverHeight,
+              displaySize: MediaImageSize.small,
               errorBuilder: (_) => _PlaceholderCover(isDark: isDark),
               loadingBuilder: (_) => _PlaceholderCover(isDark: isDark),
             )

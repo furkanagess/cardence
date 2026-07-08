@@ -19,21 +19,11 @@ class SavedCardsPageHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
-    final titleColor = CardenceAppBar.resolveForeground(context);
-
     return CardenceAppBarRegion(
       child: Row(
         children: [
           Expanded(
-            child: Text(
-              AppConstants.appName,
-              style: textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.w800,
-                letterSpacing: -0.4,
-                color: titleColor,
-              ),
-            ),
+            child: CardenceAppBar.shellTabTitle(context, AppConstants.appName),
           ),
           if (!quota.hasUnlimitedWallet)
             _WalletQuotaBadge(

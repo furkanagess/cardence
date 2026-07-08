@@ -81,6 +81,9 @@ public sealed class EventGroupService : IEventGroupService
 
     public async Task<EventGroupDto> CreateAsync(
         SaveEventGroupRequest request,
+        Stream? photoStream = null,
+        string? photoContentType = null,
+        long photoContentLength = 0,
         CancellationToken cancellationToken = default)
     {
         await _saveValidator.ValidateAndThrowAsync(request, cancellationToken);
@@ -112,6 +115,18 @@ public sealed class EventGroupService : IEventGroupService
             entity.Id,
             request.InvitedCardIds,
             cancellationToken);
+
+        if (photoStream is not null)
+        {
+            await ApplyPhotoAsync(
+                entity,
+                userId,
+                photoStream,
+                photoContentType,
+                photoContentLength,
+                cancellationToken);
+        }
+
         var cardCount = await _eventGroupRepository.CountCardsInGroupAsync(
             entity.Id,
             cancellationToken);
@@ -163,6 +178,14 @@ public sealed class EventGroupService : IEventGroupService
         var parsedId = ParseGroupId(groupId);
         var entity = await _eventGroupRepository.GetByUserAndIdAsync(userId, parsedId, cancellationToken)
             ?? throw new NotFoundException("EventGroup", groupId);
+
+        if (!string.IsNullOrWhiteSpace(entity.PhotoUrl))
+        {
+            await _eventGroupPhotoStorage.DeleteEventGroupPhotoAsync(
+                userId,
+                entity.Id,
+                cancellationToken);
+        }
 
         await _eventGroupRepository.DeleteAsync(entity, cancellationToken);
     }
@@ -234,17 +257,6 @@ public sealed class EventGroupService : IEventGroupService
         long contentLength,
         CancellationToken cancellationToken = default)
     {
-        if (contentLength <= 0 || contentLength > 5 * 1024 * 1024)
-        {
-            throw new ValidationException("Event photo must be at most 5 MB.");
-        }
-
-        if (!AllowedPhotoContentTypes.Contains(contentType))
-        {
-            throw new ValidationException(
-                "Only JPEG, PNG, or WebP images are supported for event photos.");
-        }
-
         var userId = _currentUser.GetRequiredUserId();
         var parsedGroupId = ParseGroupId(groupId);
         var entity = await _eventGroupRepository.GetByUserAndIdAsync(
@@ -253,15 +265,13 @@ public sealed class EventGroupService : IEventGroupService
                 cancellationToken)
             ?? throw new NotFoundException("EventGroup", groupId);
 
-        var photoUrl = await _eventGroupPhotoStorage.SaveEventGroupPhotoAsync(
+        await ApplyPhotoAsync(
+            entity,
             userId,
-            parsedGroupId,
             photoStream,
             contentType,
+            contentLength,
             cancellationToken);
-
-        entity.PhotoUrl = photoUrl;
-        await _eventGroupRepository.UpdateAsync(entity, cancellationToken);
 
         var cardCount = await _eventGroupRepository.CountCardsInGroupAsync(
             entity.Id,
@@ -361,6 +371,42 @@ public sealed class EventGroupService : IEventGroupService
         }
 
         await _eventGroupRepository.RejectInvitationAsync(invitation, cancellationToken);
+    }
+
+    private async Task ApplyPhotoAsync(
+        EventGroup entity,
+        Guid userId,
+        Stream photoStream,
+        string? contentType,
+        long contentLength,
+        CancellationToken cancellationToken)
+    {
+        ValidatePhotoUpload(contentType, contentLength);
+
+        var photoUrl = await _eventGroupPhotoStorage.SaveEventGroupPhotoAsync(
+            userId,
+            entity.Id,
+            photoStream,
+            contentType!,
+            cancellationToken);
+
+        entity.PhotoUrl = photoUrl;
+        await _eventGroupRepository.UpdateAsync(entity, cancellationToken);
+    }
+
+    private static void ValidatePhotoUpload(string? contentType, long contentLength)
+    {
+        if (contentLength <= 0 || contentLength > 5 * 1024 * 1024)
+        {
+            throw new ValidationException("Event photo must be at most 5 MB.");
+        }
+
+        if (string.IsNullOrWhiteSpace(contentType) ||
+            !AllowedPhotoContentTypes.Contains(contentType))
+        {
+            throw new ValidationException(
+                "Only JPEG, PNG, or WebP images are supported for event photos.");
+        }
     }
 
     private async Task EnsureUniqueNameAsync(

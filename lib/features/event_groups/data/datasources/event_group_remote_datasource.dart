@@ -1,7 +1,9 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:dio/dio.dart';
 
+import '../../../../core/media/profile_photo_normalizer.dart';
 import '../../../../core/network/api_response_parser.dart';
 import '../../../../core/network/auth_api_exception.dart';
 import '../../../../core/network/dio_api_client.dart';
@@ -18,6 +20,7 @@ abstract class EventGroupRemoteDataSource {
     DateTime? endAt,
     String? description,
     List<String> invitedCardIds = const [],
+    String? photoFilePath,
     required String accessToken,
   });
 
@@ -123,6 +126,7 @@ class EventGroupRemoteDataSourceImpl implements EventGroupRemoteDataSource {
     DateTime? endAt,
     String? description,
     List<String> invitedCardIds = const [],
+    String? photoFilePath,
     required String accessToken,
   }) async {
     final trimmedDescription = description?.trim();
@@ -135,6 +139,33 @@ class EventGroupRemoteDataSourceImpl implements EventGroupRemoteDataSource {
         'description': trimmedDescription,
       if (invitedCardIds.isNotEmpty) 'invitedCardIds': invitedCardIds,
     };
+
+    final trimmedPhotoPath = photoFilePath?.trim();
+    if (trimmedPhotoPath != null && trimmedPhotoPath.isNotEmpty) {
+      final file = File(trimmedPhotoPath);
+      if (!await file.exists()) {
+        throw AuthApiException(
+          'Etkinlik fotoğrafı bulunamadı. Lütfen fotoğrafı tekrar seçin.',
+        );
+      }
+
+      final normalizedPath =
+          await ProfilePhotoNormalizer.normalizePick(trimmedPhotoPath);
+      final formData = FormData.fromMap({
+        'request': jsonEncode(body),
+        'photo': await MultipartFile.fromFile(
+          normalizedPath,
+          filename: 'event-photo.jpg',
+        ),
+      });
+      final json = await _client.postMultipart(
+        '/SaveEventGroup',
+        formData: formData,
+        accessToken: accessToken,
+        fallbackError: 'Etkinlik grubu oluşturulamadı.',
+      );
+      return _parseGroup(json);
+    }
 
     final json = await _client.post(
       '/SaveEventGroup',
@@ -212,9 +243,11 @@ class EventGroupRemoteDataSourceImpl implements EventGroupRemoteDataSource {
       );
     }
 
+    final normalizedPath =
+        await ProfilePhotoNormalizer.normalizePick(trimmedPath);
     final formData = FormData.fromMap({
       'photo': await MultipartFile.fromFile(
-        trimmedPath,
+        normalizedPath,
         filename: 'event-photo.jpg',
       ),
     });

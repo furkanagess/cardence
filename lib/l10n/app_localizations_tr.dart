@@ -801,6 +801,10 @@ class AppLocalizationsTr extends AppLocalizations {
   String get kartZatenKaytl => 'Kart zaten kayıtlı';
 
   @override
+  String get cannotAddOwnCardToWallet =>
+      'Kendi kartınızı kaydedilen kartlara ekleyemezsiniz.';
+
+  @override
   String get kartaEklemekIstediinizAlanSein =>
       'Karta eklemek istediğiniz alanı seçin';
 

@@ -798,6 +798,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get kartZatenKaytl => 'Card already saved';
 
   @override
+  String get cannotAddOwnCardToWallet =>
+      'You cannot add your own card to saved cards.';
+
+  @override
   String get kartaEklemekIstediinizAlanSein =>
       'Select the field you want to add to the card';
 

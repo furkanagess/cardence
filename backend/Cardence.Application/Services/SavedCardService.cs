@@ -220,6 +220,13 @@ public sealed class SavedCardService : ISavedCardService
             ? null
             : await _businessCardRepository.GetByCardIdAsync(cardId, cancellationToken);
 
+        if (ownCard is not null && ownCard.UserId == userId)
+        {
+            throw new ConflictException(
+                "You cannot add your own card to saved cards.",
+                ErrorCodes.WalletOwnCardForbidden);
+        }
+
         if (!isManual && ownCard is null && IsStubRequest(request))
         {
             throw new ValidationException([

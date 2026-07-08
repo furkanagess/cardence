@@ -13,6 +13,10 @@ class AddSavedCardDuplicate extends AddSavedCardResult {
   const AddSavedCardDuplicate();
 }
 
+class AddSavedCardOwnCard extends AddSavedCardResult {
+  const AddSavedCardOwnCard();
+}
+
 class AddSavedCardLimitReached extends AddSavedCardResult {
   const AddSavedCardLimitReached(this.quota);
 

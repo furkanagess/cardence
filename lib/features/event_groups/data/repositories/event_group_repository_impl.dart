@@ -87,28 +87,24 @@ class EventGroupRepositoryImpl implements EventGroupRepository {
   @override
   Future<EventGroup> createEventGroup(EventGroupCreateInput input) async {
     final token = await _requireAccessToken();
-    var created = await _remote.createEventGroup(
+    final photoFilePath = input.photoFilePath?.trim();
+    final created = await _remote.createEventGroup(
       name: input.name,
       location: input.location,
       startAt: input.startAt,
       endAt: input.endAt,
       description: input.description,
       invitedCardIds: input.invitedCardIds,
+      photoFilePath: photoFilePath,
       accessToken: token,
     );
 
-    final photoFilePath = input.photoFilePath?.trim();
     if (photoFilePath != null && photoFilePath.isNotEmpty) {
-      try {
-        created = await _uploadAndValidateEventGroupPhoto(
-          groupId: created.id,
-          filePath: photoFilePath,
-          accessToken: token,
-        );
-      } catch (error) {
+      if (created.photoUrl == null || created.photoUrl!.trim().isEmpty) {
         await _tryDeleteEventGroup(created.id, token);
-        rethrow;
+        throw AuthApiException('Etkinlik fotoğrafı kaydedilemedi.');
       }
+      AuthenticatedImageLoader.evictAllVariants(created.photoUrl);
     }
 
     final localGroups = await _local.getEventGroups();
@@ -146,13 +142,33 @@ class EventGroupRepositoryImpl implements EventGroupRepository {
     final localGroups = await _local.getEventGroups();
     final index = localGroups.indexWhere((group) => group.id == updated.id);
     final next = [...localGroups];
+    var merged = updated;
     if (index >= 0) {
-      next[index] = updated;
+      final existing = next[index];
+      final updatedPhoto = updated.photoUrl?.trim();
+      final existingPhoto = existing.photoUrl?.trim();
+      if ((updatedPhoto == null || updatedPhoto.isEmpty) &&
+          existingPhoto != null &&
+          existingPhoto.isNotEmpty) {
+        merged = EventGroupModel(
+          id: updated.id,
+          name: updated.name,
+          location: updated.location,
+          description: updated.description,
+          startAt: updated.startAt,
+          endAt: updated.endAt,
+          status: updated.status,
+          eventDate: updated.eventDate,
+          photoUrl: existing.photoUrl,
+          invalidCardIds: updated.invalidCardIds,
+        );
+      }
+      next[index] = merged;
     } else {
-      next.add(updated);
+      next.add(merged);
     }
     await _cacheGroups(next);
-    return updated;
+    return merged;
   }
 
   @override

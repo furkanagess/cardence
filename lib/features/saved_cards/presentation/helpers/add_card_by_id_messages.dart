@@ -7,6 +7,7 @@ String? addCardByIdFormError(
 ) {
   return switch (result) {
     AddSavedCardDuplicate() => l10n.kartZatenKaytl,
+    AddSavedCardOwnCard() => l10n.cannotAddOwnCardToWallet,
     AddSavedCardInvalidPayload(:final message) =>
       message.isEmpty ? l10n.invalidCardId : message,
     _ => null,

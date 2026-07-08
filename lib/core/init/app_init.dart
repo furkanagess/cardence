@@ -104,7 +104,7 @@ import '../user_data/clear_user_scoped_local_data.dart';
 import '../user_data/sync_user_profile_cards.dart';
 
 /// Uygulama açılışında çalıştırılacak tüm init işlemleri ve sonuçları.
-/// main() içinde [AppInit.init] çağrılır; dönen [AppInitResult] ile [App] başlatılır.
+/// [AppSplashBootstrap] içinde [AppInit.init] çağrılır; dönen [AppInitResult] ile [App] başlatılır.
 class AppInit {
   AppInit._();
 

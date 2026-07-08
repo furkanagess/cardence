@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../../../core/l10n/l10n_extensions.dart';
+import '../../../../core/media/profile_photo_normalizer.dart';
 import '../../../../core/media/profile_photo_image_picker.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/atoms/authenticated_network_image.dart';
@@ -37,7 +38,11 @@ class EventGroupPhotoPickerField extends StatelessWidget {
       onError: (_, {bool openSettings = false}) {},
     );
     if (path == null) return;
-    onChanged(path);
+    final normalized = await ProfilePhotoNormalizer.normalizePick(
+      path,
+      mirrorFrontCamera: false,
+    );
+    onChanged(normalized);
   }
 
   @override

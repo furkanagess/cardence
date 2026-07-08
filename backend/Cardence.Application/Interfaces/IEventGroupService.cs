@@ -9,6 +9,9 @@ public interface IEventGroupService
 
     Task<EventGroupDto> CreateAsync(
         SaveEventGroupRequest request,
+        Stream? photoStream = null,
+        string? photoContentType = null,
+        long photoContentLength = 0,
         CancellationToken cancellationToken = default);
 
     Task<EventGroupDto> UpdateAsync(

@@ -8,6 +8,7 @@ public static class ErrorCodes
     public const string Forbidden = "FORBIDDEN";
     public const string WalletLimitReached = "WALLET_LIMIT_REACHED";
     public const string WalletDuplicateCard = "WALLET_DUPLICATE_CARD";
+    public const string WalletOwnCardForbidden = "WALLET_OWN_CARD_FORBIDDEN";
     public const string PlanLimitReached = "PLAN_LIMIT_REACHED";
     public const string FeatureNotIncluded = "FEATURE_NOT_INCLUDED";
     public const string SubscriptionRequired = "SUBSCRIPTION_REQUIRED";

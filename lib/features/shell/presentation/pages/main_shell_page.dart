@@ -4,7 +4,6 @@ import '../../../../core/l10n/l10n_extensions.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/constants/app_constants.dart';
-import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/atoms/cardence_app_bar.dart';
 import '../../../../core/widgets/organisms/cardence_scaffold.dart';
 import '../../../event_groups/domain/usecases/get_event_groups.dart';
@@ -167,20 +166,9 @@ class _MainShellPageState extends State<MainShellPage> {
   PreferredSizeWidget? _buildAppBar(BuildContext context) {
     if (_currentIndex == 0) return null;
 
-    final textTheme = Theme.of(context).textTheme;
-
     return CardenceAppBar(
       variant: CardenceAppBarVariant.primary,
-      titleWidget: Text(
-        _appBarTitle,
-        style: textTheme.titleLarge?.copyWith(
-          color: AppColors.primary,
-          fontWeight: FontWeight.w700,
-          fontSize: 22,
-        ),
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-      ),
+      titleWidget: CardenceAppBar.shellTabTitle(context, _appBarTitle),
       actions: [
         CardenceAppBar.iconAction(
           icon: Icons.settings_outlined,

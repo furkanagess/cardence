@@ -9,6 +9,7 @@ import 'l10n/app_localizations.dart';
 import 'core/auth/auth_token_coordinator.dart';
 import 'core/auth/session_expired_handler.dart';
 import 'core/constants/app_constants.dart';
+import 'core/init/app_init.dart';
 import 'core/theme/app_theme.dart';
 import 'core/theme/splash_theme.dart';
 import 'core/widgets/molecules/chuck_fab_overlay.dart';
@@ -138,6 +139,70 @@ class App extends StatefulWidget {
     required this.getNetworkGraphPath,
     required this.showPostAddCardMonetization,
   });
+
+  factory App.withInitResult({
+    required GlobalKey<NavigatorState> rootNavigatorKey,
+    required AppInitResult init,
+  }) {
+    return App(
+      rootNavigatorKey: rootNavigatorKey,
+      restoreAuthSession: init.restoreAuthSession,
+      getAuthSession: init.getAuthSession,
+      identifySubscriptionUser: init.identifySubscriptionUser,
+      loginWithEmail: init.loginWithEmail,
+      loginWithPhone: init.loginWithPhone,
+      loginWithLinkedIn: init.loginWithLinkedIn,
+      registerUser: init.registerUser,
+      getLastLoginCredentials: init.getLastLoginCredentials,
+      forgotPassword: init.forgotPassword,
+      resetPassword: init.resetPassword,
+      getCurrentUser: init.getCurrentUser,
+      logout: init.logout,
+      uploadProfilePhoto: init.uploadProfilePhoto,
+      getOnboardingCompleted: init.getOnboardingCompleted,
+      completeOnboarding: init.completeOnboarding,
+      syncOnboardingFromServer: init.syncOnboardingFromServer,
+      persistOnboardingCard: init.persistOnboardingCard,
+      saveBusinessCard: init.saveBusinessCard,
+      getOnboardingDraftCard: init.getOnboardingDraftCard,
+      getOnboardingDraftCards: init.getOnboardingDraftCards,
+      resolveOnboardingInitialDraft: init.resolveOnboardingInitialDraft,
+      getThemePreference: init.getThemePreference,
+      setThemePreference: init.setThemePreference,
+      getAccentColorId: init.getAccentColorId,
+      setAccentColorId: init.setAccentColorId,
+      initialThemePreference: init.initialThemePreference,
+      initialAccentColorId: init.initialAccentColorId,
+      getLocalePreference: init.getLocalePreference,
+      setLocalePreference: init.setLocalePreference,
+      initialLocalePreference: init.initialLocalePreference,
+      submitSupportRequest: init.submitSupportRequest,
+      requestAppReview: init.requestAppReview,
+      getEventGroups: init.getEventGroups,
+      getEventGroupInvitations: init.getEventGroupInvitations,
+      acceptEventGroupInvitation: init.acceptEventGroupInvitation,
+      rejectEventGroupInvitation: init.rejectEventGroupInvitation,
+      createEventGroup: init.createEventGroup,
+      updateEventGroup: init.updateEventGroup,
+      inviteEventGroupCardsByCardId: init.inviteEventGroupCardsByCardId,
+      deleteEventGroup: init.deleteEventGroup,
+      linkEventGroupCards: init.linkEventGroupCards,
+      linkSavedCardsToEventGroup: init.linkSavedCardsToEventGroup,
+      getSavedCards: init.getSavedCards,
+      saveSavedCard: init.saveSavedCard,
+      getSavedCardsWalletQuota: init.getSavedCardsWalletQuota,
+      addSavedCard: init.addSavedCard,
+      deleteSavedCard: init.deleteSavedCard,
+      trackSavedCardContactClick: init.trackSavedCardContactClick,
+      upgradeWalletPlan: init.upgradeWalletPlan,
+      restoreWalletPurchases: init.restoreWalletPurchases,
+      getProfileStats: init.getProfileStats,
+      getPlanEntitlements: init.getPlanEntitlements,
+      getNetworkGraph: init.getNetworkGraph,
+      getNetworkGraphPath: init.getNetworkGraphPath,
+      showPostAddCardMonetization: init.showPostAddCardMonetization,
+    );
+  }
 
   final GlobalKey<NavigatorState> rootNavigatorKey;
   final RestoreAuthSession restoreAuthSession;

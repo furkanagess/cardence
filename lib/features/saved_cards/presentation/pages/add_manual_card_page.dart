@@ -74,6 +74,7 @@ class _AddManualCardPageState extends State<AddManualCardPage> {
       case AddSavedCardSuccess():
         Navigator.of(context).pop(result);
       case AddSavedCardDuplicate():
+      case AddSavedCardOwnCard():
       case AddSavedCardLimitReached():
       case AddSavedCardPremiumRequired():
         Navigator.of(context).pop(result);

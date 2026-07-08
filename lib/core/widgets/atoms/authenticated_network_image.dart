@@ -49,20 +49,28 @@ class _AuthenticatedNetworkImageState extends State<AuthenticatedNetworkImage> {
       widget.imageUrl.trim().isEmpty ? null : widget.imageUrl.trim();
 
   MediaImageSize get _resolvedDisplaySize =>
-      widget.displaySize ?? _sizeForLayout(widget.width ?? widget.height ?? 128);
+      widget.displaySize ??
+      _sizeForLayout(_finiteDimension(widget.width, widget.height) ?? 128);
+
+  static double? _finiteDimension(double? width, double? height) {
+    if (width != null && width.isFinite) return width;
+    if (height != null && height.isFinite) return height;
+    return null;
+  }
+
+  static MediaImageSize _sizeForLayout(double layoutPx) {
+    if (!layoutPx.isFinite) return MediaImageSize.medium;
+    if (layoutPx <= 56) return MediaImageSize.thumb;
+    if (layoutPx <= 120) return MediaImageSize.small;
+    if (layoutPx <= 280) return MediaImageSize.medium;
+    return MediaImageSize.large;
+  }
 
   String? get _requestUrl {
     final source = _sourceUrl;
     if (source == null) return null;
     return ApiMediaUrls.variantUrl(source, _resolvedDisplaySize) ??
         ApiMediaUrls.resolve(source);
-  }
-
-  static MediaImageSize _sizeForLayout(double layoutPx) {
-    if (layoutPx <= 56) return MediaImageSize.thumb;
-    if (layoutPx <= 120) return MediaImageSize.small;
-    if (layoutPx <= 280) return MediaImageSize.medium;
-    return MediaImageSize.large;
   }
 
   static String? _requestUrlFor(
@@ -73,7 +81,8 @@ class _AuthenticatedNetworkImageState extends State<AuthenticatedNetworkImage> {
   ) {
     final source = imageUrl.trim();
     if (source.isEmpty) return null;
-    final size = displaySize ?? _sizeForLayout(width ?? height ?? 128);
+    final size = displaySize ??
+        _sizeForLayout(_finiteDimension(width, height) ?? 128);
     return ApiMediaUrls.variantUrl(source, size) ?? ApiMediaUrls.resolve(source);
   }
 
@@ -199,10 +208,12 @@ class _AuthenticatedNetworkImageState extends State<AuthenticatedNetworkImage> {
   }
 
   int? get _cacheSizePx {
-    final layout = widget.width ?? widget.height;
+    final layout = _finiteDimension(widget.width, widget.height);
     if (layout == null) return _resolvedDisplaySize.width;
     final ratio = MediaQuery.maybeDevicePixelRatioOf(context) ?? 1.0;
-    return (layout * ratio).ceil().clamp(1, _resolvedDisplaySize.width);
+    final pixels = layout * ratio;
+    if (!pixels.isFinite) return _resolvedDisplaySize.width;
+    return pixels.ceil().clamp(1, _resolvedDisplaySize.width);
   }
 
   @override

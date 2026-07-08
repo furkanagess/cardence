@@ -1592,6 +1592,12 @@ abstract class AppLocalizations {
   /// **'Kart zaten kayıtlı'**
   String get kartZatenKaytl;
 
+  /// No description provided for @cannotAddOwnCardToWallet.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kendi kartınızı kaydedilen kartlara ekleyemezsiniz.'**
+  String get cannotAddOwnCardToWallet;
+
   /// No description provided for @kartaEklemekIstediinizAlanSein.
   ///
   /// In tr, this message translates to:

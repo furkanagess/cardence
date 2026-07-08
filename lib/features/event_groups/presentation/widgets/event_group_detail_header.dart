@@ -16,6 +16,9 @@ double eventGroupDetailCoverHeight(BuildContext context) {
 /// Bilgi paneli ile kapak arasındaki bindirme.
 const double eventGroupDetailCoverOverlap = 24;
 
+/// Kaydırılabilir detay panelinin yatay iç boşluğu.
+const double eventGroupDetailPanelHorizontalPadding = 20;
+
 /// Etkinlik detay kapak görseli.
 class EventGroupDetailCover extends StatelessWidget {
   const EventGroupDetailCover({
@@ -178,100 +181,113 @@ class _EventGroupDetailScrollContentState
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        if (hasDescription) ...[
-          Text(
-            context.l10n.eventAboutSectionLabel.toUpperCase(),
-            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: colorScheme.onSurfaceVariant,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: 0.8,
-                ),
+        Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: eventGroupDetailPanelHorizontalPadding,
           ),
-          const SizedBox(height: 8),
-          Text(
-            description,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: colorScheme.onSurface,
-                  height: 1.5,
-                ),
-            maxLines: _aboutExpanded ? null : widget.aboutMaxLines,
-            overflow: _aboutExpanded ? null : TextOverflow.ellipsis,
-          ),
-          if (showExpandAction)
-            Align(
-              alignment: Alignment.centerLeft,
-              child: TextButton(
-                style: TextButton.styleFrom(
-                  padding: const EdgeInsets.fromLTRB(0, 4, 0, 0),
-                  minimumSize: Size.zero,
-                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  foregroundColor: colorScheme.primary,
-                ),
-                onPressed: () => setState(() => _aboutExpanded = true),
-                child: Text(
-                  context.l10n.eventShowMore,
-                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                        color: colorScheme.primary,
-                        fontWeight: FontWeight.w600,
-                      ),
-                ),
-              ),
-            )
-          else if (_aboutExpanded)
-            Align(
-              alignment: Alignment.centerLeft,
-              child: TextButton(
-                style: TextButton.styleFrom(
-                  padding: const EdgeInsets.fromLTRB(0, 4, 0, 0),
-                  minimumSize: Size.zero,
-                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                ),
-                onPressed: () => setState(() => _aboutExpanded = false),
-                child: Text(context.l10n.kapat),
-              ),
-            ),
-          const SizedBox(height: 22),
-        ],
-        if (widget.loadingLinkedCards)
-          const EventGroupDetailStatChipRowShimmer()
-        else
-          EventGroupDetailStatChipRow(
-            linkedCardCount: widget.linkedCardCount,
-            inviteCount: widget.inviteCount,
-          ),
-        const SizedBox(height: 22),
-        Row(
-          children: [
-            Expanded(
-              child: Text(
-                context.l10n.eventGroupCardsSectionTitle,
-                style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.w700,
-                      color: colorScheme.onSurface,
-                    ),
-              ),
-            ),
-            if (widget.onAddCard != null)
-              TextButton(
-                style: TextButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(horizontal: 4),
-                  minimumSize: Size.zero,
-                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  foregroundColor: colorScheme.primary,
-                ),
-                onPressed: widget.onAddCard,
-                child: Text(
-                  context.l10n.eventAddCardPlus,
-                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                        color: colorScheme.primary,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              if (hasDescription) ...[
+                Text(
+                  context.l10n.eventAboutSectionLabel.toUpperCase(),
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        color: colorScheme.onSurfaceVariant,
                         fontWeight: FontWeight.w700,
+                        letterSpacing: 0.8,
                       ),
                 ),
+                const SizedBox(height: 8),
+                Text(
+                  description,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: colorScheme.onSurface,
+                        height: 1.5,
+                      ),
+                  maxLines: _aboutExpanded ? null : widget.aboutMaxLines,
+                  overflow: _aboutExpanded ? null : TextOverflow.ellipsis,
+                ),
+                if (showExpandAction)
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: TextButton(
+                      style: TextButton.styleFrom(
+                        padding: const EdgeInsets.fromLTRB(0, 4, 0, 0),
+                        minimumSize: Size.zero,
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        foregroundColor: colorScheme.primary,
+                      ),
+                      onPressed: () => setState(() => _aboutExpanded = true),
+                      child: Text(
+                        context.l10n.eventShowMore,
+                        style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                              color: colorScheme.primary,
+                              fontWeight: FontWeight.w600,
+                            ),
+                      ),
+                    ),
+                  )
+                else if (_aboutExpanded)
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: TextButton(
+                      style: TextButton.styleFrom(
+                        padding: const EdgeInsets.fromLTRB(0, 4, 0, 0),
+                        minimumSize: Size.zero,
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      ),
+                      onPressed: () => setState(() => _aboutExpanded = false),
+                      child: Text(context.l10n.kapat),
+                    ),
+                  ),
+                const SizedBox(height: 22),
+              ],
+              if (widget.loadingLinkedCards)
+                const EventGroupDetailStatChipRowShimmer()
+              else
+                EventGroupDetailStatChipRow(
+                  linkedCardCount: widget.linkedCardCount,
+                  inviteCount: widget.inviteCount,
+                ),
+              const SizedBox(height: 22),
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      context.l10n.eventGroupCardsSectionTitle,
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.w700,
+                            color: colorScheme.onSurface,
+                          ),
+                    ),
+                  ),
+                  if (widget.onAddCard != null)
+                    TextButton(
+                      style: TextButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(horizontal: 4),
+                        minimumSize: Size.zero,
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        foregroundColor: colorScheme.primary,
+                      ),
+                      onPressed: widget.onAddCard,
+                      child: Text(
+                        context.l10n.eventAddCardPlus,
+                        style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                              color: colorScheme.primary,
+                              fontWeight: FontWeight.w700,
+                            ),
+                      ),
+                    ),
+                ],
               ),
-          ],
+              const SizedBox(height: 24),
+            ],
+          ),
         ),
-        const SizedBox(height: 12),
-        if (widget.cardsSection != null) widget.cardsSection!,
+        if (widget.cardsSection != null) ...[
+          const SizedBox(height: 8),
+          widget.cardsSection!,
+        ],
       ],
     );
   }
@@ -306,7 +322,7 @@ class EventGroupDetailScrollPanel extends StatelessWidget {
         ],
       ),
       child: SingleChildScrollView(
-        padding: EdgeInsets.fromLTRB(20, 22, 20, bottomPadding),
+        padding: EdgeInsets.only(top: 22, bottom: bottomPadding),
         child: child,
       ),
     );

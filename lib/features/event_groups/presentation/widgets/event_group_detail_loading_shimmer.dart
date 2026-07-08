@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/widgets/atoms/shimmer.dart';
+import '../../../saved_cards/presentation/widgets/saved_cards_horizontal_carousel.dart';
+import '../../../saved_cards/presentation/widgets/saved_cards_horizontal_stack_view.dart';
 
 /// Kart / davet sayısı chip satırı iskeleti.
 class EventGroupDetailStatChipRowShimmer extends StatelessWidget {
@@ -25,27 +27,24 @@ class EventGroupDetailStatChipRowShimmer extends StatelessWidget {
   }
 }
 
-/// Yatay kart listesi iskeleti.
+/// Yatay kart şeridi iskeleti.
 class EventGroupDetailCardsSectionShimmer extends StatelessWidget {
   const EventGroupDetailCardsSectionShimmer({super.key});
 
-  static const double _tileWidth = 196;
-  static const double _tileHeight = 118;
-
   @override
   Widget build(BuildContext context) {
+    final contentWidth = MediaQuery.sizeOf(context).width;
+    final cardWidth = SavedCardsHorizontalCarousel.resolveCardWidth(contentWidth);
+    final height = SavedCardsHorizontalCarousel.sectionHeight(cardWidth);
+
     return Shimmer(
       child: SizedBox(
-        height: _tileHeight,
-        child: ListView.separated(
-          scrollDirection: Axis.horizontal,
-          physics: const NeverScrollableScrollPhysics(),
-          itemCount: 3,
-          separatorBuilder: (_, __) => const SizedBox(width: 12),
-          itemBuilder: (_, __) => const ShimmerPlaceholder(
-            width: _tileWidth,
-            height: _tileHeight,
-            borderRadius: 14,
+        height: height,
+        child: Center(
+          child: ShimmerPlaceholder(
+            width: cardWidth,
+            height: SavedCardsHorizontalStackView.stackHeight,
+            borderRadius: 16,
           ),
         ),
       ),

@@ -33,6 +33,9 @@ class AddSavedCard {
       if (e.statusCode == 409 || e.errorCode == 'WALLET_DUPLICATE_CARD') {
         return const AddSavedCardDuplicate();
       }
+      if (e.errorCode == 'WALLET_OWN_CARD_FORBIDDEN') {
+        return const AddSavedCardOwnCard();
+      }
       if (e.statusCode == 403 ||
           e.errorCode == 'WALLET_LIMIT_REACHED' ||
           e.errorCode == 'PLAN_LIMIT_REACHED') {

@@ -1,7 +1,9 @@
+using Cardence.Application.Common;
 using Cardence.Application.Interfaces;
 using Cardence.Application.Services;
 using Cardence.Domain.Constants;
 using Cardence.Domain.Entities;
+using Cardence.Domain.Exceptions;
 using FluentAssertions;
 using NSubstitute;
 using Xunit;
@@ -112,5 +114,31 @@ public sealed class SavedCardServiceTests
             .UpgradeToPremiumAsync(default, default);
         await _walletRepository.DidNotReceiveWithAnyArgs()
             .SetTierAsync(default, default!, default, default);
+    }
+
+    [Fact]
+    public async Task CreateFromJsonAsync_RejectsOwnBusinessCard()
+    {
+        const string cardId = "123456";
+        _savedCardRepository.GetByUserAndCardIdAsync(_userId, cardId, Arg.Any<CancellationToken>())
+            .Returns((SavedCard?)null);
+        _businessCardRepository.GetByCardIdAsync(cardId, Arg.Any<CancellationToken>())
+            .Returns(new Card
+            {
+                Id = Guid.NewGuid(),
+                UserId = _userId,
+                CardId = cardId,
+                DisplayName = "Own Card",
+            });
+
+        var body = System.Text.Json.JsonDocument.Parse(
+            $$"""{"cardId":"{{cardId}}","displayName":"Own Card"}""").RootElement;
+
+        var act = () => _service.CreateFromJsonAsync(body);
+
+        var exception = await act.Should().ThrowAsync<ConflictException>();
+        exception.Which.Code.Should().Be(ErrorCodes.WalletOwnCardForbidden);
+        await _savedCardRepository.DidNotReceiveWithAnyArgs()
+            .AddAsync(Arg.Any<SavedCard>(), Arg.Any<CancellationToken>());
     }
 }

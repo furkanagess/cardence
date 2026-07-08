@@ -143,6 +143,30 @@ class CardenceAppBar extends StatelessWidget implements PreferredSizeWidget {
   static Color resolveForeground(BuildContext context) =>
       AppColors.appBarForegroundFor(Theme.of(context).brightness);
 
+  /// Ana kabuk sekmeleri (Cardence, Etkinlik grupları, Kartlarım) başlık stili.
+  static TextStyle shellTabTitleTextStyle(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    return textTheme.titleLarge?.copyWith(
+          fontWeight: FontWeight.w800,
+          letterSpacing: -0.4,
+          color: resolveForeground(context),
+        ) ??
+        TextStyle(
+          fontWeight: FontWeight.w800,
+          letterSpacing: -0.4,
+          color: resolveForeground(context),
+        );
+  }
+
+  static Widget shellTabTitle(BuildContext context, String title) {
+    return Text(
+      title,
+      style: shellTabTitleTextStyle(context),
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+    );
+  }
+
   /// Tüm AppBar geri butonlarında kullanılan standart ikon.
   static Widget backButton({
     required BuildContext context,

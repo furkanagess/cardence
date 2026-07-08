@@ -154,9 +154,9 @@ class SavedCardProfileHeader extends StatelessWidget {
                     title: hasTitle ? title : null,
                     textSecondary: textSecondary,
                   ),
+                  const SizedBox(height: 12),
                 ],
                 if (hasLocation) ...[
-                  const SizedBox(height: 10),
                   _LocationPill(
                     location: locationText!,
                     textSecondary: textSecondary,

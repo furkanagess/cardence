@@ -263,6 +263,7 @@
   "kartYzVeAlanDzeni": "Card face and field layout",
   "kartYzndeGrnecekIletiimVe": "Contact and profile fields shown on the card face.",
   "kartZatenKaytl": "Card already saved",
+  "cannotAddOwnCardToWallet": "You cannot add your own card to saved cards.",
   "kartaEklemekIstediinizAlanSein": "Select the field you want to add to the card",
   "kartevirmekIinSaAlttaki": "Tap the icon at the bottom right to flip the card",
   "kartlar": "Cards",

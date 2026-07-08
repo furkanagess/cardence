@@ -59,6 +59,7 @@ class AddCardByIdCubit extends Cubit<AddCardByIdState> {
           ),
         );
       case AddSavedCardDuplicate():
+      case AddSavedCardOwnCard():
       case AddSavedCardInvalidPayload():
         emit(
           state.copyWith(

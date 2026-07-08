@@ -226,6 +226,7 @@ class SavedCardsCubit extends Cubit<SavedCardsState> {
       case AddSavedCardSuccess():
         await refreshAll();
       case AddSavedCardDuplicate():
+      case AddSavedCardOwnCard():
         break;
       case AddSavedCardLimitReached():
         emit(state.copyWith(effectType: SavedCardsEffectType.openUpgradeSheet));

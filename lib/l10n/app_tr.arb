@@ -263,6 +263,7 @@
   "kartYzVeAlanDzeni": "Kart yüzü ve alan düzeni",
   "kartYzndeGrnecekIletiimVe": "Kart yüzünde görünecek iletişim ve profil alanları.",
   "kartZatenKaytl": "Kart zaten kayıtlı",
+  "cannotAddOwnCardToWallet": "Kendi kartınızı kaydedilen kartlara ekleyemezsiniz.",
   "kartaEklemekIstediinizAlanSein": "Karta eklemek istediğiniz alanı seçin",
   "kartevirmekIinSaAlttaki": "Kartı çevirmek için sağ alttaki ikona dokunun",
   "kartlar": "Kartlar",

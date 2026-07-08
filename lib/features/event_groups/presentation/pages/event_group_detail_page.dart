@@ -20,7 +20,7 @@ import '../../domain/usecases/delete_event_group.dart';
 import '../../domain/usecases/update_event_group.dart';
 import '../../domain/usecases/invite_event_group_cards_by_card_id.dart';
 import '../../../saved_cards/domain/usecases/link_saved_cards_to_event_group.dart';
-import '../widgets/event_group_detail_compact_card_tile.dart';
+import '../../../saved_cards/presentation/widgets/saved_cards_horizontal_carousel.dart';
 import '../widgets/event_group_detail_header.dart';
 import '../widgets/event_group_detail_loading_shimmer.dart';
 import '../widgets/pick_saved_cards_for_group_sheet.dart';
@@ -322,20 +322,9 @@ class _EventGroupDetailPageState extends State<EventGroupDetailPage> {
       );
     }
 
-    return SizedBox(
-      height: 118,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        itemCount: _linkedCards.length,
-        separatorBuilder: (_, __) => const SizedBox(width: 12),
-        itemBuilder: (context, index) {
-          final card = _linkedCards[index];
-          return EventGroupDetailCompactCardTile(
-            card: card,
-            onTap: () => _openCardDetail(card),
-          );
-        },
-      ),
+    return SavedCardsHorizontalCarousel(
+      cards: _linkedCards,
+      onOpenCard: (card, {heroTag}) => _openCardDetail(card, heroTag: heroTag),
     );
   }
 

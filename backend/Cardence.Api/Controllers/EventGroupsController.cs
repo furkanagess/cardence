@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Cardence.Application.Common;
 using Cardence.Application.DTOs.EventGroups;
 using Cardence.Application.DTOs.Wallet;
@@ -13,6 +14,11 @@ namespace Cardence.Api.Controllers;
 [Tags("EventGroups")]
 public sealed class EventGroupsController : ControllerBase
 {
+    private static readonly JsonSerializerOptions FormJsonOptions = new()
+    {
+        PropertyNameCaseInsensitive = true,
+    };
+
     private readonly IEventGroupService _eventGroupService;
 
     public EventGroupsController(IEventGroupService eventGroupService)
@@ -30,12 +36,75 @@ public sealed class EventGroupsController : ControllerBase
     }
 
     [HttpPost("SaveEventGroup")]
+    [RequestSizeLimit(6 * 1024 * 1024)]
     [ProducesResponseType(typeof(ApiResponse<EventGroupDto>), StatusCodes.Status201Created)]
     public async Task<ActionResult<ApiResponse<EventGroupDto>>> SaveEventGroup(
-        [FromBody] SaveEventGroupRequest request,
         CancellationToken cancellationToken)
     {
-        var group = await _eventGroupService.CreateAsync(request, cancellationToken);
+        EventGroupDto group;
+        if (Request.HasFormContentType)
+        {
+            var form = await Request.ReadFormAsync(cancellationToken);
+            var requestJson = form["request"].ToString();
+            if (string.IsNullOrWhiteSpace(requestJson))
+            {
+                return BadRequest(ApiResponse<EventGroupDto>.Fail(
+                    "InvalidRequest",
+                    "Etkinlik bilgileri gönderilmedi.",
+                    traceId: HttpContext.TraceIdentifier));
+            }
+
+            SaveEventGroupRequest request;
+            try
+            {
+                request = JsonSerializer.Deserialize<SaveEventGroupRequest>(
+                        requestJson,
+                        FormJsonOptions)
+                    ?? throw new JsonException("Request body is empty.");
+            }
+            catch (JsonException)
+            {
+                return BadRequest(ApiResponse<EventGroupDto>.Fail(
+                    "InvalidRequest",
+                    "Etkinlik bilgileri okunamadı.",
+                    traceId: HttpContext.TraceIdentifier));
+            }
+
+            var photo = form.Files.GetFile("photo");
+            if (photo is { Length: > 0 })
+            {
+                await using var stream = photo.OpenReadStream();
+                group = await _eventGroupService.CreateAsync(
+                    request,
+                    stream,
+                    photo.ContentType,
+                    photo.Length,
+                    cancellationToken);
+            }
+            else
+            {
+                group = await _eventGroupService.CreateAsync(
+                    request,
+                    cancellationToken: cancellationToken);
+            }
+        }
+        else
+        {
+            var request = await Request.ReadFromJsonAsync<SaveEventGroupRequest>(
+                cancellationToken);
+            if (request is null)
+            {
+                return BadRequest(ApiResponse<EventGroupDto>.Fail(
+                    "InvalidRequest",
+                    "Etkinlik bilgileri gönderilmedi.",
+                    traceId: HttpContext.TraceIdentifier));
+            }
+
+            group = await _eventGroupService.CreateAsync(
+                request,
+                cancellationToken: cancellationToken);
+        }
+
         return Created(
             $"/EventGroups?id={Uri.EscapeDataString(group.Id)}",
             ApiResponse<EventGroupDto>.Ok(group, HttpContext.TraceIdentifier));
