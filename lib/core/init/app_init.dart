@@ -213,9 +213,9 @@ class AppInit {
     );
 
     final session = await authLocal.getSession();
+    await _guardInit('RevenueCat configure', configureSubscriptions.call);
     unawaited(
       _initDeferredMonetization(
-        configureSubscriptions: configureSubscriptions,
         initializeMobileAds: initializeMobileAds,
         identifySubscriptionUser: identifySubscriptionUser,
         userId: session?.userId,
@@ -392,14 +392,12 @@ class AppInit {
     }
   }
 
-  /// RevenueCat ve AdMob açılışı bloklamaz; ilk kare sonrası arka planda yüklenir.
+  /// AdMob ve RevenueCat kullanıcı eşlemesi açılışı bloklamaz.
   static Future<void> _initDeferredMonetization({
-    required ConfigureSubscriptions configureSubscriptions,
     required InitializeMobileAds initializeMobileAds,
     required IdentifySubscriptionUser identifySubscriptionUser,
     required String? userId,
   }) async {
-    await _guardInit('RevenueCat configure', configureSubscriptions.call);
     await _guardInit('MobileAds init', initializeMobileAds.call);
     if (userId != null && userId.isNotEmpty) {
       await _guardInit(

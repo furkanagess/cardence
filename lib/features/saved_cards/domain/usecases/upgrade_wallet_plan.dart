@@ -13,8 +13,10 @@ class UpgradeWalletPlan {
   final SubscriptionRepository _subscriptionRepository;
   final GetPlanEntitlements _getPlanEntitlements;
 
-  Future<bool> call() async {
-    final result = await _subscriptionRepository.presentWalletPaywall();
+  Future<bool> call({bool onlyIfNeeded = false}) async {
+    final result = await _subscriptionRepository.presentWalletPaywall(
+      onlyIfNeeded: onlyIfNeeded,
+    );
     switch (result) {
       case WalletPaywallResult.purchased:
       case WalletPaywallResult.restored:

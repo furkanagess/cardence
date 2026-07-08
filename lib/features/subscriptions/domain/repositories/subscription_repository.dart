@@ -9,7 +9,7 @@ abstract class SubscriptionRepository {
 
   Future<bool> purchaseWalletPremium();
 
-  Future<WalletPaywallResult> presentWalletPaywall();
+  Future<WalletPaywallResult> presentWalletPaywall({bool onlyIfNeeded = false});
 
   Future<bool> restorePurchases();
 

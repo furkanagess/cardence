@@ -12,8 +12,9 @@ class WalletPaywallFlow {
   static Future<void> show(
     BuildContext context, {
     required SavedCardsCubit cubit,
+    bool onlyIfNeeded = false,
   }) async {
-    final success = await cubit.upgradeWallet();
+    final success = await cubit.upgradeWallet(onlyIfNeeded: onlyIfNeeded);
     if (!context.mounted || !success) return;
     await _refreshPlanIfAvailable(context);
     if (!context.mounted) return;

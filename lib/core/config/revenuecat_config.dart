@@ -23,7 +23,20 @@ class RevenueCatConfig {
 
   static const premiumEntitlementId = 'cardence-pro';
 
-  /// Current offering içindeki paket kimliği (RevenueCat dashboard).
-  /// Örnek: \$rc_monthly, \$rc_annual veya custom package id.
-  static const walletPackageIdentifier = r'$rc_monthly';
+  /// RevenueCat dashboard paywall kimliği (offering'e bağlı template).
+  static const walletPaywallIdentifier = 'cardence-pro-discount';
+
+  /// Cardence Pro offering kimliği (RevenueCat dashboard).
+  static const walletOfferingIdentifier = 'cardencepro';
+
+  /// Placement kullanılmıyor; offering doğrudan hedeflenir.
+  static const String? walletPlacementIdentifier = null;
+
+  /// Mağaza ürün kimliği (Test Store / App Store Connect).
+  /// RevenueCat → Products → `cardencepro`
+  static const walletStoreProductIdentifier = 'cardencepro';
+
+  /// Offering içindeki package kimliği (offering → Packages sekmesi).
+  /// Ürün kimliğinden farklı olabilir; örn. `$rc_monthly` veya `cardencepro`.
+  static const walletPackageIdentifier = 'cardencepro';
 }

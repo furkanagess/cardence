@@ -566,7 +566,11 @@ class _PostOnboardingPaywallGateState
     if (cubit.state.quota.isPremium) return;
 
     try {
-      await WalletPaywallFlow.show(context, cubit: cubit);
+      await WalletPaywallFlow.show(
+        context,
+        cubit: cubit,
+        onlyIfNeeded: true,
+      );
     } catch (_) {
       // Paywall açılamazsa uygulama akışı devam eder.
     }

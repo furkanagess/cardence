@@ -21,8 +21,8 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
   Future<bool> purchaseWalletPremium() => _dataSource.purchaseWalletPremium();
 
   @override
-  Future<WalletPaywallResult> presentWalletPaywall() =>
-      _dataSource.presentWalletPaywall();
+  Future<WalletPaywallResult> presentWalletPaywall({bool onlyIfNeeded = false}) =>
+      _dataSource.presentWalletPaywall(onlyIfNeeded: onlyIfNeeded);
 
   @override
   Future<bool> restorePurchases() => _dataSource.restorePurchases();
