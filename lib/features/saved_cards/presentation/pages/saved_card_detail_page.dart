@@ -8,6 +8,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/contact_launcher.dart';
+import '../../../../core/utils/clipboard_feedback.dart';
 import '../../../../core/utils/skills_format.dart';
 import '../../../../core/widgets/molecules/copy_feedback_icon_button.dart';
 import '../../../../core/widgets/molecules/skills_chip_display.dart';
@@ -350,10 +351,11 @@ class _SavedCardDetailPageState extends State<SavedCardDetailPage> {
     return AppL10n.savedAtLabel(context.l10n, _formatSavedAt(ms));
   }
 
-  Future<void> _copyToClipboard(String label, String value) async {
-    await Clipboard.setData(ClipboardData(text: value));
+  void _copyToClipboard(String label, String value) {
+    copyTextToClipboard(value);
     if (!mounted) return;
-      }
+    showClipboardCopyFeedback(context);
+  }
 
   Future<void> _launchLinkedIn() async {
     final linkedin = _card.linkedin?.trim();
@@ -564,9 +566,9 @@ class _SavedCardDetailPageState extends State<SavedCardDetailPage> {
                 ),
                 title: Text(context.l10n.kartId2),
                 subtitle: Text(_card.cardId),
-                onTap: () async {
+                onTap: () {
                   Navigator.of(sheetContext).pop();
-                  await _copyToClipboard(context.l10n.kartId2, _card.cardId);
+                  _copyToClipboard(context.l10n.kartId2, _card.cardId);
                 },
               ),
               if (_canDeleteCard)

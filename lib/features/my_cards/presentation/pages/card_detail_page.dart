@@ -8,6 +8,7 @@ import 'package:qr_flutter/qr_flutter.dart';
 import 'package:share_plus/share_plus.dart';
 import '../../../../core/network/auth_api_exception.dart';
 import '../../../../core/utils/card_id_generator.dart';
+import '../../../../core/utils/clipboard_feedback.dart';
 import '../../../../core/widgets/atoms/cardence_app_bar.dart';
 import '../../../../core/widgets/atoms/custom_button.dart';
 import '../../../../core/widgets/molecules/cardence_confirm_dialog.dart';
@@ -254,10 +255,11 @@ class _CardDetailPageState extends State<CardDetailPage> {
     return id;
   }
 
-  Future<void> _copyCardId(String cardId) async {
-    await Clipboard.setData(ClipboardData(text: cardId));
+  void _copyCardId(String cardId) {
+    copyTextToClipboard(cardId);
     if (!mounted) return;
-      }
+    showClipboardCopyFeedback(context);
+  }
 
   String _shareMessage(BuildContext context, String cardId) {
     final name = _draft.listTitle;
@@ -563,7 +565,7 @@ class _CardIdTile extends StatelessWidget {
       color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.45),
       borderRadius: BorderRadius.circular(12),
       child: InkWell(
-        onTap: onCopy,
+        onTap: hasId ? onCopy : null,
         borderRadius: BorderRadius.circular(12),
         child: Padding(
           padding: const EdgeInsets.fromLTRB(14, 12, 8, 12),
@@ -618,15 +620,10 @@ class _CardIdTile extends StatelessWidget {
                 ),
               ),
               if (hasId)
-                IconButton(
-                  tooltip: context.l10n.kopyala,
-                  visualDensity: VisualDensity.compact,
-                  onPressed: onCopy,
-                  icon: Icon(
-                    Icons.copy_all_rounded,
-                    size: 20,
-                    color: colorScheme.onSurfaceVariant,
-                  ),
+                Icon(
+                  Icons.copy_all_rounded,
+                  size: 20,
+                  color: colorScheme.onSurfaceVariant,
                 ),
             ],
           ),

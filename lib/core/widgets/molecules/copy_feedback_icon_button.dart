@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../../theme/app_colors.dart';
 import '../../utils/clipboard_feedback.dart';
@@ -40,11 +41,14 @@ class _CopyFeedbackIconButtonState extends State<CopyFeedbackIconButton> {
     super.dispose();
   }
 
-  Future<void> _copy() async {
-    await copyTextWithClipboardFeedback(context, value: widget.value);
-    if (!mounted) return;
+  void _copy() {
+    final value = widget.value.trim();
+    if (value.isEmpty) return;
+
+    HapticFeedback.lightImpact();
     _resetTimer?.cancel();
     setState(() => _copied = true);
+    copyTextToClipboard(value);
     _resetTimer = Timer(kClipboardCopyIconDuration, () {
       if (!mounted) return;
       setState(() => _copied = false);

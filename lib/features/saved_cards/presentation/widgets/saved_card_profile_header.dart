@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../../../../core/utils/clipboard_feedback.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -227,11 +228,14 @@ class _CopyableCardIdPillState extends State<_CopyableCardIdPill> {
     super.dispose();
   }
 
-  Future<void> _copy() async {
-    await copyTextWithClipboardFeedback(context, value: widget.cardId);
-    if (!mounted) return;
+  void _copy() {
+    final text = widget.cardId.trim();
+    if (text.isEmpty) return;
+
+    HapticFeedback.lightImpact();
     _resetTimer?.cancel();
     setState(() => _copied = true);
+    copyTextToClipboard(text);
     _resetTimer = Timer(kClipboardCopyIconDuration, () {
       if (!mounted) return;
       setState(() => _copied = false);
@@ -254,33 +258,30 @@ class _CopyableCardIdPillState extends State<_CopyableCardIdPill> {
           borderRadius: BorderRadius.circular(999),
           splashColor: AppColors.primary.withValues(alpha: 0.14),
           highlightColor: AppColors.primary.withValues(alpha: 0.08),
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(minHeight: 40),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    widget.cardId,
-                    style: textTheme.labelMedium?.copyWith(
-                      color: AppColors.primary,
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: 0.6,
-                    ),
+          child: Ink(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  widget.cardId,
+                  style: textTheme.labelMedium?.copyWith(
+                    color: AppColors.primary,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0.6,
                   ),
-                  const SizedBox(width: 6),
-                  AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 180),
-                    child: Icon(
-                      _copied ? Icons.check_rounded : Icons.copy_rounded,
-                      key: ValueKey(_copied),
-                      size: 14,
-                      color: AppColors.primary.withValues(alpha: 0.85),
-                    ),
+                ),
+                const SizedBox(width: 6),
+                AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 180),
+                  child: Icon(
+                    _copied ? Icons.check_rounded : Icons.copy_rounded,
+                    key: ValueKey(_copied),
+                    size: 14,
+                    color: AppColors.primary.withValues(alpha: 0.85),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         ),
