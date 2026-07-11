@@ -1,3 +1,4 @@
+import '../../../../core/config/admob_config.dart';
 import '../../../subscriptions/domain/repositories/subscription_repository.dart';
 import '../../data/datasources/post_add_card_ad_counter_local_datasource.dart';
 import '../repositories/interstitial_ad_repository.dart';
@@ -22,6 +23,8 @@ class ShowPostAddCardMonetization {
   Future<void> call({
     required Future<void> Function() showPaywall,
   }) async {
+    if (!AdMobConfig.enabled) return;
+
     if (await _subscriptionRepository.hasPremiumWalletEntitlement()) {
       return;
     }

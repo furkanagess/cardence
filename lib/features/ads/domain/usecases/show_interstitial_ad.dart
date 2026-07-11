@@ -1,3 +1,4 @@
+import '../../../../core/config/admob_config.dart';
 import '../../../subscriptions/domain/repositories/subscription_repository.dart';
 import '../repositories/interstitial_ad_repository.dart';
 
@@ -11,6 +12,8 @@ class ShowInterstitialAd {
   final SubscriptionRepository _subscriptionRepository;
 
   Future<bool> call() async {
+    if (!AdMobConfig.enabled) return false;
+
     if (await _subscriptionRepository.hasPremiumWalletEntitlement()) {
       return false;
     }

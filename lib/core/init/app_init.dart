@@ -79,7 +79,9 @@ import '../../features/subscriptions/domain/usecases/logout_subscription_user.da
 import '../../features/subscriptions/domain/usecases/finalize_premium_wallet_activation.dart';
 import '../../features/subscriptions/presentation/helpers/premium_purchase_success_handler.dart';
 import '../../features/subscriptions/domain/usecases/restore_wallet_purchases.dart';
+import '../config/admob_config.dart';
 import '../../features/ads/data/repositories/interstitial_ad_repository_impl.dart';
+import '../../features/ads/data/repositories/no_op_interstitial_ad_repository.dart';
 import '../../features/ads/data/datasources/post_add_card_ad_counter_local_datasource.dart';
 import '../../features/ads/domain/usecases/initialize_mobile_ads.dart';
 import '../../features/ads/domain/usecases/show_post_add_card_monetization.dart';
@@ -130,7 +132,9 @@ class AppInit {
     final identifySubscriptionUser = IdentifySubscriptionUser(subscriptionRepo);
     final logoutSubscriptionUser = LogoutSubscriptionUser(subscriptionRepo);
 
-    final interstitialAdRepo = InterstitialAdRepositoryImpl();
+    final interstitialAdRepo = AdMobConfig.enabled
+        ? InterstitialAdRepositoryImpl()
+        : const NoOpInterstitialAdRepository();
     final initializeMobileAds = InitializeMobileAds(interstitialAdRepo);
     final postAddCardAdCounter = PostAddCardAdCounterLocalDataSource(prefs);
     final showPostAddCardMonetization = ShowPostAddCardMonetization(
@@ -414,7 +418,10 @@ class AppInit {
     required IdentifySubscriptionUser identifySubscriptionUser,
     required String? userId,
   }) async {
-    await _guardInit('MobileAds init', initializeMobileAds.call);
+    await _guardInit('MobileAds init', () async {
+      if (!AdMobConfig.enabled) return;
+      await initializeMobileAds();
+    });
     if (userId != null && userId.isNotEmpty) {
       await _guardInit(
         'RevenueCat identify',

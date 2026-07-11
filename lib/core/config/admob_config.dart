@@ -2,9 +2,12 @@ import 'dart:io' show Platform;
 
 import 'package:flutter/foundation.dart';
 
-/// Google AdMob kimlikleri.
+/// Google AdMob kimlikleri ve özellik bayrağı.
 class AdMobConfig {
   AdMobConfig._();
+
+  /// `false` iken reklam SDK'sı başlatılmaz ve hiçbir reklam gösterilmez.
+  static const bool enabled = false;
 
   static const iosAppId = 'ca-app-pub-3499593115543692~2845897015';
   static const iosInterstitialAdUnitId =
