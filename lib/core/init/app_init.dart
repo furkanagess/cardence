@@ -13,6 +13,7 @@ import '../../features/auth/domain/usecases/complete_onboarding_remote.dart';
 import '../../features/auth/domain/usecases/forgot_password.dart';
 import '../../features/auth/domain/usecases/get_auth_session.dart';
 import '../../features/auth/domain/usecases/get_current_user.dart';
+import '../../features/auth/domain/usecases/refresh_current_user.dart';
 import '../../features/auth/domain/usecases/get_last_login_credentials.dart';
 import '../../features/auth/domain/usecases/login_with_email.dart';
 import '../../features/auth/domain/usecases/login_with_linkedin.dart';
@@ -75,6 +76,8 @@ import '../../features/subscriptions/data/repositories/subscription_repository_i
 import '../../features/subscriptions/domain/usecases/configure_subscriptions.dart';
 import '../../features/subscriptions/domain/usecases/identify_subscription_user.dart';
 import '../../features/subscriptions/domain/usecases/logout_subscription_user.dart';
+import '../../features/subscriptions/domain/usecases/finalize_premium_wallet_activation.dart';
+import '../../features/subscriptions/presentation/helpers/premium_purchase_success_handler.dart';
 import '../../features/subscriptions/domain/usecases/restore_wallet_purchases.dart';
 import '../../features/ads/data/repositories/interstitial_ad_repository_impl.dart';
 import '../../features/ads/data/datasources/post_add_card_ad_counter_local_datasource.dart';
@@ -198,6 +201,13 @@ class AppInit {
     final plans = _initPlans(authTokenProvider);
     final networkGraph = _initNetworkGraph(authTokenProvider);
 
+    final finalizePremiumWalletActivation = FinalizePremiumWalletActivation(
+      savedCardRepo,
+    );
+    final premiumPurchaseSuccessHandler = PremiumPurchaseSuccessHandler(
+      refreshCurrentUser: auth.refreshCurrentUser,
+      syncUserProfileCards: syncUserProfileCards,
+    );
     final eventGroups = _initEventGroups(
       local: eventGroupLocal,
       authTokens: authTokenProvider,
@@ -206,10 +216,12 @@ class AppInit {
       savedCardRepo: savedCardRepo,
       subscriptionRepo: subscriptionRepo,
       getPlanEntitlements: plans.getPlanEntitlements,
+      finalizePremiumWalletActivation: finalizePremiumWalletActivation,
     );
     final restoreWalletPurchases = RestoreWalletPurchases(
       subscriptionRepo,
       plans.getPlanEntitlements,
+      finalizePremiumWalletActivation,
     );
 
     final session = await authLocal.getSession();
@@ -233,6 +245,8 @@ class AppInit {
       forgotPassword: auth.forgotPassword,
       resetPassword: auth.resetPassword,
       getCurrentUser: auth.getCurrentUser,
+      refreshCurrentUser: auth.refreshCurrentUser,
+      premiumPurchaseSuccessHandler: premiumPurchaseSuccessHandler,
       getLastLoginCredentials: auth.getLastLoginCredentials,
       logout: auth.logout,
       uploadProfilePhoto: auth.uploadProfilePhoto,
@@ -319,6 +333,7 @@ class AppInit {
     required SavedCardRepositoryImpl savedCardRepo,
     required SubscriptionRepositoryImpl subscriptionRepo,
     required GetPlanEntitlements getPlanEntitlements,
+    required FinalizePremiumWalletActivation finalizePremiumWalletActivation,
   }) {
     final getQuota = GetSavedCardsWalletQuota(savedCardRepo);
     final saveSavedCard = SaveSavedCard(savedCardRepo);
@@ -332,6 +347,7 @@ class AppInit {
       upgradeWalletPlan: UpgradeWalletPlan(
         subscriptionRepo,
         getPlanEntitlements,
+        finalizePremiumWalletActivation,
       ),
       linkSavedCardsToEventGroup: LinkSavedCardsToEventGroup(saveSavedCard),
     );
@@ -421,6 +437,7 @@ class AppInit {
     ForgotPassword forgotPassword,
     ResetPassword resetPassword,
     GetCurrentUser getCurrentUser,
+    RefreshCurrentUser refreshCurrentUser,
     GetLastLoginCredentials getLastLoginCredentials,
     Logout logout,
     UploadProfilePhoto uploadProfilePhoto,
@@ -447,6 +464,7 @@ class AppInit {
       forgotPassword: ForgotPassword(repo),
       resetPassword: ResetPassword(repo),
       getCurrentUser: GetCurrentUser(repo),
+      refreshCurrentUser: RefreshCurrentUser(repo),
       getLastLoginCredentials: GetLastLoginCredentials(repo),
       logout: Logout(repo),
       uploadProfilePhoto: UploadProfilePhoto(repo),
@@ -572,6 +590,8 @@ class AppInitResult {
     required this.forgotPassword,
     required this.resetPassword,
     required this.getCurrentUser,
+    required this.refreshCurrentUser,
+    required this.premiumPurchaseSuccessHandler,
     required this.getLastLoginCredentials,
     required this.logout,
     required this.uploadProfilePhoto,
@@ -630,6 +650,8 @@ class AppInitResult {
   final ForgotPassword forgotPassword;
   final ResetPassword resetPassword;
   final GetCurrentUser getCurrentUser;
+  final RefreshCurrentUser refreshCurrentUser;
+  final PremiumPurchaseSuccessHandler premiumPurchaseSuccessHandler;
   final GetLastLoginCredentials getLastLoginCredentials;
   final Logout logout;
   final UploadProfilePhoto uploadProfilePhoto;

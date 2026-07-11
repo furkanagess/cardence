@@ -23,6 +23,8 @@ public sealed class SavedCardServiceTests
     private readonly ICardInteractionRepository _cardInteractionRepository =
         Substitute.For<ICardInteractionRepository>();
     private readonly ICurrentUserService _currentUser = Substitute.For<ICurrentUserService>();
+    private readonly IWalletOwnerPremiumSyncService _ownerPremiumSync =
+        Substitute.For<IWalletOwnerPremiumSyncService>();
     private readonly SavedCardService _service;
     private readonly Guid _userId = Guid.NewGuid();
 
@@ -41,6 +43,7 @@ public sealed class SavedCardServiceTests
             _walletRepository,
             _eventGroupRepository,
             _cardInteractionRepository,
+            _ownerPremiumSync,
             _currentUser);
     }
 
@@ -110,6 +113,10 @@ public sealed class SavedCardServiceTests
         var quota = await _service.UpgradeWalletPlanAsync();
 
         quota.Tier.Should().Be(WalletConstants.FreeTier);
+        await _ownerPremiumSync.Received(1).SyncForUserAsync(
+            _userId,
+            WalletConstants.FreeTier,
+            Arg.Any<CancellationToken>());
         await _walletRepository.DidNotReceiveWithAnyArgs()
             .UpgradeToPremiumAsync(default, default);
         await _walletRepository.DidNotReceiveWithAnyArgs()

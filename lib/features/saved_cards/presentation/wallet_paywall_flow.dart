@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../../core/widgets/molecules/purchase_success_dialog.dart';
-import '../../plans/presentation/cubit/plan_cubit.dart';
+import '../../subscriptions/presentation/helpers/premium_purchase_success_handler.dart';
+import '../../subscriptions/presentation/widgets/premium_purchase_scope.dart';
 import 'cubit/saved_cards_cubit.dart';
 
 /// RevenueCat paywall sunumu ve kota yenileme akışı.
@@ -12,20 +11,15 @@ class WalletPaywallFlow {
   static Future<void> show(
     BuildContext context, {
     required SavedCardsCubit cubit,
+    PremiumPurchaseSuccessHandler? successHandler,
     bool onlyIfNeeded = false,
   }) async {
     final success = await cubit.upgradeWallet(onlyIfNeeded: onlyIfNeeded);
     if (!context.mounted || !success) return;
-    await _refreshPlanIfAvailable(context);
-    if (!context.mounted) return;
-    await PurchaseSuccessDialog.show(context);
-  }
 
-  static Future<void> _refreshPlanIfAvailable(BuildContext context) async {
-    try {
-      await context.read<PlanCubit>().refresh();
-    } catch (_) {
-      // Some legacy flows can present the wallet paywall outside the shell tree.
-    }
+    final handler = successHandler ?? PremiumPurchaseScope.maybeOf(context);
+    if (handler == null) return;
+
+    await handler.showSuccess(context);
   }
 }

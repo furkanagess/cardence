@@ -24,6 +24,7 @@ import '../../../../core/widgets/organisms/flippable_person_card.dart';
 import '../../../business_cards/domain/usecases/persist_onboarding_card.dart';
 import '../../domain/entities/profile_stats.dart';
 import '../../../plans/presentation/cubit/plan_cubit.dart';
+import '../../../plans/presentation/cubit/plan_state.dart';
 import '../../../saved_cards/presentation/cubit/saved_cards_cubit.dart';
 import '../../../saved_cards/presentation/wallet_paywall_flow.dart';
 import '../../domain/usecases/get_profile_stats.dart';
@@ -294,17 +295,22 @@ class _ProfilePageState extends State<ProfilePage> {
         const ProfileStats(totalWalletSaveCount: 0, eventGroupCount: 0);
     final bottomInset = MediaQuery.paddingOf(context).bottom + 96;
 
-    return RefreshIndicator(
-      onRefresh: _loadPageData,
-      child: ListView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        padding: EdgeInsets.fromLTRB(0, 8, 0, 32 + bottomInset),
-        children: [
-          if (_cards.isEmpty)
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: _buildEmptyState(colorScheme, textTheme),
-            ),
+    return BlocListener<PlanCubit, PlanState>(
+      listenWhen: (previous, current) =>
+          (previous.entitlements?.isPremiumOrHigher ?? false) !=
+          (current.entitlements?.isPremiumOrHigher ?? false),
+      listener: (_, __) => _loadPageData(),
+      child: RefreshIndicator(
+        onRefresh: _loadPageData,
+        child: ListView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: EdgeInsets.fromLTRB(0, 8, 0, 32 + bottomInset),
+          children: [
+            if (_cards.isEmpty)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: _buildEmptyState(colorScheme, textTheme),
+              ),
           if (_cards.isNotEmpty) ...[
             _ProfileCardsCarousel(
               cards: _cards,
@@ -357,6 +363,7 @@ class _ProfilePageState extends State<ProfilePage> {
             ),
           ),
         ],
+      ),
       ),
     );
   }

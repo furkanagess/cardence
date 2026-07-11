@@ -20,6 +20,8 @@ public sealed class RevenueCatWebhookServiceTests
         Substitute.For<IWalletEntitlementRepository>();
     private readonly ISubscriptionEventRepository _eventRepository =
         Substitute.For<ISubscriptionEventRepository>();
+    private readonly IWalletOwnerPremiumSyncService _ownerPremiumSync =
+        Substitute.For<IWalletOwnerPremiumSyncService>();
     private readonly RevenueCatWebhookService _service;
     private readonly Guid _userId = Guid.NewGuid();
 
@@ -28,6 +30,7 @@ public sealed class RevenueCatWebhookServiceTests
         _service = new RevenueCatWebhookService(
             _walletRepository,
             _eventRepository,
+            _ownerPremiumSync,
             Options.Create(new RevenueCatOptions
             {
                 WebhookAuthorizationToken = Token,
@@ -60,6 +63,10 @@ public sealed class RevenueCatWebhookServiceTests
             WalletConstants.PremiumTier,
             WalletConstants.PremiumMaxCards,
             Arg.Any<CancellationToken>());
+        await _ownerPremiumSync.Received(1).SyncForUserAsync(
+            _userId,
+            WalletConstants.PremiumTier,
+            Arg.Any<CancellationToken>());
         await _eventRepository.Received(1).AddAsync(
             Arg.Is<SubscriptionEvent>(e =>
                 e.Provider == "revenuecat" &&
@@ -84,6 +91,10 @@ public sealed class RevenueCatWebhookServiceTests
             _userId,
             WalletConstants.FreeTier,
             WalletConstants.FreeMaxCards,
+            Arg.Any<CancellationToken>());
+        await _ownerPremiumSync.Received(1).SyncForUserAsync(
+            _userId,
+            WalletConstants.FreeTier,
             Arg.Any<CancellationToken>());
     }
 

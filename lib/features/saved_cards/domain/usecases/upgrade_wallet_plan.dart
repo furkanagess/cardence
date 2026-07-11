@@ -1,5 +1,6 @@
 import '../../../subscriptions/domain/entities/wallet_paywall_result.dart';
 import '../../../subscriptions/domain/repositories/subscription_repository.dart';
+import '../../../subscriptions/domain/usecases/finalize_premium_wallet_activation.dart';
 import '../../../plans/domain/entities/plan_tier.dart';
 import '../../../plans/domain/usecases/get_plan_entitlements.dart';
 
@@ -8,30 +9,49 @@ class UpgradeWalletPlan {
   const UpgradeWalletPlan(
     this._subscriptionRepository,
     this._getPlanEntitlements,
+    this._finalizePremiumWalletActivation,
   );
 
   final SubscriptionRepository _subscriptionRepository;
   final GetPlanEntitlements _getPlanEntitlements;
+  final FinalizePremiumWalletActivation _finalizePremiumWalletActivation;
 
   Future<bool> call({bool onlyIfNeeded = false}) async {
     final result = await _subscriptionRepository.presentWalletPaywall(
       onlyIfNeeded: onlyIfNeeded,
     );
+
     switch (result) {
-      case WalletPaywallResult.purchased:
-      case WalletPaywallResult.restored:
-      case WalletPaywallResult.notPresented:
-        break;
       case WalletPaywallResult.cancelled:
       case WalletPaywallResult.error:
         return false;
+      case WalletPaywallResult.notPresented:
+        if (!onlyIfNeeded &&
+            await _subscriptionRepository.hasPremiumWalletEntitlement()) {
+          await _tryFinalize();
+          return true;
+        }
+        return false;
+      case WalletPaywallResult.purchased:
+      case WalletPaywallResult.restored:
+        break;
     }
 
     if (!await _subscriptionRepository.hasPremiumWalletEntitlement()) {
       return false;
     }
 
-    return _waitForBackendPremiumEntitlement();
+    await _waitForBackendPremiumEntitlement();
+    await _tryFinalize();
+    return true;
+  }
+
+  Future<void> _tryFinalize() async {
+    try {
+      await _finalizePremiumWalletActivation();
+    } catch (_) {
+      // Me veya kota senkronu gecikse bile satın alma tamamlandı sayılır.
+    }
   }
 
   Future<bool> _waitForBackendPremiumEntitlement() async {

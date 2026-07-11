@@ -44,6 +44,9 @@ abstract class AuthRepository {
 
   Future<UserProfile> getCurrentUser();
 
+  /// Önbelleği atlayarak `/Me` isteği atar ve profili günceller.
+  Future<UserProfile> refreshCurrentUser();
+
   Future<LastLoginCredentials> getLastLoginCredentials();
 
   Future<UserProfile> uploadProfilePhoto(String filePath);

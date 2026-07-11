@@ -18,6 +18,7 @@ public sealed class SavedCardService : ISavedCardService
     private readonly IWalletEntitlementRepository _walletRepository;
     private readonly IEventGroupRepository _eventGroupRepository;
     private readonly ICardInteractionRepository _cardInteractionRepository;
+    private readonly IWalletOwnerPremiumSyncService _ownerPremiumSync;
     private readonly ICurrentUserService _currentUser;
 
     public SavedCardService(
@@ -26,6 +27,7 @@ public sealed class SavedCardService : ISavedCardService
         IWalletEntitlementRepository walletRepository,
         IEventGroupRepository eventGroupRepository,
         ICardInteractionRepository cardInteractionRepository,
+        IWalletOwnerPremiumSyncService ownerPremiumSync,
         ICurrentUserService currentUser)
     {
         _savedCardRepository = savedCardRepository;
@@ -33,6 +35,7 @@ public sealed class SavedCardService : ISavedCardService
         _walletRepository = walletRepository;
         _eventGroupRepository = eventGroupRepository;
         _cardInteractionRepository = cardInteractionRepository;
+        _ownerPremiumSync = ownerPremiumSync;
         _currentUser = currentUser;
     }
 
@@ -166,6 +169,12 @@ public sealed class SavedCardService : ISavedCardService
     {
         // Premium grants are authoritative via RevenueCatWebhook.
         // Keep this endpoint as a backward-compatible quota refresh for older clients.
+        var userId = _currentUser.GetRequiredUserId();
+        var entitlement = await _walletRepository.GetOrCreateAsync(userId, cancellationToken);
+        await _ownerPremiumSync.SyncForUserAsync(
+            userId,
+            entitlement.Tier,
+            cancellationToken);
         return await GetWalletQuotaAsync(cancellationToken);
     }
 

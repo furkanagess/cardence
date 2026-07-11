@@ -302,6 +302,30 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
+  Future<UserProfile> refreshCurrentUser() async {
+    final session = await getStoredSession();
+    if (session == null || !session.isValid) {
+      throw AuthApiException('Oturum bulunamadı. Lütfen tekrar giriş yapın.');
+    }
+
+    try {
+      return await _fetchAndPersistProfile(AuthSessionModel.fromEntity(session));
+    } on AuthApiException catch (e) {
+      if (e.isUnauthorized) {
+        final refreshed = await _coordinator?.refreshSession() ?? false;
+        if (refreshed) {
+          final updated = await _local.getSession();
+          if (updated != null) {
+            return _fetchAndPersistProfile(updated);
+          }
+        }
+        throw AuthApiException('Oturum bulunamadı. Lütfen tekrar giriş yapın.');
+      }
+      rethrow;
+    }
+  }
+
+  @override
   Future<LastLoginCredentials> getLastLoginCredentials() async {
     return _local.getLastLoginCredentials();
   }

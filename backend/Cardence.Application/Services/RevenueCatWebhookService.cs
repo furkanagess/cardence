@@ -16,15 +16,18 @@ public sealed class RevenueCatWebhookService : IRevenueCatWebhookService
 
     private readonly IWalletEntitlementRepository _walletRepository;
     private readonly ISubscriptionEventRepository _eventRepository;
+    private readonly IWalletOwnerPremiumSyncService _ownerPremiumSync;
     private readonly RevenueCatOptions _options;
 
     public RevenueCatWebhookService(
         IWalletEntitlementRepository walletRepository,
         ISubscriptionEventRepository eventRepository,
+        IWalletOwnerPremiumSyncService ownerPremiumSync,
         IOptions<RevenueCatOptions> options)
     {
         _walletRepository = walletRepository;
         _eventRepository = eventRepository;
+        _ownerPremiumSync = ownerPremiumSync;
         _options = options.Value;
     }
 
@@ -68,6 +71,7 @@ public sealed class RevenueCatWebhookService : IRevenueCatWebhookService
             : WalletConstants.FreeMaxCards;
 
         await _walletRepository.SetTierAsync(userId, tier, maxCards, cancellationToken);
+        await _ownerPremiumSync.SyncForUserAsync(userId, tier, cancellationToken);
         await _eventRepository.AddAsync(
             new SubscriptionEvent
             {

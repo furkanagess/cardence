@@ -17,6 +17,7 @@ public static class DependencyInjection
         services.AddScoped<ISupportService, SupportService>();
         services.AddScoped<IEventGroupService, EventGroupService>();
         services.AddScoped<IPlanPolicyService, PlanPolicyService>();
+        services.AddScoped<IWalletOwnerPremiumSyncService, WalletOwnerPremiumSyncService>();
         services.AddScoped<IRevenueCatWebhookService, RevenueCatWebhookService>();
         services.AddScoped<INetworkGraphService, NetworkGraphService>();
         return services;

@@ -5,6 +5,7 @@ import '../../../../core/l10n/l10n_extensions.dart';
 import '../../../../core/widgets/atoms/custom_button.dart';
 import '../../../plans/presentation/cubit/plan_cubit.dart';
 import '../../../subscriptions/domain/usecases/restore_wallet_purchases.dart';
+import '../../../subscriptions/presentation/widgets/premium_purchase_scope.dart';
 
 enum WalletUpgradeSheetResult {
   cancelled,
@@ -100,7 +101,12 @@ class WalletUpgradeSheet extends StatelessWidget {
                 final restored = await restoreWalletPurchases();
                 if (!context.mounted) return;
                 if (restored) {
-                  await _refreshPlanIfAvailable(context);
+                  final handler = PremiumPurchaseScope.maybeOf(context);
+                  if (handler != null) {
+                    await handler.showSuccess(context);
+                  } else {
+                    await _refreshPlanIfAvailable(context);
+                  }
                   if (!context.mounted) return;
                   Navigator.of(context).pop(WalletUpgradeSheetResult.restored);
                   return;

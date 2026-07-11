@@ -60,6 +60,8 @@ import 'features/saved_cards/domain/usecases/track_saved_card_contact_click.dart
 import 'features/saved_cards/domain/usecases/upgrade_wallet_plan.dart';
 import 'features/subscriptions/domain/usecases/identify_subscription_user.dart';
 import 'features/subscriptions/domain/usecases/restore_wallet_purchases.dart';
+import 'features/subscriptions/presentation/helpers/premium_purchase_success_handler.dart';
+import 'features/subscriptions/presentation/widgets/premium_purchase_scope.dart';
 import 'features/ads/domain/usecases/show_post_add_card_monetization.dart';
 import 'core/l10n/locale_preference_material.dart';
 import 'features/settings/domain/entities/locale_preference.dart';
@@ -133,6 +135,7 @@ class App extends StatefulWidget {
     required this.trackSavedCardContactClick,
     required this.upgradeWalletPlan,
     required this.restoreWalletPurchases,
+    required this.premiumPurchaseSuccessHandler,
     required this.getProfileStats,
     required this.getPlanEntitlements,
     required this.getNetworkGraph,
@@ -196,6 +199,7 @@ class App extends StatefulWidget {
       trackSavedCardContactClick: init.trackSavedCardContactClick,
       upgradeWalletPlan: init.upgradeWalletPlan,
       restoreWalletPurchases: init.restoreWalletPurchases,
+      premiumPurchaseSuccessHandler: init.premiumPurchaseSuccessHandler,
       getProfileStats: init.getProfileStats,
       getPlanEntitlements: init.getPlanEntitlements,
       getNetworkGraph: init.getNetworkGraph,
@@ -255,6 +259,7 @@ class App extends StatefulWidget {
   final TrackSavedCardContactClick trackSavedCardContactClick;
   final UpgradeWalletPlan upgradeWalletPlan;
   final RestoreWalletPurchases restoreWalletPurchases;
+  final PremiumPurchaseSuccessHandler premiumPurchaseSuccessHandler;
   final GetProfileStats getProfileStats;
   final GetPlanEntitlements getPlanEntitlements;
   final GetNetworkGraph getNetworkGraph;
@@ -565,8 +570,11 @@ class _AppState extends State<App> {
           data: mediaQueryData.copyWith(
             textScaler: TextScaler.noScaling,
           ),
-          child: ChuckFabOverlay(
-            child: child ?? const SizedBox.shrink(),
+          child: PremiumPurchaseScope(
+            handler: widget.premiumPurchaseSuccessHandler,
+            child: ChuckFabOverlay(
+              child: child ?? const SizedBox.shrink(),
+            ),
           ),
         );
       },
