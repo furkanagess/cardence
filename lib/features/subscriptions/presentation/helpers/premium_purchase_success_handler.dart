@@ -5,6 +5,7 @@ import '../../../../core/user_data/sync_user_profile_cards.dart';
 import '../../../../core/widgets/molecules/purchase_success_dialog.dart';
 import '../../../auth/domain/usecases/refresh_current_user.dart';
 import '../../../plans/presentation/cubit/plan_cubit.dart';
+import '../../../saved_cards/presentation/cubit/saved_cards_cubit.dart';
 
 /// Başarılı premium satın alma / geri yükleme sonrası Me yenileme ve dialog.
 class PremiumPurchaseSuccessHandler {
@@ -26,6 +27,14 @@ class PremiumPurchaseSuccessHandler {
       await context.read<PlanCubit>().refresh();
     } catch (_) {
       // Paywall shell dışından da çağrılabilir.
+    }
+
+    if (!context.mounted) return;
+
+    try {
+      await context.read<SavedCardsCubit>().refreshAll();
+    } catch (_) {
+      // Kayıtlı kartlar sekmesi dışından da çağrılabilir.
     }
 
     if (!context.mounted) return;

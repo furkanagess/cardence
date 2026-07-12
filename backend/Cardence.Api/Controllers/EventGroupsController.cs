@@ -131,11 +131,12 @@ public sealed class EventGroupsController : ControllerBase
     }
 
     [HttpPost("UploadEventGroupPhoto")]
+    [Consumes("multipart/form-data")]
     [RequestSizeLimit(5 * 1024 * 1024)]
     [ProducesResponseType(typeof(ApiResponse<EventGroupDto>), StatusCodes.Status200OK)]
     public async Task<ActionResult<ApiResponse<EventGroupDto>>> UploadEventGroupPhoto(
         [FromQuery] string id,
-        [FromForm] IFormFile photo,
+        IFormFile photo,
         CancellationToken cancellationToken)
     {
         if (photo is null || photo.Length == 0)

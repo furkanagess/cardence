@@ -60,6 +60,7 @@ class SavedCardRepositoryImpl implements SavedCardRepository {
       savedAt: remote.savedAt,
       frontImagePath: local.frontImagePath ?? remote.frontImagePath,
       backImagePath: local.backImagePath ?? remote.backImagePath,
+      isOwnerPremium: remote.isOwnerPremium,
       linkedEventGroupIds: remote.linkedEventGroupIds,
     );
   }

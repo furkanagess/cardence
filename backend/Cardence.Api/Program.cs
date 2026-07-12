@@ -187,6 +187,7 @@ builder.Services.AddSwaggerGen(options =>
 
     // Global requirement yerine BearerAuthOperationFilter endpoint bazında uygular.
     options.OperationFilter<BearerAuthOperationFilter>();
+    options.OperationFilter<FileUploadOperationFilter>();
 
     options.TagActionsBy(api =>
     {

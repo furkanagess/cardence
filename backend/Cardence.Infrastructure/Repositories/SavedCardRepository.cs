@@ -102,4 +102,18 @@ public sealed class SavedCardRepository : ISavedCardRepository
                     isOwnerPremium),
                 cancellationToken);
     }
+
+    public async Task ReconcileOwnerPremiumWithCardsAsync(
+        CancellationToken cancellationToken = default)
+    {
+        await _dbContext.Database.ExecuteSqlRawAsync(
+            """
+            UPDATE saved_cards AS sc
+            SET is_owner_premium = c.is_owner_premium
+            FROM cards AS c
+            WHERE sc.card_id = c.card_id
+              AND sc.is_owner_premium IS DISTINCT FROM c.is_owner_premium;
+            """,
+            cancellationToken);
+    }
 }

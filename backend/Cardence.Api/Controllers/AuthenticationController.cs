@@ -144,6 +144,7 @@ public sealed class AuthenticationController : ControllerBase
 
     [Authorize]
     [HttpPost("UploadProfilePhoto")]
+    [Consumes("multipart/form-data")]
     [RequestSizeLimit(5 * 1024 * 1024)]
     [ProducesResponseType(typeof(AuthServiceResponse<UserProfileEntity>), StatusCodes.Status200OK)]
     public async Task<ActionResult<AuthServiceResponse<UserProfileEntity>>> UploadProfilePhoto(

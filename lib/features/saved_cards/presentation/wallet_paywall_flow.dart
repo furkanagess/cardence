@@ -25,5 +25,7 @@ class WalletPaywallFlow {
     if (handler == null) return;
 
     await handler.showSuccess(context);
+    if (!context.mounted) return;
+    await cubit.refreshAll();
   }
 }

@@ -36,5 +36,7 @@ public sealed class WalletOwnerPremiumSyncService : IWalletOwnerPremiumSyncServi
             cardIds,
             isOwnerPremium,
             cancellationToken);
+        await _savedCardRepository.ReconcileOwnerPremiumWithCardsAsync(
+            cancellationToken);
     }
 }

@@ -31,4 +31,7 @@ public interface ISavedCardRepository
         IReadOnlyList<string> cardIds,
         bool isOwnerPremium,
         CancellationToken cancellationToken = default);
+
+    Task ReconcileOwnerPremiumWithCardsAsync(
+        CancellationToken cancellationToken = default);
 }
