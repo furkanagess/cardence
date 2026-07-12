@@ -7,6 +7,8 @@ import '../../../../core/utils/card_id_generator.dart';
 import '../../../../core/widgets/molecules/card_index_circle_selector.dart';
 import '../widgets/profile_quick_actions.dart';
 import '../../../my_cards/presentation/pages/my_card_edit_page.dart';
+import '../../../my_cards/presentation/helpers/my_card_slot_counts.dart';
+import '../../../my_cards/presentation/widgets/empty_card_slot_preview.dart';
 import '../../../auth/domain/usecases/upload_profile_photo.dart';
 import '../../../onboarding/presentation/helpers/additional_card_onboarding_launcher.dart';
 import '../../../saved_cards/domain/usecases/upgrade_wallet_plan.dart';
@@ -23,6 +25,7 @@ import '../../../onboarding/presentation/widgets/onboarding_card_preview_frame.d
 import '../../../../core/widgets/organisms/flippable_person_card.dart';
 import '../../../business_cards/domain/usecases/persist_onboarding_card.dart';
 import '../../domain/entities/profile_stats.dart';
+import '../../../plans/domain/entities/plan_entitlements.dart';
 import '../../../plans/presentation/cubit/plan_cubit.dart';
 import '../../../plans/presentation/cubit/plan_state.dart';
 import '../../../saved_cards/presentation/cubit/saved_cards_cubit.dart';
@@ -105,13 +108,17 @@ class _ProfilePageState extends State<ProfilePage> {
       final stats = results[1] as ProfileStats;
       final plan = planCubit.state.entitlements;
       final maxBusinessCards = plan?.limits.maxBusinessCards;
+      final slotCounts = resolveMyCardSlotCounts(
+        cardCount: list.length,
+        plan: plan,
+      );
       setState(() {
         _cards = list;
         _stats = stats;
         _canAddBusinessCard =
             maxBusinessCards == null || list.length < maxBusinessCards;
         _isPremium = plan?.isPremiumOrHigher ?? false;
-        if (_selectedIndex >= list.length) {
+        if (_selectedIndex >= slotCounts.unlockedSlots) {
           _selectedIndex = list.isEmpty ? 0 : list.length - 1;
         }
         _loading = false;
@@ -306,26 +313,27 @@ class _ProfilePageState extends State<ProfilePage> {
           physics: const AlwaysScrollableScrollPhysics(),
           padding: EdgeInsets.fromLTRB(0, 8, 0, 32 + bottomInset),
           children: [
-            if (_cards.isEmpty)
+            if (_cards.isEmpty && !_canAddBusinessCard)
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: _buildEmptyState(colorScheme, textTheme),
               ),
-          if (_cards.isNotEmpty) ...[
+          if (_cards.isNotEmpty || _canAddBusinessCard) ...[
             _ProfileCardsCarousel(
               cards: _cards,
               pageController: _pageController,
               selectedIndex: _selectedIndex,
+              plan: context.watch<PlanCubit>().state.entitlements,
               onPageChanged: (index) => setState(() => _selectedIndex = index),
               onCardTap: (card, {heroTag}) => _openCardDetail(card, heroTag: heroTag),
               onLockedSlotTap: _openLockedSlotPaywall,
+              onAddCard: _createNewCard,
             ),
           ],
-          Padding(
+          if (_cards.isNotEmpty || !_canAddBusinessCard)
+            Padding(
             padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
             child: ProfileQuickActions(
-              addCardLabel: context.l10n.yeniKartOlutur,
-              onAddCard: _createNewCard,
               limitHint: !_canAddBusinessCard
                   ? AppL10n.cardLimitReachedPremiumUpgrade(context.l10n)
                   : null,
@@ -413,22 +421,24 @@ class _ProfileCardsCarousel extends StatelessWidget {
     required this.cards,
     required this.pageController,
     required this.selectedIndex,
+    required this.plan,
     required this.onPageChanged,
     required this.onCardTap,
     required this.onLockedSlotTap,
+    required this.onAddCard,
   });
 
   final List<OnboardingCardDraft> cards;
   final PageController pageController;
   final int selectedIndex;
+  final PlanEntitlements? plan;
   final ValueChanged<int> onPageChanged;
   final void Function(OnboardingCardDraft card, {String? heroTag}) onCardTap;
   final VoidCallback onLockedSlotTap;
+  final VoidCallback onAddCard;
 
   @override
   Widget build(BuildContext context) {
-    if (cards.isEmpty) return const SizedBox.shrink();
-
     return LayoutBuilder(
       builder: (context, constraints) {
         final pageWidth = constraints.maxWidth;
@@ -437,6 +447,11 @@ class _ProfileCardsCarousel extends StatelessWidget {
             OnboardingCardPreviewFrame.heightForWidth(cardWidth) +
                 _profileCarouselVerticalPadding * 2;
         const selectorSpacing = 12.0;
+        final slotCounts = resolveMyCardSlotCounts(
+          cardCount: cards.length,
+          plan: plan,
+        );
+        final isEmptySlotSelected = selectedIndex >= cards.length;
 
         return Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -446,11 +461,14 @@ class _ProfileCardsCarousel extends StatelessWidget {
               Center(
                 child: CardIndexCircleSelector(
                   axis: Axis.horizontal,
-                  unlockedCount: cards.length,
+                  unlockedCount: slotCounts.unlockedSlots,
+                  filledCount: slotCounts.filledCount,
                   selectedIndex: selectedIndex,
                   onSelected: (index) {
                     onPageChanged(index);
-                    if (pageController.hasClients && cards.length > 1) {
+                    if (pageController.hasClients &&
+                        index < cards.length &&
+                        cards.length > 1) {
                       pageController.animateToPage(
                         index,
                         duration: const Duration(milliseconds: 280),
@@ -464,7 +482,18 @@ class _ProfileCardsCarousel extends StatelessWidget {
               const SizedBox(height: selectorSpacing),
               SizedBox(
                 height: carouselHeight,
-                child: cards.length == 1
+                child: isEmptySlotSelected
+                    ? Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: _profileCarouselHorizontalPadding,
+                          vertical: _profileCarouselVerticalPadding,
+                        ),
+                        child: EmptyCardSlotPreview(
+                          label: context.l10n.yeniKartOlutur,
+                          onTap: onAddCard,
+                        ),
+                      )
+                    : cards.length == 1
                     ? Padding(
                         padding: const EdgeInsets.symmetric(
                           horizontal: _profileCarouselHorizontalPadding,

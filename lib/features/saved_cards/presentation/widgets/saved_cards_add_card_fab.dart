@@ -17,10 +17,18 @@ class SavedCardsAddCardFab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    const navBarHeight = 56.0;
+    const navBarOuterPadding = 16.0;
+    const fabClearance = 16.0;
+    final bottomNavReserve =
+        navBarHeight + navBarOuterPadding + MediaQuery.paddingOf(context).bottom;
+    final fabBottomInset = bottomNavReserve + fabClearance;
 
     return Positioned.fill(
       child: DraggableFab(
-        positionStorageKey: 'saved_cards_add_card_fab_v2',
+        positionStorageKey: 'saved_cards_add_card_fab_v3',
+        defaultBottomInset: fabBottomInset,
+        minBottomInset: fabBottomInset,
         onPressed: onPressed,
         builder: (onTap) => canAddMore
             ? FloatingActionButton.extended(

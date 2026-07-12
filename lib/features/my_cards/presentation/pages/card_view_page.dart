@@ -16,6 +16,9 @@ import '../../../onboarding/domain/entities/onboarding_card_draft.dart';
 import '../../../onboarding/domain/usecases/get_onboarding_draft_cards.dart';
 import '../../../business_cards/domain/usecases/persist_onboarding_card.dart';
 import '../../../plans/presentation/cubit/plan_cubit.dart';
+import '../../../plans/presentation/cubit/plan_state.dart';
+import '../helpers/my_card_slot_counts.dart';
+import '../widgets/empty_card_slot_preview.dart';
 import '../../../saved_cards/presentation/cubit/saved_cards_cubit.dart';
 import '../../../saved_cards/presentation/wallet_paywall_flow.dart';
 import '../card_customize_colors.dart';
@@ -93,11 +96,16 @@ class _CardViewPageState extends State<CardViewPage> {
   Future<void> _loadCards() async {
     final list = await widget.getOnboardingDraftCards();
     if (!mounted) return;
+    final plan = context.read<PlanCubit>().state.entitlements;
+    final slotCounts = resolveMyCardSlotCounts(
+      cardCount: list.length,
+      plan: plan,
+    );
     setState(() {
       _cards = list;
       _savedBaseline = List<OnboardingCardDraft>.from(list);
-      if (_selectedIndex >= _cards.length) {
-        _selectedIndex = _cards.isEmpty ? 0 : _cards.length - 1;
+      if (_selectedIndex >= slotCounts.unlockedSlots) {
+        _selectedIndex = list.isEmpty ? 0 : list.length - 1;
       }
       _loading = false;
     });
@@ -273,16 +281,25 @@ class _CardViewPageState extends State<CardViewPage> {
     if (mounted) await _loadCards();
   }
 
-  void _selectCardIndex(int index) {
-    if (index < 0 || index >= _cards.length) return;
+  void _selectCardIndex(int index, {required int unlockedSlots}) {
+    if (index < 0 || index >= unlockedSlots) return;
     setState(() => _selectedIndex = index);
-    if (_pageController.hasClients && _cards.length > 1) {
+    if (_pageController.hasClients &&
+        index < _cards.length &&
+        _cards.length > 1) {
       _pageController.animateToPage(
         index,
         duration: const Duration(milliseconds: 280),
         curve: Curves.easeOutCubic,
       );
     }
+  }
+
+  Widget _buildEmptySlotPreview(BuildContext context) {
+    return EmptyCardSlotPreview(
+      label: context.l10n.yeniKartOlutur,
+      onTap: _createNewCard,
+    );
   }
 
   Future<void> _openColorPalette() async {
@@ -317,10 +334,6 @@ class _CardViewPageState extends State<CardViewPage> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-    final textTheme = theme.textTheme;
-
     if (_loading) {
       return CardenceScaffold(
         appBar: CardenceAppBar(title: context.l10n.kartGrnm),
@@ -328,61 +341,25 @@ class _CardViewPageState extends State<CardViewPage> {
       );
     }
 
-    if (_cards.isEmpty) {
-      return CardenceScaffold(
-        appBar: CardenceAppBar(title: context.l10n.kartGrnm),
-        body: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.credit_card_off_rounded,
-                    size: 64,
-                    color: colorScheme.outline.withValues(alpha: 0.6)),
-                const SizedBox(height: 16),
-                Text(
-                  context.l10n.henzKartYok,
-                  style: textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                      color: colorScheme.onSurface),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  context.l10n.profilBilgileriniziDoldurupIlkKartnz,
-                  style: textTheme.bodyMedium
-                      ?.copyWith(color: colorScheme.onSurfaceVariant),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 24),
-                CustomButton(
-                  label: context.l10n.yeniKartOlutur,
-                  icon: Icons.add_rounded,
-                  onPressed: _createNewCard,
-                  style: FilledButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    foregroundColor: AppColors.textOnPrimary,
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 20, vertical: 14),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      );
-    }
-
-    final d = _draft!;
-    final hasLastUsed = d.lastUsedPaletteBackgroundColor != null &&
-        d.lastUsedPaletteBackgroundColor!.length == 7 &&
-        d.lastUsedPaletteBackgroundColor!.startsWith('#') &&
-        !cardBackgroundColorOptions.contains(d.lastUsedPaletteBackgroundColor);
     const cardHorizontalPadding = 16.0;
-    final isCarousel = _cards.length > 1;
 
-    return PopScope(
+    return BlocBuilder<PlanCubit, PlanState>(
+      builder: (context, planState) {
+        final slotCounts = resolveMyCardSlotCounts(
+          cardCount: _cards.length,
+          plan: planState.entitlements,
+        );
+        final isEmptySlotSelected = _selectedIndex >= _cards.length;
+        final d = _draft;
+        final hasLastUsed = d != null &&
+            d.lastUsedPaletteBackgroundColor != null &&
+            d.lastUsedPaletteBackgroundColor!.length == 7 &&
+            d.lastUsedPaletteBackgroundColor!.startsWith('#') &&
+            !cardBackgroundColorOptions
+                .contains(d.lastUsedPaletteBackgroundColor);
+        final isCarousel = _cards.length > 1;
+
+        return PopScope(
       canPop: !_hasUnsavedChanges,
       onPopInvokedWithResult: (didPop, result) async {
         if (didPop || !_hasUnsavedChanges) return;
@@ -413,7 +390,9 @@ class _CardViewPageState extends State<CardViewPage> {
                             child: Center(
                               child: AspectRatio(
                                 aspectRatio: FlippablePersonCard.cardAspectRatio,
-                                child: isCarousel
+                                child: isEmptySlotSelected
+                                    ? _buildEmptySlotPreview(context)
+                                    : isCarousel
                                     ? PageView.builder(
                                         controller: _pageController,
                                         itemCount: _cards.length,
@@ -465,7 +444,7 @@ class _CardViewPageState extends State<CardViewPage> {
                                         },
                                       )
                                     : MyCardPreviewHelpers.flippableCard(
-                                        draft: d,
+                                        draft: d!,
                                         l10n: context.l10n,
                                         emptyMessage:
                                             context.l10n.kartBilgisiYok,
@@ -475,9 +454,13 @@ class _CardViewPageState extends State<CardViewPage> {
                           ),
                           const SizedBox(width: 10),
                           CardIndexCircleSelector(
-                            unlockedCount: _cards.length,
+                            unlockedCount: slotCounts.unlockedSlots,
+                            filledCount: slotCounts.filledCount,
                             selectedIndex: _selectedIndex,
-                            onSelected: _selectCardIndex,
+                            onSelected: (index) => _selectCardIndex(
+                              index,
+                              unlockedSlots: slotCounts.unlockedSlots,
+                            ),
                             onLockedTap: _openPaywallForLockedSlot,
                           ),
                           const SizedBox(width: 4),
@@ -488,6 +471,7 @@ class _CardViewPageState extends State<CardViewPage> {
                 ],
               ),
             ),
+            if (!isEmptySlotSelected && d != null)
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
               child: Column(
@@ -551,6 +535,8 @@ class _CardViewPageState extends State<CardViewPage> {
           ],
         ),
       ),
+    );
+      },
     );
   }
 

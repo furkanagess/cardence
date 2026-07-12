@@ -37,6 +37,8 @@ import '../../../onboarding/domain/usecases/get_onboarding_draft_card.dart';
 import '../../../onboarding/domain/usecases/get_onboarding_draft_cards.dart';
 import '../../../business_cards/domain/usecases/persist_onboarding_card.dart';
 import '../../../saved_cards/presentation/cubit/saved_cards_cubit.dart';
+import '../../../saved_cards/presentation/cubit/saved_cards_state.dart';
+import '../../../saved_cards/presentation/widgets/saved_cards_page_header.dart';
 import '../../../saved_cards/presentation/pages/saved_cards_page.dart';
 import '../../../saved_cards/presentation/wallet_paywall_flow.dart';
 import '../../../auth/domain/usecases/get_current_user.dart';
@@ -163,13 +165,22 @@ class _MainShellPageState extends State<MainShellPage> {
     }
   }
 
-  PreferredSizeWidget? _buildAppBar(BuildContext context) {
-    if (_currentIndex == 0) return null;
-
+  PreferredSizeWidget _buildAppBar(BuildContext context) {
     return CardenceAppBar(
       variant: CardenceAppBarVariant.primary,
       titleWidget: CardenceAppBar.shellTabTitle(context, _appBarTitle),
       actions: [
+        if (_currentIndex == 0)
+          BlocBuilder<SavedCardsCubit, SavedCardsState>(
+            buildWhen: (previous, current) => previous.quota != current.quota,
+            builder: (context, state) {
+              return SavedCardsWalletQuotaBadge(
+                quota: state.quota,
+                onUpgradeTap: () =>
+                    context.read<SavedCardsCubit>().requestUpgradeSheet(),
+              );
+            },
+          ),
         CardenceAppBar.iconAction(
           icon: Icons.settings_outlined,
           tooltip: context.l10n.ayarlar,

@@ -25,7 +25,6 @@ import '../widgets/saved_cards_card_stack_view.dart';
 import '../widgets/saved_cards_empty_results_view.dart';
 import '../widgets/saved_cards_focus_arrow_track.dart';
 import '../widgets/saved_cards_loading_shimmer.dart';
-import '../widgets/saved_cards_page_header.dart';
 import '../widgets/saved_cards_screen_toolbar.dart';
 
 /// Kaydettiği kişilerin kartları listesi (yalnızca görünüm katmanı).
@@ -255,10 +254,6 @@ class _SavedCardsPageState extends State<SavedCardsPage>
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    SavedCardsPageHeader(
-                      quota: quota,
-                      onUpgradeTap: cubit.requestUpgradeSheet,
-                    ),
                     SavedCardsScreenToolbar(
                       searchQuery: state.searchQuery,
                       onSearchQueryChanged: cubit.setSearchQuery,

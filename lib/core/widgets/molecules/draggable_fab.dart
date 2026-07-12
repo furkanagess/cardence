@@ -11,6 +11,7 @@ class DraggableFab extends StatefulWidget {
     required this.builder,
     this.positionStorageKey,
     this.defaultBottomInset = 88,
+    this.minBottomInset = 0,
     this.defaultSideInset = 20,
   });
 
@@ -22,6 +23,9 @@ class DraggableFab extends StatefulWidget {
 
   /// İlk konum için alt boşluk (nav bar üstünde başlar).
   final double defaultBottomInset;
+
+  /// FAB'ın alt kenarı ile stack altı arasında kalması gereken minimum boşluk.
+  final double minBottomInset;
 
   /// İlk konum için sağ boşluk.
   final double defaultSideInset;
@@ -103,9 +107,10 @@ class _DraggableFabState extends State<DraggableFab> {
   }
 
   Offset _clampOffset(Offset position, double maxX, double maxY) {
+    final maxTop = (maxY - widget.minBottomInset).clamp(0.0, maxY);
     return Offset(
       position.dx.clamp(0, maxX),
-      position.dy.clamp(0, maxY),
+      position.dy.clamp(0, maxTop),
     );
   }
 
