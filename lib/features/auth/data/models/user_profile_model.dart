@@ -10,6 +10,7 @@ class UserProfileModel {
     this.phone,
     this.photoUrl,
     this.onboardingCompleted = false,
+    this.isPremium = false,
     this.createdAt,
     this.savedCards = const [],
     this.businessCards = const [],
@@ -21,6 +22,7 @@ class UserProfileModel {
   final String? phone;
   final String? photoUrl;
   final bool onboardingCompleted;
+  final bool isPremium;
   final DateTime? createdAt;
   final List<SavedCardModel> savedCards;
   final List<BusinessCardModel> businessCards;
@@ -65,6 +67,7 @@ class UserProfileModel {
       onboardingCompleted: _readBool(
         json['onboardingCompleted'] ?? json['OnboardingCompleted'],
       ),
+      isPremium: _readBool(json['premium'] ?? json['Premium']),
       createdAt: createdAtRaw != null ? DateTime.tryParse(createdAtRaw) : null,
       savedCards: _parseSavedCards(json['savedCards'] ?? json['SavedCards']),
       businessCards:
@@ -79,6 +82,7 @@ class UserProfileModel {
         phone: phone,
         photoUrl: photoUrl,
         onboardingCompleted: onboardingCompleted,
+        isPremium: isPremium,
         createdAt: createdAt,
         savedCards: savedCards.map((card) => card.toEntity()).toList(),
         businessCards: businessCards.map((card) => card.toEntity()).toList(),
@@ -92,5 +96,6 @@ class UserProfileModel {
         'phone': phone,
         'photoUrl': photoUrl,
         'onboardingCompleted': onboardingCompleted,
+        'premium': isPremium,
       };
 }

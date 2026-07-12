@@ -9,14 +9,10 @@ class SavedCardsAddCardFab extends StatelessWidget {
     super.key,
     required this.canAddMore,
     required this.onPressed,
-    this.bottomClearance = 88,
-    this.margin = 20,
   });
 
   final bool canAddMore;
   final VoidCallback onPressed;
-  final double bottomClearance;
-  final double margin;
 
   @override
   Widget build(BuildContext context) {
@@ -24,8 +20,7 @@ class SavedCardsAddCardFab extends StatelessWidget {
 
     return Positioned.fill(
       child: DraggableFab(
-        bottomClearance: bottomClearance,
-        margin: margin,
+        positionStorageKey: 'saved_cards_add_card_fab_v2',
         onPressed: onPressed,
         builder: (onTap) => canAddMore
             ? FloatingActionButton.extended(

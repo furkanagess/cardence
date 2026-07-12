@@ -7,6 +7,7 @@ import '../../features/auth/data/models/auth_session_model.dart';
 import '../network/api_config.dart';
 import '../network/api_response_parser.dart';
 import '../network/auth_api_exception.dart';
+import 'refresh_session_outcome.dart';
 import 'session_expired_handler.dart';
 
 /// Access / refresh token yaşam döngüsünü yönetir.
@@ -36,7 +37,7 @@ class AuthTokenCoordinator {
     ),
   );
 
-  Completer<bool>? _refreshCompleter;
+  Completer<RefreshSessionOutcome>? _refreshCompleter;
   bool _sessionInvalid = false;
 
   void resetAfterLogin() {
@@ -47,14 +48,23 @@ class AuthTokenCoordinator {
     if (_sessionInvalid) return null;
 
     final session = await _local.getSession();
-    if (session == null || session.accessToken.isEmpty) return null;
+    if (session == null) return null;
+
+    final hasRefreshToken = session.refreshToken?.isNotEmpty ?? false;
+    if (session.accessToken.isEmpty) {
+      if (!hasRefreshToken) return null;
+      final outcome = await refreshSession();
+      if (!outcome.refreshed) return null;
+      final updated = await _local.getSession();
+      return updated?.accessToken;
+    }
 
     if (!refreshIfStale || !session.isAccessTokenStale) {
       return session.accessToken;
     }
 
-    final refreshed = await refreshSession();
-    if (!refreshed) {
+    final outcome = await refreshSession();
+    if (!outcome.refreshed) {
       return session.accessToken.isNotEmpty ? session.accessToken : null;
     }
 
@@ -62,14 +72,16 @@ class AuthTokenCoordinator {
     return updated?.accessToken;
   }
 
-  Future<bool> refreshSession() async {
-    if (_sessionInvalid) return false;
+  Future<RefreshSessionOutcome> refreshSession() async {
+    if (_sessionInvalid) {
+      return const RefreshSessionOutcome.invalidToken();
+    }
 
     if (_refreshCompleter != null) {
       return _refreshCompleter!.future;
     }
 
-    final completer = Completer<bool>();
+    final completer = Completer<RefreshSessionOutcome>();
     _refreshCompleter = completer;
 
     try {
@@ -78,14 +90,16 @@ class AuthTokenCoordinator {
       if (session == null ||
           refreshToken == null ||
           refreshToken.isEmpty) {
-        completer.complete(false);
-        return false;
+        const outcome = RefreshSessionOutcome.invalidToken();
+        completer.complete(outcome);
+        return outcome;
       }
 
       final refreshed = await _requestRefresh(refreshToken);
       if (refreshed == null) {
-        completer.complete(false);
-        return false;
+        const outcome = RefreshSessionOutcome.failed();
+        completer.complete(outcome);
+        return outcome;
       }
 
       final merged = AuthSessionModel(
@@ -102,11 +116,23 @@ class AuthTokenCoordinator {
 
       await _local.saveSession(merged);
       _sessionInvalid = false;
-      completer.complete(true);
-      return true;
+      const outcome = RefreshSessionOutcome.refreshed();
+      completer.complete(outcome);
+      return outcome;
+    } on AuthApiException catch (error) {
+      final outcome = _outcomeFromRefreshError(error);
+      completer.complete(outcome);
+      return outcome;
+    } on DioException catch (error) {
+      final outcome = _outcomeFromRefreshError(
+        ApiResponseParser.fromDioException(error, 'Oturum yenilenemedi.'),
+      );
+      completer.complete(outcome);
+      return outcome;
     } catch (_) {
-      completer.complete(false);
-      return false;
+      const outcome = RefreshSessionOutcome.failed();
+      completer.complete(outcome);
+      return outcome;
     } finally {
       _refreshCompleter = null;
     }
@@ -130,6 +156,19 @@ class AuthTokenCoordinator {
       return null;
     }
     return session;
+  }
+
+  RefreshSessionOutcome _outcomeFromRefreshError(AuthApiException error) {
+    if (error.errorCode == 'InvalidRefreshToken' || error.code == 1006) {
+      return const RefreshSessionOutcome.invalidToken();
+    }
+    if (error.isUnauthorized) {
+      return const RefreshSessionOutcome.invalidToken();
+    }
+    if (error.isNetworkError) {
+      return const RefreshSessionOutcome.failed();
+    }
+    return const RefreshSessionOutcome.failed();
   }
 
   Future<bool> hasStoredSession() async {

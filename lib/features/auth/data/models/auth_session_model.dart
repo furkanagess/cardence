@@ -75,12 +75,15 @@ class AuthSessionModel {
       );
 
   bool get isAccessTokenStale {
-    if (accessTokenExpiresAt == null) {
-      return refreshToken != null && refreshToken!.isNotEmpty;
-    }
+    if (accessToken.isEmpty) return true;
+    if (accessTokenExpiresAt == null) return false;
     final now = DateTime.now().millisecondsSinceEpoch;
     return now >= accessTokenExpiresAt! - _expirySkewMs;
   }
+
+  bool get canRestoreSession =>
+      userId.isNotEmpty &&
+      (accessToken.isNotEmpty || (refreshToken?.isNotEmpty ?? false));
 
   AuthSessionModel withComputedExpiry() {
     if (expiresIn <= 0) return this;

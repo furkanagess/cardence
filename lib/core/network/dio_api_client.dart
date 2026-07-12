@@ -163,8 +163,8 @@ class DioApiClient {
         rethrow;
       }
 
-      final refreshed = await coordinator!.refreshSession();
-      if (!refreshed) {
+      final outcome = await coordinator!.refreshSession();
+      if (!outcome.refreshed) {
         await coordinator.invalidateSession(showDialog: true);
         rethrow;
       }
@@ -188,8 +188,8 @@ class DioApiClient {
         throw parsed;
       }
 
-      final refreshed = await coordinator!.refreshSession();
-      if (!refreshed) {
+      final outcome = await coordinator!.refreshSession();
+      if (!outcome.refreshed) {
         await coordinator.invalidateSession(showDialog: true);
         throw parsed;
       }

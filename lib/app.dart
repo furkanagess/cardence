@@ -12,7 +12,6 @@ import 'core/constants/app_constants.dart';
 import 'core/init/app_init.dart';
 import 'core/theme/app_theme.dart';
 import 'core/theme/splash_theme.dart';
-import 'core/widgets/molecules/chuck_fab_overlay.dart';
 import 'core/widgets/organisms/cardence_logo_merge_animation.dart';
 import 'core/widgets/organisms/cardence_scaffold.dart';
 import 'features/auth/domain/usecases/get_auth_session.dart';
@@ -572,9 +571,7 @@ class _AppState extends State<App> {
           ),
           child: PremiumPurchaseScope(
             handler: widget.premiumPurchaseSuccessHandler,
-            child: ChuckFabOverlay(
-              child: child ?? const SizedBox.shrink(),
-            ),
+            child: child ?? const SizedBox.shrink(),
           ),
         );
       },

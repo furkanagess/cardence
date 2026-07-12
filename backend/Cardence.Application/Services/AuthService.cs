@@ -891,6 +891,10 @@ public sealed class AuthService : IAuthService
         var savedCards = await _savedCardRepository.GetByUserIdAsync(
             user.Id,
             cancellationToken);
+        var walletEntitlement = await _walletEntitlementRepository.GetOrCreateAsync(
+            user.Id,
+            cancellationToken);
+        var premium = WalletConstants.IsPremiumOrHigher(walletEntitlement.Tier);
 
         return new UserProfileEntity
         {
@@ -900,6 +904,7 @@ public sealed class AuthService : IAuthService
             Phone = user.Phone,
             PhotoUrl = user.PhotoUrl,
             OnboardingCompleted = user.OnboardingCompleted,
+            Premium = premium,
             CreatedAt = user.CreatedAt,
             BusinessCards = businessCards.Select(c => BusinessCardMapper.ToDto(c)).ToList(),
             SavedCards = savedCards.Select(SavedCardMapper.ToDto).ToList(),

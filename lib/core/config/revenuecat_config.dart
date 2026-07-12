@@ -24,13 +24,13 @@ class RevenueCatConfig {
   static const premiumEntitlementId = 'cardence-pro';
 
   /// RevenueCat dashboard paywall kimliği (offering'e bağlı template).
-  static const walletPaywallIdentifier = 'cardence-pro-discount';
+  static const walletPaywallIdentifier = 'cardence-trial';
 
   /// Cardence Pro offering kimliği (RevenueCat dashboard).
   static const walletOfferingIdentifier = 'cardencepro';
 
-  /// Placement kullanılmıyor; offering doğrudan hedeflenir.
-  static const String? walletPlacementIdentifier = null;
+  /// Placement ile hedeflenen paywall (RevenueCat Targeting).
+  static const walletPlacementIdentifier = 'cardence-trial';
 
   /// Mağaza ürün kimliği (Test Store / App Store Connect).
   /// RevenueCat → Products → `cardencepro`

@@ -100,27 +100,40 @@ public sealed class SavedCardServiceTests
     }
 
     [Fact]
-    public async Task UpgradeWalletPlanAsync_DoesNotGrantPremiumDirectly()
+    public async Task UpgradeWalletPlanAsync_UpgradesFreeTierToPremium()
     {
         _walletRepository.GetOrCreateAsync(_userId, Arg.Any<CancellationToken>())
+            .Returns(
+                new WalletEntitlement
+                {
+                    UserId = _userId,
+                    Tier = WalletConstants.FreeTier,
+                    MaxCards = WalletConstants.FreeMaxCards,
+                },
+                new WalletEntitlement
+                {
+                    UserId = _userId,
+                    Tier = WalletConstants.PremiumTier,
+                    MaxCards = WalletConstants.PremiumMaxCards,
+                });
+        _walletRepository.UpgradeToPremiumAsync(_userId, Arg.Any<CancellationToken>())
             .Returns(new WalletEntitlement
             {
                 UserId = _userId,
-                Tier = WalletConstants.FreeTier,
-                MaxCards = WalletConstants.FreeMaxCards,
+                Tier = WalletConstants.PremiumTier,
+                MaxCards = WalletConstants.PremiumMaxCards,
             });
 
         var quota = await _service.UpgradeWalletPlanAsync();
 
-        quota.Tier.Should().Be(WalletConstants.FreeTier);
+        quota.Tier.Should().Be(WalletConstants.PremiumTier);
+        await _walletRepository.Received(1).UpgradeToPremiumAsync(
+            _userId,
+            Arg.Any<CancellationToken>());
         await _ownerPremiumSync.Received(1).SyncForUserAsync(
             _userId,
-            WalletConstants.FreeTier,
+            WalletConstants.PremiumTier,
             Arg.Any<CancellationToken>());
-        await _walletRepository.DidNotReceiveWithAnyArgs()
-            .UpgradeToPremiumAsync(default, default);
-        await _walletRepository.DidNotReceiveWithAnyArgs()
-            .SetTierAsync(default, default!, default, default);
     }
 
     [Fact]

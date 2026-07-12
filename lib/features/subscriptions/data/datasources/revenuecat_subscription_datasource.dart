@@ -5,6 +5,7 @@ import 'package:purchases_flutter/purchases_flutter.dart';
 import 'package:purchases_ui_flutter/purchases_ui_flutter.dart';
 
 import '../../../../core/config/revenuecat_config.dart';
+import '../../../../core/platform/paywall_appearance_override.dart';
 import '../../domain/entities/wallet_paywall_result.dart';
 
 class RevenueCatSubscriptionDataSource {
@@ -62,7 +63,10 @@ class RevenueCatSubscriptionDataSource {
             await hasPremiumWalletEntitlement());
   }
 
-  Future<WalletPaywallResult> presentWalletPaywall({bool onlyIfNeeded = false}) async {
+  Future<WalletPaywallResult> presentWalletPaywall({
+    bool onlyIfNeeded = false,
+    bool? useDarkAppearance,
+  }) async {
     try {
       await _ensureConfigured();
       final offering = await _resolveWalletOffering();
@@ -73,27 +77,44 @@ class RevenueCatSubscriptionDataSource {
 
       debugPrint(
         '[RevenueCat] Presenting paywall '
-        '(offering=${offering.identifier}, onlyIfNeeded=$onlyIfNeeded)',
+        '(paywall=${RevenueCatConfig.walletPaywallIdentifier}, '
+        'offering=${offering.identifier}, onlyIfNeeded=$onlyIfNeeded, '
+        'useDarkAppearance=$useDarkAppearance)',
       );
 
-      final PaywallResult result;
-      if (onlyIfNeeded) {
-        result = await RevenueCatUI.presentPaywallIfNeeded(
-          RevenueCatConfig.premiumEntitlementId,
-          offering: offering,
-          displayCloseButton: true,
-          presentationConfiguration: PaywallPresentationConfiguration.fullScreen,
-        );
-      } else {
-        result = await RevenueCatUI.presentPaywall(
-          offering: offering,
-          displayCloseButton: true,
-          presentationConfiguration: PaywallPresentationConfiguration.fullScreen,
-        );
+      if (useDarkAppearance != null) {
+        await PaywallAppearanceOverride.apply(isDark: useDarkAppearance);
       }
 
-      debugPrint('[RevenueCat] Paywall result: $result');
-      return _mapPaywallResult(result);
+      try {
+        final PaywallResult result;
+        if (onlyIfNeeded) {
+          result = await RevenueCatUI.presentPaywallIfNeeded(
+            RevenueCatConfig.premiumEntitlementId,
+            offering: offering,
+            displayCloseButton: true,
+            presentationConfiguration: PaywallPresentationConfiguration.fullScreen,
+          );
+        } else {
+          result = await RevenueCatUI.presentPaywall(
+            offering: offering,
+            displayCloseButton: true,
+            presentationConfiguration: PaywallPresentationConfiguration.fullScreen,
+          );
+        }
+
+        debugPrint('[RevenueCat] Paywall result: $result');
+        if (result == PaywallResult.purchased ||
+            result == PaywallResult.restored) {
+          await Purchases.invalidateCustomerInfoCache();
+          await Purchases.getCustomerInfo();
+        }
+        return _mapPaywallResult(result);
+      } finally {
+        if (useDarkAppearance != null) {
+          await PaywallAppearanceOverride.reset();
+        }
+      }
     } catch (error, stackTrace) {
       debugPrint('[RevenueCat] presentWalletPaywall failed: $error');
       debugPrintStack(stackTrace: stackTrace);
@@ -102,8 +123,48 @@ class RevenueCatSubscriptionDataSource {
   }
 
   Future<Offering?> _resolveWalletOffering() async {
-    final offerings = await Purchases.getOfferings();
+    final paywallId = RevenueCatConfig.walletPaywallIdentifier;
+    final placementId = RevenueCatConfig.walletPlacementIdentifier;
     final offeringId = RevenueCatConfig.walletOfferingIdentifier;
+
+    if (placementId.isNotEmpty) {
+      try {
+        final placementOffering =
+            await Purchases.getCurrentOfferingForPlacement(placementId);
+        if (placementOffering != null) {
+          final packageIds = placementOffering.availablePackages
+              .map((package) => package.identifier)
+              .join(', ');
+          debugPrint(
+            '[RevenueCat] Using placement "$placementId" '
+            '(paywall=$paywallId, offering=${placementOffering.identifier}, '
+            'packages: $packageIds).',
+          );
+          return placementOffering;
+        }
+        debugPrint(
+          '[RevenueCat] Placement "$placementId" returned no offering.',
+        );
+      } catch (error) {
+        debugPrint(
+          '[RevenueCat] Placement "$placementId" failed: $error',
+        );
+      }
+    }
+
+    final offerings = await Purchases.getOfferings();
+
+    final paywallOffering = offerings.getOffering(paywallId);
+    if (paywallOffering != null) {
+      final packageIds = paywallOffering.availablePackages
+          .map((package) => package.identifier)
+          .join(', ');
+      debugPrint(
+        '[RevenueCat] Using paywall offering "$paywallId" '
+        '(packages: $packageIds).',
+      );
+      return paywallOffering;
+    }
 
     final configuredOffering = offerings.getOffering(offeringId);
     if (configuredOffering != null) {
@@ -112,13 +173,13 @@ class RevenueCatSubscriptionDataSource {
           .join(', ');
       debugPrint(
         '[RevenueCat] Using offering "$offeringId" '
-        '(packages: $packageIds).',
+        '(paywall=$paywallId, packages: $packageIds).',
       );
       return configuredOffering;
     }
 
     debugPrint(
-      '[RevenueCat] Offering "$offeringId" not found. '
+      '[RevenueCat] Offering "$offeringId" and paywall "$paywallId" not found. '
       'Available: ${offerings.all.keys.join(', ')}',
     );
 

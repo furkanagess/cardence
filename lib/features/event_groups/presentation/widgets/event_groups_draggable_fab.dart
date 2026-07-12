@@ -9,14 +9,10 @@ class EventGroupsDraggableFab extends StatelessWidget {
     super.key,
     required this.canAddGroup,
     required this.onPressed,
-    this.bottomClearance = 88,
-    this.margin = 20,
   });
 
   final bool canAddGroup;
   final VoidCallback onPressed;
-  final double bottomClearance;
-  final double margin;
 
   @override
   Widget build(BuildContext context) {
@@ -24,8 +20,7 @@ class EventGroupsDraggableFab extends StatelessWidget {
 
     return Positioned.fill(
       child: DraggableFab(
-        bottomClearance: bottomClearance,
-        margin: margin,
+        positionStorageKey: 'event_groups_add_fab_v2',
         onPressed: onPressed,
         builder: (onTap) => canAddGroup
             ? FloatingActionButton.extended(

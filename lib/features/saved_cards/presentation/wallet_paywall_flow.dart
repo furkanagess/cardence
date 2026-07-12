@@ -14,7 +14,11 @@ class WalletPaywallFlow {
     PremiumPurchaseSuccessHandler? successHandler,
     bool onlyIfNeeded = false,
   }) async {
-    final success = await cubit.upgradeWallet(onlyIfNeeded: onlyIfNeeded);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final success = await cubit.upgradeWallet(
+      onlyIfNeeded: onlyIfNeeded,
+      useDarkAppearance: isDark,
+    );
     if (!context.mounted || !success) return;
 
     final handler = successHandler ?? PremiumPurchaseScope.maybeOf(context);

@@ -167,10 +167,17 @@ public sealed class SavedCardService : ISavedCardService
     public async Task<WalletQuotaDto> UpgradeWalletPlanAsync(
         CancellationToken cancellationToken = default)
     {
-        // Premium grants are authoritative via RevenueCatWebhook.
-        // Keep this endpoint as a backward-compatible quota refresh for older clients.
+        // RevenueCat satın alması sonrası istemci bu uç noktayı çağırır.
+        // Webhook gecikse bile premium etkinleştirilir; iptal/yenileme webhook ile güncellenir.
         var userId = _currentUser.GetRequiredUserId();
         var entitlement = await _walletRepository.GetOrCreateAsync(userId, cancellationToken);
+        if (!WalletConstants.IsPremiumOrHigher(entitlement.Tier))
+        {
+            entitlement = await _walletRepository.UpgradeToPremiumAsync(
+                userId,
+                cancellationToken);
+        }
+
         await _ownerPremiumSync.SyncForUserAsync(
             userId,
             entitlement.Tier,

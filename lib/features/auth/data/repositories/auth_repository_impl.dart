@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import '../../../../core/auth/auth_token_coordinator.dart';
+import '../../../../core/auth/refresh_session_outcome.dart';
 import '../../../../core/media/authenticated_image_loader.dart';
 import '../../domain/entities/auth_session.dart';
 import '../../domain/entities/last_login_credentials.dart';
@@ -107,14 +108,18 @@ class AuthRepositoryImpl implements AuthRepository {
       return await _fetchAndPersistProfile(session);
     } on AuthApiException catch (e) {
       if (e.isUnauthorized) {
-        final refreshed = await _coordinator?.refreshSession() ?? false;
-        if (refreshed) {
+        final outcome = await _coordinator?.refreshSession() ??
+            const RefreshSessionOutcome.failed();
+        if (outcome.refreshed) {
           final updated = await _local.getSession();
           if (updated != null) {
             return _fetchAndPersistProfile(updated);
           }
         }
-        throw AuthApiException('Oturum bulunamadı. Lütfen tekrar giriş yapın.');
+        if (outcome.invalidRefreshToken) {
+          throw AuthApiException('Oturum bulunamadı. Lütfen tekrar giriş yapın.');
+        }
+        return _profileFromSession(session.toEntity());
       }
 
       return _profileFromSession(session.toEntity());
@@ -137,19 +142,24 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Future<bool> isAuthenticated() async {
-    final session = await getStoredSession();
-    return session?.isValid ?? false;
+    final stored = await _local.getSession();
+    if (stored == null || !stored.canRestoreSession) return false;
+    if (stored.accessToken.isNotEmpty) return true;
+
+    final outcome = await _coordinator?.refreshSession() ??
+        const RefreshSessionOutcome.failed();
+    return outcome.refreshed;
   }
 
   @override
   Future<RestoreSessionResult> restoreSession() async {
-    final session = await getStoredSession();
-    if (session == null || !session.isValid) {
+    var stored = await _local.getSession();
+    if (stored == null || !stored.canRestoreSession) {
       return const RestoreSessionResult(isAuthenticated: false);
     }
 
-    final stored = await _local.getSession();
-    if (stored == null) {
+    stored = await _ensureFreshAccessToken(stored);
+    if (!stored.canRestoreSession) {
       return const RestoreSessionResult(isAuthenticated: false);
     }
 
@@ -170,19 +180,58 @@ class AuthRepositoryImpl implements AuthRepository {
       );
     } on AuthApiException catch (e) {
       if (e.isUnauthorized) {
-        await clearSession();
-        return const RestoreSessionResult(isAuthenticated: false);
+        final outcome = await _coordinator?.refreshSession() ??
+            const RefreshSessionOutcome.failed();
+        if (outcome.refreshed) {
+          final updated = await _local.getSession();
+          if (updated != null) {
+            try {
+              final profile = await _resolveProfile(updated);
+              return RestoreSessionResult(
+                isAuthenticated: true,
+                onboardingCompleted: profile.onboardingCompleted,
+              );
+            } catch (_) {}
+          }
+        }
+        if (outcome.invalidRefreshToken) {
+          await clearSession();
+          return const RestoreSessionResult(isAuthenticated: false);
+        }
+        return RestoreSessionResult(
+          isAuthenticated: true,
+          onboardingCompleted: cached?.onboardingCompleted,
+        );
       }
       return RestoreSessionResult(
         isAuthenticated: true,
         onboardingCompleted: cached?.onboardingCompleted,
       );
     } catch (_) {
-      return RestoreSessionResult(
+      return const RestoreSessionResult(
         isAuthenticated: true,
         onboardingCompleted: null,
       );
     }
+  }
+
+  Future<AuthSessionModel> _ensureFreshAccessToken(
+    AuthSessionModel stored,
+  ) async {
+    final needsRefresh =
+        stored.accessToken.isEmpty || stored.isAccessTokenStale;
+    final hasRefresh = stored.refreshToken?.isNotEmpty ?? false;
+    if (!needsRefresh || !hasRefresh) return stored;
+
+    final outcome = await _coordinator?.refreshSession() ??
+        const RefreshSessionOutcome.failed();
+    if (!outcome.refreshed) {
+      return stored;
+    }
+
+    _coordinator?.resetAfterLogin();
+    final updated = await _local.getSession();
+    return updated ?? stored;
   }
 
   @override
@@ -312,14 +361,18 @@ class AuthRepositoryImpl implements AuthRepository {
       return await _fetchAndPersistProfile(AuthSessionModel.fromEntity(session));
     } on AuthApiException catch (e) {
       if (e.isUnauthorized) {
-        final refreshed = await _coordinator?.refreshSession() ?? false;
-        if (refreshed) {
+        final outcome = await _coordinator?.refreshSession() ??
+            const RefreshSessionOutcome.failed();
+        if (outcome.refreshed) {
           final updated = await _local.getSession();
           if (updated != null) {
             return _fetchAndPersistProfile(updated);
           }
         }
-        throw AuthApiException('Oturum bulunamadı. Lütfen tekrar giriş yapın.');
+        if (outcome.invalidRefreshToken) {
+          throw AuthApiException('Oturum bulunamadı. Lütfen tekrar giriş yapın.');
+        }
+        rethrow;
       }
       rethrow;
     }

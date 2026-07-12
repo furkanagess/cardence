@@ -21,7 +21,9 @@ class AuthSession extends Equatable {
   final String? phone;
   final String? displayName;
 
-  bool get isValid => accessToken.isNotEmpty && userId.isNotEmpty;
+  bool get isValid =>
+      userId.isNotEmpty &&
+      (accessToken.isNotEmpty || (refreshToken?.isNotEmpty ?? false));
 
   @override
   List<Object?> get props => [

@@ -16,9 +16,13 @@ class UpgradeWalletPlan {
   final GetPlanEntitlements _getPlanEntitlements;
   final FinalizePremiumWalletActivation _finalizePremiumWalletActivation;
 
-  Future<bool> call({bool onlyIfNeeded = false}) async {
+  Future<bool> call({
+    bool onlyIfNeeded = false,
+    bool? useDarkAppearance,
+  }) async {
     final result = await _subscriptionRepository.presentWalletPaywall(
       onlyIfNeeded: onlyIfNeeded,
+      useDarkAppearance: useDarkAppearance,
     );
 
     switch (result) {
@@ -28,22 +32,21 @@ class UpgradeWalletPlan {
       case WalletPaywallResult.notPresented:
         if (!onlyIfNeeded &&
             await _subscriptionRepository.hasPremiumWalletEntitlement()) {
-          await _tryFinalize();
+          await _completePremiumActivation();
           return true;
         }
         return false;
       case WalletPaywallResult.purchased:
       case WalletPaywallResult.restored:
-        break;
+        await _completePremiumActivation();
+        return true;
     }
+  }
 
-    if (!await _subscriptionRepository.hasPremiumWalletEntitlement()) {
-      return false;
-    }
-
-    await _waitForBackendPremiumEntitlement();
+  Future<void> _completePremiumActivation() async {
+    await _waitForRevenueCatEntitlement();
     await _tryFinalize();
-    return true;
+    await _waitForBackendPremiumEntitlement();
   }
 
   Future<void> _tryFinalize() async {
@@ -51,6 +54,18 @@ class UpgradeWalletPlan {
       await _finalizePremiumWalletActivation();
     } catch (_) {
       // Me veya kota senkronu gecikse bile satın alma tamamlandı sayılır.
+    }
+  }
+
+  Future<void> _waitForRevenueCatEntitlement() async {
+    for (var attempt = 0; attempt < 10; attempt++) {
+      if (await _subscriptionRepository.hasPremiumWalletEntitlement()) {
+        return;
+      }
+
+      if (attempt < 9) {
+        await Future<void>.delayed(const Duration(milliseconds: 500));
+      }
     }
   }
 

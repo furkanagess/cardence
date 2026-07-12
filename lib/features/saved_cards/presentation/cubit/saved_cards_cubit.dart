@@ -237,8 +237,14 @@ class SavedCardsCubit extends Cubit<SavedCardsState> {
     }
   }
 
-  Future<bool> upgradeWallet({bool onlyIfNeeded = false}) async {
-    final success = await _upgradeWalletPlan(onlyIfNeeded: onlyIfNeeded);
+  Future<bool> upgradeWallet({
+    bool onlyIfNeeded = false,
+    bool? useDarkAppearance,
+  }) async {
+    final success = await _upgradeWalletPlan(
+      onlyIfNeeded: onlyIfNeeded,
+      useDarkAppearance: useDarkAppearance,
+    );
     if (isClosed) return false;
     if (success) {
       await refreshAll();
