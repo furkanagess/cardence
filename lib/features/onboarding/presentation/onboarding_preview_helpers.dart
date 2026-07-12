@@ -14,7 +14,6 @@ class OnboardingPreviewHelpers {
   static Widget preview(
     AppLocalizations l10n,
     OnboardingCardDraft draft, {
-    bool showPremiumBadge = false,
     VoidCallback? onTap,
     VoidCallback? onDetailTap,
     VoidCallback? onDoubleTap,
@@ -34,7 +33,6 @@ class OnboardingPreviewHelpers {
       onTap: onTap,
       onDetailTap: onDetailTap,
       onDoubleTap: onDoubleTap,
-      showPremiumBadge: showPremiumBadge,
       accentColor: MyCardPreviewHelpers.parseHexColor(draft.accentColor),
       backgroundColor:
           MyCardPreviewHelpers.parseHexColor(draft.backgroundColor),

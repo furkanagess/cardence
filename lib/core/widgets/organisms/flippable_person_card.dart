@@ -29,7 +29,6 @@ class FlippablePersonCard extends StatelessWidget {
     this.onDetailTap,
     this.onDoubleTap,
     this.showAppLogo = true,
-    this.showPremiumBadge = false,
     this.flipOnTouch = false,
     this.contactEmail,
     this.contactPhone,
@@ -74,9 +73,6 @@ class FlippablePersonCard extends StatelessWidget {
 
   /// false: Cardence köşe logosu gizlenir (elle girilen kartlar).
   final bool showAppLogo;
-
-  /// true: premium kart sahibi rozeti gösterilir.
-  final bool showPremiumBadge;
 
   /// Artık kullanılmaz; geriye dönük uyumluluk için tutulur.
   final bool flipOnTouch;
@@ -207,7 +203,6 @@ class FlippablePersonCard extends StatelessWidget {
           _shouldShowActionStrip ? CardPreviewActionStrip.chipSize + 10 : 0,
       hideContactFooter: _shouldShowActionStrip,
       showAppLogo: showAppLogo,
-      showPremiumBadge: showPremiumBadge,
       contactEmail: contactEmail,
       contactPhone: contactPhone,
       contactWebsite: contactWebsite,

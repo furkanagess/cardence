@@ -20,7 +20,6 @@ class OnboardingCardPreviewFrame extends StatelessWidget {
     this.emptyMessage = 'Alanlar doldukça görünür',
     this.maxWidth = 420,
     this.normalizeForDisplay = false,
-    this.showPremiumBadge = false,
     this.contactFieldsTappable = true,
     this.gatePremiumEffects = false,
     this.showActionStrip = true,
@@ -37,9 +36,6 @@ class OnboardingCardPreviewFrame extends StatelessWidget {
 
   /// Kayıtlı kartlarda görünürlük / cardId normalizasyonu uygula.
   final bool normalizeForDisplay;
-
-  /// Premium kullanıcının kendi kartında yıldız rozeti.
-  final bool showPremiumBadge;
 
   /// false: ön yüzdeki e-posta/telefon vb. iletişim alanları tıklanamaz.
   final bool contactFieldsTappable;
@@ -86,7 +82,6 @@ class OnboardingCardPreviewFrame extends StatelessWidget {
               onDetailTap: onDetailTap,
               onDoubleTap: onDoubleTap,
               emptyMessage: emptyMessage,
-              showPremiumBadge: showPremiumBadge,
               contactFieldsTappable: contactFieldsTappable,
               showActionStrip: showActionStrip,
               heroTag: heroTag,

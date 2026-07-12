@@ -70,7 +70,8 @@ mixin SavedCardsPageEffectsMixin<T extends StatefulWidget> on State<T> {
     List<SavedCard> sourceCards,
   ) async {
     final cubit = context.read<SavedCardsCubit>();
-    final eventOptions = cubit.eventFilterOptionsForSource(context.l10n, sourceCards);
+    final eventOptions =
+        cubit.eventFilterOptionsForSource(context.l10n, sourceCards);
 
     var initialFilter = cubit.state.filter;
     if (!eventOptions.any((o) => o.value == initialFilter.eventFilter)) {

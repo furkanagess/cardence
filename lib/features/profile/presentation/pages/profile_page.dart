@@ -316,7 +316,6 @@ class _ProfilePageState extends State<ProfilePage> {
               cards: _cards,
               pageController: _pageController,
               selectedIndex: _selectedIndex,
-              showPremiumBadge: _isPremium,
               onPageChanged: (index) => setState(() => _selectedIndex = index),
               onCardTap: (card, {heroTag}) => _openCardDetail(card, heroTag: heroTag),
               onLockedSlotTap: _openLockedSlotPaywall,
@@ -414,7 +413,6 @@ class _ProfileCardsCarousel extends StatelessWidget {
     required this.cards,
     required this.pageController,
     required this.selectedIndex,
-    required this.showPremiumBadge,
     required this.onPageChanged,
     required this.onCardTap,
     required this.onLockedSlotTap,
@@ -423,7 +421,6 @@ class _ProfileCardsCarousel extends StatelessWidget {
   final List<OnboardingCardDraft> cards;
   final PageController pageController;
   final int selectedIndex;
-  final bool showPremiumBadge;
   final ValueChanged<int> onPageChanged;
   final void Function(OnboardingCardDraft card, {String? heroTag}) onCardTap;
   final VoidCallback onLockedSlotTap;
@@ -489,7 +486,6 @@ class _ProfileCardsCarousel extends StatelessWidget {
                           contactFieldsTappable: true,
                           emptyMessage: context.l10n.alanlarDoldukaGrnr,
                           normalizeForDisplay: true,
-                          showPremiumBadge: showPremiumBadge,
                           gatePremiumEffects: true,
                         ),
                       )
@@ -544,7 +540,6 @@ class _ProfileCardsCarousel extends StatelessWidget {
                                 contactFieldsTappable: true,
                                 emptyMessage: context.l10n.alanlarDoldukaGrnr,
                                 normalizeForDisplay: true,
-                                showPremiumBadge: showPremiumBadge,
                                 gatePremiumEffects: true,
                               ),
                             ),

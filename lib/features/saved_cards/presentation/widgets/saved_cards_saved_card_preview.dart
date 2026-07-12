@@ -56,7 +56,6 @@ class SavedCardsSavedCardPreview extends StatelessWidget {
       contactWebsite: card.website,
       contactLinkedin: card.linkedin,
       visibleContactFields: visibleContacts,
-      showPremiumBadge: card.isOwnerPremium,
       heroTag: heroTag,
     );
 
