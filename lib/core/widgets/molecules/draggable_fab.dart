@@ -30,6 +30,18 @@ class DraggableFab extends StatefulWidget {
   /// İlk konum için sağ boşluk.
   final double defaultSideInset;
 
+  /// Ana kabuk liquid bottom nav üstünde FAB için alt boşluk.
+  static double mainShellBottomInset(
+    BuildContext context, {
+    double clearance = 16,
+  }) {
+    const navBarHeight = 56.0;
+    const navBarOuterPadding = 16.0;
+    final bottomNavReserve =
+        navBarHeight + navBarOuterPadding + MediaQuery.paddingOf(context).bottom;
+    return bottomNavReserve + clearance;
+  }
+
   @override
   State<DraggableFab> createState() => _DraggableFabState();
 }

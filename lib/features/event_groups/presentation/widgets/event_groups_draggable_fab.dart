@@ -17,10 +17,13 @@ class EventGroupsDraggableFab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final fabBottomInset = DraggableFab.mainShellBottomInset(context);
 
     return Positioned.fill(
       child: DraggableFab(
-        positionStorageKey: 'event_groups_add_fab_v2',
+        positionStorageKey: 'event_groups_add_fab_v3',
+        defaultBottomInset: fabBottomInset,
+        minBottomInset: fabBottomInset,
         onPressed: onPressed,
         builder: (onTap) => canAddGroup
             ? FloatingActionButton.extended(
