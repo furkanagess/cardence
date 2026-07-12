@@ -6,7 +6,9 @@ namespace Cardence.Application.Mapping;
 
 public static class SavedCardMapper
 {
-    public static SavedCardDto ToDto(SavedCard entity) => new()
+    public static SavedCardDto ToDto(SavedCard entity) => ToDto(entity, ownerIsPremium: null);
+
+    public static SavedCardDto ToDto(SavedCard entity, bool? ownerIsPremium) => new()
     {
         CardId = entity.CardId,
         DisplayName = entity.DisplayName,
@@ -34,7 +36,7 @@ public static class SavedCardMapper
         AccentColor = entity.AccentColor,
         BackgroundColor = entity.BackgroundColor,
         SavedAt = entity.SavedAt,
-        IsOwnerPremium = entity.IsOwnerPremium,
+        IsOwnerPremium = ownerIsPremium ?? entity.IsOwnerPremium,
         LinkedEventGroupIds = entity.LinkedEventGroupIds,
     };
 

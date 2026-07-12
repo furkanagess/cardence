@@ -1,0 +1,10 @@
+**/bin/
+**/obj/
+**/.vs/
+**/TestResults/
+Cardence.Tests/
+database/
+deploy/
+docs/
+*.md
+.git/

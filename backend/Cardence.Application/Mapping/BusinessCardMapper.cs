@@ -5,7 +5,9 @@ namespace Cardence.Application.Mapping;
 
 public static class BusinessCardMapper
 {
-    public static BusinessCardDto ToDto(Card entity) => new()
+    public static BusinessCardDto ToDto(Card entity) => ToDto(entity, userIsPremium: false);
+
+    public static BusinessCardDto ToDto(Card entity, bool userIsPremium) => new()
     {
         CardName = entity.CardName,
         DisplayName = entity.DisplayName,
@@ -32,7 +34,7 @@ public static class BusinessCardMapper
         CardEffect = entity.CardEffect,
         LinkedEventGroupIds = [],
         CardId = entity.CardId,
-        IsOwnerPremium = entity.IsOwnerPremium,
+        IsOwnerPremium = userIsPremium || entity.IsOwnerPremium,
     };
 
     public static void ApplyDto(Card entity, BusinessCardDto dto)

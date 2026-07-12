@@ -23,9 +23,11 @@ Railway (ilk kurulum):
   railway link            # cardence API servisini seç
 
 Örnek:
-  cd backend/deploy
-  ./scripts/deploy.sh railway
-  ./scripts/deploy.sh verify
+  ./backend/deploy/scripts/deploy.sh railway
+  ./backend/deploy/scripts/deploy.sh verify
+
+  # veya backend/deploy içinden:
+  cd backend/deploy && ./scripts/deploy.sh railway
 
 Notlar:
   - Railway Dashboard → Root Directory: backend
@@ -70,11 +72,6 @@ verify_deploy() {
 deploy_railway() {
   require_cmd railway
 
-  local detach_flag=()
-  if [[ "${1:-}" == "--detach" ]]; then
-    detach_flag=(--detach)
-  fi
-
   echo "==> Railway deploy başlıyor (kök: $BACKEND_ROOT)"
   cd "$BACKEND_ROOT"
 
@@ -83,7 +80,11 @@ deploy_railway() {
     exit 1
   fi
 
-  railway up "${detach_flag[@]}"
+  if [[ "${1:-}" == "--detach" ]]; then
+    railway up --detach --yes
+  else
+    railway up --yes
+  fi
 
   echo ""
   echo "==> Deploy tetiklendi. Sağlık kontrolü bekleniyor (${WAIT_SECONDS}s)..."

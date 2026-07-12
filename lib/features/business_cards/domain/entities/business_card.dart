@@ -25,6 +25,7 @@ class BusinessCard {
     this.backgroundColor,
     this.cardEffect,
     this.cardId,
+    this.isOwnerPremium = false,
   });
 
   final String? cardName;
@@ -51,4 +52,5 @@ class BusinessCard {
   final String? backgroundColor;
   final String? cardEffect;
   final String? cardId;
+  final bool isOwnerPremium;
 }

@@ -11,6 +11,7 @@ class UserProfileModel {
     this.photoUrl,
     this.onboardingCompleted = false,
     this.isPremium = false,
+    this.isOwnerPremium = false,
     this.createdAt,
     this.savedCards = const [],
     this.businessCards = const [],
@@ -23,6 +24,7 @@ class UserProfileModel {
   final String? photoUrl;
   final bool onboardingCompleted;
   final bool isPremium;
+  final bool isOwnerPremium;
   final DateTime? createdAt;
   final List<SavedCardModel> savedCards;
   final List<BusinessCardModel> businessCards;
@@ -68,6 +70,12 @@ class UserProfileModel {
         json['onboardingCompleted'] ?? json['OnboardingCompleted'],
       ),
       isPremium: _readBool(json['premium'] ?? json['Premium']),
+      isOwnerPremium: _readBool(
+        json['isOwnerPremium'] ??
+            json['IsOwnerPremium'] ??
+            json['premium'] ??
+            json['Premium'],
+      ),
       createdAt: createdAtRaw != null ? DateTime.tryParse(createdAtRaw) : null,
       savedCards: _parseSavedCards(json['savedCards'] ?? json['SavedCards']),
       businessCards:
@@ -83,6 +91,7 @@ class UserProfileModel {
         photoUrl: photoUrl,
         onboardingCompleted: onboardingCompleted,
         isPremium: isPremium,
+        isOwnerPremium: isOwnerPremium,
         createdAt: createdAt,
         savedCards: savedCards.map((card) => card.toEntity()).toList(),
         businessCards: businessCards.map((card) => card.toEntity()).toList(),
@@ -97,5 +106,6 @@ class UserProfileModel {
         'photoUrl': photoUrl,
         'onboardingCompleted': onboardingCompleted,
         'premium': isPremium,
+        'isOwnerPremium': isOwnerPremium,
       };
 }

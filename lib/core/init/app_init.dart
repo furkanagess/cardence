@@ -221,6 +221,8 @@ class AppInit {
       subscriptionRepo: subscriptionRepo,
       getPlanEntitlements: plans.getPlanEntitlements,
       finalizePremiumWalletActivation: finalizePremiumWalletActivation,
+      refreshCurrentUser: auth.refreshCurrentUser,
+      syncUserProfileCards: syncUserProfileCards,
     );
     final restoreWalletPurchases = RestoreWalletPurchases(
       subscriptionRepo,
@@ -338,6 +340,8 @@ class AppInit {
     required SubscriptionRepositoryImpl subscriptionRepo,
     required GetPlanEntitlements getPlanEntitlements,
     required FinalizePremiumWalletActivation finalizePremiumWalletActivation,
+    required RefreshCurrentUser refreshCurrentUser,
+    required SyncUserProfileCards syncUserProfileCards,
   }) {
     final getQuota = GetSavedCardsWalletQuota(savedCardRepo);
     final saveSavedCard = SaveSavedCard(savedCardRepo);
@@ -352,6 +356,8 @@ class AppInit {
         subscriptionRepo,
         getPlanEntitlements,
         finalizePremiumWalletActivation,
+        refreshCurrentUser,
+        syncUserProfileCards,
       ),
       linkSavedCardsToEventGroup: LinkSavedCardsToEventGroup(saveSavedCard),
     );

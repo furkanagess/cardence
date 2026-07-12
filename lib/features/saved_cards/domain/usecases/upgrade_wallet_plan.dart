@@ -1,3 +1,5 @@
+import '../../../auth/domain/usecases/refresh_current_user.dart';
+import '../../../../core/user_data/sync_user_profile_cards.dart';
 import '../../../subscriptions/domain/entities/wallet_paywall_result.dart';
 import '../../../subscriptions/domain/repositories/subscription_repository.dart';
 import '../../../subscriptions/domain/usecases/finalize_premium_wallet_activation.dart';
@@ -10,11 +12,15 @@ class UpgradeWalletPlan {
     this._subscriptionRepository,
     this._getPlanEntitlements,
     this._finalizePremiumWalletActivation,
+    this._refreshCurrentUser,
+    this._syncUserProfileCards,
   );
 
   final SubscriptionRepository _subscriptionRepository;
   final GetPlanEntitlements _getPlanEntitlements;
   final FinalizePremiumWalletActivation _finalizePremiumWalletActivation;
+  final RefreshCurrentUser _refreshCurrentUser;
+  final SyncUserProfileCards _syncUserProfileCards;
 
   Future<bool> call({
     bool onlyIfNeeded = false,
@@ -45,15 +51,46 @@ class UpgradeWalletPlan {
 
   Future<void> _completePremiumActivation() async {
     await _waitForRevenueCatEntitlement();
-    await _tryFinalize();
+    await _finalizeWithRetry();
     await _waitForBackendPremiumEntitlement();
+    await _refreshProfileAfterPurchase();
   }
 
-  Future<void> _tryFinalize() async {
+  Future<void> _finalizeWithRetry() async {
+    for (var attempt = 0; attempt < 3; attempt++) {
+      try {
+        await _finalizePremiumWalletActivation();
+        return;
+      } catch (_) {
+        if (attempt < 2) {
+          await Future<void>.delayed(const Duration(seconds: 1));
+        }
+      }
+    }
+  }
+
+  Future<void> _refreshProfileAfterPurchase() async {
+    for (var attempt = 0; attempt < 3; attempt++) {
+      try {
+        final profile = await _refreshCurrentUser();
+        if (profile.isOwnerPremium || profile.isPremium) {
+          await _syncUserProfileCards(profile);
+          return;
+        }
+      } catch (_) {
+        // Sonraki denemeye geç.
+      }
+
+      if (attempt < 2) {
+        await Future<void>.delayed(const Duration(seconds: 1));
+      }
+    }
+
     try {
-      await _finalizePremiumWalletActivation();
+      final profile = await _refreshCurrentUser();
+      await _syncUserProfileCards(profile);
     } catch (_) {
-      // Me veya kota senkronu gecikse bile satın alma tamamlandı sayılır.
+      // Başarı handler ikinci kez dener.
     }
   }
 

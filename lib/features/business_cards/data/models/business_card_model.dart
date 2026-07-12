@@ -26,6 +26,7 @@ class BusinessCardModel {
     this.backgroundColor,
     this.cardEffect,
     this.cardId,
+    this.isOwnerPremium = false,
   });
 
   final String? cardName;
@@ -52,6 +53,7 @@ class BusinessCardModel {
   final String? backgroundColor;
   final String? cardEffect;
   final String? cardId;
+  final bool isOwnerPremium;
 
   factory BusinessCardModel.fromEntity(BusinessCard entity) {
     return BusinessCardModel(
@@ -79,6 +81,7 @@ class BusinessCardModel {
       backgroundColor: entity.backgroundColor,
       cardEffect: entity.cardEffect,
       cardId: entity.cardId,
+      isOwnerPremium: entity.isOwnerPremium,
     );
   }
 
@@ -107,6 +110,7 @@ class BusinessCardModel {
         backgroundColor: backgroundColor,
         cardEffect: cardEffect,
         cardId: cardId,
+        isOwnerPremium: isOwnerPremium,
       );
 
   Map<String, dynamic> toApiJson() {
@@ -143,6 +147,17 @@ class BusinessCardModel {
   static String? _str(dynamic value) =>
       value == null ? null : value.toString();
 
+  static bool _readBool(dynamic value) {
+    if (value is bool) return value;
+    if (value is num) return value != 0;
+    if (value is String) {
+      final normalized = value.trim().toLowerCase();
+      if (normalized == 'true') return true;
+      if (normalized == 'false') return false;
+    }
+    return false;
+  }
+
   factory BusinessCardModel.fromJson(Map<String, dynamic> json) {
     return BusinessCardModel(
       cardName: _str(json['cardName'] ?? json['CardName']),
@@ -169,6 +184,9 @@ class BusinessCardModel {
       backgroundColor: _str(json['backgroundColor'] ?? json['BackgroundColor']),
       cardEffect: _str(json['cardEffect'] ?? json['CardEffect']),
       cardId: _str(json['cardId'] ?? json['CardId']),
+      isOwnerPremium: _readBool(
+        json['isOwnerPremium'] ?? json['IsOwnerPremium'],
+      ),
     );
   }
 }

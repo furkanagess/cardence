@@ -895,6 +895,9 @@ public sealed class AuthService : IAuthService
             user.Id,
             cancellationToken);
         var premium = WalletConstants.IsPremiumOrHigher(walletEntitlement.Tier);
+        var ownCardIds = businessCards
+            .Select(card => card.CardId)
+            .ToHashSet(StringComparer.Ordinal);
 
         return new UserProfileEntity
         {
@@ -905,9 +908,16 @@ public sealed class AuthService : IAuthService
             PhotoUrl = user.PhotoUrl,
             OnboardingCompleted = user.OnboardingCompleted,
             Premium = premium,
+            IsOwnerPremium = premium,
             CreatedAt = user.CreatedAt,
-            BusinessCards = businessCards.Select(c => BusinessCardMapper.ToDto(c)).ToList(),
-            SavedCards = savedCards.Select(SavedCardMapper.ToDto).ToList(),
+            BusinessCards = businessCards
+                .Select(card => BusinessCardMapper.ToDto(card, premium))
+                .ToList(),
+            SavedCards = savedCards
+                .Select(card => SavedCardMapper.ToDto(
+                    card,
+                    premium && ownCardIds.Contains(card.CardId) ? true : null))
+                .ToList(),
         };
     }
 
