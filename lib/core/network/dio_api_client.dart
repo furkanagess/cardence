@@ -122,6 +122,7 @@ class DioApiClient {
 
   Future<void> delete(
     String path, {
+    Map<String, dynamic>? body,
     required String accessToken,
     required String fallbackError,
     Map<String, dynamic>? queryParameters,
@@ -130,6 +131,7 @@ class DioApiClient {
       (token) async {
         final response = await _dio.delete<dynamic>(
           _url(path),
+          data: body,
           queryParameters: queryParameters,
           options: _options(accessToken: token),
         );

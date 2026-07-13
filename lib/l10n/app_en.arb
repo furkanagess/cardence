@@ -540,6 +540,32 @@
   "invalidCardId": "Invalid card ID.",
   "invalidCardResponse": "Invalid card response.",
   "connectionError": "Connection error. Please try again.",
+  "authEmailRequired": "Email is required.",
+  "authPasswordRequired": "Password is required.",
+  "authEmailUserNotFound": "No account found with this email. Please sign up first.",
+  "authInvalidEmailPassword": "Incorrect email or password.",
+  "authPhoneRequired": "Phone number is required.",
+  "authPhoneUserNotFound": "No account found with this phone number. Please sign up first.",
+  "authInvalidPhonePassword": "Incorrect phone number or password.",
+  "authDisplayNameRequired": "Full name is required.",
+  "authDisplayNameMinLength": "Full name must be at least 2 characters.",
+  "authInvalidEmailFormat": "Enter a valid email address.",
+  "authInvalidPhoneFormat": "Enter a valid phone number.",
+  "authEmailAlreadyRegistered": "This email is already registered to another account.",
+  "authPhoneAlreadyRegistered": "This phone number is already registered to another account.",
+  "authPasswordMinLengthError": "Password must be at least {minLength} characters.",
+  "@authPasswordMinLengthError": {
+    "placeholders": {
+      "minLength": {
+        "type": "int"
+      }
+    }
+  },
+  "authLinkedInCodeRequired": "LinkedIn authorization code is required.",
+  "authInvalidRedirectUri": "Invalid redirect URI.",
+  "authLinkedInSessionInvalid": "LinkedIn session could not be verified.",
+  "authLinkedInUserNotFound": "No user found linked to this LinkedIn account.",
+  "authInvalidOtp": "Verification code is invalid or expired.",
   "supportRequestFailedRetry": "Could not send support request. Please try again.",
   "supportInvalidRequest": "Enter a valid email and a message of at least 10 characters.",
   "enAz10Karakter": "At least 10 characters",

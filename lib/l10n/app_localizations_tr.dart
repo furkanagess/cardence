@@ -1649,6 +1649,71 @@ class AppLocalizationsTr extends AppLocalizations {
   String get connectionError => 'Bağlantı hatası. Lütfen tekrar deneyin.';
 
   @override
+  String get authEmailRequired => 'E-posta gereklidir.';
+
+  @override
+  String get authPasswordRequired => 'Şifre gereklidir.';
+
+  @override
+  String get authEmailUserNotFound =>
+      'Bu e-posta ile kayıtlı kullanıcı bulunamadı. Önce kayıt olun.';
+
+  @override
+  String get authInvalidEmailPassword => 'E-posta veya şifre hatalı.';
+
+  @override
+  String get authPhoneRequired => 'Telefon gereklidir.';
+
+  @override
+  String get authPhoneUserNotFound =>
+      'Bu telefon ile kayıtlı kullanıcı bulunamadı. Önce kayıt olun.';
+
+  @override
+  String get authInvalidPhonePassword => 'Telefon veya şifre hatalı.';
+
+  @override
+  String get authDisplayNameRequired => 'Ad soyad gereklidir.';
+
+  @override
+  String get authDisplayNameMinLength => 'Ad soyad en az 2 karakter olmalıdır.';
+
+  @override
+  String get authInvalidEmailFormat => 'Geçerli bir e-posta girin.';
+
+  @override
+  String get authInvalidPhoneFormat => 'Geçerli bir telefon numarası girin.';
+
+  @override
+  String get authEmailAlreadyRegistered =>
+      'Bu e-posta adresi başka bir hesapta kayıtlı.';
+
+  @override
+  String get authPhoneAlreadyRegistered =>
+      'Bu telefon numarası başka bir hesapta kayıtlı.';
+
+  @override
+  String authPasswordMinLengthError(int minLength) {
+    return 'Şifre en az $minLength karakter olmalıdır.';
+  }
+
+  @override
+  String get authLinkedInCodeRequired =>
+      'LinkedIn yetkilendirme kodu gereklidir.';
+
+  @override
+  String get authInvalidRedirectUri => 'Geçersiz yönlendirme adresi.';
+
+  @override
+  String get authLinkedInSessionInvalid => 'LinkedIn oturumu doğrulanamadı.';
+
+  @override
+  String get authLinkedInUserNotFound =>
+      'LinkedIn hesabına bağlı kullanıcı bulunamadı.';
+
+  @override
+  String get authInvalidOtp => 'Doğrulama kodu geçersiz veya süresi dolmuş.';
+
+  @override
   String get supportRequestFailedRetry =>
       'Destek talebi gönderilemedi. Lütfen tekrar deneyin.';
 

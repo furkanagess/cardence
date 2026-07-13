@@ -70,7 +70,14 @@ class RegisterFormState extends State<RegisterForm> {
   void submit() => _submit();
 
   void _notifyCanSubmit() {
-    widget.onCanSubmitChanged?.call(canSubmit);
+    final callback = widget.onCanSubmitChanged;
+    if (callback == null) return;
+
+    final canSubmitNow = canSubmit;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      callback(canSubmitNow);
+    });
   }
 
   void _setTermsAccepted(bool accepted) {

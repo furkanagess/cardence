@@ -105,6 +105,7 @@ import '../../features/support/data/repositories/support_repository_impl.dart';
 import '../../features/support/domain/usecases/submit_support_request.dart';
 import '../auth/auth_token_coordinator.dart';
 import '../auth/auth_token_provider.dart';
+import '../notifications/push_notification_coordinator.dart';
 import '../user_data/clear_user_scoped_local_data.dart';
 import '../user_data/sync_user_profile_cards.dart';
 
@@ -120,6 +121,10 @@ class AppInit {
     final prefs = await _initSharedPreferences();
     final authLocal = AuthLocalDataSourceImpl(prefs);
     final authTokenProvider = AuthTokenProvider(authLocal);
+    final pushNotifications = PushNotificationCoordinator(
+      authTokens: authTokenProvider,
+    );
+    await _guardInit('Push notifications init', pushNotifications.initialize);
     AuthTokenCoordinator.install(
       AuthTokenCoordinator(
         local: authLocal,
@@ -175,6 +180,7 @@ class AppInit {
       onLogout: () async {
         final session = await authLocal.getSession();
         final userId = session?.userId;
+        await pushNotifications.unregisterCurrentToken();
         if (userId != null && userId.isNotEmpty) {
           await postAddCardAdCounter.clearForUser(userId);
         }

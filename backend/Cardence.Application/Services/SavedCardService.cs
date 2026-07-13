@@ -17,29 +17,32 @@ public sealed class SavedCardService : ISavedCardService
     private readonly IBusinessCardRepository _businessCardRepository;
     private readonly IWalletEntitlementRepository _walletRepository;
     private readonly IEventGroupRepository _eventGroupRepository;
-    private readonly ICardInteractionRepository _cardInteractionRepository;
     private readonly IWalletOwnerPremiumSyncService _ownerPremiumSync;
     private readonly IWalletEntitlementSyncService _walletEntitlementSync;
     private readonly ICurrentUserService _currentUser;
+    private readonly IPushNotificationService _pushNotificationService;
+    private readonly IUserRepository _userRepository;
 
     public SavedCardService(
         ISavedCardRepository savedCardRepository,
         IBusinessCardRepository businessCardRepository,
         IWalletEntitlementRepository walletRepository,
         IEventGroupRepository eventGroupRepository,
-        ICardInteractionRepository cardInteractionRepository,
         IWalletOwnerPremiumSyncService ownerPremiumSync,
         IWalletEntitlementSyncService walletEntitlementSync,
-        ICurrentUserService currentUser)
+        ICurrentUserService currentUser,
+        IPushNotificationService pushNotificationService,
+        IUserRepository userRepository)
     {
         _savedCardRepository = savedCardRepository;
         _businessCardRepository = businessCardRepository;
         _walletRepository = walletRepository;
         _eventGroupRepository = eventGroupRepository;
-        _cardInteractionRepository = cardInteractionRepository;
         _ownerPremiumSync = ownerPremiumSync;
         _walletEntitlementSync = walletEntitlementSync;
         _currentUser = currentUser;
+        _pushNotificationService = pushNotificationService;
+        _userRepository = userRepository;
     }
 
     public async Task<IReadOnlyList<SavedCardDto>> GetAllAsync(CancellationToken cancellationToken = default)
@@ -287,11 +290,11 @@ public sealed class SavedCardService : ISavedCardService
             await _businessCardRepository.IncrementSaveCountAsync(
                 ownCard.Id,
                 cancellationToken);
-            await LogCardSavedInteractionAsync(
+
+            await NotifyCardOwnerAsync(
+                ownCard.UserId,
+                cardId,
                 userId,
-                ownCard,
-                creationMethod,
-                now,
                 cancellationToken);
         }
         await _eventGroupRepository.SyncWalletCardLinksAsync(
@@ -302,43 +305,6 @@ public sealed class SavedCardService : ISavedCardService
         entity.LinkedEventGroupIds = request.LinkedEventGroupIds.ToList();
 
         return SavedCardMapper.ToDto(entity);
-    }
-
-    private async Task LogCardSavedInteractionAsync(
-        Guid userId,
-        Card targetCard,
-        string creationMethod,
-        DateTime occurredAt,
-        CancellationToken cancellationToken)
-    {
-        if (creationMethod == CardCreationMethods.QrScan)
-        {
-            await _cardInteractionRepository.AddAsync(
-                new CardInteraction
-                {
-                    Id = Guid.NewGuid(),
-                    ActorUserId = userId,
-                    TargetCardEntityId = targetCard.Id,
-                    TargetCardPublicId = targetCard.CardId,
-                    EventType = CardInteractionTypes.QrScanned,
-                    Source = creationMethod,
-                    OccurredAt = occurredAt,
-                },
-                cancellationToken);
-        }
-
-        await _cardInteractionRepository.AddAsync(
-            new CardInteraction
-            {
-                Id = Guid.NewGuid(),
-                ActorUserId = userId,
-                TargetCardEntityId = targetCard.Id,
-                TargetCardPublicId = targetCard.CardId,
-                EventType = CardInteractionTypes.CardSaved,
-                Source = creationMethod,
-                OccurredAt = occurredAt,
-            },
-            cancellationToken);
     }
 
     private static bool IsStubRequest(SavedCardDto request)
@@ -451,6 +417,27 @@ public sealed class SavedCardService : ISavedCardService
                     "cardId",
                     "Card id must be exactly 6 digits."),
             ]);
+        }
+    }
+
+    private async Task NotifyCardOwnerAsync(
+        Guid cardOwnerUserId,
+        string cardId,
+        Guid saverUserId,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            var saver = await _userRepository.GetByIdAsync(saverUserId, cancellationToken);
+            await _pushNotificationService.NotifyCardSavedAsync(
+                cardOwnerUserId,
+                cardId,
+                saver?.DisplayName,
+                cancellationToken);
+        }
+        catch (Exception)
+        {
+            // Push başarısız olsa da kaydetme akışı tamamlanmış sayılır.
         }
     }
 }

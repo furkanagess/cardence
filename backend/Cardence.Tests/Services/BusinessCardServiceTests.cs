@@ -60,6 +60,11 @@ public sealed class BusinessCardServiceTests
         await _repository.Received(1).AddAsync(
             Arg.Is<Card>(card => card.UserId == _userId),
             Arg.Any<CancellationToken>());
+        await _cardInteractionRepository.Received(1).AddAsync(
+            Arg.Is<CardInteraction>(interaction =>
+                interaction.EventType == CardInteractionTypes.CardCreated &&
+                interaction.ActorUserId == _userId),
+            Arg.Any<CancellationToken>());
     }
 
     [Fact]

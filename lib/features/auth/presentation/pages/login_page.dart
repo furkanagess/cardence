@@ -146,7 +146,7 @@ class _AuthViewState extends State<_AuthView>
       if (!context.mounted) {
         return;
       }
-          }
+    }
   }
 
   void _showAuthErrorDialog(BuildContext context, String message) {
@@ -202,7 +202,7 @@ class _AuthViewState extends State<_AuthView>
       child: BlocBuilder<LoginBloc, LoginState>(
         builder: (context, state) {
           return CardenceScaffold(
-            resizeToAvoidBottomInset: state.isRegisterMode,
+            resizeToAvoidBottomInset: false,
             appBar: state.isRegisterMode
                 ? CardenceAppBar(
                     title: context.l10n.kaytOl,
@@ -213,48 +213,48 @@ class _AuthViewState extends State<_AuthView>
                     ),
                   )
                 : null,
-            body: Padding(
-              padding: EdgeInsets.fromLTRB(
-                24,
-                math.max(MediaQuery.paddingOf(context).top - 12, 0),
-                24,
-                MediaQuery.paddingOf(context).bottom,
-              ),
-              child: LayoutBuilder(
-                builder: (context, constraints) {
-                  final bottomInset = MediaQuery.viewInsetsOf(context).bottom;
-                  final keyboardVisible = bottomInset > 0;
-                  final logoSize = keyboardVisible
-                      ? 84.0
-                      : math
-                          .min(
-                            constraints.maxWidth * 0.64,
-                            constraints.maxHeight * 0.32,
-                          )
-                          .clamp(148.0, 196.0);
-
-                  return state.isRegisterMode
-                      ? _RegisterScreenContent(
-                          state: state,
-                          bottomInset: bottomInset,
+            body: LayoutBuilder(
+              builder: (context, constraints) {
+                final bottomInset = MediaQuery.viewInsetsOf(context).bottom;
+                final keyboardVisible = bottomInset > 0;
+                final logoSize = keyboardVisible
+                    ? 84.0
+                    : math
+                        .min(
+                          constraints.maxWidth * 0.64,
+                          constraints.maxHeight * 0.32,
                         )
-                      : _LoginScreenContent(
-                          state: state,
-                          keyboardVisible: keyboardVisible,
-                          bottomInset: bottomInset,
-                          logoSize: logoSize,
-                          introFade: _introFade,
-                          colorScheme: colorScheme,
-                          textTheme: textTheme,
-                          onForgotPassword: () =>
-                              _openForgotPassword(context),
-                          onLinkedInPressed: () =>
-                              _handleLinkedInLogin(context),
-                          onRegisterTap: () =>
-                              _switchMode(context, AuthScreenMode.register),
-                        );
-                },
-              ),
+                        .clamp(148.0, 196.0);
+
+                if (state.isRegisterMode) {
+                  return _RegisterScreenContent(
+                    state: state,
+                    bottomInset: bottomInset,
+                  );
+                }
+
+                return Padding(
+                  padding: EdgeInsets.fromLTRB(
+                    24,
+                    math.max(MediaQuery.paddingOf(context).top - 12, 0),
+                    24,
+                    MediaQuery.paddingOf(context).bottom,
+                  ),
+                  child: _LoginScreenContent(
+                    state: state,
+                    keyboardVisible: keyboardVisible,
+                    bottomInset: bottomInset,
+                    logoSize: logoSize,
+                    introFade: _introFade,
+                    colorScheme: colorScheme,
+                    textTheme: textTheme,
+                    onForgotPassword: () => _openForgotPassword(context),
+                    onLinkedInPressed: () => _handleLinkedInLogin(context),
+                    onRegisterTap: () =>
+                        _switchMode(context, AuthScreenMode.register),
+                  ),
+                );
+              },
             ),
           );
         },
@@ -288,67 +288,105 @@ class _RegisterScreenContentState extends State<_RegisterScreenContent> {
       context,
       showStepIndicator: false,
     );
+    const actionLabelStyle = TextStyle(
+      fontWeight: FontWeight.w700,
+      fontSize: 17,
+      letterSpacing: 0.1,
+      height: 1,
+    );
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text(
-          context.l10n.authJoinCardenceTitle,
-          style: textTheme.headlineSmall?.copyWith(
-            fontWeight: FontWeight.w800,
-            color: colorScheme.primary,
-          ),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          context.l10n.profesyonelKimliiniziYnetmekIinYeni,
-          style: textTheme.bodyMedium?.copyWith(
-            color: colorScheme.onSurfaceVariant,
-          ),
-        ),
-        const SizedBox(height: 18),
         Expanded(
-          child: SingleChildScrollView(
-            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-            padding: EdgeInsets.only(
-              bottom: widget.bottomInset + bottomBarInset,
-            ),
-            child: RegisterForm(
-              key: _registerFormKey,
-              isLoading: widget.state.isLoading,
-              showSubmitButton: false,
-              onCanSubmitChanged: (canSubmit) {
-                if (_canSubmit == canSubmit) return;
-                setState(() => _canSubmit = canSubmit);
-              },
-              onSubmit: ({
-                required displayName,
-                required email,
-                required password,
-                phone,
-              }) =>
-                  context.read<LoginBloc>().add(
-                        RegisterSubmitted(
-                          displayName: displayName,
-                          email: email,
-                          password: password,
-                          phone: phone,
-                        ),
-                      ),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(24, 12, 24, 0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  context.l10n.authJoinCardenceTitle,
+                  style: textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.w800,
+                    color: colorScheme.primary,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  context.l10n.profesyonelKimliiniziYnetmekIinYeni,
+                  style: textTheme.bodyMedium?.copyWith(
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+                ),
+                const SizedBox(height: 18),
+                Expanded(
+                  child: SingleChildScrollView(
+                    keyboardDismissBehavior:
+                        ScrollViewKeyboardDismissBehavior.onDrag,
+                    padding: EdgeInsets.only(
+                      bottom: widget.bottomInset + bottomBarInset,
+                    ),
+                    child: RegisterForm(
+                      key: _registerFormKey,
+                      isLoading: widget.state.isLoading,
+                      showSubmitButton: false,
+                      onCanSubmitChanged: (canSubmit) {
+                        if (_canSubmit == canSubmit) return;
+                        setState(() => _canSubmit = canSubmit);
+                      },
+                      onSubmit: ({
+                        required displayName,
+                        required email,
+                        required password,
+                        phone,
+                      }) =>
+                          context.read<LoginBloc>().add(
+                                RegisterSubmitted(
+                                  displayName: displayName,
+                                  email: email,
+                                  password: password,
+                                  phone: phone,
+                                ),
+                              ),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
         ),
-        CardenceFlowBottomBarRegion(
-          child: CustomButton(
-            label: context.l10n.kaytOl,
-            height: 48,
-            isLoading: widget.state.isLoading,
-            onPressed: _canSubmit
-                ? () => _registerFormKey.currentState?.submit()
-                : null,
+        _RegisterKeyboardAwareBottom(
+          child: CardenceFlowBottomBarRegion(
+            child: CustomButton(
+              label: context.l10n.kaytOl,
+              labelStyle: actionLabelStyle,
+              height: 48,
+              isLoading: widget.state.isLoading,
+              enabled: _canSubmit,
+              onPressed: _canSubmit
+                  ? () => _registerFormKey.currentState?.submit()
+                  : null,
+            ),
           ),
         ),
       ],
+    );
+  }
+}
+
+class _RegisterKeyboardAwareBottom extends StatelessWidget {
+  const _RegisterKeyboardAwareBottom({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final bottomInset = MediaQuery.viewInsetsOf(context).bottom;
+    return AnimatedPadding(
+      duration: const Duration(milliseconds: 120),
+      curve: Curves.easeOut,
+      padding: EdgeInsets.only(bottom: bottomInset),
+      child: child,
     );
   }
 }
@@ -571,7 +609,8 @@ class _LoginFormContentState extends State<_LoginFormContent> {
   Widget _buildMethodSwitchButton() {
     final isEmail = state.method == LoginMethod.email;
     return CustomButton.outlined(
-      label: isEmail ? context.l10n.loginWithPhone : context.l10n.loginWithEmail,
+      label:
+          isEmail ? context.l10n.loginWithPhone : context.l10n.loginWithEmail,
       icon: isEmail ? Icons.phone_android_rounded : Icons.mail_outline_rounded,
       height: 48,
       isLoading: state.isLoading,

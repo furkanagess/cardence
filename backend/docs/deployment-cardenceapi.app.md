@@ -178,6 +178,15 @@ Railway API servisine isteğe bağlı ekleyin:
 |----------|----------|
 | `Monitoring__ApiKey` | `GET /health/status` tablo sayıları; header `X-Monitoring-Key` |
 
+**Push bildirimleri (FCM):** Service account dosyasını `backend/secrets/firebase-service-account.json` konumuna koyun (gitignore). Yerel geliştirmede `appsettings.Development.json` bu yolu kullanır. Production (Railway):
+
+```bash
+cd backend/deploy/scripts
+./set-push-notifications-railway.sh
+```
+
+Manuel: `PushNotifications__ServiceAccountJson` = service account JSON (tek satır, minified).
+
 ```bash
 cd backend/deploy/scripts && ./railway-monitor.sh
 MONITORING_KEY="your-key" ./railway-monitor.sh

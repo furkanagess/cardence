@@ -1,3 +1,4 @@
+using Cardence.Application.DTOs.EventGroups;
 using Cardence.Domain.Entities;
 
 namespace Cardence.Application.Interfaces;
@@ -38,7 +39,7 @@ public interface IEventGroupRepository
         IReadOnlyList<string> cardIds,
         CancellationToken cancellationToken = default);
 
-    Task<IReadOnlyList<string>> InviteCardsByCardIdsAsync(
+    Task<EventGroupInviteCardsResult> InviteCardsByCardIdsAsync(
         Guid userId,
         Guid groupId,
         IReadOnlyList<string> cardIds,

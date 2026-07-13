@@ -7,6 +7,9 @@ class AppEnv {
   /// Prod build'de Chuck'ı zorla açmak için (varsayılan kapalı).
   static const bool enableChuckInProd = false;
 
+  /// Sağ kenardaki Chuck debug FAB ikonu (varsayılan kapalı).
+  static const bool showChuckFab = false;
+
   static const String _envDefine = String.fromEnvironment(
     'ENV',
     defaultValue: 'dev',

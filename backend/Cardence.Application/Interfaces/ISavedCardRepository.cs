@@ -21,6 +21,10 @@ public interface ISavedCardRepository
         Guid userId,
         CancellationToken cancellationToken = default);
 
+    Task<IReadOnlyList<SavedCard>> GetByTargetCardPublicIdsAsync(
+        IReadOnlyCollection<string> cardPublicIds,
+        CancellationToken cancellationToken = default);
+
     Task AddAsync(SavedCard card, CancellationToken cancellationToken = default);
 
     Task UpdateAsync(SavedCard card, CancellationToken cancellationToken = default);

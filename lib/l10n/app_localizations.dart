@@ -3188,6 +3188,120 @@ abstract class AppLocalizations {
   /// **'Bağlantı hatası. Lütfen tekrar deneyin.'**
   String get connectionError;
 
+  /// No description provided for @authEmailRequired.
+  ///
+  /// In tr, this message translates to:
+  /// **'E-posta gereklidir.'**
+  String get authEmailRequired;
+
+  /// No description provided for @authPasswordRequired.
+  ///
+  /// In tr, this message translates to:
+  /// **'Şifre gereklidir.'**
+  String get authPasswordRequired;
+
+  /// No description provided for @authEmailUserNotFound.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu e-posta ile kayıtlı kullanıcı bulunamadı. Önce kayıt olun.'**
+  String get authEmailUserNotFound;
+
+  /// No description provided for @authInvalidEmailPassword.
+  ///
+  /// In tr, this message translates to:
+  /// **'E-posta veya şifre hatalı.'**
+  String get authInvalidEmailPassword;
+
+  /// No description provided for @authPhoneRequired.
+  ///
+  /// In tr, this message translates to:
+  /// **'Telefon gereklidir.'**
+  String get authPhoneRequired;
+
+  /// No description provided for @authPhoneUserNotFound.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu telefon ile kayıtlı kullanıcı bulunamadı. Önce kayıt olun.'**
+  String get authPhoneUserNotFound;
+
+  /// No description provided for @authInvalidPhonePassword.
+  ///
+  /// In tr, this message translates to:
+  /// **'Telefon veya şifre hatalı.'**
+  String get authInvalidPhonePassword;
+
+  /// No description provided for @authDisplayNameRequired.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ad soyad gereklidir.'**
+  String get authDisplayNameRequired;
+
+  /// No description provided for @authDisplayNameMinLength.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ad soyad en az 2 karakter olmalıdır.'**
+  String get authDisplayNameMinLength;
+
+  /// No description provided for @authInvalidEmailFormat.
+  ///
+  /// In tr, this message translates to:
+  /// **'Geçerli bir e-posta girin.'**
+  String get authInvalidEmailFormat;
+
+  /// No description provided for @authInvalidPhoneFormat.
+  ///
+  /// In tr, this message translates to:
+  /// **'Geçerli bir telefon numarası girin.'**
+  String get authInvalidPhoneFormat;
+
+  /// No description provided for @authEmailAlreadyRegistered.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu e-posta adresi başka bir hesapta kayıtlı.'**
+  String get authEmailAlreadyRegistered;
+
+  /// No description provided for @authPhoneAlreadyRegistered.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu telefon numarası başka bir hesapta kayıtlı.'**
+  String get authPhoneAlreadyRegistered;
+
+  /// No description provided for @authPasswordMinLengthError.
+  ///
+  /// In tr, this message translates to:
+  /// **'Şifre en az {minLength} karakter olmalıdır.'**
+  String authPasswordMinLengthError(int minLength);
+
+  /// No description provided for @authLinkedInCodeRequired.
+  ///
+  /// In tr, this message translates to:
+  /// **'LinkedIn yetkilendirme kodu gereklidir.'**
+  String get authLinkedInCodeRequired;
+
+  /// No description provided for @authInvalidRedirectUri.
+  ///
+  /// In tr, this message translates to:
+  /// **'Geçersiz yönlendirme adresi.'**
+  String get authInvalidRedirectUri;
+
+  /// No description provided for @authLinkedInSessionInvalid.
+  ///
+  /// In tr, this message translates to:
+  /// **'LinkedIn oturumu doğrulanamadı.'**
+  String get authLinkedInSessionInvalid;
+
+  /// No description provided for @authLinkedInUserNotFound.
+  ///
+  /// In tr, this message translates to:
+  /// **'LinkedIn hesabına bağlı kullanıcı bulunamadı.'**
+  String get authLinkedInUserNotFound;
+
+  /// No description provided for @authInvalidOtp.
+  ///
+  /// In tr, this message translates to:
+  /// **'Doğrulama kodu geçersiz veya süresi dolmuş.'**
+  String get authInvalidOtp;
+
   /// No description provided for @supportRequestFailedRetry.
   ///
   /// In tr, this message translates to:

@@ -15,20 +15,17 @@ public sealed class NetworkGraphService : INetworkGraphService
     private readonly IBusinessCardRepository _businessCardRepository;
     private readonly ISavedCardRepository _savedCardRepository;
     private readonly IEventGroupRepository _eventGroupRepository;
-    private readonly ICardInteractionRepository _cardInteractionRepository;
 
     public NetworkGraphService(
         ICurrentUserService currentUser,
         IBusinessCardRepository businessCardRepository,
         ISavedCardRepository savedCardRepository,
-        IEventGroupRepository eventGroupRepository,
-        ICardInteractionRepository cardInteractionRepository)
+        IEventGroupRepository eventGroupRepository)
     {
         _currentUser = currentUser;
         _businessCardRepository = businessCardRepository;
         _savedCardRepository = savedCardRepository;
         _eventGroupRepository = eventGroupRepository;
-        _cardInteractionRepository = cardInteractionRepository;
     }
 
     public async Task<NetworkGraphDto> GetGraphAsync(
@@ -97,9 +94,6 @@ public sealed class NetworkGraphService : INetworkGraphService
         var ownCards = await _businessCardRepository.GetByUserIdAsync(userId, cancellationToken);
         var savedCards = await _savedCardRepository.GetByUserIdAsync(userId, cancellationToken);
         var eventGroups = await _eventGroupRepository.GetByUserIdAsync(userId, cancellationToken);
-        var interactions = await _cardInteractionRepository.GetByTargetCardEntityIdsAsync(
-            ownCards.Select(card => card.Id).ToList(),
-            cancellationToken);
 
         var hubOwnCard = ResolveHubOwnCard(ownCards, query.CenterCardId);
         var hubNodeId = hubOwnCard is null ? null : GraphNodeIds.Card(hubOwnCard.CardId);
@@ -143,7 +137,7 @@ public sealed class NetworkGraphService : INetworkGraphService
         }
 
         AddEventLinks(graph, savedCards, eventGroups);
-        await AddReverseSaverLinksAsync(graph, interactions, userId, cancellationToken);
+        await AddReverseSaverLinksAsync(graph, ownCards, userId, cancellationToken);
 
         return graph.ToDto(
             "personal",
@@ -177,24 +171,36 @@ public sealed class NetworkGraphService : INetworkGraphService
     /// </summary>
     private async Task AddReverseSaverLinksAsync(
         GraphAccumulator graph,
-        IReadOnlyList<CardInteraction> interactions,
+        IReadOnlyList<Card> ownCards,
         Guid currentUserId,
         CancellationToken cancellationToken)
     {
-        var savedInteractions = interactions
-            .Where(interaction =>
-                interaction.EventType == CardInteractionTypes.CardSaved &&
-                interaction.ActorUserId.HasValue &&
-                interaction.ActorUserId.Value != currentUserId)
-            .ToList();
-
-        if (savedInteractions.Count == 0)
+        if (ownCards.Count == 0)
         {
             return;
         }
 
-        var actorUserIds = savedInteractions
-            .Select(interaction => interaction.ActorUserId!.Value)
+        var ownCardPublicIds = ownCards
+            .Select(card => card.CardId)
+            .Where(cardId => !string.IsNullOrWhiteSpace(cardId))
+            .Distinct(StringComparer.Ordinal)
+            .ToList();
+
+        var walletCopies = await _savedCardRepository.GetByTargetCardPublicIdsAsync(
+            ownCardPublicIds,
+            cancellationToken);
+
+        var savedByOthers = walletCopies
+            .Where(card => card.UserId != currentUserId)
+            .ToList();
+
+        if (savedByOthers.Count == 0)
+        {
+            return;
+        }
+
+        var actorUserIds = savedByOthers
+            .Select(card => card.UserId)
             .Distinct()
             .ToList();
 
@@ -202,14 +208,13 @@ public sealed class NetworkGraphService : INetworkGraphService
             actorUserIds,
             cancellationToken);
 
-        // Her kaydeden için temsilci kart (en çok kaydedilen / en güncel).
         var representativeByUser = actorCards
             .GroupBy(card => card.UserId)
             .ToDictionary(group => group.Key, group => group.First());
 
-        foreach (var interaction in savedInteractions)
+        foreach (var savedCard in savedByOthers)
         {
-            if (!representativeByUser.TryGetValue(interaction.ActorUserId!.Value, out var saverCard))
+            if (!representativeByUser.TryGetValue(savedCard.UserId, out var saverCard))
             {
                 continue;
             }
@@ -218,10 +223,10 @@ public sealed class NetworkGraphService : INetworkGraphService
             AddCompanyLink(graph, GraphNodeIds.Card(saverCard.CardId), saverCard.Company);
             graph.AddEdge(
                 GraphNodeIds.Card(saverCard.CardId),
-                GraphNodeIds.Card(interaction.TargetCardPublicId),
+                GraphNodeIds.Card(savedCard.CardId),
                 "saved_by",
                 GraphEdgeType.SavedBy,
-                occurredAt: interaction.OccurredAt);
+                occurredAt: DateTimeOffset.FromUnixTimeMilliseconds(savedCard.SavedAt).UtcDateTime);
         }
     }
 

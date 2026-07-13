@@ -23,6 +23,7 @@ public sealed class CardenceDbContext : DbContext
     public DbSet<SubscriptionEvent> SubscriptionEvents => Set<SubscriptionEvent>();
     public DbSet<CardInteraction> CardInteractions => Set<CardInteraction>();
     public DbSet<PasswordResetToken> PasswordResetTokens => Set<PasswordResetToken>();
+    public DbSet<UserDeviceToken> UserDeviceTokens => Set<UserDeviceToken>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

@@ -1,5 +1,6 @@
 using Cardence.Application.Common;
 using Cardence.Application.Interfaces;
+using Cardence.Application.DTOs.EventGroups;
 using Cardence.Domain.Constants;
 using Cardence.Domain.Entities;
 using Cardence.Infrastructure.Persistence;
@@ -143,7 +144,7 @@ public sealed class EventGroupRepository : IEventGroupRepository
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task<IReadOnlyList<string>> InviteCardsByCardIdsAsync(
+    public async Task<EventGroupInviteCardsResult> InviteCardsByCardIdsAsync(
         Guid userId,
         Guid groupId,
         IReadOnlyList<string> cardIds,
@@ -152,7 +153,7 @@ public sealed class EventGroupRepository : IEventGroupRepository
         var distinctCardIds = NormalizeCardIds(cardIds);
         if (distinctCardIds.Count == 0)
         {
-            return [];
+            return new EventGroupInviteCardsResult();
         }
 
         await DeleteExpiredInvitationsAsync(cancellationToken);
@@ -170,10 +171,14 @@ public sealed class EventGroupRepository : IEventGroupRepository
 
         if (ownedCards.Count == 0)
         {
-            return invalidCardIds;
+            return new EventGroupInviteCardsResult
+            {
+                InvalidCardIds = invalidCardIds,
+            };
         }
 
         var now = DateTime.UtcNow;
+        var newInvites = new List<CreatedEventGroupInvite>();
         foreach (var ownedCard in ownedCards)
         {
             if (ownedCard.UserId == userId)
@@ -187,16 +192,24 @@ public sealed class EventGroupRepository : IEventGroupRepository
                 continue;
             }
 
-            await CreatePendingInviteIfNeededAsync(
+            var createdInvite = await CreatePendingInviteIfNeededAsync(
                 userId,
                 groupId,
                 ownedCard,
                 now,
                 cancellationToken);
+            if (createdInvite is not null)
+            {
+                newInvites.Add(createdInvite);
+            }
         }
 
         await _dbContext.SaveChangesAsync(cancellationToken);
-        return invalidCardIds;
+        return new EventGroupInviteCardsResult
+        {
+            InvalidCardIds = invalidCardIds,
+            NewInvites = newInvites,
+        };
     }
 
     public async Task<IReadOnlyList<EventGroupCardInvite>> GetPendingInvitationsForInviteeAsync(
@@ -285,7 +298,7 @@ public sealed class EventGroupRepository : IEventGroupRepository
             .ExecuteDeleteAsync(cancellationToken);
     }
 
-    private async Task CreatePendingInviteIfNeededAsync(
+    private async Task<CreatedEventGroupInvite?> CreatePendingInviteIfNeededAsync(
         Guid inviterUserId,
         Guid groupId,
         Card ownedCard,
@@ -308,13 +321,14 @@ public sealed class EventGroupRepository : IEventGroupRepository
             else if (existingInvite.Status == EventGroupInvitationStatuses.Pending ||
                      existingInvite.Status == EventGroupInvitationStatuses.Accepted)
             {
-                return;
+                return null;
             }
         }
 
+        var invitationId = Guid.NewGuid();
         _dbContext.EventGroupCardInvites.Add(new EventGroupCardInvite
         {
-            Id = Guid.NewGuid(),
+            Id = invitationId,
             EventGroupId = groupId,
             InviterUserId = inviterUserId,
             InviteeUserId = ownedCard.UserId,
@@ -324,6 +338,15 @@ public sealed class EventGroupRepository : IEventGroupRepository
             CreatedAtUtc = now,
             ExpiresAtUtc = EventGroupInvitationPolicy.ComputeExpiresAtUtc(now),
         });
+
+        return new CreatedEventGroupInvite
+        {
+            InvitationId = invitationId,
+            InviteeUserId = ownedCard.UserId,
+            InviterUserId = inviterUserId,
+            EventGroupId = groupId,
+            CardId = ownedCard.CardId,
+        };
     }
 
     private async Task EnsureBusinessCardLinkedToGroupAsync(
@@ -352,16 +375,6 @@ public sealed class EventGroupRepository : IEventGroupRepository
             if (ownedCard.UserId != userId)
             {
                 ownedCard.SaveCount += 1;
-                _dbContext.CardInteractions.Add(new CardInteraction
-                {
-                    Id = Guid.NewGuid(),
-                    ActorUserId = userId,
-                    TargetCardEntityId = ownedCard.Id,
-                    TargetCardPublicId = ownedCard.CardId,
-                    EventType = CardInteractionTypes.CardSaved,
-                    Source = CardCreationMethods.CardenceLink,
-                    OccurredAt = now,
-                });
             }
         }
 

@@ -540,6 +540,32 @@
   "invalidCardId": "Geçersiz kart kimliği.",
   "invalidCardResponse": "Geçersiz kart yanıtı.",
   "connectionError": "Bağlantı hatası. Lütfen tekrar deneyin.",
+  "authEmailRequired": "E-posta gereklidir.",
+  "authPasswordRequired": "Şifre gereklidir.",
+  "authEmailUserNotFound": "Bu e-posta ile kayıtlı kullanıcı bulunamadı. Önce kayıt olun.",
+  "authInvalidEmailPassword": "E-posta veya şifre hatalı.",
+  "authPhoneRequired": "Telefon gereklidir.",
+  "authPhoneUserNotFound": "Bu telefon ile kayıtlı kullanıcı bulunamadı. Önce kayıt olun.",
+  "authInvalidPhonePassword": "Telefon veya şifre hatalı.",
+  "authDisplayNameRequired": "Ad soyad gereklidir.",
+  "authDisplayNameMinLength": "Ad soyad en az 2 karakter olmalıdır.",
+  "authInvalidEmailFormat": "Geçerli bir e-posta girin.",
+  "authInvalidPhoneFormat": "Geçerli bir telefon numarası girin.",
+  "authEmailAlreadyRegistered": "Bu e-posta adresi başka bir hesapta kayıtlı.",
+  "authPhoneAlreadyRegistered": "Bu telefon numarası başka bir hesapta kayıtlı.",
+  "authPasswordMinLengthError": "Şifre en az {minLength} karakter olmalıdır.",
+  "@authPasswordMinLengthError": {
+    "placeholders": {
+      "minLength": {
+        "type": "int"
+      }
+    }
+  },
+  "authLinkedInCodeRequired": "LinkedIn yetkilendirme kodu gereklidir.",
+  "authInvalidRedirectUri": "Geçersiz yönlendirme adresi.",
+  "authLinkedInSessionInvalid": "LinkedIn oturumu doğrulanamadı.",
+  "authLinkedInUserNotFound": "LinkedIn hesabına bağlı kullanıcı bulunamadı.",
+  "authInvalidOtp": "Doğrulama kodu geçersiz veya süresi dolmuş.",
   "supportRequestFailedRetry": "Destek talebi gönderilemedi. Lütfen tekrar deneyin.",
   "supportInvalidRequest": "Geçerli bir e-posta ve en az 10 karakterlik bir mesaj girin.",
   "enAz10Karakter": "En az 10 karakter",

@@ -64,6 +64,7 @@ import 'features/subscriptions/presentation/helpers/premium_purchase_success_han
 import 'features/subscriptions/presentation/widgets/premium_purchase_scope.dart';
 import 'features/ads/domain/usecases/show_post_add_card_monetization.dart';
 import 'core/l10n/locale_preference_material.dart';
+import 'core/notifications/push_notification_coordinator.dart';
 import 'features/settings/domain/entities/locale_preference.dart';
 import 'features/settings/domain/entities/theme_preference.dart';
 import 'features/settings/domain/usecases/get_accent_color_id.dart';
@@ -293,6 +294,8 @@ class _AppState extends State<App> {
           AuthTokenCoordinator.instance?.hasStoredSession() ??
           Future.value(false),
     );
+    PushNotificationCoordinator.instance?.onNotificationTap =
+        _handlePushNotificationTap;
     _bootstrap();
     _loadTheme();
     _loadLocale();
@@ -360,6 +363,7 @@ class _AppState extends State<App> {
     unawaited(
       widget.syncOnboardingFromServer(completed: onboardingDone),
     );
+    unawaited(PushNotificationCoordinator.instance?.syncTokenForCurrentSession());
 
     setState(() {
       _destination =
@@ -404,6 +408,7 @@ class _AppState extends State<App> {
 
   Future<void> _handleAuthSuccess({required bool fromRegistration}) async {
     unawaited(_identifySubscriptionUser());
+    unawaited(PushNotificationCoordinator.instance?.syncTokenForCurrentSession());
     try {
       if (fromRegistration) {
         await _goToOnboardingAfterRegistration().timeout(
@@ -441,6 +446,28 @@ class _AppState extends State<App> {
     final session = await widget.getAuthSession();
     if (session == null || session.userId.isEmpty) return;
     await widget.identifySubscriptionUser(session.userId);
+  }
+
+  void _handlePushNotificationTap(Map<String, dynamic> data) {
+    if (!mounted) return;
+
+    final messenger = ScaffoldMessenger.maybeOf(
+      widget.rootNavigatorKey.currentContext ?? context,
+    );
+    if (messenger == null) return;
+
+    if (isEventGroupInviteNotification(data)) {
+      messenger.showSnackBar(
+        const SnackBar(content: Text('Yeni bir etkinlik davetiniz var.')),
+      );
+      return;
+    }
+
+    if (isCardSavedNotification(data)) {
+      messenger.showSnackBar(
+        const SnackBar(content: Text('Kartınız cüzdana kaydedildi.')),
+      );
+    }
   }
 
   void _onOnboardingFinish() {

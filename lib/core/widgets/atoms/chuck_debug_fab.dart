@@ -7,7 +7,7 @@ import '../../network/interceptors/chuck_interceptor_service.dart';
 class ChuckDebugFab extends StatelessWidget {
   const ChuckDebugFab({super.key});
 
-  static bool get isEnabled => AppEnv.isChuckEnabled;
+  static bool get isEnabled => AppEnv.showChuckFab && AppEnv.isChuckEnabled;
 
   @override
   Widget build(BuildContext context) {

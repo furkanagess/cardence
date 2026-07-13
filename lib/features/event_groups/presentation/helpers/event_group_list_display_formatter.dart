@@ -96,7 +96,25 @@ class EventGroupListDisplayFormatter {
   static String? primaryCityFromLocation(String? location) {
     final trimmed = location?.trim();
     if (trimmed == null || trimmed.isEmpty) return null;
+
+    const displaySeparator = ' - ';
+    if (trimmed.contains(displaySeparator)) {
+      final parts = trimmed
+          .split(displaySeparator)
+          .map((part) => part.trim())
+          .where((part) => part.isNotEmpty)
+          .toList();
+      if (parts.length >= 2) return parts[1];
+      return parts.first;
+    }
+
     final parts = trimmed.split(RegExp(r'[,·|]'));
+    if (parts.length >= 3) {
+      return parts[parts.length - 2].trim();
+    }
+    if (parts.length == 2) {
+      return parts.first.trim();
+    }
     return parts.first.trim();
   }
 

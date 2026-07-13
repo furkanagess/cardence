@@ -89,6 +89,13 @@ public sealed class BusinessCardService : IBusinessCardService
         BusinessCardMapper.ApplyDto(entity, request);
         await ApplyProfilePhotoFallbackAsync(entity, userId, cancellationToken);
         await _repository.AddAsync(entity, cancellationToken);
+        await CardInteractionWriter.LogCardCreatedAsync(
+            _cardInteractionRepository,
+            entity,
+            userId,
+            CardCreationMethods.OwnCard,
+            now,
+            cancellationToken);
 
         return BusinessCardMapper.ToDto(entity);
     }

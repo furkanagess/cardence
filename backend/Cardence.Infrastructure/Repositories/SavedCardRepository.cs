@@ -66,6 +66,33 @@ public sealed class SavedCardRepository : ISavedCardRepository
                 cancellationToken);
     }
 
+    public async Task<IReadOnlyList<SavedCard>> GetByTargetCardPublicIdsAsync(
+        IReadOnlyCollection<string> cardPublicIds,
+        CancellationToken cancellationToken = default)
+    {
+        if (cardPublicIds.Count == 0)
+        {
+            return [];
+        }
+
+        var normalizedIds = cardPublicIds
+            .Where(id => !string.IsNullOrWhiteSpace(id))
+            .Select(id => id.Trim())
+            .Distinct(StringComparer.Ordinal)
+            .ToList();
+
+        if (normalizedIds.Count == 0)
+        {
+            return [];
+        }
+
+        return await _dbContext.SavedCards
+            .AsNoTracking()
+            .Where(card => normalizedIds.Contains(card.CardId))
+            .OrderByDescending(card => card.SavedAt)
+            .ToListAsync(cancellationToken);
+    }
+
     public async Task AddAsync(SavedCard card, CancellationToken cancellationToken = default)
     {
         _dbContext.SavedCards.Add(card);

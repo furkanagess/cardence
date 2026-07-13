@@ -75,7 +75,7 @@ class _EventGroupLocationPickerFieldState
       return;
     }
 
-    final query = EventGroupLocationComposer.compose(
+    final query = EventGroupLocationComposer.composeGeocodeQuery(
       venue: widget.venueController.text,
       country: widget.country,
       city: widget.city,

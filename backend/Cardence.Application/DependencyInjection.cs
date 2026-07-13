@@ -20,6 +20,7 @@ public static class DependencyInjection
         services.AddScoped<IWalletOwnerPremiumSyncService, WalletOwnerPremiumSyncService>();
         services.AddScoped<IWalletEntitlementSyncService, WalletEntitlementSyncService>();
         services.AddScoped<IRevenueCatWebhookService, RevenueCatWebhookService>();
+        services.AddScoped<IPushNotificationService, PushNotificationService>();
         services.AddScoped<INetworkGraphService, NetworkGraphService>();
         return services;
     }

@@ -20,8 +20,6 @@ public sealed class SavedCardServiceTests
         Substitute.For<IWalletEntitlementRepository>();
     private readonly IEventGroupRepository _eventGroupRepository =
         Substitute.For<IEventGroupRepository>();
-    private readonly ICardInteractionRepository _cardInteractionRepository =
-        Substitute.For<ICardInteractionRepository>();
     private readonly ICurrentUserService _currentUser = Substitute.For<ICurrentUserService>();
     private readonly IWalletOwnerPremiumSyncService _ownerPremiumSync =
         Substitute.For<IWalletOwnerPremiumSyncService>();
@@ -44,10 +42,11 @@ public sealed class SavedCardServiceTests
             _businessCardRepository,
             _walletRepository,
             _eventGroupRepository,
-            _cardInteractionRepository,
             _ownerPremiumSync,
             _walletEntitlementSync,
-            _currentUser);
+            _currentUser,
+            Substitute.For<IPushNotificationService>(),
+            Substitute.For<IUserRepository>());
     }
 
     [Fact]

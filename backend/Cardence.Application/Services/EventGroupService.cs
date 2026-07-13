@@ -25,6 +25,8 @@ public sealed class EventGroupService : IEventGroupService
     private readonly IWalletEntitlementRepository _walletRepository;
     private readonly ICurrentUserService _currentUser;
     private readonly IEventGroupPhotoStorage _eventGroupPhotoStorage;
+    private readonly IPushNotificationService _pushNotificationService;
+    private readonly IUserRepository _userRepository;
     private readonly IValidator<SaveEventGroupRequest> _saveValidator;
     private readonly IValidator<UpdateEventGroupRequest> _updateValidator;
     private readonly IValidator<LinkEventGroupCardsRequest> _linkValidator;
@@ -37,6 +39,8 @@ public sealed class EventGroupService : IEventGroupService
         IWalletEntitlementRepository walletRepository,
         ICurrentUserService currentUser,
         IEventGroupPhotoStorage eventGroupPhotoStorage,
+        IPushNotificationService pushNotificationService,
+        IUserRepository userRepository,
         IValidator<SaveEventGroupRequest> saveValidator,
         IValidator<UpdateEventGroupRequest> updateValidator,
         IValidator<LinkEventGroupCardsRequest> linkValidator,
@@ -48,6 +52,8 @@ public sealed class EventGroupService : IEventGroupService
         _walletRepository = walletRepository;
         _currentUser = currentUser;
         _eventGroupPhotoStorage = eventGroupPhotoStorage;
+        _pushNotificationService = pushNotificationService;
+        _userRepository = userRepository;
         _saveValidator = saveValidator;
         _updateValidator = updateValidator;
         _linkValidator = linkValidator;
@@ -110,10 +116,16 @@ public sealed class EventGroupService : IEventGroupService
 
         await _eventGroupRepository.AddAsync(entity, cancellationToken);
 
-        var invalidCardIds = await _eventGroupRepository.InviteCardsByCardIdsAsync(
+        var inviteResult = await _eventGroupRepository.InviteCardsByCardIdsAsync(
             userId,
             entity.Id,
             request.InvitedCardIds,
+            cancellationToken);
+
+        await NotifyNewInvitesAsync(
+            userId,
+            entity.Name,
+            inviteResult.NewInvites,
             cancellationToken);
 
         if (photoStream is not null)
@@ -131,7 +143,7 @@ public sealed class EventGroupService : IEventGroupService
             entity.Id,
             cancellationToken);
 
-        return EventGroupMapper.ToDto(entity, cardCount, invalidCardIds);
+        return EventGroupMapper.ToDto(entity, cardCount, inviteResult.InvalidCardIds);
     }
 
     public async Task<EventGroupDto> UpdateAsync(
@@ -290,16 +302,22 @@ public sealed class EventGroupService : IEventGroupService
         var entity = await _eventGroupRepository.GetByUserAndIdAsync(userId, groupId, cancellationToken)
             ?? throw new NotFoundException("EventGroup", request.Id);
 
-        var invalidCardIds = await _eventGroupRepository.InviteCardsByCardIdsAsync(
+        var inviteResult = await _eventGroupRepository.InviteCardsByCardIdsAsync(
             userId,
             groupId,
             request.CardIds,
+            cancellationToken);
+
+        await NotifyNewInvitesAsync(
+            userId,
+            entity.Name,
+            inviteResult.NewInvites,
             cancellationToken);
         var cardCount = await _eventGroupRepository.CountCardsInGroupAsync(
             entity.Id,
             cancellationToken);
 
-        return EventGroupMapper.ToDto(entity, cardCount, invalidCardIds);
+        return EventGroupMapper.ToDto(entity, cardCount, inviteResult.InvalidCardIds);
     }
 
     public async Task<IReadOnlyList<EventGroupInvitationDto>> GetPendingInvitationsAsync(
@@ -489,6 +507,36 @@ public sealed class EventGroupService : IEventGroupService
         }
 
         return normalized.Value;
+    }
+
+    private async Task NotifyNewInvitesAsync(
+        Guid inviterUserId,
+        string eventGroupName,
+        IReadOnlyList<CreatedEventGroupInvite> invites,
+        CancellationToken cancellationToken)
+    {
+        if (invites.Count == 0)
+        {
+            return;
+        }
+
+        try
+        {
+            var inviter = await _userRepository.GetByIdAsync(inviterUserId, cancellationToken);
+            var inviterDisplayName = string.IsNullOrWhiteSpace(inviter?.DisplayName)
+                ? "Bir kullanıcı"
+                : inviter.DisplayName.Trim();
+
+            await _pushNotificationService.NotifyEventGroupInvitesAsync(
+                eventGroupName,
+                inviterDisplayName,
+                invites,
+                cancellationToken);
+        }
+        catch (Exception)
+        {
+            // Push başarısız olsa da davet akışı tamamlanmış sayılır.
+        }
     }
 
     private static Guid ParseGroupId(string groupId)

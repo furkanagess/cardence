@@ -20,8 +20,8 @@ import '../../domain/usecases/delete_event_group.dart';
 import '../../domain/usecases/update_event_group.dart';
 import '../../domain/usecases/invite_event_group_cards_by_card_id.dart';
 import '../../../saved_cards/domain/usecases/link_saved_cards_to_event_group.dart';
-import '../../../saved_cards/presentation/widgets/saved_cards_horizontal_carousel.dart';
 import '../widgets/event_group_detail_header.dart';
+import '../widgets/event_group_detail_linked_cards_section.dart';
 import '../widgets/event_group_detail_loading_shimmer.dart';
 import '../widgets/pick_saved_cards_for_group_sheet.dart';
 import '../widgets/invite_event_group_cards_sheet.dart';
@@ -322,7 +322,7 @@ class _EventGroupDetailPageState extends State<EventGroupDetailPage> {
       );
     }
 
-    return SavedCardsHorizontalCarousel(
+    return EventGroupDetailLinkedCardsSection(
       cards: _linkedCards,
       onOpenCard: (card, {heroTag}) => _openCardDetail(card, heroTag: heroTag),
     );

@@ -21,7 +21,7 @@
 		<key>CFBundleSignature</key>
 		<string>????</string>
 		<key>CFBundleVersion</key>
-		<string>12</string>
+		<string>13</string>
 		<key>CFBundleLocalizations</key>
 		<array>
 			<string>tr</string>
@@ -50,6 +50,10 @@
 		<true/>
 		<key>UIApplicationSupportsIndirectInputEvents</key>
 		<true/>
+		<key>UIBackgroundModes</key>
+		<array>
+			<string>remote-notification</string>
+		</array>
 		<key>NSLocationWhenInUseUsageDescription</key>
 		<string>Etkinlik konumunu haritadan seçmek için konum erişimi kullanılır.</string>
 		<key>NSCameraUsageDescription</key>

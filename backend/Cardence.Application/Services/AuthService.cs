@@ -22,6 +22,7 @@ public sealed class AuthService : IAuthService
     private readonly ILinkedInAuthService _linkedInAuthService;
     private readonly IBusinessCardRepository _businessCardRepository;
     private readonly ISavedCardRepository _savedCardRepository;
+    private readonly ICardInteractionRepository _cardInteractionRepository;
     private readonly IJwtTokenService _jwtTokenService;
     private readonly IAuthTokenStore _authTokenStore;
     private readonly IPasswordResetTokenRepository _passwordResetTokenRepository;
@@ -49,6 +50,7 @@ public sealed class AuthService : IAuthService
         ILinkedInAuthService linkedInAuthService,
         IBusinessCardRepository businessCardRepository,
         ISavedCardRepository savedCardRepository,
+        ICardInteractionRepository cardInteractionRepository,
         IJwtTokenService jwtTokenService,
         IAuthTokenStore authTokenStore,
         IPasswordResetTokenRepository passwordResetTokenRepository,
@@ -67,6 +69,7 @@ public sealed class AuthService : IAuthService
         _linkedInAuthService = linkedInAuthService;
         _businessCardRepository = businessCardRepository;
         _savedCardRepository = savedCardRepository;
+        _cardInteractionRepository = cardInteractionRepository;
         _jwtTokenService = jwtTokenService;
         _authTokenStore = authTokenStore;
         _passwordResetTokenRepository = passwordResetTokenRepository;
@@ -548,6 +551,13 @@ public sealed class AuthService : IAuthService
             ApplyLinkedInCardFields(card, linkedInProfile, user);
 
             await _businessCardRepository.AddAsync(card, cancellationToken);
+            await CardInteractionWriter.LogCardCreatedAsync(
+                _cardInteractionRepository,
+                card,
+                user.Id,
+                CardCreationMethods.OwnCard,
+                now,
+                cancellationToken);
             return;
         }
 

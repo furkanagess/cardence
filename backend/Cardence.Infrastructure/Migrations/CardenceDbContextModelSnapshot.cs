@@ -796,6 +796,48 @@ namespace Cardence.Infrastructure.Migrations
                     b.ToTable("user_auth_providers", (string)null);
                 });
 
+            modelBuilder.Entity("Cardence.Domain.Entities.UserDeviceToken", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("Platform")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("platform");
+
+                    b.Property<string>("Token")
+                        .IsRequired()
+                        .HasMaxLength(512)
+                        .HasColumnType("character varying(512)")
+                        .HasColumnName("token");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId")
+                        .HasDatabaseName("ix_user_device_tokens_user_id");
+
+                    b.HasIndex("UserId", "Token")
+                        .IsUnique()
+                        .HasDatabaseName("ix_user_device_tokens_user_id_token");
+
+                    b.ToTable("user_device_tokens", (string)null);
+                });
+
             modelBuilder.Entity("Cardence.Domain.Entities.WalletEntitlement", b =>
                 {
                     b.Property<Guid>("UserId")
@@ -973,6 +1015,17 @@ namespace Cardence.Infrastructure.Migrations
                 {
                     b.HasOne("Cardence.Domain.Entities.User", "User")
                         .WithMany("AuthProviders")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Cardence.Domain.Entities.UserDeviceToken", b =>
+                {
+                    b.HasOne("Cardence.Domain.Entities.User", "User")
+                        .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();

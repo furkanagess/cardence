@@ -19,8 +19,6 @@ public sealed class NetworkGraphServiceTests
         Substitute.For<ISavedCardRepository>();
     private readonly IEventGroupRepository _eventGroupRepository =
         Substitute.For<IEventGroupRepository>();
-    private readonly ICardInteractionRepository _cardInteractionRepository =
-        Substitute.For<ICardInteractionRepository>();
     private readonly NetworkGraphService _service;
     private readonly Guid _userId = Guid.NewGuid();
 
@@ -31,8 +29,7 @@ public sealed class NetworkGraphServiceTests
             _currentUser,
             _businessCardRepository,
             _savedCardRepository,
-            _eventGroupRepository,
-            _cardInteractionRepository);
+            _eventGroupRepository);
     }
 
     [Fact]
@@ -70,11 +67,19 @@ public sealed class NetworkGraphServiceTests
             .Returns([savedCard]);
         _eventGroupRepository.GetByUserIdAsync(_userId, Arg.Any<CancellationToken>())
             .Returns([eventGroup]);
-        _cardInteractionRepository.GetByTargetCardEntityIdsAsync(
-                Arg.Is<IReadOnlyCollection<Guid>>(ids => ids.Contains(ownCard.Id)),
+        _savedCardRepository.GetByTargetCardPublicIdsAsync(
+                Arg.Is<IReadOnlyCollection<string>>(ids => ids.Contains(ownCard.CardId)),
                 Arg.Any<CancellationToken>())
             .Returns([
-                CardSavedInteraction(ownCard, saverUserId),
+                new SavedCard
+                {
+                    Id = Guid.NewGuid(),
+                    UserId = saverUserId,
+                    CardId = ownCard.CardId,
+                    SavedAt = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow,
+                },
             ]);
         _businessCardRepository.GetByUserIdsAsync(
                 Arg.Is<IReadOnlyCollection<Guid>>(ids => ids.Contains(saverUserId)),
@@ -119,8 +124,8 @@ public sealed class NetworkGraphServiceTests
             .Returns([savedCard]);
         _eventGroupRepository.GetByUserIdAsync(_userId, Arg.Any<CancellationToken>())
             .Returns([]);
-        _cardInteractionRepository.GetByTargetCardEntityIdsAsync(
-                Arg.Any<IReadOnlyCollection<Guid>>(),
+        _savedCardRepository.GetByTargetCardPublicIdsAsync(
+                Arg.Any<IReadOnlyCollection<string>>(),
                 Arg.Any<CancellationToken>())
             .Returns([]);
 
@@ -196,17 +201,5 @@ public sealed class NetworkGraphServiceTests
             Title = "Investor",
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow,
-        };
-
-    private static CardInteraction CardSavedInteraction(Card targetCard, Guid actorUserId) =>
-        new()
-        {
-            Id = Guid.NewGuid(),
-            ActorUserId = actorUserId,
-            TargetCardEntityId = targetCard.Id,
-            TargetCardPublicId = targetCard.CardId,
-            EventType = CardInteractionTypes.CardSaved,
-            Source = "public",
-            OccurredAt = DateTime.UtcNow,
         };
 }

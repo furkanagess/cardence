@@ -74,6 +74,12 @@ class ApiResponseParser {
     return readString(error['Code'] ?? error['code']);
   }
 
+  static String? _extractErrorDescription(Map<String, dynamic> json) {
+    final error = readMap(json['error'] ?? json['Error']);
+    if (error == null) return null;
+    return readString(error['Description'] ?? error['description']);
+  }
+
   static Map<String, dynamic> _decodeBody(dynamic data) {
     if (data is Map<String, dynamic>) return data;
     if (data is Map) return Map<String, dynamic>.from(data);
@@ -137,7 +143,7 @@ class ApiResponseParser {
         extractErrorMessage(json, fallbackError),
         code: code,
         statusCode: statusCode,
-        errorCode: errorCode,
+        errorCode: _extractErrorDescription(json) ?? errorCode,
       );
     }
 

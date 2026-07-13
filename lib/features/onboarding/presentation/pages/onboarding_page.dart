@@ -268,14 +268,14 @@ Widget _buildOnboardingStep({
         draft: state.draft,
         stepIndex: stepIndex,
         stepCount: stepCount,
-        onChanged: onChanged,
+        onChanged: context.read<OnboardingCubit>().updateDraftImmediate,
       );
     case 1:
       return OnboardingStepProfessional(
         draft: state.draft,
         stepIndex: stepIndex,
         stepCount: stepCount,
-        onChanged: onChanged,
+        onChanged: context.read<OnboardingCubit>().updateDraftImmediate,
       );
     case 2:
       return OnboardingStepPhoto(

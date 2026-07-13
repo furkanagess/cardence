@@ -1,7 +1,7 @@
 namespace Cardence.Domain.Entities;
 
 /// <summary>
-/// Kart etkilesim olaylari; profile stats ve network graph kenar kaynagi.
+/// Kart etkilesim olaylari; public goruntuleme/iletisim ve kart olusturma kaynagi.
 /// </summary>
 public sealed class CardInteraction
 {

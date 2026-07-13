@@ -5,6 +5,7 @@ using Cardence.Infrastructure.Background;
 using Cardence.Infrastructure.Email;
 using Cardence.Infrastructure.Health;
 using Cardence.Infrastructure.Persistence;
+using Cardence.Infrastructure.Push;
 using Cardence.Infrastructure.Repositories;
 using Cardence.Infrastructure.Storage;
 using Cardence.Infrastructure.Subscriptions;
@@ -29,6 +30,7 @@ public static class DependencyInjection
         services.Configure<RevenueCatOptions>(configuration.GetSection(RevenueCatOptions.SectionName));
         services.Configure<EmailOptions>(configuration.GetSection(EmailOptions.SectionName));
         services.Configure<PasswordResetOptions>(configuration.GetSection(PasswordResetOptions.SectionName));
+        services.Configure<PushNotificationOptions>(configuration.GetSection(PushNotificationOptions.SectionName));
 
         services.AddHttpClient<ILinkedInAuthService, LinkedInAuthService>();
         services.AddHttpClient<IRevenueCatEntitlementClient, RevenueCatEntitlementClient>(client =>
@@ -85,6 +87,10 @@ public static class DependencyInjection
         services.AddScoped<IHealthStatusReader, HealthStatusReader>();
         services.AddScoped<IProfilePhotoStorage, LocalProfilePhotoStorage>();
         services.AddScoped<IEventGroupPhotoStorage, LocalEventGroupPhotoStorage>();
+        services.AddScoped<IUserDeviceTokenRepository, UserDeviceTokenRepository>();
+        services.AddScoped<LoggingPushNotificationSender>();
+        services.AddScoped<FcmPushNotificationSender>();
+        services.AddScoped<IPushNotificationSender, PushNotificationSenderRouter>();
 
         services.AddHostedService<ExpiredEventGroupInvitationCleanupService>();
 

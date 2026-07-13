@@ -1645,6 +1645,73 @@ class AppLocalizationsEn extends AppLocalizations {
   String get connectionError => 'Connection error. Please try again.';
 
   @override
+  String get authEmailRequired => 'Email is required.';
+
+  @override
+  String get authPasswordRequired => 'Password is required.';
+
+  @override
+  String get authEmailUserNotFound =>
+      'No account found with this email. Please sign up first.';
+
+  @override
+  String get authInvalidEmailPassword => 'Incorrect email or password.';
+
+  @override
+  String get authPhoneRequired => 'Phone number is required.';
+
+  @override
+  String get authPhoneUserNotFound =>
+      'No account found with this phone number. Please sign up first.';
+
+  @override
+  String get authInvalidPhonePassword => 'Incorrect phone number or password.';
+
+  @override
+  String get authDisplayNameRequired => 'Full name is required.';
+
+  @override
+  String get authDisplayNameMinLength =>
+      'Full name must be at least 2 characters.';
+
+  @override
+  String get authInvalidEmailFormat => 'Enter a valid email address.';
+
+  @override
+  String get authInvalidPhoneFormat => 'Enter a valid phone number.';
+
+  @override
+  String get authEmailAlreadyRegistered =>
+      'This email is already registered to another account.';
+
+  @override
+  String get authPhoneAlreadyRegistered =>
+      'This phone number is already registered to another account.';
+
+  @override
+  String authPasswordMinLengthError(int minLength) {
+    return 'Password must be at least $minLength characters.';
+  }
+
+  @override
+  String get authLinkedInCodeRequired =>
+      'LinkedIn authorization code is required.';
+
+  @override
+  String get authInvalidRedirectUri => 'Invalid redirect URI.';
+
+  @override
+  String get authLinkedInSessionInvalid =>
+      'LinkedIn session could not be verified.';
+
+  @override
+  String get authLinkedInUserNotFound =>
+      'No user found linked to this LinkedIn account.';
+
+  @override
+  String get authInvalidOtp => 'Verification code is invalid or expired.';
+
+  @override
   String get supportRequestFailedRetry =>
       'Could not send support request. Please try again.';
 

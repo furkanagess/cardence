@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/widgets/atoms/shimmer.dart';
-import '../../../saved_cards/presentation/widgets/saved_cards_horizontal_carousel.dart';
-import '../../../saved_cards/presentation/widgets/saved_cards_horizontal_stack_view.dart';
+import '../../../../core/widgets/organisms/flippable_person_card.dart';
+import '../../../saved_cards/presentation/widgets/saved_cards_card_stack_view.dart';
 
 /// Kart / davet sayısı chip satırı iskeleti.
 class EventGroupDetailStatChipRowShimmer extends StatelessWidget {
@@ -27,24 +27,31 @@ class EventGroupDetailStatChipRowShimmer extends StatelessWidget {
   }
 }
 
-/// Yatay kart şeridi iskeleti.
+/// Dikey kart yığını iskeleti.
 class EventGroupDetailCardsSectionShimmer extends StatelessWidget {
   const EventGroupDetailCardsSectionShimmer({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final contentWidth = MediaQuery.sizeOf(context).width;
-    final cardWidth = SavedCardsHorizontalCarousel.resolveCardWidth(contentWidth);
-    final height = SavedCardsHorizontalCarousel.sectionHeight(cardWidth);
+    final viewportHeight = MediaQuery.sizeOf(context).height;
+    final stackHeight = SavedCardsCardStackView.stackContentHeight(1, 0);
+    final sectionHeight = stackHeight.clamp(
+      FlippablePersonCard.fixedHeight + 24,
+      (viewportHeight * 0.52).clamp(300.0, 480.0),
+    );
 
-    return Shimmer(
-      child: SizedBox(
-        height: height,
-        child: Center(
-          child: ShimmerPlaceholder(
-            width: cardWidth,
-            height: SavedCardsHorizontalStackView.stackHeight,
-            borderRadius: 16,
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: Shimmer(
+        child: SizedBox(
+          height: sectionHeight,
+          child: Align(
+            alignment: Alignment.topCenter,
+            child: ShimmerPlaceholder(
+              width: double.infinity,
+              height: FlippablePersonCard.fixedHeight,
+              borderRadius: 16,
+            ),
           ),
         ),
       ),
