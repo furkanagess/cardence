@@ -36,4 +36,9 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
   @override
   Future<bool> hasPremiumWalletEntitlement() =>
       _dataSource.hasPremiumWalletEntitlement();
+
+  @override
+  void registerEntitlementChangeHandler(Future<void> Function()? handler) {
+    _dataSource.registerEntitlementChangeHandler(handler);
+  }
 }

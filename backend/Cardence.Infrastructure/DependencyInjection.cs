@@ -7,6 +7,7 @@ using Cardence.Infrastructure.Health;
 using Cardence.Infrastructure.Persistence;
 using Cardence.Infrastructure.Repositories;
 using Cardence.Infrastructure.Storage;
+using Cardence.Infrastructure.Subscriptions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -30,6 +31,10 @@ public static class DependencyInjection
         services.Configure<PasswordResetOptions>(configuration.GetSection(PasswordResetOptions.SectionName));
 
         services.AddHttpClient<ILinkedInAuthService, LinkedInAuthService>();
+        services.AddHttpClient<IRevenueCatEntitlementClient, RevenueCatEntitlementClient>(client =>
+        {
+            client.Timeout = TimeSpan.FromSeconds(15);
+        });
 
         services.AddDbContext<CardenceDbContext>(options =>
         {

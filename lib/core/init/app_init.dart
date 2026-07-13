@@ -232,6 +232,16 @@ class AppInit {
 
     final session = await authLocal.getSession();
     await _guardInit('RevenueCat configure', configureSubscriptions.call);
+    subscriptionRepo.registerEntitlementChangeHandler(() async {
+      try {
+        await finalizePremiumWalletActivation();
+        final profile = await auth.refreshCurrentUser();
+        await syncUserProfileCards(profile);
+      } catch (error, stackTrace) {
+        debugPrint('[RevenueCat] entitlement sync failed: $error');
+        debugPrintStack(stackTrace: stackTrace);
+      }
+    });
     unawaited(
       _initDeferredMonetization(
         initializeMobileAds: initializeMobileAds,

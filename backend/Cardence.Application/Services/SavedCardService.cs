@@ -19,6 +19,7 @@ public sealed class SavedCardService : ISavedCardService
     private readonly IEventGroupRepository _eventGroupRepository;
     private readonly ICardInteractionRepository _cardInteractionRepository;
     private readonly IWalletOwnerPremiumSyncService _ownerPremiumSync;
+    private readonly IWalletEntitlementSyncService _walletEntitlementSync;
     private readonly ICurrentUserService _currentUser;
 
     public SavedCardService(
@@ -28,6 +29,7 @@ public sealed class SavedCardService : ISavedCardService
         IEventGroupRepository eventGroupRepository,
         ICardInteractionRepository cardInteractionRepository,
         IWalletOwnerPremiumSyncService ownerPremiumSync,
+        IWalletEntitlementSyncService walletEntitlementSync,
         ICurrentUserService currentUser)
     {
         _savedCardRepository = savedCardRepository;
@@ -36,6 +38,7 @@ public sealed class SavedCardService : ISavedCardService
         _eventGroupRepository = eventGroupRepository;
         _cardInteractionRepository = cardInteractionRepository;
         _ownerPremiumSync = ownerPremiumSync;
+        _walletEntitlementSync = walletEntitlementSync;
         _currentUser = currentUser;
     }
 
@@ -167,20 +170,10 @@ public sealed class SavedCardService : ISavedCardService
     public async Task<WalletQuotaDto> UpgradeWalletPlanAsync(
         CancellationToken cancellationToken = default)
     {
-        // RevenueCat satın alması sonrası istemci bu uç noktayı çağırır.
-        // Webhook gecikse bile premium etkinleştirilir; iptal/yenileme webhook ile güncellenir.
+        // RevenueCat satın alması / iptali sonrası istemci bu uç noktayı çağırır.
         var userId = _currentUser.GetRequiredUserId();
-        var entitlement = await _walletRepository.GetOrCreateAsync(userId, cancellationToken);
-        if (!WalletConstants.IsPremiumOrHigher(entitlement.Tier))
-        {
-            entitlement = await _walletRepository.UpgradeToPremiumAsync(
-                userId,
-                cancellationToken);
-        }
-
-        await _ownerPremiumSync.SyncForUserAsync(
+        await _walletEntitlementSync.SyncUserAfterClientPurchaseAsync(
             userId,
-            entitlement.Tier,
             cancellationToken);
         return await GetWalletQuotaAsync(cancellationToken);
     }

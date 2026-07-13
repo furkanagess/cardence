@@ -5,5 +5,9 @@ public sealed class RevenueCatOptions
     public const string SectionName = "RevenueCat";
 
     public string WebhookAuthorizationToken { get; init; } = string.Empty;
-    public string PremiumEntitlementId { get; init; } = "premium";
+
+    /// <summary>RevenueCat secret API key (server-side subscriber lookup).</summary>
+    public string SecretApiKey { get; init; } = string.Empty;
+
+    public string PremiumEntitlementId { get; init; } = "cardence-pro";
 }

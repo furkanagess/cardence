@@ -18,6 +18,7 @@ public sealed class AuthService : IAuthService
     private readonly IUserRepository _userRepository;
     private readonly IUserAuthProviderRepository _userAuthProviderRepository;
     private readonly IWalletEntitlementRepository _walletEntitlementRepository;
+    private readonly IWalletEntitlementSyncService _walletEntitlementSync;
     private readonly ILinkedInAuthService _linkedInAuthService;
     private readonly IBusinessCardRepository _businessCardRepository;
     private readonly ISavedCardRepository _savedCardRepository;
@@ -44,6 +45,7 @@ public sealed class AuthService : IAuthService
         IUserRepository userRepository,
         IUserAuthProviderRepository userAuthProviderRepository,
         IWalletEntitlementRepository walletEntitlementRepository,
+        IWalletEntitlementSyncService walletEntitlementSync,
         ILinkedInAuthService linkedInAuthService,
         IBusinessCardRepository businessCardRepository,
         ISavedCardRepository savedCardRepository,
@@ -61,6 +63,7 @@ public sealed class AuthService : IAuthService
         _userRepository = userRepository;
         _userAuthProviderRepository = userAuthProviderRepository;
         _walletEntitlementRepository = walletEntitlementRepository;
+        _walletEntitlementSync = walletEntitlementSync;
         _linkedInAuthService = linkedInAuthService;
         _businessCardRepository = businessCardRepository;
         _savedCardRepository = savedCardRepository;
@@ -640,6 +643,7 @@ public sealed class AuthService : IAuthService
                 "Kullanıcı bulunamadı.");
         }
 
+        await _walletEntitlementSync.SyncUserFromRevenueCatAsync(userId, cancellationToken);
         var profile = await BuildUserProfileAsync(user, cancellationToken);
         return AuthServiceResponse<UserProfileEntity>.Ok(profile, "Profil bilgisi alındı.");
     }

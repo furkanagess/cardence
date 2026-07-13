@@ -10,6 +10,12 @@ import '../../domain/entities/wallet_paywall_result.dart';
 
 class RevenueCatSubscriptionDataSource {
   Completer<void>? _configureCompleter;
+  Future<void> Function()? _entitlementChangeHandler;
+  bool _entitlementListenerRegistered = false;
+
+  void registerEntitlementChangeHandler(Future<void> Function()? handler) {
+    _entitlementChangeHandler = handler;
+  }
 
   Future<void> configure() async {
     if (_configureCompleter != null) {
@@ -24,6 +30,7 @@ class RevenueCatSubscriptionDataSource {
       await Purchases.configure(
         PurchasesConfiguration(RevenueCatConfig.apiKey),
       );
+      _registerEntitlementListener();
       completer.complete();
     } catch (error, stackTrace) {
       _configureCompleter = null;
@@ -38,6 +45,16 @@ class RevenueCatSubscriptionDataSource {
       return;
     }
     await _configureCompleter!.future;
+  }
+
+  void _registerEntitlementListener() {
+    if (_entitlementListenerRegistered) return;
+    _entitlementListenerRegistered = true;
+    Purchases.addCustomerInfoUpdateListener((_) {
+      final handler = _entitlementChangeHandler;
+      if (handler == null) return;
+      unawaited(handler());
+    });
   }
 
   Future<void> identifyUser(String userId) async {

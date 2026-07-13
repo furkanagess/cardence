@@ -1,6 +1,6 @@
 import '../../../saved_cards/domain/repositories/saved_card_repository.dart';
 
-/// Sunucu tarafında premium cüzdan kotasını ve `isOwnerPremium` bayrağını senkronize eder.
+/// Sunucu tarafında wallet tier ve `isOwnerPremium` bayraklarını RevenueCat ile senkronize eder.
 class FinalizePremiumWalletActivation {
   const FinalizePremiumWalletActivation(this._savedCardRepository);
 

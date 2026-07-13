@@ -17,4 +17,7 @@ abstract class SubscriptionRepository {
   Future<bool> restorePurchases();
 
   Future<bool> hasPremiumWalletEntitlement();
+
+  /// RevenueCat entitlement değişince (satın alma, yenileme, süre bitimi) tetiklenir.
+  void registerEntitlementChangeHandler(Future<void> Function()? handler);
 }

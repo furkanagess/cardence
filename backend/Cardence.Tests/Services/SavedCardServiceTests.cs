@@ -25,6 +25,8 @@ public sealed class SavedCardServiceTests
     private readonly ICurrentUserService _currentUser = Substitute.For<ICurrentUserService>();
     private readonly IWalletOwnerPremiumSyncService _ownerPremiumSync =
         Substitute.For<IWalletOwnerPremiumSyncService>();
+    private readonly IWalletEntitlementSyncService _walletEntitlementSync =
+        Substitute.For<IWalletEntitlementSyncService>();
     private readonly SavedCardService _service;
     private readonly Guid _userId = Guid.NewGuid();
 
@@ -44,6 +46,7 @@ public sealed class SavedCardServiceTests
             _eventGroupRepository,
             _cardInteractionRepository,
             _ownerPremiumSync,
+            _walletEntitlementSync,
             _currentUser);
     }
 
@@ -100,23 +103,9 @@ public sealed class SavedCardServiceTests
     }
 
     [Fact]
-    public async Task UpgradeWalletPlanAsync_UpgradesFreeTierToPremium()
+    public async Task UpgradeWalletPlanAsync_SyncsEntitlementFromRevenueCat()
     {
         _walletRepository.GetOrCreateAsync(_userId, Arg.Any<CancellationToken>())
-            .Returns(
-                new WalletEntitlement
-                {
-                    UserId = _userId,
-                    Tier = WalletConstants.FreeTier,
-                    MaxCards = WalletConstants.FreeMaxCards,
-                },
-                new WalletEntitlement
-                {
-                    UserId = _userId,
-                    Tier = WalletConstants.PremiumTier,
-                    MaxCards = WalletConstants.PremiumMaxCards,
-                });
-        _walletRepository.UpgradeToPremiumAsync(_userId, Arg.Any<CancellationToken>())
             .Returns(new WalletEntitlement
             {
                 UserId = _userId,
@@ -127,12 +116,11 @@ public sealed class SavedCardServiceTests
         var quota = await _service.UpgradeWalletPlanAsync();
 
         quota.Tier.Should().Be(WalletConstants.PremiumTier);
-        await _walletRepository.Received(1).UpgradeToPremiumAsync(
+        await _walletEntitlementSync.Received(1).SyncUserAfterClientPurchaseAsync(
             _userId,
             Arg.Any<CancellationToken>());
-        await _ownerPremiumSync.Received(1).SyncForUserAsync(
+        await _walletRepository.DidNotReceive().UpgradeToPremiumAsync(
             _userId,
-            WalletConstants.PremiumTier,
             Arg.Any<CancellationToken>());
     }
 
