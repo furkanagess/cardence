@@ -360,182 +360,196 @@ class _CardViewPageState extends State<CardViewPage> {
         final isCarousel = _cards.length > 1;
 
         return PopScope(
-      canPop: !_hasUnsavedChanges,
-      onPopInvokedWithResult: (didPop, result) async {
-        if (didPop || !_hasUnsavedChanges) return;
-        final shouldLeave = await _confirmDiscardChanges();
-        if (!mounted || !shouldLeave) return;
-        Navigator.of(context).pop();
-      },
-      child: CardenceScaffold(
-        appBar: CardenceAppBar(title: context.l10n.kartGrnm),
-        body: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Expanded(
-              child: Column(
-                children: [
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(
-                        cardHorizontalPadding,
-                        0,
-                        8,
-                        0,
-                      ),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Expanded(
-                            child: Center(
-                              child: AspectRatio(
-                                aspectRatio: FlippablePersonCard.cardAspectRatio,
-                                child: isEmptySlotSelected
-                                    ? _buildEmptySlotPreview(context)
-                                    : isCarousel
-                                    ? PageView.builder(
-                                        controller: _pageController,
-                                        itemCount: _cards.length,
-                                        onPageChanged: (index) => setState(
-                                          () => _selectedIndex = index,
-                                        ),
-                                        padEnds: false,
-                                        itemBuilder: (context, index) {
-                                          final draft = _cards[index];
-
-                                          return AnimatedBuilder(
-                                            animation: _pageController,
-                                            builder: (context, child) {
-                                              double t = 0;
-                                              if (_pageController
-                                                  .position.haveDimensions) {
-                                                final page =
-                                                    _pageController.page ??
-                                                        _pageController
-                                                            .initialPage
-                                                            .toDouble();
-                                                t = (page - index)
-                                                    .abs()
-                                                    .clamp(0.0, 1.0);
-                                              }
-                                              const maxScaleDelta = 0.06;
-                                              const maxFadeDelta = 0.2;
-                                              final scale =
-                                                  1.0 - (t * maxScaleDelta);
-                                              final opacity =
-                                                  1.0 - (t * maxFadeDelta);
-
-                                              return Opacity(
-                                                opacity: opacity,
-                                                child: Transform.scale(
-                                                  scale: scale,
-                                                  child: child,
+          canPop: !_hasUnsavedChanges,
+          onPopInvokedWithResult: (didPop, result) async {
+            if (didPop || !_hasUnsavedChanges) return;
+            final shouldLeave = await _confirmDiscardChanges();
+            if (!mounted || !shouldLeave) return;
+            Navigator.of(context).pop();
+          },
+          child: CardenceScaffold(
+            appBar: CardenceAppBar(title: context.l10n.kartGrnm),
+            body: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Expanded(
+                  child: Column(
+                    children: [
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.fromLTRB(
+                            cardHorizontalPadding,
+                            0,
+                            8,
+                            0,
+                          ),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Expanded(
+                                child: Center(
+                                  child: AspectRatio(
+                                    aspectRatio:
+                                        FlippablePersonCard.cardAspectRatio,
+                                    child: isEmptySlotSelected
+                                        ? _buildEmptySlotPreview(context)
+                                        : isCarousel
+                                            ? PageView.builder(
+                                                controller: _pageController,
+                                                itemCount: _cards.length,
+                                                onPageChanged: (index) =>
+                                                    setState(
+                                                  () => _selectedIndex = index,
                                                 ),
-                                              );
-                                            },
-                                            child: MyCardPreviewHelpers
+                                                padEnds: false,
+                                                itemBuilder: (context, index) {
+                                                  final draft = _cards[index];
+
+                                                  return AnimatedBuilder(
+                                                    animation: _pageController,
+                                                    builder: (context, child) {
+                                                      double t = 0;
+                                                      if (_pageController
+                                                          .position
+                                                          .haveDimensions) {
+                                                        final page =
+                                                            _pageController
+                                                                    .page ??
+                                                                _pageController
+                                                                    .initialPage
+                                                                    .toDouble();
+                                                        t = (page - index)
+                                                            .abs()
+                                                            .clamp(0.0, 1.0);
+                                                      }
+                                                      const maxScaleDelta =
+                                                          0.06;
+                                                      const maxFadeDelta = 0.2;
+                                                      final scale = 1.0 -
+                                                          (t * maxScaleDelta);
+                                                      final opacity = 1.0 -
+                                                          (t * maxFadeDelta);
+
+                                                      return Opacity(
+                                                        opacity: opacity,
+                                                        child: Transform.scale(
+                                                          scale: scale,
+                                                          child: child,
+                                                        ),
+                                                      );
+                                                    },
+                                                    child: MyCardPreviewHelpers
+                                                        .flippableCard(
+                                                      draft: draft,
+                                                      l10n: context.l10n,
+                                                      emptyMessage: context
+                                                          .l10n.kartBilgisiYok,
+                                                    ),
+                                                  );
+                                                },
+                                              )
+                                            : MyCardPreviewHelpers
                                                 .flippableCard(
-                                              draft: draft,
-                                              l10n: context.l10n,
-                                              emptyMessage:
-                                                  context.l10n.kartBilgisiYok,
-                                            ),
-                                          );
-                                        },
-                                      )
-                                    : MyCardPreviewHelpers.flippableCard(
-                                        draft: d!,
-                                        l10n: context.l10n,
-                                        emptyMessage:
-                                            context.l10n.kartBilgisiYok,
-                                      ),
+                                                draft: d!,
+                                                l10n: context.l10n,
+                                                emptyMessage:
+                                                    context.l10n.kartBilgisiYok,
+                                              ),
+                                  ),
+                                ),
                               ),
-                            ),
+                              const SizedBox(width: 10),
+                              CardIndexCircleSelector(
+                                unlockedCount: slotCounts.unlockedSlots,
+                                filledCount: slotCounts.filledCount,
+                                selectedIndex: _selectedIndex,
+                                onSelected: (index) => _selectCardIndex(
+                                  index,
+                                  unlockedSlots: slotCounts.unlockedSlots,
+                                ),
+                                onLockedTap: _openPaywallForLockedSlot,
+                              ),
+                              const SizedBox(width: 4),
+                            ],
                           ),
-                          const SizedBox(width: 10),
-                          CardIndexCircleSelector(
-                            unlockedCount: slotCounts.unlockedSlots,
-                            filledCount: slotCounts.filledCount,
-                            selectedIndex: _selectedIndex,
-                            onSelected: (index) => _selectCardIndex(
-                              index,
-                              unlockedSlots: slotCounts.unlockedSlots,
-                            ),
-                            onLockedTap: _openPaywallForLockedSlot,
-                          ),
-                          const SizedBox(width: 4),
-                        ],
+                        ),
                       ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            if (!isEmptySlotSelected && d != null)
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    context.l10n.kartRengi2,
-                    style: textTheme.titleSmall?.copyWith(
-                      color: colorScheme.onSurfaceVariant,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  Wrap(
-                    spacing: 12,
-                    runSpacing: 12,
-                    children: [
-                      _buildColorChip(d, null),
-                      ...cardBackgroundColorOptions
-                          .map((hex) => _buildColorChip(d, hex)),
-                      if (hasLastUsed &&
-                          d.lastUsedPaletteBackgroundColor != null)
-                        _buildColorChip(d, d.lastUsedPaletteBackgroundColor!),
-                      _buildPaletteButton(),
                     ],
                   ),
-                  const SizedBox(height: 20),
-                  Text(
-                    context.l10n.metinRengi2,
-                    style: textTheme.titleSmall?.copyWith(
-                      color: colorScheme.onSurfaceVariant,
-                      fontWeight: FontWeight.w600,
+                ),
+                if (!isEmptySlotSelected && d != null)
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          context.l10n.kartRengi2,
+                          style:
+                              Theme.of(context).textTheme.titleSmall?.copyWith(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onSurfaceVariant,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                        ),
+                        const SizedBox(height: 12),
+                        Wrap(
+                          spacing: 12,
+                          runSpacing: 12,
+                          children: [
+                            _buildColorChip(d, null),
+                            ...cardBackgroundColorOptions
+                                .map((hex) => _buildColorChip(d, hex)),
+                            if (hasLastUsed &&
+                                d.lastUsedPaletteBackgroundColor != null)
+                              _buildColorChip(
+                                  d, d.lastUsedPaletteBackgroundColor!),
+                            _buildPaletteButton(),
+                          ],
+                        ),
+                        const SizedBox(height: 20),
+                        Text(
+                          context.l10n.metinRengi2,
+                          style:
+                              Theme.of(context).textTheme.titleSmall?.copyWith(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onSurfaceVariant,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                        ),
+                        const SizedBox(height: 12),
+                        Wrap(
+                          spacing: 12,
+                          runSpacing: 12,
+                          children: [
+                            _buildTextColorChip(d, null),
+                            ...cardTextColorOptions
+                                .map((hex) => _buildTextColorChip(d, hex)),
+                            _buildTextPaletteButton(d),
+                          ],
+                        ),
+                        const SizedBox(height: 20),
+                        CustomButton(
+                          label: context.l10n.kaydet,
+                          onPressed:
+                              _hasUnsavedChanges && !_saving ? _save : null,
+                          isLoading: _saving,
+                          style: FilledButton.styleFrom(
+                            backgroundColor: AppColors.primary,
+                            foregroundColor: AppColors.textOnPrimary,
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  const SizedBox(height: 12),
-                  Wrap(
-                    spacing: 12,
-                    runSpacing: 12,
-                    children: [
-                      _buildTextColorChip(d, null),
-                      ...cardTextColorOptions
-                          .map((hex) => _buildTextColorChip(d, hex)),
-                      _buildTextPaletteButton(d),
-                    ],
-                  ),
-                  const SizedBox(height: 20),
-                  CustomButton(
-                    label: context.l10n.kaydet,
-                    onPressed: _hasUnsavedChanges && !_saving ? _save : null,
-                    isLoading: _saving,
-                    style: FilledButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      foregroundColor: AppColors.textOnPrimary,
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                    ),
-                  ),
-                ],
-              ),
+              ],
             ),
-          ],
-        ),
-      ),
-    );
+          ),
+        );
       },
     );
   }
