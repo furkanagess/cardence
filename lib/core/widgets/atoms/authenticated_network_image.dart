@@ -194,7 +194,10 @@ class _AuthenticatedNetworkImageState extends State<AuthenticatedNetworkImage> {
       _cancelLoadingIndicator();
     }
 
-    final bytes = await AuthenticatedImageLoader.loadBytes(requestUrl);
+    final bytes = await AuthenticatedImageLoader.loadBytes(
+      requestUrl,
+      sourceUrl: source,
+    );
     if (!mounted || token != _loadToken) return;
 
     _cancelLoadingIndicator();

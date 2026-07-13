@@ -31,6 +31,7 @@ public static class DependencyInjection
         services.Configure<EmailOptions>(configuration.GetSection(EmailOptions.SectionName));
         services.Configure<PasswordResetOptions>(configuration.GetSection(PasswordResetOptions.SectionName));
         services.Configure<PushNotificationOptions>(configuration.GetSection(PushNotificationOptions.SectionName));
+        services.Configure<ObjectStorageOptions>(configuration.GetSection(ObjectStorageOptions.SectionName));
 
         services.AddHttpClient<ILinkedInAuthService, LinkedInAuthService>();
         services.AddHttpClient<IRevenueCatEntitlementClient, RevenueCatEntitlementClient>(client =>
@@ -87,6 +88,9 @@ public static class DependencyInjection
         services.AddScoped<IHealthStatusReader, HealthStatusReader>();
         services.AddScoped<IProfilePhotoStorage, LocalProfilePhotoStorage>();
         services.AddScoped<IEventGroupPhotoStorage, LocalEventGroupPhotoStorage>();
+        services.AddScoped<LocalUploadContentStore>();
+        services.AddScoped<S3UploadContentStore>();
+        services.AddScoped<IUploadContentStore, ResilientUploadContentStore>();
         services.AddScoped<IUserDeviceTokenRepository, UserDeviceTokenRepository>();
         services.AddScoped<LoggingPushNotificationSender>();
         services.AddScoped<FcmPushNotificationSender>();

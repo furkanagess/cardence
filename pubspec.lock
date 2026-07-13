@@ -574,6 +574,14 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  geoclue:
+    dependency: transitive
+    description:
+      name: geoclue
+      sha256: c2a998c77474fc57aa00c6baa2928e58f4b267649057a1c76738656e9dbd2a7f
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.1.1"
   geocoding:
     dependency: "direct main"
     description:
@@ -610,18 +618,18 @@ packages:
     dependency: "direct main"
     description:
       name: geolocator
-      sha256: "149876cc5207a0f5daf4fdd3bfcf0a0f27258b3fe95108fa084f527ad0568f1b"
+      sha256: "79939537046c9025be47ec645f35c8090ecadb6fe98eba146a0d25e8c1357516"
       url: "https://pub.dev"
     source: hosted
-    version: "12.0.0"
+    version: "14.0.2"
   geolocator_android:
     dependency: transitive
     description:
       name: geolocator_android
-      sha256: "93906636752ea4d4e778afa981fdfe7409f545b3147046300df194330044d349"
+      sha256: "86ea1654e4f61ff51466848e91c116b422d6010ea269fda0fbe1af7e9e742ce1"
       url: "https://pub.dev"
     source: hosted
-    version: "4.3.1"
+    version: "5.0.3"
   geolocator_apple:
     dependency: transitive
     description:
@@ -630,6 +638,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.3.14"
+  geolocator_linux:
+    dependency: transitive
+    description:
+      name: geolocator_linux
+      sha256: c4e966f0a7a87e70049eac7a2617f9e16fd4c585a26e4330bdfc3a71e6a721f3
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.2.3"
   geolocator_platform_interface:
     dependency: transitive
     description:
@@ -742,6 +758,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.3.2"
+  gsettings:
+    dependency: transitive
+    description:
+      name: gsettings
+      sha256: "1b0ce661f5436d2db1e51f3c4295a49849f03d304003a7ba177d01e3a858249c"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.2.8"
   gtk:
     dependency: transitive
     description:
@@ -946,10 +970,34 @@ packages:
     dependency: "direct main"
     description:
       name: linkedin_login
-      sha256: "06ddcb13b34f17c4b737aa4974a05332fdef63a00a43355f9b52ca463ea2cf45"
+      sha256: aec7676775fa0a7f0c81bd0fab42bb292f8bc1f9f0bad3243e00c9d9c8b986e1
       url: "https://pub.dev"
     source: hosted
-    version: "2.3.1"
+    version: "3.1.3"
+  linkedin_login_android:
+    dependency: transitive
+    description:
+      name: linkedin_login_android
+      sha256: "459d6ea57e257b673f9cb2f6528b369f2922cde4ba10ea0f417d3bad91571641"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.0.1"
+  linkedin_login_ios:
+    dependency: transitive
+    description:
+      name: linkedin_login_ios
+      sha256: "3d1beb325a7e2e77e6b3c20245158ffa3b83ea3afc5dc81a3bffed08dccef680"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.0.2"
+  linkedin_login_platform_interface:
+    dependency: transitive
+    description:
+      name: linkedin_login_platform_interface
+      sha256: c34678d6bd5656371eed2df6b4f51685d832e8ff48d7c99e991f0a373d473200
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.0.1"
   lints:
     dependency: transitive
     description:
@@ -1535,10 +1583,10 @@ packages:
     dependency: "direct main"
     description:
       name: uuid
-      sha256: "648e103079f7c64a36dc7d39369cabb358d377078a051d6ae2ad3aa539519313"
+      sha256: "1fef9e8e11e2991bb773070d4656b7bd5d850967a2456cfc83cf47925ba79489"
       url: "https://pub.dev"
     source: hosted
-    version: "3.0.7"
+    version: "4.5.3"
   vector_math:
     dependency: transitive
     description:

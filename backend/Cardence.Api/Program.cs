@@ -6,17 +6,16 @@ using Cardence.Application.Common;
 using Cardence.Application;
 using Cardence.Application.Options;
 using Cardence.Infrastructure;
-using Cardence.Infrastructure.Persistence;
+using Cardence.Infrastructure.Storage;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.StaticFiles;
+using Cardence.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.Extensions.FileProviders;
 using Microsoft.OpenApi.Models;
 using Serilog;
 
@@ -334,53 +333,9 @@ app.Lifetime.ApplicationStarted.Register(() =>
 
 app.UseHttpsRedirection();
 
+// /uploads dosyaları kalıcı depodan (local volume veya S3) sunulur.
 app.UseAuthentication();
-
-// /uploads erişimi burada denetlenir; statik dosyalar global FallbackPolicy'den önce sunulur.
-app.Use(async (context, next) =>
-{
-    if (context.Request.Path.StartsWithSegments("/uploads")
-        && !(context.User.Identity?.IsAuthenticated ?? false)
-        && !IsPublicProfilePhotoUpload(context.Request.Path))
-    {
-        context.Response.StatusCode = StatusCodes.Status401Unauthorized;
-        context.Response.ContentType = "application/json";
-        await context.Response.WriteAsJsonAsync(
-            ApiResponse<object?>.Fail(
-                ErrorCodes.Unauthorized,
-                "Yetkilendirme gerekli.",
-                traceId: context.TraceIdentifier));
-        return;
-    }
-
-    await next();
-});
-
-var uploadsPath = Path.Combine(app.Environment.ContentRootPath, "uploads");
-Directory.CreateDirectory(uploadsPath);
-var uploadContentTypes = new FileExtensionContentTypeProvider();
-uploadContentTypes.Mappings[".jpg"] = "image/jpeg";
-uploadContentTypes.Mappings[".jpeg"] = "image/jpeg";
-uploadContentTypes.Mappings[".png"] = "image/png";
-uploadContentTypes.Mappings[".webp"] = "image/webp";
-app.UseStaticFiles(new StaticFileOptions
-{
-    FileProvider = new PhysicalFileProvider(uploadsPath),
-    RequestPath = "/uploads",
-    ContentTypeProvider = uploadContentTypes,
-    OnPrepareResponse = static ctx =>
-    {
-        if (!ctx.Context.Request.Path.StartsWithSegments("/uploads"))
-        {
-            return;
-        }
-
-        var cacheValue = ctx.Context.Request.Query.ContainsKey("v")
-            ? "public,max-age=31536000,immutable"
-            : "private,max-age=3600";
-        ctx.Context.Response.Headers.CacheControl = cacheValue;
-    },
-});
+app.UseUploadContent();
 
 app.UseAuthorization();
 
@@ -392,56 +347,5 @@ app.MapHealthChecks("/health/ready", new HealthCheckOptions
 }).AllowAnonymous();
 
 app.Run();
-
-static bool IsPublicProfilePhotoUpload(PathString path)
-{
-    var value = path.Value;
-    if (string.IsNullOrEmpty(value))
-    {
-        return false;
-    }
-
-    var segments = value.Split('/', StringSplitOptions.RemoveEmptyEntries);
-    if (segments.Length != 4)
-    {
-        return false;
-    }
-
-    if (!segments[0].Equals("uploads", StringComparison.OrdinalIgnoreCase)
-        || !segments[1].Equals("users", StringComparison.OrdinalIgnoreCase))
-    {
-        return false;
-    }
-
-    if (!IsUserIdSegment(segments[2]))
-    {
-        return false;
-    }
-
-    return MediaUrlBuilder.IsProfilePhotoFile(segments[3]);
-}
-
-static bool IsUserIdSegment(string segment)
-{
-    if (Guid.TryParse(segment, out _))
-    {
-        return true;
-    }
-
-    if (segment.Length != 32)
-    {
-        return false;
-    }
-
-    foreach (var ch in segment)
-    {
-        if (!Uri.IsHexDigit(ch))
-        {
-            return false;
-        }
-    }
-
-    return true;
-}
 
 public partial class Program;

@@ -23,6 +23,9 @@ RUN dotnet publish Cardence.Api/Cardence.Api.csproj \
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS final
 WORKDIR /app
 
+RUN mkdir -p /app/uploads
+VOLUME ["/app/uploads"]
+
 ENV ASPNETCORE_ENVIRONMENT=Production
 
 EXPOSE 8080

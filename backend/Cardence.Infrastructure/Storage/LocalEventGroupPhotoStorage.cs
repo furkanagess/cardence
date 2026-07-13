@@ -1,21 +1,20 @@
 using Cardence.Application.Common;
 using Cardence.Application.Interfaces;
 using Cardence.Application.Options;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 
 namespace Cardence.Infrastructure.Storage;
 
 public sealed class LocalEventGroupPhotoStorage : IEventGroupPhotoStorage
 {
-    private readonly string _uploadRoot;
+    private readonly IUploadContentStore _contentStore;
     private readonly string _publicBaseUrl;
 
     public LocalEventGroupPhotoStorage(
-        IHostEnvironment environment,
+        IUploadContentStore contentStore,
         IOptions<ApiOptions> apiOptions)
     {
-        _uploadRoot = Path.Combine(environment.ContentRootPath, "uploads");
+        _contentStore = contentStore;
         _publicBaseUrl = apiOptions.Value.PublicBaseUrl.TrimEnd('/');
     }
 
@@ -28,16 +27,26 @@ public sealed class LocalEventGroupPhotoStorage : IEventGroupPhotoStorage
     {
         _ = contentType;
 
-        var groupDir = Path.Combine(
-            _uploadRoot,
-            "users",
-            userId.ToString("D"),
-            "event-groups");
-        await MediaImageProcessor.SaveEventGroupVariantsAsync(
+        var relativeDirectory = $"users/{userId:D}/event-groups";
+        await _contentStore.DeleteMatchingFilesAsync(
+            relativeDirectory,
+            groupId.ToString("D"),
+            cancellationToken);
+
+        var variants = await MediaImageProcessor.CreateEventGroupVariantsAsync(
             content,
-            groupDir,
             groupId,
             cancellationToken);
+
+        foreach (var (fileName, bytes) in variants)
+        {
+            await using var stream = new MemoryStream(bytes);
+            await _contentStore.SaveFileAsync(
+                $"{relativeDirectory}/{fileName}",
+                stream,
+                "image/jpeg",
+                cancellationToken);
+        }
 
         var version = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
         return MediaUrlBuilder.EventGroupPhotoUrl(
@@ -53,24 +62,9 @@ public sealed class LocalEventGroupPhotoStorage : IEventGroupPhotoStorage
         Guid groupId,
         CancellationToken cancellationToken = default)
     {
-        _ = cancellationToken;
-
-        var groupDir = Path.Combine(
-            _uploadRoot,
-            "users",
-            userId.ToString("D"),
-            "event-groups");
-        if (!Directory.Exists(groupDir))
-        {
-            return Task.CompletedTask;
-        }
-
-        var prefix = $"{groupId:D}";
-        foreach (var file in Directory.EnumerateFiles(groupDir, $"{prefix}*"))
-        {
-            File.Delete(file);
-        }
-
-        return Task.CompletedTask;
+        return _contentStore.DeleteMatchingFilesAsync(
+            $"users/{userId:D}/event-groups",
+            groupId.ToString("D"),
+            cancellationToken);
     }
 }

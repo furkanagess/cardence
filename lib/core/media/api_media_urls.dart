@@ -68,6 +68,14 @@ class ApiMediaUrls {
   static bool isPublicProfilePhotoUrl(String? url) =>
       isPublicProfilePhotoPath(normalizedPath(url));
 
+  /// Etkinlik kapak fotoğrafları herkese açıktır.
+  static bool isPublicEventGroupPhotoUrl(String? url) =>
+      isPublicEventGroupPhotoPath(normalizedPath(url));
+
+  /// Herkese açık Cardence `/uploads` yolu.
+  static bool isPublicUploadUrl(String? url) =>
+      isPublicProfilePhotoUrl(url) || isPublicEventGroupPhotoUrl(url);
+
   static bool isPublicProfilePhotoPath(String path) {
     final segments =
         path.split('/').where((segment) => segment.isNotEmpty).toList();
@@ -78,6 +86,20 @@ class ApiMediaUrls {
     final fileName = segments[3].toLowerCase();
     return fileName.startsWith('profile-') && fileName.endsWith('.jpg') ||
         fileName.startsWith('profile.');
+  }
+
+  static bool isPublicEventGroupPhotoPath(String path) {
+    final segments =
+        path.split('/').where((segment) => segment.isNotEmpty).toList();
+    if (segments.length != 5) return false;
+    if (segments[0] != 'uploads' ||
+        segments[1] != 'users' ||
+        segments[3] != 'event-groups') {
+      return false;
+    }
+    if (!_isUserIdSegment(segments[2])) return false;
+
+    return _eventGroupSizedPattern.hasMatch(segments[4]);
   }
 
   static String _applyVariantToPath(String path, int width) {

@@ -37,7 +37,10 @@ class AuthenticatedImageLoader {
 
   static bool hasCachedBytes(String url) => cachedBytes(url) != null;
 
-  static Future<Uint8List?> loadBytes(String url) async {
+  static Future<Uint8List?> loadBytes(
+    String url, {
+    String? sourceUrl,
+  }) async {
     final resolved = ApiMediaUrls.resolve(url);
     if (resolved == null) return null;
 
@@ -53,7 +56,11 @@ class AuthenticatedImageLoader {
     final inFlight = _inFlight[resolved];
     if (inFlight != null) return inFlight;
 
-    final future = _loadResolved(resolved, url);
+    final future = _loadResolved(
+      resolved,
+      sourceUrl ?? url,
+      preferredResolvedUrl: resolved,
+    );
     _inFlight[resolved] = future;
     try {
       return await future;
@@ -64,35 +71,53 @@ class AuthenticatedImageLoader {
 
   static Future<Uint8List?> _loadResolved(
     String resolvedUrl,
-    String sourceUrl,
-  ) async {
+    String sourceUrl, {
+    required String preferredResolvedUrl,
+  }) async {
     if (!ApiMediaUrls.isApiUploadUrl(sourceUrl)) return null;
 
     final token =
         await AuthTokenCoordinator.instance?.getValidAccessToken();
+    final isPublic = ApiMediaUrls.isPublicUploadUrl(sourceUrl);
+    final urlsToTry = _buildFallbackUrls(sourceUrl, preferredResolvedUrl);
 
-    if (token != null && token.isNotEmpty) {
-      final authed = await _fetchBytes(resolvedUrl, bearerToken: token);
-      if (authed != null) return authed;
-    }
-
-    if (ApiMediaUrls.isPublicProfilePhotoUrl(sourceUrl)) {
-      final publicBytes = await _fetchBytes(resolvedUrl);
-      if (publicBytes != null) return publicBytes;
-    }
-
-    final canonical = ApiMediaUrls.resolve(sourceUrl);
-    if (canonical != null && canonical != resolvedUrl) {
+    for (final tryUrl in urlsToTry) {
       if (token != null && token.isNotEmpty) {
-        final fallback = await _fetchBytes(canonical, bearerToken: token);
-        if (fallback != null) return fallback;
+        final authed = await _fetchBytes(tryUrl, bearerToken: token);
+        if (authed != null) return authed;
       }
-      if (ApiMediaUrls.isPublicProfilePhotoUrl(sourceUrl)) {
-        return _fetchBytes(canonical);
+
+      if (isPublic) {
+        final publicBytes = await _fetchBytes(tryUrl);
+        if (publicBytes != null) return publicBytes;
       }
     }
 
     return null;
+  }
+
+  static List<String> _buildFallbackUrls(
+    String sourceUrl,
+    String preferredResolvedUrl,
+  ) {
+    final ordered = <String>[];
+
+    void add(String? url) {
+      final resolved = ApiMediaUrls.resolve(url);
+      if (resolved == null || resolved.isEmpty) return;
+      if (!ordered.contains(resolved)) {
+        ordered.add(resolved);
+      }
+    }
+
+    add(preferredResolvedUrl);
+    add(ApiMediaUrls.resolve(sourceUrl));
+
+    for (final size in MediaImageSize.values) {
+      add(ApiMediaUrls.variantUrl(sourceUrl, size));
+    }
+
+    return ordered;
   }
 
   static Future<Uint8List?> _fetchBytes(

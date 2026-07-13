@@ -12,6 +12,21 @@ public static class MediaImageProcessor
 {
     private const int JpegQuality = 82;
 
+    public static async Task<IReadOnlyDictionary<string, byte[]>> CreateProfileVariantsAsync(
+        Stream content,
+        CancellationToken cancellationToken = default)
+    {
+        return await CreateVariantsAsync(content, "profile", cancellationToken);
+    }
+
+    public static async Task<IReadOnlyDictionary<string, byte[]>> CreateEventGroupVariantsAsync(
+        Stream content,
+        Guid groupId,
+        CancellationToken cancellationToken = default)
+    {
+        return await CreateVariantsAsync(content, groupId.ToString("D"), cancellationToken);
+    }
+
     public static async Task SaveProfileVariantsAsync(
         Stream content,
         string userDirectory,
@@ -20,14 +35,12 @@ public static class MediaImageProcessor
         Directory.CreateDirectory(userDirectory);
         DeleteExistingProfileFiles(userDirectory);
 
-        await using var buffer = new MemoryStream();
-        await content.CopyToAsync(buffer, cancellationToken);
-        buffer.Position = 0;
-
-        using var image = await Image.LoadAsync(buffer, cancellationToken);
-        image.Mutate(x => x.AutoOrient());
-
-        await WriteVariantsAsync(image, userDirectory, "profile", cancellationToken);
+        var variants = await CreateProfileVariantsAsync(content, cancellationToken);
+        foreach (var (fileName, bytes) in variants)
+        {
+            var path = Path.Combine(userDirectory, fileName);
+            await File.WriteAllBytesAsync(path, bytes, cancellationToken);
+        }
     }
 
     public static async Task SaveEventGroupVariantsAsync(
@@ -39,6 +52,19 @@ public static class MediaImageProcessor
         Directory.CreateDirectory(groupDirectory);
         DeleteExistingEventGroupFiles(groupDirectory, groupId);
 
+        var variants = await CreateEventGroupVariantsAsync(content, groupId, cancellationToken);
+        foreach (var (fileName, bytes) in variants)
+        {
+            var path = Path.Combine(groupDirectory, fileName);
+            await File.WriteAllBytesAsync(path, bytes, cancellationToken);
+        }
+    }
+
+    private static async Task<IReadOnlyDictionary<string, byte[]>> CreateVariantsAsync(
+        Stream content,
+        string baseName,
+        CancellationToken cancellationToken)
+    {
         await using var buffer = new MemoryStream();
         await content.CopyToAsync(buffer, cancellationToken);
         buffer.Position = 0;
@@ -46,20 +72,12 @@ public static class MediaImageProcessor
         using var image = await Image.LoadAsync(buffer, cancellationToken);
         image.Mutate(x => x.AutoOrient());
 
-        await WriteVariantsAsync(image, groupDirectory, groupId.ToString("D"), cancellationToken);
-    }
-
-    private static async Task WriteVariantsAsync(
-        Image image,
-        string directory,
-        string baseName,
-        CancellationToken cancellationToken)
-    {
         var encoder = new JpegEncoder
         {
             Quality = JpegQuality,
         };
 
+        var variants = new Dictionary<string, byte[]>(StringComparer.Ordinal);
         foreach (var width in MediaVariantWidths.All)
         {
             using var resized = image.Clone(ctx => ctx.Resize(new ResizeOptions
@@ -68,9 +86,12 @@ public static class MediaImageProcessor
                 Mode = ResizeMode.Max,
             }));
 
-            var path = Path.Combine(directory, $"{baseName}-{width}.jpg");
-            await resized.SaveAsJpegAsync(path, encoder, cancellationToken);
+            await using var output = new MemoryStream();
+            await resized.SaveAsJpegAsync(output, encoder, cancellationToken);
+            variants[$"{baseName}-{width}.jpg"] = output.ToArray();
         }
+
+        return variants;
     }
 
     private static void DeleteExistingProfileFiles(string userDirectory)

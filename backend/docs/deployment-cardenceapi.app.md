@@ -65,6 +65,12 @@ Railway Dashboard → API servisi → **Settings**:
 | `Email__SmtpPassword`        | SendGrid API key (`SG.xxx`)  |
 | `Email__FromAddress`         | `noreply@cardenceapi.app`    |
 | `PasswordReset__ResetBaseUrl`| `https://cardenceapi.app/auth/reset-password` |
+| `ObjectStorage__Provider`    | `local` |
+| `ObjectStorage__LocalRootPath` | `/app/uploads` |
+| `RAILWAY_RUN_UID`            | `0` (volume yazma izni) |
+
+> **Medya depolama (profil + etkinlik fotoğrafları):** Railway Volume zorunlu.
+> Aşağıdaki **Medya depolama (Volume)** bölümüne bakın.
 
 > **Şifre sıfırlama maili:** SendGrid'de API key oluşturun ve gönderen adresini doğrulayın.
 > Detay: [`railway.env.example`](../railway.env.example) → `Email__*` değişkenleri.
@@ -123,6 +129,43 @@ API ayrıca şu ortam değişkenlerini de okur (ConnectionStrings set edilmemiş
 Yine de Railway'de `ConnectionStrings__Default` referansını açıkça set etmek en güvenilir yoldur.
 
 Örnek env listesi: [`railway.env.example`](../railway.env.example)
+
+#### Medya depolama (Volume) — profil ve etkinlik fotoğrafları
+
+Fotoğraflar veritabanında URL olarak tutulur; dosyalar `/app/uploads` altında saklanır.
+Volume olmadan her deploy'da dosyalar silinir ve TestFlight'ta görseller 404 verir.
+
+**1. Volume oluştur ve bağla**
+
+```bash
+cd backend/deploy/scripts
+./setup-uploads-volume-railway.sh
+```
+
+Manuel (Railway Dashboard): cardence servisi → **Volumes** → **Add Volume** → mount path: `/app/uploads`
+
+**2. Ortam değişkenleri** (script otomatik set eder)
+
+| Variable | Değer |
+|----------|-------|
+| `ObjectStorage__Provider` | `local` |
+| `ObjectStorage__LocalRootPath` | `/app/uploads` |
+| `RAILWAY_RUN_UID` | `0` |
+
+**3. Redeploy**
+
+```bash
+cd backend && railway redeploy
+```
+
+**4. Doğrula** (kullanıcı profil fotoğrafı yükledikten sonra)
+
+```bash
+curl -I "https://cardenceapi.app/uploads/users/{userId}/profile-512.jpg"
+# HTTP/2 200
+```
+
+> Daha önce yüklenmiş fotoğraflar deploy sırasında kaybolmuş olabilir; kullanıcıların yeniden yüklemesi gerekir.
 
 ### Seçenek B — Docker (VPS / Fly.io)
 
