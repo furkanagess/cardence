@@ -54,11 +54,15 @@ import 'features/saved_cards/domain/usecases/add_saved_card.dart';
 import 'features/saved_cards/domain/usecases/delete_saved_card.dart';
 import 'features/saved_cards/domain/usecases/get_saved_cards.dart';
 import 'features/saved_cards/domain/usecases/get_saved_cards_wallet_quota.dart';
+import 'features/saved_cards/domain/usecases/get_wallet_card_invitations.dart';
+import 'features/saved_cards/domain/usecases/accept_wallet_card_invitation.dart';
+import 'features/saved_cards/domain/usecases/reject_wallet_card_invitation.dart';
 import 'features/saved_cards/domain/usecases/link_saved_cards_to_event_group.dart';
 import 'features/saved_cards/domain/usecases/save_saved_card.dart';
 import 'features/saved_cards/domain/usecases/track_saved_card_contact_click.dart';
 import 'features/saved_cards/domain/usecases/upgrade_wallet_plan.dart';
 import 'features/subscriptions/domain/usecases/identify_subscription_user.dart';
+import 'features/subscriptions/domain/usecases/set_subscription_preferred_locale.dart';
 import 'features/subscriptions/domain/usecases/restore_wallet_purchases.dart';
 import 'features/subscriptions/presentation/helpers/premium_purchase_success_handler.dart';
 import 'features/subscriptions/presentation/widgets/premium_purchase_scope.dart';
@@ -89,6 +93,7 @@ class App extends StatefulWidget {
     required this.restoreAuthSession,
     required this.getAuthSession,
     required this.identifySubscriptionUser,
+    required this.setSubscriptionPreferredLocale,
     required this.loginWithEmail,
     required this.loginWithPhone,
     required this.loginWithLinkedIn,
@@ -131,6 +136,9 @@ class App extends StatefulWidget {
     required this.getSavedCards,
     required this.saveSavedCard,
     required this.getSavedCardsWalletQuota,
+    required this.getWalletCardInvitations,
+    required this.acceptWalletCardInvitation,
+    required this.rejectWalletCardInvitation,
     required this.addSavedCard,
     required this.deleteSavedCard,
     required this.trackSavedCardContactClick,
@@ -153,6 +161,7 @@ class App extends StatefulWidget {
       restoreAuthSession: init.restoreAuthSession,
       getAuthSession: init.getAuthSession,
       identifySubscriptionUser: init.identifySubscriptionUser,
+      setSubscriptionPreferredLocale: init.setSubscriptionPreferredLocale,
       loginWithEmail: init.loginWithEmail,
       loginWithPhone: init.loginWithPhone,
       loginWithLinkedIn: init.loginWithLinkedIn,
@@ -195,6 +204,9 @@ class App extends StatefulWidget {
       getSavedCards: init.getSavedCards,
       saveSavedCard: init.saveSavedCard,
       getSavedCardsWalletQuota: init.getSavedCardsWalletQuota,
+      getWalletCardInvitations: init.getWalletCardInvitations,
+      acceptWalletCardInvitation: init.acceptWalletCardInvitation,
+      rejectWalletCardInvitation: init.rejectWalletCardInvitation,
       addSavedCard: init.addSavedCard,
       deleteSavedCard: init.deleteSavedCard,
       trackSavedCardContactClick: init.trackSavedCardContactClick,
@@ -213,6 +225,7 @@ class App extends StatefulWidget {
   final RestoreAuthSession restoreAuthSession;
   final GetAuthSession getAuthSession;
   final IdentifySubscriptionUser identifySubscriptionUser;
+  final SetSubscriptionPreferredLocale setSubscriptionPreferredLocale;
   final LoginWithEmail loginWithEmail;
   final LoginWithPhone loginWithPhone;
   final LoginWithLinkedIn loginWithLinkedIn;
@@ -255,6 +268,9 @@ class App extends StatefulWidget {
   final GetSavedCards getSavedCards;
   final SaveSavedCard saveSavedCard;
   final GetSavedCardsWalletQuota getSavedCardsWalletQuota;
+  final GetWalletCardInvitations getWalletCardInvitations;
+  final AcceptWalletCardInvitation acceptWalletCardInvitation;
+  final RejectWalletCardInvitation rejectWalletCardInvitation;
   final AddSavedCard addSavedCard;
   final DeleteSavedCard deleteSavedCard;
   final TrackSavedCardContactClick trackSavedCardContactClick;
@@ -494,6 +510,11 @@ class _AppState extends State<App> {
     await widget.setLocalePreference(preference);
     if (!mounted) return;
     setState(() => _localePreference = preference);
+    unawaited(
+      widget.setSubscriptionPreferredLocale(
+        revenueCatPreferredLocaleForPreference(preference),
+      ),
+    );
   }
 
   ThemeMode get _themeMode {
@@ -550,6 +571,9 @@ class _AppState extends State<App> {
           getSavedCards: widget.getSavedCards,
           saveSavedCard: widget.saveSavedCard,
           getSavedCardsWalletQuota: widget.getSavedCardsWalletQuota,
+          getWalletCardInvitations: widget.getWalletCardInvitations,
+          acceptWalletCardInvitation: widget.acceptWalletCardInvitation,
+          rejectWalletCardInvitation: widget.rejectWalletCardInvitation,
           addSavedCard: widget.addSavedCard,
           deleteSavedCard: widget.deleteSavedCard,
           trackSavedCardContactClick: widget.trackSavedCardContactClick,

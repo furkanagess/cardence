@@ -4,6 +4,7 @@ import '../../../event_groups/domain/entities/event_group.dart';
 import '../../domain/entities/add_saved_card_result.dart';
 import '../../domain/entities/saved_card.dart';
 import '../../domain/entities/saved_cards_wallet_quota.dart';
+import '../../domain/entities/wallet_card_invitation.dart';
 import '../../domain/entities/wallet_plan_tier.dart';
 import '../../domain/saved_cards_wallet_limits.dart';
 import 'saved_cards_filter_models.dart';
@@ -13,6 +14,9 @@ enum SavedCardsEffectType {
   openFilters,
   openAddCard,
   openUpgradeSheet,
+  invitationAccepted,
+  invitationRejected,
+  invitationQuotaFull,
 }
 
 class SavedCardsState extends Equatable {
@@ -25,9 +29,11 @@ class SavedCardsState extends Equatable {
   const SavedCardsState({
     this.cards = const [],
     this.eventGroups = const [],
+    this.invitations = const [],
     this.quota = _initialQuota,
     this.isLoadingQuota = true,
     this.isLoadingCards = true,
+    this.respondingInvitationId,
     this.filter = const SavedCardsFilterSelection(
       eventFilter: SavedCardsFilterSelection.allEventsValue,
       dateFilter: SavedCardsDateFilter.all,
@@ -40,9 +46,11 @@ class SavedCardsState extends Equatable {
 
   final List<SavedCard> cards;
   final List<EventGroup> eventGroups;
+  final List<WalletCardInvitation> invitations;
   final SavedCardsWalletQuota quota;
   final bool isLoadingQuota;
   final bool isLoadingCards;
+  final String? respondingInvitationId;
   final SavedCardsFilterSelection filter;
   final String searchQuery;
   final SavedCardsEffectType effectType;
@@ -55,9 +63,12 @@ class SavedCardsState extends Equatable {
   SavedCardsState copyWith({
     List<SavedCard>? cards,
     List<EventGroup>? eventGroups,
+    List<WalletCardInvitation>? invitations,
     SavedCardsWalletQuota? quota,
     bool? isLoadingQuota,
     bool? isLoadingCards,
+    String? respondingInvitationId,
+    bool clearRespondingInvitationId = false,
     SavedCardsFilterSelection? filter,
     String? searchQuery,
     SavedCardsEffectType? effectType,
@@ -68,9 +79,13 @@ class SavedCardsState extends Equatable {
     return SavedCardsState(
       cards: cards ?? this.cards,
       eventGroups: eventGroups ?? this.eventGroups,
+      invitations: invitations ?? this.invitations,
       quota: quota ?? this.quota,
       isLoadingQuota: isLoadingQuota ?? this.isLoadingQuota,
       isLoadingCards: isLoadingCards ?? this.isLoadingCards,
+      respondingInvitationId: clearRespondingInvitationId
+          ? null
+          : (respondingInvitationId ?? this.respondingInvitationId),
       filter: filter ?? this.filter,
       searchQuery: searchQuery ?? this.searchQuery,
       effectType: clearEffect
@@ -86,9 +101,11 @@ class SavedCardsState extends Equatable {
   List<Object?> get props => [
         cards,
         eventGroups,
+        invitations,
         quota,
         isLoadingQuota,
         isLoadingCards,
+        respondingInvitationId,
         filter,
         searchQuery,
         effectType,

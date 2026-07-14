@@ -24,11 +24,17 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
   Future<WalletPaywallResult> presentWalletPaywall({
     bool onlyIfNeeded = false,
     bool? useDarkAppearance,
+    String? preferredLocale,
   }) =>
       _dataSource.presentWalletPaywall(
         onlyIfNeeded: onlyIfNeeded,
         useDarkAppearance: useDarkAppearance,
+        preferredLocale: preferredLocale,
       );
+
+  @override
+  Future<void> setPreferredLocale(String? locale) =>
+      _dataSource.setPreferredLocale(locale);
 
   @override
   Future<bool> restorePurchases() => _dataSource.restorePurchases();

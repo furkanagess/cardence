@@ -3416,6 +3416,24 @@ abstract class AppLocalizations {
   /// **'Kart ID\'nizi gönderin; karşı taraf Cardence\'te kartınızı ekleyebilir.'**
   String get shareCardIdSubtitle;
 
+  /// No description provided for @shareWithQrSubtitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'QR kodu göstererek hızlıca ekletin'**
+  String get shareWithQrSubtitle;
+
+  /// No description provided for @shareWithCardId.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kart ID ile paylaş'**
+  String get shareWithCardId;
+
+  /// No description provided for @shareWithCardIdSubtitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kart kimliğini mesaj olarak gönderin'**
+  String get shareWithCardIdSubtitle;
+
   /// No description provided for @rateOnAppStore.
   ///
   /// In tr, this message translates to:
@@ -4316,6 +4334,102 @@ abstract class AppLocalizations {
   /// **'Davetler'**
   String get eventInvitationsSection;
 
+  /// No description provided for @eventInvitationQuotaFull.
+  ///
+  /// In tr, this message translates to:
+  /// **'Etkinlik grubu hakkınız dolu. Daveti kabul etmek için kapasitenizi artırın.'**
+  String get eventInvitationQuotaFull;
+
+  /// No description provided for @eventInvitationUpgradeToAccept.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kapasiteyi artır'**
+  String get eventInvitationUpgradeToAccept;
+
+  /// No description provided for @scanCardQrTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'QR okut'**
+  String get scanCardQrTitle;
+
+  /// No description provided for @scanCardQrHint.
+  ///
+  /// In tr, this message translates to:
+  /// **'Cardence QR kodunu çerçeveye hizalayın'**
+  String get scanCardQrHint;
+
+  /// No description provided for @scanCardQrInvalid.
+  ///
+  /// In tr, this message translates to:
+  /// **'Geçerli bir Cardence QR kodu bulunamadı'**
+  String get scanCardQrInvalid;
+
+  /// No description provided for @scanCardQrCameraDenied.
+  ///
+  /// In tr, this message translates to:
+  /// **'QR okutmak için kamera izni gerekli'**
+  String get scanCardQrCameraDenied;
+
+  /// No description provided for @scanCardQrAllowCamera.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kamera izni ver'**
+  String get scanCardQrAllowCamera;
+
+  /// No description provided for @walletCardInvitationsSection.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kart ekleme davetleri'**
+  String get walletCardInvitationsSection;
+
+  /// No description provided for @walletCardInvitationAddedYou.
+  ///
+  /// In tr, this message translates to:
+  /// **'{inviterName} sizi cüzdanınıza ekledi'**
+  String walletCardInvitationAddedYou(String inviterName);
+
+  /// No description provided for @walletCardInvitationPrompt.
+  ///
+  /// In tr, this message translates to:
+  /// **'Siz de onu kartlarınıza eklemek ister misiniz?'**
+  String walletCardInvitationPrompt(String inviterName);
+
+  /// No description provided for @walletCardInvitationAccept.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kabul et'**
+  String get walletCardInvitationAccept;
+
+  /// No description provided for @walletCardInvitationReject.
+  ///
+  /// In tr, this message translates to:
+  /// **'Reddet'**
+  String get walletCardInvitationReject;
+
+  /// No description provided for @walletCardInvitationAccepted.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kart cüzdanınıza eklendi'**
+  String get walletCardInvitationAccepted;
+
+  /// No description provided for @walletCardInvitationRejected.
+  ///
+  /// In tr, this message translates to:
+  /// **'Davet reddedildi'**
+  String get walletCardInvitationRejected;
+
+  /// No description provided for @walletCardInvitationQuotaFull.
+  ///
+  /// In tr, this message translates to:
+  /// **'Cüzdan kapasiteniz dolu. Daveti kabul etmek için kapasitenizi artırın.'**
+  String get walletCardInvitationQuotaFull;
+
+  /// No description provided for @walletCardInvitationUpgradeToAccept.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kapasiteyi artır'**
+  String get walletCardInvitationUpgradeToAccept;
+
   /// No description provided for @eventEndedSection.
   ///
   /// In tr, this message translates to:
@@ -4909,6 +5023,30 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Kartımı oluştur'**
   String get createMyCard;
+
+  /// No description provided for @cardCreatedShareTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kartın hazır'**
+  String get cardCreatedShareTitle;
+
+  /// No description provided for @cardCreatedShareHeadline.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kartın oluşturuldu'**
+  String get cardCreatedShareHeadline;
+
+  /// No description provided for @cardCreatedShareSubtitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'QR kodunu veya kart ID’ni paylaşarak başkalarının seni cüzdanına eklemesini sağlayabilirsin.'**
+  String get cardCreatedShareSubtitle;
+
+  /// No description provided for @cardCreatedShareContinue.
+  ///
+  /// In tr, this message translates to:
+  /// **'Devam et'**
+  String get cardCreatedShareContinue;
 
   /// No description provided for @continueWithArrow.
   ///

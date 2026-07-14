@@ -838,6 +838,70 @@ namespace Cardence.Infrastructure.Migrations
                     b.ToTable("user_device_tokens", (string)null);
                 });
 
+            modelBuilder.Entity("Cardence.Domain.Entities.WalletCardInvite", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at_utc");
+
+                    b.Property<DateTime>("ExpiresAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("expires_at_utc");
+
+                    b.Property<Guid>("InviteeUserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("invitee_user_id");
+
+                    b.Property<Guid>("InviterUserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("inviter_user_id");
+
+                    b.Property<Guid>("ProposedCardEntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("proposed_card_entity_id");
+
+                    b.Property<string>("ProposedCardId")
+                        .IsRequired()
+                        .HasMaxLength(6)
+                        .HasColumnType("character varying(6)")
+                        .HasColumnName("proposed_card_id");
+
+                    b.Property<DateTime?>("RespondedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("responded_at_utc");
+
+                    b.Property<string>("SavedCardId")
+                        .IsRequired()
+                        .HasMaxLength(6)
+                        .HasColumnType("character varying(6)")
+                        .HasColumnName("saved_card_id");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("status");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ExpiresAtUtc");
+
+                    b.HasIndex("InviterUserId");
+
+                    b.HasIndex("ProposedCardEntityId");
+
+                    b.HasIndex("InviteeUserId", "Status");
+
+                    b.HasIndex("InviteeUserId", "InviterUserId", "Status");
+
+                    b.ToTable("wallet_card_invites", (string)null);
+                });
+
             modelBuilder.Entity("Cardence.Domain.Entities.WalletEntitlement", b =>
                 {
                     b.Property<Guid>("UserId")
@@ -1031,6 +1095,33 @@ namespace Cardence.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Cardence.Domain.Entities.WalletCardInvite", b =>
+                {
+                    b.HasOne("Cardence.Domain.Entities.User", "InviteeUser")
+                        .WithMany()
+                        .HasForeignKey("InviteeUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Cardence.Domain.Entities.User", "InviterUser")
+                        .WithMany()
+                        .HasForeignKey("InviterUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Cardence.Domain.Entities.Card", "ProposedCard")
+                        .WithMany()
+                        .HasForeignKey("ProposedCardEntityId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("InviteeUser");
+
+                    b.Navigation("InviterUser");
+
+                    b.Navigation("ProposedCard");
                 });
 
             modelBuilder.Entity("Cardence.Domain.Entities.WalletEntitlement", b =>

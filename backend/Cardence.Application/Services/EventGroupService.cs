@@ -359,6 +359,8 @@ public sealed class EventGroupService : IEventGroupService
             throw new NotFoundException("EventGroupInvitation", request.Id);
         }
 
+        await EnsureCanCreateEventGroupAsync(userId, cancellationToken);
+
         await _eventGroupRepository.AcceptInvitationAsync(invitation, cancellationToken);
     }
 

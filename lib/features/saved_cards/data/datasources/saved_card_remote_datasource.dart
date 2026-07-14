@@ -2,6 +2,7 @@ import '../../../../core/network/api_response_parser.dart';
 import '../../../../core/network/auth_api_exception.dart';
 import '../../../../core/network/dio_api_client.dart';
 import '../models/saved_card_model.dart';
+import '../models/wallet_card_invitation_model.dart';
 import '../models/wallet_quota_model.dart';
 
 abstract class SavedCardRemoteDataSource {
@@ -23,6 +24,20 @@ abstract class SavedCardRemoteDataSource {
 
   Future<void> deleteSavedCard({
     required String cardId,
+    required String accessToken,
+  });
+
+  Future<List<WalletCardInvitationModel>> getPendingInvitations({
+    required String accessToken,
+  });
+
+  Future<void> acceptInvitation({
+    required String invitationId,
+    required String accessToken,
+  });
+
+  Future<void> rejectInvitation({
+    required String invitationId,
     required String accessToken,
   });
 }
@@ -135,6 +150,63 @@ class SavedCardRemoteDataSourceImpl implements SavedCardRemoteDataSource {
       '/DeleteSavedCard?cardId=${Uri.encodeQueryComponent(cardId)}',
       accessToken: accessToken,
       fallbackError: 'Kart silinemedi.',
+    );
+  }
+
+  List<WalletCardInvitationModel> _parseInvitationList(
+    Map<String, dynamic> json,
+  ) {
+    final data = json['data'] ?? json['Data'];
+    if (data is! List) {
+      throw AuthApiException('Kart ekleme davetleri alınamadı.');
+    }
+
+    return data
+        .map(
+          (item) => WalletCardInvitationModel.fromJson(
+            Map<String, dynamic>.from(item as Map),
+          ),
+        )
+        .toList();
+  }
+
+  @override
+  Future<List<WalletCardInvitationModel>> getPendingInvitations({
+    required String accessToken,
+  }) async {
+    final json = await _client.get(
+      '/WalletCardInvitations',
+      accessToken: accessToken,
+      fallbackError: 'Kart ekleme davetleri alınamadı.',
+    );
+    return _parseInvitationList(json);
+  }
+
+  @override
+  Future<void> acceptInvitation({
+    required String invitationId,
+    required String accessToken,
+  }) async {
+    await _client.post(
+      '/AcceptWalletCardInvitation',
+      body: {'id': invitationId},
+      accessToken: accessToken,
+      fallbackError: 'Davet kabul edilemedi.',
+      requireData: false,
+    );
+  }
+
+  @override
+  Future<void> rejectInvitation({
+    required String invitationId,
+    required String accessToken,
+  }) async {
+    await _client.post(
+      '/RejectWalletCardInvitation',
+      body: {'id': invitationId},
+      accessToken: accessToken,
+      fallbackError: 'Davet reddedilemedi.',
+      requireData: false,
     );
   }
 }

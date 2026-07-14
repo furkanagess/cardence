@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../core/l10n/app_l10n.dart';
 import '../../../../core/l10n/l10n_extensions.dart';
+import '../../../../core/l10n/locale_preference_material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/widgets/organisms/cardence_scaffold.dart';
@@ -20,6 +21,7 @@ import '../widgets/onboarding_step_photo.dart';
 import '../widgets/onboarding_step_preview.dart';
 import '../widgets/onboarding_step_professional.dart';
 import '../../../my_cards/presentation/helpers/card_effect_premium_helper.dart';
+import 'card_created_share_page.dart';
 
 /// İlk açılışta veya ek kart oluştururken adım adım kart onboarding ekranı.
 class OnboardingPageView extends StatefulWidget {
@@ -361,14 +363,20 @@ class _OnboardingBottomActions extends StatelessWidget {
                   final resolved = await prepareCardDraftForPersist(
                     context,
                     cubit.state.draft,
-                    onRequestPremium: upgradeWalletPlan,
+                    onRequestPremium: () => upgradeWalletPlan(
+                      preferredLocale: revenueCatPreferredLocaleFrom(
+                        Localizations.localeOf(context),
+                      ),
+                    ),
                   );
                   if (!context.mounted || resolved == null) return;
                   if (resolved.cardEffect != cubit.state.draft.cardEffect) {
                     cubit.updateDraft(resolved);
                   }
                   final synced = await cubit.finishOnboarding();
-                  if (context.mounted && synced != null) onFinish(synced);
+                  if (!context.mounted || synced == null) return;
+                  await CardCreatedSharePage.open(context, draft: synced);
+                  if (context.mounted) onFinish(synced);
                   return;
                 }
 

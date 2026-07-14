@@ -585,6 +585,9 @@
   "newCard": "Yeni kart",
   "scanQrToSaveCard": "Diğer kişi bu QR'ı Cardence ile okutarak kartınızı kaydedebilir.",
   "shareCardIdSubtitle": "Kart ID'nizi gönderin; karşı taraf Cardence'te kartınızı ekleyebilir.",
+  "shareWithQrSubtitle": "QR kodu göstererek hızlıca ekletin",
+  "shareWithCardId": "Kart ID ile paylaş",
+  "shareWithCardIdSubtitle": "Kart kimliğini mesaj olarak gönderin",
   "rateOnAppStore": "App Store üzerinden geri bildirim verin",
   "selectCards": "Kartları seç",
   "upgradeToPremium": "Premium'a geç",
@@ -861,6 +864,36 @@
   "eventInvitationAccepted": "Davet kabul edildi",
   "eventInvitationRejected": "Davet reddedildi",
   "eventInvitationsSection": "Davetler",
+  "eventInvitationQuotaFull": "Etkinlik grubu hakkınız dolu. Daveti kabul etmek için kapasitenizi artırın.",
+  "eventInvitationUpgradeToAccept": "Kapasiteyi artır",
+  "scanCardQrTitle": "QR okut",
+  "scanCardQrHint": "Cardence QR kodunu çerçeveye hizalayın",
+  "scanCardQrInvalid": "Geçerli bir Cardence QR kodu bulunamadı",
+  "scanCardQrCameraDenied": "QR okutmak için kamera izni gerekli",
+  "scanCardQrAllowCamera": "Kamera izni ver",
+  "walletCardInvitationsSection": "Kart ekleme davetleri",
+  "walletCardInvitationAddedYou": "{inviterName} sizi cüzdanınıza ekledi",
+  "@walletCardInvitationAddedYou": {
+    "placeholders": {
+      "inviterName": {
+        "type": "String"
+      }
+    }
+  },
+  "walletCardInvitationPrompt": "Siz de onu kartlarınıza eklemek ister misiniz?",
+  "@walletCardInvitationPrompt": {
+    "placeholders": {
+      "inviterName": {
+        "type": "String"
+      }
+    }
+  },
+  "walletCardInvitationAccept": "Kabul et",
+  "walletCardInvitationReject": "Reddet",
+  "walletCardInvitationAccepted": "Kart cüzdanınıza eklendi",
+  "walletCardInvitationRejected": "Davet reddedildi",
+  "walletCardInvitationQuotaFull": "Cüzdan kapasiteniz dolu. Daveti kabul etmek için kapasitenizi artırın.",
+  "walletCardInvitationUpgradeToAccept": "Kapasiteyi artır",
   "eventEndedSection": "Sona eren",
   "eventGroupLinkedCardCount": "{count} kart",
   "@eventGroupLinkedCardCount": {
@@ -1099,6 +1132,10 @@
   "networkGraphNoConnectedNodes": "Bu grafikte bağlı düğüm yok.",
   "networkGraphConnectionTypes": "Bağlantı türleri",
   "createMyCard": "Kartımı oluştur",
+  "cardCreatedShareTitle": "Kartın hazır",
+  "cardCreatedShareHeadline": "Kartın oluşturuldu",
+  "cardCreatedShareSubtitle": "QR kodunu veya kart ID’ni paylaşarak başkalarının seni cüzdanına eklemesini sağlayabilirsin.",
+  "cardCreatedShareContinue": "Devam et",
   "continueWithArrow": "Devam →",
   "swipeHorizontalToSwitchCards": "Yatay kaydırarak kartlar arasında geçin.",
   "tapCardToEdit": "Detay için karttaki detay düğmesini kullanın.",

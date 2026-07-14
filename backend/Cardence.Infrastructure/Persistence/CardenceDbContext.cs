@@ -24,6 +24,7 @@ public sealed class CardenceDbContext : DbContext
     public DbSet<CardInteraction> CardInteractions => Set<CardInteraction>();
     public DbSet<PasswordResetToken> PasswordResetTokens => Set<PasswordResetToken>();
     public DbSet<UserDeviceToken> UserDeviceTokens => Set<UserDeviceToken>();
+    public DbSet<WalletCardInvite> WalletCardInvites => Set<WalletCardInvite>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

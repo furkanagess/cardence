@@ -17,6 +17,7 @@ import '../widgets/collapsible_card_preview_panel.dart';
 import '../widgets/my_card_preview_helpers.dart';
 import '../helpers/card_effect_premium_helper.dart';
 import '../../../onboarding/domain/entities/onboarding_card_draft.dart';
+import '../../../onboarding/presentation/pages/card_created_share_page.dart';
 import '../../../../core/network/auth_api_exception.dart';
 import '../../../business_cards/domain/usecases/persist_onboarding_card.dart';
 
@@ -200,6 +201,10 @@ class _MyCardEditPageState extends State<MyCardEditPage> {
       });
       widget.onDraftUpdated?.call(updated);
       if (popAfter) {
+        if (widget.isNewCard) {
+          await CardCreatedSharePage.open(context, draft: updated);
+          if (!mounted) return;
+        }
         Navigator.of(context).pop(updated);
       }
     } on AuthApiException catch (e) {

@@ -57,7 +57,7 @@
 		<key>NSLocationWhenInUseUsageDescription</key>
 		<string>Etkinlik konumunu haritadan seçmek için konum erişimi kullanılır.</string>
 		<key>NSCameraUsageDescription</key>
-		<string>Profil fotoğrafı ve kartvizit çekimi için kamera kullanılır.</string>
+		<string>Profil fotoğrafı, kartvizit çekimi ve QR kod okutma için kamera kullanılır.</string>
 		<key>NSPhotoLibraryUsageDescription</key>
 		<string>Profil fotoğrafı ve kartvizit görseli seçmek için galeri erişimi gerekir.</string>
 		<key>UIStatusBarHidden</key>

@@ -13,9 +13,6 @@ double eventGroupDetailCoverHeight(BuildContext context) {
   return (height * 0.36).clamp(260.0, 340.0);
 }
 
-/// Bilgi paneli ile kapak arasındaki bindirme.
-const double eventGroupDetailCoverOverlap = 24;
-
 /// Kaydırılabilir detay panelinin yatay iç boşluğu.
 const double eventGroupDetailPanelHorizontalPadding = 20;
 
@@ -30,7 +27,6 @@ class EventGroupDetailCover extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final hasPhoto = group.photoUrl?.trim().isNotEmpty == true;
 
@@ -40,7 +36,6 @@ class EventGroupDetailCover extends StatelessWidget {
       child: _CoverSection(
         hasPhoto: hasPhoto,
         photoUrl: group.photoUrl,
-        colorScheme: colorScheme,
         isDark: isDark,
       ),
     );
@@ -70,7 +65,7 @@ class EventGroupDetailHeroOverlay extends StatelessWidget {
     return Align(
       alignment: Alignment.bottomLeft,
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 0, 20, 56),
+        padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
@@ -293,7 +288,7 @@ class _EventGroupDetailScrollContentState
   }
 }
 
-/// Yuvarlatılmış üst köşeli kaydırılabilir panel sarmalayıcısı.
+/// Kapak görselinin altında ayrı duran kaydırılabilir içerik paneli.
 class EventGroupDetailScrollPanel extends StatelessWidget {
   const EventGroupDetailScrollPanel({
     super.key,
@@ -307,22 +302,11 @@ class EventGroupDetailScrollPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: colorScheme.surface,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.primary.withValues(alpha: isDark ? 0.08 : 0.05),
-            blurRadius: 24,
-            offset: const Offset(0, -6),
-          ),
-        ],
-      ),
+    return ColoredBox(
+      color: colorScheme.surface,
       child: SingleChildScrollView(
-        padding: EdgeInsets.only(top: 22, bottom: bottomPadding),
+        padding: EdgeInsets.only(top: 20, bottom: bottomPadding),
         child: child,
       ),
     );
@@ -445,84 +429,71 @@ class _CoverSection extends StatelessWidget {
   const _CoverSection({
     required this.hasPhoto,
     this.photoUrl,
-    required this.colorScheme,
     required this.isDark,
   });
 
   final bool hasPhoto;
   final String? photoUrl;
-  final ColorScheme colorScheme;
   final bool isDark;
 
-  @override
-  Widget build(BuildContext context) {
-    if (hasPhoto) {
-      return Stack(
-        fit: StackFit.expand,
-        children: [
-          AuthenticatedNetworkImage(
-            imageUrl: photoUrl!.trim(),
-            fit: BoxFit.cover,
-            errorBuilder: (_) => _PlaceholderCover(colorScheme: colorScheme),
+  Widget get _emptyCover => DecoratedBox(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: isDark
+                ? [
+                    AppColors.primary.withValues(alpha: 0.55),
+                    AppColors.surfaceVariantDark,
+                  ]
+                : [
+                    AppColors.primary.withValues(alpha: 0.65),
+                    AppColors.secondary,
+                  ],
           ),
-          DecoratedBox(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [
-                  AppColors.textPrimary.withValues(alpha: 0.12),
-                  AppColors.textPrimary.withValues(alpha: isDark ? 0.72 : 0.62),
-                ],
-                stops: const [0.35, 1.0],
-              ),
-            ),
+        ),
+        child: Center(
+          child: Icon(
+            Icons.event_rounded,
+            size: 56,
+            color: AppColors.textOnPrimary.withValues(alpha: 0.4),
           ),
-        ],
+        ),
       );
-    }
-
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: isDark
-              ? [
-                  AppColors.primary.withValues(alpha: 0.45),
-                  AppColors.textPrimary.withValues(alpha: 0.85),
-                ]
-              : [
-                  AppColors.primary.withValues(alpha: 0.55),
-                  AppColors.textPrimary.withValues(alpha: 0.78),
-                ],
-        ),
-      ),
-      child: Center(
-        child: Icon(
-          Icons.event_rounded,
-          size: 56,
-          color: AppColors.textOnPrimary.withValues(alpha: 0.35),
-        ),
-      ),
-    );
-  }
-}
-
-class _PlaceholderCover extends StatelessWidget {
-  const _PlaceholderCover({required this.colorScheme});
-
-  final ColorScheme colorScheme;
 
   @override
   Widget build(BuildContext context) {
+    // Kapak her zaman opak yüzey; yükleme/hata sırasında şeffaf boşluk olmaz.
     return ColoredBox(
-      color: colorScheme.surfaceContainerHighest,
-      child: Icon(
-        Icons.event_rounded,
-        size: 48,
-        color: colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
-      ),
+      color: isDark ? AppColors.surfaceVariantDark : AppColors.surfaceVariant,
+      child: hasPhoto
+          ? Stack(
+              fit: StackFit.expand,
+              children: [
+                AuthenticatedNetworkImage(
+                  imageUrl: photoUrl!.trim(),
+                  fit: BoxFit.cover,
+                  loadingBuilder: (_) => _emptyCover,
+                  errorBuilder: (_) => _emptyCover,
+                ),
+                DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        AppColors.textPrimary.withValues(alpha: 0.12),
+                        AppColors.textPrimary.withValues(
+                          alpha: isDark ? 0.72 : 0.62,
+                        ),
+                      ],
+                      stops: const [0.35, 1.0],
+                    ),
+                  ),
+                ),
+              ],
+            )
+          : _emptyCover,
     );
   }
 }

@@ -19,6 +19,9 @@ import '../../../saved_cards/domain/usecases/add_saved_card.dart';
 import '../../../saved_cards/domain/usecases/delete_saved_card.dart';
 import '../../../saved_cards/domain/usecases/get_saved_cards.dart';
 import '../../../saved_cards/domain/usecases/get_saved_cards_wallet_quota.dart';
+import '../../../saved_cards/domain/usecases/get_wallet_card_invitations.dart';
+import '../../../saved_cards/domain/usecases/accept_wallet_card_invitation.dart';
+import '../../../saved_cards/domain/usecases/reject_wallet_card_invitation.dart';
 import '../../../saved_cards/domain/usecases/link_saved_cards_to_event_group.dart';
 import '../../../saved_cards/domain/usecases/save_saved_card.dart';
 import '../../../saved_cards/domain/usecases/track_saved_card_contact_click.dart';
@@ -71,6 +74,9 @@ class MainShellPage extends StatefulWidget {
     required this.getSavedCards,
     required this.saveSavedCard,
     required this.getSavedCardsWalletQuota,
+    required this.getWalletCardInvitations,
+    required this.acceptWalletCardInvitation,
+    required this.rejectWalletCardInvitation,
     required this.addSavedCard,
     required this.deleteSavedCard,
     required this.trackSavedCardContactClick,
@@ -109,6 +115,9 @@ class MainShellPage extends StatefulWidget {
   final GetSavedCards getSavedCards;
   final SaveSavedCard saveSavedCard;
   final GetSavedCardsWalletQuota getSavedCardsWalletQuota;
+  final GetWalletCardInvitations getWalletCardInvitations;
+  final AcceptWalletCardInvitation acceptWalletCardInvitation;
+  final RejectWalletCardInvitation rejectWalletCardInvitation;
   final AddSavedCard addSavedCard;
   final DeleteSavedCard deleteSavedCard;
   final TrackSavedCardContactClick trackSavedCardContactClick;
@@ -201,6 +210,9 @@ class _MainShellPageState extends State<MainShellPage> {
             getEventGroups: widget.getEventGroups,
             getSavedCardsWalletQuota: widget.getSavedCardsWalletQuota,
             upgradeWalletPlan: widget.upgradeWalletPlan,
+            getWalletCardInvitations: widget.getWalletCardInvitations,
+            acceptWalletCardInvitation: widget.acceptWalletCardInvitation,
+            rejectWalletCardInvitation: widget.rejectWalletCardInvitation,
           )..load(),
         ),
         BlocProvider(

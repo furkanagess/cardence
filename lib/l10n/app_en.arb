@@ -585,6 +585,9 @@
   "newCard": "New card",
   "scanQrToSaveCard": "Others can scan this QR with Cardence to save your card.",
   "shareCardIdSubtitle": "Share your Card ID; the other person can add your card in Cardence.",
+  "shareWithQrSubtitle": "Show a QR code for a quick add",
+  "shareWithCardId": "Share with Card ID",
+  "shareWithCardIdSubtitle": "Send the card ID as a message",
   "rateOnAppStore": "Rate us on the App Store or Play Store",
   "selectCards": "Select cards",
   "upgradeToPremium": "Upgrade to Premium",
@@ -861,6 +864,36 @@
   "eventInvitationAccepted": "Invitation accepted",
   "eventInvitationRejected": "Invitation declined",
   "eventInvitationsSection": "Invitations",
+  "eventInvitationQuotaFull": "Your event group limit is full. Increase capacity to accept this invitation.",
+  "eventInvitationUpgradeToAccept": "Increase capacity",
+  "scanCardQrTitle": "Scan QR",
+  "scanCardQrHint": "Align the Cardence QR code within the frame",
+  "scanCardQrInvalid": "No valid Cardence QR code found",
+  "scanCardQrCameraDenied": "Camera permission is required to scan QR codes",
+  "scanCardQrAllowCamera": "Allow camera access",
+  "walletCardInvitationsSection": "Card add invitations",
+  "walletCardInvitationAddedYou": "{inviterName} added you to their wallet",
+  "@walletCardInvitationAddedYou": {
+    "placeholders": {
+      "inviterName": {
+        "type": "String"
+      }
+    }
+  },
+  "walletCardInvitationPrompt": "Would you like to add them to your cards too?",
+  "@walletCardInvitationPrompt": {
+    "placeholders": {
+      "inviterName": {
+        "type": "String"
+      }
+    }
+  },
+  "walletCardInvitationAccept": "Accept",
+  "walletCardInvitationReject": "Decline",
+  "walletCardInvitationAccepted": "Card added to your wallet",
+  "walletCardInvitationRejected": "Invitation declined",
+  "walletCardInvitationQuotaFull": "Your wallet is full. Increase capacity to accept this invitation.",
+  "walletCardInvitationUpgradeToAccept": "Increase capacity",
   "eventEndedSection": "Ended",
   "eventGroupLinkedCardCount": "{count} cards",
   "@eventGroupLinkedCardCount": {
@@ -1099,6 +1132,10 @@
   "networkGraphNoConnectedNodes": "No connected nodes in this graph.",
   "networkGraphConnectionTypes": "Connection types",
   "createMyCard": "Create my card",
+  "cardCreatedShareTitle": "Your card is ready",
+  "cardCreatedShareHeadline": "Card created",
+  "cardCreatedShareSubtitle": "Share your QR code or Card ID so others can add you to their wallet.",
+  "cardCreatedShareContinue": "Continue",
   "continueWithArrow": "Continue →",
   "swipeHorizontalToSwitchCards": "Swipe horizontally to switch cards.",
   "tapCardToEdit": "Use the detail button on the card to view more.",

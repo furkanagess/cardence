@@ -1776,6 +1776,15 @@ class AppLocalizationsEn extends AppLocalizations {
       'Share your Card ID; the other person can add your card in Cardence.';
 
   @override
+  String get shareWithQrSubtitle => 'Show a QR code for a quick add';
+
+  @override
+  String get shareWithCardId => 'Share with Card ID';
+
+  @override
+  String get shareWithCardIdSubtitle => 'Send the card ID as a message';
+
+  @override
   String get rateOnAppStore => 'Rate us on the App Store or Play Store';
 
   @override
@@ -2301,6 +2310,61 @@ class AppLocalizationsEn extends AppLocalizations {
   String get eventInvitationsSection => 'Invitations';
 
   @override
+  String get eventInvitationQuotaFull =>
+      'Your event group limit is full. Increase capacity to accept this invitation.';
+
+  @override
+  String get eventInvitationUpgradeToAccept => 'Increase capacity';
+
+  @override
+  String get scanCardQrTitle => 'Scan QR';
+
+  @override
+  String get scanCardQrHint => 'Align the Cardence QR code within the frame';
+
+  @override
+  String get scanCardQrInvalid => 'No valid Cardence QR code found';
+
+  @override
+  String get scanCardQrCameraDenied =>
+      'Camera permission is required to scan QR codes';
+
+  @override
+  String get scanCardQrAllowCamera => 'Allow camera access';
+
+  @override
+  String get walletCardInvitationsSection => 'Card add invitations';
+
+  @override
+  String walletCardInvitationAddedYou(String inviterName) {
+    return '$inviterName added you to their wallet';
+  }
+
+  @override
+  String walletCardInvitationPrompt(String inviterName) {
+    return 'Would you like to add them to your cards too?';
+  }
+
+  @override
+  String get walletCardInvitationAccept => 'Accept';
+
+  @override
+  String get walletCardInvitationReject => 'Decline';
+
+  @override
+  String get walletCardInvitationAccepted => 'Card added to your wallet';
+
+  @override
+  String get walletCardInvitationRejected => 'Invitation declined';
+
+  @override
+  String get walletCardInvitationQuotaFull =>
+      'Your wallet is full. Increase capacity to accept this invitation.';
+
+  @override
+  String get walletCardInvitationUpgradeToAccept => 'Increase capacity';
+
+  @override
   String get eventEndedSection => 'Ended';
 
   @override
@@ -2645,6 +2709,19 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get createMyCard => 'Create my card';
+
+  @override
+  String get cardCreatedShareTitle => 'Your card is ready';
+
+  @override
+  String get cardCreatedShareHeadline => 'Card created';
+
+  @override
+  String get cardCreatedShareSubtitle =>
+      'Share your QR code or Card ID so others can add you to their wallet.';
+
+  @override
+  String get cardCreatedShareContinue => 'Continue';
 
   @override
   String get continueWithArrow => 'Continue →';

@@ -8,6 +8,7 @@ using Cardence.Domain.Entities;
 using Cardence.Domain.Exceptions;
 using FluentValidation;
 using FluentValidation.Results;
+using Microsoft.Extensions.Logging;
 
 namespace Cardence.Application.Services;
 
@@ -17,32 +18,41 @@ public sealed class SavedCardService : ISavedCardService
     private readonly IBusinessCardRepository _businessCardRepository;
     private readonly IWalletEntitlementRepository _walletRepository;
     private readonly IEventGroupRepository _eventGroupRepository;
+    private readonly IWalletCardInviteRepository _walletCardInviteRepository;
     private readonly IWalletOwnerPremiumSyncService _ownerPremiumSync;
     private readonly IWalletEntitlementSyncService _walletEntitlementSync;
     private readonly ICurrentUserService _currentUser;
     private readonly IPushNotificationService _pushNotificationService;
     private readonly IUserRepository _userRepository;
+    private readonly IValidator<RespondWalletCardInvitationRequest> _respondInvitationValidator;
+    private readonly ILogger<SavedCardService> _logger;
 
     public SavedCardService(
         ISavedCardRepository savedCardRepository,
         IBusinessCardRepository businessCardRepository,
         IWalletEntitlementRepository walletRepository,
         IEventGroupRepository eventGroupRepository,
+        IWalletCardInviteRepository walletCardInviteRepository,
         IWalletOwnerPremiumSyncService ownerPremiumSync,
         IWalletEntitlementSyncService walletEntitlementSync,
         ICurrentUserService currentUser,
         IPushNotificationService pushNotificationService,
-        IUserRepository userRepository)
+        IUserRepository userRepository,
+        IValidator<RespondWalletCardInvitationRequest> respondInvitationValidator,
+        ILogger<SavedCardService> logger)
     {
         _savedCardRepository = savedCardRepository;
         _businessCardRepository = businessCardRepository;
         _walletRepository = walletRepository;
         _eventGroupRepository = eventGroupRepository;
+        _walletCardInviteRepository = walletCardInviteRepository;
         _ownerPremiumSync = ownerPremiumSync;
         _walletEntitlementSync = walletEntitlementSync;
         _currentUser = currentUser;
         _pushNotificationService = pushNotificationService;
         _userRepository = userRepository;
+        _respondInvitationValidator = respondInvitationValidator;
+        _logger = logger;
     }
 
     public async Task<IReadOnlyList<SavedCardDto>> GetAllAsync(CancellationToken cancellationToken = default)
@@ -284,6 +294,8 @@ public sealed class SavedCardService : ISavedCardService
             ]);
         }
 
+        await EnsureCanAddToWalletAsync(userId, cancellationToken);
+
         await _savedCardRepository.AddAsync(entity, cancellationToken);
         if (ownCard is not null && ownCard.UserId != userId)
         {
@@ -296,6 +308,12 @@ public sealed class SavedCardService : ISavedCardService
                 cardId,
                 userId,
                 cancellationToken);
+
+            await TryCreateReciprocalInviteAsync(
+                inviteeUserId: ownCard.UserId,
+                inviterUserId: userId,
+                savedCardId: cardId,
+                cancellationToken);
         }
         await _eventGroupRepository.SyncWalletCardLinksAsync(
             userId,
@@ -305,6 +323,247 @@ public sealed class SavedCardService : ISavedCardService
         entity.LinkedEventGroupIds = request.LinkedEventGroupIds.ToList();
 
         return SavedCardMapper.ToDto(entity);
+    }
+
+    public async Task<IReadOnlyList<WalletCardInvitationDto>> GetPendingInvitationsAsync(
+        CancellationToken cancellationToken = default)
+    {
+        var userId = _currentUser.GetRequiredUserId();
+        var invitations = await _walletCardInviteRepository.GetPendingForInviteeAsync(
+            userId,
+            cancellationToken);
+
+        return invitations
+            .Select(WalletCardInvitationMapper.ToDto)
+            .ToList();
+    }
+
+    public async Task AcceptInvitationAsync(
+        RespondWalletCardInvitationRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        await _respondInvitationValidator.ValidateAndThrowAsync(request, cancellationToken);
+
+        var userId = _currentUser.GetRequiredUserId();
+        var invitation = await GetPendingInvitationOrThrowAsync(
+            userId,
+            request.Id,
+            cancellationToken);
+
+        await EnsureCanAddToWalletAsync(userId, cancellationToken);
+
+        var proposedCard = invitation.ProposedCard
+            ?? await _businessCardRepository.GetByCardIdAsync(
+                invitation.ProposedCardId,
+                cancellationToken)
+            ?? throw new NotFoundException("Card", invitation.ProposedCardId);
+
+        var existing = await _savedCardRepository.GetByUserAndCardIdAsync(
+            userId,
+            proposedCard.CardId,
+            cancellationToken);
+
+        if (existing is null)
+        {
+            var usedCount = await _savedCardRepository.CountByUserIdAsync(
+                userId,
+                cancellationToken);
+            var now = DateTime.UtcNow;
+            var entity = CreateSavedCardFromBusinessCard(
+                userId,
+                proposedCard,
+                usedCount,
+                now);
+
+            await _savedCardRepository.AddAsync(entity, cancellationToken);
+            await _businessCardRepository.IncrementSaveCountAsync(
+                proposedCard.Id,
+                cancellationToken);
+        }
+
+        invitation.Status = EventGroupInvitationStatuses.Accepted;
+        invitation.RespondedAtUtc = DateTime.UtcNow;
+        await _walletCardInviteRepository.SaveChangesAsync(cancellationToken);
+    }
+
+    public async Task RejectInvitationAsync(
+        RespondWalletCardInvitationRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        await _respondInvitationValidator.ValidateAndThrowAsync(request, cancellationToken);
+
+        var userId = _currentUser.GetRequiredUserId();
+        var invitation = await GetPendingInvitationOrThrowAsync(
+            userId,
+            request.Id,
+            cancellationToken);
+
+        invitation.Status = EventGroupInvitationStatuses.Rejected;
+        invitation.RespondedAtUtc = DateTime.UtcNow;
+        await _walletCardInviteRepository.SaveChangesAsync(cancellationToken);
+    }
+
+    private async Task<WalletCardInvite> GetPendingInvitationOrThrowAsync(
+        Guid inviteeUserId,
+        string invitationIdRaw,
+        CancellationToken cancellationToken)
+    {
+        if (!Guid.TryParse(invitationIdRaw, out var invitationId))
+        {
+            throw new NotFoundException("WalletCardInvitation", invitationIdRaw);
+        }
+
+        var invitation = await _walletCardInviteRepository.GetForInviteeAsync(
+            inviteeUserId,
+            invitationId,
+            cancellationToken)
+            ?? throw new NotFoundException("WalletCardInvitation", invitationIdRaw);
+
+        if (invitation.Status != EventGroupInvitationStatuses.Pending)
+        {
+            throw new ConflictException(
+                "Invitation is no longer pending.",
+                ErrorCodes.WalletCardInvitationNotPending);
+        }
+
+        if (EventGroupInvitationPolicy.IsExpired(invitation.ExpiresAtUtc))
+        {
+            throw new NotFoundException("WalletCardInvitation", invitationIdRaw);
+        }
+
+        return invitation;
+    }
+
+    private async Task EnsureCanAddToWalletAsync(
+        Guid userId,
+        CancellationToken cancellationToken)
+    {
+        var entitlement = await _walletRepository.GetOrCreateAsync(userId, cancellationToken);
+        if (WalletConstants.HasUnlimitedWalletCards(entitlement.Tier))
+        {
+            return;
+        }
+
+        var usedCount = await _savedCardRepository.CountByUserIdAsync(userId, cancellationToken);
+        if (usedCount >= entitlement.MaxCards)
+        {
+            throw new ForbiddenException(
+                "Wallet card limit reached.",
+                ErrorCodes.WalletLimitReached);
+        }
+    }
+
+    private async Task TryCreateReciprocalInviteAsync(
+        Guid inviteeUserId,
+        Guid inviterUserId,
+        string savedCardId,
+        CancellationToken cancellationToken)
+    {
+        if (inviteeUserId == inviterUserId)
+        {
+            return;
+        }
+
+        try
+        {
+            var inviterCards = await _businessCardRepository.GetByUserIdAsync(
+                inviterUserId,
+                cancellationToken);
+            // En güncel kendi kart (QR / link ile karşılıklı ekleme için)
+            var proposedCard = inviterCards.FirstOrDefault();
+            if (proposedCard is null)
+            {
+                _logger.LogDebug(
+                    "Reciprocal wallet invite skipped: inviter {InviterUserId} has no business card.",
+                    inviterUserId);
+                return;
+            }
+
+            var alreadySaved = await _savedCardRepository.GetByUserAndCardIdAsync(
+                inviteeUserId,
+                proposedCard.CardId,
+                cancellationToken);
+            if (alreadySaved is not null)
+            {
+                _logger.LogDebug(
+                    "Reciprocal wallet invite skipped: invitee {InviteeUserId} already has card {CardId}.",
+                    inviteeUserId,
+                    proposedCard.CardId);
+                return;
+            }
+
+            var now = DateTime.UtcNow;
+            await _walletCardInviteRepository.UpsertPendingAsync(
+                new WalletCardInvite
+                {
+                    Id = Guid.NewGuid(),
+                    InviterUserId = inviterUserId,
+                    InviteeUserId = inviteeUserId,
+                    ProposedCardEntityId = proposedCard.Id,
+                    ProposedCardId = proposedCard.CardId,
+                    SavedCardId = savedCardId,
+                    Status = EventGroupInvitationStatuses.Pending,
+                    CreatedAtUtc = now,
+                    ExpiresAtUtc = EventGroupInvitationPolicy.ComputeExpiresAtUtc(now),
+                },
+                cancellationToken);
+
+            _logger.LogInformation(
+                "Reciprocal wallet invite created: invitee={InviteeUserId}, inviter={InviterUserId}, proposedCard={ProposedCardId}",
+                inviteeUserId,
+                inviterUserId,
+                proposedCard.CardId);
+        }
+        catch (Exception ex)
+        {
+            // Davet oluşturma başarısız olsa da kaydetme akışı tamamlanmış sayılır.
+            _logger.LogWarning(
+                ex,
+                "Failed to create reciprocal wallet invite for invitee {InviteeUserId} from inviter {InviterUserId}.",
+                inviteeUserId,
+                inviterUserId);
+        }
+    }
+
+    private static SavedCard CreateSavedCardFromBusinessCard(
+        Guid userId,
+        Card card,
+        int sortOrder,
+        DateTime now)
+    {
+        return new SavedCard
+        {
+            Id = Guid.NewGuid(),
+            UserId = userId,
+            CardId = card.CardId,
+            CreationMethod = CardCreationMethods.CardenceLink,
+            DisplayName = card.DisplayName,
+            Email = card.Email,
+            Phone = card.Phone,
+            Company = card.Company,
+            Title = card.Title,
+            Website = card.Website,
+            Linkedin = card.Linkedin,
+            Skills = card.Skills,
+            School = card.School,
+            About = card.About,
+            Address = card.Address,
+            City = card.City,
+            Country = card.Country,
+            Department = card.Department,
+            AttendedEvents = card.AttendedEvents,
+            Twitter = card.Twitter,
+            Instagram = card.Instagram,
+            Birthday = card.Birthday,
+            PhotoUrl = card.PhotoUrl,
+            AccentColor = card.AccentColor,
+            BackgroundColor = card.BackgroundColor,
+            SavedAt = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
+            SortOrder = sortOrder,
+            IsOwnerPremium = card.IsOwnerPremium,
+            CreatedAt = now,
+            UpdatedAt = now,
+        };
     }
 
     private static bool IsStubRequest(SavedCardDto request)

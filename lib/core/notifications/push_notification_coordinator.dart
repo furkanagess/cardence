@@ -169,17 +169,17 @@ class PushNotificationCoordinator {
     final notification = message.notification;
     if (notification == null) return;
 
+    // iOS: sistem zaten banner gösterir (setForegroundNotificationPresentationOptions).
+    // Local notification da gösterilirse bildirim çift gider.
+    if (Platform.isIOS) return;
+
     final androidDetails = AndroidNotificationDetails(
       _androidChannelId,
       _androidChannelName,
       importance: Importance.high,
       priority: Priority.high,
     );
-    const iosDetails = DarwinNotificationDetails();
-    final details = NotificationDetails(
-      android: androidDetails,
-      iOS: iosDetails,
-    );
+    final details = NotificationDetails(android: androidDetails);
 
     await _localNotifications.show(
       notification.hashCode,

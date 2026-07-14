@@ -25,10 +25,12 @@ class UpgradeWalletPlan {
   Future<bool> call({
     bool onlyIfNeeded = false,
     bool? useDarkAppearance,
+    String? preferredLocale,
   }) async {
     final result = await _subscriptionRepository.presentWalletPaywall(
       onlyIfNeeded: onlyIfNeeded,
       useDarkAppearance: useDarkAppearance,
+      preferredLocale: preferredLocale,
     );
 
     switch (result) {

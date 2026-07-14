@@ -92,6 +92,7 @@ public static class DependencyInjection
         services.AddScoped<S3UploadContentStore>();
         services.AddScoped<IUploadContentStore, ResilientUploadContentStore>();
         services.AddScoped<IUserDeviceTokenRepository, UserDeviceTokenRepository>();
+        services.AddScoped<IWalletCardInviteRepository, WalletCardInviteRepository>();
         services.AddScoped<LoggingPushNotificationSender>();
         services.AddScoped<FcmPushNotificationSender>();
         services.AddScoped<IPushNotificationSender, PushNotificationSenderRouter>();

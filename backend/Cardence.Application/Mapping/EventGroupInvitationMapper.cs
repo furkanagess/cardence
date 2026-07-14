@@ -17,6 +17,7 @@ public static class EventGroupInvitationMapper
             Id = invite.Id.ToString(),
             EventGroupId = invite.EventGroupId.ToString(),
             EventName = group.Name,
+            Description = group.Description,
             Location = group.Location,
             StartAt = group.StartAtUtc,
             EndAt = group.EndAtUtc,

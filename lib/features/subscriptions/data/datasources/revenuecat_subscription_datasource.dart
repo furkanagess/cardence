@@ -83,9 +83,11 @@ class RevenueCatSubscriptionDataSource {
   Future<WalletPaywallResult> presentWalletPaywall({
     bool onlyIfNeeded = false,
     bool? useDarkAppearance,
+    String? preferredLocale,
   }) async {
     try {
       await _ensureConfigured();
+      await setPreferredLocale(preferredLocale);
       final offering = await _resolveWalletOffering();
       if (offering == null) {
         debugPrint('[RevenueCat] No offering resolved; paywall cannot open.');
@@ -96,7 +98,8 @@ class RevenueCatSubscriptionDataSource {
         '[RevenueCat] Presenting paywall '
         '(paywall=${RevenueCatConfig.walletPaywallIdentifier}, '
         'offering=${offering.identifier}, onlyIfNeeded=$onlyIfNeeded, '
-        'useDarkAppearance=$useDarkAppearance)',
+        'useDarkAppearance=$useDarkAppearance, '
+        'preferredLocale=$preferredLocale)',
       );
 
       if (useDarkAppearance != null) {
@@ -136,6 +139,17 @@ class RevenueCatSubscriptionDataSource {
       debugPrint('[RevenueCat] presentWalletPaywall failed: $error');
       debugPrintStack(stackTrace: stackTrace);
       return WalletPaywallResult.error;
+    }
+  }
+
+  Future<void> setPreferredLocale(String? locale) async {
+    await _ensureConfigured();
+    try {
+      await Purchases.overridePreferredUILocale(locale);
+      debugPrint('[RevenueCat] preferredUILocale=$locale');
+    } catch (error, stackTrace) {
+      debugPrint('[RevenueCat] setPreferredLocale failed: $error');
+      debugPrintStack(stackTrace: stackTrace);
     }
   }
 

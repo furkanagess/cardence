@@ -26,6 +26,7 @@ import '../widgets/saved_cards_empty_results_view.dart';
 import '../widgets/saved_cards_focus_arrow_track.dart';
 import '../widgets/saved_cards_loading_shimmer.dart';
 import '../widgets/saved_cards_screen_toolbar.dart';
+import '../widgets/wallet_card_invitations_section.dart';
 
 /// Kaydettiği kişilerin kartları listesi (yalnızca görünüm katmanı).
 class SavedCardsPage extends StatefulWidget {
@@ -247,7 +248,10 @@ class _SavedCardsPageState extends State<SavedCardsPage>
         }
 
         return CardenceScaffold(
-          body: ColoredBox(
+          body: GestureDetector(
+            onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+            behavior: HitTestBehavior.translucent,
+            child: ColoredBox(
             color: Theme.of(context).scaffoldBackgroundColor,
             child: Stack(
               children: [
@@ -261,6 +265,19 @@ class _SavedCardsPageState extends State<SavedCardsPage>
                       hasActiveSearch: state.hasActiveSearch,
                       activeFilterCount: state.activeFilterCount,
                       onOpenFilters: cubit.requestOpenFilters,
+                    ),
+                    WalletCardInvitationsSection(
+                      invitations: state.invitations,
+                      respondingInvitationId: state.respondingInvitationId,
+                      canAccept: canAddMore,
+                      onAccept: (invitation) => cubit.respondToInvitation(
+                        invitation: invitation,
+                        accept: true,
+                      ),
+                      onReject: (invitation) => cubit.respondToInvitation(
+                        invitation: invitation,
+                        accept: false,
+                      ),
                     ),
                     Expanded(
                       child: state.isLoadingCards
@@ -277,6 +294,9 @@ class _SavedCardsPageState extends State<SavedCardsPage>
                                   children: [
                                     SingleChildScrollView(
                                       controller: _stackScrollController,
+                                      keyboardDismissBehavior:
+                                          ScrollViewKeyboardDismissBehavior
+                                              .onDrag,
                                       padding: const EdgeInsets.fromLTRB(
                                         horizontalPadding,
                                         topPadding,
@@ -327,6 +347,7 @@ class _SavedCardsPageState extends State<SavedCardsPage>
                   onPressed: cubit.handleAddCardTap,
                 ),
               ],
+            ),
             ),
           ),
         );

@@ -2,6 +2,7 @@ import '../../../../core/auth/auth_token_provider.dart';
 import '../../../auth/data/datasources/auth_remote_datasource.dart';
 import '../../domain/entities/saved_card.dart';
 import '../../domain/entities/saved_cards_wallet_quota.dart';
+import '../../domain/entities/wallet_card_invitation.dart';
 import '../../domain/repositories/saved_card_repository.dart';
 import '../../domain/extensions/card_share_payload_to_saved_card.dart';
 import '../datasources/public_business_card_remote_datasource.dart';
@@ -168,6 +169,32 @@ class SavedCardRepositoryImpl implements SavedCardRepository {
   Future<void> cacheFromProfile(List<SavedCard> cards) async {
     await _local.replaceAll(
       cards.map(SavedCardModel.fromEntity).toList(growable: false),
+    );
+  }
+
+  @override
+  Future<List<WalletCardInvitation>> getPendingWalletCardInvitations() async {
+    final token = await _requireAccessToken();
+    final invitations =
+        await _remote.getPendingInvitations(accessToken: token);
+    return invitations.map((model) => model.toEntity()).toList();
+  }
+
+  @override
+  Future<void> acceptWalletCardInvitation(String invitationId) async {
+    final token = await _requireAccessToken();
+    await _remote.acceptInvitation(
+      invitationId: invitationId,
+      accessToken: token,
+    );
+  }
+
+  @override
+  Future<void> rejectWalletCardInvitation(String invitationId) async {
+    final token = await _requireAccessToken();
+    await _remote.rejectInvitation(
+      invitationId: invitationId,
+      accessToken: token,
     );
   }
 }

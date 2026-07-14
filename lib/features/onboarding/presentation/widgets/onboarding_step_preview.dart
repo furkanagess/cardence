@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../../core/l10n/l10n_extensions.dart';
+import '../../../../core/l10n/locale_preference_material.dart';
 
 import '../../../../core/widgets/molecules/card_appearance_customize_section.dart';
 import '../../../../core/widgets/molecules/card_effect_customize_section.dart';
@@ -110,7 +110,11 @@ class OnboardingStepPreview extends StatelessWidget {
           onEffectChanged: (effect) {
             _applyDraft(context, draft.copyWith(cardEffect: effect));
           },
-          onUpgradeToPro: upgradeWalletPlan,
+          onUpgradeToPro: () => upgradeWalletPlan(
+            preferredLocale: revenueCatPreferredLocaleFrom(
+              Localizations.localeOf(context),
+            ),
+          ),
           compact: true,
           headerPadding: const EdgeInsets.symmetric(horizontal: _horizontalInset),
         ),

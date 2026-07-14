@@ -5,6 +5,7 @@ public sealed class EventGroupInvitationDto
     public string Id { get; set; } = string.Empty;
     public string EventGroupId { get; set; } = string.Empty;
     public string EventName { get; set; } = string.Empty;
+    public string? Description { get; set; }
     public string? Location { get; set; }
     public DateTime StartAt { get; set; }
     public DateTime? EndAt { get; set; }

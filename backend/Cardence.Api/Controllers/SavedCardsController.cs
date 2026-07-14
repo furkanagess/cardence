@@ -86,4 +86,35 @@ public sealed class SavedCardsController : ControllerBase
         var quota = await _savedCardService.UpgradeWalletPlanAsync(cancellationToken);
         return Ok(ApiResponse<WalletQuotaDto>.Ok(quota, HttpContext.TraceIdentifier));
     }
+
+    [HttpGet("WalletCardInvitations")]
+    [ProducesResponseType(typeof(ApiResponse<IReadOnlyList<WalletCardInvitationDto>>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<ApiResponse<IReadOnlyList<WalletCardInvitationDto>>>> GetWalletCardInvitations(
+        CancellationToken cancellationToken)
+    {
+        var invitations = await _savedCardService.GetPendingInvitationsAsync(cancellationToken);
+        return Ok(ApiResponse<IReadOnlyList<WalletCardInvitationDto>>.Ok(
+            invitations,
+            HttpContext.TraceIdentifier));
+    }
+
+    [HttpPost("AcceptWalletCardInvitation")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    public async Task<IActionResult> AcceptWalletCardInvitation(
+        [FromBody] RespondWalletCardInvitationRequest request,
+        CancellationToken cancellationToken)
+    {
+        await _savedCardService.AcceptInvitationAsync(request, cancellationToken);
+        return NoContent();
+    }
+
+    [HttpPost("RejectWalletCardInvitation")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    public async Task<IActionResult> RejectWalletCardInvitation(
+        [FromBody] RespondWalletCardInvitationRequest request,
+        CancellationToken cancellationToken)
+    {
+        await _savedCardService.RejectInvitationAsync(request, cancellationToken);
+        return NoContent();
+    }
 }

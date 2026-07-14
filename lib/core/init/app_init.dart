@@ -69,6 +69,9 @@ import '../../features/saved_cards/domain/usecases/link_saved_cards_to_event_gro
 import '../../features/saved_cards/domain/usecases/delete_saved_card.dart';
 import '../../features/saved_cards/domain/usecases/get_saved_cards.dart';
 import '../../features/saved_cards/domain/usecases/get_saved_cards_wallet_quota.dart';
+import '../../features/saved_cards/domain/usecases/get_wallet_card_invitations.dart';
+import '../../features/saved_cards/domain/usecases/accept_wallet_card_invitation.dart';
+import '../../features/saved_cards/domain/usecases/reject_wallet_card_invitation.dart';
 import '../../features/saved_cards/domain/usecases/save_saved_card.dart';
 import '../../features/saved_cards/domain/usecases/track_saved_card_contact_click.dart';
 import '../../features/saved_cards/domain/usecases/upgrade_wallet_plan.dart';
@@ -77,9 +80,11 @@ import '../../features/subscriptions/domain/usecases/configure_subscriptions.dar
 import '../../features/subscriptions/domain/usecases/identify_subscription_user.dart';
 import '../../features/subscriptions/domain/usecases/logout_subscription_user.dart';
 import '../../features/subscriptions/domain/usecases/finalize_premium_wallet_activation.dart';
+import '../../features/subscriptions/domain/usecases/set_subscription_preferred_locale.dart';
 import '../../features/subscriptions/presentation/helpers/premium_purchase_success_handler.dart';
 import '../../features/subscriptions/domain/usecases/restore_wallet_purchases.dart';
 import '../config/admob_config.dart';
+import '../l10n/locale_preference_material.dart';
 import '../../features/ads/data/repositories/interstitial_ad_repository_impl.dart';
 import '../../features/ads/data/repositories/no_op_interstitial_ad_repository.dart';
 import '../../features/ads/data/datasources/post_add_card_ad_counter_local_datasource.dart';
@@ -136,6 +141,8 @@ class AppInit {
     final configureSubscriptions = ConfigureSubscriptions(subscriptionRepo);
     final identifySubscriptionUser = IdentifySubscriptionUser(subscriptionRepo);
     final logoutSubscriptionUser = LogoutSubscriptionUser(subscriptionRepo);
+    final setSubscriptionPreferredLocale =
+        SetSubscriptionPreferredLocale(subscriptionRepo);
 
     final interstitialAdRepo = AdMobConfig.enabled
         ? InterstitialAdRepositoryImpl()
@@ -238,6 +245,12 @@ class AppInit {
 
     final session = await authLocal.getSession();
     await _guardInit('RevenueCat configure', configureSubscriptions.call);
+    await _guardInit(
+      'RevenueCat locale',
+      () => setSubscriptionPreferredLocale(
+        revenueCatPreferredLocaleForPreference(initialLocalePreference),
+      ),
+    );
     subscriptionRepo.registerEntitlementChangeHandler(() async {
       try {
         await finalizePremiumWalletActivation();
@@ -260,6 +273,7 @@ class AppInit {
       restoreAuthSession: auth.restoreAuthSession,
       getAuthSession: auth.getAuthSession,
       identifySubscriptionUser: identifySubscriptionUser,
+      setSubscriptionPreferredLocale: setSubscriptionPreferredLocale,
       loginWithEmail: auth.loginWithEmail,
       loginWithPhone: auth.loginWithPhone,
       loginWithLinkedIn: auth.loginWithLinkedIn,
@@ -304,6 +318,9 @@ class AppInit {
       getSavedCards: savedCards.getSavedCards,
       saveSavedCard: savedCards.saveSavedCard,
       getSavedCardsWalletQuota: savedCards.getSavedCardsWalletQuota,
+      getWalletCardInvitations: savedCards.getWalletCardInvitations,
+      acceptWalletCardInvitation: savedCards.acceptWalletCardInvitation,
+      rejectWalletCardInvitation: savedCards.rejectWalletCardInvitation,
       addSavedCard: savedCards.addSavedCard,
       deleteSavedCard: savedCards.deleteSavedCard,
       trackSavedCardContactClick: savedCards.trackSavedCardContactClick,
@@ -346,6 +363,9 @@ class AppInit {
     GetSavedCards getSavedCards,
     SaveSavedCard saveSavedCard,
     GetSavedCardsWalletQuota getSavedCardsWalletQuota,
+    GetWalletCardInvitations getWalletCardInvitations,
+    AcceptWalletCardInvitation acceptWalletCardInvitation,
+    RejectWalletCardInvitation rejectWalletCardInvitation,
     AddSavedCard addSavedCard,
     DeleteSavedCard deleteSavedCard,
     TrackSavedCardContactClick trackSavedCardContactClick,
@@ -365,6 +385,9 @@ class AppInit {
       getSavedCards: GetSavedCards(savedCardRepo),
       saveSavedCard: saveSavedCard,
       getSavedCardsWalletQuota: getQuota,
+      getWalletCardInvitations: GetWalletCardInvitations(savedCardRepo),
+      acceptWalletCardInvitation: AcceptWalletCardInvitation(savedCardRepo),
+      rejectWalletCardInvitation: RejectWalletCardInvitation(savedCardRepo),
       addSavedCard: AddSavedCard(savedCardRepo),
       deleteSavedCard: DeleteSavedCard(savedCardRepo),
       trackSavedCardContactClick: TrackSavedCardContactClick(savedCardRepo),
@@ -612,6 +635,7 @@ class AppInitResult {
     required this.restoreAuthSession,
     required this.getAuthSession,
     required this.identifySubscriptionUser,
+    required this.setSubscriptionPreferredLocale,
     required this.loginWithEmail,
     required this.loginWithPhone,
     required this.loginWithLinkedIn,
@@ -656,6 +680,9 @@ class AppInitResult {
     required this.getSavedCards,
     required this.saveSavedCard,
     required this.getSavedCardsWalletQuota,
+    required this.getWalletCardInvitations,
+    required this.acceptWalletCardInvitation,
+    required this.rejectWalletCardInvitation,
     required this.addSavedCard,
     required this.deleteSavedCard,
     required this.trackSavedCardContactClick,
@@ -672,6 +699,7 @@ class AppInitResult {
   final RestoreAuthSession restoreAuthSession;
   final GetAuthSession getAuthSession;
   final IdentifySubscriptionUser identifySubscriptionUser;
+  final SetSubscriptionPreferredLocale setSubscriptionPreferredLocale;
   final LoginWithEmail loginWithEmail;
   final LoginWithPhone loginWithPhone;
   final LoginWithLinkedIn loginWithLinkedIn;
@@ -716,6 +744,9 @@ class AppInitResult {
   final GetSavedCards getSavedCards;
   final SaveSavedCard saveSavedCard;
   final GetSavedCardsWalletQuota getSavedCardsWalletQuota;
+  final GetWalletCardInvitations getWalletCardInvitations;
+  final AcceptWalletCardInvitation acceptWalletCardInvitation;
+  final RejectWalletCardInvitation rejectWalletCardInvitation;
   final AddSavedCard addSavedCard;
   final DeleteSavedCard deleteSavedCard;
   final TrackSavedCardContactClick trackSavedCardContactClick;

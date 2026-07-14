@@ -4,6 +4,10 @@ import '../../../../core/l10n/l10n_extensions.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/atoms/custom_button.dart';
 import '../../domain/entities/event_group_invitation.dart';
+import '../helpers/event_group_invitation_formatter.dart';
+import '../helpers/event_group_list_display_formatter.dart';
+import '../helpers/event_group_meta_formatter.dart';
+import 'event_group_cover_thumbnail.dart';
 
 class EventGroupInvitationCard extends StatelessWidget {
   const EventGroupInvitationCard({
@@ -12,12 +16,14 @@ class EventGroupInvitationCard extends StatelessWidget {
     required this.onAccept,
     required this.onReject,
     this.isResponding = false,
+    this.canAccept = true,
   });
 
   final EventGroupInvitation invitation;
   final VoidCallback onAccept;
   final VoidCallback onReject;
   final bool isResponding;
+  final bool canAccept;
 
   @override
   Widget build(BuildContext context) {
@@ -26,6 +32,24 @@ class EventGroupInvitationCard extends StatelessWidget {
     final colorScheme = theme.colorScheme;
     final isDark = theme.brightness == Brightness.dark;
     final l10n = context.l10n;
+
+    final description = invitation.description?.trim();
+    final location = EventGroupListDisplayFormatter.primaryCityFromLocation(
+          invitation.location,
+        ) ??
+        invitation.location?.trim();
+    final schedule = EventGroupMetaFormatter.formatRange(
+      invitation.startAt,
+      invitation.endAt,
+    );
+    final remaining = EventGroupInvitationFormatter.eventStartRemainingLabel(
+      l10n,
+      invitation.startAt,
+      invitation.endAt,
+    );
+    final cardLabel = invitation.cardDisplayName?.trim().isNotEmpty == true
+        ? invitation.cardDisplayName!.trim()
+        : invitation.cardId;
 
     return Material(
       color: colorScheme.surface,
@@ -47,6 +71,12 @@ class EventGroupInvitationCard extends StatelessWidget {
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                EventGroupCoverThumbnail(
+                  photoUrl: invitation.photoUrl,
+                  size: 56,
+                  borderRadius: 12,
+                ),
+                const SizedBox(width: 12),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -63,40 +93,85 @@ class EventGroupInvitationCard extends StatelessWidget {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        l10n.eventInvitationInvitedSubtitle,
+                        l10n.eventInvitationInvitedBy(invitation.inviterName),
                         style: textTheme.bodyMedium?.copyWith(
                           color: AppColors.primary,
                           fontWeight: FontWeight.w600,
                           height: 1.25,
                         ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ],
                   ),
                 ),
-                const SizedBox(width: 12),
-                DecoratedBox(
-                  decoration: BoxDecoration(
-                    color: AppColors.primaryContainer.withValues(
-                      alpha: isDark ? 0.45 : 1,
-                    ),
-                    borderRadius: BorderRadius.circular(10),
+              ],
+            ),
+            const SizedBox(height: 12),
+            _InvitationDetailRow(
+              icon: Icons.schedule_rounded,
+              label: schedule,
+            ),
+            if (location != null && location.isNotEmpty) ...[
+              const SizedBox(height: 6),
+              _InvitationDetailRow(
+                icon: Icons.place_outlined,
+                label: location,
+              ),
+            ],
+            const SizedBox(height: 6),
+            _InvitationDetailRow(
+              icon: Icons.hourglass_bottom_rounded,
+              label: remaining,
+            ),
+            const SizedBox(height: 6),
+            _InvitationDetailRow(
+              icon: Icons.badge_outlined,
+              label: l10n.eventInvitationCardLabel(cardLabel),
+            ),
+            if (description != null && description.isNotEmpty) ...[
+              const SizedBox(height: 10),
+              Text(
+                description,
+                style: textTheme.bodySmall?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
+                  height: 1.35,
+                ),
+                maxLines: 3,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+            if (!canAccept) ...[
+              const SizedBox(height: 12),
+              DecoratedBox(
+                decoration: BoxDecoration(
+                  color: AppColors.warning.withValues(alpha: isDark ? 0.18 : 0.12),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 10,
                   ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(8),
-                    child: Icon(
-                      Icons.calendar_month_rounded,
-                      size: 20,
-                      color: AppColors.primary,
+                  child: Text(
+                    l10n.eventInvitationQuotaFull,
+                    style: textTheme.bodySmall?.copyWith(
+                      color: colorScheme.onSurface,
+                      fontWeight: FontWeight.w600,
+                      height: 1.3,
                     ),
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
             const SizedBox(height: 14),
             _InvitationResponseActions(
-              acceptLabel: l10n.eventInvitationAccept,
+              acceptLabel: canAccept
+                  ? l10n.eventInvitationAccept
+                  : l10n.eventInvitationUpgradeToAccept,
               rejectLabel: l10n.eventInvitationReject,
               isResponding: isResponding,
+              canAccept: canAccept,
               onAccept: onAccept,
               onReject: onReject,
             ),
@@ -107,11 +182,43 @@ class EventGroupInvitationCard extends StatelessWidget {
   }
 }
 
+class _InvitationDetailRow extends StatelessWidget {
+  const _InvitationDetailRow({
+    required this.icon,
+    required this.label,
+  });
+
+  final IconData icon;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(icon, size: 16, color: colorScheme.onSurfaceVariant),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text(
+            label,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
+                  height: 1.3,
+                ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
 class _InvitationResponseActions extends StatelessWidget {
   const _InvitationResponseActions({
     required this.acceptLabel,
     required this.rejectLabel,
     required this.isResponding,
+    required this.canAccept,
     required this.onAccept,
     required this.onReject,
   });
@@ -119,6 +226,7 @@ class _InvitationResponseActions extends StatelessWidget {
   final String acceptLabel;
   final String rejectLabel;
   final bool isResponding;
+  final bool canAccept;
   final VoidCallback onAccept;
   final VoidCallback onReject;
 
@@ -166,7 +274,9 @@ class _InvitationResponseActions extends StatelessWidget {
             fullWidth: true,
             visualDensity: VisualDensity.compact,
             style: FilledButton.styleFrom(
-              backgroundColor: AppColors.primary,
+              backgroundColor: canAccept
+                  ? AppColors.primary
+                  : AppColors.secondary,
               foregroundColor: AppColors.textOnPrimary,
               minimumSize: const Size(0, _actionButtonHeight),
               maximumSize: const Size(double.infinity, _actionButtonHeight),

@@ -12,7 +12,11 @@ abstract class SubscriptionRepository {
   Future<WalletPaywallResult> presentWalletPaywall({
     bool onlyIfNeeded = false,
     bool? useDarkAppearance,
+    String? preferredLocale,
   });
+
+  /// Paywall / Customer Center dilini uygulama diline göre ayarlar.
+  Future<void> setPreferredLocale(String? locale);
 
   Future<bool> restorePurchases();
 

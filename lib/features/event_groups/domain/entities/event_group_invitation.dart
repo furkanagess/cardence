@@ -3,6 +3,7 @@ class EventGroupInvitation {
     required this.id,
     required this.eventGroupId,
     required this.eventName,
+    this.description,
     this.location,
     required this.startAt,
     this.endAt,
@@ -18,6 +19,7 @@ class EventGroupInvitation {
   final String id;
   final String eventGroupId;
   final String eventName;
+  final String? description;
   final String? location;
   final DateTime startAt;
   final DateTime? endAt;

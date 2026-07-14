@@ -1,5 +1,6 @@
 import '../entities/saved_card.dart';
 import '../entities/saved_cards_wallet_quota.dart';
+import '../entities/wallet_card_invitation.dart';
 
 abstract class SavedCardRepository {
   Future<List<SavedCard>> getSavedCards();
@@ -16,4 +17,8 @@ abstract class SavedCardRepository {
   Future<SavedCardsWalletQuota> getWalletQuota();
   Future<void> syncWalletPremium();
   Future<void> cacheFromProfile(List<SavedCard> cards);
+
+  Future<List<WalletCardInvitation>> getPendingWalletCardInvitations();
+  Future<void> acceptWalletCardInvitation(String invitationId);
+  Future<void> rejectWalletCardInvitation(String invitationId);
 }

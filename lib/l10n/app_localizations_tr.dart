@@ -1778,6 +1778,15 @@ class AppLocalizationsTr extends AppLocalizations {
       'Kart ID\'nizi gönderin; karşı taraf Cardence\'te kartınızı ekleyebilir.';
 
   @override
+  String get shareWithQrSubtitle => 'QR kodu göstererek hızlıca ekletin';
+
+  @override
+  String get shareWithCardId => 'Kart ID ile paylaş';
+
+  @override
+  String get shareWithCardIdSubtitle => 'Kart kimliğini mesaj olarak gönderin';
+
+  @override
   String get rateOnAppStore => 'App Store üzerinden geri bildirim verin';
 
   @override
@@ -2302,6 +2311,60 @@ class AppLocalizationsTr extends AppLocalizations {
   String get eventInvitationsSection => 'Davetler';
 
   @override
+  String get eventInvitationQuotaFull =>
+      'Etkinlik grubu hakkınız dolu. Daveti kabul etmek için kapasitenizi artırın.';
+
+  @override
+  String get eventInvitationUpgradeToAccept => 'Kapasiteyi artır';
+
+  @override
+  String get scanCardQrTitle => 'QR okut';
+
+  @override
+  String get scanCardQrHint => 'Cardence QR kodunu çerçeveye hizalayın';
+
+  @override
+  String get scanCardQrInvalid => 'Geçerli bir Cardence QR kodu bulunamadı';
+
+  @override
+  String get scanCardQrCameraDenied => 'QR okutmak için kamera izni gerekli';
+
+  @override
+  String get scanCardQrAllowCamera => 'Kamera izni ver';
+
+  @override
+  String get walletCardInvitationsSection => 'Kart ekleme davetleri';
+
+  @override
+  String walletCardInvitationAddedYou(String inviterName) {
+    return '$inviterName sizi cüzdanınıza ekledi';
+  }
+
+  @override
+  String walletCardInvitationPrompt(String inviterName) {
+    return 'Siz de onu kartlarınıza eklemek ister misiniz?';
+  }
+
+  @override
+  String get walletCardInvitationAccept => 'Kabul et';
+
+  @override
+  String get walletCardInvitationReject => 'Reddet';
+
+  @override
+  String get walletCardInvitationAccepted => 'Kart cüzdanınıza eklendi';
+
+  @override
+  String get walletCardInvitationRejected => 'Davet reddedildi';
+
+  @override
+  String get walletCardInvitationQuotaFull =>
+      'Cüzdan kapasiteniz dolu. Daveti kabul etmek için kapasitenizi artırın.';
+
+  @override
+  String get walletCardInvitationUpgradeToAccept => 'Kapasiteyi artır';
+
+  @override
   String get eventEndedSection => 'Sona eren';
 
   @override
@@ -2645,6 +2708,19 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get createMyCard => 'Kartımı oluştur';
+
+  @override
+  String get cardCreatedShareTitle => 'Kartın hazır';
+
+  @override
+  String get cardCreatedShareHeadline => 'Kartın oluşturuldu';
+
+  @override
+  String get cardCreatedShareSubtitle =>
+      'QR kodunu veya kart ID’ni paylaşarak başkalarının seni cüzdanına eklemesini sağlayabilirsin.';
+
+  @override
+  String get cardCreatedShareContinue => 'Devam et';
 
   @override
   String get continueWithArrow => 'Devam →';

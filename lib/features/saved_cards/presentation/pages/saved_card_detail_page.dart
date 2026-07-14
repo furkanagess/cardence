@@ -14,7 +14,9 @@ import '../../../../core/widgets/molecules/copy_feedback_icon_button.dart';
 import '../../../../core/widgets/molecules/skills_chip_display.dart';
 import '../../../../core/widgets/atoms/custom_button.dart';
 import '../../../../core/widgets/organisms/cardence_scaffold.dart';
+import '../../../../core/widgets/organisms/card_share_options_sheet.dart';
 import '../../../../core/widgets/organisms/flippable_person_card.dart';
+import '../../../../core/utils/card_id_generator.dart';
 import '../../../event_groups/domain/entities/event_group.dart';
 import '../../../event_groups/domain/usecases/get_event_groups.dart';
 import '../../../event_groups/domain/usecases/delete_event_group.dart';
@@ -121,9 +123,21 @@ class _SavedCardDetailPageState extends State<SavedCardDetailPage> {
 
   bool get _canDeleteCard => widget.deleteSavedCard != null && !_isDemoCard;
 
+  bool get _canShowShareQr =>
+      !_isDemoCard &&
+      CardIdGenerator.isValid(_card.cardId) &&
+      !CardIdGenerator.isManualWalletId(_card.cardId);
+
   List<EventGroup> get _availableGroupsForCard => _eventGroups
       .where((g) => !_card.linkedEventGroupIds.contains(g.id))
       .toList();
+
+  Future<void> _showShareOptions() {
+    return CardShareOptionsSheet.show(
+      context,
+      cardId: _card.cardId,
+    );
+  }
 
   Future<void> _openAddToEventGroupsSheet() async {
     final available = _availableGroupsForCard;
@@ -535,65 +549,6 @@ class _SavedCardDetailPageState extends State<SavedCardDetailPage> {
     await _openEditField(def);
   }
 
-  Future<void> _showMoreMenu() async {
-    final colorScheme = Theme.of(context).colorScheme;
-
-    await showModalBottomSheet<void>(
-      context: context,
-      backgroundColor: colorScheme.surface,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (sheetContext) {
-        return SafeArea(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const SizedBox(height: 8),
-              Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: colorScheme.outline.withValues(alpha: 0.4),
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-              const SizedBox(height: 8),
-              ListTile(
-                leading: Icon(
-                  Icons.copy_all_rounded,
-                  color: colorScheme.onSurfaceVariant,
-                ),
-                title: Text(context.l10n.kartId2),
-                subtitle: Text(_card.cardId),
-                onTap: () {
-                  Navigator.of(sheetContext).pop();
-                  _copyToClipboard(context.l10n.kartId2, _card.cardId);
-                },
-              ),
-              if (_canDeleteCard)
-                ListTile(
-                  leading: Icon(
-                    Icons.delete_outline_rounded,
-                    color: AppColors.error,
-                  ),
-                  title: Text(
-                    context.l10n.kartSil,
-                    style: TextStyle(color: AppColors.error),
-                  ),
-                  onTap: () {
-                    Navigator.of(sheetContext).pop();
-                    _confirmDeleteCard();
-                  },
-                ),
-              const SizedBox(height: 8),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -626,11 +581,12 @@ class _SavedCardDetailPageState extends State<SavedCardDetailPage> {
                 hasPhone: hasPhone,
                 hasLinkedIn: hasLinkedIn,
                 hasWebsite: hasWebsite,
+                showShare: _canShowShareQr,
                 onEmail: hasEmail ? _launchEmail : null,
                 onPhone: hasPhone ? _launchPhone : null,
                 onLinkedIn: hasLinkedIn ? _launchLinkedIn : null,
                 onWebsite: hasWebsite ? _launchCardWebsite : null,
-                onMore: _showMoreMenu,
+                onShare: _canShowShareQr ? _showShareOptions : null,
               ),
               SavedCardProfileSection(
                 title: context.l10n.kartGrnm2,
@@ -807,6 +763,14 @@ class _SavedCardDetailPageState extends State<SavedCardDetailPage> {
                       tooltip: context.l10n.duzenle,
                       onPressed: _handleAppBarEdit,
                     ),
+                  if (_canDeleteCard) ...[
+                    if (_canOpenAppBarEdit) const SizedBox(width: 8),
+                    EventGroupDetailOverlayIconButton(
+                      icon: Icons.delete_outline_rounded,
+                      tooltip: context.l10n.kartSil,
+                      onPressed: _confirmDeleteCard,
+                    ),
+                  ],
                 ],
               ),
             ),

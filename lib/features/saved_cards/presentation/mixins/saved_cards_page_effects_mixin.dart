@@ -7,12 +7,9 @@ import '../../domain/entities/saved_card.dart';
 import '../cubit/saved_cards_cubit.dart';
 import '../cubit/saved_cards_filter_models.dart';
 import '../cubit/saved_cards_state.dart';
-import '../widgets/add_saved_card_sheet.dart';
 import '../widgets/saved_cards_filter_sheet.dart';
 import '../wallet_paywall_flow.dart';
-import '../pages/add_card_by_id_page.dart';
-import '../pages/add_manual_card_page.dart';
-import '../pages/scan_physical_card_page.dart';
+import '../pages/scan_card_qr_page.dart';
 import '../pages/saved_card_detail_page.dart';
 import '../widgets/saved_cards_note_editor_sheet.dart';
 import '../../domain/usecases/add_saved_card.dart';
@@ -62,6 +59,23 @@ mixin SavedCardsPageEffectsMixin<T extends StatefulWidget> on State<T> {
           restoreWalletPurchases: restoreWalletPurchases,
         );
         context.read<SavedCardsCubit>().clearEffect();
+      case SavedCardsEffectType.invitationAccepted:
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(context.l10n.walletCardInvitationAccepted)),
+        );
+        context.read<SavedCardsCubit>().clearEffect();
+      case SavedCardsEffectType.invitationRejected:
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(context.l10n.walletCardInvitationRejected)),
+        );
+        context.read<SavedCardsCubit>().clearEffect();
+      case SavedCardsEffectType.invitationQuotaFull:
+        _openUpgradeSheet(
+          context,
+          upgradeWalletPlan: upgradeWalletPlan,
+          restoreWalletPurchases: restoreWalletPurchases,
+        );
+        context.read<SavedCardsCubit>().clearEffect();
     }
   }
 
@@ -101,15 +115,7 @@ mixin SavedCardsPageEffectsMixin<T extends StatefulWidget> on State<T> {
     final cubit = context.read<SavedCardsCubit>();
     final quota = cubit.state.quota;
 
-    final method = await AddSavedCardSheet.show(
-      context,
-      quota: quota,
-      canAdd: quota.canAddMore,
-      canAddManualSavedCard: quota.canAddManualSavedCard,
-    );
-    if (!context.mounted || method == null) return;
-
-    if (method == AddSavedCardMethod.openPaywall) {
+    if (!quota.canAddMore) {
       await _openUpgradeSheet(
         context,
         upgradeWalletPlan: upgradeWalletPlan,
@@ -118,29 +124,11 @@ mixin SavedCardsPageEffectsMixin<T extends StatefulWidget> on State<T> {
       return;
     }
 
-    AddSavedCardResult? result;
-    switch (method) {
-      case AddSavedCardMethod.openPaywall:
-        return;
-      case AddSavedCardMethod.manualEntry:
-        result = await Navigator.of(context).push<AddSavedCardResult>(
-          MaterialPageRoute(
-            builder: (_) => AddManualCardPage(addSavedCard: addSavedCard),
-          ),
-        );
-      case AddSavedCardMethod.physicalScan:
-        result = await Navigator.of(context).push<AddSavedCardResult>(
-          MaterialPageRoute(
-            builder: (_) => ScanPhysicalCardPage(addSavedCard: addSavedCard),
-          ),
-        );
-      case AddSavedCardMethod.cardId:
-        result = await Navigator.of(context).push<AddSavedCardResult>(
-          MaterialPageRoute(
-            builder: (_) => AddCardByIdPage(addSavedCard: addSavedCard),
-          ),
-        );
-    }
+    final result = await Navigator.of(context).push<AddSavedCardResult>(
+      MaterialPageRoute(
+        builder: (_) => ScanCardQrPage(addSavedCard: addSavedCard),
+      ),
+    );
 
     if (!context.mounted) return;
     await cubit.handleAddCardResult(result);

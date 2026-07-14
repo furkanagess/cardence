@@ -6,8 +6,12 @@ import '../../../event_groups/domain/usecases/get_event_groups.dart';
 import '../../domain/entities/add_saved_card_result.dart';
 import '../../domain/entities/saved_card.dart';
 import '../../domain/entities/saved_cards_wallet_quota.dart';
+import '../../domain/entities/wallet_card_invitation.dart';
+import '../../domain/usecases/accept_wallet_card_invitation.dart';
 import '../../domain/usecases/get_saved_cards.dart';
 import '../../domain/usecases/get_saved_cards_wallet_quota.dart';
+import '../../domain/usecases/get_wallet_card_invitations.dart';
+import '../../domain/usecases/reject_wallet_card_invitation.dart';
 import '../../domain/usecases/save_saved_card.dart';
 import '../../domain/usecases/upgrade_wallet_plan.dart';
 import 'saved_cards_filter_models.dart';
@@ -21,11 +25,17 @@ class SavedCardsCubit extends Cubit<SavedCardsState> {
     required GetEventGroups getEventGroups,
     required GetSavedCardsWalletQuota getSavedCardsWalletQuota,
     required UpgradeWalletPlan upgradeWalletPlan,
+    required GetWalletCardInvitations getWalletCardInvitations,
+    required AcceptWalletCardInvitation acceptWalletCardInvitation,
+    required RejectWalletCardInvitation rejectWalletCardInvitation,
   })  : _getSavedCards = getSavedCards,
         _saveSavedCard = saveSavedCard,
         _getEventGroups = getEventGroups,
         _getSavedCardsWalletQuota = getSavedCardsWalletQuota,
         _upgradeWalletPlan = upgradeWalletPlan,
+        _getWalletCardInvitations = getWalletCardInvitations,
+        _acceptWalletCardInvitation = acceptWalletCardInvitation,
+        _rejectWalletCardInvitation = rejectWalletCardInvitation,
         super(const SavedCardsState());
 
   final GetSavedCards _getSavedCards;
@@ -33,6 +43,9 @@ class SavedCardsCubit extends Cubit<SavedCardsState> {
   final GetEventGroups _getEventGroups;
   final GetSavedCardsWalletQuota _getSavedCardsWalletQuota;
   final UpgradeWalletPlan _upgradeWalletPlan;
+  final GetWalletCardInvitations _getWalletCardInvitations;
+  final AcceptWalletCardInvitation _acceptWalletCardInvitation;
+  final RejectWalletCardInvitation _rejectWalletCardInvitation;
 
   List<SavedCard> get sourceCards => state.cards;
 
@@ -43,6 +56,7 @@ class SavedCardsCubit extends Cubit<SavedCardsState> {
       _loadCardsSafely(),
       _loadEventGroupsSafely(),
       _loadQuotaSafely(),
+      _loadInvitationsSafely(),
     ]);
   }
 
@@ -88,6 +102,14 @@ class SavedCardsCubit extends Cubit<SavedCardsState> {
     }
   }
 
+  Future<void> _loadInvitationsSafely() async {
+    try {
+      await _loadInvitations();
+    } on AuthApiException {
+      // Endpoint henüz production'da olmayabilir.
+    } catch (_) {}
+  }
+
   SavedCardsWalletQuota _fallbackQuota() {
     return SavedCardsWalletQuota.freeDefault(
       usedCount: state.cards.length,
@@ -131,6 +153,56 @@ class SavedCardsCubit extends Cubit<SavedCardsState> {
       ),
     );
     _syncDefaultQuotaCounts();
+  }
+
+  Future<void> _loadInvitations() async {
+    final invitations = await _getWalletCardInvitations();
+    if (isClosed) return;
+    emit(state.copyWith(invitations: invitations));
+  }
+
+  Future<void> respondToInvitation({
+    required WalletCardInvitation invitation,
+    required bool accept,
+  }) async {
+    if (state.respondingInvitationId != null) return;
+
+    if (accept && !state.quota.canAddMore) {
+      emit(state.copyWith(effectType: SavedCardsEffectType.invitationQuotaFull));
+      return;
+    }
+
+    emit(state.copyWith(respondingInvitationId: invitation.id));
+    try {
+      if (accept) {
+        await _acceptWalletCardInvitation(invitation.id);
+      } else {
+        await _rejectWalletCardInvitation(invitation.id);
+      }
+      if (isClosed) return;
+      emit(
+        state.copyWith(
+          clearRespondingInvitationId: true,
+          effectType: accept
+              ? SavedCardsEffectType.invitationAccepted
+              : SavedCardsEffectType.invitationRejected,
+        ),
+      );
+      await refreshAll();
+    } on AuthApiException catch (e) {
+      if (isClosed) return;
+      emit(state.copyWith(clearRespondingInvitationId: true));
+      if (accept &&
+          (e.errorCode == 'WALLET_LIMIT_REACHED' ||
+              e.errorCode == 'PLAN_LIMIT_REACHED')) {
+        emit(
+          state.copyWith(effectType: SavedCardsEffectType.invitationQuotaFull),
+        );
+      }
+    } catch (_) {
+      if (isClosed) return;
+      emit(state.copyWith(clearRespondingInvitationId: true));
+    }
   }
 
   void clearEffect() {
@@ -240,10 +312,12 @@ class SavedCardsCubit extends Cubit<SavedCardsState> {
   Future<bool> upgradeWallet({
     bool onlyIfNeeded = false,
     bool? useDarkAppearance,
+    String? preferredLocale,
   }) async {
     final success = await _upgradeWalletPlan(
       onlyIfNeeded: onlyIfNeeded,
       useDarkAppearance: useDarkAppearance,
+      preferredLocale: preferredLocale,
     );
     if (isClosed) return false;
     if (success) {

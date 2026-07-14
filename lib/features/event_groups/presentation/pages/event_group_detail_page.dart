@@ -353,17 +353,14 @@ class _EventGroupDetailPageState extends State<EventGroupDetailPage> {
               ),
             ),
             Expanded(
-              child: Transform.translate(
-                offset: const Offset(0, -eventGroupDetailCoverOverlap),
-                child: EventGroupDetailScrollPanel(
-                  bottomPadding: bottomInset + 16,
-                  child: EventGroupDetailScrollContent(
-                    group: _group,
-                    linkedCardCount: _linkedCards.length,
-                    loadingLinkedCards: _loadingLinkedCards,
-                    onAddCard: _loadingLinkedCards ? null : _openAddCardsPicker,
-                    cardsSection: _buildCardsSection(context),
-                  ),
+              child: EventGroupDetailScrollPanel(
+                bottomPadding: bottomInset + 16,
+                child: EventGroupDetailScrollContent(
+                  group: _group,
+                  linkedCardCount: _linkedCards.length,
+                  loadingLinkedCards: _loadingLinkedCards,
+                  onAddCard: _loadingLinkedCards ? null : _openAddCardsPicker,
+                  cardsSection: _buildCardsSection(context),
                 ),
               ),
             ),

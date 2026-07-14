@@ -5,6 +5,7 @@ class EventGroupInvitationModel {
     required this.id,
     required this.eventGroupId,
     required this.eventName,
+    this.description,
     this.location,
     required this.startAt,
     this.endAt,
@@ -20,6 +21,7 @@ class EventGroupInvitationModel {
   final String id;
   final String eventGroupId;
   final String eventName;
+  final String? description;
   final String? location;
   final DateTime startAt;
   final DateTime? endAt;
@@ -51,6 +53,7 @@ class EventGroupInvitationModel {
       eventGroupId:
           (json['eventGroupId'] ?? json['EventGroupId'])?.toString() ?? '',
       eventName: (json['eventName'] ?? json['EventName'])?.toString() ?? '',
+      description: (json['description'] ?? json['Description'])?.toString(),
       location: (json['location'] ?? json['Location'])?.toString(),
       startAt: DateTime.tryParse(rawStartAt?.toString() ?? '') ??
           DateTime.now(),
@@ -74,6 +77,7 @@ class EventGroupInvitationModel {
         id: id,
         eventGroupId: eventGroupId,
         eventName: eventName,
+        description: description,
         location: location,
         startAt: startAt,
         endAt: endAt,

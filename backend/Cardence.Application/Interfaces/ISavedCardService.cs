@@ -20,4 +20,15 @@ public interface ISavedCardService
     Task<WalletQuotaDto> GetWalletQuotaAsync(CancellationToken cancellationToken = default);
 
     Task<WalletQuotaDto> UpgradeWalletPlanAsync(CancellationToken cancellationToken = default);
+
+    Task<IReadOnlyList<WalletCardInvitationDto>> GetPendingInvitationsAsync(
+        CancellationToken cancellationToken = default);
+
+    Task AcceptInvitationAsync(
+        RespondWalletCardInvitationRequest request,
+        CancellationToken cancellationToken = default);
+
+    Task RejectInvitationAsync(
+        RespondWalletCardInvitationRequest request,
+        CancellationToken cancellationToken = default);
 }

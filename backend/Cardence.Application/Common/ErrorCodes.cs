@@ -19,6 +19,7 @@ public static class ErrorCodes
     public const string EventGroupNotFound = "EVENT_GROUP_NOT_FOUND";
     public const string DuplicateEventGroupName = "DUPLICATE_EVENT_GROUP_NAME";
     public const string EventGroupInvitationNotPending = "EVENT_GROUP_INVITATION_NOT_PENDING";
+    public const string WalletCardInvitationNotPending = "WALLET_CARD_INVITATION_NOT_PENDING";
     public const string OnboardingIncomplete = "ONBOARDING_INCOMPLETE";
     public const string InternalError = "INTERNAL_ERROR";
 }

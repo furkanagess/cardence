@@ -125,6 +125,24 @@ class _EventGroupsPageState extends State<EventGroupsPage> {
   }) async {
     if (_respondingInvitationId != null) return;
 
+    if (accept) {
+      final savedCardsCubit = context.read<SavedCardsCubit>();
+      final planCubit = context.read<PlanCubit>();
+      final planAllowsGroup = _canAddGroupFromPlan(planCubit.state);
+      final quota = savedCardsCubit.state.quota;
+      if (!planAllowsGroup || !quota.canAddEventGroup) {
+        await WalletPaywallFlow.show(
+          context,
+          cubit: savedCardsCubit,
+        );
+        if (mounted) {
+          await planCubit.refresh();
+          await savedCardsCubit.refreshAll();
+        }
+        return;
+      }
+    }
+
     setState(() => _respondingInvitationId = invitation.id);
     try {
       if (accept) {
@@ -134,8 +152,24 @@ class _EventGroupsPageState extends State<EventGroupsPage> {
       }
       if (!mounted) return;
       await _loadGroups();
-    } on AuthApiException {
+      if (mounted && accept) {
+        await context.read<SavedCardsCubit>().refreshAll();
+      }
+    } on AuthApiException catch (e) {
       if (!mounted) return;
+      if (accept &&
+          (e.errorCode == 'PREMIUM_REQUIRED' ||
+              e.errorCode == 'PLAN_LIMIT_REACHED')) {
+        final savedCardsCubit = context.read<SavedCardsCubit>();
+        await WalletPaywallFlow.show(
+          context,
+          cubit: savedCardsCubit,
+        );
+        if (mounted) {
+          await context.read<PlanCubit>().refresh();
+          await savedCardsCubit.refreshAll();
+        }
+      }
     } finally {
       if (mounted) setState(() => _respondingInvitationId = null);
     }
@@ -269,7 +303,11 @@ class _EventGroupsPageState extends State<EventGroupsPage> {
             return Stack(
               children: [
                 Positioned.fill(
-                  child: _buildContent(context, savedCards),
+                  child: _buildContent(
+                    context,
+                    savedCards,
+                    canAcceptInvitations: canAddGroup,
+                  ),
                 ),
                 EventGroupsDraggableFab(
                   canAddGroup: canAddGroup,
@@ -283,7 +321,11 @@ class _EventGroupsPageState extends State<EventGroupsPage> {
     );
   }
 
-  Widget _buildContent(BuildContext context, List<SavedCard> savedCards) {
+  Widget _buildContent(
+    BuildContext context,
+    List<SavedCard> savedCards, {
+    required bool canAcceptInvitations,
+  }) {
     final theme = Theme.of(context);
     final textTheme = theme.textTheme;
     final colorScheme = theme.colorScheme;
@@ -337,7 +379,10 @@ class _EventGroupsPageState extends State<EventGroupsPage> {
       padding: const EdgeInsets.fromLTRB(20, 16, 20, _contentBottomInset),
       children: [
         if (_invitations.isNotEmpty) ...[
-          _buildInvitationsSection(context),
+          _buildInvitationsSection(
+            context,
+            canAcceptInvitations: canAcceptInvitations,
+          ),
           if (hasGroupSections) const SizedBox(height: 20),
         ],
         if (ongoingGroups.isNotEmpty)
@@ -387,7 +432,10 @@ class _EventGroupsPageState extends State<EventGroupsPage> {
     };
   }
 
-  Widget _buildInvitationsSection(BuildContext context) {
+  Widget _buildInvitationsSection(
+    BuildContext context, {
+    required bool canAcceptInvitations,
+  }) {
     final textTheme = Theme.of(context).textTheme;
     final colorScheme = Theme.of(context).colorScheme;
     final title = context.l10n.eventInvitationsSection.toUpperCase();
@@ -411,6 +459,7 @@ class _EventGroupsPageState extends State<EventGroupsPage> {
           EventGroupInvitationCard(
             invitation: _invitations[index],
             isResponding: _respondingInvitationId == _invitations[index].id,
+            canAccept: canAcceptInvitations,
             onAccept: () => _respondToInvitation(
               invitation: _invitations[index],
               accept: true,

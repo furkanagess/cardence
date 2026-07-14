@@ -94,6 +94,7 @@ dependencies:
   latlong2: ^0.9.1
   geolocator: ^14.0.0
   geocoding: ^5.0.0
+  mobile_scanner: ^7.2.0
 
 dev_dependencies:
   flutter_test:

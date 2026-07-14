@@ -33,6 +33,7 @@ public sealed class UserDeviceTokenRepository : IUserDeviceTokenRepository
             .AsNoTracking()
             .Where(entry => entry.UserId == userId)
             .Select(entry => entry.Token)
+            .Distinct()
             .ToListAsync(cancellationToken);
     }
 
