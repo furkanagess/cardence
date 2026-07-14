@@ -142,7 +142,9 @@ class _CreateEventGroupPageState extends State<CreateEventGroupPage> {
     _invitedCardIds = {};
     final initialCards = widget.initialPickableCards;
     if (initialCards != null && initialCards.isNotEmpty) {
-      _pickableCards = List<SavedCard>.from(initialCards);
+      _pickableCards = initialCards
+          .where((card) => !card.isManualEntry)
+          .toList(growable: false);
     }
   }
 
@@ -186,8 +188,7 @@ class _CreateEventGroupPageState extends State<CreateEventGroupPage> {
 
   DateTime? get _endAt => _combineDateAndTime(_endDate, _endTime);
 
-  bool get _canSkipCurrentStep =>
-      _step == _CreateEventStep.details || _step == _CreateEventStep.photo;
+  bool get _canSkipCurrentStep => _step == _CreateEventStep.photo;
 
   bool get _isCurrentStepReady {
     switch (_step) {
@@ -206,7 +207,8 @@ class _CreateEventGroupPageState extends State<CreateEventGroupPage> {
       case _CreateEventStep.schedule:
         return _isScheduleStepReady;
       case _CreateEventStep.details:
-        return _descriptionController.text.trim().length <= 2000;
+        final description = _descriptionController.text.trim();
+        return description.isNotEmpty && description.length <= 2000;
       case _CreateEventStep.photo:
       case _CreateEventStep.cards:
         return true;
@@ -261,6 +263,13 @@ class _CreateEventGroupPageState extends State<CreateEventGroupPage> {
         return _validateEndStep();
       case _CreateEventStep.details:
         final description = _descriptionController.text.trim();
+        if (description.isEmpty) {
+          setState(
+            () =>
+                _descriptionErrorText = context.l10n.eventDescriptionRequired,
+          );
+          return false;
+        }
         if (description.length > 2000) {
           setState(
             () => _descriptionErrorText = context.l10n.eventDescriptionTooLong,
@@ -313,14 +322,6 @@ class _CreateEventGroupPageState extends State<CreateEventGroupPage> {
   }
 
   Future<void> _skipCurrentStep() async {
-    if (_step == _CreateEventStep.details) {
-      setState(() {
-        _descriptionController.clear();
-        _descriptionErrorText = null;
-        _step = _CreateEventStep.photo;
-      });
-      return;
-    }
     if (_step == _CreateEventStep.photo) {
       setState(() {
         _photoFilePath = null;
@@ -352,7 +353,9 @@ class _CreateEventGroupPageState extends State<CreateEventGroupPage> {
     final persisted = await widget.getSavedCards();
     if (!mounted) return;
     setState(() {
-      _pickableCards = persisted;
+      _pickableCards = persisted
+          .where((card) => !card.isManualEntry)
+          .toList(growable: false);
       _loadingCards = false;
     });
   }
@@ -371,9 +374,7 @@ class _CreateEventGroupPageState extends State<CreateEventGroupPage> {
       location: location,
       startAt: startAt,
       endAt: _endAt,
-      description: _descriptionController.text.trim().isEmpty
-          ? null
-          : _descriptionController.text.trim(),
+      description: _descriptionController.text.trim(),
       photoFilePath: _photoFilePath,
       selectedCardIds: Set<String>.from(_selectedCardIds),
       invitedCardIds: _invitedCardIds.toList(),

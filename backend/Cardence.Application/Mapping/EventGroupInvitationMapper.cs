@@ -30,4 +30,29 @@ public static class EventGroupInvitationMapper
             ExpiresAt = invite.ExpiresAtUtc,
         };
     }
+
+    public static EventGroupOutboundInvitationDto ToOutboundDto(EventGroupCardInvite invite)
+    {
+        var card = invite.Card;
+        var invitee = invite.InviteeUser;
+
+        return new EventGroupOutboundInvitationDto
+        {
+            Id = invite.Id.ToString(),
+            EventGroupId = invite.EventGroupId.ToString(),
+            CardId = invite.CardId,
+            CardDisplayName = card?.DisplayName ?? card?.CardName,
+            CardTitle = card?.Title,
+            CardCompany = card?.Company,
+            CardPhotoUrl = card?.PhotoUrl,
+            InviteeName = invitee?.DisplayName
+                ?? invitee?.Email
+                ?? card?.DisplayName
+                ?? card?.CardName,
+            InviteePhotoUrl = invitee?.PhotoUrl ?? card?.PhotoUrl,
+            Status = invite.Status,
+            CreatedAt = invite.CreatedAtUtc,
+            ExpiresAt = invite.ExpiresAtUtc,
+        };
+    }
 }

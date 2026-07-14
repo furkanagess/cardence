@@ -286,7 +286,7 @@
   "kaydedildiTarihBilinmiyor": "Kaydedildi: tarih bilinmiyor",
   "kaydedilenKartlar": "Kaydedilen Kartlar",
   "kaydedilenKartlardanSe": "Kaydedilen kartlardan seç",
-  "kaydedilenKartlarnzdanSeerekBuGruba": "Kaydedilen kartlarınızdan seçerek bu gruba kart ekleyebilirsiniz.",
+  "kaydedilenKartlarnzdanSeerekBuGruba": "Kaydedilen kartlarınızdan seçerek davet gönderin. Kabul edenler gruba eklenir.",
   "kaydedilmemiDeiiklikler": "Kaydedilmemiş değişiklikler",
   "kaydet": "Kaydet",
   "kaytOl": "Kayıt ol",
@@ -746,9 +746,10 @@
   "eventLocationRegionRequired": "Ülke ve il/ilçe seçimi gereklidir.",
   "eventCreateStartSubtitle": "Başlangıç tarihi ve saatini seçin.",
   "eventCreateScheduleSubtitle": "Başlangıç tarih ve saatini seçin; isterseniz bitiş de ekleyin.",
-  "eventCreateDetailsSubtitle": "Gündem, kıyafet kodu veya diğer detayları paylaşın. Atlayabilirsiniz.",
+  "eventCreateDetailsSubtitle": "Gündem, kıyafet kodu veya diğer detayları yazın. Bu alan zorunludur.",
   "eventDescription": "Etkinlik hakkında",
   "eventDescriptionHint": "Gündem, konuşmacılar, kıyafet kodu, park bilgisi…",
+  "eventDescriptionRequired": "Etkinlik hakkında bilgisi zorunludur.",
   "eventDescriptionTooLong": "Açıklama en fazla 2000 karakter olabilir.",
   "eventAboutSection": "Hakkında",
   "eventAboutSectionLabel": "Etkinlik hakkında",
@@ -771,7 +772,14 @@
     }
   },
   "eventDetailNetworkingChip": "Networking",
-  "eventAddCardPlus": "+ Kart ekle",
+  "eventAddCardPlus": "+ Davet et",
+  "eventOutboundInvitesSectionTitle": "Davet edilenler",
+  "eventOutboundInvitesEmpty": "Henüz davet gönderilmedi.",
+  "eventOutboundInviteStatusPending": "Bekliyor",
+  "eventOutboundInviteStatusAccepted": "Kabul",
+  "eventOutboundInviteStatusRejected": "Red",
+  "eventOutboundInviteStatusExpired": "Süresi doldu",
+  "eventInviteManualCardNotSupported": "Manuel kartlar için etkinlik daveti gönderilemez. Cardence kart ID kullanın.",
   "eventLinkedCardsSection": "Bağlı kartlar ({count})",
   "@eventLinkedCardsSection": {
     "placeholders": {
@@ -788,7 +796,7 @@
   "eventPhotoChange": "Fotoğrafı değiştir",
   "eventCreateNoSavedCards": "Henüz kaydedilmiş kart yok.",
   "eventSkip": "Atla",
-  "eventGroupCardsStepSubtitle": "Kayıtlı kart seçin veya Card ID ile davet edin. İsterseniz kart seçmeden de etkinliği oluşturabilirsiniz.",
+  "eventGroupCardsStepSubtitle": "Kayıtlı kartlardan veya Card ID ile davet gönderin. Yalnızca kabul edenler etkinliğe eklenir.",
   "eventStartRequired": "Başlangıç tarihi ve saati seçin.",
   "eventLocationRequired": "Etkinlik konumu gereklidir.",
   "eventEndRequiresDateAndTime": "Bitiş için tarih ve saat birlikte seçilmelidir.",
@@ -871,8 +879,8 @@
   "scanCardQrInvalid": "Geçerli bir Cardence QR kodu bulunamadı",
   "scanCardQrCameraDenied": "QR okutmak için kamera izni gerekli",
   "scanCardQrAllowCamera": "Kamera izni ver",
-  "walletCardInvitationsSection": "Kart ekleme davetleri",
-  "walletCardInvitationAddedYou": "{inviterName} sizi cüzdanınıza ekledi",
+  "walletCardInvitationsSection": "Kart kaydetme davetleri",
+  "walletCardInvitationAddedYou": "{inviterName} sizi kaydetti",
   "@walletCardInvitationAddedYou": {
     "placeholders": {
       "inviterName": {
@@ -880,7 +888,7 @@
       }
     }
   },
-  "walletCardInvitationPrompt": "Siz de onu kartlarınıza eklemek ister misiniz?",
+  "walletCardInvitationPrompt": "Sen de o kişinin kartını kaydetmek ister misin?",
   "@walletCardInvitationPrompt": {
     "placeholders": {
       "inviterName": {
@@ -918,8 +926,8 @@
       }
     }
   },
-  "eventInviteCardsTitle": "Card ID ile kart davet et",
-  "eventInviteCardsSubtitle": "Card ID girerek bu etkinliğe kart ekleyin. Geçersiz ID'ler raporlanır.",
+  "eventInviteCardsTitle": "Etkinliğe kart davet et",
+  "eventInviteCardsSubtitle": "Card ID veya kaydedilen kartlardan seçerek davet gönderin. Kabul edenler gruba eklenir.",
   "eventSendInvites": "Davet gönder",
   "eventSendingInvites": "Davetler gönderiliyor…",
   "eventGroupCreating": "Etkinlik oluşturuluyor…",
@@ -951,8 +959,8 @@
       }
     }
   },
-  "noCardsSelectedYet": "Henüz kart seçilmedi",
-  "cardsSelectedCount": "{count} kart seçildi",
+  "noCardsSelectedYet": "Henüz davet edilecek kart seçilmedi",
+  "cardsSelectedCount": "{count} kart davet için seçildi",
   "@cardsSelectedCount": {
     "placeholders": {
       "count": {
@@ -969,7 +977,7 @@
       }
     }
   },
-  "pickSavedCardsForGroupSubtitle": "{groupName} grubuna eklenecek kayıtlı kartları seçin.",
+  "pickSavedCardsForGroupSubtitle": "\"{groupName}\" için davet göndermek istediğiniz kartları seçin.",
   "@pickSavedCardsForGroupSubtitle": {
     "placeholders": {
       "groupName": {
@@ -977,8 +985,8 @@
       }
     }
   },
-  "addCardsToGroup": "Kartları gruba ekle",
-  "addCardsToGroupCount": "{count} kartı gruba ekle",
+  "addCardsToGroup": "Davet gönder",
+  "addCardsToGroupCount": "{count} karta davet gönder",
   "@addCardsToGroupCount": {
     "placeholders": {
       "count": {
@@ -986,7 +994,7 @@
       }
     }
   },
-  "pickEventGroupsForCardSubtitle": "{cardTitle} kartının eklenebileceği grupları işaretleyin.",
+  "pickEventGroupsForCardSubtitle": "{cardTitle} kartını davet etmek istediğiniz grupları işaretleyin.",
   "@pickEventGroupsForCardSubtitle": {
     "placeholders": {
       "cardTitle": {
@@ -1039,7 +1047,7 @@
     }
   },
   "viewEventNetwork": "Etkinlik ağını görüntüle",
-  "cardsAddedToGroupMessage": "{count} kart gruba eklendi",
+  "cardsAddedToGroupMessage": "{count} davet gönderildi",
   "@cardsAddedToGroupMessage": {
     "placeholders": {
       "count": {
@@ -1055,7 +1063,7 @@
       }
     }
   },
-  "eventGroupCreatedWithCardsMessage": "\"{groupName}\" grubu {count} kartla oluşturuldu",
+  "eventGroupCreatedWithCardsMessage": "\"{groupName}\" grubu oluşturuldu; {count} davet gönderildi",
   "@eventGroupCreatedWithCardsMessage": {
     "placeholders": {
       "groupName": {

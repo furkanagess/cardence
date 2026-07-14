@@ -70,6 +70,11 @@ public interface IEventGroupRepository
         Guid inviteeUserId,
         CancellationToken cancellationToken = default);
 
+    Task<IReadOnlyList<EventGroupCardInvite>> GetOutboundInvitationsForGroupAsync(
+        Guid ownerUserId,
+        Guid groupId,
+        CancellationToken cancellationToken = default);
+
     Task<EventGroupCardInvite?> GetInvitationForInviteeAsync(
         Guid inviteeUserId,
         Guid invitationId,

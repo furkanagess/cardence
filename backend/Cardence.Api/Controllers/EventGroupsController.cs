@@ -178,6 +178,18 @@ public sealed class EventGroupsController : ControllerBase
             HttpContext.TraceIdentifier));
     }
 
+    [HttpGet("EventGroupOutboundInvitations")]
+    [ProducesResponseType(typeof(ApiResponse<IReadOnlyList<EventGroupOutboundInvitationDto>>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<ApiResponse<IReadOnlyList<EventGroupOutboundInvitationDto>>>> GetEventGroupOutboundInvitations(
+        [FromQuery] string id,
+        CancellationToken cancellationToken)
+    {
+        var invitations = await _eventGroupService.GetOutboundInvitationsAsync(id, cancellationToken);
+        return Ok(ApiResponse<IReadOnlyList<EventGroupOutboundInvitationDto>>.Ok(
+            invitations,
+            HttpContext.TraceIdentifier));
+    }
+
     [HttpPost("AcceptEventGroupInvitation")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     public async Task<IActionResult> AcceptEventGroupInvitation(

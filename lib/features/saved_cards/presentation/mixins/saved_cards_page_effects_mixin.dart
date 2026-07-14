@@ -24,6 +24,7 @@ import '../../../event_groups/domain/usecases/get_event_groups.dart';
 import '../../../event_groups/domain/usecases/delete_event_group.dart';
 import '../../../event_groups/domain/usecases/update_event_group.dart';
 import '../../../event_groups/domain/usecases/invite_event_group_cards_by_card_id.dart';
+import '../../../event_groups/domain/usecases/get_event_group_outbound_invitations.dart';
 import '../../domain/usecases/link_saved_cards_to_event_group.dart';
 
 /// Kayıtlı kartlar sayfası yan etkileri: sheet ve navigasyon.
@@ -153,6 +154,7 @@ mixin SavedCardsPageEffectsMixin<T extends StatefulWidget> on State<T> {
     required GetSavedCards getSavedCards,
     required UpdateEventGroup updateEventGroup,
     required InviteEventGroupCardsByCardId inviteEventGroupCardsByCardId,
+    required GetEventGroupOutboundInvitations getEventGroupOutboundInvitations,
     required DeleteEventGroup deleteEventGroup,
     required LinkSavedCardsToEventGroup linkSavedCardsToEventGroup,
     required SaveSavedCard saveSavedCard,
@@ -169,6 +171,7 @@ mixin SavedCardsPageEffectsMixin<T extends StatefulWidget> on State<T> {
           getSavedCards: getSavedCards,
           updateEventGroup: updateEventGroup,
           inviteEventGroupCardsByCardId: inviteEventGroupCardsByCardId,
+          getEventGroupOutboundInvitations: getEventGroupOutboundInvitations,
           deleteEventGroup: deleteEventGroup,
           linkSavedCardsToEventGroup: linkSavedCardsToEventGroup,
           saveSavedCard: saveSavedCard,

@@ -286,7 +286,7 @@
   "kaydedildiTarihBilinmiyor": "Saved: date unknown",
   "kaydedilenKartlar": "Saved Cards",
   "kaydedilenKartlardanSe": "Select from saved cards",
-  "kaydedilenKartlarnzdanSeerekBuGruba": "You can add cards to this group by selecting from your saved cards.",
+  "kaydedilenKartlarnzdanSeerekBuGruba": "Select from your saved cards to send invites. Only people who accept are added to the group.",
   "kaydedilmemiDeiiklikler": "Unsaved changes",
   "kaydet": "Save",
   "kaytOl": "Sign up",
@@ -746,9 +746,10 @@
   "eventLocationRegionRequired": "Country and province/district are required.",
   "eventCreateStartSubtitle": "Select the start date and time.",
   "eventCreateScheduleSubtitle": "Select the start date and time; optionally add an end as well.",
-  "eventCreateDetailsSubtitle": "Share agenda, dress code, or other details. You can skip this step.",
+  "eventCreateDetailsSubtitle": "Add agenda, dress code, or other details. This field is required.",
   "eventDescription": "About this event",
   "eventDescriptionHint": "Agenda, speakers, dress code, parking info…",
+  "eventDescriptionRequired": "About the event is required.",
   "eventDescriptionTooLong": "Description can be at most 2000 characters.",
   "eventAboutSection": "About",
   "eventAboutSectionLabel": "About this event",
@@ -771,7 +772,14 @@
     }
   },
   "eventDetailNetworkingChip": "Networking",
-  "eventAddCardPlus": "+ Add card",
+  "eventAddCardPlus": "+ Invite",
+  "eventOutboundInvitesSectionTitle": "Invited",
+  "eventOutboundInvitesEmpty": "No invites sent yet.",
+  "eventOutboundInviteStatusPending": "Pending",
+  "eventOutboundInviteStatusAccepted": "Accepted",
+  "eventOutboundInviteStatusRejected": "Declined",
+  "eventOutboundInviteStatusExpired": "Expired",
+  "eventInviteManualCardNotSupported": "Manual cards cannot be invited to events. Use a Cardence card ID.",
   "eventLinkedCardsSection": "Linked cards ({count})",
   "@eventLinkedCardsSection": {
     "placeholders": {
@@ -788,7 +796,7 @@
   "eventPhotoChange": "Change photo",
   "eventCreateNoSavedCards": "No saved cards yet.",
   "eventSkip": "Skip",
-  "eventGroupCardsStepSubtitle": "Select saved cards or invite by Card ID. You can create the event without cards.",
+  "eventGroupCardsStepSubtitle": "Invite contacts by Card ID or from saved cards. Only people who accept join the event.",
   "eventStartRequired": "Select a start date and time.",
   "eventLocationRequired": "Event location is required.",
   "eventEndRequiresDateAndTime": "Select both date and time for the end.",
@@ -871,8 +879,8 @@
   "scanCardQrInvalid": "No valid Cardence QR code found",
   "scanCardQrCameraDenied": "Camera permission is required to scan QR codes",
   "scanCardQrAllowCamera": "Allow camera access",
-  "walletCardInvitationsSection": "Card add invitations",
-  "walletCardInvitationAddedYou": "{inviterName} added you to their wallet",
+  "walletCardInvitationsSection": "Card save invitations",
+  "walletCardInvitationAddedYou": "{inviterName} saved you",
   "@walletCardInvitationAddedYou": {
     "placeholders": {
       "inviterName": {
@@ -880,7 +888,7 @@
       }
     }
   },
-  "walletCardInvitationPrompt": "Would you like to add them to your cards too?",
+  "walletCardInvitationPrompt": "Would you like to save their card too?",
   "@walletCardInvitationPrompt": {
     "placeholders": {
       "inviterName": {
@@ -918,8 +926,8 @@
       }
     }
   },
-  "eventInviteCardsTitle": "Invite cards by Card ID",
-  "eventInviteCardsSubtitle": "Add cards to this event by entering Card IDs. Invalid IDs are reported.",
+  "eventInviteCardsTitle": "Invite cards to event",
+  "eventInviteCardsSubtitle": "Invite by Card ID or from saved cards. Only people who accept are added to the group.",
   "eventSendInvites": "Send invites",
   "eventSendingInvites": "Sending invites…",
   "eventGroupCreating": "Creating event…",
@@ -951,8 +959,8 @@
       }
     }
   },
-  "noCardsSelectedYet": "No cards selected yet",
-  "cardsSelectedCount": "{count} cards selected",
+  "noCardsSelectedYet": "No cards selected to invite yet",
+  "cardsSelectedCount": "{count} cards selected to invite",
   "@cardsSelectedCount": {
     "placeholders": {
       "count": {
@@ -969,7 +977,7 @@
       }
     }
   },
-  "pickSavedCardsForGroupSubtitle": "Select saved cards to add to the {groupName} group.",
+  "pickSavedCardsForGroupSubtitle": "Select cards to invite to \"{groupName}\".",
   "@pickSavedCardsForGroupSubtitle": {
     "placeholders": {
       "groupName": {
@@ -977,8 +985,8 @@
       }
     }
   },
-  "addCardsToGroup": "Add cards to group",
-  "addCardsToGroupCount": "Add {count} cards to group",
+  "addCardsToGroup": "Send invites",
+  "addCardsToGroupCount": "Invite {count} cards",
   "@addCardsToGroupCount": {
     "placeholders": {
       "count": {
@@ -986,7 +994,7 @@
       }
     }
   },
-  "pickEventGroupsForCardSubtitle": "Select groups where the {cardTitle} card can be added.",
+  "pickEventGroupsForCardSubtitle": "Select groups to invite {cardTitle} to.",
   "@pickEventGroupsForCardSubtitle": {
     "placeholders": {
       "cardTitle": {
@@ -1039,7 +1047,7 @@
     }
   },
   "viewEventNetwork": "View event network",
-  "cardsAddedToGroupMessage": "{count} cards added to group",
+  "cardsAddedToGroupMessage": "{count} invites sent",
   "@cardsAddedToGroupMessage": {
     "placeholders": {
       "count": {
@@ -1055,7 +1063,7 @@
       }
     }
   },
-  "eventGroupCreatedWithCardsMessage": "\"{groupName}\" group created with {count} cards",
+  "eventGroupCreatedWithCardsMessage": "\"{groupName}\" created; {count} invites sent",
   "@eventGroupCreatedWithCardsMessage": {
     "placeholders": {
       "groupName": {

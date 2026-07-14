@@ -37,6 +37,7 @@ import '../../features/event_groups/data/datasources/event_group_local_datasourc
 import '../../features/event_groups/data/repositories/event_group_repository_impl.dart';
 import '../../features/event_groups/domain/usecases/get_event_groups.dart';
 import '../../features/event_groups/domain/usecases/get_event_group_invitations.dart';
+import '../../features/event_groups/domain/usecases/get_event_group_outbound_invitations.dart';
 import '../../features/event_groups/domain/usecases/accept_event_group_invitation.dart';
 import '../../features/event_groups/domain/usecases/reject_event_group_invitation.dart';
 import '../../features/event_groups/data/datasources/event_group_remote_datasource.dart';
@@ -313,6 +314,8 @@ class AppInit {
       createEventGroup: eventGroups.createEventGroup,
       updateEventGroup: eventGroups.updateEventGroup,
       inviteEventGroupCardsByCardId: eventGroups.inviteEventGroupCardsByCardId,
+      getEventGroupOutboundInvitations:
+          eventGroups.getEventGroupOutboundInvitations,
       deleteEventGroup: eventGroups.deleteEventGroup,
       linkEventGroupCards: eventGroups.linkEventGroupCards,
       getSavedCards: savedCards.getSavedCards,
@@ -410,6 +413,7 @@ class AppInit {
     CreateEventGroup createEventGroup,
     UpdateEventGroup updateEventGroup,
     InviteEventGroupCardsByCardId inviteEventGroupCardsByCardId,
+    GetEventGroupOutboundInvitations getEventGroupOutboundInvitations,
     DeleteEventGroup deleteEventGroup,
     LinkEventGroupCards linkEventGroupCards,
   }) _initEventGroups({
@@ -429,6 +433,7 @@ class AppInit {
       createEventGroup: CreateEventGroup(repo),
       updateEventGroup: UpdateEventGroup(repo),
       inviteEventGroupCardsByCardId: InviteEventGroupCardsByCardId(repo),
+      getEventGroupOutboundInvitations: GetEventGroupOutboundInvitations(repo),
       deleteEventGroup: DeleteEventGroup(repo),
       linkEventGroupCards: LinkEventGroupCards(repo),
     );
@@ -675,6 +680,7 @@ class AppInitResult {
     required this.createEventGroup,
     required this.updateEventGroup,
     required this.inviteEventGroupCardsByCardId,
+    required this.getEventGroupOutboundInvitations,
     required this.deleteEventGroup,
     required this.linkEventGroupCards,
     required this.getSavedCards,
@@ -739,6 +745,7 @@ class AppInitResult {
   final CreateEventGroup createEventGroup;
   final UpdateEventGroup updateEventGroup;
   final InviteEventGroupCardsByCardId inviteEventGroupCardsByCardId;
+  final GetEventGroupOutboundInvitations getEventGroupOutboundInvitations;
   final DeleteEventGroup deleteEventGroup;
   final LinkEventGroupCards linkEventGroupCards;
   final GetSavedCards getSavedCards;

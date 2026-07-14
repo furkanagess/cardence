@@ -92,56 +92,8 @@ public sealed class EventGroupRepository : IEventGroupRepository
         IReadOnlyList<string> cardIds,
         CancellationToken cancellationToken = default)
     {
-        if (cardIds.Count == 0)
-        {
-            return;
-        }
-
-        var distinctCardIds = cardIds
-            .Select(cardId => cardId.Trim())
-            .Where(cardId => !string.IsNullOrEmpty(cardId))
-            .Distinct(StringComparer.Ordinal)
-            .ToList();
-
-        if (distinctCardIds.Count == 0)
-        {
-            return;
-        }
-
-        var walletCards = await _dbContext.SavedCards
-            .Where(card =>
-                card.UserId == userId &&
-                distinctCardIds.Contains(card.CardId))
-            .Select(card => new { card.Id, card.CardId })
-            .ToListAsync(cancellationToken);
-
-        if (walletCards.Count == 0)
-        {
-            return;
-        }
-
-        var walletCardIds = walletCards.Select(card => card.Id).ToList();
-        var existingLinks = await _dbContext.SavedCardEventGroups
-            .Where(link => link.EventGroupId == groupId && walletCardIds.Contains(link.SavedCardId))
-            .Select(link => link.SavedCardId)
-            .ToListAsync(cancellationToken);
-
-        var existingSet = existingLinks.ToHashSet();
-        foreach (var walletCard in walletCards)
-        {
-            if (existingSet.Contains(walletCard.Id))
-            {
-                continue;
-            }
-
-            _dbContext.SavedCardEventGroups.Add(new SavedCardEventGroup
-            {
-                SavedCardId = walletCard.Id,
-                EventGroupId = groupId,
-            });
-        }
-
-        await _dbContext.SaveChangesAsync(cancellationToken);
+        // Doğrudan üyelik yasak; eski istemciler için davet akışına yönlendirilir.
+        await InviteCardsByCardIdsAsync(userId, groupId, cardIds, cancellationToken);
     }
 
     public async Task<EventGroupInviteCardsResult> InviteCardsByCardIdsAsync(
@@ -228,6 +180,32 @@ public sealed class EventGroupRepository : IEventGroupRepository
                 invite.InviteeUserId == inviteeUserId &&
                 invite.Status == EventGroupInvitationStatuses.Pending &&
                 invite.ExpiresAtUtc > now)
+            .OrderByDescending(invite => invite.CreatedAtUtc)
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task<IReadOnlyList<EventGroupCardInvite>> GetOutboundInvitationsForGroupAsync(
+        Guid ownerUserId,
+        Guid groupId,
+        CancellationToken cancellationToken = default)
+    {
+        await DeleteExpiredInvitationsAsync(cancellationToken);
+
+        var ownsGroup = await _dbContext.EventGroups
+            .AsNoTracking()
+            .AnyAsync(
+                group => group.Id == groupId && group.UserId == ownerUserId,
+                cancellationToken);
+        if (!ownsGroup)
+        {
+            return [];
+        }
+
+        return await _dbContext.EventGroupCardInvites
+            .AsNoTracking()
+            .Include(invite => invite.InviteeUser)
+            .Include(invite => invite.Card)
+            .Where(invite => invite.EventGroupId == groupId)
             .OrderByDescending(invite => invite.CreatedAtUtc)
             .ToListAsync(cancellationToken);
     }
@@ -486,30 +464,11 @@ public sealed class EventGroupRepository : IEventGroupRepository
         if (toRemove.Count > 0)
         {
             _dbContext.SavedCardEventGroups.RemoveRange(toRemove);
-        }
-
-        var existingSet = existingLinks
-            .Select(link => link.EventGroupId)
-            .ToHashSet();
-
-        foreach (var groupId in ownedSet)
-        {
-            if (existingSet.Contains(groupId))
-            {
-                continue;
-            }
-
-            _dbContext.SavedCardEventGroups.Add(new SavedCardEventGroup
-            {
-                SavedCardId = savedCardId,
-                EventGroupId = groupId,
-            });
-        }
-
-        if (toRemove.Count > 0 || ownedSet.Any(groupId => !existingSet.Contains(groupId)))
-        {
             await _dbContext.SaveChangesAsync(cancellationToken);
         }
+
+        // Yeni grup üyeliği yalnızca davet kabulüyle eklenir; SaveSavedCard
+        // üzerinden linkedEventGroupIds ile doğrudan ekleme yapılmaz.
     }
 
     public async Task PopulateLinkedGroupIdsAsync(

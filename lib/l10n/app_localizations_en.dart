@@ -877,7 +877,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get kaydedilenKartlarnzdanSeerekBuGruba =>
-      'You can add cards to this group by selecting from your saved cards.';
+      'Select from your saved cards to send invites. Only people who accept are added to the group.';
 
   @override
   String get kaydedilmemiDeiiklikler => 'Unsaved changes';
@@ -2100,7 +2100,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get eventCreateDetailsSubtitle =>
-      'Share agenda, dress code, or other details. You can skip this step.';
+      'Add agenda, dress code, or other details. This field is required.';
 
   @override
   String get eventDescription => 'About this event';
@@ -2108,6 +2108,9 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get eventDescriptionHint =>
       'Agenda, speakers, dress code, parking info…';
+
+  @override
+  String get eventDescriptionRequired => 'About the event is required.';
 
   @override
   String get eventDescriptionTooLong =>
@@ -2139,7 +2142,29 @@ class AppLocalizationsEn extends AppLocalizations {
   String get eventDetailNetworkingChip => 'Networking';
 
   @override
-  String get eventAddCardPlus => '+ Add card';
+  String get eventAddCardPlus => '+ Invite';
+
+  @override
+  String get eventOutboundInvitesSectionTitle => 'Invited';
+
+  @override
+  String get eventOutboundInvitesEmpty => 'No invites sent yet.';
+
+  @override
+  String get eventOutboundInviteStatusPending => 'Pending';
+
+  @override
+  String get eventOutboundInviteStatusAccepted => 'Accepted';
+
+  @override
+  String get eventOutboundInviteStatusRejected => 'Declined';
+
+  @override
+  String get eventOutboundInviteStatusExpired => 'Expired';
+
+  @override
+  String get eventInviteManualCardNotSupported =>
+      'Manual cards cannot be invited to events. Use a Cardence card ID.';
 
   @override
   String eventLinkedCardsSection(int count) {
@@ -2174,7 +2199,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get eventGroupCardsStepSubtitle =>
-      'Select saved cards or invite by Card ID. You can create the event without cards.';
+      'Invite contacts by Card ID or from saved cards. Only people who accept join the event.';
 
   @override
   String get eventStartRequired => 'Select a start date and time.';
@@ -2333,16 +2358,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get scanCardQrAllowCamera => 'Allow camera access';
 
   @override
-  String get walletCardInvitationsSection => 'Card add invitations';
+  String get walletCardInvitationsSection => 'Card save invitations';
 
   @override
   String walletCardInvitationAddedYou(String inviterName) {
-    return '$inviterName added you to their wallet';
+    return '$inviterName saved you';
   }
 
   @override
   String walletCardInvitationPrompt(String inviterName) {
-    return 'Would you like to add them to your cards too?';
+    return 'Would you like to save their card too?';
   }
 
   @override
@@ -2399,11 +2424,11 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get eventInviteCardsTitle => 'Invite cards by Card ID';
+  String get eventInviteCardsTitle => 'Invite cards to event';
 
   @override
   String get eventInviteCardsSubtitle =>
-      'Add cards to this event by entering Card IDs. Invalid IDs are reported.';
+      'Invite by Card ID or from saved cards. Only people who accept are added to the group.';
 
   @override
   String get eventSendInvites => 'Send invites';
@@ -2443,11 +2468,11 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get noCardsSelectedYet => 'No cards selected yet';
+  String get noCardsSelectedYet => 'No cards selected to invite yet';
 
   @override
   String cardsSelectedCount(int count) {
-    return '$count cards selected';
+    return '$count cards selected to invite';
   }
 
   @override
@@ -2460,20 +2485,20 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String pickSavedCardsForGroupSubtitle(String groupName) {
-    return 'Select saved cards to add to the $groupName group.';
+    return 'Select cards to invite to \"$groupName\".';
   }
 
   @override
-  String get addCardsToGroup => 'Add cards to group';
+  String get addCardsToGroup => 'Send invites';
 
   @override
   String addCardsToGroupCount(int count) {
-    return 'Add $count cards to group';
+    return 'Invite $count cards';
   }
 
   @override
   String pickEventGroupsForCardSubtitle(String cardTitle) {
-    return 'Select groups where the $cardTitle card can be added.';
+    return 'Select groups to invite $cardTitle to.';
   }
 
   @override
@@ -2558,7 +2583,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String cardsAddedToGroupMessage(int count) {
-    return '$count cards added to group';
+    return '$count invites sent';
   }
 
   @override
@@ -2568,7 +2593,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String eventGroupCreatedWithCardsMessage(String groupName, int count) {
-    return '\"$groupName\" group created with $count cards';
+    return '\"$groupName\" created; $count invites sent';
   }
 
   @override

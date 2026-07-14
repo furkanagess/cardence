@@ -130,15 +130,40 @@ class EventGroupInvitationCard extends StatelessWidget {
               label: l10n.eventInvitationCardLabel(cardLabel),
             ),
             if (description != null && description.isNotEmpty) ...[
-              const SizedBox(height: 10),
-              Text(
-                description,
-                style: textTheme.bodySmall?.copyWith(
-                  color: colorScheme.onSurfaceVariant,
-                  height: 1.35,
+              const SizedBox(height: 12),
+              DecoratedBox(
+                decoration: BoxDecoration(
+                  color: colorScheme.surfaceContainerHighest.withValues(
+                    alpha: isDark ? 0.35 : 0.55,
+                  ),
+                  borderRadius: BorderRadius.circular(12),
                 ),
-                maxLines: 3,
-                overflow: TextOverflow.ellipsis,
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        l10n.eventAboutSectionLabel.toUpperCase(),
+                        style: textTheme.labelSmall?.copyWith(
+                          color: colorScheme.onSurfaceVariant,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: 0.6,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        description,
+                        style: textTheme.bodyMedium?.copyWith(
+                          color: colorScheme.onSurface,
+                          height: 1.4,
+                        ),
+                        maxLines: 5,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ],
             if (!canAccept) ...[

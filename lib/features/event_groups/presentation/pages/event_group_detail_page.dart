@@ -19,8 +19,11 @@ import '../../domain/usecases/get_event_groups.dart';
 import '../../domain/usecases/delete_event_group.dart';
 import '../../domain/usecases/update_event_group.dart';
 import '../../domain/usecases/invite_event_group_cards_by_card_id.dart';
+import '../../domain/usecases/get_event_group_outbound_invitations.dart';
 import '../../../saved_cards/domain/usecases/link_saved_cards_to_event_group.dart';
+import '../../domain/entities/event_group_outbound_invitation.dart';
 import '../widgets/event_group_detail_header.dart';
+import '../widgets/event_group_detail_invited_section.dart';
 import '../widgets/event_group_detail_linked_cards_section.dart';
 import '../widgets/event_group_detail_loading_shimmer.dart';
 import '../widgets/pick_saved_cards_for_group_sheet.dart';
@@ -35,6 +38,7 @@ class EventGroupDetailPage extends StatefulWidget {
     required this.getEventGroups,
     required this.updateEventGroup,
     required this.inviteEventGroupCardsByCardId,
+    required this.getEventGroupOutboundInvitations,
     required this.deleteEventGroup,
     required this.linkSavedCardsToEventGroup,
     required this.getSavedCards,
@@ -49,6 +53,7 @@ class EventGroupDetailPage extends StatefulWidget {
   final GetEventGroups getEventGroups;
   final UpdateEventGroup updateEventGroup;
   final InviteEventGroupCardsByCardId inviteEventGroupCardsByCardId;
+  final GetEventGroupOutboundInvitations getEventGroupOutboundInvitations;
   final DeleteEventGroup deleteEventGroup;
   final LinkSavedCardsToEventGroup linkSavedCardsToEventGroup;
   final GetSavedCards getSavedCards;
@@ -66,7 +71,9 @@ class _EventGroupDetailPageState extends State<EventGroupDetailPage> {
   late EventGroup _group;
   List<SavedCard> _linkedCards = [];
   List<SavedCard> _availableToAdd = [];
+  List<EventGroupOutboundInvitation> _outboundInvitations = [];
   bool _loadingLinkedCards = false;
+  bool _loadingInvitations = false;
   bool _initialLoading = true;
 
   @override
@@ -78,10 +85,19 @@ class _EventGroupDetailPageState extends State<EventGroupDetailPage> {
 
   Future<void> _load() async {
     if (_initialLoading && mounted) {
-      setState(() => _loadingLinkedCards = true);
+      setState(() {
+        _loadingLinkedCards = true;
+        _loadingInvitations = true;
+      });
     }
-    final groups = await widget.getEventGroups();
-    final cards = await widget.getSavedCards();
+    final groupsFuture = widget.getEventGroups();
+    final cardsFuture = widget.getSavedCards();
+    final invitationsFuture = _fetchOutboundInvitations();
+
+    final groups = await groupsFuture;
+    final cards = await cardsFuture;
+    final invitations = await invitationsFuture;
+
     if (!mounted) return;
     EventGroup? refreshedGroup;
     for (final group in groups) {
@@ -90,19 +106,44 @@ class _EventGroupDetailPageState extends State<EventGroupDetailPage> {
         break;
       }
     }
-    final allCards = cards;
     setState(() {
       if (refreshedGroup != null) {
         _group = refreshedGroup;
       }
-      _linkedCards = allCards
+      _linkedCards = cards
           .where((c) => c.linkedEventGroupIds.contains(_group.id))
           .toList();
-      _availableToAdd = allCards
+      _availableToAdd = cards
           .where((c) => !c.linkedEventGroupIds.contains(_group.id))
           .toList();
+      if (invitations != null) {
+        _outboundInvitations = invitations;
+      }
       _loadingLinkedCards = false;
+      _loadingInvitations = false;
       _initialLoading = false;
+    });
+  }
+
+  /// Null = istek başarısız; mevcut liste korunur.
+  Future<List<EventGroupOutboundInvitation>?> _fetchOutboundInvitations() async {
+    try {
+      return await widget.getEventGroupOutboundInvitations(_group.id);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Future<void> _refreshOutboundInvitations() async {
+    if (!mounted) return;
+    setState(() => _loadingInvitations = true);
+    final invitations = await _fetchOutboundInvitations();
+    if (!mounted) return;
+    setState(() {
+      if (invitations != null) {
+        _outboundInvitations = invitations;
+      }
+      _loadingInvitations = false;
     });
   }
 
@@ -142,37 +183,42 @@ class _EventGroupDetailPageState extends State<EventGroupDetailPage> {
     );
     if (!mounted || result == null) return;
 
-    if (result.invitedCount > 0) {
-      await widget.onSavedCardsChanged?.call();
-      await _load();
-    }
-
     setState(() => _group = result.group);
+    // Davet gönderildikten hemen sonra listeyi yenile (bağlı kartlar ayrı yüklenir).
+    await _refreshOutboundInvitations();
+    await widget.onSavedCardsChanged?.call();
+    if (!mounted) return;
+    await _load();
   }
 
   Future<void> _openAddCardsPicker() async {
-    if (_availableToAdd.isEmpty) {
+    final inviteable = _availableToAdd
+        .where((card) => !card.isManualEntry)
+        .toList(growable: false);
+
+    if (inviteable.isEmpty) {
       await _openInviteByCardId();
       return;
     }
 
     final selectedIds = await PickSavedCardsForGroupSheet.show(
       context,
-      cards: _availableToAdd,
+      cards: inviteable,
       eventGroupId: _group.id,
       eventGroupName: _group.name,
       addOnly: true,
     );
     if (!mounted || selectedIds == null || selectedIds.isEmpty) return;
 
-    final allCards = await widget.getSavedCards();
-    await widget.linkSavedCardsToEventGroup(
+    final updated = await widget.inviteEventGroupCardsByCardId(
       groupId: _group.id,
-      allCards: allCards,
-      cardIdsToAdd: selectedIds.toList(),
+      cardIds: selectedIds.toList(),
     );
-    await widget.getSavedCards();
+    if (!mounted) return;
 
+    setState(() => _group = updated);
+    await _refreshOutboundInvitations();
+    await widget.onSavedCardsChanged?.call();
     if (!mounted) return;
     await _load();
   }
@@ -358,8 +404,19 @@ class _EventGroupDetailPageState extends State<EventGroupDetailPage> {
                 child: EventGroupDetailScrollContent(
                   group: _group,
                   linkedCardCount: _linkedCards.length,
+                  inviteCount: _outboundInvitations
+                      .where((invite) => invite.isPending)
+                      .length,
                   loadingLinkedCards: _loadingLinkedCards,
                   onAddCard: _loadingLinkedCards ? null : _openAddCardsPicker,
+                  invitedSection: EventGroupDetailInvitedSection(
+                    key: ValueKey(
+                      'outbound-${_outboundInvitations.length}-'
+                      '${_outboundInvitations.map((e) => e.id).join(',')}',
+                    ),
+                    invitations: _outboundInvitations,
+                    isLoading: _loadingInvitations,
+                  ),
                   cardsSection: _buildCardsSection(context),
                 ),
               ),

@@ -29,6 +29,7 @@ import '../../domain/usecases/reject_event_group_invitation.dart';
 import '../../domain/usecases/create_event_group.dart';
 import '../../domain/usecases/update_event_group.dart';
 import '../../domain/usecases/invite_event_group_cards_by_card_id.dart';
+import '../../domain/usecases/get_event_group_outbound_invitations.dart';
 import '../../domain/usecases/delete_event_group.dart';
 import '../../../saved_cards/domain/usecases/link_saved_cards_to_event_group.dart';
 import '../../../saved_cards/domain/entities/saved_card.dart';
@@ -48,6 +49,7 @@ class EventGroupsPage extends StatefulWidget {
     required this.createEventGroup,
     required this.updateEventGroup,
     required this.inviteEventGroupCardsByCardId,
+    required this.getEventGroupOutboundInvitations,
     required this.deleteEventGroup,
     required this.linkSavedCardsToEventGroup,
     required this.getSavedCards,
@@ -65,6 +67,7 @@ class EventGroupsPage extends StatefulWidget {
   final CreateEventGroup createEventGroup;
   final UpdateEventGroup updateEventGroup;
   final InviteEventGroupCardsByCardId inviteEventGroupCardsByCardId;
+  final GetEventGroupOutboundInvitations getEventGroupOutboundInvitations;
   final DeleteEventGroup deleteEventGroup;
   final LinkSavedCardsToEventGroup linkSavedCardsToEventGroup;
   final GetSavedCards getSavedCards;
@@ -193,6 +196,11 @@ class _EventGroupsPageState extends State<EventGroupsPage> {
     final savedCardsCubit = context.read<SavedCardsCubit>();
 
     try {
+      final invitedCardIds = <String>{
+        ...draft.invitedCardIds,
+        ...draft.selectedCardIds,
+      }.toList();
+
       final newGroup = await widget.createEventGroup(
         EventGroupCreateInput(
           name: draft.name,
@@ -201,32 +209,21 @@ class _EventGroupsPageState extends State<EventGroupsPage> {
           endAt: draft.endAt,
           description: draft.description,
           photoFilePath: draft.photoFilePath,
-          invitedCardIds: draft.invitedCardIds,
+          invitedCardIds: invitedCardIds,
         ),
       );
 
-      if (draft.selectedCardIds.isNotEmpty) {
-        final allCards = savedCardsCubit.state.cards;
-        await widget.linkSavedCardsToEventGroup(
-          groupId: newGroup.id,
-          allCards: allCards,
-          cardIdsToAdd: draft.selectedCardIds.toList(),
-        );
-      }
-
       final validInvitedCount =
-          draft.invitedCardIds.length - newGroup.invalidCardIds.length;
-      if (draft.selectedCardIds.isNotEmpty || validInvitedCount > 0) {
-        if (mounted) {
-          await savedCardsCubit.refreshAll();
-        }
+          invitedCardIds.length - newGroup.invalidCardIds.length;
+      if (validInvitedCount > 0 && mounted) {
+        await savedCardsCubit.refreshAll();
       }
 
-      final successMessage = draft.selectedCardIds.isNotEmpty
+      final successMessage = validInvitedCount > 0
           ? AppL10n.eventGroupCreatedWithCardsMessage(
               l10n,
               draft.name,
-              draft.selectedCardIds.length,
+              validInvitedCount,
             )
           : AppL10n.eventGroupCreatedMessage(l10n, draft.name);
 
@@ -485,6 +482,8 @@ class _EventGroupsPageState extends State<EventGroupsPage> {
               updateEventGroup: widget.updateEventGroup,
               inviteEventGroupCardsByCardId:
                   widget.inviteEventGroupCardsByCardId,
+              getEventGroupOutboundInvitations:
+                  widget.getEventGroupOutboundInvitations,
               deleteEventGroup: widget.deleteEventGroup,
               linkSavedCardsToEventGroup: widget.linkSavedCardsToEventGroup,
               getSavedCards: widget.getSavedCards,

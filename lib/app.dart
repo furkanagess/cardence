@@ -32,6 +32,7 @@ import 'features/auth/presentation/pages/reset_password_from_link_page.dart';
 import 'features/auth/presentation/helpers/password_reset_deep_link.dart';
 import 'features/event_groups/domain/usecases/get_event_groups.dart';
 import 'features/event_groups/domain/usecases/get_event_group_invitations.dart';
+import 'features/event_groups/domain/usecases/get_event_group_outbound_invitations.dart';
 import 'features/event_groups/domain/usecases/accept_event_group_invitation.dart';
 import 'features/event_groups/domain/usecases/reject_event_group_invitation.dart';
 import 'features/event_groups/domain/usecases/create_event_group.dart';
@@ -130,6 +131,7 @@ class App extends StatefulWidget {
     required this.createEventGroup,
     required this.updateEventGroup,
     required this.inviteEventGroupCardsByCardId,
+    required this.getEventGroupOutboundInvitations,
     required this.deleteEventGroup,
     required this.linkEventGroupCards,
     required this.linkSavedCardsToEventGroup,
@@ -198,6 +200,7 @@ class App extends StatefulWidget {
       createEventGroup: init.createEventGroup,
       updateEventGroup: init.updateEventGroup,
       inviteEventGroupCardsByCardId: init.inviteEventGroupCardsByCardId,
+      getEventGroupOutboundInvitations: init.getEventGroupOutboundInvitations,
       deleteEventGroup: init.deleteEventGroup,
       linkEventGroupCards: init.linkEventGroupCards,
       linkSavedCardsToEventGroup: init.linkSavedCardsToEventGroup,
@@ -262,6 +265,7 @@ class App extends StatefulWidget {
   final CreateEventGroup createEventGroup;
   final UpdateEventGroup updateEventGroup;
   final InviteEventGroupCardsByCardId inviteEventGroupCardsByCardId;
+  final GetEventGroupOutboundInvitations getEventGroupOutboundInvitations;
   final DeleteEventGroup deleteEventGroup;
   final LinkEventGroupCards linkEventGroupCards;
   final LinkSavedCardsToEventGroup linkSavedCardsToEventGroup;
@@ -565,6 +569,8 @@ class _AppState extends State<App> {
           createEventGroup: widget.createEventGroup,
           updateEventGroup: widget.updateEventGroup,
           inviteEventGroupCardsByCardId: widget.inviteEventGroupCardsByCardId,
+          getEventGroupOutboundInvitations:
+              widget.getEventGroupOutboundInvitations,
           deleteEventGroup: widget.deleteEventGroup,
           linkEventGroupCards: widget.linkEventGroupCards,
           linkSavedCardsToEventGroup: widget.linkSavedCardsToEventGroup,

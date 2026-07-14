@@ -47,6 +47,10 @@ public interface IEventGroupService
     Task<IReadOnlyList<EventGroupInvitationDto>> GetPendingInvitationsAsync(
         CancellationToken cancellationToken = default);
 
+    Task<IReadOnlyList<EventGroupOutboundInvitationDto>> GetOutboundInvitationsAsync(
+        string groupId,
+        CancellationToken cancellationToken = default);
+
     Task AcceptInvitationAsync(
         RespondEventGroupInvitationRequest request,
         CancellationToken cancellationToken = default);

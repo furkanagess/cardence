@@ -4,6 +4,7 @@ import '../../../../core/network/auth_api_exception.dart';
 import '../../domain/entities/event_group.dart';
 import '../../domain/entities/event_group_create_input.dart';
 import '../../domain/entities/event_group_invitation.dart';
+import '../../domain/entities/event_group_outbound_invitation.dart';
 import '../../domain/entities/event_group_update_input.dart';
 import '../../domain/repositories/event_group_repository.dart';
 import '../datasources/event_group_local_datasource.dart';
@@ -61,6 +62,24 @@ class EventGroupRepositoryImpl implements EventGroupRepository {
       );
       return invitations.map((model) => model.toEntity()).toList();
     } on AuthApiException catch (e) {
+      if (e.isNetworkError || e.statusCode == 404) return [];
+      rethrow;
+    }
+  }
+
+  @override
+  Future<List<EventGroupOutboundInvitation>> getOutboundInvitations(
+    String groupId,
+  ) async {
+    final token = await _requireAccessToken();
+    try {
+      final invitations = await _remote.getOutboundInvitations(
+        groupId: groupId,
+        accessToken: token,
+      );
+      return invitations.map((model) => model.toEntity()).toList();
+    } on AuthApiException catch (e) {
+      // Endpoint henüz deploy edilmemiş olabilir; boş liste dön.
       if (e.isNetworkError || e.statusCode == 404) return [];
       rethrow;
     }

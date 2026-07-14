@@ -22,6 +22,7 @@ import '../../../event_groups/domain/usecases/get_event_groups.dart';
 import '../../../event_groups/domain/usecases/delete_event_group.dart';
 import '../../../event_groups/domain/usecases/update_event_group.dart';
 import '../../../event_groups/domain/usecases/invite_event_group_cards_by_card_id.dart';
+import '../../../event_groups/domain/usecases/get_event_group_outbound_invitations.dart';
 import '../../domain/usecases/link_saved_cards_to_event_group.dart';
 import '../../../event_groups/presentation/pages/event_group_detail_page.dart';
 import '../../../event_groups/presentation/widgets/pick_event_groups_for_card_sheet.dart';
@@ -51,6 +52,7 @@ class SavedCardDetailPage extends StatefulWidget {
     this.getSavedCards,
     this.updateEventGroup,
     this.inviteEventGroupCardsByCardId,
+    this.getEventGroupOutboundInvitations,
     this.deleteEventGroup,
     this.linkSavedCardsToEventGroup,
     this.saveSavedCard,
@@ -67,6 +69,7 @@ class SavedCardDetailPage extends StatefulWidget {
   final GetSavedCards? getSavedCards;
   final UpdateEventGroup? updateEventGroup;
   final InviteEventGroupCardsByCardId? inviteEventGroupCardsByCardId;
+  final GetEventGroupOutboundInvitations? getEventGroupOutboundInvitations;
   final DeleteEventGroup? deleteEventGroup;
   final LinkSavedCardsToEventGroup? linkSavedCardsToEventGroup;
   final SaveSavedCard? saveSavedCard;
@@ -111,6 +114,7 @@ class _SavedCardDetailPageState extends State<SavedCardDetailPage> {
       widget.getSavedCards != null &&
       widget.updateEventGroup != null &&
       widget.inviteEventGroupCardsByCardId != null &&
+      widget.getEventGroupOutboundInvitations != null &&
       widget.deleteEventGroup != null &&
       widget.linkSavedCardsToEventGroup != null &&
       widget.saveSavedCard != null &&
@@ -140,10 +144,21 @@ class _SavedCardDetailPageState extends State<SavedCardDetailPage> {
   }
 
   Future<void> _openAddToEventGroupsSheet() async {
+    final invite = widget.inviteEventGroupCardsByCardId;
+    if (invite == null) return;
+
+    if (_card.isManualEntry) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(context.l10n.eventInviteManualCardNotSupported)),
+      );
+      return;
+    }
+
     final available = _availableGroupsForCard;
     if (available.isEmpty) {
       if (!mounted) return;
-            return;
+      return;
     }
 
     final selectedIds = await PickEventGroupsForCardSheet.show(
@@ -153,13 +168,31 @@ class _SavedCardDetailPageState extends State<SavedCardDetailPage> {
     );
     if (!mounted || selectedIds == null || selectedIds.isEmpty) return;
 
-    final ids = List<String>.from(_card.linkedEventGroupIds);
+    var invitedGroupCount = 0;
     for (final groupId in selectedIds) {
-      if (!ids.contains(groupId)) ids.add(groupId);
-    }
-    await _persistCard(_card.copyWith(linkedEventGroupIds: ids));
-    if (!mounted) return;
+      final updated = await invite(
+        groupId: groupId,
+        cardIds: [_card.cardId],
+      );
+      if (updated.invalidCardIds.contains(_card.cardId)) {
+        continue;
       }
+      invitedGroupCount++;
+    }
+
+    if (!mounted) return;
+    await _loadEventGroups();
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          invitedGroupCount > 0
+              ? context.l10n.eventInvitesSentSuccess
+              : context.l10n.eventInviteSendFailed,
+        ),
+      ),
+    );
+  }
 
   Future<void> _openEventGroupDetail(EventGroup group) async {
     if (!_canOpenGroupDetail) return;
@@ -171,6 +204,8 @@ class _SavedCardDetailPageState extends State<SavedCardDetailPage> {
           updateEventGroup: widget.updateEventGroup!,
           inviteEventGroupCardsByCardId:
               widget.inviteEventGroupCardsByCardId!,
+          getEventGroupOutboundInvitations:
+              widget.getEventGroupOutboundInvitations!,
           deleteEventGroup: widget.deleteEventGroup!,
           linkSavedCardsToEventGroup: widget.linkSavedCardsToEventGroup!,
           getSavedCards: widget.getSavedCards!,

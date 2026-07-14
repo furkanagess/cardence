@@ -17,8 +17,9 @@ public sealed class SaveEventGroupRequestValidator : AbstractValidator<SaveEvent
             .WithMessage("Etkinlik konumu gereklidir.");
 
         RuleFor(x => x.Description)
-            .MaximumLength(2000)
-            .When(x => !string.IsNullOrWhiteSpace(x.Description));
+            .NotEmpty()
+            .WithMessage("Etkinlik hakkında bilgisini giriniz.")
+            .MaximumLength(2000);
 
         RuleFor(x => x)
             .Must(x => x.StartAt.HasValue || x.EventDate.HasValue)

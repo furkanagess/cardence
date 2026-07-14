@@ -1,6 +1,7 @@
 import '../entities/event_group.dart';
 import '../entities/event_group_create_input.dart';
 import '../entities/event_group_invitation.dart';
+import '../entities/event_group_outbound_invitation.dart';
 import '../entities/event_group_update_input.dart';
 
 /// Etkinlik grupları – sunucu birincil, yerel önbellek yedek.
@@ -8,6 +9,10 @@ abstract class EventGroupRepository {
   Future<List<EventGroup>> getEventGroups();
 
   Future<List<EventGroupInvitation>> getPendingInvitations();
+
+  Future<List<EventGroupOutboundInvitation>> getOutboundInvitations(
+    String groupId,
+  );
 
   Future<void> acceptInvitation(String invitationId);
 

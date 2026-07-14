@@ -879,7 +879,7 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get kaydedilenKartlarnzdanSeerekBuGruba =>
-      'Kaydedilen kartlarınızdan seçerek bu gruba kart ekleyebilirsiniz.';
+      'Kaydedilen kartlarınızdan seçerek davet gönderin. Kabul edenler gruba eklenir.';
 
   @override
   String get kaydedilmemiDeiiklikler => 'Kaydedilmemiş değişiklikler';
@@ -2102,7 +2102,7 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get eventCreateDetailsSubtitle =>
-      'Gündem, kıyafet kodu veya diğer detayları paylaşın. Atlayabilirsiniz.';
+      'Gündem, kıyafet kodu veya diğer detayları yazın. Bu alan zorunludur.';
 
   @override
   String get eventDescription => 'Etkinlik hakkında';
@@ -2110,6 +2110,10 @@ class AppLocalizationsTr extends AppLocalizations {
   @override
   String get eventDescriptionHint =>
       'Gündem, konuşmacılar, kıyafet kodu, park bilgisi…';
+
+  @override
+  String get eventDescriptionRequired =>
+      'Etkinlik hakkında bilgisi zorunludur.';
 
   @override
   String get eventDescriptionTooLong =>
@@ -2141,7 +2145,29 @@ class AppLocalizationsTr extends AppLocalizations {
   String get eventDetailNetworkingChip => 'Networking';
 
   @override
-  String get eventAddCardPlus => '+ Kart ekle';
+  String get eventAddCardPlus => '+ Davet et';
+
+  @override
+  String get eventOutboundInvitesSectionTitle => 'Davet edilenler';
+
+  @override
+  String get eventOutboundInvitesEmpty => 'Henüz davet gönderilmedi.';
+
+  @override
+  String get eventOutboundInviteStatusPending => 'Bekliyor';
+
+  @override
+  String get eventOutboundInviteStatusAccepted => 'Kabul';
+
+  @override
+  String get eventOutboundInviteStatusRejected => 'Red';
+
+  @override
+  String get eventOutboundInviteStatusExpired => 'Süresi doldu';
+
+  @override
+  String get eventInviteManualCardNotSupported =>
+      'Manuel kartlar için etkinlik daveti gönderilemez. Cardence kart ID kullanın.';
 
   @override
   String eventLinkedCardsSection(int count) {
@@ -2176,7 +2202,7 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get eventGroupCardsStepSubtitle =>
-      'Kayıtlı kart seçin veya Card ID ile davet edin. İsterseniz kart seçmeden de etkinliği oluşturabilirsiniz.';
+      'Kayıtlı kartlardan veya Card ID ile davet gönderin. Yalnızca kabul edenler etkinliğe eklenir.';
 
   @override
   String get eventStartRequired => 'Başlangıç tarihi ve saati seçin.';
@@ -2333,16 +2359,16 @@ class AppLocalizationsTr extends AppLocalizations {
   String get scanCardQrAllowCamera => 'Kamera izni ver';
 
   @override
-  String get walletCardInvitationsSection => 'Kart ekleme davetleri';
+  String get walletCardInvitationsSection => 'Kart kaydetme davetleri';
 
   @override
   String walletCardInvitationAddedYou(String inviterName) {
-    return '$inviterName sizi cüzdanınıza ekledi';
+    return '$inviterName sizi kaydetti';
   }
 
   @override
   String walletCardInvitationPrompt(String inviterName) {
-    return 'Siz de onu kartlarınıza eklemek ister misiniz?';
+    return 'Sen de o kişinin kartını kaydetmek ister misin?';
   }
 
   @override
@@ -2399,11 +2425,11 @@ class AppLocalizationsTr extends AppLocalizations {
   }
 
   @override
-  String get eventInviteCardsTitle => 'Card ID ile kart davet et';
+  String get eventInviteCardsTitle => 'Etkinliğe kart davet et';
 
   @override
   String get eventInviteCardsSubtitle =>
-      'Card ID girerek bu etkinliğe kart ekleyin. Geçersiz ID\'ler raporlanır.';
+      'Card ID veya kaydedilen kartlardan seçerek davet gönderin. Kabul edenler gruba eklenir.';
 
   @override
   String get eventSendInvites => 'Davet gönder';
@@ -2443,11 +2469,11 @@ class AppLocalizationsTr extends AppLocalizations {
   }
 
   @override
-  String get noCardsSelectedYet => 'Henüz kart seçilmedi';
+  String get noCardsSelectedYet => 'Henüz davet edilecek kart seçilmedi';
 
   @override
   String cardsSelectedCount(int count) {
-    return '$count kart seçildi';
+    return '$count kart davet için seçildi';
   }
 
   @override
@@ -2460,20 +2486,20 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String pickSavedCardsForGroupSubtitle(String groupName) {
-    return '$groupName grubuna eklenecek kayıtlı kartları seçin.';
+    return '\"$groupName\" için davet göndermek istediğiniz kartları seçin.';
   }
 
   @override
-  String get addCardsToGroup => 'Kartları gruba ekle';
+  String get addCardsToGroup => 'Davet gönder';
 
   @override
   String addCardsToGroupCount(int count) {
-    return '$count kartı gruba ekle';
+    return '$count karta davet gönder';
   }
 
   @override
   String pickEventGroupsForCardSubtitle(String cardTitle) {
-    return '$cardTitle kartının eklenebileceği grupları işaretleyin.';
+    return '$cardTitle kartını davet etmek istediğiniz grupları işaretleyin.';
   }
 
   @override
@@ -2558,7 +2584,7 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String cardsAddedToGroupMessage(int count) {
-    return '$count kart gruba eklendi';
+    return '$count davet gönderildi';
   }
 
   @override
@@ -2568,7 +2594,7 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String eventGroupCreatedWithCardsMessage(String groupName, int count) {
-    return '\"$groupName\" grubu $count kartla oluşturuldu';
+    return '\"$groupName\" grubu oluşturuldu; $count davet gönderildi';
   }
 
   @override

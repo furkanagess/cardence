@@ -7,6 +7,7 @@ import '../../../event_groups/domain/usecases/get_event_groups.dart';
 import '../../../event_groups/domain/usecases/delete_event_group.dart';
 import '../../../event_groups/domain/usecases/update_event_group.dart';
 import '../../../event_groups/domain/usecases/invite_event_group_cards_by_card_id.dart';
+import '../../../event_groups/domain/usecases/get_event_group_outbound_invitations.dart';
 import '../../domain/entities/saved_card.dart';
 import '../../domain/usecases/link_saved_cards_to_event_group.dart';
 import '../../domain/usecases/add_saved_card.dart';
@@ -42,6 +43,7 @@ class SavedCardsPage extends StatefulWidget {
     required this.getSavedCards,
     required this.updateEventGroup,
     required this.inviteEventGroupCardsByCardId,
+    required this.getEventGroupOutboundInvitations,
     required this.deleteEventGroup,
     required this.linkSavedCardsToEventGroup,
     required this.saveSavedCard,
@@ -59,6 +61,7 @@ class SavedCardsPage extends StatefulWidget {
   final GetSavedCards getSavedCards;
   final UpdateEventGroup updateEventGroup;
   final InviteEventGroupCardsByCardId inviteEventGroupCardsByCardId;
+  final GetEventGroupOutboundInvitations getEventGroupOutboundInvitations;
   final DeleteEventGroup deleteEventGroup;
   final LinkSavedCardsToEventGroup linkSavedCardsToEventGroup;
   final SaveSavedCard saveSavedCard;
@@ -204,6 +207,8 @@ class _SavedCardsPageState extends State<SavedCardsPage>
       getSavedCards: widget.getSavedCards,
       updateEventGroup: widget.updateEventGroup,
       inviteEventGroupCardsByCardId: widget.inviteEventGroupCardsByCardId,
+      getEventGroupOutboundInvitations:
+          widget.getEventGroupOutboundInvitations,
       deleteEventGroup: widget.deleteEventGroup,
       linkSavedCardsToEventGroup: widget.linkSavedCardsToEventGroup,
       saveSavedCard: widget.saveSavedCard,

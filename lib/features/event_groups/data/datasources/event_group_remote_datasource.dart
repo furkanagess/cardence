@@ -9,6 +9,7 @@ import '../../../../core/network/auth_api_exception.dart';
 import '../../../../core/network/dio_api_client.dart';
 import '../models/event_group_model.dart';
 import '../models/event_group_invitation_model.dart';
+import '../models/event_group_outbound_invitation_model.dart';
 
 abstract class EventGroupRemoteDataSource {
   Future<List<EventGroupModel>> getEventGroups({required String accessToken});
@@ -65,6 +66,11 @@ abstract class EventGroupRemoteDataSource {
   });
 
   Future<List<EventGroupInvitationModel>> getPendingInvitations({
+    required String accessToken,
+  });
+
+  Future<List<EventGroupOutboundInvitationModel>> getOutboundInvitations({
+    required String groupId,
     required String accessToken,
   });
 
@@ -331,6 +337,37 @@ class EventGroupRemoteDataSourceImpl implements EventGroupRemoteDataSource {
       fallbackError: 'Etkinlik davetleri alınamadı.',
     );
     return _parseInvitationList(json);
+  }
+
+  List<EventGroupOutboundInvitationModel> _parseOutboundInvitationList(
+    Map<String, dynamic> json,
+  ) {
+    final data = json['data'] ?? json['Data'];
+    if (data is! List) {
+      throw AuthApiException('Gönderilen davetler alınamadı.');
+    }
+
+    return data
+        .map(
+          (item) => EventGroupOutboundInvitationModel.fromJson(
+            Map<String, dynamic>.from(item as Map),
+          ),
+        )
+        .toList();
+  }
+
+  @override
+  Future<List<EventGroupOutboundInvitationModel>> getOutboundInvitations({
+    required String groupId,
+    required String accessToken,
+  }) async {
+    final json = await _client.get(
+      '/EventGroupOutboundInvitations',
+      queryParameters: {'id': groupId},
+      accessToken: accessToken,
+      fallbackError: 'Gönderilen davetler alınamadı.',
+    );
+    return _parseOutboundInvitationList(json);
   }
 
   @override

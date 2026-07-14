@@ -145,6 +145,7 @@ class EventGroupDetailScrollContent extends StatefulWidget {
     this.aboutMaxLines = 2,
     this.loadingLinkedCards = false,
     this.onAddCard,
+    this.invitedSection,
     this.cardsSection,
   });
 
@@ -154,6 +155,7 @@ class EventGroupDetailScrollContent extends StatefulWidget {
   final int aboutMaxLines;
   final bool loadingLinkedCards;
   final VoidCallback? onAddCard;
+  final Widget? invitedSection;
   final Widget? cardsSection;
 
   @override
@@ -244,6 +246,20 @@ class _EventGroupDetailScrollContentState
                   linkedCardCount: widget.linkedCardCount,
                   inviteCount: widget.inviteCount,
                 ),
+            ],
+          ),
+        ),
+        if (widget.invitedSection != null) ...[
+          const SizedBox(height: 22),
+          widget.invitedSection!,
+        ],
+        Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: eventGroupDetailPanelHorizontalPadding,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
               const SizedBox(height: 22),
               Row(
                 children: [
@@ -275,14 +291,11 @@ class _EventGroupDetailScrollContentState
                     ),
                 ],
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 16),
             ],
           ),
         ),
-        if (widget.cardsSection != null) ...[
-          const SizedBox(height: 8),
-          widget.cardsSection!,
-        ],
+        if (widget.cardsSection != null) widget.cardsSection!,
       ],
     );
   }

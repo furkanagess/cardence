@@ -1733,7 +1733,7 @@ abstract class AppLocalizations {
   /// No description provided for @kaydedilenKartlarnzdanSeerekBuGruba.
   ///
   /// In tr, this message translates to:
-  /// **'Kaydedilen kartlarınızdan seçerek bu gruba kart ekleyebilirsiniz.'**
+  /// **'Kaydedilen kartlarınızdan seçerek davet gönderin. Kabul edenler gruba eklenir.'**
   String get kaydedilenKartlarnzdanSeerekBuGruba;
 
   /// No description provided for @kaydedilmemiDeiiklikler.
@@ -3983,7 +3983,7 @@ abstract class AppLocalizations {
   /// No description provided for @eventCreateDetailsSubtitle.
   ///
   /// In tr, this message translates to:
-  /// **'Gündem, kıyafet kodu veya diğer detayları paylaşın. Atlayabilirsiniz.'**
+  /// **'Gündem, kıyafet kodu veya diğer detayları yazın. Bu alan zorunludur.'**
   String get eventCreateDetailsSubtitle;
 
   /// No description provided for @eventDescription.
@@ -3997,6 +3997,12 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Gündem, konuşmacılar, kıyafet kodu, park bilgisi…'**
   String get eventDescriptionHint;
+
+  /// No description provided for @eventDescriptionRequired.
+  ///
+  /// In tr, this message translates to:
+  /// **'Etkinlik hakkında bilgisi zorunludur.'**
+  String get eventDescriptionRequired;
 
   /// No description provided for @eventDescriptionTooLong.
   ///
@@ -4049,8 +4055,50 @@ abstract class AppLocalizations {
   /// No description provided for @eventAddCardPlus.
   ///
   /// In tr, this message translates to:
-  /// **'+ Kart ekle'**
+  /// **'+ Davet et'**
   String get eventAddCardPlus;
+
+  /// No description provided for @eventOutboundInvitesSectionTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Davet edilenler'**
+  String get eventOutboundInvitesSectionTitle;
+
+  /// No description provided for @eventOutboundInvitesEmpty.
+  ///
+  /// In tr, this message translates to:
+  /// **'Henüz davet gönderilmedi.'**
+  String get eventOutboundInvitesEmpty;
+
+  /// No description provided for @eventOutboundInviteStatusPending.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bekliyor'**
+  String get eventOutboundInviteStatusPending;
+
+  /// No description provided for @eventOutboundInviteStatusAccepted.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kabul'**
+  String get eventOutboundInviteStatusAccepted;
+
+  /// No description provided for @eventOutboundInviteStatusRejected.
+  ///
+  /// In tr, this message translates to:
+  /// **'Red'**
+  String get eventOutboundInviteStatusRejected;
+
+  /// No description provided for @eventOutboundInviteStatusExpired.
+  ///
+  /// In tr, this message translates to:
+  /// **'Süresi doldu'**
+  String get eventOutboundInviteStatusExpired;
+
+  /// No description provided for @eventInviteManualCardNotSupported.
+  ///
+  /// In tr, this message translates to:
+  /// **'Manuel kartlar için etkinlik daveti gönderilemez. Cardence kart ID kullanın.'**
+  String get eventInviteManualCardNotSupported;
 
   /// No description provided for @eventLinkedCardsSection.
   ///
@@ -4109,7 +4157,7 @@ abstract class AppLocalizations {
   /// No description provided for @eventGroupCardsStepSubtitle.
   ///
   /// In tr, this message translates to:
-  /// **'Kayıtlı kart seçin veya Card ID ile davet edin. İsterseniz kart seçmeden de etkinliği oluşturabilirsiniz.'**
+  /// **'Kayıtlı kartlardan veya Card ID ile davet gönderin. Yalnızca kabul edenler etkinliğe eklenir.'**
   String get eventGroupCardsStepSubtitle;
 
   /// No description provided for @eventStartRequired.
@@ -4379,19 +4427,19 @@ abstract class AppLocalizations {
   /// No description provided for @walletCardInvitationsSection.
   ///
   /// In tr, this message translates to:
-  /// **'Kart ekleme davetleri'**
+  /// **'Kart kaydetme davetleri'**
   String get walletCardInvitationsSection;
 
   /// No description provided for @walletCardInvitationAddedYou.
   ///
   /// In tr, this message translates to:
-  /// **'{inviterName} sizi cüzdanınıza ekledi'**
+  /// **'{inviterName} sizi kaydetti'**
   String walletCardInvitationAddedYou(String inviterName);
 
   /// No description provided for @walletCardInvitationPrompt.
   ///
   /// In tr, this message translates to:
-  /// **'Siz de onu kartlarınıza eklemek ister misiniz?'**
+  /// **'Sen de o kişinin kartını kaydetmek ister misin?'**
   String walletCardInvitationPrompt(String inviterName);
 
   /// No description provided for @walletCardInvitationAccept.
@@ -4493,13 +4541,13 @@ abstract class AppLocalizations {
   /// No description provided for @eventInviteCardsTitle.
   ///
   /// In tr, this message translates to:
-  /// **'Card ID ile kart davet et'**
+  /// **'Etkinliğe kart davet et'**
   String get eventInviteCardsTitle;
 
   /// No description provided for @eventInviteCardsSubtitle.
   ///
   /// In tr, this message translates to:
-  /// **'Card ID girerek bu etkinliğe kart ekleyin. Geçersiz ID\'ler raporlanır.'**
+  /// **'Card ID veya kaydedilen kartlardan seçerek davet gönderin. Kabul edenler gruba eklenir.'**
   String get eventInviteCardsSubtitle;
 
   /// No description provided for @eventSendInvites.
@@ -4565,13 +4613,13 @@ abstract class AppLocalizations {
   /// No description provided for @noCardsSelectedYet.
   ///
   /// In tr, this message translates to:
-  /// **'Henüz kart seçilmedi'**
+  /// **'Henüz davet edilecek kart seçilmedi'**
   String get noCardsSelectedYet;
 
   /// No description provided for @cardsSelectedCount.
   ///
   /// In tr, this message translates to:
-  /// **'{count} kart seçildi'**
+  /// **'{count} kart davet için seçildi'**
   String cardsSelectedCount(int count);
 
   /// No description provided for @createGroup.
@@ -4589,25 +4637,25 @@ abstract class AppLocalizations {
   /// No description provided for @pickSavedCardsForGroupSubtitle.
   ///
   /// In tr, this message translates to:
-  /// **'{groupName} grubuna eklenecek kayıtlı kartları seçin.'**
+  /// **'\"{groupName}\" için davet göndermek istediğiniz kartları seçin.'**
   String pickSavedCardsForGroupSubtitle(String groupName);
 
   /// No description provided for @addCardsToGroup.
   ///
   /// In tr, this message translates to:
-  /// **'Kartları gruba ekle'**
+  /// **'Davet gönder'**
   String get addCardsToGroup;
 
   /// No description provided for @addCardsToGroupCount.
   ///
   /// In tr, this message translates to:
-  /// **'{count} kartı gruba ekle'**
+  /// **'{count} karta davet gönder'**
   String addCardsToGroupCount(int count);
 
   /// No description provided for @pickEventGroupsForCardSubtitle.
   ///
   /// In tr, this message translates to:
-  /// **'{cardTitle} kartının eklenebileceği grupları işaretleyin.'**
+  /// **'{cardTitle} kartını davet etmek istediğiniz grupları işaretleyin.'**
   String pickEventGroupsForCardSubtitle(String cardTitle);
 
   /// No description provided for @addToGroups.
@@ -4757,7 +4805,7 @@ abstract class AppLocalizations {
   /// No description provided for @cardsAddedToGroupMessage.
   ///
   /// In tr, this message translates to:
-  /// **'{count} kart gruba eklendi'**
+  /// **'{count} davet gönderildi'**
   String cardsAddedToGroupMessage(int count);
 
   /// No description provided for @eventGroupCreatedMessage.
@@ -4769,7 +4817,7 @@ abstract class AppLocalizations {
   /// No description provided for @eventGroupCreatedWithCardsMessage.
   ///
   /// In tr, this message translates to:
-  /// **'\"{groupName}\" grubu {count} kartla oluşturuldu'**
+  /// **'\"{groupName}\" grubu oluşturuldu; {count} davet gönderildi'**
   String eventGroupCreatedWithCardsMessage(String groupName, int count);
 
   /// No description provided for @networkGraph.

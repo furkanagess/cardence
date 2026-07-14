@@ -208,15 +208,13 @@ public sealed class EventGroupService : IEventGroupService
     {
         await _linkValidator.ValidateAndThrowAsync(request, cancellationToken);
 
-        var userId = _currentUser.GetRequiredUserId();
-        var groupId = ParseGroupId(request.Id);
-        _ = await _eventGroupRepository.GetByUserAndIdAsync(userId, groupId, cancellationToken)
-            ?? throw new NotFoundException("EventGroup", request.Id);
-
-        await _eventGroupRepository.LinkCardsAsync(
-            userId,
-            groupId,
-            request.CardIds,
+        // Geriye dönük uyumluluk: doğrudan bağlamak yerine davet gönder.
+        await InviteCardsByCardIdAsync(
+            new InviteEventGroupCardsByCardIdRequest
+            {
+                Id = request.Id,
+                CardIds = request.CardIds,
+            },
             cancellationToken);
     }
 
@@ -330,6 +328,25 @@ public sealed class EventGroupService : IEventGroupService
 
         return invitations
             .Select(EventGroupInvitationMapper.ToDto)
+            .ToList();
+    }
+
+    public async Task<IReadOnlyList<EventGroupOutboundInvitationDto>> GetOutboundInvitationsAsync(
+        string groupId,
+        CancellationToken cancellationToken = default)
+    {
+        var userId = _currentUser.GetRequiredUserId();
+        var parsedGroupId = ParseGroupId(groupId);
+        _ = await _eventGroupRepository.GetByUserAndIdAsync(userId, parsedGroupId, cancellationToken)
+            ?? throw new NotFoundException("EventGroup", groupId);
+
+        var invitations = await _eventGroupRepository.GetOutboundInvitationsForGroupAsync(
+            userId,
+            parsedGroupId,
+            cancellationToken);
+
+        return invitations
+            .Select(EventGroupInvitationMapper.ToOutboundDto)
             .ToList();
     }
 
