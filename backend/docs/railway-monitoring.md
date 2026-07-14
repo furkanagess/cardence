@@ -146,9 +146,11 @@ Railway → PostgreSQL → **Connect** → Public Network URL:
 
 ```sql
 SELECT count(*) FROM users;
-SELECT count(*) FROM business_cards;
-SELECT count(*) FROM saved_cards;
-SELECT id, display_name, email, created_at FROM users ORDER BY created_at DESC LIMIT 20;
+SELECT count(*) FROM cards;
+-- Wallet entries live on users.saved_card_ids (compat view: saved_cards)
+SELECT COALESCE(SUM(jsonb_array_length(COALESCE(saved_card_ids, '[]'::jsonb))), 0)
+FROM users;
+SELECT "Id", display_name, email, created_at FROM users ORDER BY created_at DESC LIMIT 20;
 ```
 
 ---

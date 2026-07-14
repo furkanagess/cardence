@@ -73,11 +73,13 @@ public sealed class HealthStatusReader : IHealthStatusReader
     {
         var users = await _dbContext.Users.CountAsync(cancellationToken);
         var ownCards = await _dbContext.Cards.CountAsync(cancellationToken);
-        var savedCards = await _dbContext.Users
-            .AsNoTracking()
-            .SumAsync(
-                user => user.SavedCardIds.Count,
-                cancellationToken);
+        // jsonb_array_length — do not query dropped table saved_cards.
+        var savedCards = await _dbContext.Database.SqlQueryRaw<int>(
+                """
+                SELECT COALESCE(SUM(jsonb_array_length(COALESCE(saved_card_ids, '[]'::jsonb))), 0)::int AS "Value"
+                FROM users
+                """)
+            .SingleAsync(cancellationToken);
         var walletEntitlements = await _dbContext.WalletEntitlements.CountAsync(cancellationToken);
         var authRefreshTokens = await _dbContext.AuthRefreshTokens.CountAsync(cancellationToken);
 
