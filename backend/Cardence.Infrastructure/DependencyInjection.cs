@@ -13,6 +13,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
 
 namespace Cardence.Infrastructure;
 
@@ -89,8 +90,18 @@ public static class DependencyInjection
         services.AddScoped<IProfilePhotoStorage, LocalProfilePhotoStorage>();
         services.AddScoped<IEventGroupPhotoStorage, LocalEventGroupPhotoStorage>();
         services.AddScoped<LocalUploadContentStore>();
-        services.AddScoped<S3UploadContentStore>();
-        services.AddScoped<IUploadContentStore, ResilientUploadContentStore>();
+        services.AddScoped<IUploadContentStore>(sp =>
+        {
+            var options = sp.GetRequiredService<IOptions<ObjectStorageOptions>>();
+            var local = sp.GetRequiredService<LocalUploadContentStore>();
+            S3UploadContentStore? s3 = null;
+            if (options.Value.UseS3)
+            {
+                s3 = ActivatorUtilities.CreateInstance<S3UploadContentStore>(sp);
+            }
+
+            return new ResilientUploadContentStore(local, options, s3);
+        });
         services.AddScoped<IUserDeviceTokenRepository, UserDeviceTokenRepository>();
         services.AddScoped<IWalletCardInviteRepository, WalletCardInviteRepository>();
         services.AddScoped<LoggingPushNotificationSender>();

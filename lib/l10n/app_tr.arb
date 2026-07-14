@@ -775,6 +775,15 @@
   "eventAddCardPlus": "+ Davet et",
   "eventOutboundInvitesSectionTitle": "Davet edilenler",
   "eventOutboundInvitesEmpty": "Henüz davet gönderilmedi.",
+  "eventOutboundInvitesCount": "{count} kişi davet edildi",
+  "@eventOutboundInvitesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "eventOutboundInvitesListTitle": "Davet edilenler",
   "eventOutboundInviteStatusPending": "Bekliyor",
   "eventOutboundInviteStatusAccepted": "Kabul",
   "eventOutboundInviteStatusRejected": "Red",
@@ -880,7 +889,10 @@
   "scanCardQrCameraDenied": "QR okutmak için kamera izni gerekli",
   "scanCardQrAllowCamera": "Kamera izni ver",
   "walletCardInvitationsSection": "Kart kaydetme davetleri",
-  "walletCardInvitationAddedYou": "{inviterName} sizi kaydetti",
+  "walletCardInvitationsPageTitle": "Cüzdan davetleri",
+  "walletCardInvitationsEmpty": "Bekleyen cüzdan davetiniz yok.",
+  "walletCardInvitationsAppBarTooltip": "Cüzdan davetleri",
+  "walletCardInvitationAddedYou": "{inviterName} sizi cüzdanına ekledi",
   "@walletCardInvitationAddedYou": {
     "placeholders": {
       "inviterName": {
@@ -888,7 +900,7 @@
       }
     }
   },
-  "walletCardInvitationPrompt": "Sen de o kişinin kartını kaydetmek ister misin?",
+  "walletCardInvitationPrompt": "Siz de onu eklemek ister misiniz?",
   "@walletCardInvitationPrompt": {
     "placeholders": {
       "inviterName": {

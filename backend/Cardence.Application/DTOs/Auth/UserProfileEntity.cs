@@ -14,6 +14,7 @@ public sealed class UserProfileEntity
     public bool Premium { get; init; }
     public bool IsOwnerPremium { get; init; }
     public DateTime CreatedAt { get; init; }
+    public IReadOnlyList<string> SavedCardIds { get; init; } = [];
     public IReadOnlyList<SavedCardDto> SavedCards { get; init; } = [];
     public IReadOnlyList<BusinessCardDto> BusinessCards { get; init; } = [];
 }

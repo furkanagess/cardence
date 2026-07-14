@@ -34,6 +34,12 @@ public sealed class Card
     public string? CardEffect { get; set; }
     public int SaveCount { get; set; }
     public bool IsOwnerPremium { get; set; }
+
+    /// <summary>
+    /// Manuel/cüzdan-only kontak kartı; Kartlarım listesine dahil edilmez.
+    /// </summary>
+    public bool IsWalletContact { get; set; }
+
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
 

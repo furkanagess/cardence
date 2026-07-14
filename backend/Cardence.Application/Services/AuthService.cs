@@ -924,6 +924,10 @@ public sealed class AuthService : IAuthService
             Premium = premium,
             IsOwnerPremium = premium,
             CreatedAt = user.CreatedAt,
+            SavedCardIds = savedCards
+                .Select(card => card.CardId)
+                .Distinct(StringComparer.Ordinal)
+                .ToList(),
             BusinessCards = businessCards
                 .Select(card => BusinessCardMapper.ToDto(card, premium))
                 .ToList(),

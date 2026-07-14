@@ -223,3 +223,7 @@ bool isEventGroupInviteNotification(Map<String, dynamic> data) {
 bool isCardSavedNotification(Map<String, dynamic> data) {
   return readPushNotificationType(data) == PushNotificationTypes.cardSaved;
 }
+
+bool isWalletCardInviteNotification(Map<String, dynamic> data) {
+  return readPushNotificationType(data) == PushNotificationTypes.walletCardInvite;
+}

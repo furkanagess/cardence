@@ -24,4 +24,10 @@ public interface IPushNotificationService
         string cardId,
         string? saverDisplayName,
         CancellationToken cancellationToken = default);
+
+    Task NotifyWalletCardInviteAsync(
+        Guid inviteeUserId,
+        Guid invitationId,
+        string? inviterDisplayName,
+        CancellationToken cancellationToken = default);
 }

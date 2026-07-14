@@ -36,6 +36,11 @@ public sealed class S3UploadContentStore : IUploadContentStore
         {
             s3Config.RegionEndpoint = RegionEndpoint.GetBySystemName(config.Region);
         }
+        else
+        {
+            throw new InvalidOperationException(
+                "ObjectStorage S3 requires Endpoint or a concrete Region (not 'auto').");
+        }
 
         _client = new AmazonS3Client(config.AccessKeyId, config.SecretAccessKey, s3Config);
     }

@@ -1,11 +1,10 @@
 namespace Cardence.Domain.Entities;
 
 /// <summary>
-/// Cüzdana kaydedilen kart kopyası; kullanıcının kendi kartı (<see cref="Card"/>) değildir.
+/// Cüzdan görünümü: users.saved_card_ids + cards satırından üretilen projeksiyon (persist edilmez).
 /// </summary>
 public sealed class SavedCard
 {
-    public Guid Id { get; set; }
     public Guid UserId { get; set; }
     public string CardId { get; set; } = string.Empty;
     public string CreationMethod { get; set; } = string.Empty;
@@ -35,12 +34,9 @@ public sealed class SavedCard
     public long SavedAt { get; set; }
     public int SortOrder { get; set; }
     public bool IsOwnerPremium { get; set; }
+    public bool IsWalletContact { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
 
-    /// <summary>API yanıtı; join tablosundan doldurulur.</summary>
     public List<string> LinkedEventGroupIds { get; set; } = [];
-
-    public User User { get; set; } = null!;
-    public ICollection<SavedCardEventGroup> EventGroupLinks { get; set; } = [];
 }

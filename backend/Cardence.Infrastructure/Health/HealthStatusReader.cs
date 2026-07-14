@@ -73,7 +73,11 @@ public sealed class HealthStatusReader : IHealthStatusReader
     {
         var users = await _dbContext.Users.CountAsync(cancellationToken);
         var ownCards = await _dbContext.Cards.CountAsync(cancellationToken);
-        var savedCards = await _dbContext.SavedCards.CountAsync(cancellationToken);
+        var savedCards = await _dbContext.Users
+            .AsNoTracking()
+            .SumAsync(
+                user => user.SavedCardIds.Count,
+                cancellationToken);
         var walletEntitlements = await _dbContext.WalletEntitlements.CountAsync(cancellationToken);
         var authRefreshTokens = await _dbContext.AuthRefreshTokens.CountAsync(cancellationToken);
 

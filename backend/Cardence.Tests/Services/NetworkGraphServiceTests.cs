@@ -73,7 +73,6 @@ public sealed class NetworkGraphServiceTests
             .Returns([
                 new SavedCard
                 {
-                    Id = Guid.NewGuid(),
                     UserId = saverUserId,
                     CardId = ownCard.CardId,
                     SavedAt = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
@@ -193,7 +192,6 @@ public sealed class NetworkGraphServiceTests
     private SavedCard SavedCard(string cardId, string company) =>
         new()
         {
-            Id = Guid.NewGuid(),
             UserId = _userId,
             CardId = cardId,
             DisplayName = $"Saved {cardId}",

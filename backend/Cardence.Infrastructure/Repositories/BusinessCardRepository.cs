@@ -20,7 +20,7 @@ public sealed class BusinessCardRepository : IBusinessCardRepository
     {
         return await _dbContext.Cards
             .AsNoTracking()
-            .Where(card => card.UserId == userId)
+            .Where(card => card.UserId == userId && !card.IsWalletContact)
             .OrderByDescending(card => card.UpdatedAt)
             .ToListAsync(cancellationToken);
     }
@@ -124,7 +124,7 @@ public sealed class BusinessCardRepository : IBusinessCardRepository
     {
         return await _dbContext.Cards
             .AsNoTracking()
-            .CountAsync(card => card.UserId == userId, cancellationToken);
+            .CountAsync(card => card.UserId == userId && !card.IsWalletContact, cancellationToken);
     }
 
     public async Task SetOwnerPremiumByUserIdAsync(

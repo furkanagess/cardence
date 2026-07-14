@@ -9,7 +9,7 @@ public interface IWalletCardInviteRepository
         Guid inviterUserId,
         CancellationToken cancellationToken = default);
 
-    Task UpsertPendingAsync(
+    Task<Guid> UpsertPendingAsync(
         WalletCardInvite invite,
         CancellationToken cancellationToken = default);
 

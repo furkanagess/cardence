@@ -12,8 +12,13 @@ public sealed class User
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
 
+    /// <summary>Cüzdandaki kartların public card_id listesi (tekilleştirilmiş, sıralı).</summary>
+    public List<string> SavedCardIds { get; set; } = [];
+
+    /// <summary>card_id → kullanıcı notu.</summary>
+    public Dictionary<string, string> SavedCardNotes { get; set; } = new(StringComparer.Ordinal);
+
     public ICollection<Card> Cards { get; set; } = [];
-    public ICollection<SavedCard> SavedCards { get; set; } = [];
     public ICollection<UserAuthProvider> AuthProviders { get; set; } = [];
     public ICollection<PasswordResetToken> PasswordResetTokens { get; set; } = [];
 }

@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:app_links/app_links.dart';
 
@@ -62,6 +63,8 @@ import 'features/saved_cards/domain/usecases/link_saved_cards_to_event_group.dar
 import 'features/saved_cards/domain/usecases/save_saved_card.dart';
 import 'features/saved_cards/domain/usecases/track_saved_card_contact_click.dart';
 import 'features/saved_cards/domain/usecases/upgrade_wallet_plan.dart';
+import 'features/saved_cards/presentation/cubit/saved_cards_cubit.dart';
+import 'features/saved_cards/presentation/pages/wallet_card_invitations_page.dart';
 import 'features/subscriptions/domain/usecases/identify_subscription_user.dart';
 import 'features/subscriptions/domain/usecases/set_subscription_preferred_locale.dart';
 import 'features/subscriptions/domain/usecases/restore_wallet_purchases.dart';
@@ -471,21 +474,36 @@ class _AppState extends State<App> {
   void _handlePushNotificationTap(Map<String, dynamic> data) {
     if (!mounted) return;
 
-    final messenger = ScaffoldMessenger.maybeOf(
-      widget.rootNavigatorKey.currentContext ?? context,
-    );
+    final navContext = widget.rootNavigatorKey.currentContext ?? context;
+
+    if (isWalletCardInviteNotification(data) ||
+        isCardSavedNotification(data)) {
+      Navigator.of(navContext).push(
+        MaterialPageRoute<void>(
+          builder: (_) => BlocProvider(
+            create: (_) => SavedCardsCubit(
+              getSavedCards: widget.getSavedCards,
+              saveSavedCard: widget.saveSavedCard,
+              getEventGroups: widget.getEventGroups,
+              getSavedCardsWalletQuota: widget.getSavedCardsWalletQuota,
+              upgradeWalletPlan: widget.upgradeWalletPlan,
+              getWalletCardInvitations: widget.getWalletCardInvitations,
+              acceptWalletCardInvitation: widget.acceptWalletCardInvitation,
+              rejectWalletCardInvitation: widget.rejectWalletCardInvitation,
+            )..load(),
+            child: const WalletCardInvitationsPage(),
+          ),
+        ),
+      );
+      return;
+    }
+
+    final messenger = ScaffoldMessenger.maybeOf(navContext);
     if (messenger == null) return;
 
     if (isEventGroupInviteNotification(data)) {
       messenger.showSnackBar(
         const SnackBar(content: Text('Yeni bir etkinlik davetiniz var.')),
-      );
-      return;
-    }
-
-    if (isCardSavedNotification(data)) {
-      messenger.showSnackBar(
-        const SnackBar(content: Text('Kartınız cüzdana kaydedildi.')),
       );
     }
   }

@@ -142,6 +142,30 @@ public sealed class PushNotificationService : IPushNotificationService
             cancellationToken);
     }
 
+    public async Task NotifyWalletCardInviteAsync(
+        Guid inviteeUserId,
+        Guid invitationId,
+        string? inviterDisplayName,
+        CancellationToken cancellationToken = default)
+    {
+        var inviterName = string.IsNullOrWhiteSpace(inviterDisplayName)
+            ? "Birisi"
+            : inviterDisplayName.Trim();
+        var title = "Cüzdan daveti";
+        var body = $"{inviterName} sizi cüzdanına ekledi. Siz de onu eklemek ister misiniz?";
+
+        await SendToUserAsync(
+            inviteeUserId,
+            title,
+            body,
+            new Dictionary<string, string>
+            {
+                ["type"] = PushNotificationTypes.WalletCardInvite,
+                ["invitationId"] = invitationId.ToString(),
+            },
+            cancellationToken);
+    }
+
     private async Task SendToUserAsync(
         Guid userId,
         string title,

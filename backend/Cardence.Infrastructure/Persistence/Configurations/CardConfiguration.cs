@@ -41,11 +41,13 @@ public sealed class CardConfiguration : IEntityTypeConfiguration<Card>
         builder.Property(x => x.CardEffect).HasMaxLength(32).HasColumnName("card_effect");
         builder.Property(x => x.SaveCount).HasColumnName("save_count").HasDefaultValue(0);
         builder.Property(x => x.IsOwnerPremium).HasColumnName("is_owner_premium").HasDefaultValue(false);
+        builder.Property(x => x.IsWalletContact).HasColumnName("is_wallet_contact").HasDefaultValue(false);
         builder.Property(x => x.CreatedAt).HasColumnName("created_at");
         builder.Property(x => x.UpdatedAt).HasColumnName("updated_at");
 
         builder.HasIndex(x => x.CardId).IsUnique();
         builder.HasIndex(x => new { x.UserId, x.CardId });
+        builder.HasIndex(x => new { x.UserId, x.IsWalletContact });
 
         builder.HasOne(x => x.User)
             .WithMany(x => x.Cards)

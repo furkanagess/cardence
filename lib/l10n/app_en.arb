@@ -775,6 +775,15 @@
   "eventAddCardPlus": "+ Invite",
   "eventOutboundInvitesSectionTitle": "Invited",
   "eventOutboundInvitesEmpty": "No invites sent yet.",
+  "eventOutboundInvitesCount": "{count} people invited",
+  "@eventOutboundInvitesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "eventOutboundInvitesListTitle": "Invited people",
   "eventOutboundInviteStatusPending": "Pending",
   "eventOutboundInviteStatusAccepted": "Accepted",
   "eventOutboundInviteStatusRejected": "Declined",
@@ -880,7 +889,10 @@
   "scanCardQrCameraDenied": "Camera permission is required to scan QR codes",
   "scanCardQrAllowCamera": "Allow camera access",
   "walletCardInvitationsSection": "Card save invitations",
-  "walletCardInvitationAddedYou": "{inviterName} saved you",
+  "walletCardInvitationsPageTitle": "Wallet invitations",
+  "walletCardInvitationsEmpty": "You have no pending wallet invitations.",
+  "walletCardInvitationsAppBarTooltip": "Wallet invitations",
+  "walletCardInvitationAddedYou": "{inviterName} added you to their wallet",
   "@walletCardInvitationAddedYou": {
     "placeholders": {
       "inviterName": {
@@ -888,7 +900,7 @@
       }
     }
   },
-  "walletCardInvitationPrompt": "Would you like to save their card too?",
+  "walletCardInvitationPrompt": "Would you like to add them too?",
   "@walletCardInvitationPrompt": {
     "placeholders": {
       "inviterName": {

@@ -3,6 +3,7 @@ import '../../../../core/l10n/app_l10n.dart';
 import '../../../../core/l10n/l10n_extensions.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/atoms/custom_button.dart';
+import '../../../../core/widgets/molecules/create_card_button.dart';
 import '../../../../core/widgets/organisms/cardence_scaffold.dart';
 import '../../../saved_cards/domain/entities/saved_card.dart';
 import '../../../saved_cards/domain/usecases/delete_saved_card.dart';
@@ -330,40 +331,27 @@ class _EventGroupDetailPageState extends State<EventGroupDetailPage> {
 
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     if (_linkedCards.isEmpty) {
-      return DecoratedBox(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(
-            color: colorScheme.primary.withValues(alpha: isDark ? 0.45 : 0.35),
-            style: BorderStyle.solid,
-          ),
-          color: colorScheme.surfaceContainerHighest.withValues(
-            alpha: isDark ? 0.25 : 0.35,
-          ),
+      return Padding(
+        padding: const EdgeInsets.symmetric(
+          horizontal: eventGroupDetailPanelHorizontalPadding,
         ),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 28),
-          child: Column(
-            children: [
-              Text(
-                context.l10n.noCardsInGroup,
-                textAlign: TextAlign.center,
-                style: textTheme.bodyMedium?.copyWith(
-                  color: colorScheme.onSurfaceVariant,
-                ),
+        child: Column(
+          children: [
+            Text(
+              context.l10n.noCardsInGroup,
+              textAlign: TextAlign.center,
+              style: textTheme.bodyMedium?.copyWith(
+                color: colorScheme.onSurfaceVariant,
               ),
-              const SizedBox(height: 16),
-              CustomButton.tonal(
-                label: AppL10n.kartEkle(context.l10n),
-                icon: Icons.person_add_alt_1_rounded,
-                onPressed: _openAddCardsPicker,
-                fullWidth: false,
-              ),
-            ],
-          ),
+            ),
+            const SizedBox(height: 16),
+            CreateCardButton(
+              label: AppL10n.kartEkle(context.l10n),
+              onTap: _openAddCardsPicker,
+            ),
+          ],
         ),
       );
     }

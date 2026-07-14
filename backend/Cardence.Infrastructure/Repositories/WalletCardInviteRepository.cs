@@ -31,7 +31,7 @@ public sealed class WalletCardInviteRepository : IWalletCardInviteRepository
                 cancellationToken);
     }
 
-    public async Task UpsertPendingAsync(
+    public async Task<Guid> UpsertPendingAsync(
         WalletCardInvite invite,
         CancellationToken cancellationToken = default)
     {
@@ -47,13 +47,13 @@ public sealed class WalletCardInviteRepository : IWalletCardInviteRepository
             existing.SavedCardId = invite.SavedCardId;
             existing.ExpiresAtUtc = invite.ExpiresAtUtc;
             existing.CreatedAtUtc = invite.CreatedAtUtc;
-        }
-        else
-        {
-            _dbContext.WalletCardInvites.Add(invite);
+            await _dbContext.SaveChangesAsync(cancellationToken);
+            return existing.Id;
         }
 
+        _dbContext.WalletCardInvites.Add(invite);
         await _dbContext.SaveChangesAsync(cancellationToken);
+        return invite.Id;
     }
 
     public async Task<IReadOnlyList<WalletCardInvite>> GetPendingForInviteeAsync(

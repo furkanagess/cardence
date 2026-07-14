@@ -96,7 +96,9 @@ class ProfileAvatar extends StatelessWidget {
       width: size,
       height: size,
       decoration: BoxDecoration(
-        color: _hasPhoto ? Colors.transparent : colorScheme.primaryContainer,
+        color: _hasPhoto
+            ? AppColors.surfaceLight
+            : colorScheme.primaryContainer,
         borderRadius: _borderRadius,
         border: _hasPhoto
             ? null

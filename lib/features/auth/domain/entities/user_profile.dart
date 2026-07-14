@@ -14,6 +14,7 @@ class UserProfile extends Equatable {
     this.isPremium = false,
     this.isOwnerPremium = false,
     this.createdAt,
+    this.savedCardIds = const [],
     this.savedCards = const [],
     this.businessCards = const [],
   });
@@ -27,6 +28,7 @@ class UserProfile extends Equatable {
   final bool isPremium;
   final bool isOwnerPremium;
   final DateTime? createdAt;
+  final List<String> savedCardIds;
   final List<SavedCard> savedCards;
   final List<BusinessCard> businessCards;
 
@@ -41,6 +43,7 @@ class UserProfile extends Equatable {
         isPremium,
         isOwnerPremium,
         createdAt,
+        savedCardIds,
         savedCards,
         businessCards,
       ];

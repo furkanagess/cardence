@@ -4070,6 +4070,18 @@ abstract class AppLocalizations {
   /// **'Henüz davet gönderilmedi.'**
   String get eventOutboundInvitesEmpty;
 
+  /// No description provided for @eventOutboundInvitesCount.
+  ///
+  /// In tr, this message translates to:
+  /// **'{count} kişi davet edildi'**
+  String eventOutboundInvitesCount(int count);
+
+  /// No description provided for @eventOutboundInvitesListTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Davet edilenler'**
+  String get eventOutboundInvitesListTitle;
+
   /// No description provided for @eventOutboundInviteStatusPending.
   ///
   /// In tr, this message translates to:
@@ -4430,16 +4442,34 @@ abstract class AppLocalizations {
   /// **'Kart kaydetme davetleri'**
   String get walletCardInvitationsSection;
 
+  /// No description provided for @walletCardInvitationsPageTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Cüzdan davetleri'**
+  String get walletCardInvitationsPageTitle;
+
+  /// No description provided for @walletCardInvitationsEmpty.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bekleyen cüzdan davetiniz yok.'**
+  String get walletCardInvitationsEmpty;
+
+  /// No description provided for @walletCardInvitationsAppBarTooltip.
+  ///
+  /// In tr, this message translates to:
+  /// **'Cüzdan davetleri'**
+  String get walletCardInvitationsAppBarTooltip;
+
   /// No description provided for @walletCardInvitationAddedYou.
   ///
   /// In tr, this message translates to:
-  /// **'{inviterName} sizi kaydetti'**
+  /// **'{inviterName} sizi cüzdanına ekledi'**
   String walletCardInvitationAddedYou(String inviterName);
 
   /// No description provided for @walletCardInvitationPrompt.
   ///
   /// In tr, this message translates to:
-  /// **'Sen de o kişinin kartını kaydetmek ister misin?'**
+  /// **'Siz de onu eklemek ister misiniz?'**
   String walletCardInvitationPrompt(String inviterName);
 
   /// No description provided for @walletCardInvitationAccept.

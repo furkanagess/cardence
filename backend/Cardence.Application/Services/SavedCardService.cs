@@ -59,10 +59,7 @@ public sealed class SavedCardService : ISavedCardService
     {
         var userId = _currentUser.GetRequiredUserId();
         var cards = await _savedCardRepository.GetByUserIdAsync(userId, cancellationToken);
-        await SavedCardEnrichment.HydrateLinkedProfilesAsync(
-            cards,
-            _businessCardRepository,
-            cancellationToken);
+        await _eventGroupRepository.PopulateLinkedGroupIdsAsync(cards, cancellationToken);
         return SavedCardEnrichment
             .SortForWalletDisplay(cards)
             .Select(SavedCardMapper.ToDto)
@@ -102,10 +99,45 @@ public sealed class SavedCardService : ISavedCardService
             SavedCardMapper.ApplyExtendedProfile(existing, request);
         }
 
+        if (CardCreationMethods.IsManualEntry(existing.CreationMethod) &&
+            existing.IsWalletContact)
+        {
+            var walletContact = await _businessCardRepository.GetByUserAndCardIdAsync(
+                userId,
+                existing.CardId,
+                cancellationToken);
+            if (walletContact is not null)
+            {
+                walletContact.DisplayName = existing.DisplayName;
+                walletContact.Email = existing.Email;
+                walletContact.Phone = existing.Phone;
+                walletContact.Company = existing.Company;
+                walletContact.Title = existing.Title;
+                walletContact.Website = existing.Website;
+                walletContact.Linkedin = existing.Linkedin;
+                walletContact.Skills = existing.Skills;
+                walletContact.School = existing.School;
+                walletContact.About = existing.About;
+                walletContact.Address = existing.Address;
+                walletContact.City = existing.City;
+                walletContact.Country = existing.Country;
+                walletContact.Department = existing.Department;
+                walletContact.AttendedEvents = existing.AttendedEvents;
+                walletContact.Twitter = existing.Twitter;
+                walletContact.Instagram = existing.Instagram;
+                walletContact.Birthday = existing.Birthday;
+                walletContact.AccentColor = existing.AccentColor;
+                walletContact.BackgroundColor = existing.BackgroundColor;
+                walletContact.PhotoUrl = existing.PhotoUrl;
+                walletContact.UpdatedAt = DateTime.UtcNow;
+                await _businessCardRepository.UpdateAsync(walletContact, cancellationToken);
+            }
+        }
+
         await _savedCardRepository.UpdateAsync(existing, cancellationToken);
         await _eventGroupRepository.SyncWalletCardLinksAsync(
             userId,
-            existing.Id,
+            existing.CardId,
             request.LinkedEventGroupIds,
             cancellationToken);
         existing.LinkedEventGroupIds = request.LinkedEventGroupIds.ToList();
@@ -259,42 +291,94 @@ public sealed class SavedCardService : ISavedCardService
         }
 
         var now = DateTime.UtcNow;
+
+        if (isManual)
+        {
+            if (string.IsNullOrWhiteSpace(request.DisplayName) &&
+                string.IsNullOrWhiteSpace(request.Email) &&
+                string.IsNullOrWhiteSpace(request.Phone))
+            {
+                throw new ValidationException([
+                    new ValidationFailure(
+                        "cardId",
+                        "Invalid card payload."),
+                ]);
+            }
+
+            await EnsureCanAddToWalletAsync(userId, cancellationToken);
+            await _businessCardRepository.AddAsync(
+                new Card
+                {
+                    Id = Guid.NewGuid(),
+                    UserId = userId,
+                    CardId = cardId,
+                    DisplayName = request.DisplayName,
+                    Email = request.Email,
+                    Phone = request.Phone,
+                    Company = request.Company,
+                    Title = request.Title,
+                    Website = request.Website,
+                    Linkedin = request.Linkedin,
+                    Skills = request.Skills,
+                    School = request.School,
+                    About = request.About,
+                    Address = request.Address,
+                    City = request.City,
+                    Country = request.Country,
+                    Department = request.Department,
+                    AttendedEvents = request.AttendedEvents,
+                    Twitter = request.Twitter,
+                    Instagram = request.Instagram,
+                    Birthday = request.Birthday,
+                    PhotoUrl = request.PhotoUrl,
+                    AccentColor = request.AccentColor,
+                    BackgroundColor = request.BackgroundColor,
+                    IsWalletContact = true,
+                    CreatedAt = now,
+                    UpdatedAt = now,
+                },
+                cancellationToken);
+        }
+        else
+        {
+            if (ownCard is null)
+            {
+                throw new ValidationException([
+                    new ValidationFailure(
+                        "cardId",
+                        "Card not found. Check the ID or scan the QR code."),
+                ]);
+            }
+
+            await EnsureCanAddToWalletAsync(userId, cancellationToken);
+        }
+
         var entity = new SavedCard
         {
-            Id = Guid.NewGuid(),
             UserId = userId,
             CardId = cardId,
             CreationMethod = creationMethod,
+            Note = request.Note,
             SavedAt = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
             SortOrder = usedCount,
             CreatedAt = now,
             UpdatedAt = now,
             LinkedEventGroupIds = request.LinkedEventGroupIds.ToList(),
+            IsWalletContact = isManual,
         };
-
-        SavedCardMapper.ApplyDto(entity, request);
-        entity.CreationMethod = creationMethod;
 
         if (ownCard is not null)
         {
-            var note = entity.Note;
             SavedCardMapper.HydrateFromOwnCard(entity, ownCard);
-            entity.Note = note;
+            entity.Note = request.Note;
             entity.IsOwnerPremium = ownCard.IsOwnerPremium;
         }
-
-        if (string.IsNullOrWhiteSpace(entity.DisplayName) &&
-            string.IsNullOrWhiteSpace(entity.Email) &&
-            string.IsNullOrWhiteSpace(entity.Phone))
+        else if (isManual)
         {
-            throw new ValidationException([
-                new ValidationFailure(
-                    "cardId",
-                    "Invalid card payload."),
-            ]);
+            SavedCardMapper.ApplyDto(entity, request);
+            entity.CreationMethod = creationMethod;
+            entity.IsWalletContact = true;
         }
-
-        await EnsureCanAddToWalletAsync(userId, cancellationToken);
 
         await _savedCardRepository.AddAsync(entity, cancellationToken);
         if (ownCard is not null && ownCard.UserId != userId)
@@ -303,26 +387,42 @@ public sealed class SavedCardService : ISavedCardService
                 ownCard.Id,
                 cancellationToken);
 
-            await NotifyCardOwnerAsync(
-                ownCard.UserId,
-                cardId,
-                userId,
-                cancellationToken);
-
-            await TryCreateReciprocalInviteAsync(
+            var invitationId = await TryCreateReciprocalInviteAsync(
                 inviteeUserId: ownCard.UserId,
                 inviterUserId: userId,
                 savedCardId: cardId,
                 cancellationToken);
+
+            if (invitationId is Guid inviteId)
+            {
+                await NotifyWalletInviteAsync(
+                    ownCard.UserId,
+                    inviteId,
+                    userId,
+                    cancellationToken);
+            }
+            else
+            {
+                await NotifyCardOwnerAsync(
+                    ownCard.UserId,
+                    cardId,
+                    userId,
+                    cancellationToken);
+            }
         }
+
         await _eventGroupRepository.SyncWalletCardLinksAsync(
             userId,
-            entity.Id,
+            cardId,
             request.LinkedEventGroupIds,
             cancellationToken);
-        entity.LinkedEventGroupIds = request.LinkedEventGroupIds.ToList();
 
-        return SavedCardMapper.ToDto(entity);
+        var created = await _savedCardRepository.GetByUserAndCardIdAsync(
+            userId,
+            cardId,
+            cancellationToken) ?? entity;
+        created.LinkedEventGroupIds = request.LinkedEventGroupIds.ToList();
+        return SavedCardMapper.ToDto(created);
     }
 
     public async Task<IReadOnlyList<WalletCardInvitationDto>> GetPendingInvitationsAsync(
@@ -453,7 +553,7 @@ public sealed class SavedCardService : ISavedCardService
         }
     }
 
-    private async Task TryCreateReciprocalInviteAsync(
+    private async Task<Guid?> TryCreateReciprocalInviteAsync(
         Guid inviteeUserId,
         Guid inviterUserId,
         string savedCardId,
@@ -461,7 +561,7 @@ public sealed class SavedCardService : ISavedCardService
     {
         if (inviteeUserId == inviterUserId)
         {
-            return;
+            return null;
         }
 
         try
@@ -476,7 +576,7 @@ public sealed class SavedCardService : ISavedCardService
                 _logger.LogDebug(
                     "Reciprocal wallet invite skipped: inviter {InviterUserId} has no business card.",
                     inviterUserId);
-                return;
+                return null;
             }
 
             var alreadySaved = await _savedCardRepository.GetByUserAndCardIdAsync(
@@ -489,11 +589,11 @@ public sealed class SavedCardService : ISavedCardService
                     "Reciprocal wallet invite skipped: invitee {InviteeUserId} already has card {CardId}.",
                     inviteeUserId,
                     proposedCard.CardId);
-                return;
+                return null;
             }
 
             var now = DateTime.UtcNow;
-            await _walletCardInviteRepository.UpsertPendingAsync(
+            var invitationId = await _walletCardInviteRepository.UpsertPendingAsync(
                 new WalletCardInvite
                 {
                     Id = Guid.NewGuid(),
@@ -513,6 +613,7 @@ public sealed class SavedCardService : ISavedCardService
                 inviteeUserId,
                 inviterUserId,
                 proposedCard.CardId);
+            return invitationId;
         }
         catch (Exception ex)
         {
@@ -522,6 +623,7 @@ public sealed class SavedCardService : ISavedCardService
                 "Failed to create reciprocal wallet invite for invitee {InviteeUserId} from inviter {InviterUserId}.",
                 inviteeUserId,
                 inviterUserId);
+            return null;
         }
     }
 
@@ -533,7 +635,6 @@ public sealed class SavedCardService : ISavedCardService
     {
         return new SavedCard
         {
-            Id = Guid.NewGuid(),
             UserId = userId,
             CardId = card.CardId,
             CreationMethod = CardCreationMethods.CardenceLink,
@@ -692,6 +793,27 @@ public sealed class SavedCardService : ISavedCardService
                 cardOwnerUserId,
                 cardId,
                 saver?.DisplayName,
+                cancellationToken);
+        }
+        catch (Exception)
+        {
+            // Push başarısız olsa da kaydetme akışı tamamlanmış sayılır.
+        }
+    }
+
+    private async Task NotifyWalletInviteAsync(
+        Guid inviteeUserId,
+        Guid invitationId,
+        Guid inviterUserId,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            var inviter = await _userRepository.GetByIdAsync(inviterUserId, cancellationToken);
+            await _pushNotificationService.NotifyWalletCardInviteAsync(
+                inviteeUserId,
+                invitationId,
+                inviter?.DisplayName,
                 cancellationToken);
         }
         catch (Exception)

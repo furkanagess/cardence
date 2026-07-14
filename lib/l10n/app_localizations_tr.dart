@@ -2154,6 +2154,14 @@ class AppLocalizationsTr extends AppLocalizations {
   String get eventOutboundInvitesEmpty => 'Henüz davet gönderilmedi.';
 
   @override
+  String eventOutboundInvitesCount(int count) {
+    return '$count kişi davet edildi';
+  }
+
+  @override
+  String get eventOutboundInvitesListTitle => 'Davet edilenler';
+
+  @override
   String get eventOutboundInviteStatusPending => 'Bekliyor';
 
   @override
@@ -2362,13 +2370,22 @@ class AppLocalizationsTr extends AppLocalizations {
   String get walletCardInvitationsSection => 'Kart kaydetme davetleri';
 
   @override
+  String get walletCardInvitationsPageTitle => 'Cüzdan davetleri';
+
+  @override
+  String get walletCardInvitationsEmpty => 'Bekleyen cüzdan davetiniz yok.';
+
+  @override
+  String get walletCardInvitationsAppBarTooltip => 'Cüzdan davetleri';
+
+  @override
   String walletCardInvitationAddedYou(String inviterName) {
-    return '$inviterName sizi kaydetti';
+    return '$inviterName sizi cüzdanına ekledi';
   }
 
   @override
   String walletCardInvitationPrompt(String inviterName) {
-    return 'Sen de o kişinin kartını kaydetmek ister misin?';
+    return 'Siz de onu eklemek ister misiniz?';
   }
 
   @override

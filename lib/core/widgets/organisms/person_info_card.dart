@@ -768,7 +768,7 @@ class _CompactBusinessCardFace extends StatelessWidget {
 
   static double get _radius => PersonInfoCard.compactCardRadius;
 
-  static double get _photoRadius => PersonInfoCard.compactCardRadius * 0.5;
+  static double get _photoRadius => PersonInfoCard.compactCardRadius;
 
   static const double _photoSize = 64;
 

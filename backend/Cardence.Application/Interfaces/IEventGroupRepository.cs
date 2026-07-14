@@ -58,7 +58,7 @@ public interface IEventGroupRepository
 
     Task SyncWalletCardLinksAsync(
         Guid userId,
-        Guid savedCardId,
+        string cardId,
         IReadOnlyList<string> groupIds,
         CancellationToken cancellationToken = default);
 

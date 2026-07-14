@@ -13,6 +13,7 @@ class UserProfileModel {
     this.isPremium = false,
     this.isOwnerPremium = false,
     this.createdAt,
+    this.savedCardIds = const [],
     this.savedCards = const [],
     this.businessCards = const [],
   });
@@ -26,6 +27,7 @@ class UserProfileModel {
   final bool isPremium;
   final bool isOwnerPremium;
   final DateTime? createdAt;
+  final List<String> savedCardIds;
   final List<SavedCardModel> savedCards;
   final List<BusinessCardModel> businessCards;
 
@@ -45,6 +47,14 @@ class UserProfileModel {
     return value
         .whereType<Map<String, dynamic>>()
         .map(SavedCardModel.fromJson)
+        .toList();
+  }
+
+  static List<String> _parseSavedCardIds(dynamic value) {
+    if (value is! List) return const [];
+    return value
+        .map((item) => item?.toString().trim() ?? '')
+        .where((item) => item.isNotEmpty)
         .toList();
   }
 
@@ -77,6 +87,9 @@ class UserProfileModel {
             json['Premium'],
       ),
       createdAt: createdAtRaw != null ? DateTime.tryParse(createdAtRaw) : null,
+      savedCardIds: _parseSavedCardIds(
+        json['savedCardIds'] ?? json['SavedCardIds'],
+      ),
       savedCards: _parseSavedCards(json['savedCards'] ?? json['SavedCards']),
       businessCards:
           _parseBusinessCards(json['businessCards'] ?? json['BusinessCards']),
@@ -93,6 +106,9 @@ class UserProfileModel {
         isPremium: isPremium,
         isOwnerPremium: isOwnerPremium,
         createdAt: createdAt,
+        savedCardIds: savedCardIds.isNotEmpty
+            ? savedCardIds
+            : savedCards.map((card) => card.cardId).toList(),
         savedCards: savedCards.map((card) => card.toEntity()).toList(),
         businessCards: businessCards.map((card) => card.toEntity()).toList(),
       );

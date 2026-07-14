@@ -44,6 +44,7 @@ import '../../../saved_cards/presentation/cubit/saved_cards_cubit.dart';
 import '../../../saved_cards/presentation/cubit/saved_cards_state.dart';
 import '../../../saved_cards/presentation/widgets/saved_cards_page_header.dart';
 import '../../../saved_cards/presentation/pages/saved_cards_page.dart';
+import '../../../saved_cards/presentation/pages/wallet_card_invitations_page.dart';
 import '../../../saved_cards/presentation/wallet_paywall_flow.dart';
 import '../../../auth/domain/usecases/get_current_user.dart';
 import '../../../auth/domain/usecases/upload_profile_photo.dart';
@@ -193,6 +194,25 @@ class _MainShellPageState extends State<MainShellPage> {
               );
             },
           ),
+        BlocBuilder<SavedCardsCubit, SavedCardsState>(
+          buildWhen: (previous, current) =>
+              previous.invitations.length != current.invitations.length,
+          builder: (context, state) {
+            final count = state.invitations.length;
+            return IconButton(
+              tooltip: context.l10n.walletCardInvitationsAppBarTooltip,
+              onPressed: () => _openWalletCardInvitations(context),
+              icon: Badge(
+                isLabelVisible: count > 0,
+                label: Text(count > 99 ? '99+' : '$count'),
+                child: const Icon(
+                  Icons.mail_outline_rounded,
+                  size: 24,
+                ),
+              ),
+            );
+          },
+        ),
         CardenceAppBar.iconAction(
           icon: Icons.settings_outlined,
           tooltip: context.l10n.ayarlar,
@@ -200,6 +220,20 @@ class _MainShellPageState extends State<MainShellPage> {
         ),
       ],
     );
+  }
+
+  Future<void> _openWalletCardInvitations(BuildContext context) async {
+    final cubit = context.read<SavedCardsCubit>();
+    await Navigator.of(context).push<void>(
+      MaterialPageRoute<void>(
+        builder: (_) => BlocProvider.value(
+          value: cubit,
+          child: const WalletCardInvitationsPage(),
+        ),
+      ),
+    );
+    if (!context.mounted) return;
+    await cubit.refreshAll();
   }
 
   @override

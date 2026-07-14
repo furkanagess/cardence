@@ -2151,6 +2151,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get eventOutboundInvitesEmpty => 'No invites sent yet.';
 
   @override
+  String eventOutboundInvitesCount(int count) {
+    return '$count people invited';
+  }
+
+  @override
+  String get eventOutboundInvitesListTitle => 'Invited people';
+
+  @override
   String get eventOutboundInviteStatusPending => 'Pending';
 
   @override
@@ -2361,13 +2369,23 @@ class AppLocalizationsEn extends AppLocalizations {
   String get walletCardInvitationsSection => 'Card save invitations';
 
   @override
+  String get walletCardInvitationsPageTitle => 'Wallet invitations';
+
+  @override
+  String get walletCardInvitationsEmpty =>
+      'You have no pending wallet invitations.';
+
+  @override
+  String get walletCardInvitationsAppBarTooltip => 'Wallet invitations';
+
+  @override
   String walletCardInvitationAddedYou(String inviterName) {
-    return '$inviterName saved you';
+    return '$inviterName added you to their wallet';
   }
 
   @override
   String walletCardInvitationPrompt(String inviterName) {
-    return 'Would you like to save their card too?';
+    return 'Would you like to add them too?';
   }
 
   @override

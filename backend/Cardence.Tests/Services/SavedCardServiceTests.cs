@@ -196,6 +196,9 @@ public sealed class SavedCardServiceTests
             ]);
         _savedCardRepository.GetByUserAndCardIdAsync(ownerUserId, saverCardId, Arg.Any<CancellationToken>())
             .Returns((SavedCard?)null);
+        _walletCardInviteRepository
+            .UpsertPendingAsync(Arg.Any<WalletCardInvite>(), Arg.Any<CancellationToken>())
+            .Returns(ci => ci.ArgAt<WalletCardInvite>(0).Id);
 
         var body = System.Text.Json.JsonDocument.Parse(
             $$"""{"cardId":"{{ownerCardId}}","displayName":"Owner Card","email":"owner@example.com"}""")

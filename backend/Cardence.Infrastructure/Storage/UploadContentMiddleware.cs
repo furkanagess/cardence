@@ -3,6 +3,7 @@ using Cardence.Application.Interfaces;
 using Cardence.Domain.Constants;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Cardence.Infrastructure.Storage;
 
@@ -22,7 +23,7 @@ public sealed class UploadContentMiddleware
         _next = next;
     }
 
-    public async Task InvokeAsync(HttpContext context, IUploadContentStore contentStore)
+    public async Task InvokeAsync(HttpContext context)
     {
         if (!context.Request.Path.StartsWithSegments("/uploads", out var remaining))
         {
@@ -50,6 +51,7 @@ public sealed class UploadContentMiddleware
             return;
         }
 
+        var contentStore = context.RequestServices.GetRequiredService<IUploadContentStore>();
         var stream = await contentStore.OpenReadAsync(relativeKey, context.RequestAborted);
         if (stream is null)
         {

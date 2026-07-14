@@ -99,6 +99,7 @@ class SavedCardProfileHeader extends StatelessWidget {
                 child: Container(
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
+                    color: AppColors.surfaceLight,
                     border: Border.all(
                       color: surfaceColor,
                       width: 4,
