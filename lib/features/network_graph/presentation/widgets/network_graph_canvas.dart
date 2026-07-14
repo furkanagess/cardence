@@ -322,11 +322,8 @@ class _GraphNodeBubble extends StatelessWidget {
   final NetworkGraphNodeStyle style;
   final ValueChanged<GraphNode>? onTap;
 
-  bool get _showAvatar {
-    final hasPhoto = node.photoUrl?.trim().isNotEmpty ?? false;
-    return hasPhoto &&
-        (node.type == GraphNodeType.card || node.type == GraphNodeType.user);
-  }
+  bool get _showAvatar =>
+      node.type == GraphNodeType.card || node.type == GraphNodeType.user;
 
   @override
   Widget build(BuildContext context) {

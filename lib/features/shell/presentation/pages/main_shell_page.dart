@@ -194,30 +194,32 @@ class _MainShellPageState extends State<MainShellPage> {
               );
             },
           ),
-        BlocBuilder<SavedCardsCubit, SavedCardsState>(
-          buildWhen: (previous, current) =>
-              previous.invitations.length != current.invitations.length,
-          builder: (context, state) {
-            final count = state.invitations.length;
-            return IconButton(
-              tooltip: context.l10n.walletCardInvitationsAppBarTooltip,
-              onPressed: () => _openWalletCardInvitations(context),
-              icon: Badge(
-                isLabelVisible: count > 0,
-                label: Text(count > 99 ? '99+' : '$count'),
-                child: const Icon(
-                  Icons.mail_outline_rounded,
-                  size: 24,
+        if (_currentIndex == 0)
+          BlocBuilder<SavedCardsCubit, SavedCardsState>(
+            buildWhen: (previous, current) =>
+                previous.invitations.length != current.invitations.length,
+            builder: (context, state) {
+              final count = state.invitations.length;
+              return IconButton(
+                tooltip: context.l10n.walletCardInvitationsAppBarTooltip,
+                onPressed: () => _openWalletCardInvitations(context),
+                icon: Badge(
+                  isLabelVisible: count > 0,
+                  label: Text(count > 99 ? '99+' : '$count'),
+                  child: const Icon(
+                    Icons.mail_outline_rounded,
+                    size: 24,
+                  ),
                 ),
-              ),
-            );
-          },
-        ),
-        CardenceAppBar.iconAction(
-          icon: Icons.settings_outlined,
-          tooltip: context.l10n.ayarlar,
-          onPressed: _openingSettings ? null : () => _openSettings(context),
-        ),
+              );
+            },
+          ),
+        if (_currentIndex != 0)
+          CardenceAppBar.iconAction(
+            icon: Icons.settings_outlined,
+            tooltip: context.l10n.ayarlar,
+            onPressed: _openingSettings ? null : () => _openSettings(context),
+          ),
       ],
     );
   }

@@ -61,7 +61,8 @@ class NetworkGraphNodeTile extends StatelessWidget {
         side: BorderSide(color: colorScheme.outlineVariant),
       ),
       child: ListTile(
-        leading: (node.photoUrl?.trim().isNotEmpty ?? false)
+        leading: (node.type == GraphNodeType.card ||
+                node.type == GraphNodeType.user)
             ? ProfileAvatar(
                 photoUrl: node.photoUrl,
                 displayName: NetworkGraphDisplay.nodeLabel(node),

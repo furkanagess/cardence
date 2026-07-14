@@ -18,9 +18,7 @@ public partial class AddSavedCardsCompatView : Migration
             """
             CREATE OR REPLACE VIEW public.saved_cards AS
             SELECT
-                (
-                    ('x' || substr(md5(u."Id"::text || ':' || ids.card_id), 1, 32))::uuid
-                ) AS "Id",
+                md5(u."Id"::text || ':' || ids.card_id)::uuid AS "Id",
                 u."Id" AS user_id,
                 ids.card_id,
                 c.display_name,

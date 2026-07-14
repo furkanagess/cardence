@@ -329,15 +329,12 @@ class PersonInfoCard extends StatelessWidget {
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        if (photoUrl != null &&
-                            photoUrl!.trim().isNotEmpty) ...[
-                          ProfileAvatar(
-                            photoUrl: photoUrl,
-                            displayName: title,
-                            size: 56,
-                          ),
-                          const SizedBox(width: 14),
-                        ],
+                        ProfileAvatar(
+                          photoUrl: photoUrl,
+                          displayName: title,
+                          size: 56,
+                        ),
+                        const SizedBox(width: 14),
                         Expanded(
                           child: RichText(
                             maxLines: 2,
@@ -1156,32 +1153,11 @@ class _CompactBusinessCardFace extends StatelessWidget {
   }
 
   Widget _buildPhotoSlot() {
-    final url = photoUrl?.trim();
-    if (url != null && url.isNotEmpty) {
-      return ProfileAvatar(
-        photoUrl: photoUrl,
-        displayName: title,
-        size: _photoSize,
-        borderRadius: BorderRadius.circular(_photoRadius),
-      );
-    }
-
-    return Container(
-      width: _photoSize,
-      height: _photoSize,
-      decoration: BoxDecoration(
-        color: onSurfaceVariant.withValues(alpha: 0.16),
-        borderRadius: BorderRadius.circular(_photoRadius),
-        border: Border.all(
-          color: onSurfaceVariant.withValues(alpha: 0.22),
-        ),
-      ),
-      alignment: Alignment.center,
-      child: Icon(
-        Icons.badge_outlined,
-        size: 30,
-        color: onSurfaceVariant.withValues(alpha: 0.85),
-      ),
+    return ProfileAvatar(
+      photoUrl: photoUrl,
+      displayName: title,
+      size: _photoSize,
+      borderRadius: BorderRadius.circular(_photoRadius),
     );
   }
 

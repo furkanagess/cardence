@@ -1,3 +1,4 @@
+import 'package:characters/characters.dart';
 import 'package:flutter/material.dart';
 
 import '../../theme/app_colors.dart';
@@ -40,7 +41,7 @@ class ProfileAvatar extends StatelessWidget {
   String get _initial {
     final name = displayName?.trim();
     if (name == null || name.isEmpty) return '?';
-    return name[0].toUpperCase();
+    return name.characters.first.toUpperCase();
   }
 
   BorderRadius get _borderRadius =>
