@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import '../../domain/entities/onboarding_card_draft.dart';
-import '../../../../core/domain/card_visual_effect.dart';
 
 /// Kart taslağı modeli – JSON / entity dönüşümü Data katmanında.
 class OnboardingCardDraftModel {
@@ -32,7 +31,6 @@ class OnboardingCardDraftModel {
     this.accentColor,
     this.backgroundColor,
     this.lastUsedPaletteBackgroundColor,
-    this.cardEffect,
     List<String>? linkedEventGroupIds,
     this.cardId,
   })  : visibleFields = visibleFields ?? const [],
@@ -66,7 +64,6 @@ class OnboardingCardDraftModel {
   final String? accentColor;
   final String? backgroundColor;
   final String? lastUsedPaletteBackgroundColor;
-  final String? cardEffect;
   final List<String> linkedEventGroupIds;
   final String? cardId;
 
@@ -101,7 +98,6 @@ class OnboardingCardDraftModel {
       accentColor: entity.accentColor,
       backgroundColor: entity.backgroundColor,
       lastUsedPaletteBackgroundColor: entity.lastUsedPaletteBackgroundColor,
-      cardEffect: entity.cardEffect.storageKey,
       linkedEventGroupIds: List.from(entity.linkedEventGroupIds),
       cardId: entity.cardId,
     );
@@ -135,7 +131,6 @@ class OnboardingCardDraftModel {
       accentColor: accentColor,
       backgroundColor: backgroundColor,
       lastUsedPaletteBackgroundColor: lastUsedPaletteBackgroundColor,
-      cardEffect: CardVisualEffect.fromStorage(cardEffect),
       linkedEventGroupIds: List.from(linkedEventGroupIds),
       cardId: cardId,
     );
@@ -169,7 +164,6 @@ class OnboardingCardDraftModel {
       'accentColor': accentColor,
       'backgroundColor': backgroundColor,
       'lastUsedPaletteBackgroundColor': lastUsedPaletteBackgroundColor,
-      'cardEffect': cardEffect,
       'linkedEventGroupIds': linkedEventGroupIds,
       'cardId': cardId,
     };
@@ -229,7 +223,6 @@ class OnboardingCardDraftModel {
       backgroundColor: json['backgroundColor'] as String?,
       lastUsedPaletteBackgroundColor:
           json['lastUsedPaletteBackgroundColor'] as String?,
-      cardEffect: json['cardEffect'] as String?,
       linkedEventGroupIds: (json['linkedEventGroupIds'] as List<dynamic>?)
               ?.map((e) => e as String)
               .toList() ??

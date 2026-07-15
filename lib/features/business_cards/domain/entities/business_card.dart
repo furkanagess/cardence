@@ -23,7 +23,6 @@ class BusinessCard {
     this.photoUrl,
     this.accentColor,
     this.backgroundColor,
-    this.cardEffect,
     this.cardId,
     this.isOwnerPremium = false,
   });
@@ -50,7 +49,6 @@ class BusinessCard {
   final String? photoUrl;
   final String? accentColor;
   final String? backgroundColor;
-  final String? cardEffect;
   final String? cardId;
   final bool isOwnerPremium;
 }

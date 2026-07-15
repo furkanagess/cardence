@@ -24,7 +24,6 @@ public sealed class BusinessCardDto
     public string? PhotoUrl { get; init; }
     public string? AccentColor { get; init; }
     public string? BackgroundColor { get; init; }
-    public string? CardEffect { get; init; }
     public IReadOnlyList<string> LinkedEventGroupIds { get; init; } = [];
     public string? CardId { get; init; }
     public bool IsOwnerPremium { get; init; }

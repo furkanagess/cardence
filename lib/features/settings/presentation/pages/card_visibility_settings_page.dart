@@ -5,8 +5,6 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/atoms/cardence_app_bar.dart';
 import '../../../../core/widgets/atoms/custom_button.dart';
 import '../../../../core/widgets/molecules/card_color_customize_section.dart';
-import '../../../../core/widgets/molecules/card_effect_customize_section.dart';
-import '../../../../core/domain/card_visual_effect.dart';
 import '../../../../core/widgets/organisms/cardence_scaffold.dart';
 import '../../../../core/widgets/organisms/flippable_person_card.dart';
 import '../../../business_cards/domain/usecases/persist_onboarding_card.dart';
@@ -14,7 +12,6 @@ import '../../../my_cards/presentation/widgets/my_card_preview_helpers.dart';
 import '../../../onboarding/domain/entities/onboarding_card_draft.dart';
 import '../../../onboarding/domain/usecases/get_onboarding_draft_cards.dart';
 import '../widgets/card_appearance_section_card.dart';
-import '../../../my_cards/presentation/helpers/card_effect_premium_helper.dart';
 
 /// Kart görünümü: renk, metin rengi ve kart efekti.
 class CardVisibilitySettingsPage extends StatefulWidget {
@@ -103,28 +100,13 @@ class _CardVisibilitySettingsPageState extends State<CardVisibilitySettingsPage>
     );
   }
 
-  void _setCardEffect(CardVisualEffect effect) {
-    final draft = _draft;
-    if (draft == null) return;
-    _updateDraft(draft.copyWith(cardEffect: effect));
-  }
-
   Future<void> _save() async {
     final draft = _draft;
     if (draft == null || _saving) return;
 
     setState(() => _saving = true);
     try {
-      final resolved = await prepareCardDraftForPersist(context, draft);
-      if (!mounted) return;
-      if (resolved == null) {
-        setState(() => _saving = false);
-        return;
-      }
-      if (resolved.cardEffect != draft.cardEffect) {
-        _updateDraft(resolved);
-      }
-      final synced = await widget.persistOnboardingCard(resolved);
+      final synced = await widget.persistOnboardingCard(draft);
       if (!mounted) return;
       widget.onDraftUpdated?.call(synced);
       Navigator.of(context).pop();
@@ -264,7 +246,6 @@ class _CardVisibilitySettingsPageState extends State<CardVisibilitySettingsPage>
                       l10n: context.l10n,
                       backgroundColor: bg,
                       accentColor: accent,
-                      cardEffect: draft.cardEffect,
                       emptyMessage: context.l10n.nizleme,
                       showActionStrip: false,
                     ),
@@ -287,7 +268,6 @@ class _CardVisibilitySettingsPageState extends State<CardVisibilitySettingsPage>
                       l10n: context.l10n,
                       backgroundColor: bg,
                       accentColor: accent,
-                      cardEffect: draft.cardEffect,
                       emptyMessage: context.l10n.nizleme,
                       showActionStrip: false,
                     ),
@@ -295,20 +275,6 @@ class _CardVisibilitySettingsPageState extends State<CardVisibilitySettingsPage>
                     useAutomaticTextPill: true,
                     onBackgroundColorChanged: _setBackgroundColor,
                     onAccentColorChanged: _setAccentColor,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                CardAppearanceSectionCard(
-                  title: context.l10n.kartEfekti,
-                  trailing: Icon(
-                    Icons.auto_awesome_outlined,
-                    size: 20,
-                    color: colorScheme.onSurfaceVariant,
-                  ),
-                  child: CardEffectCustomizeSection(
-                    selectedEffect: draft.cardEffect,
-                    onEffectChanged: _setCardEffect,
-                    compact: true,
                   ),
                 ),
               ],

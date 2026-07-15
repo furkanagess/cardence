@@ -2,9 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../core/l10n/app_l10n.dart';
 import '../../../core/l10n/l10n_extensions.dart';
 
-import '../molecules/card_effect_overlay.dart';
 import '../molecules/card_preview_action_strip.dart';
-import '../../domain/card_visual_effect.dart';
 import 'person_info_card.dart';
 
 /// Dikdörtgen (kartvizit oranında) kişi kartı önizlemesi.
@@ -37,7 +35,6 @@ class FlippablePersonCard extends StatelessWidget {
     this.visibleContactFields = const [],
     this.jobTitle,
     this.contactFieldsTappable = true,
-    this.cardEffect = CardVisualEffect.none,
     this.showActionStrip = true,
     this.heroTag,
   });
@@ -85,7 +82,6 @@ class FlippablePersonCard extends StatelessWidget {
   final List<String> visibleContactFields;
   final String? jobTitle;
   final bool contactFieldsTappable;
-  final CardVisualEffect cardEffect;
 
   /// true: alt sağda detay + iletişim ikonları; kart içi iletişim satırları gizlenir.
   final bool showActionStrip;
@@ -129,7 +125,7 @@ class FlippablePersonCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final cardSurface = backgroundColor ?? colorScheme.surface;
-    final cardFace = _wrapWithEffect(_buildFront(context));
+    final cardFace = _buildFront(context);
     final heroChild = Material(
       color: Colors.transparent,
       child: cardFace,
@@ -171,15 +167,6 @@ class FlippablePersonCard extends StatelessWidget {
           ],
         ),
       ),
-    );
-  }
-
-  Widget _wrapWithEffect(Widget card) {
-    return CardEffectOverlay(
-      effect: cardEffect,
-      accentColor: accentColor,
-      borderRadius: BorderRadius.circular(PersonInfoCard.compactCardRadius),
-      child: card,
     );
   }
 

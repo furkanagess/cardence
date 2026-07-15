@@ -24,7 +24,6 @@ class BusinessCardModel {
     this.photoUrl,
     this.accentColor,
     this.backgroundColor,
-    this.cardEffect,
     this.cardId,
     this.isOwnerPremium = false,
   });
@@ -51,7 +50,6 @@ class BusinessCardModel {
   final String? photoUrl;
   final String? accentColor;
   final String? backgroundColor;
-  final String? cardEffect;
   final String? cardId;
   final bool isOwnerPremium;
 
@@ -79,7 +77,6 @@ class BusinessCardModel {
       photoUrl: entity.photoUrl,
       accentColor: entity.accentColor,
       backgroundColor: entity.backgroundColor,
-      cardEffect: entity.cardEffect,
       cardId: entity.cardId,
       isOwnerPremium: entity.isOwnerPremium,
     );
@@ -108,7 +105,6 @@ class BusinessCardModel {
         photoUrl: photoUrl,
         accentColor: accentColor,
         backgroundColor: backgroundColor,
-        cardEffect: cardEffect,
         cardId: cardId,
         isOwnerPremium: isOwnerPremium,
       );
@@ -137,7 +133,6 @@ class BusinessCardModel {
       'photoUrl': photoUrl,
       'accentColor': accentColor,
       'backgroundColor': backgroundColor,
-      'cardEffect': cardEffect,
       'cardId': cardId,
     };
     json.removeWhere((_, value) => value == null);
@@ -182,7 +177,6 @@ class BusinessCardModel {
       photoUrl: _str(json['photoUrl'] ?? json['PhotoUrl']),
       accentColor: _str(json['accentColor'] ?? json['AccentColor']),
       backgroundColor: _str(json['backgroundColor'] ?? json['BackgroundColor']),
-      cardEffect: _str(json['cardEffect'] ?? json['CardEffect']),
       cardId: _str(json['cardId'] ?? json['CardId']),
       isOwnerPremium: _readBool(
         json['isOwnerPremium'] ?? json['IsOwnerPremium'],

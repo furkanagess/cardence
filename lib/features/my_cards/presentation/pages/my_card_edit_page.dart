@@ -15,7 +15,6 @@ import '../../../../core/widgets/molecules/country_city_picker_field.dart';
 import '../../../../core/widgets/molecules/skills_chip_input.dart';
 import '../widgets/collapsible_card_preview_panel.dart';
 import '../widgets/my_card_preview_helpers.dart';
-import '../helpers/card_effect_premium_helper.dart';
 import '../../../onboarding/domain/entities/onboarding_card_draft.dart';
 import '../../../onboarding/presentation/pages/card_created_share_page.dart';
 import '../../../../core/network/auth_api_exception.dart';
@@ -180,19 +179,8 @@ class _MyCardEditPageState extends State<MyCardEditPage> {
             return;
     }
     setState(() => _saving = true);
-    final originalDraft = _buildDraft();
-    var draft = originalDraft;
+    final draft = _buildDraft();
     try {
-      final resolved = await prepareCardDraftForPersist(context, draft);
-      if (!mounted) return;
-      if (resolved == null) {
-        setState(() => _saving = false);
-        return;
-      }
-      draft = resolved;
-      if (resolved.cardEffect != originalDraft.cardEffect) {
-        setState(() => _baselineDraft = resolved);
-      }
       final updated = await widget.persistOnboardingCard(draft);
       if (!mounted) return;
       setState(() {
@@ -288,18 +276,16 @@ class _MyCardEditPageState extends State<MyCardEditPage> {
                     CardAppearanceCustomizeSection(
                       backgroundColor: draft.backgroundColor,
                       accentColor: draft.accentColor,
-                      cardEffect: draft.cardEffect,
                       compact: true,
                       lastUsedPaletteBackgroundColor:
                           draft.lastUsedPaletteBackgroundColor,
-                      previewBuilder: (bg, accent, effect) => AspectRatio(
+                      previewBuilder: (bg, accent) => AspectRatio(
                         aspectRatio: FlippablePersonCard.cardAspectRatio,
                         child: MyCardPreviewHelpers.flippableCardWithColors(
                           draft: draft,
                           l10n: context.l10n,
                           backgroundColor: bg,
                           accentColor: accent,
-                          cardEffect: effect,
                         ),
                       ),
                       onBackgroundColorChanged: (hex) {
@@ -315,13 +301,6 @@ class _MyCardEditPageState extends State<MyCardEditPage> {
                           _baselineDraft = hex == null
                               ? _baselineDraft.copyWith(clearAccentColor: true)
                               : _baselineDraft.copyWith(accentColor: hex);
-                        });
-                        sheetSetState(() {});
-                      },
-                      onEffectChanged: (effect) {
-                        setState(() {
-                          _baselineDraft =
-                              _baselineDraft.copyWith(cardEffect: effect);
                         });
                         sheetSetState(() {});
                       },

@@ -515,7 +515,6 @@ class _ProfileCardsCarousel extends StatelessWidget {
                           contactFieldsTappable: true,
                           emptyMessage: context.l10n.alanlarDoldukaGrnr,
                           normalizeForDisplay: true,
-                          gatePremiumEffects: true,
                         ),
                       )
                     : PageView.builder(
@@ -569,7 +568,6 @@ class _ProfileCardsCarousel extends StatelessWidget {
                                 contactFieldsTappable: true,
                                 emptyMessage: context.l10n.alanlarDoldukaGrnr,
                                 normalizeForDisplay: true,
-                                gatePremiumEffects: true,
                               ),
                             ),
                           );

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../core/l10n/app_l10n.dart';
 import '../../../../core/l10n/l10n_extensions.dart';
-import '../../../../core/l10n/locale_preference_material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/widgets/organisms/cardence_scaffold.dart';
@@ -20,7 +19,6 @@ import '../widgets/onboarding_step_optional.dart';
 import '../widgets/onboarding_step_photo.dart';
 import '../widgets/onboarding_step_preview.dart';
 import '../widgets/onboarding_step_professional.dart';
-import '../../../my_cards/presentation/helpers/card_effect_premium_helper.dart';
 import 'card_created_share_page.dart';
 
 /// İlk açılışta veya ek kart oluştururken adım adım kart onboarding ekranı.
@@ -319,77 +317,54 @@ class _OnboardingBottomActions extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CardEffectPremiumHelper.build(
-      builder: (context, isPremium) {
-        return BlocBuilder<OnboardingCubit, OnboardingState>(
-          buildWhen: (a, b) =>
-              a.currentPageIndex != b.currentPageIndex ||
-              a.isLastPage != b.isLastPage ||
-              a.isSaving != b.isSaving ||
-              a.draft != b.draft,
-          builder: (context, state) {
-            final isLastPage = state.isLastPage;
-            final isSaving = state.isSaving;
+    return BlocBuilder<OnboardingCubit, OnboardingState>(
+      buildWhen: (a, b) =>
+          a.currentPageIndex != b.currentPageIndex ||
+          a.isLastPage != b.isLastPage ||
+          a.isSaving != b.isSaving ||
+          a.draft != b.draft,
+      builder: (context, state) {
+        final isLastPage = state.isLastPage;
+        final isSaving = state.isSaving;
 
-            final primaryLabel = isLastPage
-                ? AppL10n.createMyCard(context.l10n)
-                : context.l10n.devam;
+        final primaryLabel = isLastPage
+            ? AppL10n.createMyCard(context.l10n)
+            : context.l10n.devam;
 
-            return OnboardingBottomBar(
-              stepCount: OnboardingState.stepCount,
-              currentIndex: state.currentPageIndex,
-              primaryLabel: primaryLabel,
-              isLoading: isSaving,
-              enabled: state.canProceedCurrentStep(
-                context.l10n,
-                isPremium: isPremium,
-              ),
-              showStepIndicator: false,
-              onStepSelected:
-                  state.isFirstPage ? null : (index) => onGoToPage(index),
-              onBackPressed: state.isFirstPage
-                  ? null
-                  : () => onGoToPage(state.currentPageIndex - 1),
-              backLabel: context.l10n.geri,
-              onPrimaryPressed: () async {
-                if (isLastPage) {
-                  if (!state.canFinish(
-                    context.l10n,
-                    isPremium: isPremium,
-                  )) {
-                    return;
-                  }
-                  final cubit = context.read<OnboardingCubit>();
-                  final resolved = await prepareCardDraftForPersist(
-                    context,
-                    cubit.state.draft,
-                    onRequestPremium: () => upgradeWalletPlan(
-                      preferredLocale: revenueCatPreferredLocaleFrom(
-                        Localizations.localeOf(context),
-                      ),
-                    ),
-                  );
-                  if (!context.mounted || resolved == null) return;
-                  if (resolved.cardEffect != cubit.state.draft.cardEffect) {
-                    cubit.updateDraft(resolved);
-                  }
-                  final synced = await cubit.finishOnboarding();
-                  if (!context.mounted || synced == null) return;
-                  await CardCreatedSharePage.open(context, draft: synced);
-                  if (context.mounted) onFinish(synced);
-                  return;
-                }
+        return OnboardingBottomBar(
+          stepCount: OnboardingState.stepCount,
+          currentIndex: state.currentPageIndex,
+          primaryLabel: primaryLabel,
+          isLoading: isSaving,
+          enabled: state.canProceedCurrentStep(context.l10n),
+          showStepIndicator: false,
+          onStepSelected:
+              state.isFirstPage ? null : (index) => onGoToPage(index),
+          onBackPressed: state.isFirstPage
+              ? null
+              : () => onGoToPage(state.currentPageIndex - 1),
+          backLabel: context.l10n.geri,
+          onPrimaryPressed: () async {
+            if (isLastPage) {
+              if (!state.canFinish(context.l10n)) {
+                return;
+              }
+              final cubit = context.read<OnboardingCubit>();
+              final synced = await cubit.finishOnboarding();
+              if (!context.mounted || synced == null) return;
+              await CardCreatedSharePage.open(context, draft: synced);
+              if (context.mounted) onFinish(synced);
+              return;
+            }
 
-                final error =
-                    state.validationErrorForCurrentStep(context.l10n);
-                if (error != null) {
-                  return;
-                }
+            final error =
+                state.validationErrorForCurrentStep(context.l10n);
+            if (error != null) {
+              return;
+            }
 
-                FocusManager.instance.primaryFocus?.unfocus();
-                context.read<OnboardingCubit>().nextPage();
-              },
-            );
+            FocusManager.instance.primaryFocus?.unfocus();
+            context.read<OnboardingCubit>().nextPage();
           },
         );
       },

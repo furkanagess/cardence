@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../../core/l10n/locale_preference_material.dart';
 
 import '../../../../core/widgets/molecules/card_appearance_customize_section.dart';
-import '../../../../core/widgets/molecules/card_effect_customize_section.dart';
 import '../../domain/entities/onboarding_card_draft.dart';
 import '../../../saved_cards/domain/usecases/upgrade_wallet_plan.dart';
 import '../cubit/onboarding_cubit.dart';
@@ -48,7 +46,6 @@ class OnboardingStepPreview extends StatelessWidget {
               CardAppearanceCustomizeSection(
                 backgroundColor: draft.backgroundColor,
                 accentColor: draft.accentColor,
-                cardEffect: draft.cardEffect,
                 compact: true,
                 showDefaultColorChips: false,
                 presetColorOptionLimit: 4,
@@ -57,16 +54,13 @@ class OnboardingStepPreview extends StatelessWidget {
                 showRandomBackgroundColorChip: true,
                 showRandomTextColorChip: true,
                 colorChipSize: 40,
-                showEffectSection: false,
                 lastUsedPaletteBackgroundColor:
                     draft.lastUsedPaletteBackgroundColor,
                 showInlinePreview: false,
-                previewBuilder: (bg, accent, effect) =>
-                    OnboardingCardPreviewFrame(
+                previewBuilder: (bg, accent) => OnboardingCardPreviewFrame(
                   draft: draft.copyWith(
                     backgroundColor: bg,
                     accentColor: accent,
-                    cardEffect: effect,
                     clearBackgroundColor: bg == null,
                     clearAccentColor: accent == null,
                   ),
@@ -88,9 +82,6 @@ class OnboardingStepPreview extends StatelessWidget {
                         : draft.copyWith(accentColor: hex),
                   );
                 },
-                onEffectChanged: (effect) {
-                  _applyDraft(context, draft.copyWith(cardEffect: effect));
-                },
                 onLastUsedPaletteBackgroundChanged: (hex) {
                   _applyDraft(
                     context,
@@ -103,20 +94,6 @@ class OnboardingStepPreview extends StatelessWidget {
               ),
             ],
           ),
-        ),
-        const SizedBox(height: 12),
-        CardEffectCustomizeSection(
-          selectedEffect: draft.cardEffect,
-          onEffectChanged: (effect) {
-            _applyDraft(context, draft.copyWith(cardEffect: effect));
-          },
-          onUpgradeToPro: () => upgradeWalletPlan(
-            preferredLocale: revenueCatPreferredLocaleFrom(
-              Localizations.localeOf(context),
-            ),
-          ),
-          compact: true,
-          headerPadding: const EdgeInsets.symmetric(horizontal: _horizontalInset),
         ),
         const SizedBox(height: 16),
       ],

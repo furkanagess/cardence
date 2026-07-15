@@ -11,11 +11,9 @@ import '../../../../core/widgets/molecules/card_appearance_customize_section.dar
 import '../../../../core/widgets/organisms/card_share_options_sheet.dart';
 import '../../../../core/widgets/organisms/cardence_scaffold.dart';
 import '../../../../core/widgets/organisms/flippable_person_card.dart';
-import '../../../../core/domain/card_visual_effect.dart';
 import '../card_customize_colors.dart';
 import '../widgets/collapsible_card_preview_panel.dart';
 import '../widgets/my_card_preview_helpers.dart';
-import '../helpers/card_effect_premium_helper.dart';
 import '../../../onboarding/domain/entities/onboarding_card_draft.dart';
 import '../../../business_cards/domain/usecases/persist_onboarding_card.dart';
 import 'my_card_edit_page.dart';
@@ -64,16 +62,6 @@ class _CardDetailPageState extends State<CardDetailPage> {
       draftToSave = draftToSave.copyWith(cardId: CardIdGenerator.generateBusinessCandidate());
     }
     try {
-      final resolved = await prepareCardDraftForPersist(context, draftToSave);
-      if (!mounted) return;
-      if (resolved == null) {
-        setState(() => _saving = false);
-        return;
-      }
-      draftToSave = resolved;
-      if (resolved.cardEffect != _draft.cardEffect) {
-        _applyDraft(resolved);
-      }
       final synced = await widget.persistOnboardingCard(draftToSave);
       if (!mounted) return;
       setState(() {
@@ -127,10 +115,6 @@ class _CardDetailPageState extends State<CardDetailPage> {
 
   void _setTextColor(String hex) {
     _applyDraft(_draft.copyWith(accentColor: hex));
-  }
-
-  void _setCardEffect(CardVisualEffect effect) {
-    _applyDraft(_draft.copyWith(cardEffect: effect));
   }
 
   void _showCustomizeBottomSheet() {
@@ -190,18 +174,16 @@ class _CardDetailPageState extends State<CardDetailPage> {
                     CardAppearanceCustomizeSection(
                       backgroundColor: _draft.backgroundColor,
                       accentColor: _draft.accentColor,
-                      cardEffect: _draft.cardEffect,
                       compact: true,
                       lastUsedPaletteBackgroundColor:
                           _draft.lastUsedPaletteBackgroundColor,
-                      previewBuilder: (bg, accent, effect) => AspectRatio(
+                      previewBuilder: (bg, accent) => AspectRatio(
                         aspectRatio: FlippablePersonCard.cardAspectRatio,
                         child: MyCardPreviewHelpers.flippableCardWithColors(
                           draft: _draft,
                           l10n: context.l10n,
                           backgroundColor: bg,
                           accentColor: accent,
-                          cardEffect: effect,
                         ),
                       ),
                       onBackgroundColorChanged: (hex) {
@@ -221,10 +203,6 @@ class _CardDetailPageState extends State<CardDetailPage> {
                         } else {
                           _setTextColor(hex);
                         }
-                        setSheetState(() {});
-                      },
-                      onEffectChanged: (effect) {
-                        _setCardEffect(effect);
                         setSheetState(() {});
                       },
                       onLastUsedPaletteBackgroundChanged: (hex) {
@@ -251,13 +229,6 @@ class _CardDetailPageState extends State<CardDetailPage> {
       _applyDraft(draftToSave);
     }
     if (_hasUnsavedChanges || draftToSave.cardId != _savedDraft.cardId) {
-      final resolved = await prepareCardDraftForPersist(context, draftToSave);
-      if (!mounted) return draftToSave;
-      if (resolved == null) return draftToSave;
-      draftToSave = resolved;
-      if (resolved.cardEffect != _draft.cardEffect) {
-        _applyDraft(resolved);
-      }
       final synced = await widget.persistOnboardingCard(draftToSave);
       if (!mounted) return synced;
       setState(() {

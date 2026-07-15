@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../../../../l10n/app_localizations.dart';
-import '../../../../core/domain/card_visual_effect.dart';
 import '../../../onboarding/presentation/widgets/onboarding_card_preview_frame.dart';
 import '../../../onboarding/domain/entities/onboarding_card_draft.dart';
 
@@ -42,7 +41,6 @@ class MyCardPreviewHelpers {
     VoidCallback? onDetailTap,
     VoidCallback? onDoubleTap,
     String? emptyMessage,
-    bool gatePremiumEffects = false,
     bool showActionStrip = true,
     bool contactFieldsTappable = true,
     String? heroTag,
@@ -56,7 +54,6 @@ class MyCardPreviewHelpers {
       onDoubleTap: onDoubleTap,
       emptyMessage: emptyMessage ?? l10n.alanlarDoldukaGrnr,
       normalizeForDisplay: true,
-      gatePremiumEffects: gatePremiumEffects,
       showActionStrip: showActionStrip,
       contactFieldsTappable: contactFieldsTappable,
       heroTag: heroTag,
@@ -68,7 +65,6 @@ class MyCardPreviewHelpers {
     required AppLocalizations l10n,
     String? backgroundColor,
     String? accentColor,
-    CardVisualEffect? cardEffect,
     String? emptyMessage,
     bool showActionStrip = true,
   }) {
@@ -76,7 +72,6 @@ class MyCardPreviewHelpers {
       draft: draft.copyWith(
         backgroundColor: backgroundColor,
         accentColor: accentColor,
-        cardEffect: cardEffect,
         clearBackgroundColor: backgroundColor == null,
         clearAccentColor: accentColor == null,
       ),

@@ -53,25 +53,18 @@ class OnboardingState extends Equatable {
       validationErrorForStep(l10n, currentPageIndex);
 
   /// Mevcut adımda Devam / Tamamla aktif mi.
-  bool canProceedCurrentStep(
-    AppLocalizations l10n, {
-    required bool isPremium,
-  }) {
-    if (isLastPage) return canFinish(l10n, isPremium: isPremium);
+  bool canProceedCurrentStep(AppLocalizations l10n) {
+    if (isLastPage) return canFinish(l10n);
     return validationErrorForCurrentStep(l10n) == null;
   }
 
-  bool canFinish(
-    AppLocalizations l10n, {
-    required bool isPremium,
-  }) =>
+  bool canFinish(AppLocalizations l10n) =>
       OnboardingValidation.fieldsAreValid(
         displayName: draft.displayName,
         company: draft.company,
         title: draft.title,
         email: draft.email,
-      ) &&
-      !(draft.cardEffect.requiresPremium && !isPremium);
+      );
 
   OnboardingState copyWith({
     int? currentPageIndex,

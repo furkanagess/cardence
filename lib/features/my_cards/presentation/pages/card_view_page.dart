@@ -22,7 +22,6 @@ import '../widgets/empty_card_slot_preview.dart';
 import '../../../saved_cards/presentation/cubit/saved_cards_cubit.dart';
 import '../../../saved_cards/presentation/wallet_paywall_flow.dart';
 import '../card_customize_colors.dart';
-import '../helpers/card_effect_premium_helper.dart';
 
 /// Kart görünümü: önizleme, renk düzenlemesi ve yeni kart oluşturma.
 class CardViewPage extends StatefulWidget {
@@ -180,13 +179,7 @@ class _CardViewPageState extends State<CardViewPage> {
       var nextBaseline = List<OnboardingCardDraft>.from(_savedBaseline);
 
       for (final card in dirtyCards) {
-        final resolved = await prepareCardDraftForPersist(context, card);
-        if (!mounted) return;
-        if (resolved == null) {
-          setState(() => _saving = false);
-          return;
-        }
-        final synced = await widget.persistOnboardingCard(resolved);
+        final synced = await widget.persistOnboardingCard(card);
         if (!mounted) return;
 
         final syncedId = synced.cardId;
@@ -240,7 +233,6 @@ class _CardViewPageState extends State<CardViewPage> {
         l10n: context.l10n,
         backgroundColor: previewBg,
         accentColor: previewAccent,
-        cardEffect: d.cardEffect,
       ),
     );
     if (applied == null) return;
@@ -324,7 +316,6 @@ class _CardViewPageState extends State<CardViewPage> {
         l10n: context.l10n,
         backgroundColor: previewBg,
         accentColor: previewAccent,
-        cardEffect: d.cardEffect,
       ),
     );
     if (applied == null) return;
