@@ -6,8 +6,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/widgets/organisms/cardence_scaffold.dart';
 import '../../../business_cards/domain/usecases/persist_onboarding_card.dart';
 import '../../../auth/domain/usecases/upload_profile_photo.dart';
+import '../../../saved_cards/domain/entities/manual_saved_card_draft.dart';
 import '../../../saved_cards/domain/usecases/upgrade_wallet_plan.dart';
+import '../../../saved_cards/presentation/pages/scan_physical_card_page.dart';
 import '../../domain/entities/onboarding_card_draft.dart';
+import '../../domain/helpers/manual_draft_to_onboarding_mapper.dart';
 import '../../domain/usecases/resolve_onboarding_initial_draft.dart';
 import '../cubit/onboarding_cubit.dart';
 import '../cubit/onboarding_state.dart';
@@ -141,7 +144,7 @@ class _OnboardingContentState extends State<_OnboardingContent> {
               });
             },
             child: CardenceScaffold(
-              resizeToAvoidBottomInset: false,
+              resizeToAvoidBottomInset: true,
               body: SafeArea(
                 bottom: false,
                 child: Column(
@@ -159,6 +162,8 @@ class _OnboardingContentState extends State<_OnboardingContent> {
                             index: index,
                             uploadProfilePhoto: widget.uploadProfilePhoto,
                             upgradeWalletPlan: widget.upgradeWalletPlan,
+                            onScanPhysicalCard: () =>
+                                _fillDraftFromPhysicalScan(context),
                           );
                         },
                       ),
@@ -196,6 +201,26 @@ class _OnboardingContentState extends State<_OnboardingContent> {
     FocusManager.instance.primaryFocus?.unfocus();
     context.read<OnboardingCubit>().setPage(index);
   }
+
+  Future<void> _fillDraftFromPhysicalScan(BuildContext context) async {
+    final cubit = context.read<OnboardingCubit>();
+    final scanned = await Navigator.of(context).push<ManualSavedCardDraft>(
+      MaterialPageRoute(
+        builder: (_) => const ScanPhysicalCardPage(returnDraftOnly: true),
+      ),
+    );
+    if (!context.mounted || scanned == null) return;
+
+    final merged = ManualDraftToOnboardingMapper.merge(
+      cubit.state.draft,
+      scanned,
+    );
+    cubit.updateDraftImmediate(merged);
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(context.l10n.onboardingScanCardFilled)),
+    );
+  }
 }
 
 class _OnboardingKeyboardAwareBottom extends StatelessWidget {
@@ -220,11 +245,13 @@ class _OnboardingStepPage extends StatelessWidget {
     required this.index,
     required this.uploadProfilePhoto,
     required this.upgradeWalletPlan,
+    required this.onScanPhysicalCard,
   });
 
   final int index;
   final UploadProfilePhoto uploadProfilePhoto;
   final UpgradeWalletPlan upgradeWalletPlan;
+  final VoidCallback onScanPhysicalCard;
 
   @override
   Widget build(BuildContext context) {
@@ -237,13 +264,16 @@ class _OnboardingStepPage extends StatelessWidget {
       builder: (context, state) {
         return SingleChildScrollView(
           keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-          padding: const EdgeInsets.only(bottom: 8),
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.viewInsetsOf(context).bottom + 8,
+          ),
           child: _buildOnboardingStep(
             context: context,
             state: state,
             index: index,
             uploadProfilePhoto: uploadProfilePhoto,
             upgradeWalletPlan: upgradeWalletPlan,
+            onScanPhysicalCard: onScanPhysicalCard,
           ),
         );
       },
@@ -257,6 +287,7 @@ Widget _buildOnboardingStep({
   required int index,
   required UploadProfilePhoto uploadProfilePhoto,
   required UpgradeWalletPlan upgradeWalletPlan,
+  required VoidCallback onScanPhysicalCard,
 }) {
   final stepIndex = index + 1;
   final stepCount = OnboardingState.stepCount;
@@ -269,6 +300,7 @@ Widget _buildOnboardingStep({
         stepIndex: stepIndex,
         stepCount: stepCount,
         onChanged: context.read<OnboardingCubit>().updateDraftImmediate,
+        onScanPhysicalCard: onScanPhysicalCard,
       );
     case 1:
       return OnboardingStepProfessional(

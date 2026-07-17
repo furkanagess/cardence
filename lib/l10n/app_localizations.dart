@@ -1688,6 +1688,18 @@ abstract class AppLocalizations {
   /// **'Kartvizit fotoğrafla'**
   String get kartvizitFotorafla;
 
+  /// No description provided for @onboardingScanCardHint.
+  ///
+  /// In tr, this message translates to:
+  /// **'Fiziksel kartvizitini çekerek alanları otomatik doldur'**
+  String get onboardingScanCardHint;
+
+  /// No description provided for @onboardingScanCardFilled.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kart bilgileri fotoğraftan dolduruldu. Kontrol edip devam edebilirsin.'**
+  String get onboardingScanCardFilled;
+
   /// No description provided for @kartvizitinnYzndeGrnecekBilgiler.
   ///
   /// In tr, this message translates to:
@@ -2833,6 +2845,78 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Yeniden çek'**
   String get yenidenek;
+
+  /// No description provided for @scanCardAddBackSide.
+  ///
+  /// In tr, this message translates to:
+  /// **'Arka yüz ekle'**
+  String get scanCardAddBackSide;
+
+  /// No description provided for @scanCardSkipBackSide.
+  ///
+  /// In tr, this message translates to:
+  /// **'Atla ve bilgileri oku'**
+  String get scanCardSkipBackSide;
+
+  /// No description provided for @scanCardFrontCapturing.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ön yüz için kamerayı hazırlıyoruz…'**
+  String get scanCardFrontCapturing;
+
+  /// No description provided for @scanCardBackOptionalHint.
+  ///
+  /// In tr, this message translates to:
+  /// **'İstersen arka yüzü de ekleyebilirsin'**
+  String get scanCardBackOptionalHint;
+
+  /// No description provided for @scanCardAlignFrontHint.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kartın ön yüzünü çerçeveye hizala'**
+  String get scanCardAlignFrontHint;
+
+  /// No description provided for @scanCardAlignBackHint.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kartın arka yüzünü çerçeveye hizala (opsiyonel)'**
+  String get scanCardAlignBackHint;
+
+  /// No description provided for @scanCardPhysicalCameraDenied.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kartvizit taramak için kamera izni gerekli'**
+  String get scanCardPhysicalCameraDenied;
+
+  /// No description provided for @scanCardPhysicalCameraError.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kamera açılamadı. Tekrar deneyin.'**
+  String get scanCardPhysicalCameraError;
+
+  /// No description provided for @scanCardTakePhoto.
+  ///
+  /// In tr, this message translates to:
+  /// **'Fotoğraf çek'**
+  String get scanCardTakePhoto;
+
+  /// No description provided for @scanCardCropTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kartviziti kırp'**
+  String get scanCardCropTitle;
+
+  /// No description provided for @scanCardCaptureFrontHint.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ön yüzü çekin'**
+  String get scanCardCaptureFrontHint;
+
+  /// No description provided for @scanCardCaptureBackHint.
+  ///
+  /// In tr, this message translates to:
+  /// **'Arka yüzü ekleyin (varsa)'**
+  String get scanCardCaptureBackHint;
 
   /// No description provided for @yeniifre.
   ///
@@ -4297,6 +4381,12 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Kamera izni ver'**
   String get scanCardQrAllowCamera;
+
+  /// No description provided for @scanCardOpenPermissions.
+  ///
+  /// In tr, this message translates to:
+  /// **'İzinleri aç'**
+  String get scanCardOpenPermissions;
 
   /// No description provided for @walletCardInvitationsSection.
   ///

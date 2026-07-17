@@ -11,11 +11,15 @@ class CardBackIdBadge extends StatelessWidget {
     required this.cardId,
     required this.onSurface,
     required this.onSurfaceVariant,
+    this.scale = 1.0,
   });
 
   final String? cardId;
   final Color onSurface;
   final Color onSurfaceVariant;
+
+  /// Kart yüzü genişliğine göre ölçek (bkz. CardFaceMetrics).
+  final double scale;
 
   String? get _copyableId {
     final id = cardId?.trim();
@@ -39,7 +43,10 @@ class CardBackIdBadge extends StatelessWidget {
         onTap: id == null ? null : () => _copy(context, id),
         borderRadius: BorderRadius.circular(8),
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+          padding: EdgeInsets.symmetric(
+            horizontal: 4 * scale,
+            vertical: 2 * scale,
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             mainAxisSize: MainAxisSize.min,
@@ -50,11 +57,11 @@ class CardBackIdBadge extends StatelessWidget {
                   color: onSurfaceVariant,
                   fontWeight: FontWeight.w600,
                   letterSpacing: 0.7,
-                  fontSize: 9,
+                  fontSize: 9 * scale,
                   height: 1.1,
                 ),
               ),
-              const SizedBox(height: 2),
+              SizedBox(height: 2 * scale),
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -64,6 +71,8 @@ class CardBackIdBadge extends StatelessWidget {
                       color: onSurface,
                       fontWeight: FontWeight.w700,
                       letterSpacing: id != null ? 1.4 : 2,
+                      fontSize:
+                          (textTheme.labelMedium?.fontSize ?? 12) * scale,
                       fontFeatures: id != null
                           ? const [FontFeature.tabularFigures()]
                           : null,
@@ -71,10 +80,10 @@ class CardBackIdBadge extends StatelessWidget {
                     ),
                   ),
                   if (id != null) ...[
-                    const SizedBox(width: 4),
+                    SizedBox(width: 4 * scale),
                     Icon(
                       Icons.content_copy_rounded,
-                      size: 13,
+                      size: 13 * scale,
                       color: onSurfaceVariant,
                     ),
                   ],

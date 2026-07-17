@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../core/l10n/l10n_extensions.dart';
 
+import '../../../../core/widgets/atoms/custom_button.dart';
 import '../../../../core/widgets/atoms/custom_text_field.dart';
 import '../../domain/entities/onboarding_card_draft.dart';
 import '../onboarding_name_helper.dart';
@@ -14,12 +15,14 @@ class OnboardingStepName extends StatefulWidget {
     required this.onChanged,
     required this.stepIndex,
     required this.stepCount,
+    this.onScanPhysicalCard,
   });
 
   final OnboardingCardDraft draft;
   final ValueChanged<OnboardingCardDraft> onChanged;
   final int stepIndex;
   final int stepCount;
+  final VoidCallback? onScanPhysicalCard;
 
   @override
   State<OnboardingStepName> createState() => _OnboardingStepNameState();
@@ -95,14 +98,58 @@ class _OnboardingStepNameState extends State<OnboardingStepName> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
     return OnboardingStepShell(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          if (widget.onScanPhysicalCard != null) ...[
+            CustomButton.outlined(
+              label: context.l10n.kartvizitFotorafla,
+              icon: Icons.photo_camera_outlined,
+              onPressed: widget.onScanPhysicalCard,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              context.l10n.onboardingScanCardHint,
+              textAlign: TextAlign.center,
+              style: textTheme.bodySmall?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+                height: 1.35,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: Divider(
+                    color: colorScheme.outlineVariant.withValues(alpha: 0.8),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  child: Text(
+                    context.l10n.authOrDivider,
+                    style: textTheme.labelMedium?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: Divider(
+                    color: colorScheme.outlineVariant.withValues(alpha: 0.8),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+          ],
           OnboardingFieldLabel(label: 'Ad', required: true),
           CustomTextField(
             controller: _firstNameController,
-            autofocus: true,
+            autofocus: widget.onScanPhysicalCard == null,
             textCapitalization: TextCapitalization.words,
             textInputAction: TextInputAction.next,
             hintText: context.l10n.rnMehmet,

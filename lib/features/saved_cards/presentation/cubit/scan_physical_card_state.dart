@@ -2,7 +2,11 @@ import 'package:equatable/equatable.dart';
 
 import '../../domain/entities/manual_saved_card_draft.dart';
 
-enum ScanPhysicalCardStep { front, back, processing }
+enum ScanPhysicalCardPhase {
+  permission,
+  capture,
+  processing,
+}
 
 enum ScanCameraPermissionStatus {
   unknown,
@@ -14,7 +18,7 @@ enum ScanCameraPermissionStatus {
 
 class ScanPhysicalCardState extends Equatable {
   const ScanPhysicalCardState({
-    this.step = ScanPhysicalCardStep.front,
+    this.phase = ScanPhysicalCardPhase.permission,
     this.frontImagePath,
     this.backImagePath,
     this.isBusy = false,
@@ -23,7 +27,7 @@ class ScanPhysicalCardState extends Equatable {
     this.cameraPermission = ScanCameraPermissionStatus.unknown,
   });
 
-  final ScanPhysicalCardStep step;
+  final ScanPhysicalCardPhase phase;
   final String? frontImagePath;
   final String? backImagePath;
   final bool isBusy;
@@ -31,16 +35,17 @@ class ScanPhysicalCardState extends Equatable {
   final ManualSavedCardDraft? completedDraft;
   final ScanCameraPermissionStatus cameraPermission;
 
-  bool get canCapture =>
-      !isBusy && step != ScanPhysicalCardStep.processing;
+  bool get isProcessing => phase == ScanPhysicalCardPhase.processing;
+  bool get needsPermission => phase == ScanPhysicalCardPhase.permission;
+  bool get isCapturing => phase == ScanPhysicalCardPhase.capture;
+
+  bool get canCapture => !isBusy && isCapturing;
 
   bool get canReadInfo =>
-      frontImagePath != null &&
-      !isBusy &&
-      step != ScanPhysicalCardStep.processing;
+      frontImagePath != null && !isBusy && !isProcessing;
 
   ScanPhysicalCardState copyWith({
-    ScanPhysicalCardStep? step,
+    ScanPhysicalCardPhase? phase,
     String? frontImagePath,
     String? backImagePath,
     bool? isBusy,
@@ -49,11 +54,13 @@ class ScanPhysicalCardState extends Equatable {
     ScanCameraPermissionStatus? cameraPermission,
     bool clearError = false,
     bool clearCompletedDraft = false,
+    bool clearBackImage = false,
   }) {
     return ScanPhysicalCardState(
-      step: step ?? this.step,
+      phase: phase ?? this.phase,
       frontImagePath: frontImagePath ?? this.frontImagePath,
-      backImagePath: backImagePath ?? this.backImagePath,
+      backImagePath:
+          clearBackImage ? null : (backImagePath ?? this.backImagePath),
       isBusy: isBusy ?? this.isBusy,
       errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
       completedDraft: clearCompletedDraft
@@ -65,7 +72,7 @@ class ScanPhysicalCardState extends Equatable {
 
   @override
   List<Object?> get props => [
-        step,
+        phase,
         frontImagePath,
         backImagePath,
         isBusy,
@@ -74,3 +81,6 @@ class ScanPhysicalCardState extends Equatable {
         cameraPermission,
       ];
 }
+
+/// Eski adım enum'u — bazı importlar için alias.
+typedef ScanPhysicalCardStep = ScanPhysicalCardPhase;

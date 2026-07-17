@@ -144,36 +144,51 @@ class _CommaSeparatedChipInputState extends State<CommaSeparatedChipInput> {
           ),
           if (_items.isNotEmpty) ...[
             const SizedBox(height: 12),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: List.generate(_items.length, (index) {
-                final item = _items[index];
-                return Chip(
-                  avatar: widget.chipIcon != null
-                      ? Icon(
-                          widget.chipIcon,
+            LayoutBuilder(
+              builder: (context, constraints) {
+                final chipMaxWidth = constraints.maxWidth;
+                return Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: List.generate(_items.length, (index) {
+                    final item = _items[index];
+                    return ConstrainedBox(
+                      constraints: BoxConstraints(maxWidth: chipMaxWidth),
+                      child: Chip(
+                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        visualDensity: VisualDensity.compact,
+                        avatar: widget.chipIcon != null
+                            ? Icon(
+                                widget.chipIcon,
+                                size: 18,
+                                color: colorScheme.onSurfaceVariant,
+                              )
+                            : null,
+                        deleteIcon: Icon(
+                          Icons.remove_circle_outline,
                           size: 18,
                           color: colorScheme.onSurfaceVariant,
-                        )
-                      : null,
-                  deleteIcon: Icon(
-                    Icons.remove_circle_outline,
-                    size: 18,
-                    color: colorScheme.onSurfaceVariant,
-                  ),
-                  onDeleted: () => _remove(index),
-                  backgroundColor: colorScheme.surfaceContainerHighest
-                      .withValues(alpha: 0.6),
-                  side: BorderSide(
-                    color: colorScheme.outline.withValues(alpha: 0.5),
-                  ),
-                  label: Text(item),
-                  labelStyle: textTheme.bodyMedium?.copyWith(
-                    color: colorScheme.onSurface,
-                  ),
+                        ),
+                        onDeleted: () => _remove(index),
+                        backgroundColor: colorScheme.surfaceContainerHighest
+                            .withValues(alpha: 0.6),
+                        side: BorderSide(
+                          color: colorScheme.outline.withValues(alpha: 0.5),
+                        ),
+                        label: Text(
+                          item,
+                          maxLines: 2,
+                          softWrap: true,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        labelStyle: textTheme.bodyMedium?.copyWith(
+                          color: colorScheme.onSurface,
+                        ),
+                      ),
+                    );
+                  }),
                 );
-              }),
+              },
             ),
           ],
         ],

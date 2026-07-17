@@ -17,6 +17,7 @@ class CardPreviewActionStrip extends StatelessWidget {
     this.contactFieldsTappable = true,
     this.iconColor,
     this.chipBackground,
+    this.scale = 1.0,
   });
 
   final Color cardSurfaceColor;
@@ -31,10 +32,17 @@ class CardPreviewActionStrip extends StatelessWidget {
   final Color? iconColor;
   final Color? chipBackground;
 
+  /// Kart yüzü genişliğine göre ölçek (bkz. CardFaceMetrics). Sabitler tasarım
+  /// referansı olarak kalır; build içinde `scale * const` uygulanır.
+  final double scale;
+
   static const double chipSize = 36;
   static const double chipRadius = 10;
   static const double chipGap = 8;
   static const double horizontalPadding = 14;
+
+  /// Verilen ölçekte kullanılacak fiili chip boyutu (dış çağırıcılar için).
+  static double scaledChipSize(double scale) => chipSize * scale;
 
   bool get _hasEmail => email?.trim().isNotEmpty == true;
   bool get _hasPhone => phone?.trim().isNotEmpty == true;
@@ -55,11 +63,13 @@ class CardPreviewActionStrip extends StatelessWidget {
     final resolvedChipBackground = chipBackground ?? palette.chipBackground;
     final resolvedChipBorder = palette.chipBorder;
 
+    final chipGapScaled = chipGap * scale;
+
     final contactChips = <Widget>[];
 
     void addContactChip(Widget chip) {
       if (contactChips.isNotEmpty) {
-        contactChips.add(const SizedBox(width: chipGap));
+        contactChips.add(SizedBox(width: chipGapScaled));
       }
       contactChips.add(chip);
     }
@@ -72,6 +82,7 @@ class CardPreviewActionStrip extends StatelessWidget {
           iconColor: resolvedIconColor,
           backgroundColor: resolvedChipBackground,
           borderColor: resolvedChipBorder,
+          scale: scale,
           onTap: contactFieldsTappable
               ? () => ContactLauncher.launchEmail(context, value)
               : null,
@@ -88,6 +99,7 @@ class CardPreviewActionStrip extends StatelessWidget {
           iconColor: resolvedIconColor,
           backgroundColor: resolvedChipBackground,
           borderColor: resolvedChipBorder,
+          scale: scale,
           onTap: contactFieldsTappable
               ? () => ContactLauncher.launchPhone(context, value)
               : null,
@@ -104,6 +116,7 @@ class CardPreviewActionStrip extends StatelessWidget {
           iconColor: resolvedIconColor,
           backgroundColor: resolvedChipBackground,
           borderColor: resolvedChipBorder,
+          scale: scale,
           onTap: contactFieldsTappable
               ? () => ContactLauncher.launchWebUrl(context, value)
               : null,
@@ -113,8 +126,8 @@ class CardPreviewActionStrip extends StatelessWidget {
     }
 
     return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: CardPreviewActionStrip.horizontalPadding,
+      padding: EdgeInsets.symmetric(
+        horizontal: CardPreviewActionStrip.horizontalPadding * scale,
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -131,6 +144,7 @@ class CardPreviewActionStrip extends StatelessWidget {
               iconColor: palette.detailIconColor,
               backgroundColor: palette.detailChipBackground,
               borderColor: palette.chipBorder,
+              scale: scale,
               onTap: onDetailTap,
               tooltip: context.l10n.kartDetay,
             ),
@@ -148,6 +162,7 @@ class _ActionChip extends StatelessWidget {
     required this.borderColor,
     this.onTap,
     this.tooltip,
+    this.scale = 1.0,
   });
 
   final IconData icon;
@@ -156,17 +171,18 @@ class _ActionChip extends StatelessWidget {
   final Color borderColor;
   final VoidCallback? onTap;
   final String? tooltip;
+  final double scale;
 
   @override
   Widget build(BuildContext context) {
     final enabled = onTap != null;
+    final chipSize = CardPreviewActionStrip.chipSize * scale;
+    final chipRadius = CardPreviewActionStrip.chipRadius * scale;
 
     Widget chip = DecoratedBox(
       decoration: BoxDecoration(
         color: backgroundColor,
-        borderRadius: BorderRadius.circular(
-          CardPreviewActionStrip.chipRadius,
-        ),
+        borderRadius: BorderRadius.circular(chipRadius),
         border: Border.all(
           color: borderColor,
         ),
@@ -175,16 +191,14 @@ class _ActionChip extends StatelessWidget {
         color: Colors.transparent,
         child: InkWell(
           onTap: onTap,
-          borderRadius: BorderRadius.circular(
-            CardPreviewActionStrip.chipRadius,
-          ),
+          borderRadius: BorderRadius.circular(chipRadius),
           child: SizedBox(
-            width: CardPreviewActionStrip.chipSize,
-            height: CardPreviewActionStrip.chipSize,
+            width: chipSize,
+            height: chipSize,
             child: Center(
               child: Icon(
                 icon,
-                size: 20,
+                size: 20 * scale,
                 color: iconColor.withValues(
                   alpha: enabled ? 1 : 0.45,
                 ),

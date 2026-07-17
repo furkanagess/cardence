@@ -127,7 +127,15 @@ mixin SavedCardsPageEffectsMixin<T extends StatefulWidget> on State<T> {
 
     final result = await Navigator.of(context).push<AddSavedCardResult>(
       MaterialPageRoute(
-        builder: (_) => ScanCardQrPage(addSavedCard: addSavedCard),
+        builder: (_) => ScanCardQrPage(
+          addSavedCard: addSavedCard,
+          canAddManualSavedCard: quota.canAddManualSavedCard,
+          onRequestPaywall: () => _openUpgradeSheet(
+            context,
+            upgradeWalletPlan: upgradeWalletPlan,
+            restoreWalletPurchases: restoreWalletPurchases,
+          ),
+        ),
       ),
     );
 

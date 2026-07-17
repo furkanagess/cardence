@@ -856,6 +856,14 @@ class AppLocalizationsTr extends AppLocalizations {
   String get kartvizitFotorafla => 'Kartvizit fotoğrafla';
 
   @override
+  String get onboardingScanCardHint =>
+      'Fiziksel kartvizitini çekerek alanları otomatik doldur';
+
+  @override
+  String get onboardingScanCardFilled =>
+      'Kart bilgileri fotoğraftan dolduruldu. Kontrol edip devam edebilirsin.';
+
+  @override
   String get kartvizitinnYzndeGrnecekBilgiler =>
       'Kartvizitin ön yüzünde görünecek bilgiler';
 
@@ -1466,6 +1474,44 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get yenidenek => 'Yeniden çek';
+
+  @override
+  String get scanCardAddBackSide => 'Arka yüz ekle';
+
+  @override
+  String get scanCardSkipBackSide => 'Atla ve bilgileri oku';
+
+  @override
+  String get scanCardFrontCapturing => 'Ön yüz için kamerayı hazırlıyoruz…';
+
+  @override
+  String get scanCardBackOptionalHint => 'İstersen arka yüzü de ekleyebilirsin';
+
+  @override
+  String get scanCardAlignFrontHint => 'Kartın ön yüzünü çerçeveye hizala';
+
+  @override
+  String get scanCardAlignBackHint =>
+      'Kartın arka yüzünü çerçeveye hizala (opsiyonel)';
+
+  @override
+  String get scanCardPhysicalCameraDenied =>
+      'Kartvizit taramak için kamera izni gerekli';
+
+  @override
+  String get scanCardPhysicalCameraError => 'Kamera açılamadı. Tekrar deneyin.';
+
+  @override
+  String get scanCardTakePhoto => 'Fotoğraf çek';
+
+  @override
+  String get scanCardCropTitle => 'Kartviziti kırp';
+
+  @override
+  String get scanCardCaptureFrontHint => 'Ön yüzü çekin';
+
+  @override
+  String get scanCardCaptureBackHint => 'Arka yüzü ekleyin (varsa)';
 
   @override
   String get yeniifre => 'Yeni şifre';
@@ -2293,6 +2339,9 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get scanCardQrAllowCamera => 'Kamera izni ver';
+
+  @override
+  String get scanCardOpenPermissions => 'İzinleri aç';
 
   @override
   String get walletCardInvitationsSection => 'Kart kaydetme davetleri';

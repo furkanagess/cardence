@@ -854,6 +854,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get kartvizitFotorafla => 'Scan business card';
 
   @override
+  String get onboardingScanCardHint =>
+      'Photograph your physical card to auto-fill the fields';
+
+  @override
+  String get onboardingScanCardFilled =>
+      'Card details were filled from the photo. Review them and continue.';
+
+  @override
   String get kartvizitinnYzndeGrnecekBilgiler =>
       'Information shown on the front side of the business card';
 
@@ -1463,6 +1471,46 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get yenidenek => 'Retake';
+
+  @override
+  String get scanCardAddBackSide => 'Add back side';
+
+  @override
+  String get scanCardSkipBackSide => 'Skip and read details';
+
+  @override
+  String get scanCardFrontCapturing => 'Opening camera for the front side…';
+
+  @override
+  String get scanCardBackOptionalHint => 'You can optionally add the back side';
+
+  @override
+  String get scanCardAlignFrontHint =>
+      'Align the front of the card within the frame';
+
+  @override
+  String get scanCardAlignBackHint =>
+      'Align the back of the card within the frame (optional)';
+
+  @override
+  String get scanCardPhysicalCameraDenied =>
+      'Camera permission is required to scan business cards';
+
+  @override
+  String get scanCardPhysicalCameraError =>
+      'Could not open the camera. Please try again.';
+
+  @override
+  String get scanCardTakePhoto => 'Take photo';
+
+  @override
+  String get scanCardCropTitle => 'Crop business card';
+
+  @override
+  String get scanCardCaptureFrontHint => 'Take a photo of the front';
+
+  @override
+  String get scanCardCaptureBackHint => 'Add the back side (if any)';
 
   @override
   String get yeniifre => 'New password';
@@ -2292,6 +2340,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get scanCardQrAllowCamera => 'Allow camera access';
+
+  @override
+  String get scanCardOpenPermissions => 'Open permissions';
 
   @override
   String get walletCardInvitationsSection => 'Card save invitations';

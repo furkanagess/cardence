@@ -24,6 +24,10 @@ class CameraPermissionDataSource {
     if (current.isGranted) {
       return CameraPermissionOutcome.granted;
     }
+    // Kalıcı redde sistem diyaloğu açılmaz; ayarlara yönlendirilir.
+    if (current.isPermanentlyDenied) {
+      return CameraPermissionOutcome.permanentlyDenied;
+    }
 
     final result = await Permission.camera.request();
     if (result.isGranted) {

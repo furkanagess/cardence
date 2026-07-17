@@ -22,8 +22,8 @@ class ScanCardQrPermissionBody extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final colorScheme = Theme.of(context).colorScheme;
-    final permanentlyDenied =
-        status == ScanCameraPermissionStatus.permanentlyDenied;
+    final canRequestAgain =
+        status != ScanCameraPermissionStatus.permanentlyDenied;
 
     return Center(
       child: Padding(
@@ -45,15 +45,19 @@ class ScanCardQrPermissionBody extends StatelessWidget {
                   ),
             ),
             const SizedBox(height: 20),
+            if (canRequestAgain) ...[
+              CustomButton(
+                label: l10n.scanCardQrAllowCamera,
+                onPressed: onRequest,
+              ),
+              const SizedBox(height: 10),
+            ],
             CustomButton(
-              label: permanentlyDenied
-                  ? l10n.ayarlar
-                  : l10n.scanCardQrAllowCamera,
-              onPressed: permanentlyDenied
-                  ? () {
-                      onOpenSettings();
-                    }
-                  : onRequest,
+              label: l10n.scanCardOpenPermissions,
+              variant: CustomButtonVariant.outlined,
+              onPressed: () {
+                onOpenSettings();
+              },
             ),
           ],
         ),

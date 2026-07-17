@@ -1,8 +1,8 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:image_picker/image_picker.dart';
 
 import '../../data/datasources/camera_permission_datasource.dart';
 import '../../data/datasources/physical_card_ocr_datasource.dart';
+import '../../data/datasources/physical_card_photo_capture_datasource.dart';
 import '../../domain/entities/manual_saved_card_draft.dart';
 import '../../domain/parsers/business_card_text_parser.dart';
 import 'scan_physical_card_state.dart';
@@ -11,49 +11,91 @@ class ScanPhysicalCardCubit extends Cubit<ScanPhysicalCardState> {
   ScanPhysicalCardCubit({
     required PhysicalCardOcrDataSource ocrDataSource,
     required CameraPermissionDataSource cameraPermissionDataSource,
-    ImagePicker? imagePicker,
+    PhysicalCardPhotoCaptureDataSource? photoCaptureDataSource,
   })  : _ocrDataSource = ocrDataSource,
         _cameraPermissionDataSource = cameraPermissionDataSource,
-        _imagePicker = imagePicker ?? ImagePicker(),
+        _photoCapture =
+            photoCaptureDataSource ?? PhysicalCardPhotoCaptureDataSource(),
         super(const ScanPhysicalCardState());
 
   final PhysicalCardOcrDataSource _ocrDataSource;
   final CameraPermissionDataSource _cameraPermissionDataSource;
-  final ImagePicker _imagePicker;
+  final PhysicalCardPhotoCaptureDataSource _photoCapture;
 
-  Future<void> syncCameraPermissionStatus() async {
+  Future<void> initialize() async {
+    emit(
+      state.copyWith(
+        cameraPermission: ScanCameraPermissionStatus.checking,
+        clearError: true,
+      ),
+    );
+    await syncCameraPermissionStatus(requestIfNeeded: true);
+  }
+
+  Future<void> syncCameraPermissionStatus({
+    bool requestIfNeeded = false,
+  }) async {
+    if (requestIfNeeded &&
+        state.cameraPermission != ScanCameraPermissionStatus.granted) {
+      final outcome = await _cameraPermissionDataSource.requestCameraAccess();
+      if (isClosed) return;
+      final status = _statusFromOutcome(outcome);
+      emit(
+        state.copyWith(
+          cameraPermission: status,
+          phase: status == ScanCameraPermissionStatus.granted
+              ? ScanPhysicalCardPhase.capture
+              : ScanPhysicalCardPhase.permission,
+          clearError: true,
+        ),
+      );
+      return;
+    }
+
     final status = await _readPermissionStatus();
-    if (isClosed || status == state.cameraPermission) return;
-    emit(state.copyWith(cameraPermission: status));
+    if (isClosed) return;
+    emit(
+      state.copyWith(
+        cameraPermission: status,
+        phase: status == ScanCameraPermissionStatus.granted
+            ? (state.isProcessing
+                ? ScanPhysicalCardPhase.processing
+                : ScanPhysicalCardPhase.capture)
+            : ScanPhysicalCardPhase.permission,
+      ),
+    );
   }
 
-  Future<void> openCameraSettings() async {
-    await _cameraPermissionDataSource.openSettings();
+  Future<bool> openCameraSettings() {
+    return _cameraPermissionDataSource.openSettings();
   }
 
-  Future<void> captureFront() async {
-    await _capture(isFront: true);
+  Future<void> captureFront({required String cropTitle}) {
+    return _capture(isFront: true, cropTitle: cropTitle);
   }
 
-  Future<void> captureBack() async {
-    await _capture(isFront: false);
+  Future<void> captureBack({required String cropTitle}) {
+    return _capture(isFront: false, cropTitle: cropTitle);
   }
 
-  Future<void> _capture({required bool isFront}) async {
-    if (state.isBusy) return;
+  Future<void> _capture({
+    required bool isFront,
+    required String cropTitle,
+  }) async {
+    if (!state.canCapture) return;
 
     emit(state.copyWith(isBusy: true, clearError: true));
 
     if (state.cameraPermission != ScanCameraPermissionStatus.granted) {
       final outcome = await _cameraPermissionDataSource.requestCameraAccess();
       if (isClosed) return;
-
       final status = _statusFromOutcome(outcome);
       if (status != ScanCameraPermissionStatus.granted) {
         emit(
           state.copyWith(
             isBusy: false,
             cameraPermission: status,
+            phase: ScanPhysicalCardPhase.permission,
             errorMessage: status == ScanCameraPermissionStatus.permanentlyDenied
                 ? 'Kamera izni kapalı. Ayarlardan izin verip tekrar deneyin.'
                 : 'Kartvizit çekmek için kamera izni gerekli.',
@@ -61,17 +103,18 @@ class ScanPhysicalCardCubit extends Cubit<ScanPhysicalCardState> {
         );
         return;
       }
-
-      emit(state.copyWith(cameraPermission: status));
+      emit(
+        state.copyWith(
+          cameraPermission: status,
+          phase: ScanPhysicalCardPhase.capture,
+        ),
+      );
     }
 
     try {
-      final image = await _imagePicker.pickImage(
-        source: ImageSource.camera,
-        preferredCameraDevice: CameraDevice.rear,
-        imageQuality: 88,
-      );
-      if (image == null) {
+      final path = await _photoCapture.captureRearAndCrop(cropTitle: cropTitle);
+      if (isClosed) return;
+      if (path == null) {
         emit(state.copyWith(isBusy: false));
         return;
       }
@@ -79,19 +122,21 @@ class ScanPhysicalCardCubit extends Cubit<ScanPhysicalCardState> {
       if (isFront) {
         emit(
           state.copyWith(
-            frontImagePath: image.path,
+            frontImagePath: path,
             isBusy: false,
+            clearBackImage: false,
           ),
         );
       } else {
         emit(
           state.copyWith(
-            backImagePath: image.path,
+            backImagePath: path,
             isBusy: false,
           ),
         );
       }
     } catch (_) {
+      if (isClosed) return;
       emit(
         state.copyWith(
           isBusy: false,
@@ -106,7 +151,7 @@ class ScanPhysicalCardCubit extends Cubit<ScanPhysicalCardState> {
     if (draft == null || isClosed) return;
     emit(
       state.copyWith(
-        step: ScanPhysicalCardStep.processing,
+        phase: ScanPhysicalCardPhase.processing,
         completedDraft: draft,
         isBusy: false,
       ),
@@ -119,7 +164,7 @@ class ScanPhysicalCardCubit extends Cubit<ScanPhysicalCardState> {
 
     emit(
       state.copyWith(
-        step: ScanPhysicalCardStep.processing,
+        phase: ScanPhysicalCardPhase.processing,
         isBusy: true,
         clearError: true,
       ),
@@ -160,21 +205,14 @@ class ScanPhysicalCardCubit extends Cubit<ScanPhysicalCardState> {
     }
   }
 
-  void retakeFront() {
-    emit(
-      ScanPhysicalCardState(
-        step: ScanPhysicalCardStep.front,
-        cameraPermission: state.cameraPermission,
-      ),
-    );
-  }
-
   Future<ScanCameraPermissionStatus> _readPermissionStatus() async {
     final outcome = await _cameraPermissionDataSource.readCameraAccess();
     return _statusFromOutcome(outcome);
   }
 
-  ScanCameraPermissionStatus _statusFromOutcome(CameraPermissionOutcome outcome) {
+  ScanCameraPermissionStatus _statusFromOutcome(
+    CameraPermissionOutcome outcome,
+  ) {
     return switch (outcome) {
       CameraPermissionOutcome.granted => ScanCameraPermissionStatus.granted,
       CameraPermissionOutcome.denied => ScanCameraPermissionStatus.denied,

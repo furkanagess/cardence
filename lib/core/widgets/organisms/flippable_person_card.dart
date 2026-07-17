@@ -3,6 +3,7 @@ import '../../../core/l10n/app_l10n.dart';
 import '../../../core/l10n/l10n_extensions.dart';
 
 import '../molecules/card_preview_action_strip.dart';
+import 'card_face_metrics.dart';
 import 'person_info_card.dart';
 
 /// Dikdörtgen (kartvizit oranında) kişi kartı önizlemesi.
@@ -125,52 +126,59 @@ class FlippablePersonCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final cardSurface = backgroundColor ?? colorScheme.surface;
-    final cardFace = _buildFront(context);
-    final heroChild = Material(
-      color: Colors.transparent,
-      child: cardFace,
-    );
 
     return AspectRatio(
       aspectRatio: FlippablePersonCard.cardAspectRatio,
       child: Padding(
         padding: const EdgeInsets.fromLTRB(10, 6, 10, 14),
-        child: Stack(
-          clipBehavior: Clip.none,
-          children: [
-            Positioned.fill(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(2, 0, 2, 8),
-                child: heroTag == null
-                    ? heroChild
-                    : Hero(
-                        tag: heroTag!,
-                        child: heroChild,
-                      ),
-              ),
-            ),
-            if (_shouldShowActionStrip)
-              Positioned(
-                left: 2,
-                right: 2,
-                bottom: 24,
-                child: CardPreviewActionStrip(
-                  cardSurfaceColor: cardSurface,
-                  accentColor: accentColor,
-                  onDetailTap: _resolvedDetailTap,
-                  email: contactEmail,
-                  phone: contactPhone,
-                  linkedin: contactLinkedin,
-                  contactFieldsTappable: contactFieldsTappable,
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final m = CardFaceMetrics.fromWidth(constraints.maxWidth);
+            final cardFace = _buildFront(context, m);
+            final heroChild = Material(
+              color: Colors.transparent,
+              child: cardFace,
+            );
+
+            return Stack(
+              clipBehavior: Clip.none,
+              children: [
+                Positioned.fill(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(2, 0, 2, 8),
+                    child: heroTag == null
+                        ? heroChild
+                        : Hero(
+                            tag: heroTag!,
+                            child: heroChild,
+                          ),
+                  ),
                 ),
-              ),
-          ],
+                if (_shouldShowActionStrip)
+                  Positioned(
+                    left: 2,
+                    right: 2,
+                    bottom: m.s(24),
+                    child: CardPreviewActionStrip(
+                      cardSurfaceColor: cardSurface,
+                      accentColor: accentColor,
+                      onDetailTap: _resolvedDetailTap,
+                      email: contactEmail,
+                      phone: contactPhone,
+                      linkedin: contactLinkedin,
+                      contactFieldsTappable: contactFieldsTappable,
+                      scale: m.scale,
+                    ),
+                  ),
+              ],
+            );
+          },
         ),
       ),
     );
   }
 
-  Widget _buildFront(BuildContext context) {
+  Widget _buildFront(BuildContext context, CardFaceMetrics m) {
     final defaultEmpty = AppL10n.noInfoYet(context.l10n);
     final resolvedEmpty = emptyMessage ?? defaultEmpty;
 
@@ -186,8 +194,9 @@ class FlippablePersonCard extends StatelessWidget {
       accentColor: accentColor,
       backgroundColor: backgroundColor,
       photoUrl: photoUrl,
-      bottomInset:
-          _shouldShowActionStrip ? CardPreviewActionStrip.chipSize + 10 : 0,
+      bottomInset: _shouldShowActionStrip
+          ? m.s(CardPreviewActionStrip.chipSize + 10)
+          : 0,
       hideContactFooter: _shouldShowActionStrip,
       showAppLogo: showAppLogo,
       contactEmail: contactEmail,

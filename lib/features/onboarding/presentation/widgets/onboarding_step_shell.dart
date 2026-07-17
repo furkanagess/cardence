@@ -21,6 +21,7 @@ class OnboardingStepShell extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisSize: MainAxisSize.min,
         children: [
           if (hasSubtitle) ...[
             Text(
@@ -32,10 +33,7 @@ class OnboardingStepShell extends StatelessWidget {
             ),
             const SizedBox(height: 16),
           ],
-          Align(
-            alignment: Alignment.topCenter,
-            child: child,
-          ),
+          child,
         ],
       ),
     );

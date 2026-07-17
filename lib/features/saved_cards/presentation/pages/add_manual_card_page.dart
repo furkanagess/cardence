@@ -128,7 +128,7 @@ class _AddManualCardContent extends StatelessWidget {
             onGoToPage(flowState.currentPageIndex - 1);
           },
           child: CardenceScaffold(
-            resizeToAvoidBottomInset: false,
+            resizeToAvoidBottomInset: true,
             appBar: CardenceAppBar(
               title: AddManualCardStepTitles.forIndex(
                 context.l10n,
@@ -202,30 +202,33 @@ class _AddManualCardStepPage extends StatelessWidget {
         final cubit = context.read<AddManualCardCubit>();
         final onChanged = cubit.updateDraft;
 
-        switch (index) {
-          case 0:
-            return AddManualCardStepName(
+        final step = switch (index) {
+          0 => AddManualCardStepName(
               draft: state.draft,
               onChanged: onChanged,
-            );
-          case 1:
-            return AddManualCardStepProfessional(
+            ),
+          1 => AddManualCardStepProfessional(
               draft: state.draft,
               onChanged: onChanged,
-            );
-          case 2:
-            return AddManualCardStepOptional(
+            ),
+          2 => AddManualCardStepOptional(
               draft: state.draft,
               onChanged: onChanged,
-            );
-          case 3:
-            return AddManualCardStepPreview(
+            ),
+          3 => AddManualCardStepPreview(
               draft: state.draft,
               onChanged: onChanged,
-            );
-          default:
-            return const SizedBox.shrink();
-        }
+            ),
+          _ => const SizedBox.shrink(),
+        };
+
+        return SingleChildScrollView(
+          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.viewInsetsOf(context).bottom + 8,
+          ),
+          child: step,
+        );
       },
     );
   }

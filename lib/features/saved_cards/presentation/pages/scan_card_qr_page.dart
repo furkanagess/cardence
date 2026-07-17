@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
 import '../../../../core/l10n/l10n_extensions.dart';
+import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/atoms/cardence_app_bar.dart';
 import '../../../../core/widgets/atoms/custom_button.dart';
 import '../../../../core/widgets/organisms/cardence_scaffold.dart';
@@ -15,15 +16,20 @@ import '../helpers/add_card_by_id_messages.dart';
 import '../widgets/add_card_flow_status_views.dart';
 import '../widgets/scan_card_qr_views.dart';
 import 'add_card_by_id_page.dart';
+import 'scan_physical_card_page.dart';
 
-/// QR okutarak cüzdana kart ekleme; altta Kart ID ile ekleme seçeneği.
+/// QR okutarak cüzdana kart ekleme; altta Kart ID ve fotoğraf ile ekleme.
 class ScanCardQrPage extends StatelessWidget {
   const ScanCardQrPage({
     super.key,
     required this.addSavedCard,
+    this.canAddManualSavedCard = true,
+    this.onRequestPaywall,
   });
 
   final AddSavedCard addSavedCard;
+  final bool canAddManualSavedCard;
+  final Future<void> Function()? onRequestPaywall;
 
   static const Duration _statusDisplayDuration = Duration(milliseconds: 2400);
 
@@ -34,15 +40,25 @@ class ScanCardQrPage extends StatelessWidget {
         addSavedCard: addSavedCard,
         cameraPermissionDataSource: CameraPermissionDataSource(),
       )..initialize(),
-      child: _ScanCardQrView(addSavedCard: addSavedCard),
+      child: _ScanCardQrView(
+        addSavedCard: addSavedCard,
+        canAddManualSavedCard: canAddManualSavedCard,
+        onRequestPaywall: onRequestPaywall,
+      ),
     );
   }
 }
 
 class _ScanCardQrView extends StatefulWidget {
-  const _ScanCardQrView({required this.addSavedCard});
+  const _ScanCardQrView({
+    required this.addSavedCard,
+    required this.canAddManualSavedCard,
+    this.onRequestPaywall,
+  });
 
   final AddSavedCard addSavedCard;
+  final bool canAddManualSavedCard;
+  final Future<void> Function()? onRequestPaywall;
 
   @override
   State<_ScanCardQrView> createState() => _ScanCardQrViewState();
@@ -51,8 +67,11 @@ class _ScanCardQrView extends StatefulWidget {
 class _ScanCardQrViewState extends State<_ScanCardQrView>
     with WidgetsBindingObserver {
   late final MobileScannerController _scannerController;
-  bool _openingCardId = false;
+  bool _secondaryFlowActive = false;
   bool _completing = false;
+
+  /// Alt ekran açıkken MobileScanner ağaca hiç girmez (dispose sonrası kullanım yok).
+  bool get _showScannerPreview => !_secondaryFlowActive;
 
   @override
   void initState() {
@@ -74,27 +93,50 @@ class _ScanCardQrViewState extends State<_ScanCardQrView>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (!mounted) return;
+    if (!mounted || _secondaryFlowActive) return;
+
     final cubit = context.read<ScanCardQrCubit>();
+    if (state == AppLifecycleState.inactive ||
+        state == AppLifecycleState.paused ||
+        state == AppLifecycleState.hidden) {
+      _stopScannerQuietly();
+      return;
+    }
     if (state == AppLifecycleState.resumed) {
-      cubit.syncCameraPermissionStatus();
+      cubit.syncCameraPermissionStatus().then((_) {
+        if (!mounted || _secondaryFlowActive) return;
+        _syncScanner(context.read<ScanCardQrCubit>().state);
+      });
     }
   }
 
+  Future<void> _stopScannerQuietly() async {
+    try {
+      if (_scannerController.value.isRunning) {
+        await _scannerController.stop();
+      }
+    } on MobileScannerException {
+      // Zaten durmuş / dispose edilmiş olabilir.
+    } catch (_) {}
+  }
+
   Future<void> _syncScanner(ScanCardQrState state) async {
+    if (_secondaryFlowActive || !_showScannerPreview) return;
     try {
       if (state.canScan) {
-        if (!_scannerController.value.isRunning) {
-          await _scannerController.start();
-        }
+        if (_scannerController.value.isRunning) return;
+        await Future<void>.delayed(const Duration(milliseconds: 150));
+        if (!mounted || _secondaryFlowActive) return;
+        if (!context.read<ScanCardQrCubit>().state.canScan) return;
+        await _scannerController.start();
         return;
       }
       if (_scannerController.value.isRunning) {
         await _scannerController.stop();
       }
-    } catch (_) {
-      // Kamera geçiş hataları sessizce yutulur.
-    }
+    } on MobileScannerException {
+      // Geçiş hataları yutulur.
+    } catch (_) {}
   }
 
   Future<void> _handleCompletedStatus(ScanCardQrState state) async {
@@ -107,28 +149,67 @@ class _ScanCardQrViewState extends State<_ScanCardQrView>
     Navigator.of(context).pop(result);
   }
 
-  Future<void> _openAddByCardId() async {
-    if (_openingCardId) return;
-    _openingCardId = true;
+  Future<void> _openSecondaryFlow(
+    Future<AddSavedCardResult?> Function() open,
+  ) async {
+    if (_secondaryFlowActive) return;
+
+    // Önce preview'ı ağaçtan çıkar, sonra kamerayı durdur.
+    setState(() => _secondaryFlowActive = true);
+    await _stopScannerQuietly();
+    // Widget unmount + kamera serbest kalsın.
+    await Future<void>.delayed(const Duration(milliseconds: 250));
+    if (!mounted) return;
+
+    var shouldRestartScanner = true;
     try {
-      if (_scannerController.value.isRunning) {
-        await _scannerController.stop();
+      final result = await open();
+      if (!mounted) {
+        shouldRestartScanner = false;
+        return;
       }
-      if (!mounted) return;
-      final result = await Navigator.of(context).push<AddSavedCardResult>(
-        MaterialPageRoute(
-          builder: (_) => AddCardByIdPage(addSavedCard: widget.addSavedCard),
-        ),
-      );
-      if (!mounted) return;
       if (result != null) {
+        shouldRestartScanner = false;
         Navigator.of(context).pop(result);
         return;
       }
-      await context.read<ScanCardQrCubit>().syncCameraPermissionStatus();
     } finally {
-      _openingCardId = false;
+      if (mounted) {
+        setState(() => _secondaryFlowActive = false);
+      }
     }
+
+    if (!mounted || !shouldRestartScanner) return;
+    await Future<void>.delayed(const Duration(milliseconds: 200));
+    if (!mounted || _secondaryFlowActive) return;
+    await context.read<ScanCardQrCubit>().syncCameraPermissionStatus();
+    if (!mounted || _secondaryFlowActive) return;
+    await _syncScanner(context.read<ScanCardQrCubit>().state);
+  }
+
+  Future<void> _openAddByCardId() {
+    return _openSecondaryFlow(
+      () => Navigator.of(context).push<AddSavedCardResult>(
+        MaterialPageRoute(
+          builder: (_) => AddCardByIdPage(addSavedCard: widget.addSavedCard),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _openPhysicalScan() async {
+    if (!widget.canAddManualSavedCard) {
+      await widget.onRequestPaywall?.call();
+      return;
+    }
+    return _openSecondaryFlow(
+      () => Navigator.of(context).push<AddSavedCardResult>(
+        MaterialPageRoute(
+          builder: (_) =>
+              ScanPhysicalCardPage(addSavedCard: widget.addSavedCard),
+        ),
+      ),
+    );
   }
 
   String? _feedbackMessage(ScanCardQrState state) {
@@ -141,6 +222,22 @@ class _ScanCardQrViewState extends State<_ScanCardQrView>
     return addCardByIdFormError(l10n, result);
   }
 
+  Widget _buildScannerArea(ScanCardQrState state, String? feedback) {
+    if (!_showScannerPreview) {
+      return const ColoredBox(
+        color: AppColors.pureBlack,
+        child: Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    return ScanCardQrScannerBody(
+      key: const ValueKey('qr-scanning'),
+      controller: _scannerController,
+      feedback: feedback,
+      onDetect: (raw) => context.read<ScanCardQrCubit>().onRawQrDetected(raw),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<ScanCardQrCubit, ScanCardQrState>(
@@ -149,7 +246,9 @@ class _ScanCardQrViewState extends State<_ScanCardQrView>
           previous.cameraPermission != current.cameraPermission ||
           previous.canScan != current.canScan,
       listener: (context, state) {
-        _syncScanner(state);
+        if (!_secondaryFlowActive) {
+          _syncScanner(state);
+        }
         if (state.isSuccess ||
             (state.isFailure && state.result != null)) {
           _handleCompletedStatus(state);
@@ -201,11 +300,9 @@ class _ScanCardQrViewState extends State<_ScanCardQrView>
                           ),
                           onOpenSettings: cubit.openSettings,
                         ),
-                      ScanCardQrPhase.scanning => ScanCardQrScannerBody(
-                          key: const ValueKey('qr-scanning'),
-                          controller: _scannerController,
-                          feedback: feedback,
-                          onDetect: (raw) => cubit.onRawQrDetected(raw),
+                      ScanCardQrPhase.scanning => KeyedSubtree(
+                          key: const ValueKey('qr-scanning-area'),
+                          child: _buildScannerArea(state, feedback),
                         ),
                     },
                   ),
@@ -235,7 +332,19 @@ class _ScanCardQrViewState extends State<_ScanCardQrView>
                             label: l10n.kartIdIleEkle,
                             icon: Icons.badge_outlined,
                             variant: CustomButtonVariant.outlined,
-                            onPressed: _openAddByCardId,
+                            onPressed:
+                                _secondaryFlowActive ? null : _openAddByCardId,
+                          ),
+                          const SizedBox(height: 10),
+                          CustomButton(
+                            label: l10n.kartvizitFotorafla,
+                            icon: widget.canAddManualSavedCard
+                                ? Icons.photo_camera_outlined
+                                : Icons.workspace_premium_outlined,
+                            variant: CustomButtonVariant.outlined,
+                            onPressed: _secondaryFlowActive
+                                ? null
+                                : _openPhysicalScan,
                           ),
                         ],
                       ),

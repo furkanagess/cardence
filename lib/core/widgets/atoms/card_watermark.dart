@@ -23,14 +23,19 @@ class CardWatermark extends StatelessWidget {
     super.key,
     required this.surfaceColor,
     this.variant = CardWatermarkVariant.card,
+    this.size,
   });
 
   final Color surfaceColor;
   final CardWatermarkVariant variant;
 
+  /// Verilirse variant'a bağlı varsayılan boyut yerine kullanılır.
+  final double? size;
+
   static const String assetPath = 'assets/icons/cardence_logo-removebg.png';
 
   double get _size {
+    if (size != null) return size!;
     switch (variant) {
       case CardWatermarkVariant.cardCompact:
         return 172;

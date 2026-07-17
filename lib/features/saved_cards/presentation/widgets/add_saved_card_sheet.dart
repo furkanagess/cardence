@@ -7,13 +7,14 @@ import '../../domain/entities/saved_cards_wallet_quota.dart';
 
 /// Kart ekleme yöntemi seçimi.
 enum AddSavedCardMethod {
+  qrScan,
   manualEntry,
   physicalScan,
   cardId,
   openPaywall,
 }
 
-/// Manuel giriş, fotoğraf veya kart ID ile ekleme alt sayfası.
+/// Manuel giriş, fotoğraf, QR veya kart ID ile ekleme alt sayfası.
 class AddSavedCardSheet extends StatelessWidget {
   const AddSavedCardSheet({
     super.key,
@@ -91,19 +92,13 @@ class AddSavedCardSheet extends StatelessWidget {
             ),
             const SizedBox(height: 20),
             _MethodTile(
-              icon: Icons.edit_note_rounded,
-              title: context.l10n.bilgileriElleGir,
-              subtitle: context.l10n.kartvizitBilgileriniManuelYazn,
-              enabled: canAdd && canAddManualSavedCard,
-              premiumLocked: !canAddManualSavedCard,
-              onTap: canAdd && canAddManualSavedCard
-                  ? () =>
-                      Navigator.of(context).pop(AddSavedCardMethod.manualEntry)
-                  : !canAddManualSavedCard
-                      ? () => Navigator.of(context).pop(
-                            AddSavedCardMethod.openPaywall,
-                          )
-                      : null,
+              icon: Icons.qr_code_scanner_rounded,
+              title: context.l10n.scanCardQrTitle,
+              subtitle: context.l10n.scanCardQrHint,
+              enabled: canAdd,
+              onTap: canAdd
+                  ? () => Navigator.of(context).pop(AddSavedCardMethod.qrScan)
+                  : null,
             ),
             const SizedBox(height: 10),
             _MethodTile(
@@ -115,6 +110,22 @@ class AddSavedCardSheet extends StatelessWidget {
               onTap: canAdd && canAddManualSavedCard
                   ? () =>
                       Navigator.of(context).pop(AddSavedCardMethod.physicalScan)
+                  : !canAddManualSavedCard
+                      ? () => Navigator.of(context).pop(
+                            AddSavedCardMethod.openPaywall,
+                          )
+                      : null,
+            ),
+            const SizedBox(height: 10),
+            _MethodTile(
+              icon: Icons.edit_note_rounded,
+              title: context.l10n.bilgileriElleGir,
+              subtitle: context.l10n.kartvizitBilgileriniManuelYazn,
+              enabled: canAdd && canAddManualSavedCard,
+              premiumLocked: !canAddManualSavedCard,
+              onTap: canAdd && canAddManualSavedCard
+                  ? () =>
+                      Navigator.of(context).pop(AddSavedCardMethod.manualEntry)
                   : !canAddManualSavedCard
                       ? () => Navigator.of(context).pop(
                             AddSavedCardMethod.openPaywall,

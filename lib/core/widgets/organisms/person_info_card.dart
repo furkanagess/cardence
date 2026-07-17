@@ -8,6 +8,7 @@ import '../atoms/card_watermark.dart';
 import '../atoms/custom_button.dart';
 import '../atoms/profile_avatar.dart';
 import '../molecules/card_back_id_badge.dart';
+import 'card_face_metrics.dart';
 
 bool _isNoteLabel(String label) => label == 'Notlar' || label == 'Notes';
 
@@ -763,10 +764,6 @@ class _CompactBusinessCardFace extends StatelessWidget {
     this.contactFieldsTappable = true,
   });
 
-  static double get _radius => PersonInfoCard.compactCardRadius;
-
-  static double get _photoRadius => PersonInfoCard.compactCardRadius;
-
   static const double _photoSize = 64;
 
   final String? title;
@@ -866,88 +863,104 @@ class _CompactBusinessCardFace extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (backFace) {
-      return _buildCardShell(
-        context,
-        child: _buildBackAboutContent(context),
-      );
-    }
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final m = CardFaceMetrics.fromWidth(constraints.maxWidth);
 
-    final textTheme = Theme.of(context).textTheme;
-    final hasTitle = title != null && title!.trim().isNotEmpty;
-    final resolvedJobTitle = jobTitle?.trim().isNotEmpty == true
-        ? jobTitle!.trim()
-        : _valueForLabels(['Pozisyon', 'Ünvan', 'Title']);
-    final company = titleSecondary?.trim().isNotEmpty == true
-        ? titleSecondary!.trim()
-        : _valueForLabels(['Şirket', 'Company']);
-    final email = _resolveContact(_email, contactEmail, 'email');
-    final phone = _resolveContact(_phone, contactPhone, 'phone');
-    final website = _resolveContact(null, contactWebsite, 'website');
-    final linkedin = _resolveContact(null, contactLinkedin, 'linkedin');
-    final hasContent = hasTitle ||
-        resolvedJobTitle != null ||
-        company != null ||
-        email != null ||
-        phone != null ||
-        website != null ||
-        linkedin != null;
+        if (backFace) {
+          return _buildCardShell(
+            context,
+            m,
+            child: _buildBackAboutContent(context, m),
+          );
+        }
 
-    return _buildCardShell(
-      context,
-      child: !hasContent
-          ? _buildEmptyState(context)
-          : Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildTopSection(
-                  textTheme,
-                  hasTitle: hasTitle,
-                  jobTitle: resolvedJobTitle,
-                  company: company,
-                ),
-                if (fillHeight) const Spacer(),
-                if (!hideContactFooter &&
-                    (email != null ||
-                        phone != null ||
-                        website != null ||
-                        linkedin != null))
-                  Padding(
-                    padding: EdgeInsets.only(
-                      right: bottomRightInset > 0 ? bottomRightInset * 0.65 : 0,
-                    ),
-                    child: _buildContactFooter(
-                      context,
+        final textTheme = Theme.of(context).textTheme;
+        final hasTitle = title != null && title!.trim().isNotEmpty;
+        final resolvedJobTitle = jobTitle?.trim().isNotEmpty == true
+            ? jobTitle!.trim()
+            : _valueForLabels(['Pozisyon', 'Ünvan', 'Title']);
+        final company = titleSecondary?.trim().isNotEmpty == true
+            ? titleSecondary!.trim()
+            : _valueForLabels(['Şirket', 'Company']);
+        final email = _resolveContact(_email, contactEmail, 'email');
+        final phone = _resolveContact(_phone, contactPhone, 'phone');
+        final website = _resolveContact(null, contactWebsite, 'website');
+        final linkedin = _resolveContact(null, contactLinkedin, 'linkedin');
+        final hasContent = hasTitle ||
+            resolvedJobTitle != null ||
+            company != null ||
+            email != null ||
+            phone != null ||
+            website != null ||
+            linkedin != null;
+
+        return _buildCardShell(
+          context,
+          m,
+          child: !hasContent
+              ? _buildEmptyState(context, m)
+              : Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildTopSection(
+                      m,
                       textTheme,
-                      email: email,
-                      phone: phone,
-                      website: website,
-                      linkedin: linkedin,
+                      hasTitle: hasTitle,
+                      jobTitle: resolvedJobTitle,
+                      company: company,
                     ),
-                  ),
-                if (_noteEntry(context) != null && fillHeight) ...[
-                  const SizedBox(height: 8),
-                  Expanded(child: _buildNote(context, textTheme)),
-                ],
-              ],
-            ),
+                    if (fillHeight) const Spacer(),
+                    if (!hideContactFooter &&
+                        (email != null ||
+                            phone != null ||
+                            website != null ||
+                            linkedin != null))
+                      Padding(
+                        padding: EdgeInsets.only(
+                          right:
+                              bottomRightInset > 0 ? bottomRightInset * 0.65 : 0,
+                        ),
+                        child: _buildContactFooter(
+                          context,
+                          m,
+                          textTheme,
+                          email: email,
+                          phone: phone,
+                          website: website,
+                          linkedin: linkedin,
+                        ),
+                      ),
+                    if (_noteEntry(context) != null && fillHeight) ...[
+                      SizedBox(height: m.s(8)),
+                      Expanded(child: _buildNote(context, m, textTheme)),
+                    ],
+                  ],
+                ),
+        );
+      },
     );
   }
 
-  Widget _buildCardShell(BuildContext context, {required Widget child}) {
+  Widget _buildCardShell(
+    BuildContext context,
+    CardFaceMetrics m, {
+    required Widget child,
+  }) {
     final isSurfaceDark = backgroundColor.computeLuminance() < 0.35;
     final shadowOpacity = isSurfaceDark ? 0.52 : 0.24;
     const depth = 12.0;
     const blurMain = 30.0;
     final borderColorSubtle = onSurfaceVariant.withValues(alpha: 0.28);
-    final innerRadius = _radius - 1;
+    final radius = m.s(PersonInfoCard.compactCardRadius);
+    final innerRadius = radius - 1;
 
     return Container(
       width: double.infinity,
       height: fillHeight ? double.infinity : null,
       decoration: BoxDecoration(
         color: backgroundColor,
-        borderRadius: BorderRadius.circular(_radius),
+        borderRadius: BorderRadius.circular(radius),
         border: Border.all(color: borderColorSubtle, width: 1),
         boxShadow: PersonInfoCard.compactCardShadows(
           isSurfaceDark: isSurfaceDark,
@@ -967,15 +980,16 @@ class _CompactBusinessCardFace extends StatelessWidget {
                 child: CardWatermark(
                   surfaceColor: backgroundColor,
                   variant: CardWatermarkVariant.cardCompact,
+                  size: m.s(172),
                 ),
               ),
             Positioned.fill(
               child: Padding(
                 padding: EdgeInsets.fromLTRB(
-                  14,
-                  14,
-                  14 + titleRightInset,
-                  14 +
+                  m.s(14),
+                  m.s(14),
+                  m.s(14) + titleRightInset,
+                  m.s(14) +
                       (bottomInset > 0
                           ? bottomInset
                           : bottomRightInset * 0.35),
@@ -985,12 +999,13 @@ class _CompactBusinessCardFace extends StatelessWidget {
             ),
             if (showCardIdOnBack)
               Positioned(
-                top: 10,
-                right: 12 + titleRightInset,
+                top: m.s(10),
+                right: m.s(12) + titleRightInset,
                 child: CardBackIdBadge(
                   cardId: cardId,
                   onSurface: onSurface,
                   onSurfaceVariant: onSurfaceVariant,
+                  scale: m.scale,
                 ),
               ),
           ],
@@ -999,7 +1014,7 @@ class _CompactBusinessCardFace extends StatelessWidget {
     );
   }
 
-  Widget _buildBackAboutContent(BuildContext context) {
+  Widget _buildBackAboutContent(BuildContext context, CardFaceMetrics m) {
     final textTheme = Theme.of(context).textTheme;
     final about = _aboutText?.trim() ?? '';
     final hasAbout = about.isNotEmpty;
@@ -1009,7 +1024,7 @@ class _CompactBusinessCardFace extends StatelessWidget {
       children: [
         // Kart ID rozeti sağ üstte; solda başlık için boşluk.
         Padding(
-          padding: EdgeInsets.only(right: showCardIdOnBack ? 72 : 0),
+          padding: EdgeInsets.only(right: showCardIdOnBack ? m.s(72) : 0),
           child: Text(
             context.l10n.hakkmda,
             style: textTheme.titleSmall?.copyWith(
@@ -1019,7 +1034,7 @@ class _CompactBusinessCardFace extends StatelessWidget {
             ),
           ),
         ),
-        const SizedBox(height: 10),
+        SizedBox(height: m.s(10)),
         Expanded(
           child: Text(
             hasAbout ? about : context.l10n.hakkimdaBilgisiYok,
@@ -1048,7 +1063,7 @@ class _CompactBusinessCardFace extends StatelessWidget {
     return null;
   }
 
-  Widget _buildEmptyState(BuildContext context) {
+  Widget _buildEmptyState(BuildContext context, CardFaceMetrics m) {
     final textTheme = Theme.of(context).textTheme;
     if (emptyActionLabel != null && onEmptyActionTap != null) {
       return Center(
@@ -1071,6 +1086,7 @@ class _CompactBusinessCardFace extends StatelessWidget {
   }
 
   Widget _buildTopSection(
+    CardFaceMetrics m,
     TextTheme textTheme, {
     required bool hasTitle,
     String? jobTitle,
@@ -1091,27 +1107,27 @@ class _CompactBusinessCardFace extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                if (hasTitle) _buildNameLine(textTheme),
-                if (hasTitle && hasSubtitle) const SizedBox(height: 5),
-                if (hasRole) _buildJobTitleLine(textTheme, role),
-                if (hasRole && hasOrg) const SizedBox(height: 3),
-                if (hasOrg) _buildCompanyLine(textTheme, org),
+                if (hasTitle) _buildNameLine(m, textTheme),
+                if (hasTitle && hasSubtitle) SizedBox(height: m.s(5)),
+                if (hasRole) _buildJobTitleLine(m, textTheme, role),
+                if (hasRole && hasOrg) SizedBox(height: m.s(3)),
+                if (hasOrg) _buildCompanyLine(m, textTheme, org),
               ],
             ),
           ),
-        if (hasText) const SizedBox(width: 12),
-        _buildPhotoSlot(),
+        if (hasText) SizedBox(width: m.s(12)),
+        _buildPhotoSlot(m),
       ],
     );
   }
 
-  Widget _buildJobTitleLine(TextTheme textTheme, String jobTitle) {
+  Widget _buildJobTitleLine(CardFaceMetrics m, TextTheme textTheme, String jobTitle) {
     return Text(
       jobTitle,
       maxLines: 1,
       overflow: TextOverflow.ellipsis,
       style: textTheme.bodyMedium?.copyWith(
-        fontSize: 14,
+        fontSize: m.s(14),
         color: Color.alphaBlend(
           onSurface.withValues(alpha: 0.9),
           backgroundColor,
@@ -1122,13 +1138,13 @@ class _CompactBusinessCardFace extends StatelessWidget {
     );
   }
 
-  Widget _buildCompanyLine(TextTheme textTheme, String company) {
+  Widget _buildCompanyLine(CardFaceMetrics m, TextTheme textTheme, String company) {
     return Text(
       company.toUpperCase(),
       maxLines: 1,
       overflow: TextOverflow.ellipsis,
       style: textTheme.labelSmall?.copyWith(
-        fontSize: 11,
+        fontSize: m.s(11),
         color: onSurfaceVariant,
         fontWeight: FontWeight.w700,
         letterSpacing: 0.8,
@@ -1137,13 +1153,13 @@ class _CompactBusinessCardFace extends StatelessWidget {
     );
   }
 
-  Widget _buildNameLine(TextTheme textTheme) {
+  Widget _buildNameLine(CardFaceMetrics m, TextTheme textTheme) {
     return Text(
       title!,
       maxLines: 1,
       overflow: TextOverflow.ellipsis,
       style: textTheme.titleLarge?.copyWith(
-        fontSize: 22,
+        fontSize: m.s(22),
         fontWeight: FontWeight.w700,
         color: onSurface,
         letterSpacing: -0.2,
@@ -1152,17 +1168,18 @@ class _CompactBusinessCardFace extends StatelessWidget {
     );
   }
 
-  Widget _buildPhotoSlot() {
+  Widget _buildPhotoSlot(CardFaceMetrics m) {
     return ProfileAvatar(
       photoUrl: photoUrl,
       displayName: title,
-      size: _photoSize,
-      borderRadius: BorderRadius.circular(_photoRadius),
+      size: m.s(_photoSize),
+      borderRadius: BorderRadius.circular(m.s(PersonInfoCard.compactCardRadius)),
     );
   }
 
   Widget _buildContactFooter(
     BuildContext context,
+    CardFaceMetrics m,
     TextTheme textTheme, {
     String? email,
     String? phone,
@@ -1171,7 +1188,7 @@ class _CompactBusinessCardFace extends StatelessWidget {
   }) {
     final lines = <Widget>[];
     void addLine(Widget line) {
-      if (lines.isNotEmpty) lines.add(const SizedBox(height: 5));
+      if (lines.isNotEmpty) lines.add(SizedBox(height: m.s(5)));
       lines.add(line);
     }
 
@@ -1182,6 +1199,7 @@ class _CompactBusinessCardFace extends StatelessWidget {
           final value = email.trim();
           addLine(
             _buildContactLine(
+              m,
               textTheme,
               icon: Icons.mail_outline_rounded,
               value: value,
@@ -1195,6 +1213,7 @@ class _CompactBusinessCardFace extends StatelessWidget {
           final value = phone.trim();
           addLine(
             _buildContactLine(
+              m,
               textTheme,
               icon: Icons.phone_outlined,
               value: value,
@@ -1208,6 +1227,7 @@ class _CompactBusinessCardFace extends StatelessWidget {
           final value = linkedin.trim();
           addLine(
             _buildContactLine(
+              m,
               textTheme,
               icon: Icons.link_rounded,
               value: value,
@@ -1221,6 +1241,7 @@ class _CompactBusinessCardFace extends StatelessWidget {
           final value = website.trim();
           addLine(
             _buildContactLine(
+              m,
               textTheme,
               icon: Icons.language_rounded,
               value: value,
@@ -1245,22 +1266,24 @@ class _CompactBusinessCardFace extends StatelessWidget {
   static const double _contactIconSlot = 22;
 
   Widget _buildContactLine(
+    CardFaceMetrics m,
     TextTheme textTheme, {
     required IconData icon,
     required String value,
     VoidCallback? onTap,
   }) {
     final iconColor = accentColor ?? onSurfaceVariant;
+    final contactIconCircle = m.s(_contactIconCircle);
 
     final row = Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         SizedBox(
-          width: _contactIconSlot,
+          width: m.s(_contactIconSlot),
           child: Center(
             child: Container(
-              width: _contactIconCircle,
-              height: _contactIconCircle,
+              width: contactIconCircle,
+              height: contactIconCircle,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: iconColor.withValues(alpha: 0.14),
@@ -1271,20 +1294,20 @@ class _CompactBusinessCardFace extends StatelessWidget {
               alignment: Alignment.center,
               child: Icon(
                 icon,
-                size: _contactIconSize,
+                size: m.s(_contactIconSize),
                 color: iconColor,
               ),
             ),
           ),
         ),
-        const SizedBox(width: 10),
+        SizedBox(width: m.s(10)),
         Expanded(
           child: Text(
             value,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: textTheme.bodyMedium?.copyWith(
-              fontSize: 13,
+              fontSize: m.s(13),
               color: onSurface,
               fontWeight: FontWeight.w500,
               height: 1.0,
@@ -1295,23 +1318,23 @@ class _CompactBusinessCardFace extends StatelessWidget {
     );
 
     if (onTap == null) {
-      return SizedBox(height: _contactIconCircle, child: row);
+      return SizedBox(height: contactIconCircle, child: row);
     }
 
     return Material(
       color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(m.s(8)),
         child: SizedBox(
-          height: _contactIconCircle,
+          height: contactIconCircle,
           child: row,
         ),
       ),
     );
   }
 
-  Widget _buildNote(BuildContext context, TextTheme textTheme) {
+  Widget _buildNote(BuildContext context, CardFaceMetrics m, TextTheme textTheme) {
     final note = _noteEntry(context)!;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1331,15 +1354,15 @@ class _CompactBusinessCardFace extends StatelessWidget {
               CustomButton.text(
                 label: context.l10n.dzenle,
                 onPressed: onNoteEditTap,
-                height: 28,
+                height: m.s(28),
                 labelStyle: textTheme.labelSmall?.copyWith(
                   color: onSurfaceVariant,
                   fontWeight: FontWeight.w600,
                 ),
                 style: TextButton.styleFrom(
                   visualDensity: VisualDensity.compact,
-                  padding: const EdgeInsets.symmetric(horizontal: 8),
-                  minimumSize: const Size(0, 28),
+                  padding: EdgeInsets.symmetric(horizontal: m.s(8)),
+                  minimumSize: Size(0, m.s(28)),
                 ),
               ),
           ],
