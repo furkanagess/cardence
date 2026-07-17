@@ -60,9 +60,6 @@
             android:name="flutterEmbedding"
             android:value="2" />
         <meta-data
-            android:name="com.google.android.gms.ads.APPLICATION_ID"
-            android:value="ca-app-pub-3499593115543692~3216442429"/>
-        <meta-data
             android:name="com.google.firebase.messaging.default_notification_channel_id"
             android:value="cardence_default" />
     </application>

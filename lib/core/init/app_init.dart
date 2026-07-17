@@ -84,13 +84,7 @@ import '../../features/subscriptions/domain/usecases/finalize_premium_wallet_act
 import '../../features/subscriptions/domain/usecases/set_subscription_preferred_locale.dart';
 import '../../features/subscriptions/presentation/helpers/premium_purchase_success_handler.dart';
 import '../../features/subscriptions/domain/usecases/restore_wallet_purchases.dart';
-import '../config/admob_config.dart';
 import '../l10n/locale_preference_material.dart';
-import '../../features/ads/data/repositories/interstitial_ad_repository_impl.dart';
-import '../../features/ads/data/repositories/no_op_interstitial_ad_repository.dart';
-import '../../features/ads/data/datasources/post_add_card_ad_counter_local_datasource.dart';
-import '../../features/ads/domain/usecases/initialize_mobile_ads.dart';
-import '../../features/ads/domain/usecases/show_post_add_card_monetization.dart';
 import '../../features/settings/data/repositories/app_review_repository_impl.dart';
 import '../../features/settings/data/datasources/locale_local_datasource.dart';
 import '../../features/settings/data/datasources/theme_local_datasource.dart';
@@ -145,18 +139,6 @@ class AppInit {
     final setSubscriptionPreferredLocale =
         SetSubscriptionPreferredLocale(subscriptionRepo);
 
-    final interstitialAdRepo = AdMobConfig.enabled
-        ? InterstitialAdRepositoryImpl()
-        : const NoOpInterstitialAdRepository();
-    final initializeMobileAds = InitializeMobileAds(interstitialAdRepo);
-    final postAddCardAdCounter = PostAddCardAdCounterLocalDataSource(prefs);
-    final showPostAddCardMonetization = ShowPostAddCardMonetization(
-      interstitialAdRepo,
-      subscriptionRepo,
-      postAddCardAdCounter,
-      authLocal,
-    );
-
     final onboardingLocal = OnboardingLocalDataSourceImpl(prefs, authLocal);
     final onboardingRepo = OnboardingRepositoryImpl(onboardingLocal);
     final syncOnboardingFromServer = SyncOnboardingFromServer(onboardingRepo);
@@ -186,12 +168,7 @@ class AppInit {
       authLocal: authLocal,
       onProfileSynced: syncUserProfileCards.call,
       onLogout: () async {
-        final session = await authLocal.getSession();
-        final userId = session?.userId;
         await pushNotifications.unregisterCurrentToken();
-        if (userId != null && userId.isNotEmpty) {
-          await postAddCardAdCounter.clearForUser(userId);
-        }
         await logoutSubscriptionUser();
         await clearUserScopedLocalData();
       },
@@ -264,7 +241,6 @@ class AppInit {
     });
     unawaited(
       _initDeferredMonetization(
-        initializeMobileAds: initializeMobileAds,
         identifySubscriptionUser: identifySubscriptionUser,
         userId: session?.userId,
       ),
@@ -334,7 +310,6 @@ class AppInit {
       getPlanEntitlements: plans.getPlanEntitlements,
       getNetworkGraph: networkGraph.getNetworkGraph,
       getNetworkGraphPath: networkGraph.getNetworkGraphPath,
-      showPostAddCardMonetization: showPostAddCardMonetization,
     );
   }
 
@@ -462,16 +437,11 @@ class AppInit {
     }
   }
 
-  /// AdMob ve RevenueCat kullanıcı eşlemesi açılışı bloklamaz.
+  /// RevenueCat kullanıcı eşlemesi açılışı bloklamaz.
   static Future<void> _initDeferredMonetization({
-    required InitializeMobileAds initializeMobileAds,
     required IdentifySubscriptionUser identifySubscriptionUser,
     required String? userId,
   }) async {
-    await _guardInit('MobileAds init', () async {
-      if (!AdMobConfig.enabled) return;
-      await initializeMobileAds();
-    });
     if (userId != null && userId.isNotEmpty) {
       await _guardInit(
         'RevenueCat identify',
@@ -699,7 +669,6 @@ class AppInitResult {
     required this.getPlanEntitlements,
     required this.getNetworkGraph,
     required this.getNetworkGraphPath,
-    required this.showPostAddCardMonetization,
   });
 
   final RestoreAuthSession restoreAuthSession;
@@ -764,5 +733,4 @@ class AppInitResult {
   final GetPlanEntitlements getPlanEntitlements;
   final GetNetworkGraph getNetworkGraph;
   final GetNetworkGraphPath getNetworkGraphPath;
-  final ShowPostAddCardMonetization showPostAddCardMonetization;
 }

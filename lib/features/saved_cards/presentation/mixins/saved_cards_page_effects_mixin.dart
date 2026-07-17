@@ -18,7 +18,6 @@ import '../../domain/usecases/get_saved_cards.dart';
 import '../../domain/usecases/save_saved_card.dart';
 import '../../domain/usecases/track_saved_card_contact_click.dart';
 import '../../domain/usecases/upgrade_wallet_plan.dart';
-import '../../../ads/domain/usecases/show_post_add_card_monetization.dart';
 import '../../../subscriptions/domain/usecases/restore_wallet_purchases.dart';
 import '../../../event_groups/domain/usecases/get_event_groups.dart';
 import '../../../event_groups/domain/usecases/delete_event_group.dart';
@@ -35,7 +34,6 @@ mixin SavedCardsPageEffectsMixin<T extends StatefulWidget> on State<T> {
     required AddSavedCard addSavedCard,
     required UpgradeWalletPlan upgradeWalletPlan,
     required RestoreWalletPurchases restoreWalletPurchases,
-    required ShowPostAddCardMonetization showPostAddCardMonetization,
     required List<SavedCard> sourceCards,
   }) {
     switch (state.effectType) {
@@ -48,7 +46,6 @@ mixin SavedCardsPageEffectsMixin<T extends StatefulWidget> on State<T> {
         _openAddCardFlow(
           context,
           addSavedCard: addSavedCard,
-          showPostAddCardMonetization: showPostAddCardMonetization,
           upgradeWalletPlan: upgradeWalletPlan,
           restoreWalletPurchases: restoreWalletPurchases,
         );
@@ -109,7 +106,6 @@ mixin SavedCardsPageEffectsMixin<T extends StatefulWidget> on State<T> {
   Future<void> _openAddCardFlow(
     BuildContext context, {
     required AddSavedCard addSavedCard,
-    required ShowPostAddCardMonetization showPostAddCardMonetization,
     required UpgradeWalletPlan upgradeWalletPlan,
     required RestoreWalletPurchases restoreWalletPurchases,
   }) async {
@@ -142,16 +138,6 @@ mixin SavedCardsPageEffectsMixin<T extends StatefulWidget> on State<T> {
     if (!context.mounted) return;
     await cubit.handleAddCardResult(result);
 
-    if (!context.mounted) return;
-    if (result is AddSavedCardSuccess) {
-      await showPostAddCardMonetization(
-        showPaywall: () => _openUpgradeSheet(
-          context,
-          upgradeWalletPlan: upgradeWalletPlan,
-          restoreWalletPurchases: restoreWalletPurchases,
-        ),
-      );
-    }
   }
 
   Future<void> openSavedCardDetail(

@@ -17,7 +17,6 @@ import '../../domain/usecases/save_saved_card.dart';
 import '../../domain/usecases/track_saved_card_contact_click.dart';
 import '../../domain/usecases/upgrade_wallet_plan.dart';
 import '../../../subscriptions/domain/usecases/restore_wallet_purchases.dart';
-import '../../../ads/domain/usecases/show_post_add_card_monetization.dart';
 import '../cubit/saved_cards_cubit.dart';
 import '../cubit/saved_cards_state.dart';
 import '../mixins/saved_cards_page_effects_mixin.dart';
@@ -36,7 +35,6 @@ class SavedCardsPage extends StatefulWidget {
     required this.addSavedCard,
     required this.upgradeWalletPlan,
     required this.restoreWalletPurchases,
-    required this.showPostAddCardMonetization,
     required this.getEventGroups,
     required this.getSavedCards,
     required this.updateEventGroup,
@@ -54,7 +52,6 @@ class SavedCardsPage extends StatefulWidget {
   final AddSavedCard addSavedCard;
   final UpgradeWalletPlan upgradeWalletPlan;
   final RestoreWalletPurchases restoreWalletPurchases;
-  final ShowPostAddCardMonetization showPostAddCardMonetization;
   final GetEventGroups getEventGroups;
   final GetSavedCards getSavedCards;
   final UpdateEventGroup updateEventGroup;
@@ -226,7 +223,6 @@ class _SavedCardsPageState extends State<SavedCardsPage>
           addSavedCard: widget.addSavedCard,
           upgradeWalletPlan: widget.upgradeWalletPlan,
           restoreWalletPurchases: widget.restoreWalletPurchases,
-          showPostAddCardMonetization: widget.showPostAddCardMonetization,
           sourceCards: cubit.sourceCards,
         );
       },

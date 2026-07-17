@@ -70,7 +70,6 @@ import 'features/subscriptions/domain/usecases/set_subscription_preferred_locale
 import 'features/subscriptions/domain/usecases/restore_wallet_purchases.dart';
 import 'features/subscriptions/presentation/helpers/premium_purchase_success_handler.dart';
 import 'features/subscriptions/presentation/widgets/premium_purchase_scope.dart';
-import 'features/ads/domain/usecases/show_post_add_card_monetization.dart';
 import 'core/l10n/locale_preference_material.dart';
 import 'core/notifications/push_notification_coordinator.dart';
 import 'features/settings/domain/entities/locale_preference.dart';
@@ -154,7 +153,6 @@ class App extends StatefulWidget {
     required this.getPlanEntitlements,
     required this.getNetworkGraph,
     required this.getNetworkGraphPath,
-    required this.showPostAddCardMonetization,
   });
 
   factory App.withInitResult({
@@ -223,7 +221,6 @@ class App extends StatefulWidget {
       getPlanEntitlements: init.getPlanEntitlements,
       getNetworkGraph: init.getNetworkGraph,
       getNetworkGraphPath: init.getNetworkGraphPath,
-      showPostAddCardMonetization: init.showPostAddCardMonetization,
     );
   }
 
@@ -288,7 +285,6 @@ class App extends StatefulWidget {
   final GetPlanEntitlements getPlanEntitlements;
   final GetNetworkGraph getNetworkGraph;
   final GetNetworkGraphPath getNetworkGraphPath;
-  final ShowPostAddCardMonetization showPostAddCardMonetization;
 
   @override
   State<App> createState() => _AppState();
@@ -616,7 +612,6 @@ class _AppState extends State<App> {
           submitSupportRequest: widget.submitSupportRequest,
           requestAppReview: widget.requestAppReview,
           getProfileStats: widget.getProfileStats,
-          showPostAddCardMonetization: widget.showPostAddCardMonetization,
         );
     }
   }

@@ -28,7 +28,6 @@ import '../../../saved_cards/domain/usecases/save_saved_card.dart';
 import '../../../saved_cards/domain/usecases/track_saved_card_contact_click.dart';
 import '../../../saved_cards/domain/usecases/upgrade_wallet_plan.dart';
 import '../../../subscriptions/domain/usecases/restore_wallet_purchases.dart';
-import '../../../ads/domain/usecases/show_post_add_card_monetization.dart';
 import '../../../event_groups/presentation/pages/event_groups_page.dart';
 import '../../../onboarding/domain/entities/onboarding_card_draft.dart';
 import '../../../network_graph/domain/usecases/get_network_graph.dart';
@@ -89,7 +88,6 @@ class MainShellPage extends StatefulWidget {
     required this.getPlanEntitlements,
     required this.getNetworkGraph,
     required this.getNetworkGraphPath,
-    required this.showPostAddCardMonetization,
     required this.themePreference,
     required this.onThemeChanged,
     required this.localePreference,
@@ -131,7 +129,6 @@ class MainShellPage extends StatefulWidget {
   final GetPlanEntitlements getPlanEntitlements;
   final GetNetworkGraph getNetworkGraph;
   final GetNetworkGraphPath getNetworkGraphPath;
-  final ShowPostAddCardMonetization showPostAddCardMonetization;
   final ThemePreference themePreference;
   final ValueChanged<ThemePreference> onThemeChanged;
   final LocalePreference localePreference;
@@ -285,7 +282,6 @@ class _MainShellPageState extends State<MainShellPage> {
                 upgradeWalletPlan: widget.upgradeWalletPlan,
                 trackSavedCardContactClick: widget.trackSavedCardContactClick,
                 restoreWalletPurchases: widget.restoreWalletPurchases,
-                showPostAddCardMonetization: widget.showPostAddCardMonetization,
                 filterTrigger: _savedCardsFilterTrigger,
                 addCardTrigger: _savedCardsAddCardTrigger,
               ),
