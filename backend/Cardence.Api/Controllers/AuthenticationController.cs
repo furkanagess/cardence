@@ -66,6 +66,28 @@ public sealed class AuthenticationController : ControllerBase
     }
 
     [AllowAnonymous]
+    [HttpPost("LoginWithGoogle")]
+    [ProducesResponseType(typeof(AuthServiceResponse<AuthSessionEntity>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<AuthServiceResponse<AuthSessionEntity>>> LoginWithGoogle(
+        [FromBody] LoginWithGoogleRequest request,
+        CancellationToken cancellationToken)
+    {
+        var response = await _authService.LoginWithGoogleAsync(request, cancellationToken);
+        return Ok(response);
+    }
+
+    [AllowAnonymous]
+    [HttpPost("LoginWithApple")]
+    [ProducesResponseType(typeof(AuthServiceResponse<AuthSessionEntity>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<AuthServiceResponse<AuthSessionEntity>>> LoginWithApple(
+        [FromBody] LoginWithAppleRequest request,
+        CancellationToken cancellationToken)
+    {
+        var response = await _authService.LoginWithAppleAsync(request, cancellationToken);
+        return Ok(response);
+    }
+
+    [AllowAnonymous]
     [HttpPost("SendOTP")]
     [ProducesResponseType(typeof(AuthServiceResponse<object?>), StatusCodes.Status200OK)]
     public async Task<ActionResult<AuthServiceResponse<object?>>> SendOtp(

@@ -1,15 +1,15 @@
-/// Cardence uygulamasında desteklenen 4 giriş yöntemi.
+/// Cardence uygulamasında desteklenen giriş yöntemleri.
 enum AuthProvider {
-  /// Google ile giriş (Firebase Auth + google_sign_in)
+  /// Google ile giriş (native SDK + Cardence API JWT)
   google,
 
-  /// Apple ile giriş (Firebase Auth + sign_in_with_apple)
+  /// Apple ile giriş (Sign in with Apple + Cardence API JWT)
   apple,
 
-  /// Telefon numarası ile giriş (Firebase Auth Phone)
+  /// Telefon numarası ile giriş
   phone,
 
-  /// LinkedIn ile giriş (LinkedIn OAuth + Firestore kullanıcı eşlemesi)
+  /// LinkedIn ile giriş (OAuth + Cardence API JWT)
   linkedin,
 }
 
@@ -17,7 +17,7 @@ enum AuthProvider {
 class AuthConstants {
   AuthConstants._();
 
-  /// Firebase Auth providerId değerleri (UserInfo.providerId ile eşleşir).
+  /// Backend `user_auth_providers.provider_id` değerleri.
   static const String providerIdGoogle = 'google.com';
   static const String providerIdApple = 'apple.com';
   static const String providerIdPhone = 'phone';
@@ -36,7 +36,7 @@ class AuthConstants {
     }
   }
 
-  /// Firebase Auth providerId'den AuthProvider'a dönüşüm.
+  /// Provider ID'den AuthProvider'a dönüşüm.
   static AuthProvider? fromProviderId(String? providerId) {
     if (providerId == null) return null;
     switch (providerId) {

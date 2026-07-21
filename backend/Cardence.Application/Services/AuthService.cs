@@ -20,6 +20,8 @@ public sealed class AuthService : IAuthService
     private readonly IWalletEntitlementRepository _walletEntitlementRepository;
     private readonly IWalletEntitlementSyncService _walletEntitlementSync;
     private readonly ILinkedInAuthService _linkedInAuthService;
+    private readonly IGoogleAuthService _googleAuthService;
+    private readonly IAppleAuthService _appleAuthService;
     private readonly IBusinessCardRepository _businessCardRepository;
     private readonly ISavedCardRepository _savedCardRepository;
     private readonly ICardInteractionRepository _cardInteractionRepository;
@@ -48,6 +50,8 @@ public sealed class AuthService : IAuthService
         IWalletEntitlementRepository walletEntitlementRepository,
         IWalletEntitlementSyncService walletEntitlementSync,
         ILinkedInAuthService linkedInAuthService,
+        IGoogleAuthService googleAuthService,
+        IAppleAuthService appleAuthService,
         IBusinessCardRepository businessCardRepository,
         ISavedCardRepository savedCardRepository,
         ICardInteractionRepository cardInteractionRepository,
@@ -67,6 +71,8 @@ public sealed class AuthService : IAuthService
         _walletEntitlementRepository = walletEntitlementRepository;
         _walletEntitlementSync = walletEntitlementSync;
         _linkedInAuthService = linkedInAuthService;
+        _googleAuthService = googleAuthService;
+        _appleAuthService = appleAuthService;
         _businessCardRepository = businessCardRepository;
         _savedCardRepository = savedCardRepository;
         _cardInteractionRepository = cardInteractionRepository;
@@ -523,6 +529,183 @@ public sealed class AuthService : IAuthService
         await EnsureLinkedInBusinessCardAsync(user, linkedInProfile, cancellationToken);
 
         return await CreateSessionAsync(user, "Giriş başarılı.", cancellationToken);
+    }
+
+    public async Task<AuthServiceResponse<AuthSessionEntity>> LoginWithGoogleAsync(
+        LoginWithGoogleRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrWhiteSpace(request.IdToken))
+        {
+            return FailSession(
+                AuthErrorCodes.InvalidRequest,
+                "InvalidRequest",
+                "Google kimlik jetonu gereklidir.");
+        }
+
+        var googleResult = await _googleAuthService.ValidateIdTokenAsync(
+            request.IdToken.Trim(),
+            cancellationToken);
+
+        if (!googleResult.IsSuccess || googleResult.Profile is null)
+        {
+            return FailSession(
+                AuthErrorCodes.InvalidOAuthToken,
+                "InvalidOAuthToken",
+                googleResult.ErrorMessage ?? "Google oturumu doğrulanamadı.");
+        }
+
+        return await LoginWithExternalProviderAsync(
+            AuthProviderIds.Google,
+            googleResult.Profile,
+            "Google hesabına bağlı kullanıcı bulunamadı.",
+            cancellationToken);
+    }
+
+    public async Task<AuthServiceResponse<AuthSessionEntity>> LoginWithAppleAsync(
+        LoginWithAppleRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrWhiteSpace(request.IdentityToken))
+        {
+            return FailSession(
+                AuthErrorCodes.InvalidRequest,
+                "InvalidRequest",
+                "Apple kimlik jetonu gereklidir.");
+        }
+
+        var appleResult = await _appleAuthService.ValidateIdentityTokenAsync(
+            request.IdentityToken.Trim(),
+            request.GivenName,
+            request.FamilyName,
+            cancellationToken);
+
+        if (!appleResult.IsSuccess || appleResult.Profile is null)
+        {
+            return FailSession(
+                AuthErrorCodes.InvalidOAuthToken,
+                "InvalidOAuthToken",
+                appleResult.ErrorMessage ?? "Apple oturumu doğrulanamadı.");
+        }
+
+        return await LoginWithExternalProviderAsync(
+            AuthProviderIds.Apple,
+            appleResult.Profile,
+            "Apple hesabına bağlı kullanıcı bulunamadı.",
+            cancellationToken);
+    }
+
+    private async Task<AuthServiceResponse<AuthSessionEntity>> LoginWithExternalProviderAsync(
+        string providerId,
+        ExternalAuthUserInfo profile,
+        string userNotFoundMessage,
+        CancellationToken cancellationToken)
+    {
+        var existingProvider = await _userAuthProviderRepository.GetByProviderAsync(
+            providerId,
+            profile.Sub,
+            cancellationToken);
+
+        if (existingProvider is not null)
+        {
+            var existingUser = await _userRepository.GetByIdAsync(
+                existingProvider.UserId,
+                cancellationToken);
+
+            if (existingUser is null)
+            {
+                return FailSession(
+                    AuthErrorCodes.UserNotFound,
+                    "UserNotFound",
+                    userNotFoundMessage);
+            }
+
+            await ApplyExternalProfileUpdatesAsync(existingUser, profile, cancellationToken);
+            return await CreateSessionAsync(existingUser, "Giriş başarılı.", cancellationToken);
+        }
+
+        User? user = null;
+        if (!string.IsNullOrWhiteSpace(profile.Email))
+        {
+            user = await _userRepository.GetByEmailAsync(profile.Email, cancellationToken);
+        }
+
+        if (user is not null)
+        {
+            await _userAuthProviderRepository.AddAsync(
+                new UserAuthProvider
+                {
+                    ProviderId = providerId,
+                    ProviderUserId = profile.Sub,
+                    UserId = user.Id,
+                },
+                cancellationToken);
+
+            await ApplyExternalProfileUpdatesAsync(user, profile, cancellationToken);
+            return await CreateSessionAsync(user, "Giriş başarılı.", cancellationToken);
+        }
+
+        var now = DateTime.UtcNow;
+        user = new User
+        {
+            Id = Guid.NewGuid(),
+            DisplayName = profile.DisplayName,
+            Email = profile.Email,
+            PhotoUrl = profile.PictureUrl,
+            PasswordHash = null,
+            CreatedAt = now,
+            UpdatedAt = now,
+        };
+
+        await _userRepository.AddAsync(user, cancellationToken);
+        await _userAuthProviderRepository.AddAsync(
+            new UserAuthProvider
+            {
+                ProviderId = providerId,
+                ProviderUserId = profile.Sub,
+                UserId = user.Id,
+            },
+            cancellationToken);
+        await _walletEntitlementRepository.GetOrCreateAsync(user.Id, cancellationToken);
+
+        return await CreateSessionAsync(user, "Giriş başarılı.", cancellationToken);
+    }
+
+    private async Task ApplyExternalProfileUpdatesAsync(
+        User user,
+        ExternalAuthUserInfo profile,
+        CancellationToken cancellationToken)
+    {
+        var updated = false;
+
+        if (string.IsNullOrWhiteSpace(user.DisplayName)
+            && !string.IsNullOrWhiteSpace(profile.DisplayName))
+        {
+            user.DisplayName = profile.DisplayName.Trim();
+            updated = true;
+        }
+
+        if (string.IsNullOrWhiteSpace(user.PhotoUrl)
+            && !string.IsNullOrWhiteSpace(profile.PictureUrl))
+        {
+            user.PhotoUrl = profile.PictureUrl.Trim();
+            updated = true;
+        }
+
+        if (string.IsNullOrWhiteSpace(user.Email)
+            && !string.IsNullOrWhiteSpace(profile.Email))
+        {
+            user.Email = profile.Email;
+            updated = true;
+        }
+
+        if (!updated)
+        {
+            return;
+        }
+
+        user.UpdatedAt = DateTime.UtcNow;
+        await _userRepository.UpdateAsync(user, cancellationToken);
     }
 
     private async Task EnsureLinkedInBusinessCardAsync(

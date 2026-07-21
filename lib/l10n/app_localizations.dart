@@ -992,6 +992,18 @@ abstract class AppLocalizations {
   /// **'LinkedIn ile devam et'**
   String get linkedinIleDevamEt;
 
+  /// No description provided for @googleIleDevamEt.
+  ///
+  /// In tr, this message translates to:
+  /// **'Google ile devam et'**
+  String get googleIleDevamEt;
+
+  /// No description provided for @appleIleDevamEt.
+  ///
+  /// In tr, this message translates to:
+  /// **'Apple ile devam et'**
+  String get appleIleDevamEt;
+
   /// No description provided for @ad.
   ///
   /// In tr, this message translates to:
@@ -3031,6 +3043,18 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'LinkedIn ile giriş başarısız.'**
   String get linkedinLoginFailed;
+
+  /// No description provided for @googleLoginFailed.
+  ///
+  /// In tr, this message translates to:
+  /// **'Google ile giriş başarısız.'**
+  String get googleLoginFailed;
+
+  /// No description provided for @appleLoginFailed.
+  ///
+  /// In tr, this message translates to:
+  /// **'Apple ile giriş başarısız.'**
+  String get appleLoginFailed;
 
   /// No description provided for @profilePhotoUploadFailed.
   ///

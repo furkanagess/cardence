@@ -72,6 +72,33 @@ class LoginLinkedInSubmitted extends LoginEvent {
   List<Object?> get props => [authorizationCode];
 }
 
+class LoginGoogleSubmitted extends LoginEvent {
+  const LoginGoogleSubmitted({required this.idToken});
+
+  final String idToken;
+
+  @override
+  List<Object?> get props => [idToken];
+}
+
+class LoginAppleSubmitted extends LoginEvent {
+  const LoginAppleSubmitted({
+    required this.identityToken,
+    this.authorizationCode,
+    this.givenName,
+    this.familyName,
+  });
+
+  final String identityToken;
+  final String? authorizationCode;
+  final String? givenName;
+  final String? familyName;
+
+  @override
+  List<Object?> get props =>
+      [identityToken, authorizationCode, givenName, familyName];
+}
+
 class LoginPhoneSubmitted extends LoginEvent {
   const LoginPhoneSubmitted({
     required this.phone,

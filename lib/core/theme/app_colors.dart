@@ -146,6 +146,11 @@ class AppColors {
 
   // --- Marka (sosyal giriş) ---
   static const Color linkedInBrand = Color(0xFF0A66C2);
+  static const Color googleBlue = Color(0xFF4285F4);
+  static const Color googleRed = Color(0xFFEA4335);
+  static const Color googleYellow = Color(0xFFFBBC05);
+  static const Color googleGreen = Color(0xFF34A853);
+  static const Color appleBrand = Color(0xFF000000);
 
   // --- Network graph canvas ---
   static const Color graphCanvasBackgroundDark = Color(0xFF000000);

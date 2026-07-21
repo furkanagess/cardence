@@ -481,6 +481,12 @@ class AppLocalizationsTr extends AppLocalizations {
   String get linkedinIleDevamEt => 'LinkedIn ile devam et';
 
   @override
+  String get googleIleDevamEt => 'Google ile devam et';
+
+  @override
+  String get appleIleDevamEt => 'Apple ile devam et';
+
+  @override
   String get ad => 'Ad';
 
   @override
@@ -1570,6 +1576,12 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get linkedinLoginFailed => 'LinkedIn ile giriş başarısız.';
+
+  @override
+  String get googleLoginFailed => 'Google ile giriş başarısız.';
+
+  @override
+  String get appleLoginFailed => 'Apple ile giriş başarısız.';
 
   @override
   String get profilePhotoUploadFailed => 'Profil fotoğrafı yüklenemedi.';

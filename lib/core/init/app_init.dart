@@ -15,7 +15,9 @@ import '../../features/auth/domain/usecases/get_auth_session.dart';
 import '../../features/auth/domain/usecases/get_current_user.dart';
 import '../../features/auth/domain/usecases/refresh_current_user.dart';
 import '../../features/auth/domain/usecases/get_last_login_credentials.dart';
+import '../../features/auth/domain/usecases/login_with_apple.dart';
 import '../../features/auth/domain/usecases/login_with_email.dart';
+import '../../features/auth/domain/usecases/login_with_google.dart';
 import '../../features/auth/domain/usecases/login_with_linkedin.dart';
 import '../../features/auth/domain/usecases/login_with_phone.dart';
 import '../../features/auth/domain/usecases/logout.dart';
@@ -254,6 +256,8 @@ class AppInit {
       loginWithEmail: auth.loginWithEmail,
       loginWithPhone: auth.loginWithPhone,
       loginWithLinkedIn: auth.loginWithLinkedIn,
+      loginWithGoogle: auth.loginWithGoogle,
+      loginWithApple: auth.loginWithApple,
       registerUser: auth.registerUser,
       forgotPassword: auth.forgotPassword,
       resetPassword: auth.resetPassword,
@@ -460,6 +464,8 @@ class AppInit {
     LoginWithEmail loginWithEmail,
     LoginWithPhone loginWithPhone,
     LoginWithLinkedIn loginWithLinkedIn,
+    LoginWithGoogle loginWithGoogle,
+    LoginWithApple loginWithApple,
     RegisterUser registerUser,
     ForgotPassword forgotPassword,
     ResetPassword resetPassword,
@@ -487,6 +493,8 @@ class AppInit {
       loginWithEmail: LoginWithEmail(repo),
       loginWithPhone: LoginWithPhone(repo),
       loginWithLinkedIn: LoginWithLinkedIn(repo),
+      loginWithGoogle: LoginWithGoogle(repo),
+      loginWithApple: LoginWithApple(repo),
       registerUser: RegisterUser(repo),
       forgotPassword: ForgotPassword(repo),
       resetPassword: ResetPassword(repo),
@@ -614,6 +622,8 @@ class AppInitResult {
     required this.loginWithEmail,
     required this.loginWithPhone,
     required this.loginWithLinkedIn,
+    required this.loginWithGoogle,
+    required this.loginWithApple,
     required this.registerUser,
     required this.forgotPassword,
     required this.resetPassword,
@@ -678,6 +688,8 @@ class AppInitResult {
   final LoginWithEmail loginWithEmail;
   final LoginWithPhone loginWithPhone;
   final LoginWithLinkedIn loginWithLinkedIn;
+  final LoginWithGoogle loginWithGoogle;
+  final LoginWithApple loginWithApple;
   final RegisterUser registerUser;
   final ForgotPassword forgotPassword;
   final ResetPassword resetPassword;

@@ -28,6 +28,8 @@ public static class DependencyInjection
         services.Configure<ApiOptions>(configuration.GetSection(ApiOptions.SectionName));
         services.Configure<MonitoringOptions>(configuration.GetSection(MonitoringOptions.SectionName));
         services.Configure<LinkedInAuthOptions>(configuration.GetSection(LinkedInAuthOptions.SectionName));
+        services.Configure<GoogleAuthOptions>(configuration.GetSection(GoogleAuthOptions.SectionName));
+        services.Configure<AppleAuthOptions>(configuration.GetSection(AppleAuthOptions.SectionName));
         services.Configure<RevenueCatOptions>(configuration.GetSection(RevenueCatOptions.SectionName));
         services.Configure<EmailOptions>(configuration.GetSection(EmailOptions.SectionName));
         services.Configure<PasswordResetOptions>(configuration.GetSection(PasswordResetOptions.SectionName));
@@ -35,6 +37,8 @@ public static class DependencyInjection
         services.Configure<ObjectStorageOptions>(configuration.GetSection(ObjectStorageOptions.SectionName));
 
         services.AddHttpClient<ILinkedInAuthService, LinkedInAuthService>();
+        services.AddSingleton<IGoogleAuthService, GoogleAuthService>();
+        services.AddHttpClient<IAppleAuthService, AppleAuthService>();
         services.AddHttpClient<IRevenueCatEntitlementClient, RevenueCatEntitlementClient>(client =>
         {
             client.Timeout = TimeSpan.FromSeconds(15);

@@ -86,6 +86,10 @@ class AuthLocalDataSourceImpl implements AuthLocalDataSource {
       method = LastLoginMethod.phone;
     } else if (methodRaw == LastLoginMethod.linkedin.name) {
       method = LastLoginMethod.linkedin;
+    } else if (methodRaw == LastLoginMethod.google.name) {
+      method = LastLoginMethod.google;
+    } else if (methodRaw == LastLoginMethod.apple.name) {
+      method = LastLoginMethod.apple;
     }
 
     return LastLoginCredentials(

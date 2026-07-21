@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/l10n/api_error_localizer.dart';
+import '../../../../core/network/auth_api_exception.dart';
 import '../../../../core/theme/splash_theme.dart';
 import '../../../../core/widgets/atoms/cardence_app_bar.dart';
 import '../../../../core/widgets/atoms/custom_button.dart';
@@ -13,7 +14,9 @@ import '../../../../core/widgets/organisms/cardence_logo_merge_animation.dart';
 import '../../../../core/widgets/organisms/cardence_scaffold.dart';
 import '../../domain/usecases/forgot_password.dart';
 import '../../domain/usecases/get_last_login_credentials.dart';
+import '../../domain/usecases/login_with_apple.dart';
 import '../../domain/usecases/login_with_email.dart';
+import '../../domain/usecases/login_with_google.dart';
 import '../../domain/usecases/login_with_linkedin.dart';
 import '../../domain/usecases/login_with_phone.dart';
 import '../../domain/usecases/register_user.dart';
@@ -23,6 +26,8 @@ import '../bloc/login_event.dart';
 import '../bloc/login_state.dart';
 import '../widgets/login_email_form.dart';
 import '../widgets/login_phone_form.dart';
+import '../oauth/apple_auth_flow.dart';
+import '../oauth/google_auth_flow.dart';
 import '../oauth/linkedin_auth_flow.dart';
 import '../widgets/login_social_section.dart';
 import '../widgets/register_form.dart';
@@ -35,6 +40,8 @@ class LoginPage extends StatelessWidget {
     required this.loginWithEmail,
     required this.loginWithPhone,
     required this.loginWithLinkedIn,
+    required this.loginWithGoogle,
+    required this.loginWithApple,
     required this.registerUser,
     required this.getLastLoginCredentials,
     required this.forgotPassword,
@@ -45,6 +52,8 @@ class LoginPage extends StatelessWidget {
   final LoginWithEmail loginWithEmail;
   final LoginWithPhone loginWithPhone;
   final LoginWithLinkedIn loginWithLinkedIn;
+  final LoginWithGoogle loginWithGoogle;
+  final LoginWithApple loginWithApple;
   final RegisterUser registerUser;
   final GetLastLoginCredentials getLastLoginCredentials;
   final ForgotPassword forgotPassword;
@@ -58,6 +67,8 @@ class LoginPage extends StatelessWidget {
         loginWithEmail: loginWithEmail,
         loginWithPhone: loginWithPhone,
         loginWithLinkedIn: loginWithLinkedIn,
+        loginWithGoogle: loginWithGoogle,
+        loginWithApple: loginWithApple,
         registerUser: registerUser,
         getLastLoginCredentials: getLastLoginCredentials,
       )..add(const LoginStarted()),
@@ -142,10 +153,65 @@ class _AuthViewState extends State<_AuthView>
       context.read<LoginBloc>().add(
             LoginLinkedInSubmitted(authorizationCode: code),
           );
-    } catch (_) {
+    } catch (e) {
       if (!context.mounted) {
         return;
       }
+      _showAuthErrorDialog(
+        context,
+        e is AuthApiException ? e.message : context.l10n.linkedinLoginFailed,
+      );
+    }
+  }
+
+  Future<void> _handleGoogleLogin(BuildContext context) async {
+    try {
+      final idToken = await requestGoogleIdToken();
+      if (!context.mounted) {
+        return;
+      }
+      if (idToken == null || idToken.isEmpty) {
+        return;
+      }
+
+      context.read<LoginBloc>().add(LoginGoogleSubmitted(idToken: idToken));
+    } catch (e) {
+      if (!context.mounted) {
+        return;
+      }
+      _showAuthErrorDialog(
+        context,
+        e is AuthApiException ? e.message : context.l10n.googleLoginFailed,
+      );
+    }
+  }
+
+  Future<void> _handleAppleLogin(BuildContext context) async {
+    try {
+      final credential = await requestAppleCredential();
+      if (!context.mounted) {
+        return;
+      }
+      if (credential == null) {
+        return;
+      }
+
+      context.read<LoginBloc>().add(
+            LoginAppleSubmitted(
+              identityToken: credential.identityToken,
+              authorizationCode: credential.authorizationCode,
+              givenName: credential.givenName,
+              familyName: credential.familyName,
+            ),
+          );
+    } catch (e) {
+      if (!context.mounted) {
+        return;
+      }
+      _showAuthErrorDialog(
+        context,
+        e is AuthApiException ? e.message : context.l10n.appleLoginFailed,
+      );
     }
   }
 
@@ -249,6 +315,8 @@ class _AuthViewState extends State<_AuthView>
                     colorScheme: colorScheme,
                     textTheme: textTheme,
                     onForgotPassword: () => _openForgotPassword(context),
+                    onApplePressed: () => _handleAppleLogin(context),
+                    onGooglePressed: () => _handleGoogleLogin(context),
                     onLinkedInPressed: () => _handleLinkedInLogin(context),
                     onRegisterTap: () =>
                         _switchMode(context, AuthScreenMode.register),
@@ -401,6 +469,8 @@ class _LoginScreenContent extends StatelessWidget {
     required this.colorScheme,
     required this.textTheme,
     required this.onForgotPassword,
+    required this.onApplePressed,
+    required this.onGooglePressed,
     required this.onLinkedInPressed,
     required this.onRegisterTap,
   });
@@ -413,6 +483,8 @@ class _LoginScreenContent extends StatelessWidget {
   final ColorScheme colorScheme;
   final TextTheme textTheme;
   final VoidCallback onForgotPassword;
+  final VoidCallback onApplePressed;
+  final VoidCallback onGooglePressed;
   final VoidCallback onLinkedInPressed;
   final VoidCallback onRegisterTap;
 
@@ -461,6 +533,8 @@ class _LoginScreenContent extends StatelessWidget {
             expandToFill: !keyboardVisible,
             bottomInset: bottomInset,
             onForgotPassword: onForgotPassword,
+            onApplePressed: onApplePressed,
+            onGooglePressed: onGooglePressed,
             onLinkedInPressed: onLinkedInPressed,
           ),
         ),
@@ -525,6 +599,8 @@ class _LoginFormContent extends StatefulWidget {
   const _LoginFormContent({
     required this.state,
     required this.onForgotPassword,
+    required this.onApplePressed,
+    required this.onGooglePressed,
     required this.onLinkedInPressed,
     this.expandToFill = false,
     this.bottomInset = 0,
@@ -532,6 +608,8 @@ class _LoginFormContent extends StatefulWidget {
 
   final LoginState state;
   final VoidCallback onForgotPassword;
+  final VoidCallback onApplePressed;
+  final VoidCallback onGooglePressed;
   final VoidCallback onLinkedInPressed;
   final bool expandToFill;
   final double bottomInset;
@@ -600,9 +678,12 @@ class _LoginFormContentState extends State<_LoginFormContent> {
   }
 
   Widget _buildSocialSection() {
+    final disabled = state.isLoading;
     return LoginSocialSection(
       isLoading: state.isLoading,
-      onLinkedInPressed: state.isLoading ? null : widget.onLinkedInPressed,
+      onApplePressed: disabled ? null : widget.onApplePressed,
+      onGooglePressed: disabled ? null : widget.onGooglePressed,
+      onLinkedInPressed: disabled ? null : widget.onLinkedInPressed,
     );
   }
 

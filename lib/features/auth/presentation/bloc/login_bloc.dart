@@ -5,7 +5,9 @@ import '../../../../core/l10n/app_error_keys.dart';
 import '../../data/datasources/auth_remote_datasource.dart';
 import '../../domain/entities/last_login_credentials.dart';
 import '../../domain/usecases/get_last_login_credentials.dart';
+import '../../domain/usecases/login_with_apple.dart';
 import '../../domain/usecases/login_with_email.dart';
+import '../../domain/usecases/login_with_google.dart';
 import '../../domain/usecases/login_with_linkedin.dart';
 import '../../domain/usecases/login_with_phone.dart';
 import '../../domain/usecases/register_user.dart';
@@ -17,11 +19,15 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     required LoginWithEmail loginWithEmail,
     required LoginWithPhone loginWithPhone,
     required LoginWithLinkedIn loginWithLinkedIn,
+    required LoginWithGoogle loginWithGoogle,
+    required LoginWithApple loginWithApple,
     required RegisterUser registerUser,
     required GetLastLoginCredentials getLastLoginCredentials,
   })  : _loginWithEmail = loginWithEmail,
         _loginWithPhone = loginWithPhone,
         _loginWithLinkedIn = loginWithLinkedIn,
+        _loginWithGoogle = loginWithGoogle,
+        _loginWithApple = loginWithApple,
         _registerUser = registerUser,
         _getLastLoginCredentials = getLastLoginCredentials,
         super(const LoginState()) {
@@ -31,12 +37,16 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     on<LoginEmailSubmitted>(_onEmailSubmitted);
     on<LoginPhoneSubmitted>(_onPhoneSubmitted);
     on<LoginLinkedInSubmitted>(_onLinkedInSubmitted);
+    on<LoginGoogleSubmitted>(_onGoogleSubmitted);
+    on<LoginAppleSubmitted>(_onAppleSubmitted);
     on<RegisterSubmitted>(_onRegisterSubmitted);
   }
 
   final LoginWithEmail _loginWithEmail;
   final LoginWithPhone _loginWithPhone;
   final LoginWithLinkedIn _loginWithLinkedIn;
+  final LoginWithGoogle _loginWithGoogle;
+  final LoginWithApple _loginWithApple;
   final RegisterUser _registerUser;
   final GetLastLoginCredentials _getLastLoginCredentials;
 
@@ -142,6 +152,49 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     }
   }
 
+  Future<void> _onGoogleSubmitted(
+    LoginGoogleSubmitted event,
+    Emitter<LoginState> emit,
+  ) async {
+    emit(state.copyWith(status: LoginStatus.loading, clearError: true));
+    try {
+      await _loginWithGoogle(idToken: event.idToken);
+      emit(state.copyWith(status: LoginStatus.success));
+    } on AuthApiException catch (e) {
+      emit(
+          state.copyWith(status: LoginStatus.failure, errorMessage: e.message));
+    } catch (_) {
+      emit(state.copyWith(
+        status: LoginStatus.failure,
+        errorMessage: AppErrorKeys.connectionError,
+      ));
+    }
+  }
+
+  Future<void> _onAppleSubmitted(
+    LoginAppleSubmitted event,
+    Emitter<LoginState> emit,
+  ) async {
+    emit(state.copyWith(status: LoginStatus.loading, clearError: true));
+    try {
+      await _loginWithApple(
+        identityToken: event.identityToken,
+        authorizationCode: event.authorizationCode,
+        givenName: event.givenName,
+        familyName: event.familyName,
+      );
+      emit(state.copyWith(status: LoginStatus.success));
+    } on AuthApiException catch (e) {
+      emit(
+          state.copyWith(status: LoginStatus.failure, errorMessage: e.message));
+    } catch (_) {
+      emit(state.copyWith(
+        status: LoginStatus.failure,
+        errorMessage: AppErrorKeys.connectionError,
+      ));
+    }
+  }
+
   Future<void> _onRegisterSubmitted(
     RegisterSubmitted event,
     Emitter<LoginState> emit,
@@ -171,9 +224,3 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     }
   }
 }
-
-// --- OTP handlers (geçici kapalı) ---
-// on<LoginPhoneOtpRequested>(_onPhoneOtpRequested);
-// on<LoginPhoneOtpVerified>(_onPhoneOtpVerified);
-// on<LoginPhoneOtpResendRequested>(_onPhoneOtpResendRequested);
-// on<LoginPhoneStepBack>(_onPhoneStepBack);

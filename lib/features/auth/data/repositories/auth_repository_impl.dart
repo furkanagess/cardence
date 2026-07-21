@@ -288,6 +288,34 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
+  Future<AuthSession> loginWithGoogle({required String idToken}) async {
+    final model = await _remote.loginWithGoogle(idToken: idToken);
+    final session = await _persist(model);
+    await _syncProfileAfterLogin(model);
+    await _rememberLogin(method: LastLoginMethod.google);
+    return session;
+  }
+
+  @override
+  Future<AuthSession> loginWithApple({
+    required String identityToken,
+    String? authorizationCode,
+    String? givenName,
+    String? familyName,
+  }) async {
+    final model = await _remote.loginWithApple(
+      identityToken: identityToken,
+      authorizationCode: authorizationCode,
+      givenName: givenName,
+      familyName: familyName,
+    );
+    final session = await _persist(model);
+    await _syncProfileAfterLogin(model);
+    await _rememberLogin(method: LastLoginMethod.apple);
+    return session;
+  }
+
+  @override
   Future<AuthSession> register({
     required String displayName,
     required String email,

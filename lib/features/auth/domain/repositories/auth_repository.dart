@@ -25,6 +25,15 @@ abstract class AuthRepository {
     required String redirectUri,
   });
 
+  Future<AuthSession> loginWithGoogle({required String idToken});
+
+  Future<AuthSession> loginWithApple({
+    required String identityToken,
+    String? authorizationCode,
+    String? givenName,
+    String? familyName,
+  });
+
   Future<AuthSession> register({
     required String displayName,
     required String email,

@@ -32,6 +32,14 @@ public interface IAuthService
         LoginWithLinkedInRequest request,
         CancellationToken cancellationToken = default);
 
+    Task<AuthServiceResponse<AuthSessionEntity>> LoginWithGoogleAsync(
+        LoginWithGoogleRequest request,
+        CancellationToken cancellationToken = default);
+
+    Task<AuthServiceResponse<AuthSessionEntity>> LoginWithAppleAsync(
+        LoginWithAppleRequest request,
+        CancellationToken cancellationToken = default);
+
     Task<AuthServiceResponse<UserProfileEntity>> GetMeAsync(
         Guid userId,
         CancellationToken cancellationToken = default);

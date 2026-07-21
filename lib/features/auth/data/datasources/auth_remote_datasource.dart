@@ -43,6 +43,15 @@ abstract class AuthRemoteDataSource {
     required String redirectUri,
   });
 
+  Future<AuthSessionModel> loginWithGoogle({required String idToken});
+
+  Future<AuthSessionModel> loginWithApple({
+    required String identityToken,
+    String? authorizationCode,
+    String? givenName,
+    String? familyName,
+  });
+
   Future<UserProfileModel> getMe(String accessToken);
 
   Future<UserProfileModel> completeOnboarding(String accessToken);
@@ -133,6 +142,43 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         'redirectUri': redirectUri,
       },
       fallbackError: 'LinkedIn ile giriş başarısız.',
+    );
+    return _parseSession(json);
+  }
+
+  @override
+  Future<AuthSessionModel> loginWithGoogle({required String idToken}) async {
+    final json = await _client.post(
+      '/LoginWithGoogle',
+      body: {'idToken': idToken},
+      fallbackError: 'Google ile giriş başarısız.',
+    );
+    return _parseSession(json);
+  }
+
+  @override
+  Future<AuthSessionModel> loginWithApple({
+    required String identityToken,
+    String? authorizationCode,
+    String? givenName,
+    String? familyName,
+  }) async {
+    final body = <String, dynamic>{
+      'identityToken': identityToken,
+    };
+    if (authorizationCode != null && authorizationCode.isNotEmpty) {
+      body['authorizationCode'] = authorizationCode;
+    }
+    if (givenName != null && givenName.isNotEmpty) {
+      body['givenName'] = givenName;
+    }
+    if (familyName != null && familyName.isNotEmpty) {
+      body['familyName'] = familyName;
+    }
+    final json = await _client.post(
+      '/LoginWithApple',
+      body: body,
+      fallbackError: 'Apple ile giriş başarısız.',
     );
     return _parseSession(json);
   }

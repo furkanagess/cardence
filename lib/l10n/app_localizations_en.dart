@@ -480,6 +480,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get linkedinIleDevamEt => 'Continue with LinkedIn';
 
   @override
+  String get googleIleDevamEt => 'Continue with Google';
+
+  @override
+  String get appleIleDevamEt => 'Continue with Apple';
+
+  @override
   String get ad => 'First name';
 
   @override
@@ -1568,6 +1574,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get linkedinLoginFailed => 'LinkedIn sign-in failed.';
+
+  @override
+  String get googleLoginFailed => 'Google sign-in failed.';
+
+  @override
+  String get appleLoginFailed => 'Apple sign-in failed.';
 
   @override
   String get profilePhotoUploadFailed => 'Could not upload profile photo.';

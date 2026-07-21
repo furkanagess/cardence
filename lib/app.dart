@@ -20,7 +20,9 @@ import 'features/auth/domain/usecases/get_auth_session.dart';
 import 'features/auth/domain/usecases/forgot_password.dart';
 import 'features/auth/domain/usecases/get_current_user.dart';
 import 'features/auth/domain/usecases/get_last_login_credentials.dart';
+import 'features/auth/domain/usecases/login_with_apple.dart';
 import 'features/auth/domain/usecases/login_with_email.dart';
+import 'features/auth/domain/usecases/login_with_google.dart';
 import 'features/auth/domain/usecases/login_with_linkedin.dart';
 import 'features/auth/domain/usecases/login_with_phone.dart';
 import 'features/auth/domain/usecases/logout.dart';
@@ -100,6 +102,8 @@ class App extends StatefulWidget {
     required this.loginWithEmail,
     required this.loginWithPhone,
     required this.loginWithLinkedIn,
+    required this.loginWithGoogle,
+    required this.loginWithApple,
     required this.registerUser,
     required this.getLastLoginCredentials,
     required this.forgotPassword,
@@ -168,6 +172,8 @@ class App extends StatefulWidget {
       loginWithEmail: init.loginWithEmail,
       loginWithPhone: init.loginWithPhone,
       loginWithLinkedIn: init.loginWithLinkedIn,
+      loginWithGoogle: init.loginWithGoogle,
+      loginWithApple: init.loginWithApple,
       registerUser: init.registerUser,
       getLastLoginCredentials: init.getLastLoginCredentials,
       forgotPassword: init.forgotPassword,
@@ -232,6 +238,8 @@ class App extends StatefulWidget {
   final LoginWithEmail loginWithEmail;
   final LoginWithPhone loginWithPhone;
   final LoginWithLinkedIn loginWithLinkedIn;
+  final LoginWithGoogle loginWithGoogle;
+  final LoginWithApple loginWithApple;
   final RegisterUser registerUser;
   final GetLastLoginCredentials getLastLoginCredentials;
   final ForgotPassword forgotPassword;
@@ -555,6 +563,8 @@ class _AppState extends State<App> {
           loginWithEmail: widget.loginWithEmail,
           loginWithPhone: widget.loginWithPhone,
           loginWithLinkedIn: widget.loginWithLinkedIn,
+          loginWithGoogle: widget.loginWithGoogle,
+          loginWithApple: widget.loginWithApple,
           registerUser: widget.registerUser,
           getLastLoginCredentials: widget.getLastLoginCredentials,
           forgotPassword: widget.forgotPassword,

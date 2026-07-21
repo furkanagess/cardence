@@ -64,6 +64,10 @@ class ApiErrorLocalizer {
         return l10n.invalidProfileResponse;
       case 'linkedinLoginFailed':
         return l10n.linkedinLoginFailed;
+      case 'googleLoginFailed':
+        return l10n.googleLoginFailed;
+      case 'appleLoginFailed':
+        return l10n.appleLoginFailed;
       case 'profilePhotoUploadFailed':
         return l10n.profilePhotoUploadFailed;
       case 'serverResponseUnreadable':
@@ -164,6 +168,8 @@ class ApiErrorLocalizer {
     'Profil bilgisi alınamadı.': 'profileInfoUnavailable',
     'Geçersiz profil yanıtı.': 'invalidProfileResponse',
     'LinkedIn ile giriş başarısız.': 'linkedinLoginFailed',
+    'Google ile giriş başarısız.': 'googleLoginFailed',
+    'Apple ile giriş başarısız.': 'appleLoginFailed',
     'Profil fotoğrafı yüklenemedi.': 'profilePhotoUploadFailed',
     'Sunucu yanıtı okunamadı.': 'serverResponseUnreadable',
     'Kart kimliği eksik.': 'cardIdMissing',
