@@ -1180,6 +1180,25 @@ public sealed class AuthService : IAuthService
             "Profil fotoğrafı güncellendi.");
     }
 
+    public async Task<AuthServiceResponse<object?>> DeleteAccountAsync(
+        Guid userId,
+        CancellationToken cancellationToken = default)
+    {
+        var user = await _userRepository.GetByIdAsync(userId, cancellationToken);
+        if (user is null)
+        {
+            return AuthServiceResponse<object?>.Fail(
+                AuthErrorCodes.UserNotFound,
+                "UserNotFound",
+                "Kullanıcı bulunamadı.");
+        }
+
+        await _userRepository.DeleteAsync(user, cancellationToken);
+        _logger.LogInformation("User account deleted: {UserId}", userId);
+
+        return AuthServiceResponse<object?>.Ok(null, "Hesap silindi.");
+    }
+
     private async Task<AuthServiceResponse<object?>> SendResetOtpInternalAsync(
         string otpKey,
         string target,

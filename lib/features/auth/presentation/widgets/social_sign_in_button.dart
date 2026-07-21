@@ -12,6 +12,7 @@ class SocialSignInButton extends StatelessWidget {
     required this.onPressed,
     this.isLoading = false,
     this.loadingColor,
+    this.iconOnly = false,
   });
 
   final String label;
@@ -20,7 +21,11 @@ class SocialSignInButton extends StatelessWidget {
   final bool isLoading;
   final Color? loadingColor;
 
+  /// Kare, yalnızca ikon — yan yana sosyal satır için.
+  final bool iconOnly;
+
   static const double height = 48;
+  static const double iconSize = 52;
   static const double radius = 10;
 
   @override
@@ -35,58 +40,82 @@ class SocialSignInButton extends StatelessWidget {
     final textColor =
         isDark ? AppColors.textPrimaryDark : AppColors.textPrimary;
 
-    return SizedBox(
-      width: double.infinity,
-      height: height,
-      child: Material(
-        color: backgroundColor,
-        elevation: 0,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(radius),
-          side: BorderSide(
-            color: isInteractive
-                ? borderColor
-                : borderColor.withValues(alpha: 0.55),
-          ),
-        ),
-        child: InkWell(
-          onTap: isInteractive ? onPressed : null,
-          borderRadius: BorderRadius.circular(radius),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: isLoading
-                ? Center(
-                    child: SizedBox(
-                      width: 22,
-                      height: 22,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: loadingColor ?? theme.colorScheme.primary,
-                      ),
-                    ),
-                  )
-                : Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      SizedBox(width: 22, height: 22, child: icon),
-                      const SizedBox(width: 12),
-                      Flexible(
-                        child: Text(
-                          label,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: theme.textTheme.titleSmall?.copyWith(
-                            color: textColor,
-                            fontWeight: FontWeight.w600,
-                            letterSpacing: -0.1,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-          ),
+    final side = iconOnly ? iconSize : height;
+
+    final child = Material(
+      color: backgroundColor,
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(radius),
+        side: BorderSide(
+          color: isInteractive
+              ? borderColor
+              : borderColor.withValues(alpha: 0.55),
         ),
       ),
+      child: InkWell(
+        onTap: isInteractive ? onPressed : null,
+        borderRadius: BorderRadius.circular(radius),
+        child: iconOnly
+            ? Center(
+                child: isLoading
+                    ? SizedBox(
+                        width: 22,
+                        height: 22,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: loadingColor ?? theme.colorScheme.primary,
+                        ),
+                      )
+                    : SizedBox(width: 24, height: 24, child: icon),
+              )
+            : Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: isLoading
+                    ? Center(
+                        child: SizedBox(
+                          width: 22,
+                          height: 22,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: loadingColor ?? theme.colorScheme.primary,
+                          ),
+                        ),
+                      )
+                    : Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          SizedBox(width: 22, height: 22, child: icon),
+                          const SizedBox(width: 12),
+                          Flexible(
+                            child: Text(
+                              label,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: theme.textTheme.titleSmall?.copyWith(
+                                color: textColor,
+                                fontWeight: FontWeight.w600,
+                                letterSpacing: -0.1,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+              ),
+      ),
+    );
+
+    final sized = SizedBox(
+      width: iconOnly ? side : double.infinity,
+      height: side,
+      child: child,
+    );
+
+    if (!iconOnly) return sized;
+
+    return Tooltip(
+      message: label,
+      child: sized,
     );
   }
 }

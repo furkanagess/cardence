@@ -10,6 +10,7 @@ import '../../features/auth/data/datasources/auth_remote_datasource.dart';
 import '../../features/auth/data/repositories/auth_repository_impl.dart';
 import '../../features/auth/domain/entities/user_profile.dart';
 import '../../features/auth/domain/usecases/complete_onboarding_remote.dart';
+import '../../features/auth/domain/usecases/delete_account.dart';
 import '../../features/auth/domain/usecases/forgot_password.dart';
 import '../../features/auth/domain/usecases/get_auth_session.dart';
 import '../../features/auth/domain/usecases/get_current_user.dart';
@@ -266,6 +267,7 @@ class AppInit {
       premiumPurchaseSuccessHandler: premiumPurchaseSuccessHandler,
       getLastLoginCredentials: auth.getLastLoginCredentials,
       logout: auth.logout,
+      deleteAccount: auth.deleteAccount,
       uploadProfilePhoto: auth.uploadProfilePhoto,
       getOnboardingCompleted: onboarding.getOnboardingCompleted,
       completeOnboarding: onboarding.completeOnboarding,
@@ -473,6 +475,7 @@ class AppInit {
     RefreshCurrentUser refreshCurrentUser,
     GetLastLoginCredentials getLastLoginCredentials,
     Logout logout,
+    DeleteAccount deleteAccount,
     UploadProfilePhoto uploadProfilePhoto,
     CompleteOnboardingRemote completeOnboardingRemote,
   }) _initAuth({
@@ -502,6 +505,7 @@ class AppInit {
       refreshCurrentUser: RefreshCurrentUser(repo),
       getLastLoginCredentials: GetLastLoginCredentials(repo),
       logout: Logout(repo),
+      deleteAccount: DeleteAccount(repo),
       uploadProfilePhoto: UploadProfilePhoto(repo),
       completeOnboardingRemote: CompleteOnboardingRemote(repo),
     );
@@ -632,6 +636,7 @@ class AppInitResult {
     required this.premiumPurchaseSuccessHandler,
     required this.getLastLoginCredentials,
     required this.logout,
+    required this.deleteAccount,
     required this.uploadProfilePhoto,
     required this.getOnboardingCompleted,
     required this.completeOnboarding,
@@ -698,6 +703,7 @@ class AppInitResult {
   final PremiumPurchaseSuccessHandler premiumPurchaseSuccessHandler;
   final GetLastLoginCredentials getLastLoginCredentials;
   final Logout logout;
+  final DeleteAccount deleteAccount;
   final UploadProfilePhoto uploadProfilePhoto;
   final GetOnboardingCompleted getOnboardingCompleted;
   final Future<void> Function() completeOnboarding;

@@ -68,6 +68,8 @@ class ApiErrorLocalizer {
         return l10n.googleLoginFailed;
       case 'appleLoginFailed':
         return l10n.appleLoginFailed;
+      case 'deleteAccountFailed':
+        return l10n.deleteAccountFailed;
       case 'profilePhotoUploadFailed':
         return l10n.profilePhotoUploadFailed;
       case 'serverResponseUnreadable':
@@ -170,6 +172,8 @@ class ApiErrorLocalizer {
     'LinkedIn ile giriş başarısız.': 'linkedinLoginFailed',
     'Google ile giriş başarısız.': 'googleLoginFailed',
     'Apple ile giriş başarısız.': 'appleLoginFailed',
+    'Hesap silindi.': 'deleteAccountSuccess',
+    'Hesap silinemedi.': 'deleteAccountFailed',
     'Profil fotoğrafı yüklenemedi.': 'profilePhotoUploadFailed',
     'Sunucu yanıtı okunamadı.': 'serverResponseUnreadable',
     'Kart kimliği eksik.': 'cardIdMissing',

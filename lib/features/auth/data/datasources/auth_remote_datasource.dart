@@ -60,6 +60,8 @@ abstract class AuthRemoteDataSource {
     required String filePath,
     required String accessToken,
   });
+
+  Future<void> deleteAccount(String accessToken);
 }
 
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
@@ -288,5 +290,14 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       fallbackError: 'Profil fotoğrafı yüklenemedi.',
     );
     return _parseProfile(json);
+  }
+
+  @override
+  Future<void> deleteAccount(String accessToken) async {
+    await _client.delete(
+      '/DeleteAccount',
+      accessToken: accessToken,
+      fallbackError: 'Hesap silinemedi.',
+    );
   }
 }

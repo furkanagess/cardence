@@ -62,6 +62,9 @@ abstract class AuthRepository {
 
   Future<void> completeOnboardingOnServer();
 
+  /// Sunucuda hesabı kalıcı siler, ardından yerel oturumu temizler.
+  Future<void> deleteAccount();
+
   Future<void> logout();
 
   Future<void> clearSession();

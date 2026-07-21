@@ -349,7 +349,9 @@ Başarılı oturum yanıtlarında `entity` alanı `AuthSessionEntity` döner:
 | `POST` | `/SendOTP`               | Telefona OTP gönder                               | Hayır |
 | `POST` | `/RefreshAuthentication` | Refresh token ile yeni access token               | Hayır |
 
-**Planlanan (henüz implemente değil):** `/LoginWithGoogle`, `/LoginWithApple`, `/LoginWithLinkedIn`, `/Me`, `/UpdateProfile`, `/DeleteAccount`
+**Planlanan (henüz implemente değil):** `/UpdateProfile`
+
+**Kimlik doğrulama (mevcut):** `/Authentication`, `/Register`, `/LoginWithPhone`, `/LoginWithEmail`, `/LoginWithLinkedIn`, `/LoginWithGoogle`, `/LoginWithApple`, `/Me`, `/DeleteAccount`, `/ForgotPassword`, `/ResetPassword`, `/CompleteOnboarding`, `/UploadProfilePhoto`, `/RefreshAuthentication`
 
 **POST `/Authentication` request:**
 

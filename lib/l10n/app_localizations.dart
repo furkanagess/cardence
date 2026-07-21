@@ -1274,6 +1274,30 @@ abstract class AppLocalizations {
   /// **'Çıkış yap'**
   String get kYap;
 
+  /// No description provided for @deleteAccountTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Hesabı sil'**
+  String get deleteAccountTitle;
+
+  /// No description provided for @deleteAccountConfirmAction.
+  ///
+  /// In tr, this message translates to:
+  /// **'Hesabı sil'**
+  String get deleteAccountConfirmAction;
+
+  /// No description provided for @deleteAccountConfirmMessage.
+  ///
+  /// In tr, this message translates to:
+  /// **'Hesabınız ve ilişkili verileriniz kalıcı olarak silinecektir. Bu işlem geri alınamaz.'**
+  String get deleteAccountConfirmMessage;
+
+  /// No description provided for @deleteAccountFailed.
+  ///
+  /// In tr, this message translates to:
+  /// **'Hesap silinemedi. Lütfen tekrar deneyin.'**
+  String get deleteAccountFailed;
+
   /// No description provided for @kamera.
   ///
   /// In tr, this message translates to:

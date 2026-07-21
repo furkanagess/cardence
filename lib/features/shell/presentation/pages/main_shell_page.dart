@@ -93,6 +93,7 @@ class MainShellPage extends StatefulWidget {
     required this.localePreference,
     required this.onLocaleChanged,
     required this.onLogout,
+    required this.onDeleteAccount,
     required this.uploadProfilePhoto,
     required this.submitSupportRequest,
     required this.requestAppReview,
@@ -134,6 +135,7 @@ class MainShellPage extends StatefulWidget {
   final LocalePreference localePreference;
   final ValueChanged<LocalePreference> onLocaleChanged;
   final Future<void> Function() onLogout;
+  final Future<void> Function() onDeleteAccount;
   final UploadProfilePhoto uploadProfilePhoto;
   final SubmitSupportRequest submitSupportRequest;
   final RequestAppReview requestAppReview;
@@ -369,6 +371,7 @@ class _MainShellPageState extends State<MainShellPage> {
             currentLocale: widget.localePreference,
             onLocaleChanged: widget.onLocaleChanged,
             onLogout: widget.onLogout,
+            onDeleteAccount: widget.onDeleteAccount,
             userDisplayName: displayName,
             userEmail: user.email ?? draft?.email,
             userPhotoUrl: draft?.photoUrl ?? user.photoUrl,

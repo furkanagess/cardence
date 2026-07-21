@@ -632,6 +632,20 @@ class AppLocalizationsEn extends AppLocalizations {
   String get kYap => 'Log out';
 
   @override
+  String get deleteAccountTitle => 'Delete account';
+
+  @override
+  String get deleteAccountConfirmAction => 'Delete account';
+
+  @override
+  String get deleteAccountConfirmMessage =>
+      'Your account and associated data will be permanently deleted. This cannot be undone.';
+
+  @override
+  String get deleteAccountFailed =>
+      'Could not delete account. Please try again.';
+
+  @override
   String get kamera => 'Camera';
 
   @override

@@ -12,20 +12,23 @@ class AppleSignInButton extends StatelessWidget {
     required this.onPressed,
     this.isLoading = false,
     this.label,
+    this.iconOnly = true,
   });
 
   final VoidCallback? onPressed;
   final bool isLoading;
   final String? label;
+  final bool iconOnly;
 
   @override
   Widget build(BuildContext context) {
     return SocialSignInButton(
       label: label ?? context.l10n.appleIleDevamEt,
-      icon: const AppleBrandIcon(size: 22),
+      icon: const AppleBrandIcon(size: 24),
       onPressed: onPressed,
       isLoading: isLoading,
       loadingColor: AppColors.appleBrand,
+      iconOnly: iconOnly,
     );
   }
 }

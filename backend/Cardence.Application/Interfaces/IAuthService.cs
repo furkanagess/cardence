@@ -62,4 +62,8 @@ public interface IAuthService
         string contentType,
         long contentLength,
         CancellationToken cancellationToken = default);
+
+    Task<AuthServiceResponse<object?>> DeleteAccountAsync(
+        Guid userId,
+        CancellationToken cancellationToken = default);
 }

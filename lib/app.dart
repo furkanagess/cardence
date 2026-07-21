@@ -17,6 +17,7 @@ import 'core/widgets/molecules/chuck_fab_overlay.dart';
 import 'core/widgets/organisms/cardence_logo_merge_animation.dart';
 import 'core/widgets/organisms/cardence_scaffold.dart';
 import 'features/auth/domain/usecases/get_auth_session.dart';
+import 'features/auth/domain/usecases/delete_account.dart';
 import 'features/auth/domain/usecases/forgot_password.dart';
 import 'features/auth/domain/usecases/get_current_user.dart';
 import 'features/auth/domain/usecases/get_last_login_credentials.dart';
@@ -110,6 +111,7 @@ class App extends StatefulWidget {
     required this.resetPassword,
     required this.getCurrentUser,
     required this.logout,
+    required this.deleteAccount,
     required this.uploadProfilePhoto,
     required this.getOnboardingCompleted,
     required this.completeOnboarding,
@@ -180,6 +182,7 @@ class App extends StatefulWidget {
       resetPassword: init.resetPassword,
       getCurrentUser: init.getCurrentUser,
       logout: init.logout,
+      deleteAccount: init.deleteAccount,
       uploadProfilePhoto: init.uploadProfilePhoto,
       getOnboardingCompleted: init.getOnboardingCompleted,
       completeOnboarding: init.completeOnboarding,
@@ -246,6 +249,7 @@ class App extends StatefulWidget {
   final ResetPassword resetPassword;
   final GetCurrentUser getCurrentUser;
   final Logout logout;
+  final DeleteAccount deleteAccount;
   final UploadProfilePhoto uploadProfilePhoto;
   final GetOnboardingCompleted getOnboardingCompleted;
   final Future<void> Function() completeOnboarding;
@@ -526,6 +530,13 @@ class _AppState extends State<App> {
     await widget.logout();
   }
 
+  Future<void> _onDeleteAccount() async {
+    await widget.deleteAccount();
+    if (!mounted) return;
+    widget.rootNavigatorKey.currentState?.popUntil((route) => route.isFirst);
+    setState(() => _destination = _AppDestination.login);
+  }
+
   void _onThemeChanged(ThemePreference preference) async {
     await widget.setThemePreference(preference);
     if (!mounted) return;
@@ -618,6 +629,7 @@ class _AppState extends State<App> {
           localePreference: _localePreference,
           onLocaleChanged: _onLocaleChanged,
           onLogout: _onLogout,
+          onDeleteAccount: _onDeleteAccount,
           uploadProfilePhoto: widget.uploadProfilePhoto,
           submitSupportRequest: widget.submitSupportRequest,
           requestAppReview: widget.requestAppReview,

@@ -9,4 +9,5 @@ public interface IUserRepository
     Task<User?> GetByPhoneAsync(string phone, CancellationToken cancellationToken = default);
     Task AddAsync(User user, CancellationToken cancellationToken = default);
     Task UpdateAsync(User user, CancellationToken cancellationToken = default);
+    Task DeleteAsync(User user, CancellationToken cancellationToken = default);
 }

@@ -197,4 +197,20 @@ public sealed class AuthenticationController : ControllerBase
 
         return Ok(response);
     }
+
+    [Authorize]
+    [HttpDelete("DeleteAccount")]
+    [ProducesResponseType(typeof(AuthServiceResponse<object?>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<AuthServiceResponse<object?>>> DeleteAccount(
+        CancellationToken cancellationToken)
+    {
+        var userId = _currentUserService.GetRequiredUserId();
+        var response = await _authService.DeleteAccountAsync(userId, cancellationToken);
+        if (!response.Success)
+        {
+            return BadRequest(response);
+        }
+
+        return Ok(response);
+    }
 }

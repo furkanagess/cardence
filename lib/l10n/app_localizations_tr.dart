@@ -633,6 +633,19 @@ class AppLocalizationsTr extends AppLocalizations {
   String get kYap => 'Çıkış yap';
 
   @override
+  String get deleteAccountTitle => 'Hesabı sil';
+
+  @override
+  String get deleteAccountConfirmAction => 'Hesabı sil';
+
+  @override
+  String get deleteAccountConfirmMessage =>
+      'Hesabınız ve ilişkili verileriniz kalıcı olarak silinecektir. Bu işlem geri alınamaz.';
+
+  @override
+  String get deleteAccountFailed => 'Hesap silinemedi. Lütfen tekrar deneyin.';
+
+  @override
   String get kamera => 'Kamera';
 
   @override

@@ -456,6 +456,16 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
+  Future<void> deleteAccount() async {
+    final token = await _coordinator?.getValidAccessToken();
+    if (token == null || token.isEmpty) {
+      throw AuthApiException('Oturum bulunamadı. Lütfen tekrar giriş yapın.');
+    }
+    await _remote.deleteAccount(token);
+    await clearSession();
+  }
+
+  @override
   Future<void> logout() => clearSession();
 
   @override
