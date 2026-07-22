@@ -1,3 +1,8 @@
 // Tüm iOS hedefleri için ortak imza ayarları (App Store archive dahil).
 DEVELOPMENT_TEAM = 4NZ23FB632
 CODE_SIGN_STYLE = Automatic
+
+// Apple Silicon Mac'te Xcode / simülatörün açılması için.
+// Generated.xcconfig ve bazı pod'lar arm64 sim'i dışlayabiliyor; bunu geri al.
+EXCLUDED_ARCHS[sdk=iphonesimulator*]=i386
+EXCLUDED_ARCHS[sdk=iphoneos*]=armv7
