@@ -1,9 +1,11 @@
+import 'package:flutter/foundation.dart';
+
+import '../../../auth/domain/usecases/get_auth_session.dart';
 import '../../../auth/domain/usecases/refresh_current_user.dart';
 import '../../../../core/user_data/sync_user_profile_cards.dart';
 import '../../../subscriptions/domain/entities/wallet_paywall_result.dart';
 import '../../../subscriptions/domain/repositories/subscription_repository.dart';
 import '../../../subscriptions/domain/usecases/finalize_premium_wallet_activation.dart';
-import '../../../plans/domain/entities/plan_tier.dart';
 import '../../../plans/domain/usecases/get_plan_entitlements.dart';
 
 /// RevenueCat paywall üzerinden satın alma ve sunucu kotası senkronizasyonu.
@@ -14,6 +16,7 @@ class UpgradeWalletPlan {
     this._finalizePremiumWalletActivation,
     this._refreshCurrentUser,
     this._syncUserProfileCards,
+    this._getAuthSession,
   );
 
   final SubscriptionRepository _subscriptionRepository;
@@ -21,12 +24,15 @@ class UpgradeWalletPlan {
   final FinalizePremiumWalletActivation _finalizePremiumWalletActivation;
   final RefreshCurrentUser _refreshCurrentUser;
   final SyncUserProfileCards _syncUserProfileCards;
+  final GetAuthSession _getAuthSession;
 
   Future<bool> call({
     bool onlyIfNeeded = false,
     bool? useDarkAppearance,
     String? preferredLocale,
   }) async {
+    await _tryEnsureRevenueCatIdentity();
+
     final result = await _subscriptionRepository.presentWalletPaywall(
       onlyIfNeeded: onlyIfNeeded,
       useDarkAppearance: useDarkAppearance,
@@ -40,88 +46,85 @@ class UpgradeWalletPlan {
       case WalletPaywallResult.notPresented:
         if (!onlyIfNeeded &&
             await _subscriptionRepository.hasPremiumWalletEntitlement()) {
-          await _completePremiumActivation();
+          await _syncAfterPurchase();
           return true;
         }
         return false;
       case WalletPaywallResult.purchased:
       case WalletPaywallResult.restored:
-        await _completePremiumActivation();
+        await _syncAfterPurchase();
         return true;
     }
   }
 
-  Future<void> _completePremiumActivation() async {
-    await _waitForRevenueCatEntitlement();
-    await _finalizeWithRetry();
-    await _waitForBackendPremiumEntitlement();
-    await _refreshProfileAfterPurchase();
-  }
-
-  Future<void> _finalizeWithRetry() async {
-    for (var attempt = 0; attempt < 3; attempt++) {
-      try {
-        await _finalizePremiumWalletActivation();
-        return;
-      } catch (_) {
-        if (attempt < 2) {
-          await Future<void>.delayed(const Duration(seconds: 1));
-        }
-      }
+  Future<void> _tryEnsureRevenueCatIdentity() async {
+    try {
+      final session = await _getAuthSession();
+      final userId = session?.userId.trim() ?? '';
+      if (userId.isEmpty) return;
+      await _subscriptionRepository.identifyUser(userId);
+    } catch (error, stackTrace) {
+      debugPrint('[UpgradeWalletPlan] RC identify failed: $error');
+      debugPrintStack(stackTrace: stackTrace);
     }
   }
 
-  Future<void> _refreshProfileAfterPurchase() async {
-    for (var attempt = 0; attempt < 3; attempt++) {
+  /// Önce `POST /UpgradeWalletPlan` (DB premium), sonra `/Me` yenile.
+  /// RC identify hatası sunucu yazımını engellemez.
+  Future<void> _syncAfterPurchase() async {
+    for (var attempt = 0; attempt < 5; attempt++) {
       try {
+        final quota = await _finalizePremiumWalletActivation(
+          requirePremium: true,
+        );
+        debugPrint(
+          '[UpgradeWalletPlan] UpgradeWalletPlan ok '
+          '(attempt=${attempt + 1}, tier=${quota.tier.name})',
+        );
+
         final profile = await _refreshCurrentUser();
+        await _syncUserProfileCards(profile);
+        debugPrint(
+          '[UpgradeWalletPlan] /Me premium=${profile.isPremium} '
+          'isOwnerPremium=${profile.isOwnerPremium}',
+        );
         if (profile.isOwnerPremium || profile.isPremium) {
-          await _syncUserProfileCards(profile);
+          await _refreshPlanEntitlements();
           return;
         }
-      } catch (_) {
-        // Sonraki denemeye geç.
+      } catch (error, stackTrace) {
+        debugPrint(
+          '[UpgradeWalletPlan] sync attempt ${attempt + 1} failed: $error',
+        );
+        debugPrintStack(stackTrace: stackTrace);
       }
 
-      if (attempt < 2) {
-        await Future<void>.delayed(const Duration(seconds: 1));
+      if (attempt < 4) {
+        await Future<void>.delayed(Duration(milliseconds: 400 * (attempt + 1)));
       }
     }
 
     try {
+      await _finalizePremiumWalletActivation(requirePremium: false);
+    } catch (error) {
+      debugPrint('[UpgradeWalletPlan] final UpgradeWalletPlan failed: $error');
+    }
+    try {
       final profile = await _refreshCurrentUser();
       await _syncUserProfileCards(profile);
-    } catch (_) {
-      // Başarı handler ikinci kez dener.
+      debugPrint(
+        '[UpgradeWalletPlan] final /Me premium=${profile.isPremium} '
+        'isOwnerPremium=${profile.isOwnerPremium}',
+      );
+    } catch (error) {
+      debugPrint('[UpgradeWalletPlan] final /Me failed: $error');
     }
+    await _refreshPlanEntitlements();
   }
 
-  Future<void> _waitForRevenueCatEntitlement() async {
-    for (var attempt = 0; attempt < 10; attempt++) {
-      if (await _subscriptionRepository.hasPremiumWalletEntitlement()) {
-        return;
-      }
-
-      if (attempt < 9) {
-        await Future<void>.delayed(const Duration(milliseconds: 500));
-      }
-    }
-  }
-
-  Future<bool> _waitForBackendPremiumEntitlement() async {
-    for (var attempt = 0; attempt < 5; attempt++) {
-      final entitlements = await _getPlanEntitlements();
-      if (entitlements.tier == PlanTier.premium ||
-          entitlements.tier == PlanTier.business ||
-          entitlements.tier == PlanTier.enterprise) {
-        return true;
-      }
-
-      if (attempt < 4) {
-        await Future<void>.delayed(const Duration(seconds: 1));
-      }
-    }
-
-    return false;
+  Future<void> _refreshPlanEntitlements() async {
+    try {
+      await _getPlanEntitlements();
+    } catch (_) {}
   }
 }

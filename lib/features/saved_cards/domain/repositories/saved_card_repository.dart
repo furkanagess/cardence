@@ -15,7 +15,10 @@ abstract class SavedCardRepository {
   Future<void> saveCard(SavedCard card);
   Future<void> deleteCard(String cardId);
   Future<SavedCardsWalletQuota> getWalletQuota();
-  Future<void> syncWalletPremium();
+
+  /// Sunucuda premium + isOwnerPremium yazar; dönen kota premium olmalıdır.
+  Future<SavedCardsWalletQuota> syncWalletPremium();
+
   Future<void> cacheFromProfile(List<SavedCard> cards);
 
   Future<List<WalletCardInvitation>> getPendingWalletCardInvitations();

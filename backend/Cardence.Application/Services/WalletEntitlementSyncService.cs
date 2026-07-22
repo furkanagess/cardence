@@ -26,43 +26,23 @@ public sealed class WalletEntitlementSyncService : IWalletEntitlementSyncService
         var rcActive = await _revenueCatClient.HasActivePremiumEntitlementAsync(
             userId,
             cancellationToken);
-        if (!rcActive.HasValue)
+        if (rcActive != true)
         {
+            // false/null: Me/login poll'larında fresh purchase ile yarışıp
+            // premium'u geri alma. İptal / süre bitimi webhook ile uygulanır.
             return;
         }
 
-        await ApplyTierAsync(userId, rcActive.Value, cancellationToken);
+        await ApplyTierAsync(userId, isPremium: true, cancellationToken);
     }
 
     public async Task SyncUserAfterClientPurchaseAsync(
         Guid userId,
         CancellationToken cancellationToken = default)
     {
-        var rcActive = await _revenueCatClient.HasActivePremiumEntitlementAsync(
-            userId,
-            cancellationToken);
-        if (rcActive == true)
-        {
-            await ApplyTierAsync(userId, isPremium: true, cancellationToken);
-            return;
-        }
-
-        if (rcActive == false)
-        {
-            await ApplyTierAsync(userId, isPremium: false, cancellationToken);
-            return;
-        }
-
-        var entitlement = await _walletRepository.GetOrCreateAsync(userId, cancellationToken);
-        if (!WalletConstants.IsPremiumOrHigher(entitlement.Tier))
-        {
-            entitlement = await _walletRepository.UpgradeToPremiumAsync(userId, cancellationToken);
-        }
-
-        await _ownerPremiumSync.SyncForUserAsync(
-            userId,
-            entitlement.Tier,
-            cancellationToken);
+        // İstemci satın alma sonrası: RC API gecikse / entitlement id eşleşmese
+        // bile DB'ye premium yaz. Downgrade yalnızca EXPIRATION/REFUND webhook.
+        await ApplyTierAsync(userId, isPremium: true, cancellationToken);
     }
 
     private async Task ApplyTierAsync(

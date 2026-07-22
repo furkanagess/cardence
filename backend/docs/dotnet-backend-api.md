@@ -692,7 +692,7 @@ Flutter: `GetPlanEntitlements`, RevenueCat purchase/restore, backend webhook syn
 | Method | Endpoint              | Açıklama                                | Auth           |
 | ------ | --------------------- | --------------------------------------- | -------------- |
 | `GET`  | `/WalletEntitlement`  | Mevcut plan                             | Evet           |
-| `POST` | `/UpgradeWalletPlan`  | Legacy kota refresh; Premium grant etmez | Evet           |
+| `POST` | `/UpgradeWalletPlan`  | Satın alma sonrası premium + isOwnerPremium yazar | Evet           |
 | `POST` | `/RevenueCatWebhook`  | RevenueCat entitlement event senkronu   | Webhook secret |
 
 **POST `/RevenueCatWebhook` auth:**
@@ -703,6 +703,16 @@ RevenueCat webhook isteği aşağıdaki header'lardan biriyle `RevenueCat:Webhoo
 - `X-RevenueCat-Auth: {token}`
 
 Endpoint idempotency için `event.id` değerini `subscription_events.provider_event_id` alanında saklar.
+
+**Webhook → wallet tier:**
+
+| Event | Etki |
+| ----- | ---- |
+| `INITIAL_PURCHASE`, `RENEWAL`, `UNCANCELLATION`, `PRODUCT_CHANGE`, `TRANSFER`, `NON_RENEWING_PURCHASE`, … | `premium` |
+| `EXPIRATION`, `REFUND` | `free` |
+| `CANCELLATION`, `SUBSCRIBER_ALIAS`, diğer / bilinmeyen | Tier değiştirilmez |
+
+`/Me.premium` kaynağı `wallet_entitlements.tier` (UpgradeWalletPlan + webhook). Me içinde RevenueCat poll yapılmaz.
 
 **Plan limitleri:**
 

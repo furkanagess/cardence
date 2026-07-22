@@ -14,8 +14,6 @@ class PlanCubit extends Cubit<PlanState> {
   Future<void> load() => refresh();
 
   Future<void> refresh() async {
-    if (state.isLoading) return;
-
     emit(state.copyWith(status: PlanStatus.loading, clearError: true));
     try {
       final entitlements = await _getPlanEntitlements();

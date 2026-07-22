@@ -99,6 +99,41 @@ public sealed class RevenueCatWebhookServiceTests
     }
 
     [Fact]
+    public async Task ProcessAsync_DoesNotChangeTier_WhenSubscriberAliasArrives()
+    {
+        var body = WebhookBody("event_alias", "SUBSCRIBER_ALIAS");
+        _eventRepository.ExistsAsync("revenuecat", "event_alias", Arg.Any<CancellationToken>())
+            .Returns(false);
+
+        var result = await _service.ProcessAsync(body, $"Bearer {Token}", null);
+
+        result.Processed.Should().BeTrue();
+        result.Tier.Should().BeEmpty();
+        await _walletRepository.DidNotReceiveWithAnyArgs()
+            .SetTierAsync(default, default!, default, default);
+        await _ownerPremiumSync.DidNotReceiveWithAnyArgs()
+            .SyncForUserAsync(default, default!, default);
+        await _eventRepository.Received(1).AddAsync(
+            Arg.Is<SubscriptionEvent>(e => e.EventType == "SUBSCRIBER_ALIAS"),
+            Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task ProcessAsync_DoesNotDowngrade_WhenCancellationArrives()
+    {
+        var body = WebhookBody("event_cancel", "CANCELLATION");
+        _eventRepository.ExistsAsync("revenuecat", "event_cancel", Arg.Any<CancellationToken>())
+            .Returns(false);
+
+        var result = await _service.ProcessAsync(body, $"Bearer {Token}", null);
+
+        result.Processed.Should().BeTrue();
+        result.Tier.Should().BeEmpty();
+        await _walletRepository.DidNotReceiveWithAnyArgs()
+            .SetTierAsync(default, default!, default, default);
+    }
+
+    [Fact]
     public async Task ProcessAsync_SkipsDuplicateEvent()
     {
         var body = WebhookBody("event_3", "RENEWAL");

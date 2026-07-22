@@ -9,7 +9,7 @@ import 'cubit/saved_cards_cubit.dart';
 class WalletPaywallFlow {
   WalletPaywallFlow._();
 
-  static Future<void> show(
+  static Future<bool> show(
     BuildContext context, {
     required SavedCardsCubit cubit,
     PremiumPurchaseSuccessHandler? successHandler,
@@ -19,18 +19,26 @@ class WalletPaywallFlow {
     final preferredLocale = revenueCatPreferredLocaleFrom(
       Localizations.localeOf(context),
     );
-    final success = await cubit.upgradeWallet(
+    final purchased = await cubit.upgradeWallet(
       onlyIfNeeded: onlyIfNeeded,
       useDarkAppearance: isDark,
       preferredLocale: preferredLocale,
     );
-    if (!context.mounted || !success) return;
+    if (!context.mounted || !purchased) return false;
 
+    // Paywall kapandı → /Me + Plan + cüzdan ekranı yenile.
     final handler = successHandler ?? PremiumPurchaseScope.maybeOf(context);
-    if (handler == null) return;
+    if (handler != null) {
+      await handler.showSuccess(context);
+    } else {
+      await cubit.refreshAll();
+    }
 
-    await handler.showSuccess(context);
-    if (!context.mounted) return;
-    await cubit.refreshAll();
+    if (!context.mounted) return true;
+    await WidgetsBinding.instance.endOfFrame;
+    if (context.mounted) {
+      await cubit.refreshAll();
+    }
+    return true;
   }
 }

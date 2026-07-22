@@ -34,6 +34,7 @@ import '../../../network_graph/domain/usecases/get_network_graph.dart';
 import '../../../network_graph/domain/usecases/get_network_graph_path.dart';
 import '../../../plans/domain/usecases/get_plan_entitlements.dart';
 import '../../../plans/presentation/cubit/plan_cubit.dart';
+import '../../../plans/presentation/cubit/plan_state.dart';
 import '../../../profile/domain/usecases/get_profile_stats.dart';
 import '../../../profile/presentation/pages/profile_page.dart';
 import '../../../onboarding/domain/usecases/get_onboarding_draft_card.dart';
@@ -259,85 +260,95 @@ class _MainShellPageState extends State<MainShellPage> {
           )..load(),
         ),
       ],
-      child: _PostOnboardingPaywallGate(
-        enabled: widget.showPostOnboardingPaywall,
-        child: CardenceScaffold(
-          appBar: _buildAppBar(context),
-          body: IndexedStack(
-            index: _currentIndex,
-            children: [
-              HeroMode(
-                enabled: _currentIndex == 0,
-                child: SavedCardsPage(
-                getEventGroups: widget.getEventGroups,
-                getSavedCards: widget.getSavedCards,
-                updateEventGroup: widget.updateEventGroup,
-                inviteEventGroupCardsByCardId:
-                    widget.inviteEventGroupCardsByCardId,
-                getEventGroupOutboundInvitations:
-                    widget.getEventGroupOutboundInvitations,
-                deleteEventGroup: widget.deleteEventGroup,
-                linkSavedCardsToEventGroup: widget.linkSavedCardsToEventGroup,
-                saveSavedCard: widget.saveSavedCard,
-                deleteSavedCard: widget.deleteSavedCard,
-                addSavedCard: widget.addSavedCard,
-                upgradeWalletPlan: widget.upgradeWalletPlan,
-                trackSavedCardContactClick: widget.trackSavedCardContactClick,
-                restoreWalletPurchases: widget.restoreWalletPurchases,
-                filterTrigger: _savedCardsFilterTrigger,
-                addCardTrigger: _savedCardsAddCardTrigger,
-              ),
-              ),
-              HeroMode(
-                enabled: _currentIndex == 1,
-                child: EventGroupsPage(
-                getEventGroups: widget.getEventGroups,
-                getEventGroupInvitations: widget.getEventGroupInvitations,
-                acceptEventGroupInvitation: widget.acceptEventGroupInvitation,
-                rejectEventGroupInvitation: widget.rejectEventGroupInvitation,
-                createEventGroup: widget.createEventGroup,
-                updateEventGroup: widget.updateEventGroup,
-                inviteEventGroupCardsByCardId:
-                    widget.inviteEventGroupCardsByCardId,
-                getEventGroupOutboundInvitations:
-                    widget.getEventGroupOutboundInvitations,
-                deleteEventGroup: widget.deleteEventGroup,
-                linkSavedCardsToEventGroup: widget.linkSavedCardsToEventGroup,
-                getSavedCards: widget.getSavedCards,
-                saveSavedCard: widget.saveSavedCard,
-                deleteSavedCard: widget.deleteSavedCard,
-                restoreWalletPurchases: widget.restoreWalletPurchases,
-                getNetworkGraph: widget.getNetworkGraph,
-                getNetworkGraphPath: widget.getNetworkGraphPath,
-              ),
-              ),
-              HeroMode(
-                enabled: _currentIndex == 2,
-                child: ProfilePage(
-                draft: _myCardDraft,
-                getOnboardingDraftCards: widget.getOnboardingDraftCards,
-                persistOnboardingCard: widget.persistOnboardingCard,
-                getProfileStats: widget.getProfileStats,
-                getNetworkGraph: widget.getNetworkGraph,
-                getNetworkGraphPath: widget.getNetworkGraphPath,
-                getEventGroups: widget.getEventGroups,
-                uploadProfilePhoto: widget.uploadProfilePhoto,
-                upgradeWalletPlan: widget.upgradeWalletPlan,
-                onDraftUpdated: (updated) =>
-                    setState(() => _myCardDraft = updated),
-              ),
-              ),
-            ],
-          ),
-          extendBody: true,
-          bottomNavigationBar: SafeArea(
-            top: false,
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(24, 0, 24, 16),
-              child: _LiquidGlassBottomNavBar(
-                currentIndex: _currentIndex,
-                itemCount: 3,
-                onTap: (index) => setState(() => _currentIndex = index),
+      child: BlocListener<PlanCubit, PlanState>(
+        listenWhen: (previous, current) =>
+            (previous.entitlements?.isPremiumOrHigher ?? false) !=
+            (current.entitlements?.isPremiumOrHigher ?? false),
+        listener: (context, state) {
+          // Paywall sonrası premium değişince IndexedStack altındaki
+          // ekranların yeniden kurulması için shell'i rebuild et.
+          if (mounted) setState(() {});
+        },
+        child: _PostOnboardingPaywallGate(
+          enabled: widget.showPostOnboardingPaywall,
+          child: CardenceScaffold(
+            appBar: _buildAppBar(context),
+            body: IndexedStack(
+              index: _currentIndex,
+              children: [
+                HeroMode(
+                  enabled: _currentIndex == 0,
+                  child: SavedCardsPage(
+                  getEventGroups: widget.getEventGroups,
+                  getSavedCards: widget.getSavedCards,
+                  updateEventGroup: widget.updateEventGroup,
+                  inviteEventGroupCardsByCardId:
+                      widget.inviteEventGroupCardsByCardId,
+                  getEventGroupOutboundInvitations:
+                      widget.getEventGroupOutboundInvitations,
+                  deleteEventGroup: widget.deleteEventGroup,
+                  linkSavedCardsToEventGroup: widget.linkSavedCardsToEventGroup,
+                  saveSavedCard: widget.saveSavedCard,
+                  deleteSavedCard: widget.deleteSavedCard,
+                  addSavedCard: widget.addSavedCard,
+                  upgradeWalletPlan: widget.upgradeWalletPlan,
+                  trackSavedCardContactClick: widget.trackSavedCardContactClick,
+                  restoreWalletPurchases: widget.restoreWalletPurchases,
+                  filterTrigger: _savedCardsFilterTrigger,
+                  addCardTrigger: _savedCardsAddCardTrigger,
+                ),
+                ),
+                HeroMode(
+                  enabled: _currentIndex == 1,
+                  child: EventGroupsPage(
+                  getEventGroups: widget.getEventGroups,
+                  getEventGroupInvitations: widget.getEventGroupInvitations,
+                  acceptEventGroupInvitation: widget.acceptEventGroupInvitation,
+                  rejectEventGroupInvitation: widget.rejectEventGroupInvitation,
+                  createEventGroup: widget.createEventGroup,
+                  updateEventGroup: widget.updateEventGroup,
+                  inviteEventGroupCardsByCardId:
+                      widget.inviteEventGroupCardsByCardId,
+                  getEventGroupOutboundInvitations:
+                      widget.getEventGroupOutboundInvitations,
+                  deleteEventGroup: widget.deleteEventGroup,
+                  linkSavedCardsToEventGroup: widget.linkSavedCardsToEventGroup,
+                  getSavedCards: widget.getSavedCards,
+                  saveSavedCard: widget.saveSavedCard,
+                  deleteSavedCard: widget.deleteSavedCard,
+                  restoreWalletPurchases: widget.restoreWalletPurchases,
+                  getNetworkGraph: widget.getNetworkGraph,
+                  getNetworkGraphPath: widget.getNetworkGraphPath,
+                ),
+                ),
+                HeroMode(
+                  enabled: _currentIndex == 2,
+                  child: ProfilePage(
+                  draft: _myCardDraft,
+                  getOnboardingDraftCards: widget.getOnboardingDraftCards,
+                  persistOnboardingCard: widget.persistOnboardingCard,
+                  getProfileStats: widget.getProfileStats,
+                  getNetworkGraph: widget.getNetworkGraph,
+                  getNetworkGraphPath: widget.getNetworkGraphPath,
+                  getEventGroups: widget.getEventGroups,
+                  uploadProfilePhoto: widget.uploadProfilePhoto,
+                  upgradeWalletPlan: widget.upgradeWalletPlan,
+                  onDraftUpdated: (updated) =>
+                      setState(() => _myCardDraft = updated),
+                ),
+                ),
+              ],
+            ),
+            extendBody: true,
+            bottomNavigationBar: SafeArea(
+              top: false,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(24, 0, 24, 16),
+                child: _LiquidGlassBottomNavBar(
+                  currentIndex: _currentIndex,
+                  itemCount: 3,
+                  onTap: (index) => setState(() => _currentIndex = index),
+                ),
               ),
             ),
           ),

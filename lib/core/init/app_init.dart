@@ -217,6 +217,7 @@ class AppInit {
       finalizePremiumWalletActivation: finalizePremiumWalletActivation,
       refreshCurrentUser: auth.refreshCurrentUser,
       syncUserProfileCards: syncUserProfileCards,
+      getAuthSession: auth.getAuthSession,
     );
     final restoreWalletPurchases = RestoreWalletPurchases(
       subscriptionRepo,
@@ -234,7 +235,12 @@ class AppInit {
     );
     subscriptionRepo.registerEntitlementChangeHandler(() async {
       try {
-        await finalizePremiumWalletActivation();
+        // Yalnızca RC'de premium entitlement varken sunucuya yaz.
+        // Aksi halde satın alma öncesi boş sync "tier=free" gürültüsü üretir.
+        if (!await subscriptionRepo.hasPremiumWalletEntitlement()) {
+          return;
+        }
+        await finalizePremiumWalletActivation(requirePremium: false);
         final profile = await auth.refreshCurrentUser();
         await syncUserProfileCards(profile);
       } catch (error, stackTrace) {
@@ -362,6 +368,7 @@ class AppInit {
     required FinalizePremiumWalletActivation finalizePremiumWalletActivation,
     required RefreshCurrentUser refreshCurrentUser,
     required SyncUserProfileCards syncUserProfileCards,
+    required GetAuthSession getAuthSession,
   }) {
     final getQuota = GetSavedCardsWalletQuota(savedCardRepo);
     final saveSavedCard = SaveSavedCard(savedCardRepo);
@@ -381,6 +388,7 @@ class AppInit {
         finalizePremiumWalletActivation,
         refreshCurrentUser,
         syncUserProfileCards,
+        getAuthSession,
       ),
       linkSavedCardsToEventGroup: LinkSavedCardsToEventGroup(saveSavedCard),
     );

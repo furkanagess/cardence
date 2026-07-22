@@ -109,8 +109,15 @@ class RevenueCatSubscriptionDataSource {
       try {
         final PaywallResult result;
         if (onlyIfNeeded) {
-          result = await RevenueCatUI.presentPaywallIfNeeded(
-            RevenueCatConfig.premiumEntitlementId,
+          // presentPaywallIfNeeded tek ID ister; discount entitlement'ı kaçırmamak
+          // için önce tüm premium ID'leri kontrol et.
+          if (await hasPremiumWalletEntitlement()) {
+            debugPrint(
+              '[RevenueCat] Premium already active; skipping paywall.',
+            );
+            return WalletPaywallResult.notPresented;
+          }
+          result = await RevenueCatUI.presentPaywall(
             offering: offering,
             displayCloseButton: true,
             presentationConfiguration: PaywallPresentationConfiguration.fullScreen,
@@ -127,7 +134,15 @@ class RevenueCatSubscriptionDataSource {
         if (result == PaywallResult.purchased ||
             result == PaywallResult.restored) {
           await Purchases.invalidateCustomerInfoCache();
-          await Purchases.getCustomerInfo();
+          final customerInfo = await Purchases.getCustomerInfo();
+          final activeIds = customerInfo.entitlements.active.keys.join(', ');
+          final matched = _activePremiumEntitlementIds(customerInfo);
+          debugPrint(
+            '[RevenueCat] Active entitlements after purchase: '
+            '[${activeIds.isEmpty ? 'none' : activeIds}] '
+            '(matched premium: '
+            '[${matched.isEmpty ? 'none' : matched.join(', ')}])',
+          );
         }
         return _mapPaywallResult(result);
       } finally {
@@ -253,7 +268,12 @@ class RevenueCatSubscriptionDataSource {
   }
 
   bool _hasPremiumEntitlement(CustomerInfo customerInfo) {
-    return customerInfo.entitlements.active
-        .containsKey(RevenueCatConfig.premiumEntitlementId);
+    return _activePremiumEntitlementIds(customerInfo).isNotEmpty;
+  }
+
+  List<String> _activePremiumEntitlementIds(CustomerInfo customerInfo) {
+    return customerInfo.entitlements.active.keys
+        .where(RevenueCatConfig.isPremiumEntitlementId)
+        .toList(growable: false);
   }
 }

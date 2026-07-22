@@ -18,7 +18,6 @@ public sealed class AuthService : IAuthService
     private readonly IUserRepository _userRepository;
     private readonly IUserAuthProviderRepository _userAuthProviderRepository;
     private readonly IWalletEntitlementRepository _walletEntitlementRepository;
-    private readonly IWalletEntitlementSyncService _walletEntitlementSync;
     private readonly ILinkedInAuthService _linkedInAuthService;
     private readonly IGoogleAuthService _googleAuthService;
     private readonly IAppleAuthService _appleAuthService;
@@ -48,7 +47,6 @@ public sealed class AuthService : IAuthService
         IUserRepository userRepository,
         IUserAuthProviderRepository userAuthProviderRepository,
         IWalletEntitlementRepository walletEntitlementRepository,
-        IWalletEntitlementSyncService walletEntitlementSync,
         ILinkedInAuthService linkedInAuthService,
         IGoogleAuthService googleAuthService,
         IAppleAuthService appleAuthService,
@@ -69,7 +67,6 @@ public sealed class AuthService : IAuthService
         _userRepository = userRepository;
         _userAuthProviderRepository = userAuthProviderRepository;
         _walletEntitlementRepository = walletEntitlementRepository;
-        _walletEntitlementSync = walletEntitlementSync;
         _linkedInAuthService = linkedInAuthService;
         _googleAuthService = googleAuthService;
         _appleAuthService = appleAuthService;
@@ -836,7 +833,9 @@ public sealed class AuthService : IAuthService
                 "Kullanıcı bulunamadı.");
         }
 
-        await _walletEntitlementSync.SyncUserFromRevenueCatAsync(userId, cancellationToken);
+        // Premium kaynağı: UpgradeWalletPlan + RevenueCat webhook.
+        // Me içinde RC poll yapma — fresh purchase ile yarışıp isOwnerPremium'u
+        // false'a çekmesin; DB'deki wallet entitlement okunur.
         var profile = await BuildUserProfileAsync(user, cancellationToken);
         return AuthServiceResponse<UserProfileEntity>.Ok(profile, "Profil bilgisi alındı.");
     }

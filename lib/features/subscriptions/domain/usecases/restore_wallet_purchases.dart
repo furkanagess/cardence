@@ -22,16 +22,22 @@ class RestoreWalletPurchases {
       return false;
     }
 
-    await _waitForBackendPremiumEntitlement();
+    // Önce sunucuyu yükselt, sonra entitlement'ın yansımasını bekle.
     await _tryFinalize();
+    await _waitForBackendPremiumEntitlement();
     return true;
   }
 
   Future<void> _tryFinalize() async {
-    try {
-      await _finalizePremiumWalletActivation();
-    } catch (_) {
-      // Geri yükleme tamamlandı; sunucu senkronu gecikse bile devam et.
+    for (var attempt = 0; attempt < 3; attempt++) {
+      try {
+        await _finalizePremiumWalletActivation();
+        return;
+      } catch (_) {
+        if (attempt < 2) {
+          await Future<void>.delayed(const Duration(seconds: 1));
+        }
+      }
     }
   }
 

@@ -314,17 +314,24 @@ class SavedCardsCubit extends Cubit<SavedCardsState> {
     bool? useDarkAppearance,
     String? preferredLocale,
   }) async {
-    final success = await _upgradeWalletPlan(
-      onlyIfNeeded: onlyIfNeeded,
-      useDarkAppearance: useDarkAppearance,
-      preferredLocale: preferredLocale,
-    );
-    if (isClosed) return false;
-    if (success) {
-      await refreshAll();
-    } else {
-      await _loadQuota();
+    try {
+      final success = await _upgradeWalletPlan(
+        onlyIfNeeded: onlyIfNeeded,
+        useDarkAppearance: useDarkAppearance,
+        preferredLocale: preferredLocale,
+      );
+      if (isClosed) return false;
+      if (success) {
+        await refreshAll();
+      } else {
+        await _loadQuota();
+      }
+      return success;
+    } catch (_) {
+      if (!isClosed) {
+        await _loadQuota();
+      }
+      return false;
     }
-    return success;
   }
 }

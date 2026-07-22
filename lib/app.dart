@@ -438,7 +438,7 @@ class _AppState extends State<App> {
   }
 
   Future<void> _handleAuthSuccess({required bool fromRegistration}) async {
-    unawaited(_identifySubscriptionUser());
+    await _identifySubscriptionUser();
     unawaited(PushNotificationCoordinator.instance?.syncTokenForCurrentSession());
     try {
       if (fromRegistration) {

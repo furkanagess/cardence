@@ -65,13 +65,20 @@ public sealed class RevenueCatWebhookService : IRevenueCatWebhookService
             };
         }
 
+        // null = tier dokunma (SUBSCRIBER_ALIAS, CANCELLATION, bilinmeyen event…).
+        // Aksi halde logIn alias / iptal (süre bitmeden) premium'u free'ye çekip
+        // /Me'de premium=false bırakıyordu.
         var tier = ResolveTier(eventType);
-        var maxCards = tier == WalletConstants.PremiumTier
-            ? WalletConstants.PremiumMaxCards
-            : WalletConstants.FreeMaxCards;
+        if (tier is not null)
+        {
+            var maxCards = tier == WalletConstants.PremiumTier
+                ? WalletConstants.PremiumMaxCards
+                : WalletConstants.FreeMaxCards;
 
-        await _walletRepository.SetTierAsync(userId, tier, maxCards, cancellationToken);
-        await _ownerPremiumSync.SyncForUserAsync(userId, tier, cancellationToken);
+            await _walletRepository.SetTierAsync(userId, tier, maxCards, cancellationToken);
+            await _ownerPremiumSync.SyncForUserAsync(userId, tier, cancellationToken);
+        }
+
         await _eventRepository.AddAsync(
             new SubscriptionEvent
             {
@@ -89,7 +96,7 @@ public sealed class RevenueCatWebhookService : IRevenueCatWebhookService
         {
             Processed = true,
             Duplicate = false,
-            Tier = tier,
+            Tier = tier ?? string.Empty,
             EventType = eventType,
         };
     }
@@ -121,7 +128,10 @@ public sealed class RevenueCatWebhookService : IRevenueCatWebhookService
         }
     }
 
-    private static string ResolveTier(string eventType)
+    /// <summary>
+    /// Premium veren / geri alan event'ler. null = mevcut wallet tier'ına dokunma.
+    /// </summary>
+    private static string? ResolveTier(string eventType)
     {
         var normalized = eventType.Trim().ToUpperInvariant();
         return normalized switch
@@ -130,12 +140,14 @@ public sealed class RevenueCatWebhookService : IRevenueCatWebhookService
             "RENEWAL" or
             "UNCANCELLATION" or
             "PRODUCT_CHANGE" or
-            "TRANSFER" => WalletConstants.PremiumTier,
-            "CANCELLATION" or
+            "TRANSFER" or
+            "NON_RENEWING_PURCHASE" or
+            "TEMPORARY_ENTITLEMENT_GRANT" or
+            "SUBSCRIPTION_EXTENDED" => WalletConstants.PremiumTier,
+            // CANCELLATION = yenileme iptali; entitlement EXPIRATION'a kadar aktif kalır.
             "EXPIRATION" or
-            "BILLING_ISSUE" or
             "REFUND" => WalletConstants.FreeTier,
-            _ => WalletConstants.FreeTier,
+            _ => null,
         };
     }
 

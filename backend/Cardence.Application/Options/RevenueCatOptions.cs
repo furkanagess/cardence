@@ -10,4 +10,11 @@ public sealed class RevenueCatOptions
     public string SecretApiKey { get; init; } = string.Empty;
 
     public string PremiumEntitlementId { get; init; } = "cardence-pro";
+
+    /// <summary>
+    /// Virgülle ayrılmış ek premium entitlement kimlikleri
+    /// (örn. cardence-pro-discount).
+    /// </summary>
+    public string PremiumEntitlementIds { get; init; } =
+        "cardence-pro,cardence-pro-discount";
 }

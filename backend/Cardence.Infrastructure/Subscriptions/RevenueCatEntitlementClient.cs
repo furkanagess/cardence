@@ -33,10 +33,6 @@ public sealed class RevenueCatEntitlementClient : IRevenueCatEntitlementClient
             return null;
         }
 
-        var entitlementId = string.IsNullOrWhiteSpace(_options.PremiumEntitlementId)
-            ? "cardence-pro"
-            : _options.PremiumEntitlementId.Trim();
-
         try
         {
             using var request = new HttpRequestMessage(
@@ -57,7 +53,7 @@ public sealed class RevenueCatEntitlementClient : IRevenueCatEntitlementClient
 
             await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
             using var document = await JsonDocument.ParseAsync(stream, cancellationToken: cancellationToken);
-            return IsEntitlementActive(document.RootElement, entitlementId);
+            return HasAnyActivePremiumEntitlement(document.RootElement);
         }
         catch (Exception exception) when (exception is not OperationCanceledException)
         {
@@ -67,6 +63,49 @@ public sealed class RevenueCatEntitlementClient : IRevenueCatEntitlementClient
                 userId);
             return null;
         }
+    }
+
+    private bool HasAnyActivePremiumEntitlement(JsonElement root)
+    {
+        foreach (var entitlementId in ResolvePremiumEntitlementIds())
+        {
+            if (IsEntitlementActive(root, entitlementId))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private IEnumerable<string> ResolvePremiumEntitlementIds()
+    {
+        var ids = new HashSet<string>(StringComparer.Ordinal);
+        if (!string.IsNullOrWhiteSpace(_options.PremiumEntitlementId))
+        {
+            ids.Add(_options.PremiumEntitlementId.Trim());
+        }
+
+        if (!string.IsNullOrWhiteSpace(_options.PremiumEntitlementIds))
+        {
+            foreach (var part in _options.PremiumEntitlementIds.Split(
+                         ',',
+                         StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+            {
+                if (!string.IsNullOrWhiteSpace(part))
+                {
+                    ids.Add(part);
+                }
+            }
+        }
+
+        if (ids.Count == 0)
+        {
+            ids.Add("cardence-pro");
+            ids.Add("cardence-pro-discount");
+        }
+
+        return ids;
     }
 
     private static bool IsEntitlementActive(JsonElement root, string entitlementId)

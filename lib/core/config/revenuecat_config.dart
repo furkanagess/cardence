@@ -4,7 +4,7 @@ import 'package:flutter/foundation.dart';
 
 /// RevenueCat yapılandırması.
 ///
-/// Dashboard'da `cardence-pro` entitlement kimliği tanımlı olmalıdır.
+/// Dashboard entitlement kimlikleri: `cardence-pro`, `cardence-pro-discount`.
 class RevenueCatConfig {
   RevenueCatConfig._();
 
@@ -21,7 +21,20 @@ class RevenueCatConfig {
     return androidApiKey;
   }
 
+  /// Birincil entitlement (paywall `presentPaywallIfNeeded` için).
   static const premiumEntitlementId = 'cardence-pro';
+
+  /// İndirimli / alternatif premium entitlement.
+  static const premiumDiscountEntitlementId = 'cardence-pro-discount';
+
+  /// Aktif premium sayılan tüm entitlement kimlikleri.
+  static const Set<String> premiumEntitlementIds = {
+    premiumEntitlementId,
+    premiumDiscountEntitlementId,
+  };
+
+  static bool isPremiumEntitlementId(String id) =>
+      premiumEntitlementIds.contains(id);
 
   /// RevenueCat dashboard paywall kimliği (offering'e bağlı template).
   static const walletPaywallIdentifier = 'cardence-monthly';

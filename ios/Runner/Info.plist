@@ -67,6 +67,9 @@
 			<key>NSAllowsLocalNetworking</key>
 			<true/>
 		</dict>
+		<!-- Google Sign-In (required by GoogleSignIn SDK 6+) -->
+		<key>GIDClientID</key>
+		<string>1011139931151-hddebtvhu5gglr57vivc78a3oo89p36b.apps.googleusercontent.com</string>
 		<key>CFBundleURLTypes</key>
 		<array>
 			<dict>
@@ -86,7 +89,7 @@
 				<string>google-sign-in</string>
 				<key>CFBundleURLSchemes</key>
 				<array>
-					<string>com.googleusercontent.apps.1011139931151-d5lsq79omrpdvojrs9o70ouj7ed3d244</string>
+					<string>com.googleusercontent.apps.1011139931151-hddebtvhu5gglr57vivc78a3oo89p36b</string>
 				</array>
 			</dict>
 		</array>

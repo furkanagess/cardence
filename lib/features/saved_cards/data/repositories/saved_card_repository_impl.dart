@@ -160,9 +160,10 @@ class SavedCardRepositoryImpl implements SavedCardRepository {
   }
 
   @override
-  Future<void> syncWalletPremium() async {
+  Future<SavedCardsWalletQuota> syncWalletPremium() async {
     final token = await _requireAccessToken();
-    await _remote.upgradeWalletPlan(accessToken: token);
+    final quota = await _remote.upgradeWalletPlan(accessToken: token);
+    return quota.toEntity();
   }
 
   @override
